@@ -1,0 +1,5 @@
+.venv
+rizin
+.git
+**/__pycache__
+**/*.pyc
