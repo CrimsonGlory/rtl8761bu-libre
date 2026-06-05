@@ -29,8 +29,8 @@ RUN apt-get update \
 # confusing error at build time.
 RUN echo 'void f(void){}' \
   | mipsel-linux-gnu-gcc \
-      -mips32r2 -mips16 -EL -msoft-float -G 0 \
-      -nostdlib -ffreestanding -fno-pic \
+      -mips32r2 -EL -msoft-float -G 0 \
+      -nostdlib -nostartfiles -ffreestanding -fno-pic \
       -x c -c -o /dev/null - \
  && echo "MIPS16e toolchain: OK"
 

@@ -52,7 +52,7 @@ def main():
 
     open(sys.argv[1], 'wb').write(cfg)
     print(f"gen_config: {cfg.hex()} → {sys.argv[1]}")
-    print(f"  type=0x{CONFIG_MARKER:04x}  "
+    print(f"  marker=0x{CONFIG_MARKER.hex()}  "
           f"offset=0x{SYSCONFIG_OFFSET:04x}  "
           f"value=0x{SYSCONFIG_VALUE:04x}")
 

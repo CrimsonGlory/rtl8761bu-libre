@@ -1,0 +1,1285 @@
+I am Xenova. What you need to know about
+me is that this particular work is work
+I do with the minority of my time. The
+majority of my time is spent on open
+security training to a nonprofit I run
+where I create free classes and give
+them away. And I encourage other people
+to create free classes and give them
+away. So, this is not directly related
+to free classes that are going to be
+given away, except that it turns out I
+created too much material. So, I'm
+probably going to turn this whole thing
+into a free class and give it away. All
+right. So, Alakazam, boom. These
+particular Bluetooth dongles can now
+send arbitrary low-level packets that
+they're architecturally not supposed to.
+And there's your magic command pseudo
+copy Zeno's magic firmware over the real
+tech firmware. And you've got arbitrary
+code execution. So, today we're going to
+talk about magic's biggest secrets
+revealed. Or at least that's what I
+wanted to talk to you about. So, what I
+wanted to present was not just what I
+found, but how I found it so that other
+people could follow in my footsteps and
+do the same thing for other chips, cuz
+there's a lot of chips that need
+exploration. I made 350 slides and then
+I decided that's not going to actually
+fit in this talk. So, I cut it down to a
+lean 140 and we're going to see what can
+we get through. Now, the uh abstract
+promised you that suffering builds
+strength. That is one of my life
+philosophies. You saw some of that
+yesterday. Marius suffered for his uh
+incorrect wiring on his glitching setup.
+Uh Wayche, he suffered for being able to
+only use uh core dump crash logs in
+order to debug the MediaTek chips.
+Suffering builds strength. That's 100%
+true. And so I hope you understand when
+I tell you that I hope you too will go
+out and suffer so that you too can gain
+the strength to do awesome work. So in
+this talk terminology BC or BTC is going
+to be Bluetooth classic not Bitcoin. BL
+is Bluetooth low energy and BD adder is
+a Bluetooth device address. It's that
+thing that looks like a MAC address but
+it's not a MAC address. What you need to
+know about Bluetooth addresses is that
+spoofing a Bluetooth classic address or
+a Bluetooth low energy public address is
+hard. There's no official way to do it.
+And spoofing random addresses is easy
+because there's official APIs that you
+can just use. So motivation one for this
+talk. This is why it's sort of OSD2
+related, but Veronica and I wanted to
+show machinein-the-middle attacks using
+WAD wireless hacking framework in our
+future open security training Bluetooth
+low energy class. But there's no
+architectural way, as I just said, to
+set Bluetooth classic addresses or B
+public addresses. So, WAD will help you
+machine in the middle a device that's
+using a random address, but it won't
+help you machine in the middle a device
+that's using public. So, if you want to
+attack something using public, you need
+to have some way to spoof the BDR. And
+there's no good ways to do that except
+that some really old chips like the CSR4
+dongle have some really old deprecated
+tools like a tool called Bei Adder from
+Bluesy that just doesn't even come
+included anymore. Those tools know how
+to spoof the BD adders on those old
+chips. But the CSR dongle is called the
+CSR 4.0 for a reason. It only supports
+Bluetooth spec 4.0 which is the very
+very first one that supported Bluetooth
+low energy. So great a new class. It can
+do low energy, but this is only
+supporting features from 2010. So we're
+teaching a new class. We don't want
+students to be locked into only 2010
+stuff. So we need new hardware that we
+can teach to that speaks to Bluetooth
+5.4, which is what we teach in the
+class. Secondary motivation, I have
+Bluetooth printing. I presented it here
+at hardware.io 2 years ago. And that
+uses some security researchers tool
+called Brack. Sorry, I'm going to like
+even though I don't have time for it, I
+got to give you a big mouse because then
+you'll see what I'm actually pointing
+at.
+There you go.
+That's going to actually matter later.
+So, Bracktoothoth, uh, it uses that's
+what I was using in Bluetooth printing
+for LMP sending arbitrary Bluetooth
+classic low-level link manager protocol
+stuff, but the source code's not
+available. That's not great. It also
+only supported x86 when I initially
+started the work. and it uses a big dev
+board like this which forced me into
+using a big x86 board instead of a small
+little ARMbased single board computer
+and then I had to use voltage adapters
+to use big old honken power supplies and
+everything. Another problem with using
+brack sending low-level packets is that
+it requires an ESP rover kit. You
+literally can't even buy those anymore.
+I had to go off and find what the
+replacement is. Those cost $55 and
+they're big and bulky. And I would
+rather have people that I teach
+Bluetooth printing or people actually
+doing Bluetooth printing, I'd rather
+have them use a simple USB dongle than a
+big old dev kit. The third motivation
+for this is that I'm putting together a
+crew, a blue crew of people who want to
+do awesome Bluetooth security research.
+If that's you, get in touch. But
+basically, I wanted to lead by example
+for the blue crew, which is to say, I
+wanted to go off reverse engineer
+something. Say, here's how I did it. Now
+you go off and reverse engineer Qualcomm
+or MediaTek or any other thing that
+hasn't been looked at because almost
+everything hasn't been looked at.
+There's like three or four chips out of
+20 plus chips that have been looked at.
+We need more people digging into this
+stuff. So the future uh Bluetooth the
+current Bluetooth printing class is
+there on open security training.
+Veronica and I are making more classes.
+Blue crew members will be expected to
+know all the stuff about Bluetooth that
+we put out there and then they're
+expected to go off and do cool things.
+So, time for meat. So, what's on the
+agenda? Suffering and strength. Right?
+So, I don't want this to come off as
+whiny. Hopefully, I'm not whining that,
+oh, I suffered and it was hard. No,
+suffering is good here. Suffering builds
+strength. You got to break yourself down
+a little bit to build yourself up a
+little bit better. So, the types of
+things I ran into is that this
+particular chip was MIP 16e, and I don't
+know MIPS. Uh, has no private or public
+SDKs, has no strings really. There's
+like 10 strings, but turns out those 10
+strings are good enough. No J-tag
+option, no live debugging, anything like
+that, and end up having to write code in
+an unfamiliar language. So started this
+work back in last January with a plan
+for a plan that someday we needed to
+have better chips for our Bluetooth
+classes. So I go off and buy a bunch of
+dongles on Amazon, just some random
+cheap stuff. And they say they support
+5.3 and 5.4, before, but when you plug
+them into Linux, run HCI command config-
+A, look at the verbose output, it tells
+you, okay, all the chips I bought turned
+out to actually all be real tech stuff.
+And you will see this. If you buy random
+white label cheapo Bluetooth dongles, it
+turns out most everything's using real
+tech today. So, it's using real tech,
+but the chips, according to themselves
+report, they only support Bluetooth 5.1,
+not 5.3, not 5.4 like the people are
+putting. And I confirmed this later with
+Realtech that yes, they only support
+5.1. Those sellers are straight up
+lying. So, I didn't know at the time, I
+hadn't cracked these open at the time,
+but if you got them, you crack them and
+you find out that they're using realtech
+uh 8761 BU or BUV. And actually, I I
+show this picture just to say I really
+expected all the white label stuff to
+just be the same on this inside with
+like a different plastic shell around
+it. So, I was actually somewhat
+surprised that we did see different PCBs
+and different chips. So, then, you know,
+had I actually went off and read the
+data sheets, but I did that later on,
+uh, the BUV is a USB interface, the BUE
+is a USB interface, and turns out
+there's two other chips that have UART
+interfaces. So what I did that was
+wrong, which caused me a little
+suffering was that around April when I
+started to think, okay, maybe I am going
+to poke at these things at some point in
+the future, I just Googled RTL 8761B
+devboard and I went out and got the
+wrong devboard. I said, okay, there's a
+USB port and it's got the real tech
+chip, so this must be the dev board for
+playing with those USB dongles, right?
+Wrong. So it turns out, like I just
+said, there's a thing that uses a USB
+interface and one that uses a UART
+interface. So, this USB is actually only
+for power. It doesn't actually speak
+data over the USB. Do as I say, not as I
+do. Double check your dev boards,
+specifically the interfaces, because
+there are different physical transports
+that Bluetooth uses uh in order to speak
+with chips. So, the actual start of the
+project started this last uh July when I
+got the Bluetooth printing class up in
+Open Security Training. I'm running that
+and in the background, I say, "Okay,
+I've got a little free time. I don't
+have to pay attention super much to the
+students. They'll post questions
+whenever they post. So I said, "Okay,
+let's start looking at these real tech
+chips in the background. Maybe we can
+use these for the future." And so I plug
+in the devboard. There's no lights.
+There's no power. There's no indication
+this thing actually works. So I messaged
+the Alibaba sellers a little bit peeved
+thinking that they've deceived me and
+sold me some garbage. But they said,
+"Look, we just ship whatever Realtech
+gives us. You know, talk to Realte." And
+I did. I sent off emails and heard back
+from them later. But while I was waiting
+to hear back from realtech, I go out on
+my OS hunt osu uh int hunting uh to find
+out what I can find about real tech
+stuff and how it's used.
+So if you look on Linux, you will find
+that there is a lib firmware RTLBT and
+RTL various other stuff, Wi-Fi and so
+forth. But there's a Realtech Bluetooth
+folder full of Realtech Bluetooth chip
+firmwares of some sort. I don't know
+what these are at this point, but they
+say they're firmware. They're in a
+firmware directory. So that's probably
+some firmware.
+So if furthermore, if you go off and do
+your OS in and you do googling to find
+out who's ever reverse engineered real
+tech stuff, you will find a few hits for
+Wi-Fi things. You will find zero hits
+for Bluetooth things. So you know, wait
+yesterday saying, "Oh, there's only
+three things for MediaTek." I'm telling
+you there's zero things for Bluetooth on
+Realtech.
+But 80-51 enthusiast, 80-51 enthusiast
+that he is, was looking at some real
+tech Wi-Fi chips, which happened to be
+using 80-51based processors for their
+Wi-Fi cores. And while he was looking at
+that, he happened to just poke at the
+Bluetooth that was also co-resident on
+these chips. And what he found was that
+there seemed to be a bunch of repeating
+patterns of 006F. He did a little bit of
+analysis and ultimately concluded he
+thought that the 00 f uh 6f sorry 65 was
+the noop instruction. So then he had to
+correlate that back. What assembly
+architecture uses 0065 for noops? And
+the answer turned out to be myip 16e. So
+just that little hint was enough to get
+me going with those firmwares that I
+found on Linux. So cool. They're
+probably MIP 16E, which is a short form
+encoding for MIP's 32-bit instructions
+in the same way that thumb is a short
+form encoding for ARM. But oh no, I
+don't know MIPS, do I? Well, luck is
+what happens when preparation meets
+opportunity. Which is why I tell you all
+to go out and take all those classes on
+open security training, get lucky in the
+future. Well, I got lucky because I
+teach a class on risk 5 assembly for
+OST2. takes you about 28 hours on
+average, maybe more, maybe less. But the
+op codes for MIPS significantly overlaps
+with myip uh risk 5. Actually, you know,
+they have they share sar similar
+lineage. Mips in some sense you might
+call risk 3 or risk 2 like it's just a
+earlier uh anticedent of risk 5. So even
+if graas decompiler didn't work, which
+it did if I use x86, I could still
+understand the assembly. And so again,
+get prepared to get lucky by taking OST2
+classes. I got lucky in this case. So
+even though Gedra could disassemble
+these, it didn't really work
+particularly well. And so you throw it
+into Gedra. You select MIPS. I didn't
+even see this until I was making the
+slide. It does say MIP 16E down there.
+So that's the right thing to select.
+[snorts] And then you find some header
+information and you find a bunch of
+zeros. But when eventually you get past
+the bunch of zeros, you do what you
+normally do. You select it. You hit D to
+disassemble and you get invalid
+instruction or at least it doesn't
+continue on with valid instructions. So,
+the right way to deal with this for all
+of you future people who are going to
+run out there and grab a real tech chip
+is that you need to hit F12 to
+disassemble as M.I.P. 16E. If you do
+that, you get a whole bunch of assembly
+instructions. That looks good. That's
+great. Hit F to find a function, keep
+running, and then immediately stop
+because immediately after the assembly
+is a bunch of data references, usually
+in those small 16bit encodings of
+assembly instructions, you can't put a
+32-bit reference to a 32-bit memory
+address. So, you got a bunch of data
+references at the end that are
+referenced from within the assembly. And
+basically, GERA just doesn't like that.
+Doesn't continue. It should just say
+like code data. Okay, continue. It
+doesn't. We keep trying. We assemble and
+we keep running into problems. So what
+do you do? You file a GEDRA issue and
+then you play the waiting game, right?
+[snorts] No, the waiting game sucks. So
+let's have Veronica make us a Gedra
+script instead. So I asked Veronica to
+make a script. I've never bothered
+learning IDA or GEDA scripting because I
+have a reverse engineer in my house, a
+former NSA engineer who may or may not
+and cannot confirm or deny whether or
+not she ever used Gedra before it was
+public. So ask her to make a script for
+you and basically uh you know easy mode.
+Now we've got a whole bunch of assembly
+for the firmware files but we still
+don't know exactly what is contained
+within the firmware. More assembly mo
+bettera. Woohoo. And do there's still no
+strings whatsoever. Okay. Well, we're
+going to keep going. Go back to OSN. You
+know I just always, you know, you go up,
+you go down. This is a very important
+thing in reverse engineering. Go deep,
+go up, go broad. Go deep, go up, go
+broad. So download all the documentation
+I can find for any real tech chip. Don't
+care whether it's my chip because
+there's probably architectural
+similarities between my chip and other
+chips. So this is a diagram of the
+Bluetooth stack for both Bluetooth low
+energy and Bluetooth classic. But what
+we care about for our purposes is that
+Linux is a host that can speak both
+Bluetooth low energy and Bluetooth
+classic. And this real tech chip down
+here at the bottom is a real tech chip.
+Can speak both Bluetooth low energy and
+Bluetooth classic. So how things
+normally work with Bluetooth is that you
+have a Linux host and it sends HCI host
+controller interface packets across to
+the host controller interface. Things
+like official commands, set a random
+address. That's why I said random
+addresses are easy mode because anyone
+can just say set a random address.
+There's no equivalent for public
+addresses, which is as a reminder what
+I'm trying to figure out right now.
+So they can send things like that. They
+can send things down to classic side
+saying inquiry like tell me what
+Bluetooth classic stuff is out there
+right now. But you can also have things
+like a realtech driver running in the
+background sending magic vendor specific
+commands. So vendor specific commands
+are officially speced out as having a
+special number 3F for the group and then
+whatever the vendor wants for the actual
+command. In this case 20 for some sort
+of vendor download, vendor firmware
+download type thing. So what I can see
+by just like plugging in a real tech
+dongle and using something like BTON is
+that it's sending VSC OCF that's op code
+uh op code command field OCF just
+command 20 20 2020 20 it's sending
+fragments of those firmware files that
+are sitting on the Linux file system
+also followed by a configuration file
+that's sitting on the file system. So
+you can confirm that for yourself. You
+just run bmon within Linux, attach a
+dongle, and you'll see a whole bunch of
+these vendor specific commands. So those
+config files are interesting because
+they're sitting right next to all the
+firmware files and leaked documentation
+indicates that they do have the
+capability to set the beader. This is
+how real tech allows people to set the
+biotterer except for this particular
+chip. It's not the leaked documents have
+the exact way to configure this, but it
+doesn't work on this chip. So, it turns
+out like something about the format of
+the config file is different for this
+chip than the leak documents.
+Got to talk a little bit like I'm only
+talking about this to give like the hint
+that like anyone anywhere that ever
+wants to do Bluetooth reverse
+engineering, if you're going to reverse
+engineer the Bluetooth controller
+itself, you need to let the
+specification be your guide. So, the
+format of those HCI commands, the
+special commands going down from the
+realtech driver. when it's using a
+vendor specific command. The least
+significant 16 bits are broken up
+annoyingly into a six- bit field and a
+10- bit field. So the six- bit field is
+the op code group field. The 10- bit
+field is the actual command. And so when
+you're looking at this, the 3F that is
+mandatory for vendor specific commands
+must be shifted up by 10. And therefore,
+if you see any constants like this, then
+those are kind of going to be your hint
+when you're reverse engineering. If you
+see 3F, if you see those constants that
+are 16 bit, FC, FD, FE, FF, if you see
+shift by 10, these are the kind of hints
+to you somewhere, excuse me, somewhere
+in the code, there is uh some vendor
+specific command processing going on.
+So always let the specification be your
+guide. You need to use the hints that
+the spec gives you about magic numbers
+and things that must be in order to do
+the reverse engineering. [gasps] So now
+finally 801 we have some instructions
+from realtech about how to turn on that
+dev board that was shipped in a state
+that cannot actually power on. Here's
+the jumpers you set. Just including that
+for posterity. They sent it in a
+confidential document to a person who
+has no NDA. So there you go. Should have
+really shipped that way, right? Don't
+waste my time. All right. Anyways, uh so
+what do you do when you can power on
+your board? Well, this particular board,
+as I said, is the wrong board. it is
+using the UART interface. So what you
+have to do is you have to connect up to
+the UART, plug in like a USB to UART
+adapter, plug it in, run screen or what
+have you in order to see the serial
+output and you see a whole bunch of
+nothing. And then you debug it with
+something like a logic analyzer and what
+do you see? You see a whole bunch of
+nothing. So my devboard is doing all of
+nothing when I power it on. So back to
+OSIN and just running around fiddling
+around. But the most useful discovery of
+this research occurred on 803 when I was
+looking at tools a particular tool RF
+test tool which is just a Windows tool
+for other devices not for this
+particular chip but it did have an
+interface which requested a compport a
+serial port in Windows parlance and that
+particular tool had capabilities like
+read the BD adder so I could see this
+tool I actually got it working on this
+chip and it can read the BD adder that's
+the true beady adder so I this tool
+interfaces with this chip. Fine. What I
+need to figure out now is how does this
+chip how does this tool work, right? I
+need to sort of reverse engineer the
+tool, but I want to do a more dynamic
+analysis rather than static analysis if
+at all humanly possible. The most useful
+thing being that there was this function
+rwreg bt. And if you pulled up that
+background command uh uh menu bar, you
+got this new tab appearing. And this new
+tab had these things like btrwg. Well,
+we might infer that that means Bluetooth
+readr register of some sort. It's got RF
+registers, modem registers. BTOC AON
+probably stands for system on a chip
+always on uh domain of power. So there's
+a thing, we connect it and we try out
+some stuff. We try a bunch of different
+addresses and we get all zeros. We would
+call that inconclusive, right? I don't
+know whether this is actually doing
+anything useful at this point. I can
+read and it seems like it's doing
+something, but it's sending me zeros.
+That's not useful. So Ger tip of the day
+is that when you want to find out where
+you should potentially be reading to an
+address that might be truly valid, then
+you go to the defined data and you
+scroll through that. And what you're
+seeing here is that there's a whole
+bunch of stuff in the range 80
+something. And you can actually see over
+in this assembly at offset 30, like
+literally the very first assembly, you
+can see that it'll have in blue
+addresses which are defined within the
+context of the blob of data that I've
+included right now. And there's
+addresses which are not defined within
+the context of the blob of data. So I've
+just allowed this to be located at
+offset zero. And it's telling you, well,
+I'm off I'm at offset zero. I've only
+got hex 4000 worth of firmware data, but
+some sort of access is going on to
+address 8010 blah blah blah. So stuff up
+in the 80 range seems to be accessed by
+this firmware. Don't know what it is,
+but I want to go try to read that
+instead. So run down to the last defined
+data. I can see it's accessed from many
+different places in the assembly code
+that I've already loaded. Go ahead and
+do that. Throw that into the tool and
+boom, we get some nonzero values. That's
+what I want to see. That's saying
+something interesting is going on here.
+And move on to try all the other types.
+Get some non-zero values for that other
+type as well. But also get this nice
+little hint here. We've got a quote
+unquote read flash. And it is at some
+sort of FC61.
+Well, to me that now looks like a vendor
+specific command. I said be on the
+lookout for 3F shifted up by 10 bits and
+those are what are vendor specific
+commands. So this looks like vener
+specific command number 61 to me at this
+point. Only problem being that this
+particular chip definitely does not have
+flash. So it is just running from ROM
+with some ephemeral RAM and information
+sent into it. Okay. Well, so now I want
+to figure out like what is the tool
+doing behind the scenes? You're not
+supposed to understand this diagram.
+That's just the Windows architectural
+Bluetooth diagram grabbed from some
+Microsoft site. But the basic point is
+I've got some real tech tool I found and
+it sends some sort of magic command down
+to my chip somehow through the Bluetooth
+stack andor through the serial stack
+lands down here at my serial adapter
+sends over to the board via you know
+serial the HCI data. But to figure out
+what's really going on there, I'm going
+to hook up the sale logic analyzer and
+just read the same wires that are being
+sent off to the devboard. And then I can
+infer or not infer, just literally see
+what's going on with this tool. So send
+a magic command here. It says it's
+reading flash. What's going on behind
+the scenes? Let's look at like what kind
+of data we expect back, what sort of
+data we put in. So there's your diagram,
+but thankfully for you, I like to zoom.
+So we can see in the serial trace that
+it is indeed sending some sort of data
+like FC61. So that looks like a vendor
+specific command. We can see in the
+serial trace that it's sending something
+that looks like the address that I
+requested to read 80 12 DC50. We can see
+a 20 which because we know four bytes of
+data come back that's probably a 32-bit
+x20 32 32 bits worth of data to read and
+that five is probably just the length of
+this data right here. So, that looks
+like some sort of read from a 32-bit
+address of four bytes of data. And
+indeed, I see the full four bytes of
+data coming back here. So, cool. At this
+point, I think I've got a special magic
+command. I think it reads I don't know
+100%. Does it read from like some offset
+in memory that it thinks is where flash
+starts? Does it read from the base of
+memory? I don't know. That turns out the
+answer is it reads from the base of
+memory. So, you're just giving an
+address and you get to request anywhere
+within the 32-bit address space. So,
+what do you do with that? Well, you just
+try to scan all of memory, right? And
+you don't want to scan every single bite
+of memory. Instead, you want to like do
+hopping and scan little pieces of
+memory. If it's invalid, this chip's
+memory controller seems to send back
+dead beef. So, what you do is just in
+case it's using paging. Unlikely, but
+just in case, you do hex 1000 chunks of
+memory. You skip forward hex 1000. Just
+read four bytes and see did you get dead
+beef or did you get anything other than
+dead beef? And what you come up with
+from that is you get some sort of memory
+map. So cool. I now have a sense of like
+what the ranges are. And the ranges make
+sense according to my assembly which was
+reaching out and trying to grab stuff in
+the hex 80 something range.
+That's the final thing. Can't dwell on
+it. Don't have time rocking through
+these 140 slides. But there is some
+aliasing going on in there as well. So
+now at this point I have scanned all of
+the memory. I've figured out the memory
+map. Now I can read all of the memory
+that is within those valid memory
+ranges. So I've got what I think is
+probably the ROM at 8000000.
+So I load the ROM into GEDA along with
+all the existing firmware so that now
+the existing firmware can reach out and
+grab data from the thing that I think is
+the ROM at hex 8000 x80.
+Uh but there's still no strings. But
+thankfully I'm an optimist and so I go
+ahead and I use the GEDra manual search
+for strings. you get all the normal sort
+of garbage that you would expect. And
+out of all the strings in the entire
+thing, everything is garbage except for
+like exactly 10 strings. But those 10
+strings are super super useful because
+for instance, it's saying something
+about HCI commands, HCI events, LMP,
+which is the packet data type that I
+want to send later on. So cool, that is
+super relevant to my interests. What do
+you do when you have a useful string?
+You go check the cross references. Where
+is that string used? What code uses the
+string HCI? Check the cross references.
+Go there. And it's finally decompilation
+time. The first and essentially only use
+of these strings. There's two aliased
+copies of this function. The only use of
+these strings is essentially a single
+function gets called over and over. It
+gets called with those strings as one of
+the parameters. It gets called with
+another parameter that is unique to each
+thing. So we might think there's maybe
+some sort of registration going on where
+it's saying like this thing gets
+registered as index 3. This thing gets
+indexed as register 7. And again it's
+got all sorts of different data for
+other parameters. So what do we do? Said
+I'm looking for vendor specific
+commands. How these sort of things work
+on this system. So HCI command probably
+is where I'm going to find vendor
+specific commands. Go look at the data.
+The data itself points here. Well that
+data further points to some particular
+function. And so we have to go skimming
+along through the function. Now for the
+interest of time, I can't show you the
+nice animated version. So suffice to say
+that if I just skim down through that
+function which is pointed to by the
+single function registration that
+includes the string HCI command, there's
+going to be a bunch of references to
+data where it says this variable, is it
+equal to three? Is it not equal to four?
+Is it equal to 8? Is it not equal to 6?
+And is it equal to 3F? And 3F is when
+your lies light up and you say 3F,
+that's the special magic vendor specific
+op code group field. And indeed, if you
+let the specification be your guide, you
+will see that all the other op code
+group fields for all the other v uh HCI
+commands are in the range of 1 through 6
+and 8. So all of these numbers that are
+checking all sanity checks out 3 4 8 6.
+These are numbers for upcode group
+fields. These are numbers for HCI
+commands. And so this thing right here
+really looks like if it's using an op
+code group 3f then call this function.
+So that seems like that's probably the
+process all the vendor specific commands
+function. Drill down into that. Again
+don't have time to show you the nice
+form. So the quick form is yes there's
+totally a bunch of those special magic
+range values of FC something FD
+something. We even got this FC20 that
+FC, we said vendor specific command 20
+was the like firmware download thing. So
+I can drill into that specific function
+if I want and really reverse engineer
+how the firmware download works. But I
+don't care about that because hold up,
+what am I even trying to do here? Right?
+Does anyone remember? Sorry, I don't
+take questions. So what am I trying to
+do? I'm trying to spoof the beady adder.
+Right? So in reverse engineering, you
+sometimes have to stop yourself from
+getting lost in the weeds. you go deep,
+but sometimes just stop, come up a level
+and say, "What am I even doing again?"
+Like, don't reverse engineer all of
+this. Great. I've got ROM dumping. I've
+got RAM dumping. I've got the capability
+to go read a bunch of code. How about I
+don't. Instead, what are my goals? I
+want to spoof the BD header. Now, I know
+a little bit about how config files are
+being used, how vendor specific commands
+are being used. I could drill into
+vendor specific command 20, but instead
+I go off a Google in again and I go to
+GitHub and I search for things. And what
+I find is there is some utilization of
+the commands or sorry configuration
+files. There's a function called get MAC
+offset. So even the vendors called BD
+adders MAC addresses sometimes. Get MAC
+offset for this particular chip 8761B is
+hex 30. So now I can put that together
+with the leaked information about config
+files and get my magic commands. So
+basically some sort of special header,
+some sort of total size length that's
+nine for the rest of the bytes. 30 is
+the offset where essentially this config
+file is saying go to the beginning of
+some sort of config stuff in memory. Go
+to offset 30, plug in a BD adder, and
+that's what we'll use for our custom BD
+adder. Otherwise, they use one that's
+flat uh burned into OTP. So cool. I've
+got that. I just write it in a literal
+text file. I reverse that text file to a
+binary file. I compress that binary
+file. I move the other file out of the
+way. I copy it over to where it's
+supposed to go. And boom. I've got a
+custom beady adder. [gasps] Goal one
+achieved. Hold your applause, please. We
+have to keep going. On to goal two. So
+cool. We can now spoof bi adders. We can
+do we can say anyone who wants to use
+WAD to go off and do machine in the
+middle attacks against devices that
+happen to be using public addresses,
+feel free to. Now you know from those
+previous slides how to configure the few
+bytes in order to spoof your bead out.
+So the stretch goal here was for
+Bluetooth printing purposes. I wanted to
+get rid of those brack dev boards and
+move down to just a custom little
+Bluetooth chip on a normal USB dongle.
+So there's two ways I could go about
+that. I already showed that I have the
+ability to go reverse engineer all the
+vendor specific commands, but I also
+have memory read and memory write
+capability. So which is the better way?
+As I said, if you can not have to read
+all the code, that would be the better
+way. So I need to make some sort of
+tool. My tool needs to speak over HCI.
+It needs to send my packet data of what
+I want to send later on. And then it
+needs to reach somehow to the LMP layer,
+the link manager protocol, Bluetooth
+classic lowest layer, always baked into
+the chip. And then that should send off
+that packet data for me. That's the goal
+here. Cool. Backing up a step, you know,
+just want to say like I I hopefully
+didn't miss the obvious when we look at
+the, you know, leak documentation for
+the RTL. um 8761B if we look at the
+block diagrams there is no even JTAG or
+debug or any sort of thing on the block
+diagram and they could just be leaving
+it off the block diagram but I don't
+think they are because if you look at it
+for other chips they put it on the
+diagram so some other chip ARMbased chip
+has S SWD so how are they debugging I
+don't know I suspect via serial debug
+basically like ser print print f
+debugging I don't know but also we can
+see if we look at the pin out for the
+particular chip there are again no easy
+obvious vious like there's the S SWD,
+there's the TDIO, like there's no
+obvious pins that are labeled according
+to debug interfaces. So, I'm not
+probably going to be able to get like a
+hardware debug access. So, instead, I
+need to figure out how their whole like
+patching firmware update mechanism
+works. And I'll tell you that there's
+just generally two ways that people tend
+to do this in a ecosystem like Bluetooth
+where the majority of the code down at
+the controller level, it's just baked
+into the ROM. So you can either have
+everything's in the ROM or maybe it's
+booting off flash, but [snorts] it's
+very common for it to all be in the ROM.
+And so the problem is if you need to
+patch the ROM somehow because you have,
+you know, they're they're going to have
+bugs. You need to patch the ROM somehow.
+There's basically two approaches. The
+first is to have something like patch
+registers, patch RAM. These are sort of
+architectural things baked into the
+design of the chip where you can
+essentially say like there's a big row
+of registers that you put addresses
+into. And as the CPU is executing code
+and the program counter is going through
+addresses, the hardware says, "Oh,
+program counter equals that value from
+that register. I need to redirect
+somewhere else and run some other code."
+So that's like sort of patch register
+patch ramp. Maybe the other place is the
+patch ram. The other way you can do it
+is that you can sprinkle little if this
+function pointer is not equal to null
+call the function pointer sprinkle that
+through your ROM and then update RAM
+locations which are otherwise equal to
+zero. So set if function pointer in RAM
+not equal to zero then call the function
+pointer. If not keep going. So I'll tell
+you straight up it's using the if
+function pointer not equal to null
+version. The reason I can say this like
+I didn't know this going in a priori and
+I didn't really initially care super
+much but it became obvious eventually
+through just looking at enough code. You
+can see that we have here things where
+it says if code pointer pointer this
+particular address not equal to code
+pointer zero then go down here and
+double dreference this code pointer
+pointer and call it with a bunch of
+parameters. And so that's just a
+roundabout way of saying if the pointer
+is not null call it as a function
+pointer. So that's what it's doing. If
+we went off and looked at this
+particular address 8 009 whatever that
+particular address has another
+particular address that's why it's a
+double pointer and that particular
+address holds zeros by default anyways
+and so you can think of it like how the
+patching mechanism really works is that
+they load some stuff into RAM the ROM
+jumps to that stuff that stuff goes and
+fills in a bunch of function pointers
+anywhere that they want to sort of hook
+the existing code execution and control
+flow So literally it's architected for
+dump some code on and hook the control
+flow. Obviously I can use that to dump
+some code on and hook the control flow.
+Just a matter of figuring out how.
+All right, not bad. So the suffering
+truly begins 5 days from the CFP
+deadline. So I have to back up for two
+seconds to say that on the 18th, you
+know, we come back here to the 7th, I
+told some security researchers on a
+Bluetooth private Slack that hey, we can
+figure out the spoofing the be adder.
+People don't need to use the CSR4
+dongles anymore. Then Antonio Vasquez
+Blanco, who's a Bluetooth security
+researcher, on the 15th, he provided me
+my memory dump script in his scape USB
+Bluetooth library. So he had made a
+library that talks USB Bluetooth and
+then uses escape for packet crafting. So
+he just said, "Hey, if you use this, you
+can talk to a normal USB dongle instead
+of your serial thing that you were
+using." And so I thanked him for that. I
+used it. And then on the 18th is where
+the the story picks up. Then I went and
+analyzed Bumble. Bumble is some Google
+uh open- source code for doing
+Bluetooth. And Bumble already had
+support for doing patch download onto
+realtech chips. they already had grabbed
+the algorithm from the Linux code which
+is open source and they had implemented
+it themselves. So then I grabbed it from
+their code and implemented myself in uh
+the escape USB Bluetooth.
+So the initial pock basically it
+downloads my code into memory. It takes
+the initial patches puts them into
+memory with a little prologue hook at
+the very very first function. And so the
+idea is when the very first function is
+called, it will jump down to my pot code
+and it will jump back up and continue
+execution in the normal code. And for
+what it's worth, this is how I was
+programming uh assembly at this point. I
+went and I looked at the assembly
+language. I would grab something like uh
+hey, I need an or assembly instruction.
+I'd grab that and then I would like
+fiddle with those bits until I like
+changed, you know, value one to value
+two, you know, register one to register
+two. So this is how I was writing my
+six. uh MIF16E assembly at this point
+just don't even I didn't even open the
+manual yet I was just like take that
+fiddle with the bits great good keep
+going got 5 days to go but puck one
+doesn't work after 4 hours suffering you
+know debugging and eventually I decide
+okay well I wrote my code into some
+memory that I hope and I think is not
+being used but that's not particularly
+safe so instead let's like tack my code
+on the end of the original patches same
+idea and let's feed that in again
+another 4 hours no But finally, you
+know, 14 1/2 hours into the day at 9:00
+p.m., I figure out there's a double D
+reference that should only be a single D
+reference, right? Writing assembly in
+some unfamiliar language, doing it
+wrong, suffering, but becoming more
+strong for that. So, finally, PAC 2 is
+working at the end of the day. Time to
+hold off. We've only got 4 days to go.
+What are we going to do? How are we
+going to get arbitrary LMP packet going?
+So, it's time to break out the big guns.
+This is my brain food. Your brain runs
+on glucose. When you need to get
+anything done, you give it a boost.
+Little little bit of sucrose like so. So
+cool. Now I've got 4 days to the
+deadline. I want to send LMP packets. I
+want The thing about LMP packets is they
+have to be sent in the context of an
+active connection. It's not just like an
+advertising packet. I don't know about
+Wi-Fi from yesterday, but those
+management frames I feel like management
+frames just get to get sent around
+without an active connection. We need to
+create and establish a legitimate active
+connection. Then we can send LMP
+packets. That's where we're trying to
+get here. And so Scapy USB Bluetooth is
+really not meant for that. It's really
+not particularly good at like create an
+active connection. Now I've got like a
+raw socket, but then I have to manage
+all the state myself. Antonio helps me
+out. He at least gets me to the point
+where I can create a connection, send an
+LMP name request using normal legitimate
+ACI, not my custom crafted packets. And
+then I go off and I try searching,
+scraping through memory on the recipient
+realtech dongle. So now I've got real
+tech sender, real tech recipient. I can
+scrape the memory on the real tech
+recipient, but I can't find my packets
+anywhere in memory. I just straight up
+scrape memory. It's not there. And so
+then I waste the rest of the day reverse
+engineering LMP more because I've been
+spending more time on HCI than LMP.
+Cool. 3 days to go and uh you know 4
+minutes to go. So basically uh at that
+point it's worth saying that like
+Bluetooth classic there's no good ways
+to sniff the packets and so I have to
+come up with my own way to sniff the
+packet which is my two dongles one of
+which now turns into a logging thing cuz
+I don't trust that I'm sending packets
+unless I can see it quote unquote over
+the air. Well second best option is see
+it on the recipient that it received the
+actual packet. So around this time, for
+what it's worth, had a little
+conversation with Veronica where I said,
+"Hey, I need to write a lot of code now.
+It's time to start breaking out the myip
+16 assembler." And she said, "You were
+writing your code in hex? That's the
+dumbest thing I've ever heard." And I
+said, "Thanks, honey. That's going in
+the slides."
+All right. So, basically, suffering,
+suffering, suffering. I'm not going to
+dwell on the particular suffering.
+Again, I don't want this to come off as
+whiny, but the point is everywhere you
+see suffering, you are also seeing me
+leveling up in terms of myip skills and
+my writing assembly in a weird
+environment where I have to use like
+memory dumping for debugging. Like I
+don't want to say like you know
+yesterday uh way he had like core dump
+so he could see register values. I
+didn't have register values. I have
+memory dumps I have to put in assembly
+to get register values. Whatever. Level
+up, level up, level up. I now have
+patched code inside of the Bluetooth
+controller. I can use legitimate things
+like remote name requests. So basically
+when you get a name request from a
+remote thing, it's supposed to take a
+buffer of like 253 bytes and send it up
+to the host. I'm using that now as my
+LMP logging mechanism.
+But at this point, my primary fuel is
+exhausted. This is 2 days later, by the
+way, that I made my way through that.
+And it's time to switch to auxiliary
+boosters because we got, you know, one
+more day to go. suffering, suffering,
+suffering, suffering, suffering. And
+finally, a critical decision point 3.5
+hours from the CFP deadline. Do I keep
+coding up until the CFP deadline and
+confirm that this all works or do I
+actually like write up my CFP deadline?
+Which do you think I did? Well, at this
+point, I was zen because I knew that
+this could work. I have this arbitrary
+write capability, arbitrary read
+capability. I am super confident that
+I'm going to get arbitrary packet
+sending capability. It's just going to
+be slow and hella painful. So, my power
+reserves uh are spent and it's time to
+now go on intermission and go off and do
+all the other stuff I've been putting
+off. But, I put in my CFP uh submission.
+As you may or may not know, sometimes
+speakers don't actually have their full
+stuff working before they submit a talk.
+Pro tip right there. Anyways, later on,
+come back, spin up, figure out that it
+doesn't like the various hackish ways
+that I'm logging information. That's
+breaking connections. Switch to other
+stuff. Switch to Bumble. Bumble is using
+object-oriented programming. That's my
+kryptonite. I can't handle abstraction
+layers. And so I say, "Okay, Veronica,
+you're going to read the code instead of
+me. She's got a programmer mindset." But
+then I have to create a special lab
+setup for her to actually test my code
+and read the Bumble code. That takes 2
+days to set up. I give it to her. And
+then an hour and a half after I give it
+to her, I figure it out quote unquote
+myself using GitHub Copilot and Chat
+GPT. I finally figure out how to get
+Bumble to send my vendor specific
+commands.
+And the final progress is on the 23rd, I
+can now send an LMP packet using a
+function that I see in the code to send
+that exact packet. And then one little
+bit more of suffering is that I finally
+figure out how to send the actual
+arbitrary LMP packet, which has six
+arguments and you can only send four as
+registers. So I have to learn about
+their calling conventions and everything
+else. And finally, boom, goal two. I've
+completed the That's Sorry, don't clap.
+No, no, no, no. And so, basically, CFP
+deadline plus 2 days, two work days.
+I've actually now got this arbitrary
+capability to send a blob of data down
+and get it sent out over the air. So, I
+can get rid of Brack. This is not even
+the final form. Uh, the dark firmware
+real, which is what we're going to call
+this, it takes a bunch more suffering to
+get it working with Bluetooth printing.
+Not going to care about that point. But
+the nice takeaway from that is that
+forced me to turn it into the standalone
+file which gives you the magic commands
+where you just get to now overwrite a
+file instead of doing dynamic download.
+Just take a file, stick it on the file
+system, and you get to put the custom
+firmware onto the real tech chips. And
+now Kazam, these things are now able to
+send stuff they're not supposed to. So
+taking a step back, I'm going to leave
+this for future Bluetooth researchers to
+read. Like to do better work in the
+Bluetooth space, we need people not just
+saying there exists a vendor specific
+command. you need to actually document
+the parameters of the command. For this
+particular audience, I'll say it would
+be super cool if anyone else wants to
+like go off and try to do the exact same
+thing in terms of ROM recovery using
+your particular techniques like fault
+injection or optical analysis and then
+like contribute that to open security
+training. We can have students do it the
+Zeno way and the U way. But yeah, the
+final one last thing here is that it
+turned out that realtech was really nice
+and this was suspicious to me. So
+essentially, I got them to get give me
+the hardware setup con configuration.
+They asked me what I was up to. I told
+them Bluetooth printing. I thought they
+were going to stop talking to me at that
+point and instead they turned around and
+said, "Hey, if this is what you're
+trying to do, we could make you an
+official way to send an arbitrary packet
+of LMP and LLCP." I said like, "Hell's
+yes, I'll take it." So, they told me
+they're not going to do it for the RTL
+8761B, but rather the C, the upcoming
+chip, the chip that they want other
+people to move to. They sent me a dev
+board. I ran their magic commands with
+their custom firmware. So, they
+literally have this firmware written
+here in time for hardware.io. And so,
+it's documented. I got them to take the
+real tech proprietary off of that and
+just say realtech uh copyright. So, like
+officially, they're going to have a
+documented way for you to send arbitrary
+commands. don't have to rely on my
+hackish firmware. That is a bestcase
+outcome scenario here. I'm not going to
+do a great job of maintaining it. So,
+the future looks bright. We're
+essentially having a vendor stepping up
+and saying, "We will give you the
+capabilities you need to send arbitrary
+packets for doing fuzzing, for doing
+vulnerability hunting, and I hope other
+people follow their lead." That's it.
+The code is already open source and
+released. The code, the geer files,
+everything is released. And uh thanks to
+Veronica for making Gedra scripts.
+Thanks to Antonio for helping me with an
+updated memory dump. So I don't have any
+further time to take questions. I'm
+going to watch the next talk. So don't
+come up to me and ask me questions. You
+can find me over in the coffee area
+after the next talk, the coffee break.
+Thank you for your time.
+[applause]
+Wow.
+That was a sprint. Um, despite saying
+that he doesn't take questions, maybe we
+can ask one.
+>> Does anybody have a question?
+>> What do you got?
+>> Come at me. Stump the chump.
+>> Anyone who is capable to following that?
+All right, we've got one.
+>> Uh, so when you were trying to execute
+um your own instruction from RAM, uh, I
+noticed that one of the last slides you
+added an epilogue at the bottom. So you
+were jumping from the end of RAM. What
+was the reason for that?
+>> Yeah. So unfortunately like I had to cut
+so many slides that I can't tell you but
+he did correctly notice that my previous
+thing said I was hooking function
+prologs and eventually it said hooking
+function epilog. The answer turned out
+to be that the existing patch code would
+insert its patches. And so earlier when
+I hooked function prologues and I put my
+patches in, it would stomp my patches.
+So I need to like wait for them to put
+their patches and then I stomp their
+patches instead of them stomping my
+patches. But still I obviously have to
+call through to their original function
+pointer to make sure everything still
+works. Yep.
+>> Thank you so much. Let's give a round of
+applause to the person who managed to
+follow the entire talk of Zena.

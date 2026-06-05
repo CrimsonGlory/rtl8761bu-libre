@@ -1,0 +1,5139 @@
+1
+00:00:03,040 --> 00:00:05,440
+I am Xenova. What you need to know about
+
+2
+00:00:05,440 --> 00:00:07,919
+me is that this particular work is work
+
+3
+00:00:07,919 --> 00:00:09,760
+I do with the minority of my time. The
+
+4
+00:00:09,760 --> 00:00:11,599
+majority of my time is spent on open
+
+5
+00:00:11,599 --> 00:00:13,840
+security training to a nonprofit I run
+
+6
+00:00:13,840 --> 00:00:15,599
+where I create free classes and give
+
+7
+00:00:15,599 --> 00:00:17,359
+them away. And I encourage other people
+
+8
+00:00:17,359 --> 00:00:19,279
+to create free classes and give them
+
+9
+00:00:19,279 --> 00:00:22,320
+away. So, this is not directly related
+
+10
+00:00:22,320 --> 00:00:24,080
+to free classes that are going to be
+
+11
+00:00:24,080 --> 00:00:26,560
+given away, except that it turns out I
+
+12
+00:00:26,560 --> 00:00:27,920
+created too much material. So, I'm
+
+13
+00:00:27,920 --> 00:00:29,119
+probably going to turn this whole thing
+
+14
+00:00:29,119 --> 00:00:31,039
+into a free class and give it away. All
+
+15
+00:00:31,039 --> 00:00:33,680
+right. So, Alakazam, boom. These
+
+16
+00:00:33,680 --> 00:00:35,360
+particular Bluetooth dongles can now
+
+17
+00:00:35,360 --> 00:00:37,120
+send arbitrary low-level packets that
+
+18
+00:00:37,120 --> 00:00:39,520
+they're architecturally not supposed to.
+
+19
+00:00:39,520 --> 00:00:41,440
+And there's your magic command pseudo
+
+20
+00:00:41,440 --> 00:00:44,239
+copy Zeno's magic firmware over the real
+
+21
+00:00:44,239 --> 00:00:46,079
+tech firmware. And you've got arbitrary
+
+22
+00:00:46,079 --> 00:00:48,239
+code execution. So, today we're going to
+
+23
+00:00:48,239 --> 00:00:50,079
+talk about magic's biggest secrets
+
+24
+00:00:50,079 --> 00:00:51,520
+revealed. Or at least that's what I
+
+25
+00:00:51,520 --> 00:00:53,600
+wanted to talk to you about. So, what I
+
+26
+00:00:53,600 --> 00:00:55,680
+wanted to present was not just what I
+
+27
+00:00:55,680 --> 00:00:57,760
+found, but how I found it so that other
+
+28
+00:00:57,760 --> 00:00:59,199
+people could follow in my footsteps and
+
+29
+00:00:59,199 --> 00:01:00,879
+do the same thing for other chips, cuz
+
+30
+00:01:00,879 --> 00:01:02,000
+there's a lot of chips that need
+
+31
+00:01:02,000 --> 00:01:05,519
+exploration. I made 350 slides and then
+
+32
+00:01:05,519 --> 00:01:07,360
+I decided that's not going to actually
+
+33
+00:01:07,360 --> 00:01:09,680
+fit in this talk. So, I cut it down to a
+
+34
+00:01:09,680 --> 00:01:11,840
+lean 140 and we're going to see what can
+
+35
+00:01:11,840 --> 00:01:14,560
+we get through. Now, the uh abstract
+
+36
+00:01:14,560 --> 00:01:16,400
+promised you that suffering builds
+
+37
+00:01:16,400 --> 00:01:17,920
+strength. That is one of my life
+
+38
+00:01:17,920 --> 00:01:19,920
+philosophies. You saw some of that
+
+39
+00:01:19,920 --> 00:01:23,280
+yesterday. Marius suffered for his uh
+
+40
+00:01:23,280 --> 00:01:26,320
+incorrect wiring on his glitching setup.
+
+41
+00:01:26,320 --> 00:01:29,280
+Uh Wayche, he suffered for being able to
+
+42
+00:01:29,280 --> 00:01:32,320
+only use uh core dump crash logs in
+
+43
+00:01:32,320 --> 00:01:34,799
+order to debug the MediaTek chips.
+
+44
+00:01:34,799 --> 00:01:37,119
+Suffering builds strength. That's 100%
+
+45
+00:01:37,119 --> 00:01:39,520
+true. And so I hope you understand when
+
+46
+00:01:39,520 --> 00:01:41,759
+I tell you that I hope you too will go
+
+47
+00:01:41,759 --> 00:01:44,799
+out and suffer so that you too can gain
+
+48
+00:01:44,799 --> 00:01:47,360
+the strength to do awesome work. So in
+
+49
+00:01:47,360 --> 00:01:50,079
+this talk terminology BC or BTC is going
+
+50
+00:01:50,079 --> 00:01:53,040
+to be Bluetooth classic not Bitcoin. BL
+
+51
+00:01:53,040 --> 00:01:54,799
+is Bluetooth low energy and BD adder is
+
+52
+00:01:54,799 --> 00:01:56,240
+a Bluetooth device address. It's that
+
+53
+00:01:56,240 --> 00:01:57,520
+thing that looks like a MAC address but
+
+54
+00:01:57,520 --> 00:01:59,439
+it's not a MAC address. What you need to
+
+55
+00:01:59,439 --> 00:02:01,520
+know about Bluetooth addresses is that
+
+56
+00:02:01,520 --> 00:02:03,759
+spoofing a Bluetooth classic address or
+
+57
+00:02:03,759 --> 00:02:06,000
+a Bluetooth low energy public address is
+
+58
+00:02:06,000 --> 00:02:08,160
+hard. There's no official way to do it.
+
+59
+00:02:08,160 --> 00:02:10,399
+And spoofing random addresses is easy
+
+60
+00:02:10,399 --> 00:02:12,319
+because there's official APIs that you
+
+61
+00:02:12,319 --> 00:02:15,280
+can just use. So motivation one for this
+
+62
+00:02:15,280 --> 00:02:17,599
+talk. This is why it's sort of OSD2
+
+63
+00:02:17,599 --> 00:02:19,840
+related, but Veronica and I wanted to
+
+64
+00:02:19,840 --> 00:02:21,840
+show machinein-the-middle attacks using
+
+65
+00:02:21,840 --> 00:02:23,840
+WAD wireless hacking framework in our
+
+66
+00:02:23,840 --> 00:02:25,760
+future open security training Bluetooth
+
+67
+00:02:25,760 --> 00:02:28,080
+low energy class. But there's no
+
+68
+00:02:28,080 --> 00:02:29,920
+architectural way, as I just said, to
+
+69
+00:02:29,920 --> 00:02:32,080
+set Bluetooth classic addresses or B
+
+70
+00:02:32,080 --> 00:02:33,920
+public addresses. So, WAD will help you
+
+71
+00:02:33,920 --> 00:02:35,280
+machine in the middle a device that's
+
+72
+00:02:35,280 --> 00:02:37,200
+using a random address, but it won't
+
+73
+00:02:37,200 --> 00:02:38,720
+help you machine in the middle a device
+
+74
+00:02:38,720 --> 00:02:40,000
+that's using public. So, if you want to
+
+75
+00:02:40,000 --> 00:02:41,840
+attack something using public, you need
+
+76
+00:02:41,840 --> 00:02:45,120
+to have some way to spoof the BDR. And
+
+77
+00:02:45,120 --> 00:02:47,440
+there's no good ways to do that except
+
+78
+00:02:47,440 --> 00:02:51,040
+that some really old chips like the CSR4
+
+79
+00:02:51,040 --> 00:02:53,360
+dongle have some really old deprecated
+
+80
+00:02:53,360 --> 00:02:56,160
+tools like a tool called Bei Adder from
+
+81
+00:02:56,160 --> 00:02:57,760
+Bluesy that just doesn't even come
+
+82
+00:02:57,760 --> 00:02:59,920
+included anymore. Those tools know how
+
+83
+00:02:59,920 --> 00:03:01,519
+to spoof the BD adders on those old
+
+84
+00:03:01,519 --> 00:03:04,239
+chips. But the CSR dongle is called the
+
+85
+00:03:04,239 --> 00:03:06,879
+CSR 4.0 for a reason. It only supports
+
+86
+00:03:06,879 --> 00:03:09,040
+Bluetooth spec 4.0 which is the very
+
+87
+00:03:09,040 --> 00:03:10,480
+very first one that supported Bluetooth
+
+88
+00:03:10,480 --> 00:03:12,800
+low energy. So great a new class. It can
+
+89
+00:03:12,800 --> 00:03:14,720
+do low energy, but this is only
+
+90
+00:03:14,720 --> 00:03:17,040
+supporting features from 2010. So we're
+
+91
+00:03:17,040 --> 00:03:18,480
+teaching a new class. We don't want
+
+92
+00:03:18,480 --> 00:03:20,319
+students to be locked into only 2010
+
+93
+00:03:20,319 --> 00:03:23,440
+stuff. So we need new hardware that we
+
+94
+00:03:23,440 --> 00:03:25,840
+can teach to that speaks to Bluetooth
+
+95
+00:03:25,840 --> 00:03:27,440
+5.4, which is what we teach in the
+
+96
+00:03:27,440 --> 00:03:29,599
+class. Secondary motivation, I have
+
+97
+00:03:29,599 --> 00:03:30,959
+Bluetooth printing. I presented it here
+
+98
+00:03:30,959 --> 00:03:33,840
+at hardware.io 2 years ago. And that
+
+99
+00:03:33,840 --> 00:03:35,920
+uses some security researchers tool
+
+100
+00:03:35,920 --> 00:03:38,080
+called Brack. Sorry, I'm going to like
+
+101
+00:03:38,080 --> 00:03:39,760
+even though I don't have time for it, I
+
+102
+00:03:39,760 --> 00:03:42,560
+got to give you a big mouse because then
+
+103
+00:03:42,560 --> 00:03:44,000
+you'll see what I'm actually pointing
+
+104
+00:03:44,000 --> 00:03:46,560
+at.
+
+105
+00:03:46,560 --> 00:03:48,959
+There you go.
+
+106
+00:03:48,959 --> 00:03:50,720
+That's going to actually matter later.
+
+107
+00:03:50,720 --> 00:03:53,680
+So, Bracktoothoth, uh, it uses that's
+
+108
+00:03:53,680 --> 00:03:55,040
+what I was using in Bluetooth printing
+
+109
+00:03:55,040 --> 00:03:57,439
+for LMP sending arbitrary Bluetooth
+
+110
+00:03:57,439 --> 00:03:59,599
+classic low-level link manager protocol
+
+111
+00:03:59,599 --> 00:04:01,120
+stuff, but the source code's not
+
+112
+00:04:01,120 --> 00:04:02,799
+available. That's not great. It also
+
+113
+00:04:02,799 --> 00:04:04,720
+only supported x86 when I initially
+
+114
+00:04:04,720 --> 00:04:08,000
+started the work. and it uses a big dev
+
+115
+00:04:08,000 --> 00:04:09,920
+board like this which forced me into
+
+116
+00:04:09,920 --> 00:04:12,400
+using a big x86 board instead of a small
+
+117
+00:04:12,400 --> 00:04:14,640
+little ARMbased single board computer
+
+118
+00:04:14,640 --> 00:04:16,959
+and then I had to use voltage adapters
+
+119
+00:04:16,959 --> 00:04:19,440
+to use big old honken power supplies and
+
+120
+00:04:19,440 --> 00:04:20,880
+everything. Another problem with using
+
+121
+00:04:20,880 --> 00:04:23,120
+brack sending low-level packets is that
+
+122
+00:04:23,120 --> 00:04:25,199
+it requires an ESP rover kit. You
+
+123
+00:04:25,199 --> 00:04:26,720
+literally can't even buy those anymore.
+
+124
+00:04:26,720 --> 00:04:28,160
+I had to go off and find what the
+
+125
+00:04:28,160 --> 00:04:30,639
+replacement is. Those cost $55 and
+
+126
+00:04:30,639 --> 00:04:32,400
+they're big and bulky. And I would
+
+127
+00:04:32,400 --> 00:04:33,919
+rather have people that I teach
+
+128
+00:04:33,919 --> 00:04:35,280
+Bluetooth printing or people actually
+
+129
+00:04:35,280 --> 00:04:36,800
+doing Bluetooth printing, I'd rather
+
+130
+00:04:36,800 --> 00:04:39,120
+have them use a simple USB dongle than a
+
+131
+00:04:39,120 --> 00:04:41,919
+big old dev kit. The third motivation
+
+132
+00:04:41,919 --> 00:04:43,600
+for this is that I'm putting together a
+
+133
+00:04:43,600 --> 00:04:45,600
+crew, a blue crew of people who want to
+
+134
+00:04:45,600 --> 00:04:47,360
+do awesome Bluetooth security research.
+
+135
+00:04:47,360 --> 00:04:49,680
+If that's you, get in touch. But
+
+136
+00:04:49,680 --> 00:04:51,360
+basically, I wanted to lead by example
+
+137
+00:04:51,360 --> 00:04:53,199
+for the blue crew, which is to say, I
+
+138
+00:04:53,199 --> 00:04:54,720
+wanted to go off reverse engineer
+
+139
+00:04:54,720 --> 00:04:56,720
+something. Say, here's how I did it. Now
+
+140
+00:04:56,720 --> 00:04:58,800
+you go off and reverse engineer Qualcomm
+
+141
+00:04:58,800 --> 00:05:00,639
+or MediaTek or any other thing that
+
+142
+00:05:00,639 --> 00:05:02,080
+hasn't been looked at because almost
+
+143
+00:05:02,080 --> 00:05:03,759
+everything hasn't been looked at.
+
+144
+00:05:03,759 --> 00:05:05,919
+There's like three or four chips out of
+
+145
+00:05:05,919 --> 00:05:07,919
+20 plus chips that have been looked at.
+
+146
+00:05:07,919 --> 00:05:09,440
+We need more people digging into this
+
+147
+00:05:09,440 --> 00:05:12,720
+stuff. So the future uh Bluetooth the
+
+148
+00:05:12,720 --> 00:05:14,080
+current Bluetooth printing class is
+
+149
+00:05:14,080 --> 00:05:15,520
+there on open security training.
+
+150
+00:05:15,520 --> 00:05:17,840
+Veronica and I are making more classes.
+
+151
+00:05:17,840 --> 00:05:19,840
+Blue crew members will be expected to
+
+152
+00:05:19,840 --> 00:05:21,759
+know all the stuff about Bluetooth that
+
+153
+00:05:21,759 --> 00:05:23,039
+we put out there and then they're
+
+154
+00:05:23,039 --> 00:05:25,600
+expected to go off and do cool things.
+
+155
+00:05:25,600 --> 00:05:28,080
+So, time for meat. So, what's on the
+
+156
+00:05:28,080 --> 00:05:29,759
+agenda? Suffering and strength. Right?
+
+157
+00:05:29,759 --> 00:05:31,520
+So, I don't want this to come off as
+
+158
+00:05:31,520 --> 00:05:33,680
+whiny. Hopefully, I'm not whining that,
+
+159
+00:05:33,680 --> 00:05:35,919
+oh, I suffered and it was hard. No,
+
+160
+00:05:35,919 --> 00:05:38,639
+suffering is good here. Suffering builds
+
+161
+00:05:38,639 --> 00:05:40,400
+strength. You got to break yourself down
+
+162
+00:05:40,400 --> 00:05:41,840
+a little bit to build yourself up a
+
+163
+00:05:41,840 --> 00:05:43,680
+little bit better. So, the types of
+
+164
+00:05:43,680 --> 00:05:45,199
+things I ran into is that this
+
+165
+00:05:45,199 --> 00:05:47,360
+particular chip was MIP 16e, and I don't
+
+166
+00:05:47,360 --> 00:05:49,919
+know MIPS. Uh, has no private or public
+
+167
+00:05:49,919 --> 00:05:52,400
+SDKs, has no strings really. There's
+
+168
+00:05:52,400 --> 00:05:54,400
+like 10 strings, but turns out those 10
+
+169
+00:05:54,400 --> 00:05:56,560
+strings are good enough. No J-tag
+
+170
+00:05:56,560 --> 00:05:58,400
+option, no live debugging, anything like
+
+171
+00:05:58,400 --> 00:06:00,639
+that, and end up having to write code in
+
+172
+00:06:00,639 --> 00:06:03,840
+an unfamiliar language. So started this
+
+173
+00:06:03,840 --> 00:06:06,080
+work back in last January with a plan
+
+174
+00:06:06,080 --> 00:06:07,840
+for a plan that someday we needed to
+
+175
+00:06:07,840 --> 00:06:09,280
+have better chips for our Bluetooth
+
+176
+00:06:09,280 --> 00:06:11,360
+classes. So I go off and buy a bunch of
+
+177
+00:06:11,360 --> 00:06:13,360
+dongles on Amazon, just some random
+
+178
+00:06:13,360 --> 00:06:16,400
+cheap stuff. And they say they support
+
+179
+00:06:16,400 --> 00:06:18,720
+5.3 and 5.4, before, but when you plug
+
+180
+00:06:18,720 --> 00:06:21,360
+them into Linux, run HCI command config-
+
+181
+00:06:21,360 --> 00:06:23,759
+A, look at the verbose output, it tells
+
+182
+00:06:23,759 --> 00:06:25,600
+you, okay, all the chips I bought turned
+
+183
+00:06:25,600 --> 00:06:27,199
+out to actually all be real tech stuff.
+
+184
+00:06:27,199 --> 00:06:29,759
+And you will see this. If you buy random
+
+185
+00:06:29,759 --> 00:06:32,560
+white label cheapo Bluetooth dongles, it
+
+186
+00:06:32,560 --> 00:06:34,000
+turns out most everything's using real
+
+187
+00:06:34,000 --> 00:06:36,479
+tech today. So, it's using real tech,
+
+188
+00:06:36,479 --> 00:06:38,479
+but the chips, according to themselves
+
+189
+00:06:38,479 --> 00:06:40,639
+report, they only support Bluetooth 5.1,
+
+190
+00:06:40,639 --> 00:06:43,840
+not 5.3, not 5.4 like the people are
+
+191
+00:06:43,840 --> 00:06:46,000
+putting. And I confirmed this later with
+
+192
+00:06:46,000 --> 00:06:47,840
+Realtech that yes, they only support
+
+193
+00:06:47,840 --> 00:06:50,720
+5.1. Those sellers are straight up
+
+194
+00:06:50,720 --> 00:06:53,600
+lying. So, I didn't know at the time, I
+
+195
+00:06:53,600 --> 00:06:54,960
+hadn't cracked these open at the time,
+
+196
+00:06:54,960 --> 00:06:56,560
+but if you got them, you crack them and
+
+197
+00:06:56,560 --> 00:06:58,560
+you find out that they're using realtech
+
+198
+00:06:58,560 --> 00:07:02,960
+uh 8761 BU or BUV. And actually, I I
+
+199
+00:07:02,960 --> 00:07:04,639
+show this picture just to say I really
+
+200
+00:07:04,639 --> 00:07:06,160
+expected all the white label stuff to
+
+201
+00:07:06,160 --> 00:07:07,840
+just be the same on this inside with
+
+202
+00:07:07,840 --> 00:07:09,440
+like a different plastic shell around
+
+203
+00:07:09,440 --> 00:07:10,800
+it. So, I was actually somewhat
+
+204
+00:07:10,800 --> 00:07:12,880
+surprised that we did see different PCBs
+
+205
+00:07:12,880 --> 00:07:16,000
+and different chips. So, then, you know,
+
+206
+00:07:16,000 --> 00:07:18,080
+had I actually went off and read the
+
+207
+00:07:18,080 --> 00:07:20,560
+data sheets, but I did that later on,
+
+208
+00:07:20,560 --> 00:07:23,680
+uh, the BUV is a USB interface, the BUE
+
+209
+00:07:23,680 --> 00:07:25,520
+is a USB interface, and turns out
+
+210
+00:07:25,520 --> 00:07:27,599
+there's two other chips that have UART
+
+211
+00:07:27,599 --> 00:07:30,319
+interfaces. So what I did that was
+
+212
+00:07:30,319 --> 00:07:31,919
+wrong, which caused me a little
+
+213
+00:07:31,919 --> 00:07:34,720
+suffering was that around April when I
+
+214
+00:07:34,720 --> 00:07:36,319
+started to think, okay, maybe I am going
+
+215
+00:07:36,319 --> 00:07:37,840
+to poke at these things at some point in
+
+216
+00:07:37,840 --> 00:07:40,639
+the future, I just Googled RTL 8761B
+
+217
+00:07:40,639 --> 00:07:43,599
+devboard and I went out and got the
+
+218
+00:07:43,599 --> 00:07:45,520
+wrong devboard. I said, okay, there's a
+
+219
+00:07:45,520 --> 00:07:47,280
+USB port and it's got the real tech
+
+220
+00:07:47,280 --> 00:07:48,720
+chip, so this must be the dev board for
+
+221
+00:07:48,720 --> 00:07:50,800
+playing with those USB dongles, right?
+
+222
+00:07:50,800 --> 00:07:53,199
+Wrong. So it turns out, like I just
+
+223
+00:07:53,199 --> 00:07:55,199
+said, there's a thing that uses a USB
+
+224
+00:07:55,199 --> 00:07:57,360
+interface and one that uses a UART
+
+225
+00:07:57,360 --> 00:08:00,000
+interface. So, this USB is actually only
+
+226
+00:08:00,000 --> 00:08:02,080
+for power. It doesn't actually speak
+
+227
+00:08:02,080 --> 00:08:05,199
+data over the USB. Do as I say, not as I
+
+228
+00:08:05,199 --> 00:08:07,680
+do. Double check your dev boards,
+
+229
+00:08:07,680 --> 00:08:09,520
+specifically the interfaces, because
+
+230
+00:08:09,520 --> 00:08:11,759
+there are different physical transports
+
+231
+00:08:11,759 --> 00:08:14,879
+that Bluetooth uses uh in order to speak
+
+232
+00:08:14,879 --> 00:08:16,960
+with chips. So, the actual start of the
+
+233
+00:08:16,960 --> 00:08:19,759
+project started this last uh July when I
+
+234
+00:08:19,759 --> 00:08:21,520
+got the Bluetooth printing class up in
+
+235
+00:08:21,520 --> 00:08:23,360
+Open Security Training. I'm running that
+
+236
+00:08:23,360 --> 00:08:24,800
+and in the background, I say, "Okay,
+
+237
+00:08:24,800 --> 00:08:25,919
+I've got a little free time. I don't
+
+238
+00:08:25,919 --> 00:08:28,000
+have to pay attention super much to the
+
+239
+00:08:28,000 --> 00:08:29,440
+students. They'll post questions
+
+240
+00:08:29,440 --> 00:08:31,280
+whenever they post. So I said, "Okay,
+
+241
+00:08:31,280 --> 00:08:32,640
+let's start looking at these real tech
+
+242
+00:08:32,640 --> 00:08:33,839
+chips in the background. Maybe we can
+
+243
+00:08:33,839 --> 00:08:36,240
+use these for the future." And so I plug
+
+244
+00:08:36,240 --> 00:08:38,000
+in the devboard. There's no lights.
+
+245
+00:08:38,000 --> 00:08:39,440
+There's no power. There's no indication
+
+246
+00:08:39,440 --> 00:08:41,039
+this thing actually works. So I messaged
+
+247
+00:08:41,039 --> 00:08:43,680
+the Alibaba sellers a little bit peeved
+
+248
+00:08:43,680 --> 00:08:45,440
+thinking that they've deceived me and
+
+249
+00:08:45,440 --> 00:08:47,680
+sold me some garbage. But they said,
+
+250
+00:08:47,680 --> 00:08:49,440
+"Look, we just ship whatever Realtech
+
+251
+00:08:49,440 --> 00:08:51,839
+gives us. You know, talk to Realte." And
+
+252
+00:08:51,839 --> 00:08:53,519
+I did. I sent off emails and heard back
+
+253
+00:08:53,519 --> 00:08:55,200
+from them later. But while I was waiting
+
+254
+00:08:55,200 --> 00:08:57,279
+to hear back from realtech, I go out on
+
+255
+00:08:57,279 --> 00:09:01,120
+my OS hunt osu uh int hunting uh to find
+
+256
+00:09:01,120 --> 00:09:02,800
+out what I can find about real tech
+
+257
+00:09:02,800 --> 00:09:05,200
+stuff and how it's used.
+
+258
+00:09:05,200 --> 00:09:07,519
+So if you look on Linux, you will find
+
+259
+00:09:07,519 --> 00:09:10,000
+that there is a lib firmware RTLBT and
+
+260
+00:09:10,000 --> 00:09:12,240
+RTL various other stuff, Wi-Fi and so
+
+261
+00:09:12,240 --> 00:09:14,399
+forth. But there's a Realtech Bluetooth
+
+262
+00:09:14,399 --> 00:09:16,720
+folder full of Realtech Bluetooth chip
+
+263
+00:09:16,720 --> 00:09:18,800
+firmwares of some sort. I don't know
+
+264
+00:09:18,800 --> 00:09:20,080
+what these are at this point, but they
+
+265
+00:09:20,080 --> 00:09:21,040
+say they're firmware. They're in a
+
+266
+00:09:21,040 --> 00:09:22,560
+firmware directory. So that's probably
+
+267
+00:09:22,560 --> 00:09:24,720
+some firmware.
+
+268
+00:09:24,720 --> 00:09:26,720
+So if furthermore, if you go off and do
+
+269
+00:09:26,720 --> 00:09:28,959
+your OS in and you do googling to find
+
+270
+00:09:28,959 --> 00:09:31,120
+out who's ever reverse engineered real
+
+271
+00:09:31,120 --> 00:09:33,360
+tech stuff, you will find a few hits for
+
+272
+00:09:33,360 --> 00:09:35,120
+Wi-Fi things. You will find zero hits
+
+273
+00:09:35,120 --> 00:09:37,600
+for Bluetooth things. So you know, wait
+
+274
+00:09:37,600 --> 00:09:38,800
+yesterday saying, "Oh, there's only
+
+275
+00:09:38,800 --> 00:09:40,240
+three things for MediaTek." I'm telling
+
+276
+00:09:40,240 --> 00:09:42,880
+you there's zero things for Bluetooth on
+
+277
+00:09:42,880 --> 00:09:44,560
+Realtech.
+
+278
+00:09:44,560 --> 00:09:48,720
+But 80-51 enthusiast, 80-51 enthusiast
+
+279
+00:09:48,720 --> 00:09:51,519
+that he is, was looking at some real
+
+280
+00:09:51,519 --> 00:09:53,200
+tech Wi-Fi chips, which happened to be
+
+281
+00:09:53,200 --> 00:09:55,839
+using 80-51based processors for their
+
+282
+00:09:55,839 --> 00:09:58,240
+Wi-Fi cores. And while he was looking at
+
+283
+00:09:58,240 --> 00:10:00,560
+that, he happened to just poke at the
+
+284
+00:10:00,560 --> 00:10:02,959
+Bluetooth that was also co-resident on
+
+285
+00:10:02,959 --> 00:10:05,120
+these chips. And what he found was that
+
+286
+00:10:05,120 --> 00:10:06,800
+there seemed to be a bunch of repeating
+
+287
+00:10:06,800 --> 00:10:09,519
+patterns of 006F. He did a little bit of
+
+288
+00:10:09,519 --> 00:10:11,600
+analysis and ultimately concluded he
+
+289
+00:10:11,600 --> 00:10:16,560
+thought that the 00 f uh 6f sorry 65 was
+
+290
+00:10:16,560 --> 00:10:18,880
+the noop instruction. So then he had to
+
+291
+00:10:18,880 --> 00:10:20,560
+correlate that back. What assembly
+
+292
+00:10:20,560 --> 00:10:23,440
+architecture uses 0065 for noops? And
+
+293
+00:10:23,440 --> 00:10:25,839
+the answer turned out to be myip 16e. So
+
+294
+00:10:25,839 --> 00:10:27,600
+just that little hint was enough to get
+
+295
+00:10:27,600 --> 00:10:29,360
+me going with those firmwares that I
+
+296
+00:10:29,360 --> 00:10:32,160
+found on Linux. So cool. They're
+
+297
+00:10:32,160 --> 00:10:35,279
+probably MIP 16E, which is a short form
+
+298
+00:10:35,279 --> 00:10:37,279
+encoding for MIP's 32-bit instructions
+
+299
+00:10:37,279 --> 00:10:38,640
+in the same way that thumb is a short
+
+300
+00:10:38,640 --> 00:10:41,600
+form encoding for ARM. But oh no, I
+
+301
+00:10:41,600 --> 00:10:45,519
+don't know MIPS, do I? Well, luck is
+
+302
+00:10:45,519 --> 00:10:47,440
+what happens when preparation meets
+
+303
+00:10:47,440 --> 00:10:49,120
+opportunity. Which is why I tell you all
+
+304
+00:10:49,120 --> 00:10:51,040
+to go out and take all those classes on
+
+305
+00:10:51,040 --> 00:10:53,200
+open security training, get lucky in the
+
+306
+00:10:53,200 --> 00:10:55,760
+future. Well, I got lucky because I
+
+307
+00:10:55,760 --> 00:10:58,240
+teach a class on risk 5 assembly for
+
+308
+00:10:58,240 --> 00:11:00,320
+OST2. takes you about 28 hours on
+
+309
+00:11:00,320 --> 00:11:03,279
+average, maybe more, maybe less. But the
+
+310
+00:11:03,279 --> 00:11:06,320
+op codes for MIPS significantly overlaps
+
+311
+00:11:06,320 --> 00:11:08,560
+with myip uh risk 5. Actually, you know,
+
+312
+00:11:08,560 --> 00:11:11,120
+they have they share sar similar
+
+313
+00:11:11,120 --> 00:11:13,440
+lineage. Mips in some sense you might
+
+314
+00:11:13,440 --> 00:11:16,640
+call risk 3 or risk 2 like it's just a
+
+315
+00:11:16,640 --> 00:11:20,320
+earlier uh anticedent of risk 5. So even
+
+316
+00:11:20,320 --> 00:11:22,160
+if graas decompiler didn't work, which
+
+317
+00:11:22,160 --> 00:11:24,560
+it did if I use x86, I could still
+
+318
+00:11:24,560 --> 00:11:27,839
+understand the assembly. And so again,
+
+319
+00:11:27,839 --> 00:11:31,200
+get prepared to get lucky by taking OST2
+
+320
+00:11:31,200 --> 00:11:33,680
+classes. I got lucky in this case. So
+
+321
+00:11:33,680 --> 00:11:35,839
+even though Gedra could disassemble
+
+322
+00:11:35,839 --> 00:11:36,880
+these, it didn't really work
+
+323
+00:11:36,880 --> 00:11:38,880
+particularly well. And so you throw it
+
+324
+00:11:38,880 --> 00:11:40,959
+into Gedra. You select MIPS. I didn't
+
+325
+00:11:40,959 --> 00:11:42,480
+even see this until I was making the
+
+326
+00:11:42,480 --> 00:11:44,880
+slide. It does say MIP 16E down there.
+
+327
+00:11:44,880 --> 00:11:46,753
+So that's the right thing to select.
+
+328
+00:11:46,753 --> 00:11:48,240
+[snorts] And then you find some header
+
+329
+00:11:48,240 --> 00:11:50,079
+information and you find a bunch of
+
+330
+00:11:50,079 --> 00:11:52,240
+zeros. But when eventually you get past
+
+331
+00:11:52,240 --> 00:11:53,839
+the bunch of zeros, you do what you
+
+332
+00:11:53,839 --> 00:11:56,800
+normally do. You select it. You hit D to
+
+333
+00:11:56,800 --> 00:11:59,600
+disassemble and you get invalid
+
+334
+00:11:59,600 --> 00:12:01,200
+instruction or at least it doesn't
+
+335
+00:12:01,200 --> 00:12:03,200
+continue on with valid instructions. So,
+
+336
+00:12:03,200 --> 00:12:04,560
+the right way to deal with this for all
+
+337
+00:12:04,560 --> 00:12:05,920
+of you future people who are going to
+
+338
+00:12:05,920 --> 00:12:08,000
+run out there and grab a real tech chip
+
+339
+00:12:08,000 --> 00:12:10,399
+is that you need to hit F12 to
+
+340
+00:12:10,399 --> 00:12:13,360
+disassemble as M.I.P. 16E. If you do
+
+341
+00:12:13,360 --> 00:12:14,959
+that, you get a whole bunch of assembly
+
+342
+00:12:14,959 --> 00:12:16,560
+instructions. That looks good. That's
+
+343
+00:12:16,560 --> 00:12:18,800
+great. Hit F to find a function, keep
+
+344
+00:12:18,800 --> 00:12:21,600
+running, and then immediately stop
+
+345
+00:12:21,600 --> 00:12:24,160
+because immediately after the assembly
+
+346
+00:12:24,160 --> 00:12:25,839
+is a bunch of data references, usually
+
+347
+00:12:25,839 --> 00:12:28,160
+in those small 16bit encodings of
+
+348
+00:12:28,160 --> 00:12:30,240
+assembly instructions, you can't put a
+
+349
+00:12:30,240 --> 00:12:32,639
+32-bit reference to a 32-bit memory
+
+350
+00:12:32,639 --> 00:12:34,240
+address. So, you got a bunch of data
+
+351
+00:12:34,240 --> 00:12:35,519
+references at the end that are
+
+352
+00:12:35,519 --> 00:12:37,680
+referenced from within the assembly. And
+
+353
+00:12:37,680 --> 00:12:40,079
+basically, GERA just doesn't like that.
+
+354
+00:12:40,079 --> 00:12:41,519
+Doesn't continue. It should just say
+
+355
+00:12:41,519 --> 00:12:44,160
+like code data. Okay, continue. It
+
+356
+00:12:44,160 --> 00:12:47,040
+doesn't. We keep trying. We assemble and
+
+357
+00:12:47,040 --> 00:12:49,360
+we keep running into problems. So what
+
+358
+00:12:49,360 --> 00:12:51,120
+do you do? You file a GEDRA issue and
+
+359
+00:12:51,120 --> 00:12:53,563
+then you play the waiting game, right?
+
+360
+00:12:53,563 --> 00:12:56,079
+[snorts] No, the waiting game sucks. So
+
+361
+00:12:56,079 --> 00:12:57,839
+let's have Veronica make us a Gedra
+
+362
+00:12:57,839 --> 00:13:00,639
+script instead. So I asked Veronica to
+
+363
+00:13:00,639 --> 00:13:02,000
+make a script. I've never bothered
+
+364
+00:13:02,000 --> 00:13:04,240
+learning IDA or GEDA scripting because I
+
+365
+00:13:04,240 --> 00:13:06,240
+have a reverse engineer in my house, a
+
+366
+00:13:06,240 --> 00:13:08,480
+former NSA engineer who may or may not
+
+367
+00:13:08,480 --> 00:13:10,399
+and cannot confirm or deny whether or
+
+368
+00:13:10,399 --> 00:13:12,240
+not she ever used Gedra before it was
+
+369
+00:13:12,240 --> 00:13:15,200
+public. So ask her to make a script for
+
+370
+00:13:15,200 --> 00:13:18,639
+you and basically uh you know easy mode.
+
+371
+00:13:18,639 --> 00:13:20,639
+Now we've got a whole bunch of assembly
+
+372
+00:13:20,639 --> 00:13:22,240
+for the firmware files but we still
+
+373
+00:13:22,240 --> 00:13:23,600
+don't know exactly what is contained
+
+374
+00:13:23,600 --> 00:13:26,000
+within the firmware. More assembly mo
+
+375
+00:13:26,000 --> 00:13:29,760
+bettera. Woohoo. And do there's still no
+
+376
+00:13:29,760 --> 00:13:32,320
+strings whatsoever. Okay. Well, we're
+
+377
+00:13:32,320 --> 00:13:35,120
+going to keep going. Go back to OSN. You
+
+378
+00:13:35,120 --> 00:13:37,120
+know I just always, you know, you go up,
+
+379
+00:13:37,120 --> 00:13:38,240
+you go down. This is a very important
+
+380
+00:13:38,240 --> 00:13:39,839
+thing in reverse engineering. Go deep,
+
+381
+00:13:39,839 --> 00:13:41,920
+go up, go broad. Go deep, go up, go
+
+382
+00:13:41,920 --> 00:13:44,160
+broad. So download all the documentation
+
+383
+00:13:44,160 --> 00:13:46,160
+I can find for any real tech chip. Don't
+
+384
+00:13:46,160 --> 00:13:47,920
+care whether it's my chip because
+
+385
+00:13:47,920 --> 00:13:49,040
+there's probably architectural
+
+386
+00:13:49,040 --> 00:13:50,800
+similarities between my chip and other
+
+387
+00:13:50,800 --> 00:13:54,399
+chips. So this is a diagram of the
+
+388
+00:13:54,399 --> 00:13:56,000
+Bluetooth stack for both Bluetooth low
+
+389
+00:13:56,000 --> 00:13:57,839
+energy and Bluetooth classic. But what
+
+390
+00:13:57,839 --> 00:14:00,399
+we care about for our purposes is that
+
+391
+00:14:00,399 --> 00:14:03,680
+Linux is a host that can speak both
+
+392
+00:14:03,680 --> 00:14:05,519
+Bluetooth low energy and Bluetooth
+
+393
+00:14:05,519 --> 00:14:07,839
+classic. And this real tech chip down
+
+394
+00:14:07,839 --> 00:14:10,480
+here at the bottom is a real tech chip.
+
+395
+00:14:10,480 --> 00:14:12,240
+Can speak both Bluetooth low energy and
+
+396
+00:14:12,240 --> 00:14:14,560
+Bluetooth classic. So how things
+
+397
+00:14:14,560 --> 00:14:16,480
+normally work with Bluetooth is that you
+
+398
+00:14:16,480 --> 00:14:19,519
+have a Linux host and it sends HCI host
+
+399
+00:14:19,519 --> 00:14:21,519
+controller interface packets across to
+
+400
+00:14:21,519 --> 00:14:23,360
+the host controller interface. Things
+
+401
+00:14:23,360 --> 00:14:25,360
+like official commands, set a random
+
+402
+00:14:25,360 --> 00:14:26,639
+address. That's why I said random
+
+403
+00:14:26,639 --> 00:14:28,720
+addresses are easy mode because anyone
+
+404
+00:14:28,720 --> 00:14:30,639
+can just say set a random address.
+
+405
+00:14:30,639 --> 00:14:32,000
+There's no equivalent for public
+
+406
+00:14:32,000 --> 00:14:34,000
+addresses, which is as a reminder what
+
+407
+00:14:34,000 --> 00:14:36,160
+I'm trying to figure out right now.
+
+408
+00:14:36,160 --> 00:14:37,600
+So they can send things like that. They
+
+409
+00:14:37,600 --> 00:14:39,279
+can send things down to classic side
+
+410
+00:14:39,279 --> 00:14:40,959
+saying inquiry like tell me what
+
+411
+00:14:40,959 --> 00:14:42,320
+Bluetooth classic stuff is out there
+
+412
+00:14:42,320 --> 00:14:44,079
+right now. But you can also have things
+
+413
+00:14:44,079 --> 00:14:45,760
+like a realtech driver running in the
+
+414
+00:14:45,760 --> 00:14:48,320
+background sending magic vendor specific
+
+415
+00:14:48,320 --> 00:14:50,560
+commands. So vendor specific commands
+
+416
+00:14:50,560 --> 00:14:53,040
+are officially speced out as having a
+
+417
+00:14:53,040 --> 00:14:55,600
+special number 3F for the group and then
+
+418
+00:14:55,600 --> 00:14:57,279
+whatever the vendor wants for the actual
+
+419
+00:14:57,279 --> 00:14:59,600
+command. In this case 20 for some sort
+
+420
+00:14:59,600 --> 00:15:01,519
+of vendor download, vendor firmware
+
+421
+00:15:01,519 --> 00:15:04,320
+download type thing. So what I can see
+
+422
+00:15:04,320 --> 00:15:06,000
+by just like plugging in a real tech
+
+423
+00:15:06,000 --> 00:15:08,480
+dongle and using something like BTON is
+
+424
+00:15:08,480 --> 00:15:12,320
+that it's sending VSC OCF that's op code
+
+425
+00:15:12,320 --> 00:15:16,000
+uh op code command field OCF just
+
+426
+00:15:16,000 --> 00:15:18,320
+command 20 20 2020 20 it's sending
+
+427
+00:15:18,320 --> 00:15:21,440
+fragments of those firmware files that
+
+428
+00:15:21,440 --> 00:15:23,360
+are sitting on the Linux file system
+
+429
+00:15:23,360 --> 00:15:26,399
+also followed by a configuration file
+
+430
+00:15:26,399 --> 00:15:28,800
+that's sitting on the file system. So
+
+431
+00:15:28,800 --> 00:15:30,399
+you can confirm that for yourself. You
+
+432
+00:15:30,399 --> 00:15:33,360
+just run bmon within Linux, attach a
+
+433
+00:15:33,360 --> 00:15:34,880
+dongle, and you'll see a whole bunch of
+
+434
+00:15:34,880 --> 00:15:37,600
+these vendor specific commands. So those
+
+435
+00:15:37,600 --> 00:15:39,040
+config files are interesting because
+
+436
+00:15:39,040 --> 00:15:40,240
+they're sitting right next to all the
+
+437
+00:15:40,240 --> 00:15:42,880
+firmware files and leaked documentation
+
+438
+00:15:42,880 --> 00:15:44,639
+indicates that they do have the
+
+439
+00:15:44,639 --> 00:15:46,880
+capability to set the beader. This is
+
+440
+00:15:46,880 --> 00:15:48,639
+how real tech allows people to set the
+
+441
+00:15:48,639 --> 00:15:51,040
+biotterer except for this particular
+
+442
+00:15:51,040 --> 00:15:53,759
+chip. It's not the leaked documents have
+
+443
+00:15:53,759 --> 00:15:56,320
+the exact way to configure this, but it
+
+444
+00:15:56,320 --> 00:15:58,000
+doesn't work on this chip. So, it turns
+
+445
+00:15:58,000 --> 00:15:59,600
+out like something about the format of
+
+446
+00:15:59,600 --> 00:16:01,360
+the config file is different for this
+
+447
+00:16:01,360 --> 00:16:04,079
+chip than the leak documents.
+
+448
+00:16:04,079 --> 00:16:05,920
+Got to talk a little bit like I'm only
+
+449
+00:16:05,920 --> 00:16:07,759
+talking about this to give like the hint
+
+450
+00:16:07,759 --> 00:16:09,759
+that like anyone anywhere that ever
+
+451
+00:16:09,759 --> 00:16:11,040
+wants to do Bluetooth reverse
+
+452
+00:16:11,040 --> 00:16:12,399
+engineering, if you're going to reverse
+
+453
+00:16:12,399 --> 00:16:13,680
+engineer the Bluetooth controller
+
+454
+00:16:13,680 --> 00:16:15,839
+itself, you need to let the
+
+455
+00:16:15,839 --> 00:16:18,079
+specification be your guide. So, the
+
+456
+00:16:18,079 --> 00:16:20,079
+format of those HCI commands, the
+
+457
+00:16:20,079 --> 00:16:21,680
+special commands going down from the
+
+458
+00:16:21,680 --> 00:16:23,519
+realtech driver. when it's using a
+
+459
+00:16:23,519 --> 00:16:25,519
+vendor specific command. The least
+
+460
+00:16:25,519 --> 00:16:27,680
+significant 16 bits are broken up
+
+461
+00:16:27,680 --> 00:16:30,240
+annoyingly into a six- bit field and a
+
+462
+00:16:30,240 --> 00:16:32,560
+10- bit field. So the six- bit field is
+
+463
+00:16:32,560 --> 00:16:34,560
+the op code group field. The 10- bit
+
+464
+00:16:34,560 --> 00:16:37,199
+field is the actual command. And so when
+
+465
+00:16:37,199 --> 00:16:39,360
+you're looking at this, the 3F that is
+
+466
+00:16:39,360 --> 00:16:41,199
+mandatory for vendor specific commands
+
+467
+00:16:41,199 --> 00:16:43,360
+must be shifted up by 10. And therefore,
+
+468
+00:16:43,360 --> 00:16:46,000
+if you see any constants like this, then
+
+469
+00:16:46,000 --> 00:16:47,519
+those are kind of going to be your hint
+
+470
+00:16:47,519 --> 00:16:48,800
+when you're reverse engineering. If you
+
+471
+00:16:48,800 --> 00:16:50,800
+see 3F, if you see those constants that
+
+472
+00:16:50,800 --> 00:16:54,079
+are 16 bit, FC, FD, FE, FF, if you see
+
+473
+00:16:54,079 --> 00:16:56,560
+shift by 10, these are the kind of hints
+
+474
+00:16:56,560 --> 00:16:58,720
+to you somewhere, excuse me, somewhere
+
+475
+00:16:58,720 --> 00:17:01,600
+in the code, there is uh some vendor
+
+476
+00:17:01,600 --> 00:17:04,880
+specific command processing going on.
+
+477
+00:17:04,880 --> 00:17:06,720
+So always let the specification be your
+
+478
+00:17:06,720 --> 00:17:08,959
+guide. You need to use the hints that
+
+479
+00:17:08,959 --> 00:17:10,959
+the spec gives you about magic numbers
+
+480
+00:17:10,959 --> 00:17:13,439
+and things that must be in order to do
+
+481
+00:17:13,439 --> 00:17:16,400
+the reverse engineering. [gasps] So now
+
+482
+00:17:16,400 --> 00:17:19,199
+finally 801 we have some instructions
+
+483
+00:17:19,199 --> 00:17:21,120
+from realtech about how to turn on that
+
+484
+00:17:21,120 --> 00:17:22,880
+dev board that was shipped in a state
+
+485
+00:17:22,880 --> 00:17:24,559
+that cannot actually power on. Here's
+
+486
+00:17:24,559 --> 00:17:26,720
+the jumpers you set. Just including that
+
+487
+00:17:26,720 --> 00:17:29,039
+for posterity. They sent it in a
+
+488
+00:17:29,039 --> 00:17:30,799
+confidential document to a person who
+
+489
+00:17:30,799 --> 00:17:34,080
+has no NDA. So there you go. Should have
+
+490
+00:17:34,080 --> 00:17:35,840
+really shipped that way, right? Don't
+
+491
+00:17:35,840 --> 00:17:38,880
+waste my time. All right. Anyways, uh so
+
+492
+00:17:38,880 --> 00:17:40,400
+what do you do when you can power on
+
+493
+00:17:40,400 --> 00:17:42,320
+your board? Well, this particular board,
+
+494
+00:17:42,320 --> 00:17:44,160
+as I said, is the wrong board. it is
+
+495
+00:17:44,160 --> 00:17:46,000
+using the UART interface. So what you
+
+496
+00:17:46,000 --> 00:17:47,440
+have to do is you have to connect up to
+
+497
+00:17:47,440 --> 00:17:49,840
+the UART, plug in like a USB to UART
+
+498
+00:17:49,840 --> 00:17:52,080
+adapter, plug it in, run screen or what
+
+499
+00:17:52,080 --> 00:17:53,520
+have you in order to see the serial
+
+500
+00:17:53,520 --> 00:17:56,000
+output and you see a whole bunch of
+
+501
+00:17:56,000 --> 00:17:58,480
+nothing. And then you debug it with
+
+502
+00:17:58,480 --> 00:18:00,240
+something like a logic analyzer and what
+
+503
+00:18:00,240 --> 00:18:02,480
+do you see? You see a whole bunch of
+
+504
+00:18:02,480 --> 00:18:04,799
+nothing. So my devboard is doing all of
+
+505
+00:18:04,799 --> 00:18:08,400
+nothing when I power it on. So back to
+
+506
+00:18:08,400 --> 00:18:10,559
+OSIN and just running around fiddling
+
+507
+00:18:10,559 --> 00:18:12,960
+around. But the most useful discovery of
+
+508
+00:18:12,960 --> 00:18:16,240
+this research occurred on 803 when I was
+
+509
+00:18:16,240 --> 00:18:18,960
+looking at tools a particular tool RF
+
+510
+00:18:18,960 --> 00:18:21,600
+test tool which is just a Windows tool
+
+511
+00:18:21,600 --> 00:18:23,039
+for other devices not for this
+
+512
+00:18:23,039 --> 00:18:25,039
+particular chip but it did have an
+
+513
+00:18:25,039 --> 00:18:28,240
+interface which requested a compport a
+
+514
+00:18:28,240 --> 00:18:31,120
+serial port in Windows parlance and that
+
+515
+00:18:31,120 --> 00:18:33,280
+particular tool had capabilities like
+
+516
+00:18:33,280 --> 00:18:35,840
+read the BD adder so I could see this
+
+517
+00:18:35,840 --> 00:18:37,919
+tool I actually got it working on this
+
+518
+00:18:37,919 --> 00:18:39,760
+chip and it can read the BD adder that's
+
+519
+00:18:39,760 --> 00:18:42,080
+the true beady adder so I this tool
+
+520
+00:18:42,080 --> 00:18:44,400
+interfaces with this chip. Fine. What I
+
+521
+00:18:44,400 --> 00:18:46,240
+need to figure out now is how does this
+
+522
+00:18:46,240 --> 00:18:48,320
+chip how does this tool work, right? I
+
+523
+00:18:48,320 --> 00:18:49,840
+need to sort of reverse engineer the
+
+524
+00:18:49,840 --> 00:18:51,600
+tool, but I want to do a more dynamic
+
+525
+00:18:51,600 --> 00:18:53,600
+analysis rather than static analysis if
+
+526
+00:18:53,600 --> 00:18:56,559
+at all humanly possible. The most useful
+
+527
+00:18:56,559 --> 00:18:59,280
+thing being that there was this function
+
+528
+00:18:59,280 --> 00:19:02,400
+rwreg bt. And if you pulled up that
+
+529
+00:19:02,400 --> 00:19:05,600
+background command uh uh menu bar, you
+
+530
+00:19:05,600 --> 00:19:08,240
+got this new tab appearing. And this new
+
+531
+00:19:08,240 --> 00:19:10,880
+tab had these things like btrwg. Well,
+
+532
+00:19:10,880 --> 00:19:13,039
+we might infer that that means Bluetooth
+
+533
+00:19:13,039 --> 00:19:15,919
+readr register of some sort. It's got RF
+
+534
+00:19:15,919 --> 00:19:18,559
+registers, modem registers. BTOC AON
+
+535
+00:19:18,559 --> 00:19:20,960
+probably stands for system on a chip
+
+536
+00:19:20,960 --> 00:19:24,559
+always on uh domain of power. So there's
+
+537
+00:19:24,559 --> 00:19:27,679
+a thing, we connect it and we try out
+
+538
+00:19:27,679 --> 00:19:29,360
+some stuff. We try a bunch of different
+
+539
+00:19:29,360 --> 00:19:31,520
+addresses and we get all zeros. We would
+
+540
+00:19:31,520 --> 00:19:33,520
+call that inconclusive, right? I don't
+
+541
+00:19:33,520 --> 00:19:34,880
+know whether this is actually doing
+
+542
+00:19:34,880 --> 00:19:36,559
+anything useful at this point. I can
+
+543
+00:19:36,559 --> 00:19:38,480
+read and it seems like it's doing
+
+544
+00:19:38,480 --> 00:19:39,840
+something, but it's sending me zeros.
+
+545
+00:19:39,840 --> 00:19:42,400
+That's not useful. So Ger tip of the day
+
+546
+00:19:42,400 --> 00:19:44,240
+is that when you want to find out where
+
+547
+00:19:44,240 --> 00:19:46,400
+you should potentially be reading to an
+
+548
+00:19:46,400 --> 00:19:49,039
+address that might be truly valid, then
+
+549
+00:19:49,039 --> 00:19:51,360
+you go to the defined data and you
+
+550
+00:19:51,360 --> 00:19:53,520
+scroll through that. And what you're
+
+551
+00:19:53,520 --> 00:19:54,640
+seeing here is that there's a whole
+
+552
+00:19:54,640 --> 00:19:56,640
+bunch of stuff in the range 80
+
+553
+00:19:56,640 --> 00:19:58,799
+something. And you can actually see over
+
+554
+00:19:58,799 --> 00:20:00,799
+in this assembly at offset 30, like
+
+555
+00:20:00,799 --> 00:20:03,039
+literally the very first assembly, you
+
+556
+00:20:03,039 --> 00:20:04,880
+can see that it'll have in blue
+
+557
+00:20:04,880 --> 00:20:07,280
+addresses which are defined within the
+
+558
+00:20:07,280 --> 00:20:09,039
+context of the blob of data that I've
+
+559
+00:20:09,039 --> 00:20:10,400
+included right now. And there's
+
+560
+00:20:10,400 --> 00:20:12,320
+addresses which are not defined within
+
+561
+00:20:12,320 --> 00:20:14,160
+the context of the blob of data. So I've
+
+562
+00:20:14,160 --> 00:20:16,080
+just allowed this to be located at
+
+563
+00:20:16,080 --> 00:20:18,080
+offset zero. And it's telling you, well,
+
+564
+00:20:18,080 --> 00:20:19,840
+I'm off I'm at offset zero. I've only
+
+565
+00:20:19,840 --> 00:20:22,880
+got hex 4000 worth of firmware data, but
+
+566
+00:20:22,880 --> 00:20:24,720
+some sort of access is going on to
+
+567
+00:20:24,720 --> 00:20:27,679
+address 8010 blah blah blah. So stuff up
+
+568
+00:20:27,679 --> 00:20:30,000
+in the 80 range seems to be accessed by
+
+569
+00:20:30,000 --> 00:20:31,919
+this firmware. Don't know what it is,
+
+570
+00:20:31,919 --> 00:20:33,280
+but I want to go try to read that
+
+571
+00:20:33,280 --> 00:20:36,000
+instead. So run down to the last defined
+
+572
+00:20:36,000 --> 00:20:37,760
+data. I can see it's accessed from many
+
+573
+00:20:37,760 --> 00:20:39,200
+different places in the assembly code
+
+574
+00:20:39,200 --> 00:20:41,440
+that I've already loaded. Go ahead and
+
+575
+00:20:41,440 --> 00:20:43,520
+do that. Throw that into the tool and
+
+576
+00:20:43,520 --> 00:20:46,080
+boom, we get some nonzero values. That's
+
+577
+00:20:46,080 --> 00:20:47,360
+what I want to see. That's saying
+
+578
+00:20:47,360 --> 00:20:49,520
+something interesting is going on here.
+
+579
+00:20:49,520 --> 00:20:52,080
+And move on to try all the other types.
+
+580
+00:20:52,080 --> 00:20:54,000
+Get some non-zero values for that other
+
+581
+00:20:54,000 --> 00:20:56,240
+type as well. But also get this nice
+
+582
+00:20:56,240 --> 00:20:58,400
+little hint here. We've got a quote
+
+583
+00:20:58,400 --> 00:21:00,799
+unquote read flash. And it is at some
+
+584
+00:21:00,799 --> 00:21:02,960
+sort of FC61.
+
+585
+00:21:02,960 --> 00:21:05,200
+Well, to me that now looks like a vendor
+
+586
+00:21:05,200 --> 00:21:06,720
+specific command. I said be on the
+
+587
+00:21:06,720 --> 00:21:10,720
+lookout for 3F shifted up by 10 bits and
+
+588
+00:21:10,720 --> 00:21:12,320
+those are what are vendor specific
+
+589
+00:21:12,320 --> 00:21:13,600
+commands. So this looks like vener
+
+590
+00:21:13,600 --> 00:21:15,919
+specific command number 61 to me at this
+
+591
+00:21:15,919 --> 00:21:17,440
+point. Only problem being that this
+
+592
+00:21:17,440 --> 00:21:19,120
+particular chip definitely does not have
+
+593
+00:21:19,120 --> 00:21:21,919
+flash. So it is just running from ROM
+
+594
+00:21:21,919 --> 00:21:24,400
+with some ephemeral RAM and information
+
+595
+00:21:24,400 --> 00:21:27,600
+sent into it. Okay. Well, so now I want
+
+596
+00:21:27,600 --> 00:21:29,120
+to figure out like what is the tool
+
+597
+00:21:29,120 --> 00:21:30,720
+doing behind the scenes? You're not
+
+598
+00:21:30,720 --> 00:21:32,159
+supposed to understand this diagram.
+
+599
+00:21:32,159 --> 00:21:33,600
+That's just the Windows architectural
+
+600
+00:21:33,600 --> 00:21:35,360
+Bluetooth diagram grabbed from some
+
+601
+00:21:35,360 --> 00:21:38,080
+Microsoft site. But the basic point is
+
+602
+00:21:38,080 --> 00:21:40,080
+I've got some real tech tool I found and
+
+603
+00:21:40,080 --> 00:21:42,240
+it sends some sort of magic command down
+
+604
+00:21:42,240 --> 00:21:45,280
+to my chip somehow through the Bluetooth
+
+605
+00:21:45,280 --> 00:21:47,760
+stack andor through the serial stack
+
+606
+00:21:47,760 --> 00:21:50,400
+lands down here at my serial adapter
+
+607
+00:21:50,400 --> 00:21:53,039
+sends over to the board via you know
+
+608
+00:21:53,039 --> 00:21:55,360
+serial the HCI data. But to figure out
+
+609
+00:21:55,360 --> 00:21:56,720
+what's really going on there, I'm going
+
+610
+00:21:56,720 --> 00:21:58,799
+to hook up the sale logic analyzer and
+
+611
+00:21:58,799 --> 00:22:00,799
+just read the same wires that are being
+
+612
+00:22:00,799 --> 00:22:03,039
+sent off to the devboard. And then I can
+
+613
+00:22:03,039 --> 00:22:05,360
+infer or not infer, just literally see
+
+614
+00:22:05,360 --> 00:22:07,280
+what's going on with this tool. So send
+
+615
+00:22:07,280 --> 00:22:08,960
+a magic command here. It says it's
+
+616
+00:22:08,960 --> 00:22:10,960
+reading flash. What's going on behind
+
+617
+00:22:10,960 --> 00:22:12,720
+the scenes? Let's look at like what kind
+
+618
+00:22:12,720 --> 00:22:14,240
+of data we expect back, what sort of
+
+619
+00:22:14,240 --> 00:22:17,120
+data we put in. So there's your diagram,
+
+620
+00:22:17,120 --> 00:22:19,760
+but thankfully for you, I like to zoom.
+
+621
+00:22:19,760 --> 00:22:22,960
+So we can see in the serial trace that
+
+622
+00:22:22,960 --> 00:22:24,960
+it is indeed sending some sort of data
+
+623
+00:22:24,960 --> 00:22:27,600
+like FC61. So that looks like a vendor
+
+624
+00:22:27,600 --> 00:22:30,000
+specific command. We can see in the
+
+625
+00:22:30,000 --> 00:22:31,679
+serial trace that it's sending something
+
+626
+00:22:31,679 --> 00:22:33,360
+that looks like the address that I
+
+627
+00:22:33,360 --> 00:22:36,880
+requested to read 80 12 DC50. We can see
+
+628
+00:22:36,880 --> 00:22:39,360
+a 20 which because we know four bytes of
+
+629
+00:22:39,360 --> 00:22:41,600
+data come back that's probably a 32-bit
+
+630
+00:22:41,600 --> 00:22:45,280
+x20 32 32 bits worth of data to read and
+
+631
+00:22:45,280 --> 00:22:47,120
+that five is probably just the length of
+
+632
+00:22:47,120 --> 00:22:49,120
+this data right here. So, that looks
+
+633
+00:22:49,120 --> 00:22:51,280
+like some sort of read from a 32-bit
+
+634
+00:22:51,280 --> 00:22:53,520
+address of four bytes of data. And
+
+635
+00:22:53,520 --> 00:22:55,520
+indeed, I see the full four bytes of
+
+636
+00:22:55,520 --> 00:22:58,480
+data coming back here. So, cool. At this
+
+637
+00:22:58,480 --> 00:23:00,960
+point, I think I've got a special magic
+
+638
+00:23:00,960 --> 00:23:02,640
+command. I think it reads I don't know
+
+639
+00:23:02,640 --> 00:23:04,799
+100%. Does it read from like some offset
+
+640
+00:23:04,799 --> 00:23:06,720
+in memory that it thinks is where flash
+
+641
+00:23:06,720 --> 00:23:08,240
+starts? Does it read from the base of
+
+642
+00:23:08,240 --> 00:23:10,320
+memory? I don't know. That turns out the
+
+643
+00:23:10,320 --> 00:23:11,760
+answer is it reads from the base of
+
+644
+00:23:11,760 --> 00:23:13,200
+memory. So, you're just giving an
+
+645
+00:23:13,200 --> 00:23:15,039
+address and you get to request anywhere
+
+646
+00:23:15,039 --> 00:23:17,440
+within the 32-bit address space. So,
+
+647
+00:23:17,440 --> 00:23:19,039
+what do you do with that? Well, you just
+
+648
+00:23:19,039 --> 00:23:21,039
+try to scan all of memory, right? And
+
+649
+00:23:21,039 --> 00:23:22,480
+you don't want to scan every single bite
+
+650
+00:23:22,480 --> 00:23:24,240
+of memory. Instead, you want to like do
+
+651
+00:23:24,240 --> 00:23:26,000
+hopping and scan little pieces of
+
+652
+00:23:26,000 --> 00:23:28,080
+memory. If it's invalid, this chip's
+
+653
+00:23:28,080 --> 00:23:29,760
+memory controller seems to send back
+
+654
+00:23:29,760 --> 00:23:32,080
+dead beef. So, what you do is just in
+
+655
+00:23:32,080 --> 00:23:34,400
+case it's using paging. Unlikely, but
+
+656
+00:23:34,400 --> 00:23:37,039
+just in case, you do hex 1000 chunks of
+
+657
+00:23:37,039 --> 00:23:39,280
+memory. You skip forward hex 1000. Just
+
+658
+00:23:39,280 --> 00:23:40,960
+read four bytes and see did you get dead
+
+659
+00:23:40,960 --> 00:23:42,480
+beef or did you get anything other than
+
+660
+00:23:42,480 --> 00:23:44,640
+dead beef? And what you come up with
+
+661
+00:23:44,640 --> 00:23:47,600
+from that is you get some sort of memory
+
+662
+00:23:47,600 --> 00:23:50,799
+map. So cool. I now have a sense of like
+
+663
+00:23:50,799 --> 00:23:52,480
+what the ranges are. And the ranges make
+
+664
+00:23:52,480 --> 00:23:54,640
+sense according to my assembly which was
+
+665
+00:23:54,640 --> 00:23:56,320
+reaching out and trying to grab stuff in
+
+666
+00:23:56,320 --> 00:23:59,760
+the hex 80 something range.
+
+667
+00:23:59,760 --> 00:24:01,440
+That's the final thing. Can't dwell on
+
+668
+00:24:01,440 --> 00:24:03,440
+it. Don't have time rocking through
+
+669
+00:24:03,440 --> 00:24:05,600
+these 140 slides. But there is some
+
+670
+00:24:05,600 --> 00:24:09,520
+aliasing going on in there as well. So
+
+671
+00:24:09,520 --> 00:24:11,360
+now at this point I have scanned all of
+
+672
+00:24:11,360 --> 00:24:12,559
+the memory. I've figured out the memory
+
+673
+00:24:12,559 --> 00:24:14,480
+map. Now I can read all of the memory
+
+674
+00:24:14,480 --> 00:24:16,240
+that is within those valid memory
+
+675
+00:24:16,240 --> 00:24:18,320
+ranges. So I've got what I think is
+
+676
+00:24:18,320 --> 00:24:21,600
+probably the ROM at 8000000.
+
+677
+00:24:21,600 --> 00:24:24,000
+So I load the ROM into GEDA along with
+
+678
+00:24:24,000 --> 00:24:25,760
+all the existing firmware so that now
+
+679
+00:24:25,760 --> 00:24:27,679
+the existing firmware can reach out and
+
+680
+00:24:27,679 --> 00:24:29,520
+grab data from the thing that I think is
+
+681
+00:24:29,520 --> 00:24:33,039
+the ROM at hex 8000 x80.
+
+682
+00:24:33,039 --> 00:24:35,679
+Uh but there's still no strings. But
+
+683
+00:24:35,679 --> 00:24:37,760
+thankfully I'm an optimist and so I go
+
+684
+00:24:37,760 --> 00:24:40,000
+ahead and I use the GEDra manual search
+
+685
+00:24:40,000 --> 00:24:42,080
+for strings. you get all the normal sort
+
+686
+00:24:42,080 --> 00:24:43,760
+of garbage that you would expect. And
+
+687
+00:24:43,760 --> 00:24:45,600
+out of all the strings in the entire
+
+688
+00:24:45,600 --> 00:24:47,840
+thing, everything is garbage except for
+
+689
+00:24:47,840 --> 00:24:50,960
+like exactly 10 strings. But those 10
+
+690
+00:24:50,960 --> 00:24:53,120
+strings are super super useful because
+
+691
+00:24:53,120 --> 00:24:54,880
+for instance, it's saying something
+
+692
+00:24:54,880 --> 00:24:58,720
+about HCI commands, HCI events, LMP,
+
+693
+00:24:58,720 --> 00:25:00,480
+which is the packet data type that I
+
+694
+00:25:00,480 --> 00:25:02,640
+want to send later on. So cool, that is
+
+695
+00:25:02,640 --> 00:25:04,640
+super relevant to my interests. What do
+
+696
+00:25:04,640 --> 00:25:06,559
+you do when you have a useful string?
+
+697
+00:25:06,559 --> 00:25:08,640
+You go check the cross references. Where
+
+698
+00:25:08,640 --> 00:25:10,880
+is that string used? What code uses the
+
+699
+00:25:10,880 --> 00:25:13,760
+string HCI? Check the cross references.
+
+700
+00:25:13,760 --> 00:25:16,000
+Go there. And it's finally decompilation
+
+701
+00:25:16,000 --> 00:25:19,440
+time. The first and essentially only use
+
+702
+00:25:19,440 --> 00:25:21,120
+of these strings. There's two aliased
+
+703
+00:25:21,120 --> 00:25:23,200
+copies of this function. The only use of
+
+704
+00:25:23,200 --> 00:25:25,679
+these strings is essentially a single
+
+705
+00:25:25,679 --> 00:25:28,080
+function gets called over and over. It
+
+706
+00:25:28,080 --> 00:25:30,559
+gets called with those strings as one of
+
+707
+00:25:30,559 --> 00:25:33,039
+the parameters. It gets called with
+
+708
+00:25:33,039 --> 00:25:35,039
+another parameter that is unique to each
+
+709
+00:25:35,039 --> 00:25:36,559
+thing. So we might think there's maybe
+
+710
+00:25:36,559 --> 00:25:38,480
+some sort of registration going on where
+
+711
+00:25:38,480 --> 00:25:40,240
+it's saying like this thing gets
+
+712
+00:25:40,240 --> 00:25:42,240
+registered as index 3. This thing gets
+
+713
+00:25:42,240 --> 00:25:44,880
+indexed as register 7. And again it's
+
+714
+00:25:44,880 --> 00:25:46,480
+got all sorts of different data for
+
+715
+00:25:46,480 --> 00:25:49,840
+other parameters. So what do we do? Said
+
+716
+00:25:49,840 --> 00:25:51,360
+I'm looking for vendor specific
+
+717
+00:25:51,360 --> 00:25:53,039
+commands. How these sort of things work
+
+718
+00:25:53,039 --> 00:25:55,600
+on this system. So HCI command probably
+
+719
+00:25:55,600 --> 00:25:56,640
+is where I'm going to find vendor
+
+720
+00:25:56,640 --> 00:25:58,559
+specific commands. Go look at the data.
+
+721
+00:25:58,559 --> 00:26:00,960
+The data itself points here. Well that
+
+722
+00:26:00,960 --> 00:26:03,679
+data further points to some particular
+
+723
+00:26:03,679 --> 00:26:05,600
+function. And so we have to go skimming
+
+724
+00:26:05,600 --> 00:26:07,679
+along through the function. Now for the
+
+725
+00:26:07,679 --> 00:26:09,200
+interest of time, I can't show you the
+
+726
+00:26:09,200 --> 00:26:11,840
+nice animated version. So suffice to say
+
+727
+00:26:11,840 --> 00:26:13,679
+that if I just skim down through that
+
+728
+00:26:13,679 --> 00:26:15,440
+function which is pointed to by the
+
+729
+00:26:15,440 --> 00:26:16,880
+single function registration that
+
+730
+00:26:16,880 --> 00:26:19,760
+includes the string HCI command, there's
+
+731
+00:26:19,760 --> 00:26:21,679
+going to be a bunch of references to
+
+732
+00:26:21,679 --> 00:26:24,000
+data where it says this variable, is it
+
+733
+00:26:24,000 --> 00:26:25,600
+equal to three? Is it not equal to four?
+
+734
+00:26:25,600 --> 00:26:28,080
+Is it equal to 8? Is it not equal to 6?
+
+735
+00:26:28,080 --> 00:26:31,120
+And is it equal to 3F? And 3F is when
+
+736
+00:26:31,120 --> 00:26:33,919
+your lies light up and you say 3F,
+
+737
+00:26:33,919 --> 00:26:35,840
+that's the special magic vendor specific
+
+738
+00:26:35,840 --> 00:26:38,240
+op code group field. And indeed, if you
+
+739
+00:26:38,240 --> 00:26:40,480
+let the specification be your guide, you
+
+740
+00:26:40,480 --> 00:26:42,240
+will see that all the other op code
+
+741
+00:26:42,240 --> 00:26:45,360
+group fields for all the other v uh HCI
+
+742
+00:26:45,360 --> 00:26:47,520
+commands are in the range of 1 through 6
+
+743
+00:26:47,520 --> 00:26:49,760
+and 8. So all of these numbers that are
+
+744
+00:26:49,760 --> 00:26:53,600
+checking all sanity checks out 3 4 8 6.
+
+745
+00:26:53,600 --> 00:26:55,200
+These are numbers for upcode group
+
+746
+00:26:55,200 --> 00:26:56,880
+fields. These are numbers for HCI
+
+747
+00:26:56,880 --> 00:27:00,159
+commands. And so this thing right here
+
+748
+00:27:00,159 --> 00:27:02,960
+really looks like if it's using an op
+
+749
+00:27:02,960 --> 00:27:05,360
+code group 3f then call this function.
+
+750
+00:27:05,360 --> 00:27:07,200
+So that seems like that's probably the
+
+751
+00:27:07,200 --> 00:27:08,960
+process all the vendor specific commands
+
+752
+00:27:08,960 --> 00:27:12,240
+function. Drill down into that. Again
+
+753
+00:27:12,240 --> 00:27:13,600
+don't have time to show you the nice
+
+754
+00:27:13,600 --> 00:27:16,640
+form. So the quick form is yes there's
+
+755
+00:27:16,640 --> 00:27:18,880
+totally a bunch of those special magic
+
+756
+00:27:18,880 --> 00:27:22,159
+range values of FC something FD
+
+757
+00:27:22,159 --> 00:27:24,799
+something. We even got this FC20 that
+
+758
+00:27:24,799 --> 00:27:26,799
+FC, we said vendor specific command 20
+
+759
+00:27:26,799 --> 00:27:28,640
+was the like firmware download thing. So
+
+760
+00:27:28,640 --> 00:27:30,960
+I can drill into that specific function
+
+761
+00:27:30,960 --> 00:27:32,559
+if I want and really reverse engineer
+
+762
+00:27:32,559 --> 00:27:34,880
+how the firmware download works. But I
+
+763
+00:27:34,880 --> 00:27:37,679
+don't care about that because hold up,
+
+764
+00:27:37,679 --> 00:27:39,600
+what am I even trying to do here? Right?
+
+765
+00:27:39,600 --> 00:27:41,440
+Does anyone remember? Sorry, I don't
+
+766
+00:27:41,440 --> 00:27:43,360
+take questions. So what am I trying to
+
+767
+00:27:43,360 --> 00:27:46,000
+do? I'm trying to spoof the beady adder.
+
+768
+00:27:46,000 --> 00:27:48,080
+Right? So in reverse engineering, you
+
+769
+00:27:48,080 --> 00:27:49,440
+sometimes have to stop yourself from
+
+770
+00:27:49,440 --> 00:27:51,200
+getting lost in the weeds. you go deep,
+
+771
+00:27:51,200 --> 00:27:53,200
+but sometimes just stop, come up a level
+
+772
+00:27:53,200 --> 00:27:55,120
+and say, "What am I even doing again?"
+
+773
+00:27:55,120 --> 00:27:56,399
+Like, don't reverse engineer all of
+
+774
+00:27:56,399 --> 00:27:58,159
+this. Great. I've got ROM dumping. I've
+
+775
+00:27:58,159 --> 00:27:59,919
+got RAM dumping. I've got the capability
+
+776
+00:27:59,919 --> 00:28:02,799
+to go read a bunch of code. How about I
+
+777
+00:28:02,799 --> 00:28:05,440
+don't. Instead, what are my goals? I
+
+778
+00:28:05,440 --> 00:28:06,960
+want to spoof the BD header. Now, I know
+
+779
+00:28:06,960 --> 00:28:08,559
+a little bit about how config files are
+
+780
+00:28:08,559 --> 00:28:10,000
+being used, how vendor specific commands
+
+781
+00:28:10,000 --> 00:28:11,520
+are being used. I could drill into
+
+782
+00:28:11,520 --> 00:28:13,919
+vendor specific command 20, but instead
+
+783
+00:28:13,919 --> 00:28:16,880
+I go off a Google in again and I go to
+
+784
+00:28:16,880 --> 00:28:19,279
+GitHub and I search for things. And what
+
+785
+00:28:19,279 --> 00:28:22,640
+I find is there is some utilization of
+
+786
+00:28:22,640 --> 00:28:24,640
+the commands or sorry configuration
+
+787
+00:28:24,640 --> 00:28:26,559
+files. There's a function called get MAC
+
+788
+00:28:26,559 --> 00:28:28,799
+offset. So even the vendors called BD
+
+789
+00:28:28,799 --> 00:28:30,960
+adders MAC addresses sometimes. Get MAC
+
+790
+00:28:30,960 --> 00:28:34,399
+offset for this particular chip 8761B is
+
+791
+00:28:34,399 --> 00:28:37,600
+hex 30. So now I can put that together
+
+792
+00:28:37,600 --> 00:28:40,000
+with the leaked information about config
+
+793
+00:28:40,000 --> 00:28:43,120
+files and get my magic commands. So
+
+794
+00:28:43,120 --> 00:28:46,240
+basically some sort of special header,
+
+795
+00:28:46,240 --> 00:28:48,480
+some sort of total size length that's
+
+796
+00:28:48,480 --> 00:28:50,720
+nine for the rest of the bytes. 30 is
+
+797
+00:28:50,720 --> 00:28:52,559
+the offset where essentially this config
+
+798
+00:28:52,559 --> 00:28:54,640
+file is saying go to the beginning of
+
+799
+00:28:54,640 --> 00:28:57,039
+some sort of config stuff in memory. Go
+
+800
+00:28:57,039 --> 00:28:59,600
+to offset 30, plug in a BD adder, and
+
+801
+00:28:59,600 --> 00:29:01,440
+that's what we'll use for our custom BD
+
+802
+00:29:01,440 --> 00:29:03,120
+adder. Otherwise, they use one that's
+
+803
+00:29:03,120 --> 00:29:07,360
+flat uh burned into OTP. So cool. I've
+
+804
+00:29:07,360 --> 00:29:09,279
+got that. I just write it in a literal
+
+805
+00:29:09,279 --> 00:29:11,440
+text file. I reverse that text file to a
+
+806
+00:29:11,440 --> 00:29:13,120
+binary file. I compress that binary
+
+807
+00:29:13,120 --> 00:29:14,880
+file. I move the other file out of the
+
+808
+00:29:14,880 --> 00:29:16,720
+way. I copy it over to where it's
+
+809
+00:29:16,720 --> 00:29:19,360
+supposed to go. And boom. I've got a
+
+810
+00:29:19,360 --> 00:29:21,600
+custom beady adder. [gasps] Goal one
+
+811
+00:29:21,600 --> 00:29:23,520
+achieved. Hold your applause, please. We
+
+812
+00:29:23,520 --> 00:29:26,640
+have to keep going. On to goal two. So
+
+813
+00:29:26,640 --> 00:29:28,720
+cool. We can now spoof bi adders. We can
+
+814
+00:29:28,720 --> 00:29:30,240
+do we can say anyone who wants to use
+
+815
+00:29:30,240 --> 00:29:31,840
+WAD to go off and do machine in the
+
+816
+00:29:31,840 --> 00:29:33,120
+middle attacks against devices that
+
+817
+00:29:33,120 --> 00:29:34,799
+happen to be using public addresses,
+
+818
+00:29:34,799 --> 00:29:36,640
+feel free to. Now you know from those
+
+819
+00:29:36,640 --> 00:29:38,880
+previous slides how to configure the few
+
+820
+00:29:38,880 --> 00:29:41,120
+bytes in order to spoof your bead out.
+
+821
+00:29:41,120 --> 00:29:43,360
+So the stretch goal here was for
+
+822
+00:29:43,360 --> 00:29:45,039
+Bluetooth printing purposes. I wanted to
+
+823
+00:29:45,039 --> 00:29:48,640
+get rid of those brack dev boards and
+
+824
+00:29:48,640 --> 00:29:50,240
+move down to just a custom little
+
+825
+00:29:50,240 --> 00:29:53,440
+Bluetooth chip on a normal USB dongle.
+
+826
+00:29:53,440 --> 00:29:54,799
+So there's two ways I could go about
+
+827
+00:29:54,799 --> 00:29:56,320
+that. I already showed that I have the
+
+828
+00:29:56,320 --> 00:29:58,240
+ability to go reverse engineer all the
+
+829
+00:29:58,240 --> 00:30:00,480
+vendor specific commands, but I also
+
+830
+00:30:00,480 --> 00:30:02,320
+have memory read and memory write
+
+831
+00:30:02,320 --> 00:30:04,799
+capability. So which is the better way?
+
+832
+00:30:04,799 --> 00:30:06,720
+As I said, if you can not have to read
+
+833
+00:30:06,720 --> 00:30:08,320
+all the code, that would be the better
+
+834
+00:30:08,320 --> 00:30:10,880
+way. So I need to make some sort of
+
+835
+00:30:10,880 --> 00:30:13,360
+tool. My tool needs to speak over HCI.
+
+836
+00:30:13,360 --> 00:30:15,520
+It needs to send my packet data of what
+
+837
+00:30:15,520 --> 00:30:17,760
+I want to send later on. And then it
+
+838
+00:30:17,760 --> 00:30:19,919
+needs to reach somehow to the LMP layer,
+
+839
+00:30:19,919 --> 00:30:21,440
+the link manager protocol, Bluetooth
+
+840
+00:30:21,440 --> 00:30:23,279
+classic lowest layer, always baked into
+
+841
+00:30:23,279 --> 00:30:26,320
+the chip. And then that should send off
+
+842
+00:30:26,320 --> 00:30:28,080
+that packet data for me. That's the goal
+
+843
+00:30:28,080 --> 00:30:31,279
+here. Cool. Backing up a step, you know,
+
+844
+00:30:31,279 --> 00:30:33,279
+just want to say like I I hopefully
+
+845
+00:30:33,279 --> 00:30:34,880
+didn't miss the obvious when we look at
+
+846
+00:30:34,880 --> 00:30:36,720
+the, you know, leak documentation for
+
+847
+00:30:36,720 --> 00:30:40,720
+the RTL. um 8761B if we look at the
+
+848
+00:30:40,720 --> 00:30:43,520
+block diagrams there is no even JTAG or
+
+849
+00:30:43,520 --> 00:30:45,679
+debug or any sort of thing on the block
+
+850
+00:30:45,679 --> 00:30:47,440
+diagram and they could just be leaving
+
+851
+00:30:47,440 --> 00:30:48,960
+it off the block diagram but I don't
+
+852
+00:30:48,960 --> 00:30:50,480
+think they are because if you look at it
+
+853
+00:30:50,480 --> 00:30:52,320
+for other chips they put it on the
+
+854
+00:30:52,320 --> 00:30:54,480
+diagram so some other chip ARMbased chip
+
+855
+00:30:54,480 --> 00:30:57,039
+has S SWD so how are they debugging I
+
+856
+00:30:57,039 --> 00:30:59,200
+don't know I suspect via serial debug
+
+857
+00:30:59,200 --> 00:31:00,960
+basically like ser print print f
+
+858
+00:31:00,960 --> 00:31:03,440
+debugging I don't know but also we can
+
+859
+00:31:03,440 --> 00:31:05,120
+see if we look at the pin out for the
+
+860
+00:31:05,120 --> 00:31:07,279
+particular chip there are again no easy
+
+861
+00:31:07,279 --> 00:31:08,960
+obvious vious like there's the S SWD,
+
+862
+00:31:08,960 --> 00:31:10,799
+there's the TDIO, like there's no
+
+863
+00:31:10,799 --> 00:31:12,640
+obvious pins that are labeled according
+
+864
+00:31:12,640 --> 00:31:14,640
+to debug interfaces. So, I'm not
+
+865
+00:31:14,640 --> 00:31:15,840
+probably going to be able to get like a
+
+866
+00:31:15,840 --> 00:31:18,240
+hardware debug access. So, instead, I
+
+867
+00:31:18,240 --> 00:31:19,520
+need to figure out how their whole like
+
+868
+00:31:19,520 --> 00:31:21,760
+patching firmware update mechanism
+
+869
+00:31:21,760 --> 00:31:24,000
+works. And I'll tell you that there's
+
+870
+00:31:24,000 --> 00:31:26,399
+just generally two ways that people tend
+
+871
+00:31:26,399 --> 00:31:29,039
+to do this in a ecosystem like Bluetooth
+
+872
+00:31:29,039 --> 00:31:30,799
+where the majority of the code down at
+
+873
+00:31:30,799 --> 00:31:32,480
+the controller level, it's just baked
+
+874
+00:31:32,480 --> 00:31:34,320
+into the ROM. So you can either have
+
+875
+00:31:34,320 --> 00:31:35,679
+everything's in the ROM or maybe it's
+
+876
+00:31:35,679 --> 00:31:37,200
+booting off flash, but [snorts] it's
+
+877
+00:31:37,200 --> 00:31:39,039
+very common for it to all be in the ROM.
+
+878
+00:31:39,039 --> 00:31:40,880
+And so the problem is if you need to
+
+879
+00:31:40,880 --> 00:31:42,720
+patch the ROM somehow because you have,
+
+880
+00:31:42,720 --> 00:31:43,840
+you know, they're they're going to have
+
+881
+00:31:43,840 --> 00:31:46,000
+bugs. You need to patch the ROM somehow.
+
+882
+00:31:46,000 --> 00:31:47,919
+There's basically two approaches. The
+
+883
+00:31:47,919 --> 00:31:49,440
+first is to have something like patch
+
+884
+00:31:49,440 --> 00:31:51,279
+registers, patch RAM. These are sort of
+
+885
+00:31:51,279 --> 00:31:52,960
+architectural things baked into the
+
+886
+00:31:52,960 --> 00:31:54,559
+design of the chip where you can
+
+887
+00:31:54,559 --> 00:31:56,159
+essentially say like there's a big row
+
+888
+00:31:56,159 --> 00:31:58,080
+of registers that you put addresses
+
+889
+00:31:58,080 --> 00:32:00,960
+into. And as the CPU is executing code
+
+890
+00:32:00,960 --> 00:32:02,480
+and the program counter is going through
+
+891
+00:32:02,480 --> 00:32:04,080
+addresses, the hardware says, "Oh,
+
+892
+00:32:04,080 --> 00:32:06,000
+program counter equals that value from
+
+893
+00:32:06,000 --> 00:32:07,840
+that register. I need to redirect
+
+894
+00:32:07,840 --> 00:32:09,679
+somewhere else and run some other code."
+
+895
+00:32:09,679 --> 00:32:11,039
+So that's like sort of patch register
+
+896
+00:32:11,039 --> 00:32:12,559
+patch ramp. Maybe the other place is the
+
+897
+00:32:12,559 --> 00:32:15,200
+patch ram. The other way you can do it
+
+898
+00:32:15,200 --> 00:32:18,399
+is that you can sprinkle little if this
+
+899
+00:32:18,399 --> 00:32:20,720
+function pointer is not equal to null
+
+900
+00:32:20,720 --> 00:32:22,960
+call the function pointer sprinkle that
+
+901
+00:32:22,960 --> 00:32:27,440
+through your ROM and then update RAM
+
+902
+00:32:27,440 --> 00:32:29,440
+locations which are otherwise equal to
+
+903
+00:32:29,440 --> 00:32:32,000
+zero. So set if function pointer in RAM
+
+904
+00:32:32,000 --> 00:32:34,320
+not equal to zero then call the function
+
+905
+00:32:34,320 --> 00:32:36,720
+pointer. If not keep going. So I'll tell
+
+906
+00:32:36,720 --> 00:32:38,000
+you straight up it's using the if
+
+907
+00:32:38,000 --> 00:32:39,360
+function pointer not equal to null
+
+908
+00:32:39,360 --> 00:32:41,120
+version. The reason I can say this like
+
+909
+00:32:41,120 --> 00:32:42,880
+I didn't know this going in a priori and
+
+910
+00:32:42,880 --> 00:32:44,960
+I didn't really initially care super
+
+911
+00:32:44,960 --> 00:32:46,799
+much but it became obvious eventually
+
+912
+00:32:46,799 --> 00:32:48,799
+through just looking at enough code. You
+
+913
+00:32:48,799 --> 00:32:50,559
+can see that we have here things where
+
+914
+00:32:50,559 --> 00:32:53,519
+it says if code pointer pointer this
+
+915
+00:32:53,519 --> 00:32:55,279
+particular address not equal to code
+
+916
+00:32:55,279 --> 00:32:58,000
+pointer zero then go down here and
+
+917
+00:32:58,000 --> 00:33:00,159
+double dreference this code pointer
+
+918
+00:33:00,159 --> 00:33:01,760
+pointer and call it with a bunch of
+
+919
+00:33:01,760 --> 00:33:03,120
+parameters. And so that's just a
+
+920
+00:33:03,120 --> 00:33:04,960
+roundabout way of saying if the pointer
+
+921
+00:33:04,960 --> 00:33:06,799
+is not null call it as a function
+
+922
+00:33:06,799 --> 00:33:08,960
+pointer. So that's what it's doing. If
+
+923
+00:33:08,960 --> 00:33:10,240
+we went off and looked at this
+
+924
+00:33:10,240 --> 00:33:13,519
+particular address 8 009 whatever that
+
+925
+00:33:13,519 --> 00:33:15,279
+particular address has another
+
+926
+00:33:15,279 --> 00:33:16,880
+particular address that's why it's a
+
+927
+00:33:16,880 --> 00:33:19,360
+double pointer and that particular
+
+928
+00:33:19,360 --> 00:33:22,559
+address holds zeros by default anyways
+
+929
+00:33:22,559 --> 00:33:24,320
+and so you can think of it like how the
+
+930
+00:33:24,320 --> 00:33:26,559
+patching mechanism really works is that
+
+931
+00:33:26,559 --> 00:33:28,720
+they load some stuff into RAM the ROM
+
+932
+00:33:28,720 --> 00:33:31,440
+jumps to that stuff that stuff goes and
+
+933
+00:33:31,440 --> 00:33:33,120
+fills in a bunch of function pointers
+
+934
+00:33:33,120 --> 00:33:35,120
+anywhere that they want to sort of hook
+
+935
+00:33:35,120 --> 00:33:37,840
+the existing code execution and control
+
+936
+00:33:37,840 --> 00:33:41,440
+flow So literally it's architected for
+
+937
+00:33:41,440 --> 00:33:43,200
+dump some code on and hook the control
+
+938
+00:33:43,200 --> 00:33:45,279
+flow. Obviously I can use that to dump
+
+939
+00:33:45,279 --> 00:33:47,039
+some code on and hook the control flow.
+
+940
+00:33:47,039 --> 00:33:50,320
+Just a matter of figuring out how.
+
+941
+00:33:50,320 --> 00:33:53,039
+All right, not bad. So the suffering
+
+942
+00:33:53,039 --> 00:33:54,960
+truly begins 5 days from the CFP
+
+943
+00:33:54,960 --> 00:33:58,320
+deadline. So I have to back up for two
+
+944
+00:33:58,320 --> 00:34:00,320
+seconds to say that on the 18th, you
+
+945
+00:34:00,320 --> 00:34:02,240
+know, we come back here to the 7th, I
+
+946
+00:34:02,240 --> 00:34:04,000
+told some security researchers on a
+
+947
+00:34:04,000 --> 00:34:06,480
+Bluetooth private Slack that hey, we can
+
+948
+00:34:06,480 --> 00:34:08,480
+figure out the spoofing the be adder.
+
+949
+00:34:08,480 --> 00:34:10,000
+People don't need to use the CSR4
+
+950
+00:34:10,000 --> 00:34:12,960
+dongles anymore. Then Antonio Vasquez
+
+951
+00:34:12,960 --> 00:34:14,399
+Blanco, who's a Bluetooth security
+
+952
+00:34:14,399 --> 00:34:17,359
+researcher, on the 15th, he provided me
+
+953
+00:34:17,359 --> 00:34:21,599
+my memory dump script in his scape USB
+
+954
+00:34:21,599 --> 00:34:23,200
+Bluetooth library. So he had made a
+
+955
+00:34:23,200 --> 00:34:25,839
+library that talks USB Bluetooth and
+
+956
+00:34:25,839 --> 00:34:28,399
+then uses escape for packet crafting. So
+
+957
+00:34:28,399 --> 00:34:30,800
+he just said, "Hey, if you use this, you
+
+958
+00:34:30,800 --> 00:34:32,879
+can talk to a normal USB dongle instead
+
+959
+00:34:32,879 --> 00:34:34,639
+of your serial thing that you were
+
+960
+00:34:34,639 --> 00:34:37,520
+using." And so I thanked him for that. I
+
+961
+00:34:37,520 --> 00:34:39,200
+used it. And then on the 18th is where
+
+962
+00:34:39,200 --> 00:34:41,760
+the the story picks up. Then I went and
+
+963
+00:34:41,760 --> 00:34:43,919
+analyzed Bumble. Bumble is some Google
+
+964
+00:34:43,919 --> 00:34:45,679
+uh open- source code for doing
+
+965
+00:34:45,679 --> 00:34:48,079
+Bluetooth. And Bumble already had
+
+966
+00:34:48,079 --> 00:34:50,000
+support for doing patch download onto
+
+967
+00:34:50,000 --> 00:34:52,079
+realtech chips. they already had grabbed
+
+968
+00:34:52,079 --> 00:34:54,079
+the algorithm from the Linux code which
+
+969
+00:34:54,079 --> 00:34:56,320
+is open source and they had implemented
+
+970
+00:34:56,320 --> 00:34:57,920
+it themselves. So then I grabbed it from
+
+971
+00:34:57,920 --> 00:35:00,480
+their code and implemented myself in uh
+
+972
+00:35:00,480 --> 00:35:03,520
+the escape USB Bluetooth.
+
+973
+00:35:03,520 --> 00:35:06,079
+So the initial pock basically it
+
+974
+00:35:06,079 --> 00:35:08,800
+downloads my code into memory. It takes
+
+975
+00:35:08,800 --> 00:35:10,320
+the initial patches puts them into
+
+976
+00:35:10,320 --> 00:35:12,320
+memory with a little prologue hook at
+
+977
+00:35:12,320 --> 00:35:14,320
+the very very first function. And so the
+
+978
+00:35:14,320 --> 00:35:16,000
+idea is when the very first function is
+
+979
+00:35:16,000 --> 00:35:18,160
+called, it will jump down to my pot code
+
+980
+00:35:18,160 --> 00:35:19,839
+and it will jump back up and continue
+
+981
+00:35:19,839 --> 00:35:22,640
+execution in the normal code. And for
+
+982
+00:35:22,640 --> 00:35:24,400
+what it's worth, this is how I was
+
+983
+00:35:24,400 --> 00:35:27,040
+programming uh assembly at this point. I
+
+984
+00:35:27,040 --> 00:35:28,400
+went and I looked at the assembly
+
+985
+00:35:28,400 --> 00:35:31,040
+language. I would grab something like uh
+
+986
+00:35:31,040 --> 00:35:32,800
+hey, I need an or assembly instruction.
+
+987
+00:35:32,800 --> 00:35:34,160
+I'd grab that and then I would like
+
+988
+00:35:34,160 --> 00:35:35,839
+fiddle with those bits until I like
+
+989
+00:35:35,839 --> 00:35:38,720
+changed, you know, value one to value
+
+990
+00:35:38,720 --> 00:35:41,119
+two, you know, register one to register
+
+991
+00:35:41,119 --> 00:35:43,119
+two. So this is how I was writing my
+
+992
+00:35:43,119 --> 00:35:45,440
+six. uh MIF16E assembly at this point
+
+993
+00:35:45,440 --> 00:35:47,359
+just don't even I didn't even open the
+
+994
+00:35:47,359 --> 00:35:48,800
+manual yet I was just like take that
+
+995
+00:35:48,800 --> 00:35:50,400
+fiddle with the bits great good keep
+
+996
+00:35:50,400 --> 00:35:53,280
+going got 5 days to go but puck one
+
+997
+00:35:53,280 --> 00:35:55,920
+doesn't work after 4 hours suffering you
+
+998
+00:35:55,920 --> 00:35:58,720
+know debugging and eventually I decide
+
+999
+00:35:58,720 --> 00:36:00,640
+okay well I wrote my code into some
+
+1000
+00:36:00,640 --> 00:36:02,320
+memory that I hope and I think is not
+
+1001
+00:36:02,320 --> 00:36:04,000
+being used but that's not particularly
+
+1002
+00:36:04,000 --> 00:36:06,320
+safe so instead let's like tack my code
+
+1003
+00:36:06,320 --> 00:36:08,320
+on the end of the original patches same
+
+1004
+00:36:08,320 --> 00:36:10,880
+idea and let's feed that in again
+
+1005
+00:36:10,880 --> 00:36:14,079
+another 4 hours no But finally, you
+
+1006
+00:36:14,079 --> 00:36:16,880
+know, 14 1/2 hours into the day at 9:00
+
+1007
+00:36:16,880 --> 00:36:18,960
+p.m., I figure out there's a double D
+
+1008
+00:36:18,960 --> 00:36:20,480
+reference that should only be a single D
+
+1009
+00:36:20,480 --> 00:36:22,320
+reference, right? Writing assembly in
+
+1010
+00:36:22,320 --> 00:36:24,240
+some unfamiliar language, doing it
+
+1011
+00:36:24,240 --> 00:36:27,119
+wrong, suffering, but becoming more
+
+1012
+00:36:27,119 --> 00:36:31,280
+strong for that. So, finally, PAC 2 is
+
+1013
+00:36:31,280 --> 00:36:33,440
+working at the end of the day. Time to
+
+1014
+00:36:33,440 --> 00:36:36,079
+hold off. We've only got 4 days to go.
+
+1015
+00:36:36,079 --> 00:36:37,040
+What are we going to do? How are we
+
+1016
+00:36:37,040 --> 00:36:39,760
+going to get arbitrary LMP packet going?
+
+1017
+00:36:39,760 --> 00:36:42,320
+So, it's time to break out the big guns.
+
+1018
+00:36:42,320 --> 00:36:44,320
+This is my brain food. Your brain runs
+
+1019
+00:36:44,320 --> 00:36:45,680
+on glucose. When you need to get
+
+1020
+00:36:45,680 --> 00:36:47,599
+anything done, you give it a boost.
+
+1021
+00:36:47,599 --> 00:36:50,800
+Little little bit of sucrose like so. So
+
+1022
+00:36:50,800 --> 00:36:53,440
+cool. Now I've got 4 days to the
+
+1023
+00:36:53,440 --> 00:36:55,839
+deadline. I want to send LMP packets. I
+
+1024
+00:36:55,839 --> 00:36:57,839
+want The thing about LMP packets is they
+
+1025
+00:36:57,839 --> 00:36:59,359
+have to be sent in the context of an
+
+1026
+00:36:59,359 --> 00:37:01,040
+active connection. It's not just like an
+
+1027
+00:37:01,040 --> 00:37:02,800
+advertising packet. I don't know about
+
+1028
+00:37:02,800 --> 00:37:04,160
+Wi-Fi from yesterday, but those
+
+1029
+00:37:04,160 --> 00:37:05,760
+management frames I feel like management
+
+1030
+00:37:05,760 --> 00:37:07,599
+frames just get to get sent around
+
+1031
+00:37:07,599 --> 00:37:09,920
+without an active connection. We need to
+
+1032
+00:37:09,920 --> 00:37:11,839
+create and establish a legitimate active
+
+1033
+00:37:11,839 --> 00:37:13,680
+connection. Then we can send LMP
+
+1034
+00:37:13,680 --> 00:37:14,720
+packets. That's where we're trying to
+
+1035
+00:37:14,720 --> 00:37:17,599
+get here. And so Scapy USB Bluetooth is
+
+1036
+00:37:17,599 --> 00:37:18,960
+really not meant for that. It's really
+
+1037
+00:37:18,960 --> 00:37:20,880
+not particularly good at like create an
+
+1038
+00:37:20,880 --> 00:37:22,240
+active connection. Now I've got like a
+
+1039
+00:37:22,240 --> 00:37:23,680
+raw socket, but then I have to manage
+
+1040
+00:37:23,680 --> 00:37:26,480
+all the state myself. Antonio helps me
+
+1041
+00:37:26,480 --> 00:37:28,160
+out. He at least gets me to the point
+
+1042
+00:37:28,160 --> 00:37:29,680
+where I can create a connection, send an
+
+1043
+00:37:29,680 --> 00:37:32,079
+LMP name request using normal legitimate
+
+1044
+00:37:32,079 --> 00:37:34,720
+ACI, not my custom crafted packets. And
+
+1045
+00:37:34,720 --> 00:37:36,480
+then I go off and I try searching,
+
+1046
+00:37:36,480 --> 00:37:38,560
+scraping through memory on the recipient
+
+1047
+00:37:38,560 --> 00:37:40,240
+realtech dongle. So now I've got real
+
+1048
+00:37:40,240 --> 00:37:42,320
+tech sender, real tech recipient. I can
+
+1049
+00:37:42,320 --> 00:37:43,680
+scrape the memory on the real tech
+
+1050
+00:37:43,680 --> 00:37:45,760
+recipient, but I can't find my packets
+
+1051
+00:37:45,760 --> 00:37:47,280
+anywhere in memory. I just straight up
+
+1052
+00:37:47,280 --> 00:37:49,440
+scrape memory. It's not there. And so
+
+1053
+00:37:49,440 --> 00:37:51,040
+then I waste the rest of the day reverse
+
+1054
+00:37:51,040 --> 00:37:52,800
+engineering LMP more because I've been
+
+1055
+00:37:52,800 --> 00:37:55,040
+spending more time on HCI than LMP.
+
+1056
+00:37:55,040 --> 00:37:58,880
+Cool. 3 days to go and uh you know 4
+
+1057
+00:37:58,880 --> 00:38:04,160
+minutes to go. So basically uh at that
+
+1058
+00:38:04,160 --> 00:38:06,480
+point it's worth saying that like
+
+1059
+00:38:06,480 --> 00:38:08,160
+Bluetooth classic there's no good ways
+
+1060
+00:38:08,160 --> 00:38:09,680
+to sniff the packets and so I have to
+
+1061
+00:38:09,680 --> 00:38:11,040
+come up with my own way to sniff the
+
+1062
+00:38:11,040 --> 00:38:13,119
+packet which is my two dongles one of
+
+1063
+00:38:13,119 --> 00:38:14,800
+which now turns into a logging thing cuz
+
+1064
+00:38:14,800 --> 00:38:16,640
+I don't trust that I'm sending packets
+
+1065
+00:38:16,640 --> 00:38:18,560
+unless I can see it quote unquote over
+
+1066
+00:38:18,560 --> 00:38:20,960
+the air. Well second best option is see
+
+1067
+00:38:20,960 --> 00:38:22,800
+it on the recipient that it received the
+
+1068
+00:38:22,800 --> 00:38:25,599
+actual packet. So around this time, for
+
+1069
+00:38:25,599 --> 00:38:26,880
+what it's worth, had a little
+
+1070
+00:38:26,880 --> 00:38:28,320
+conversation with Veronica where I said,
+
+1071
+00:38:28,320 --> 00:38:30,160
+"Hey, I need to write a lot of code now.
+
+1072
+00:38:30,160 --> 00:38:31,839
+It's time to start breaking out the myip
+
+1073
+00:38:31,839 --> 00:38:34,240
+16 assembler." And she said, "You were
+
+1074
+00:38:34,240 --> 00:38:36,320
+writing your code in hex? That's the
+
+1075
+00:38:36,320 --> 00:38:38,560
+dumbest thing I've ever heard." And I
+
+1076
+00:38:38,560 --> 00:38:40,880
+said, "Thanks, honey. That's going in
+
+1077
+00:38:40,880 --> 00:38:42,640
+the slides."
+
+1078
+00:38:42,640 --> 00:38:45,760
+All right. So, basically, suffering,
+
+1079
+00:38:45,760 --> 00:38:47,040
+suffering, suffering. I'm not going to
+
+1080
+00:38:47,040 --> 00:38:48,320
+dwell on the particular suffering.
+
+1081
+00:38:48,320 --> 00:38:49,680
+Again, I don't want this to come off as
+
+1082
+00:38:49,680 --> 00:38:51,440
+whiny, but the point is everywhere you
+
+1083
+00:38:51,440 --> 00:38:53,839
+see suffering, you are also seeing me
+
+1084
+00:38:53,839 --> 00:38:56,480
+leveling up in terms of myip skills and
+
+1085
+00:38:56,480 --> 00:38:59,440
+my writing assembly in a weird
+
+1086
+00:38:59,440 --> 00:39:01,200
+environment where I have to use like
+
+1087
+00:39:01,200 --> 00:39:02,960
+memory dumping for debugging. Like I
+
+1088
+00:39:02,960 --> 00:39:04,640
+don't want to say like you know
+
+1089
+00:39:04,640 --> 00:39:07,440
+yesterday uh way he had like core dump
+
+1090
+00:39:07,440 --> 00:39:08,960
+so he could see register values. I
+
+1091
+00:39:08,960 --> 00:39:10,160
+didn't have register values. I have
+
+1092
+00:39:10,160 --> 00:39:11,760
+memory dumps I have to put in assembly
+
+1093
+00:39:11,760 --> 00:39:14,000
+to get register values. Whatever. Level
+
+1094
+00:39:14,000 --> 00:39:16,400
+up, level up, level up. I now have
+
+1095
+00:39:16,400 --> 00:39:18,960
+patched code inside of the Bluetooth
+
+1096
+00:39:18,960 --> 00:39:21,760
+controller. I can use legitimate things
+
+1097
+00:39:21,760 --> 00:39:23,839
+like remote name requests. So basically
+
+1098
+00:39:23,839 --> 00:39:25,200
+when you get a name request from a
+
+1099
+00:39:25,200 --> 00:39:26,320
+remote thing, it's supposed to take a
+
+1100
+00:39:26,320 --> 00:39:28,720
+buffer of like 253 bytes and send it up
+
+1101
+00:39:28,720 --> 00:39:30,640
+to the host. I'm using that now as my
+
+1102
+00:39:30,640 --> 00:39:33,200
+LMP logging mechanism.
+
+1103
+00:39:33,200 --> 00:39:34,960
+But at this point, my primary fuel is
+
+1104
+00:39:34,960 --> 00:39:36,800
+exhausted. This is 2 days later, by the
+
+1105
+00:39:36,800 --> 00:39:38,960
+way, that I made my way through that.
+
+1106
+00:39:38,960 --> 00:39:40,400
+And it's time to switch to auxiliary
+
+1107
+00:39:40,400 --> 00:39:42,560
+boosters because we got, you know, one
+
+1108
+00:39:42,560 --> 00:39:44,880
+more day to go. suffering, suffering,
+
+1109
+00:39:44,880 --> 00:39:47,760
+suffering, suffering, suffering. And
+
+1110
+00:39:47,760 --> 00:39:50,480
+finally, a critical decision point 3.5
+
+1111
+00:39:50,480 --> 00:39:53,119
+hours from the CFP deadline. Do I keep
+
+1112
+00:39:53,119 --> 00:39:54,960
+coding up until the CFP deadline and
+
+1113
+00:39:54,960 --> 00:39:56,880
+confirm that this all works or do I
+
+1114
+00:39:56,880 --> 00:39:58,720
+actually like write up my CFP deadline?
+
+1115
+00:39:58,720 --> 00:40:00,480
+Which do you think I did? Well, at this
+
+1116
+00:40:00,480 --> 00:40:02,800
+point, I was zen because I knew that
+
+1117
+00:40:02,800 --> 00:40:05,040
+this could work. I have this arbitrary
+
+1118
+00:40:05,040 --> 00:40:06,400
+write capability, arbitrary read
+
+1119
+00:40:06,400 --> 00:40:08,160
+capability. I am super confident that
+
+1120
+00:40:08,160 --> 00:40:09,280
+I'm going to get arbitrary packet
+
+1121
+00:40:09,280 --> 00:40:11,040
+sending capability. It's just going to
+
+1122
+00:40:11,040 --> 00:40:14,000
+be slow and hella painful. So, my power
+
+1123
+00:40:14,000 --> 00:40:16,640
+reserves uh are spent and it's time to
+
+1124
+00:40:16,640 --> 00:40:18,400
+now go on intermission and go off and do
+
+1125
+00:40:18,400 --> 00:40:19,599
+all the other stuff I've been putting
+
+1126
+00:40:19,599 --> 00:40:22,160
+off. But, I put in my CFP uh submission.
+
+1127
+00:40:22,160 --> 00:40:24,000
+As you may or may not know, sometimes
+
+1128
+00:40:24,000 --> 00:40:25,839
+speakers don't actually have their full
+
+1129
+00:40:25,839 --> 00:40:28,320
+stuff working before they submit a talk.
+
+1130
+00:40:28,320 --> 00:40:31,119
+Pro tip right there. Anyways, later on,
+
+1131
+00:40:31,119 --> 00:40:33,599
+come back, spin up, figure out that it
+
+1132
+00:40:33,599 --> 00:40:35,280
+doesn't like the various hackish ways
+
+1133
+00:40:35,280 --> 00:40:36,960
+that I'm logging information. That's
+
+1134
+00:40:36,960 --> 00:40:38,800
+breaking connections. Switch to other
+
+1135
+00:40:38,800 --> 00:40:40,800
+stuff. Switch to Bumble. Bumble is using
+
+1136
+00:40:40,800 --> 00:40:42,720
+object-oriented programming. That's my
+
+1137
+00:40:42,720 --> 00:40:44,880
+kryptonite. I can't handle abstraction
+
+1138
+00:40:44,880 --> 00:40:48,160
+layers. And so I say, "Okay, Veronica,
+
+1139
+00:40:48,160 --> 00:40:49,599
+you're going to read the code instead of
+
+1140
+00:40:49,599 --> 00:40:51,680
+me. She's got a programmer mindset." But
+
+1141
+00:40:51,680 --> 00:40:53,839
+then I have to create a special lab
+
+1142
+00:40:53,839 --> 00:40:56,079
+setup for her to actually test my code
+
+1143
+00:40:56,079 --> 00:40:58,640
+and read the Bumble code. That takes 2
+
+1144
+00:40:58,640 --> 00:41:01,200
+days to set up. I give it to her. And
+
+1145
+00:41:01,200 --> 00:41:03,040
+then an hour and a half after I give it
+
+1146
+00:41:03,040 --> 00:41:04,960
+to her, I figure it out quote unquote
+
+1147
+00:41:04,960 --> 00:41:07,359
+myself using GitHub Copilot and Chat
+
+1148
+00:41:07,359 --> 00:41:09,760
+GPT. I finally figure out how to get
+
+1149
+00:41:09,760 --> 00:41:11,440
+Bumble to send my vendor specific
+
+1150
+00:41:11,440 --> 00:41:13,359
+commands.
+
+1151
+00:41:13,359 --> 00:41:17,520
+And the final progress is on the 23rd, I
+
+1152
+00:41:17,520 --> 00:41:20,000
+can now send an LMP packet using a
+
+1153
+00:41:20,000 --> 00:41:21,920
+function that I see in the code to send
+
+1154
+00:41:21,920 --> 00:41:24,400
+that exact packet. And then one little
+
+1155
+00:41:24,400 --> 00:41:26,400
+bit more of suffering is that I finally
+
+1156
+00:41:26,400 --> 00:41:27,760
+figure out how to send the actual
+
+1157
+00:41:27,760 --> 00:41:30,240
+arbitrary LMP packet, which has six
+
+1158
+00:41:30,240 --> 00:41:32,400
+arguments and you can only send four as
+
+1159
+00:41:32,400 --> 00:41:33,680
+registers. So I have to learn about
+
+1160
+00:41:33,680 --> 00:41:35,040
+their calling conventions and everything
+
+1161
+00:41:35,040 --> 00:41:38,400
+else. And finally, boom, goal two. I've
+
+1162
+00:41:38,400 --> 00:41:41,119
+completed the That's Sorry, don't clap.
+
+1163
+00:41:41,119 --> 00:41:44,319
+No, no, no, no. And so, basically, CFP
+
+1164
+00:41:44,319 --> 00:41:46,640
+deadline plus 2 days, two work days.
+
+1165
+00:41:46,640 --> 00:41:48,160
+I've actually now got this arbitrary
+
+1166
+00:41:48,160 --> 00:41:50,720
+capability to send a blob of data down
+
+1167
+00:41:50,720 --> 00:41:52,720
+and get it sent out over the air. So, I
+
+1168
+00:41:52,720 --> 00:41:54,400
+can get rid of Brack. This is not even
+
+1169
+00:41:54,400 --> 00:41:56,640
+the final form. Uh, the dark firmware
+
+1170
+00:41:56,640 --> 00:41:58,000
+real, which is what we're going to call
+
+1171
+00:41:58,000 --> 00:42:00,160
+this, it takes a bunch more suffering to
+
+1172
+00:42:00,160 --> 00:42:02,000
+get it working with Bluetooth printing.
+
+1173
+00:42:02,000 --> 00:42:03,440
+Not going to care about that point. But
+
+1174
+00:42:03,440 --> 00:42:05,280
+the nice takeaway from that is that
+
+1175
+00:42:05,280 --> 00:42:07,359
+forced me to turn it into the standalone
+
+1176
+00:42:07,359 --> 00:42:09,359
+file which gives you the magic commands
+
+1177
+00:42:09,359 --> 00:42:11,200
+where you just get to now overwrite a
+
+1178
+00:42:11,200 --> 00:42:13,280
+file instead of doing dynamic download.
+
+1179
+00:42:13,280 --> 00:42:14,960
+Just take a file, stick it on the file
+
+1180
+00:42:14,960 --> 00:42:16,720
+system, and you get to put the custom
+
+1181
+00:42:16,720 --> 00:42:18,319
+firmware onto the real tech chips. And
+
+1182
+00:42:18,319 --> 00:42:20,560
+now Kazam, these things are now able to
+
+1183
+00:42:20,560 --> 00:42:22,960
+send stuff they're not supposed to. So
+
+1184
+00:42:22,960 --> 00:42:24,720
+taking a step back, I'm going to leave
+
+1185
+00:42:24,720 --> 00:42:26,640
+this for future Bluetooth researchers to
+
+1186
+00:42:26,640 --> 00:42:28,319
+read. Like to do better work in the
+
+1187
+00:42:28,319 --> 00:42:30,000
+Bluetooth space, we need people not just
+
+1188
+00:42:30,000 --> 00:42:31,920
+saying there exists a vendor specific
+
+1189
+00:42:31,920 --> 00:42:33,599
+command. you need to actually document
+
+1190
+00:42:33,599 --> 00:42:36,480
+the parameters of the command. For this
+
+1191
+00:42:36,480 --> 00:42:38,079
+particular audience, I'll say it would
+
+1192
+00:42:38,079 --> 00:42:39,760
+be super cool if anyone else wants to
+
+1193
+00:42:39,760 --> 00:42:41,520
+like go off and try to do the exact same
+
+1194
+00:42:41,520 --> 00:42:43,280
+thing in terms of ROM recovery using
+
+1195
+00:42:43,280 --> 00:42:44,960
+your particular techniques like fault
+
+1196
+00:42:44,960 --> 00:42:47,359
+injection or optical analysis and then
+
+1197
+00:42:47,359 --> 00:42:48,800
+like contribute that to open security
+
+1198
+00:42:48,800 --> 00:42:50,640
+training. We can have students do it the
+
+1199
+00:42:50,640 --> 00:42:53,680
+Zeno way and the U way. But yeah, the
+
+1200
+00:42:53,680 --> 00:42:56,079
+final one last thing here is that it
+
+1201
+00:42:56,079 --> 00:42:58,240
+turned out that realtech was really nice
+
+1202
+00:42:58,240 --> 00:43:00,880
+and this was suspicious to me. So
+
+1203
+00:43:00,880 --> 00:43:03,119
+essentially, I got them to get give me
+
+1204
+00:43:03,119 --> 00:43:05,359
+the hardware setup con configuration.
+
+1205
+00:43:05,359 --> 00:43:06,880
+They asked me what I was up to. I told
+
+1206
+00:43:06,880 --> 00:43:08,480
+them Bluetooth printing. I thought they
+
+1207
+00:43:08,480 --> 00:43:09,839
+were going to stop talking to me at that
+
+1208
+00:43:09,839 --> 00:43:12,480
+point and instead they turned around and
+
+1209
+00:43:12,480 --> 00:43:14,079
+said, "Hey, if this is what you're
+
+1210
+00:43:14,079 --> 00:43:15,520
+trying to do, we could make you an
+
+1211
+00:43:15,520 --> 00:43:17,839
+official way to send an arbitrary packet
+
+1212
+00:43:17,839 --> 00:43:20,960
+of LMP and LLCP." I said like, "Hell's
+
+1213
+00:43:20,960 --> 00:43:23,040
+yes, I'll take it." So, they told me
+
+1214
+00:43:23,040 --> 00:43:25,280
+they're not going to do it for the RTL
+
+1215
+00:43:25,280 --> 00:43:28,240
+8761B, but rather the C, the upcoming
+
+1216
+00:43:28,240 --> 00:43:29,760
+chip, the chip that they want other
+
+1217
+00:43:29,760 --> 00:43:31,920
+people to move to. They sent me a dev
+
+1218
+00:43:31,920 --> 00:43:33,520
+board. I ran their magic commands with
+
+1219
+00:43:33,520 --> 00:43:34,800
+their custom firmware. So, they
+
+1220
+00:43:34,800 --> 00:43:36,480
+literally have this firmware written
+
+1221
+00:43:36,480 --> 00:43:40,319
+here in time for hardware.io. And so,
+
+1222
+00:43:40,319 --> 00:43:42,640
+it's documented. I got them to take the
+
+1223
+00:43:42,640 --> 00:43:44,400
+real tech proprietary off of that and
+
+1224
+00:43:44,400 --> 00:43:47,680
+just say realtech uh copyright. So, like
+
+1225
+00:43:47,680 --> 00:43:48,880
+officially, they're going to have a
+
+1226
+00:43:48,880 --> 00:43:50,480
+documented way for you to send arbitrary
+
+1227
+00:43:50,480 --> 00:43:51,920
+commands. don't have to rely on my
+
+1228
+00:43:51,920 --> 00:43:54,880
+hackish firmware. That is a bestcase
+
+1229
+00:43:54,880 --> 00:43:57,040
+outcome scenario here. I'm not going to
+
+1230
+00:43:57,040 --> 00:43:59,520
+do a great job of maintaining it. So,
+
+1231
+00:43:59,520 --> 00:44:00,800
+the future looks bright. We're
+
+1232
+00:44:00,800 --> 00:44:02,319
+essentially having a vendor stepping up
+
+1233
+00:44:02,319 --> 00:44:03,920
+and saying, "We will give you the
+
+1234
+00:44:03,920 --> 00:44:05,599
+capabilities you need to send arbitrary
+
+1235
+00:44:05,599 --> 00:44:07,280
+packets for doing fuzzing, for doing
+
+1236
+00:44:07,280 --> 00:44:09,839
+vulnerability hunting, and I hope other
+
+1237
+00:44:09,839 --> 00:44:12,000
+people follow their lead." That's it.
+
+1238
+00:44:12,000 --> 00:44:14,560
+The code is already open source and
+
+1239
+00:44:14,560 --> 00:44:16,800
+released. The code, the geer files,
+
+1240
+00:44:16,800 --> 00:44:19,280
+everything is released. And uh thanks to
+
+1241
+00:44:19,280 --> 00:44:21,520
+Veronica for making Gedra scripts.
+
+1242
+00:44:21,520 --> 00:44:24,079
+Thanks to Antonio for helping me with an
+
+1243
+00:44:24,079 --> 00:44:26,480
+updated memory dump. So I don't have any
+
+1244
+00:44:26,480 --> 00:44:28,079
+further time to take questions. I'm
+
+1245
+00:44:28,079 --> 00:44:29,599
+going to watch the next talk. So don't
+
+1246
+00:44:29,599 --> 00:44:31,599
+come up to me and ask me questions. You
+
+1247
+00:44:31,599 --> 00:44:33,760
+can find me over in the coffee area
+
+1248
+00:44:33,760 --> 00:44:35,520
+after the next talk, the coffee break.
+
+1249
+00:44:35,520 --> 00:44:37,670
+Thank you for your time.
+
+1250
+00:44:37,670 --> 00:44:38,960
+[applause]
+
+1251
+00:44:38,960 --> 00:44:41,960
+Wow.
+
+1252
+00:44:43,920 --> 00:44:47,200
+That was a sprint. Um, despite saying
+
+1253
+00:44:47,200 --> 00:44:49,040
+that he doesn't take questions, maybe we
+
+1254
+00:44:49,040 --> 00:44:52,079
+can ask one.
+
+1255
+00:44:52,079 --> 00:44:54,079
+>> Does anybody have a question?
+
+1256
+00:44:54,079 --> 00:44:56,400
+>> What do you got?
+
+1257
+00:44:56,400 --> 00:44:59,040
+>> Come at me. Stump the chump.
+
+1258
+00:44:59,040 --> 00:45:01,599
+>> Anyone who is capable to following that?
+
+1259
+00:45:01,599 --> 00:45:05,200
+All right, we've got one.
+
+1260
+00:45:05,200 --> 00:45:07,599
+>> Uh, so when you were trying to execute
+
+1261
+00:45:07,599 --> 00:45:09,920
+um your own instruction from RAM, uh, I
+
+1262
+00:45:09,920 --> 00:45:11,920
+noticed that one of the last slides you
+
+1263
+00:45:11,920 --> 00:45:13,839
+added an epilogue at the bottom. So you
+
+1264
+00:45:13,839 --> 00:45:15,200
+were jumping from the end of RAM. What
+
+1265
+00:45:15,200 --> 00:45:16,000
+was the reason for that?
+
+1266
+00:45:16,000 --> 00:45:17,680
+>> Yeah. So unfortunately like I had to cut
+
+1267
+00:45:17,680 --> 00:45:19,359
+so many slides that I can't tell you but
+
+1268
+00:45:19,359 --> 00:45:21,440
+he did correctly notice that my previous
+
+1269
+00:45:21,440 --> 00:45:22,960
+thing said I was hooking function
+
+1270
+00:45:22,960 --> 00:45:24,640
+prologs and eventually it said hooking
+
+1271
+00:45:24,640 --> 00:45:26,400
+function epilog. The answer turned out
+
+1272
+00:45:26,400 --> 00:45:29,200
+to be that the existing patch code would
+
+1273
+00:45:29,200 --> 00:45:31,119
+insert its patches. And so earlier when
+
+1274
+00:45:31,119 --> 00:45:33,040
+I hooked function prologues and I put my
+
+1275
+00:45:33,040 --> 00:45:35,119
+patches in, it would stomp my patches.
+
+1276
+00:45:35,119 --> 00:45:36,800
+So I need to like wait for them to put
+
+1277
+00:45:36,800 --> 00:45:38,400
+their patches and then I stomp their
+
+1278
+00:45:38,400 --> 00:45:40,000
+patches instead of them stomping my
+
+1279
+00:45:40,000 --> 00:45:41,680
+patches. But still I obviously have to
+
+1280
+00:45:41,680 --> 00:45:43,280
+call through to their original function
+
+1281
+00:45:43,280 --> 00:45:44,960
+pointer to make sure everything still
+
+1282
+00:45:44,960 --> 00:45:47,760
+works. Yep.
+
+1283
+00:45:47,760 --> 00:45:49,760
+>> Thank you so much. Let's give a round of
+
+1284
+00:45:49,760 --> 00:45:51,520
+applause to the person who managed to
+
+1285
+00:45:51,520 --> 00:45:56,760
+follow the entire talk of Zena.
