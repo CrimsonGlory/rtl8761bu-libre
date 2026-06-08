@@ -198,11 +198,31 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
             FUN_8010e214, FUN_8010c278, ROM FUN_8003aea0.
           → analysis/reverse_engineering_patch_installer.md (new section appended)
 
-[NEXT]  Analyze unknown entry callees: FUN_8010a7b8, FUN_8010ad38, FUN_8010b04c,
-          FUN_8010e214, FUN_8010c278 (all called from FUN_8010a000 entry point)
-          Also: ROM FUN_8003aea0 (what ROM service does it invoke?)
-          Goal: determine which are mandatory for basic BT operation vs. optional,
-          to finalize the minimum libre entry point implementation.
+[DONE]  Analyze unknown entry callees (2026-06-08)
+          All 6 callees of FUN_8010a000 decompiled. ALL are mandatory.
+          FUN_8010a7b8  (114 B) — TLV config applier: iterates TLV-encoded config blob,
+            applies records as memcpy patches to config_base + record_type offset.
+          FUN_8010ad38   (66 B) — HW variant probe: reads HW fields 0x120/0x124 via
+            ROM FUN_80011510; bitmask check gates chip-specific init paths.
+          FUN_8010b04c   (72 B) — Baseband reg init: programs regs 0x114 (sets bits 0,1)
+            and 0x154 (RMW with literal-pool mask+OR) via ROM read/write fn-ptrs.
+          FUN_8010e214   (96 B) — Silicon revision detector: writes mode bit, reads HW
+            fields 0x7e/0x7f via ROM FUN_8000b820; extracts 5-bit revision level 0-15;
+            return value indexes PTR_DAT_8010a3a0 chip-rev table. Returns 0xff=unknown.
+          FUN_8010c278  (394 B) — RF channel init: calls variant selector (0-6), loads
+            one of 7 register tables, clears bit 8 of each listed register. 14-26 entries
+            per table. Calls ROM FUN_80011584 (read) + FUN_80011608 (write).
+          ROM FUN_8003aea0 (688 B) — Register script interpreter: 16-opcode dispatch
+            on high nibble of cmd word; executes (ptr,count) reg-cmd arrays; called
+            from 15+ ROM+patch sites. PURE ROM — libre calls via ROM addr, no reimpl.
+          → analysis/reverse_engineering_patch_installer.md (Appendix B added)
+
+[NEXT]  Identify register-table data for FUN_8010c278 (RF channel init):
+          Extract the 7 compile-time register tables (PTR_DAT_8010c418 … c438)
+          and the register-cmd script passed to ROM FUN_8003aea0 from the entry.
+          Goal: verify these are safe to copy verbatim from the original binary vs.
+          requiring libre-clean re-derivation (are they chip-config data or code?)
+          Also: identify FUN_8010c260 (variant selector called by FUN_8010c278).
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

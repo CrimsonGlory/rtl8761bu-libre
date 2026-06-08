@@ -577,9 +577,9 @@ it is what the chip actually runs (matching address `0x8010a000` = file offset `
 | `0x8003aea0` | `FUN_8003aea0` | ROM | unknown |
 | `0x8010e214` | `FUN_8010e214` | patch | unknown |
 | `0x8010a7b8` | `FUN_8010a7b8` | patch | unknown |
-| `0x8010ad38` | `FUN_8010ad38` | patch | unknown |
-| `0x8010b04c` | `FUN_8010b04c` | patch | unknown |
-| `0x8010c278` | `FUN_8010c278` | patch | unknown (late init) |
+| `0x8010ad38` | `FUN_8010ad38` | patch | HW variant probe (see Appendix B) |
+| `0x8010b04c` | `FUN_8010b04c` | patch | baseband register init (see Appendix B) |
+| `0x8010c278` | `FUN_8010c278` | patch | RF channel init (see Appendix B) |
 
 ### Libre Firmware Implication
 
@@ -591,5 +591,266 @@ The libre patch entry at `0x8010a000` must:
 4. **Call `copies_config_bdaddr`** (`0x8000fd38`) — mandatory for BD_ADDR loading
 5. **Call sub-installers** — all 6 confirmed necessary (from prior analysis)
 6. **Write global flag** — `*ptr = 4` (may be checked by ROM for readiness)
-7. **Unknown callees** (`FUN_8003aea0`, `FUN_8010e214`, `FUN_8010a7b8`, etc.) — must be
-   analyzed before determining if libre stubs or ROM calls suffice
+7. **Call ROM `FUN_8003aea0`** — register script interpreter; call via ROM address, no reimplementation needed
+8. **Implement `FUN_8010e214`** — silicon revision detector (reads HW fields 0x7e/0x7f)
+9. **Implement `FUN_8010a7b8`** — TLV config applier (applies config blob patches to config_base)
+10. **Implement `FUN_8010ad38`** — HW variant probe (reads regs 0x120/0x124)
+11. **Implement `FUN_8010b04c`** — baseband register init (sets regs 0x114, 0x154)
+12. **Implement `FUN_8010c278`** — RF channel init (7-case table-driven register batch)
+
+---
+
+## Appendix B — Entry-Point Callee Analysis (2026-06-08)
+
+Analysis of the 6 unknown direct callees of `FUN_8010a000`.  All confirmed mandatory.
+Script: `DecompileEntryCallees.java`.
+
+---
+
+### FUN_8010a7b8 — Config TLV Applier (114 bytes)
+
+**Runtime**: `0x8010a7b8`  **Called from**: entry `0x8010a1ec`, also `FUN_80103780`
+
+**Purpose**: Iterates a TLV-encoded config-override blob and applies each record as a
+memory patch to `config_base + record_type`.
+
+```c
+void FUN_8010a7b8(void) {
+    undefined *config_base = PTR_config_base_8010a83c;
+    // Guard: blob bounds and magic check
+    if ((PTR_DAT_8010a830 <= PTR_DAT_8010a82c) &&
+        (DAT_8010a838 == *(int *)PTR_DAT_8010a834)) {
+        ushort *entry = (ushort *)PTR_DAT_8010a840;
+        uint remaining = *(ushort *)(PTR_DAT_8010a834 + 4);
+        while (remaining != 0) {
+            if (PTR_DAT_8010a844 < entry + 1) return;  // bounds check
+            uint rec_len = (byte)entry[1] + 3;           // 2-byte type + 1-byte len + data
+            if (remaining < rec_len) return;
+            if (PTR_DAT_8010a844 < (ushort *)((int)entry + rec_len)) return;
+            if (*entry < 0x411) {                        // type range guard
+                (*DAT_8010a848)(config_base + *entry, (int)entry + 3);  // apply patch
+            }
+            entry = (ushort *)((int)entry + rec_len);
+            remaining -= rec_len;
+        }
+    }
+}
+```
+
+**TLV format**: Each record is `[uint16 type][uint8 length][data…]`.  `rec_len = length + 3`
+(includes the 2-byte type and 1-byte length header).  Type is an offset into `config_base`
+(must be < `0x411`).  `DAT_8010a848` is a function pointer to the apply function — in
+practice `optimized_memcpy` (`0x8000e85c`), pre-loaded by the entry installer.
+
+**Guards**:
+- `PTR_DAT_8010a830 <= PTR_DAT_8010a82c` — blob non-empty
+- `DAT_8010a838 == *(int *)PTR_DAT_8010a834` — blob magic/version matches
+
+**Libre implication**: Must implement.  Source blob and `config_base` are runtime
+pointers established before this call.  The function itself is trivial TLV iteration.
+
+---
+
+### FUN_8010ad38 — Hardware Variant Probe (66 bytes)
+
+**Runtime**: `0x8010ad38`  **Called from**: entry `0x8010a206`, also `FUN_80103780`
+
+**Purpose**: Reads two hardware config fields to determine if a specific chip variant
+feature is present.  Returns `uint` (0 or 1) used to gate conditional init.
+
+```c
+uint FUN_8010ad38(void) {
+    uint reg120 = (*DAT_8010ad7c)(0x120, 2);   // read field at offset 0x120
+    uint reg124 = (*DAT_8010ad7c)(0x124, 2);   // read field at offset 0x124
+    uint result = 1;
+    if ((DAT_8010ad84 == (DAT_8010ad80 & reg120)) &&
+        ((reg124 >> 8 & 0xff) != 0x7f)) {
+        result = 0;
+    }
+    return result;
+}
+```
+
+**Callees**: `FUN_80011510` (ROM) — hardware config-field read function.
+
+**Logic**: Passes if `(mask & reg120) == expected` AND `bits[15:8] of reg124 != 0x7f`.
+Returns 1 (feature present / variant A) or 0 (variant B / feature absent).  The
+specific mask (`DAT_8010ad80`) and expected value (`DAT_8010ad84`) are in the patch
+literal pool.
+
+**Libre implication**: Must implement.  Can call ROM `FUN_80011510` directly for
+the register reads.  The bitmask constants must be reproduced from the binary.
+
+---
+
+### FUN_8010b04c — Baseband Register Init (72 bytes)
+
+**Runtime**: `0x8010b04c`  **Called from**: entry `0x8010a210`, also `FUN_80103780`
+
+**Purpose**: Programs two baseband hardware registers via ROM read/write fn-ptrs.
+
+```c
+void FUN_8010b04c(void) {
+    uint val114 = (*SUB_8010b094)(0x114, 2);      // read reg 0x114
+    (*DAT_8010b098)(0x114, val114 | 3, 2);         // write back with bits 0,1 set
+    uint val154 = (*SUB_8010b094)(0x154, 2);       // read reg 0x154
+    uint mask   = DAT_8010b09c;
+    uint orval  = (uint)PTR_FUN_8010b0a0;          // value from literal pool
+    (*DAT_8010b098)(0x154, (mask & val154) | orval, 2);  // RMW reg 0x154
+}
+```
+
+**Callees**:
+- `FUN_80011510` (ROM) — hardware register read  (assigned to `SUB_8010b094`)
+- `FUN_80011608` (ROM) — hardware register write (assigned to `DAT_8010b098`)
+
+**Register operations**:
+- Reg `0x114`: set bits 0 and 1 (`| 3`).  Likely enables two sub-systems.
+- Reg `0x154`: read-modify-write with mask+OR values from literal pool.
+
+**Libre implication**: Must implement.  Calls ROM read/write fns directly.  The
+constants at `DAT_8010b09c` and `PTR_FUN_8010b0a0` must be reproduced.
+
+---
+
+### FUN_8010e214 — Silicon Revision Detector (96 bytes)
+
+**Runtime**: `0x8010e214`  **Called from**: entry `0x8010a1b2`, also `FUN_80103780`
+
+**Purpose**: Probes two chip config fields to extract a 5-bit-encoded silicon revision
+level (0–15).  Return value indexes `PTR_DAT_8010a3a0` chip-rev table in `FUN_8010a000`.
+
+```c
+uint FUN_8010e214(void) {
+    *DAT_8010e274 = 0x80;                          // set mode bit
+    uint16_t local_10;
+    int ok1 = (*DAT_8010e278)(0x7f, (byte *)&local_10 + 1);  // read field 0x7f → high byte
+    if (!ok1) return 0xff;
+    int ok2 = (*DAT_8010e278)(0x7e, &local_10);              // read field 0x7e → low byte
+    if (!ok2) return 0xff;
+    if ((local_10 == 0xffff) || ((byte)local_10 > local_10._1_1_)) return 0xff;
+    // Extract 5-bit groups: bits[14:10], [9:5], [4:0]
+    for (uint i = 2; ; i--) {
+        uint group = ((uint)local_10 >> (i * 5)) & 0x1f;
+        if ((group >> 4) == 0)   // high nibble zero: valid revision 0-15
+            return group;
+        if (i == 0) break;
+    }
+    return 0xff;   // no valid group found
+}
+```
+
+**Callees**: `FUN_8000b820` (ROM) — hardware config-field read.
+
+**Encoding**: `local_10` is a 16-bit word assembled from two 8-bit reads into
+adjacent bytes.  Bits are arranged in 5-bit groups.  The function scans groups from
+high to low; the first group whose high nibble is 0 is the revision level (0–15).
+`0xff` signals "unknown revision".
+
+**Libre implication**: Must implement.  Can call ROM `FUN_8000b820` for the reads.
+The result controls whether the extra hw-init path in FUN_8010a000 executes.
+
+---
+
+### FUN_8010c278 — RF Channel Init (394 bytes)
+
+**Runtime**: `0x8010c278`  **Called from**: entry `0x8010a21c` (last call), also `FUN_80103780`
+
+**Purpose**: Selects one of 7 register initialization tables based on a variant
+selector, then clears bit 8 of each hardware register listed in the table.
+
+```c
+void FUN_8010c278(void) {
+    uint variant = (*DAT_8010c410)();   // call variant selector (returns 0-6)
+    if (variant >= 7) return;
+    // Per variant: load table pointer + count, then iterate
+    // (cases 0-6 shown; tables differ in size: 0x17,0x18,0x1a,0x11,0x14,0x10,0x0e entries)
+    switch (variant) {
+      case 0: memcpy(buf, PTR_DAT_8010c418, 0x2e); count = 0x17; break;
+      case 1: memcpy(buf, PTR_DAT_8010c424, 0x30); count = 0x18; break;
+      case 2: memcpy(buf, PTR_DAT_8010c428, 0x34); count = 0x1a; break;
+      case 3: memcpy(buf, PTR_DAT_8010c42c, 0x22); count = 0x11; break;
+      case 4: memcpy(buf, PTR_DAT_8010c430, 0x28); count = 0x14; break;
+      case 5: memcpy(buf, PTR_DAT_8010c434, 0x20); count = 0x10; break;
+      case 6: memcpy(buf, PTR_DAT_8010c438, 0x1c); count = 0x0e; break;
+    }
+    for (uint i = 0; i < count; i++) {
+        uint16_t reg = buf[i];
+        uint val = read_reg(reg);
+        write_reg(reg, val & ~0x100, 1);   // clear bit 8
+    }
+}
+```
+
+**Callees**:
+- `optimized_memcpy` (`0x8000e85c`) — ROM
+- `FUN_8010c260` — variant selector (called via `DAT_8010c410`)
+- `FUN_80011584` (ROM) — hardware register read
+- `FUN_80011608` (ROM) — hardware register write
+
+**Tables**: 7 compile-time tables (PTR_DAT_8010c418 … PTR_DAT_8010c438), each an
+array of `uint16` hardware register indices.  All entries have bit 8 cleared (mask
+`& 0xfffffeff`).  Likely corresponds to RF frequency band, modulation or antenna
+configurations 0–6.
+
+**Libre implication**: Must implement.  Calls ROM read/write fn-ptrs.  All 7
+register tables must be reproduced from the binary literal pools.
+
+---
+
+### ROM FUN_8003aea0 — Register Script Interpreter (688 bytes)
+
+**Runtime**: `0x8003aea0` (ROM)  **Called from**: entry `0x8010a1ac`, 15+ other sites
+
+**Purpose**: Executes a `(ptr, count)` register-command script.  Each entry is a
+`{uint16 cmd, uint16 value}` pair.  High nibble of `cmd` dispatches to different
+hardware-access operations.
+
+**Command encoding** (high nibble of `cmd`):
+
+| High nibble | Operation |
+|-------------|-----------|
+| `0x0000` | Direct write via fn-ptr `[b150]` with (chan, subidx, len, value) |
+| `0x1000` | RMW: read via `[b154]`, apply mask+OR, write via `[b150]` (channel-indexed) |
+| `0x2000` | Write via fn-ptr `[b158]` (index = `cmd & 0xff`) |
+| `0x3000` | RMW: read via `[b15c]`, apply mask, write via `[b158]` |
+| `0x4000` | Write via fn-ptr `[b160]` (index = `cmd & 0xfff`) |
+| `0x5000` | RMW into field of `DAT_8003b164` offset |
+| `0x6000` | Direct write to `DAT_8003b168` + offset |
+| `0x7000` | RMW into `DAT_8003b168` + offset |
+| `0x8000` | Direct write to `DAT_8003b16c` + offset |
+| `0x9000` | RMW into `DAT_8003b16c` + offset |
+| `0xa000` | Call `FUN_80009680(value)` |
+| `0xb000` | Call `FUN_80009694(value)` (delay/wait?) |
+| `0xc000` | Poll loop: call `[b15c]`, retry while return < 0; delay via `FUN_80009694` |
+| `0xd000` | Poll loop: call `[b154]`, retry while `bits[3:0] != 0`; delay |
+| `0xe000` | Poll loop: call `[b154]`, retry while `bit 0 == 0` |
+| `0xf000` | Set RMW mask = value (affects subsequent RMW operations) |
+
+**Callees**: `FUN_8003b5b8`, `FUN_80009680`, `FUN_80009694`, `FUN_8003c69c`,
+`call_to_multi_VSC_e.g._0xfcc4_unknown`, `FUN_8003c5b8`, `FUN_8003c608`
+
+**Callers** (16 sites): entry `0x8010a1ac`, `FUN_8010ff08` (patch), and 14 ROM
+functions covering SCO/eSCO setup, LMP state machine, HCI handlers.
+
+**Libre implication**: **Pure ROM** — no reimplementation needed.  The libre patch
+entry calls it via its ROM address `0x8003aea0`.  The register scripts passed as
+arguments are compile-time arrays embedded in the patch binary (literal-pool pointers).
+These script arrays must be reproduced or copied verbatim from the original binary.
+
+---
+
+### Summary: Entry-Point Callees
+
+| Function | Block | Size | Role | Libre action |
+|----------|-------|------|------|--------------|
+| `FUN_8010a7b8` | patch | 114 B | TLV config applier | implement |
+| `FUN_8010ad38` | patch | 66 B | HW variant probe | implement (calls ROM `FUN_80011510`) |
+| `FUN_8010b04c` | patch | 72 B | Baseband reg init (0x114, 0x154) | implement (calls ROM read/write) |
+| `FUN_8010e214` | patch | 96 B | Silicon revision detector | implement (calls ROM `FUN_8000b820`) |
+| `FUN_8010c278` | patch | 394 B | RF channel init (7-variant table) | implement (calls ROM read/write) |
+| `ROM FUN_8003aea0` | ROM | 688 B | Register script interpreter | **call via ROM addr — no reimplementation** |
+
+All 6 are **mandatory** for correct chip initialization.  Together with BSS init,
+sub-installers, and hook installation they complete the picture of what the libre
+patch entry must do.
