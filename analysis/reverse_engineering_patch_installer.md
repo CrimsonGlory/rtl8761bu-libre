@@ -854,3 +854,126 @@ These script arrays must be reproduced or copied verbatim from the original bina
 All 6 are **mandatory** for correct chip initialization.  Together with BSS init,
 sub-installers, and hook installation they complete the picture of what the libre
 patch entry must do.
+
+---
+
+## Appendix C — RF Channel Init Data (FUN_8010c278) (2026-06-08)
+
+### FUN_8010c260 — RF Hardware Variant Selector
+
+```c
+uint FUN_8010c260(void) {
+    uint uVar1 = (*DAT_8010c274)(0xfd);   // ROM FUN_800115c8(0xfd)
+    return uVar1 & 7;                      // bits[2:0] = RF variant 0–6
+}
+```
+
+- Size: 20 bytes at `0x8010c260`
+- `DAT_8010c274` = `0x800115c9` (MIPS16e) → **ROM `FUN_800115c8`** — an RF register read function, distinct from the baseband MMIO read at `0x8001136c`.
+- Reads RF register `0xfd`, returns low 3 bits = chip RF variant (0–6).
+- Called from `FUN_8010c278` via fn-ptr at `DAT_8010c410` = `0x8010c261` (MIPS16e).
+- **Libre action**: trivial — call ROM `FUN_800115c8(0xfd)`, mask with 7.
+
+### FUN_8010c278 — Literal Pool Layout
+
+The literal pool at `0x8010c410–0x8010c438` (11 × 4-byte slots):
+
+| Address | Value | Role |
+|---------|-------|------|
+| `0x8010c410` | `0x8010c261` | **fn-ptr**: variant selector `FUN_8010c260` (MIPS16e) |
+| `0x8010c414` | `0x8000e85d` | **fn-ptr**: ROM `memcpy` (MIPS16e) — copies table to local stack |
+| `0x8010c418` | `0x80111158` | **table ptr**: case 0 (23 entries) |
+| `0x8010c41c` | `0x80011585` | **fn-ptr**: ROM reg-read `FUN_80011584` (MIPS16e) |
+| `0x8010c420` | `0x80011609` | **fn-ptr**: ROM reg-write `FUN_80011608` (MIPS16e) |
+| `0x8010c424` | `0x80111128` | **table ptr**: case 1 (24 entries) |
+| `0x8010c428` | `0x801110f4` | **table ptr**: case 2 (26 entries) |
+| `0x8010c42c` | `0x801110d0` | **table ptr**: case 3 (17 entries) |
+| `0x8010c430` | `0x801110a8` | **table ptr**: case 4 (20 entries) |
+| `0x8010c434` | `0x80111088` | **table ptr**: case 5 (16 entries) |
+| `0x8010c438` | `0x8011106c` | **table ptr**: case 6 (14 entries) |
+
+Note: slots `c41c` and `c420` are fn-ptrs interspersed among the table pointers, not table pointers themselves.
+
+### Execution Pattern (identical for all 7 cases)
+
+```c
+(*memcpy_fptr)(local_stack_buf, *case_N_table_ptr, byte_count);
+for (int i = 0; i < entry_count; i++) {
+    uint16 reg_idx = local_stack_buf[i];
+    uint32 val = (*reg_read_fptr)(reg_idx);
+    (*reg_write_fptr)(reg_idx, val & 0xfffffeff, 1);   // clear bit 8
+}
+```
+
+The table is copied to local stack first, then iterated. The `& 0xfffffeff` clears bit 8 of each register value — the same operation for all 7 variants, only the register list differs.
+
+### 7 RF Register Tables — Complete Data
+
+All tables are in the **data block** (`0x80110000+`), forming one contiguous packed region `0x8011106c–0x80111185` (280 bytes total). Tables are stored in reverse case order (case 6 first, case 0 last).
+
+Register indices are all multiples of 4 in the 16-bit RF address space `0x0160–0x01f0`. These are **not** the 6-bit baseband MMIO registers at `0xb000a0bc` — this is the RF analog register space accessed via ROM `FUN_80011584`/`FUN_80011608`.
+
+| Case | Start addr | Entries | Byte size | Register set |
+|------|-----------|---------|-----------|--------------|
+| 0 | `0x80111158` | 23 | 46 | `0x0160–0x01f0` (full set, includes `0x0168`, `0x01a0`) |
+| 1 | `0x80111128` | 24 | 48 | Full set minus `0x0180/0x0188/0x018c`, adds `0x019c` |
+| 2 | `0x801110f4` | 26 | 52 | Full set including `0x0180/0x0188/0x018c` |
+| 3 | `0x801110d0` | 17 | 34 | Reduced — includes `0x01cc`, ends at `0x01f0` |
+| 4 | `0x801110a8` | 20 | 40 | Mid set with `0x0180/0x0188/0x018c` + `0x01cc` |
+| 5 | `0x80111088` | 16 | 32 | Starts at `0x019c` (no low regs), `0x01b0–0x01ec` |
+| 6 | `0x8011106c` | 14 | 28 | Sparser — `0x0180/0x0188/0x018c`, `0x01b0`, `0x01c4–0x01f0` |
+
+Raw hex for each table (uint16 LE pairs):
+
+```
+case 0: 6001 6401 6801 9001 9401 9801 a001 b001 b401 b801 bc01
+        c001 c401 c801 d001 d401 d801 dc01 e001 e401 e801 ec01 f001
+case 1: 6001 6401 9001 9401 9801 9c01 a001 b001 b401 b801 bc01
+        c001 c401 c801 d001 d401 d801 dc01 e001 e401 e801 ec01 f001 6801
+case 2: 6001 6401 6801 8001 8801 8c01 9001 9401 9801 a001 b001 b401
+        b801 bc01 c001 c401 c801 d001 d401 d801 dc01 e001 e401 e801 ec01 f001
+case 3: 6001 6401 6801 9001 9401 9801 b001 b401 b801 bc01 c001 c401
+        c801 cc01 e801 ec01 f001
+case 4: 6001 6401 6801 8001 8801 8c01 9001 9401 9801 b001 b401 b801
+        bc01 c001 c401 c801 cc01 e801 ec01 f001
+case 5: 9c01 b001 b401 b801 bc01 c001 c401 c801 d001 d401 d801 dc01
+        e001 e401 e801 ec01
+case 6: 8001 8801 8c01 b001 c401 c801 d001 d401 d801 dc01 e001 e401
+        e801 f001
+```
+
+### Verdict: Safe to Copy Verbatim
+
+All 7 tables are **pure hardware configuration data** — lists of RF register addresses that must have bit 8 cleared. They contain no code, no computed values, no pointers. They are chip design constants derived from Realtek's hardware specification. The libre firmware may include these byte arrays verbatim.
+
+### FUN_8003aea0 Call from Entry (`FUN_8010a000`)
+
+The call site in `FUN_8010a000`:
+
+```c
+(**(code **)PTR_DAT_8010a38c)(PTR_PTR_8010a390, 2);
+// expands to:
+// fn_slot = *(uint32*)0x8010a38c = 0x801205b4  (RAM fn-ptr slot)
+// fn_ptr  = *(uint32*)0x801205b4 = 0x8003aea1  (= ROM FUN_8003aea0 MIPS16e) ✓
+// array   = *(uint32*)0x8010a390 = 0x80120264  (runtime RAM, ROM-initialized)
+// call:  FUN_8003aea0(0x80120264, 2)
+```
+
+The 2-entry reg-cmd array at runtime RAM `0x80120264`:
+
+| Entry | `cmd` | `val` | Decoded |
+|-------|-------|-------|---------|
+| `[0]` | `0x80a6` | `0x0002` | opcode `0x8000` — write 2 to `DAT_8003b16c + stride×0xa6` |
+| `[1]` | `0xffff` | `0xffff` | opcode `0xf000` — set RMW mask to `0xffff` (reset to all-bits-enabled) |
+
+`0x80120264` is in the runtime RAM area (`0x80120000+`) beyond the patch binary extent (`0x8010ADC3`). This address is **ROM-initialized** before the patch entry runs — the libre firmware does not need to populate it. The call to `FUN_8003aea0(0x80120264, 2)` proceeds via the fn-ptr at `0x801205b4` (also ROM-installed).
+
+**Libre action**: call `FUN_8003aea0` via its fn-ptr at `0x801205b4`, passing address `0x80120264` and count `2`. No data to embed in the libre binary for this call — ROM supplies it.
+
+### New ROM Function Identified
+
+| Address | Function | Role |
+|---------|----------|------|
+| `0x800115c8` | `FUN_800115c8` | RF register read — reads 16-bit register space; arg is reg index; returns register value. Used by `FUN_8010c260` to read variant register `0xfd`. |
+
+This is distinct from the known register access functions at `0x8001136c`/`0x8001139c` (baseband MMIO) and `0x80011510` (used by HW variant probe). The RTL8761BU has at least three separate hardware register access paths in ROM.

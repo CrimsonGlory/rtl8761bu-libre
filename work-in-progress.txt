@@ -217,12 +217,30 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
             from 15+ ROM+patch sites. PURE ROM — libre calls via ROM addr, no reimpl.
           → analysis/reverse_engineering_patch_installer.md (Appendix B added)
 
-[NEXT]  Identify register-table data for FUN_8010c278 (RF channel init):
-          Extract the 7 compile-time register tables (PTR_DAT_8010c418 … c438)
-          and the register-cmd script passed to ROM FUN_8003aea0 from the entry.
-          Goal: verify these are safe to copy verbatim from the original binary vs.
-          requiring libre-clean re-derivation (are they chip-config data or code?)
-          Also: identify FUN_8010c260 (variant selector called by FUN_8010c278).
+[DONE]  Identify register-table data for FUN_8010c278 (RF channel init) (2026-06-08)
+          FUN_8010c260 (20 B): reads ROM reg 0xfd via ROM FUN_800115c8, returns bits[2:0]
+            = RF hardware variant 0-6. New ROM fn: FUN_800115c8 (RF reg-read interface).
+          7 RF register tables: contiguous packed region 0x8011106c-0x80111185 (280 bytes)
+            in DATA block. All contain uint16 RF register indices in range 0x0160-0x01f0.
+            Each case: memcpy table to stack, iterate clearing bit 8 of each register.
+            Literal pool at 0x8010c410-0x8010c438: fn-ptrs at c410/c414/c41c/c420,
+            table ptrs at c418/c424/c428/c42c/c430/c434/c438 (non-contiguous in pool).
+          VERDICT: ALL 7 TABLES SAFE TO COPY VERBATIM — pure hardware config constants,
+            no code, no computed values, no pointers. Chip design data.
+          FUN_8003aea0 call from entry: 2-entry reg-cmd array at ROM-initialized RAM
+            0x80120264 → [cmd=0x80a6, val=2] + [cmd=0xffff, val=0xffff].
+            fn-ptr at 0x801205b4 → 0x8003aea1 (ROM FUN_8003aea0 confirmed).
+            Data at 0x80120264 is ROM-pre-populated; libre firmware calls via fn-ptr,
+            no data needs embedding.
+          → analysis/reverse_engineering_patch_installer.md (Appendix C added)
+
+[NEXT]  Analyze FUN_8010a7b8 (TLV config applier) in full detail:
+          Identify the config blob address/format and the fn-ptr used for memcpy patches.
+          Goal: understand what config_base + record_type fields are being patched so the
+          libre firmware can provide correct config blob or replicate the TLV loop.
+          Also: identify all fn-ptrs installed in FUN_8010a000 (the 35+ hook installs seen
+          in the decompile) — which ROM slots they write to and what functions are installed.
+          This is needed to design the minimum libre entry point.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
