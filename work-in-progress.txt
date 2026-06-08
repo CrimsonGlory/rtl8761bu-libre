@@ -1,0 +1,207 @@
+RTL8761BU Libre Firmware — Work in Progress
+============================================
+Goal: free/libre replacement for rtl8761bu_fw.bin for linux-libre / UB500 dongle.
+Based on Xeno Kovah's RE research (Hardwear.io NL 2025).
+Primary analysis tool: Ghidra headless via wairz MCP.
+Primary binary: 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+
+
+PHASE 1 — UNDERSTAND THE PATCH MECHANISM
+-----------------------------------------
+[DONE] Set up Ghidra headless analysis via wairz MCP
+[DONE] Extract Kovah's function annotations → analysis/kovah_function_list.md
+[DONE] Analyze master patch installer FUN_80103780
+         → analysis/reverse_engineering_patch_installer.md
+         → 50+ function pointers installed, 6 sub-installers called, full phase map
+[DONE] Analyze LMP VSC hook FUN_8010bba4 (bos_base+0xd8)
+         → analysis/reverse_engineering_lmp_vsc_hook.md
+[DONE] Analyze VSC opcode dispatcher
+         → analysis/reverse_engineering_vsc_dispatcher.md
+[DONE] Analyze connection record subsystem struct layout
+         → analysis/reverse_engineering_conn_record_subsystem.md
+[DONE] Analyze ROM FUN_8004f824 (slot-budget validator + hw hook dispatcher)
+         → analysis/reverse_engineering_hardware_layer.md
+         → Hook at 0x801212e4 is the ONLY path to actual baseband register writes
+
+
+PHASE 2 — MAP ALL INSTALLED HOOKS (IN PROGRESS)
+-------------------------------------------------
+[DONE]  Identify the function installed at RAM hook slot 0x801212e4 (2026-06-08)
+          RESOLVED: NOT installed by the patch. Installed by ROM FUN_80025b68
+          at SCO/eSCO connection setup time. That ROM function writes runtime-
+          generated MIPS16e code (from ROM codec tables PTR_DAT_80025ca8/cac)
+          into conn_record._x58+0x13e and sets +0xe4 → +0x13e as the hook ptr.
+          Full GZF scan (213,799 insns) confirms zero stores to 0x801212e4.
+          → analysis/reverse_engineering_sub_installers.md (revised)
+          → analysis/reverse_engineering_hardware_layer.md (Section 7 revised)
+
+          Sub-installer RUNTIME addresses (from literal pool, corrected):
+            sub-call #1: 0x8010B254  (file offset 0xB254 — BEYOND binary)
+            sub-call #2: 0x8010F7C8  (file offset 0xF7C8 — BEYOND binary)
+            sub-call #3: 0x8010F304  (file offset 0xF304 — BEYOND binary)
+            sub-call #4: 0x8010EA1C  (file offset 0xEA1C — BEYOND binary)
+            sub-call #5: 0x8010E8A8  (file offset 0xE8A8 — BEYOND binary)
+          (GZF data block uses different addresses: 8010af40, 8011011c, etc.
+           — Kovah's runtime snapshot, different firmware variant)
+
+[DONE]  Analyze sub-installers #1–#5 via GZF DATA block (2026-06-08)
+          6 functions decompiled:
+          #1 FUN_8010af40 — clears bit 6 of HW reg 0x108
+          #2 FUN_8011011c — installs 19 fn-ptrs into 0x80120600-0x80121100
+          #3 FUN_8010fc58 — installs 1 fn-ptr (FUN_80110ca4) + calls another
+          #4 FUN_8010f370 — installs 10 data-ptrs into a struct (0x28 bytes)
+          #5 FUN_8010e81c — installs 1 fn-ptr (FUN_8010e82c)
+          #6 FUN_8010eac0 — writes 0xffffffff to global + calls via ptr
+          → analysis/reverse_engineering_sub_installers.md
+
+[DONE]  Analyze second-tier installer
+          patch_that_installs_all_the_string_associated_function_patches__including_LMP
+          → analysis/reverse_engineering_string_assoc_installer.md
+          KEY FINDING: The "installer" IS the address-pair table at file 0xa0 (the
+          DATA). It is processed by ROM function interesting_string_user_fptr_-
+          registration_function @ ROM 0x80009990 — NOT accessible in wairz.
+          Full scan of binary: ZERO references to 0x801000A0 anywhere. Table
+          processor is definitively in ROM.
+          7 of 15 fn_ptrs are in binary (0x8010A174-0x8010A34C); all point into
+          a MIPS16e handler-stub region (0x8010A160-0x8010A34C) that Ghidra cannot
+          decode but manual decode shows 8-byte case-chain dispatch entries.
+          Also decompiled 7 late-patch functions (see below).
+
+
+PHASE 2 — LATE-PATCH FUNCTIONS (decompiled 2026-06-08)
+---------------------------------------------------------
+[DONE]  FUN_80009980 (runtime 0x80109980, size=175) — HW register init
+          Uses ROM register-read (thunk → FUN_8000a180 → ROM 0x8001136c) and
+          register-write (ROM 0x8001139c) fns. Programs 7 baseband registers
+          (indices 0,2,3,5,6). Reads eSCO codec params from bos+0x168/0x16a.
+          MMIO base: physical 0x1000a0bc (kseg1: 0xb000a0bc).
+[DONE]  FUN_80009c08 (runtime 0x80109c08, size=448) — eSCO negotiator
+          Selects eSCO packet type from connection type (0xA000/0xB000/0xE000/0xF000)
+          and capability flags at conn_rec+0x250. Returns type code (0x3/0x4/0x8/
+          0xa/0xb/0x3a-0x4b). Calls ROM selector fn and two alternate paths.
+[DONE]  FUN_80009de0 (runtime 0x80109de0, size=164) — Hamming-weight checksum
+          Standard popcount over first 10 bytes of input. Returns 8-bit bit-count.
+          Likely used for LMP PDU header validation.
+[DONE]  FUN_80009200 (runtime 0x80109200, size=322) — Bitfield encoder
+          Reads packed 2-bit groups from array, constructs 16-bit register values,
+          programs hardware via fn pointers. Likely PCM/I2S or RF init.
+[DONE]  FUN_80009550 (runtime 0x80109550, size=226) — Audio codec sampler
+          64-iteration loop reading codec samples; passes to debug logger.
+[DONE]  FUN_800096d4 (runtime 0x801096d4, size=258) — Audio circular buffer writer
+          8-element circular buffer, 12-byte frames, two write modes (SCO parity).
+[DONE]  FUN_80009824 (runtime 0x80109824, size=180) — eSCO retransmission timer
+          Checks packet counter vs threshold; handles retry and teardown logic.
+[BLOCKED] MIPS16e handler stubs @ 0x8010A160-0x8010A280
+          Manual decode shows 8-byte bteqz/lw/bteqz/addiu pattern (case-chain).
+          36 entries, 6 of 15 fn_ptrs from address-pair table enter here.
+          Ghidra EXTEND decoder fails; exact semantics require emulator/ROM dump.
+
+
+PHASE 3 — UNDERSTAND THE HARDWARE LAYER
+-----------------------------------------
+[BLOCKED] Decompile the hardware-write hook installed at 0x801212e4
+          Cannot identify the function address until sub-installer blocker is
+          resolved. Known prototype from hardware-layer analysis:
+            uint8_t fn(hw_obj_t *obj, uint8_t result_buf[8])
+          The libre replacement must provide a compatible stub here.
+
+[DONE]  Analyze hardware register read/write functions (2026-06-08)
+          ROM 0x8001136c (read): index in bits[21:16], returns bits[15:0].
+          ROM 0x8001139c (write): same index encoding; two MMIO writes (value,
+          then value|trigger_bit) to latch. MMIO addr: 0xb000a0bc (phys 0x1000a0bc).
+          FUN_8000a180: NOT a simple thunk — is a retry/polling wrapper around the
+          read fn; called from FUN_80009980 via v0 fn-ptr.
+          → analysis/reverse_engineering_rom_regs.md (new)
+
+[NEXT]  Read ROM codec templates PTR_DAT_80025ca8 / PTR_DAT_80025cac
+          These ROM tables hold pre-built MIPS16e code (byte-reversed) that
+          FUN_80025b68 copies into bos_base+0x13e and calls via bos_base+0xe4.
+          Disassemble the 0x30 and 0x40-byte blocks to understand what hardware
+          registers they write. Critical for confirming whether libre firmware
+          needs any hw-write logic at all.
+          Address DAT_80025ca8 is in the ROM block — decompile via GZF process mode.
+
+[TODO]  Confirm what invokes ROM FUN_80025b68 in the SCO connection-setup chain
+          FUN_80025b68 is the bos_base+0xe4 installer. If the libre firmware
+          calls the correct ROM connection-setup entry points, FUN_80025b68
+          runs automatically. Identify the call chain to confirm.
+
+[TODO]  Analyze ROM functions for connection types 0-3 (hw init chain)
+          FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c
+          These are called by FUN_80050810 (type-dispatch hook at bos_base+0xe0)
+
+[TODO]  Read eSCO packet-type tables
+          PTR_PTR_80044798 and PTR_DAT_8004479c
+          Used by ROM FUN_80044730 (eSCO packet type selector)
+
+[TODO]  Analyze early-init function FUN_8010a6c8
+          Called first thing by master installer; purpose unknown
+
+
+PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
+---------------------------------------------
+[TODO]  Enumerate all LMP opcodes handled by the VSC dispatcher
+[TODO]  Enumerate all HCI VSC opcodes handled (opcode table from dispatcher)
+[TODO]  Determine minimum set required for basic BT operation vs. full feature set
+
+
+PHASE 5 — DESIGN THE LIBRE REPLACEMENT
+----------------------------------------
+[TODO]  Define libre patch binary layout (header + code structure)
+[TODO]  Decide which ROM hooks are mandatory vs. optional
+[TODO]  Design stub implementations for non-critical functions
+[TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
+[TODO]  Write design document for libre patch architecture
+
+
+PHASE 6 — IMPLEMENT
+---------------------
+[TODO]  Implement master installer (MIPS16e asm)
+[TODO]  Implement LMP VSC hook + dispatcher
+[TODO]  Implement hardware-write hook (bos_base+0xe4)
+[TODO]  Implement minimum required sub-installers
+[TODO]  Implement version check (trivially "always OK" for known HW)
+[TODO]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
+[TODO]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
+
+
+PHASE 7 — TEST
+---------------
+[TODO]  Flash libre patch to UB500 dongle via btrtl driver
+[TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
+[TODO]  Verify BT 5.1 feature advertisement
+[TODO]  Test audio (SCO/eSCO) if applicable
+[TODO]  Run compliance checks against linux-libre blob policy
+
+
+NOTES
+-----
+- All addresses are runtime (patch at 0x80100000, ROM at 0x80000000)
+- The GZF is the authoritative analysis source (has ROM + runtime patch image)
+- Raw rtl8761bu_fw.bin (42088 bytes) = patch only; no ROM; limited for analysis
+- config_base and bos_base are runtime pointers; their values (~0x80121200) come
+  from the ROM's BT state allocation, not from the patch itself
+- wairz GZF process mode: use_saved_project=True gives access to all three blocks
+  (patch at 0x00000000, rom at 0x80000000, data at 0x80100000). script_file_id
+  and script_name both work in this mode (path bug fixed 2026-06-08).
+- Firmware format: magic(9) + fw_version(4) + unknown(3) + num_patches(2) +
+  IC_subver[n](2n) + patch_offset[n](4n). 2 patches at 0x30 and 0x3780.
+- Address mapping in GZF process mode: patch block uses FILE offsets (0x00000000+);
+  ROM block uses runtime 0x80000000+; data block uses runtime 0x80100000+.
+- Address mapping in raw import mode (old): runtime = Ghidra_addr + 0x00100000.
+- Master installer literal pool: Ghidra 0x800039F4–0x80003BC0 (patch block = file addr)
+- Patch entry called by ROM: runtime 0x8010A001 (Ghidra 0x8000A001)
+  → Ghidra can't decode this region (MIPS16e EXTEND pcode errors)
+- String-assoc address-pair table: file 0xA0 (15 entries, see sub_installers.md
+  and string_assoc_installer.md). Table processor = ROM fn @ 0x80009990.
+  7 of 15 fn_ptrs in vanilla binary (0x8010A174/A184/A1D8/A208/A2B8/A304/A34C).
+  Handler stubs: 0x8010A160-0x8010A34C — 8-byte bteqz/lw/bteqz/addiu pattern.
+- Vanilla vs GZF: rtl8761bu_fw.bin = 42088 bytes; GZF patch block = 44484 bytes.
+  Extra 2396 bytes at 0x8010A468-0x8010ADC3 = Kovah's "dark firmware" (analysis
+  code). GZF also contains 'rom' block (ROM dump via VSC FC61) and 'data' block
+  (runtime RAM snapshot with sub-installers). Both blocks are encoded in the GZF
+  ZIP but inaccessible via wairz run_ghidra_headless (always loads vanilla binary).
+  GZF accessibility: ROM and DATA are in the GZF file; wairz's import always
+  resolves to the raw binary. Ghidra GUI can open GZF directly for full access.
+- Hardware regs: MMIO at kseg1 0xb000xxxx (physical 0x1000xxxx). Register r/w
+  via ROM fns at runtime 0x8001136c (read) and 0x8001139c (write).

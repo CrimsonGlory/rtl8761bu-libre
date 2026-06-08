@@ -1,0 +1,523 @@
+ ▐▛███▜▌   Claude Code v2.1.168
+▝▜█████▛▘  Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    ~/rtl8761bu-libre
+
+  Feature of the week: /loop — run a prompt or slash command on a recurring interval
+
+
+❯ Continue with next step in work-in-progress.txt \n Document everything in     
+  markdown and update work-in-progress.txt is appropiate                        
+
+● Reading the work-in-progress file and memory index to get context.
+
+  Read 1 file, recalled 1 memory (ctrl+o to expand)
+
+● The next step is identifying which patch function gets installed at RAM hook
+  slot 0x801212e4 (bos_base+0xe4). I'll search the installer code for stores to
+  that offset.
+
+● I'll write a Ghidra script to scan for all stores to offset 0xe4
+  (bos_base+0xe4 = 0x801212e4) across the entire patch, then identify what
+  function pointer gets written there.
+
+  Called wairz (ctrl+o to expand)
+
+● Now running the script to find all stores to offsets 0xe4/0xe0/0xd8/0xe8
+  across the patch.
+
+  Called wairz (ctrl+o to expand)
+
+● The script save creates a research file — need to use script_file_id to
+  reference it.
+
+  Called wairz (ctrl+o to expand)
+
+● The script path setup is failing — the temp dir isn't being added to Ghidra's
+  path correctly. Let me use the native wairz xrefs tool on 0x801212e4 directly,
+  and also decompile the master installer to read the stores.
+
+  Called wairz 2 times (ctrl+o to expand)
+
+● Let me read the existing installer analysis to find what we know about the
+  0xe4/0xe0 slots, then write a hardcoded script.
+
+  Read 2 files (ctrl+o to expand)
+
+● The sub-installers handle the 0xe4 write — not the master installer. Let me
+  use the native wairz decompile tool and also try to write the search script
+  directly to the Ghidra scripts dir via shell.
+
+● The run_shell tool is sandboxed — I can't reach the Ghidra scripts dir from
+  there. Let me write the new script directly via the filesystem and check
+  existing scripts to understand the path.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● The scripts directory is accessible. I'll write the script directly there and
+  also check what FindXrefsTo.java looks like to understand the arg-passing
+  pattern.
+
+  Read 2 files (ctrl+o to expand)
+
+● Now I understand the structure. Let me write the search script directly to the
+  Ghidra scripts directory — script_args are broken in this setup, so
+  everything must be hardcoded.
+
+  I'll also run FindXrefsTo.java in parallel (it's already hardcoded to
+  0x801212e4) and write a new script to decompile all 6 sub-installers at once.
+
+● Write(~/wairz/ghidra/scripts/DecompileSubInstallers.java)
+  ⎿  Wrote 91 lines to ../wairz/ghidra/scripts/DecompileSubInstallers.java
+       1 // Decompile all 6 sub-installers called by the RTL8761BU master
+          patch installer.
+       2 // Addresses are hardcoded (script_args is broken in headless mo
+       3 // Sub-installers: FUN_8010af40, FUN_8011011c, FUN_8010fc58,
+       4 //                 FUN_8010f370, FUN_8010e81c, FUN_8010eac0
+       5 // @category Wairz
+       6 // @author Claude
+       7 
+       9 import ghidra.app.decompiler.DecompileOptions;
+      10 import ghidra.app.decompiler.DecompileResults;
+     … +89 lines (ctrl+o to expand)
+
+● Now run both scripts in parallel — the existing FindXrefsTo.java (hardcoded to
+  0x801212e4) and the new sub-installer decompiler.
+
+  Called wairz 2 times (ctrl+o to expand)
+
+● Key findings: xrefs to 0x801212e4 = 0 (it's a runtime write, not static), and
+  all sub-installers report "no function" — the binary is being loaded at base
+  0x80000000 instead of 0x80100000, so the 0x8010xxxx addresses don't exist in
+  the loaded image. Let me check the actual loaded function addresses.
+  Called wairz 2 times (ctrl+o to expand)
+
+● Now I understand the picture completely. wairz loads the raw 42088-byte binary
+  at 0x80000000 — one block, ram: 80000000–8000a467. The runtime addresses in
+  all analysis docs (0x8010xxxx) are offset by +0x100000 from the Ghidra
+  addresses (0x8000xxxx). The master installer is at Ghidra 0x80003780 (runtime
+  0x80103780) ✓. But the sub-installers like FUN_8010af40 → Ghidra 0x8000af40
+  are beyond the binary end (0x8000a467).
+
+  The approach must be: decompile FUN_80003780 in its actual Ghidra address
+  space and look for any store to puVar6+0xe4. Let me write a new script with
+  the correct Ghidra addresses.
+
+● Write(~/wairz/ghidra/scripts/DecompileMasterAndSubs.java)
+  ⎿  Wrote 85 lines to ../wairz/ghidra/scripts/DecompileMasterAndSubs.java
+       1 // Decompile master installer at its ACTUAL Ghidra address (0x80
+         003780,
+         0103780 → Ghidra 0x80003780).
+       3 // Also scans ALL instructions in the binary for SW with offset 
+         0xe4 (228).
+       5 // @author Claude
+       6 
+       7 import ghidra.app.decompiler.DecompInterface;
+       9 import ghidra.app.decompiler.DecompileResults;
+      10 import ghidra.app.script.GhidraScript;
+     … +90 lines (ctrl+o to expand)
+
+  Called wairz (ctrl+o to expand)
+
+● Good progress. The master installer decompile is clean. Key observations:
+  1. The SW offset scan returned zero hits — MIPS16e EXTEND instructions aren't
+  caught by the OperandType.SCALAR check
+  2. The master installer has no direct store to offset +0xe4 — it's definitely
+  in a sub-installer
+  3. The sub-callers appear as (*pcRam80003a30)(), (*pcRam80003a34)(),
+  (*pcRam80003a94)(), etc.
+
+  I need to read the literal pool values at those addresses to find the actual
+  function addresses. Let me write a script to dump the pool and then locate and
+  decompile those functions.
+
+● Write(~/wairz/ghidra/scripts/DumpLiteralPool.java)
+  ⎿  Wrote 62 lines to ../wairz/ghidra/scripts/DumpLiteralPool.java
+       1 // Dump the literal pool of FUN_80003780 (master installer).
+       2 // Reads all 4-byte words in the range 0x800039f4 – 0x80003bc0 (
+       3 // that follows and interleaves with the function body, per the 
+         decompile output).
+       4 // Then tries to identify which of those values are callable (i.
+       5 // known functions) so we can identify the sub-installers.
+       6 // @category Wairz
+       7 // @author Claude
+       9 import ghidra.app.script.GhidraScript;
+      10 import ghidra.program.model.address.*;
+     … +64 lines (ctrl+o to expand)
+
+  Called wairz (ctrl+o to expand)
+
+● Now I have the full literal pool. The direct sub-installer calls are at
+  runtime addresses:
+  - [0x80003a30] = 0x8010b255 (sub-call #1)
+  - [0x80003a34] = 0x8010f7c9 (sub-call #2)
+  - [0x80003a94] = 0x8010f305 (sub-call #3)
+  - [0x80003b1c] = 0x8010ea1d (sub-call #4)
+  - [0x80003b20] = 0x8010e8a9 (sub-call #5)
+  - [0x80003b84] = 0x8000fd39 = ROM copies_config_bdaddr ✓
+
+  All sub-calls are at runtime 0x8010xxxx (patch at 0x80100000). The file
+  offsets for these are > 0xa468, beyond the 42088-byte binary wairz holds. Let
+  me check the actual binary to understand the header layout and whether there's
+  a second patch section.
+
+  Called wairz (ctrl+o to expand)
+
+● The carving sandbox isn't available. Let me check the local binary directly.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Key findings from the literal pool dump:
+
+  The master installer installs NO function at bos_base+0xe4. The 5 direct
+  sub-calls are at runtime addresses:
+  - [0x80003a30] → 0x8010b254 (sub-call #1)
+  - [0x80003a34] → 0x8010f7c8 (sub-call #2)
+  - [0x80003a94] → 0x8010f304 (sub-call #3)
+  - [0x80003b1c] → 0x8010ea1c (sub-call #4)
+  - [0x80003b20] → 0x8010e8a8 (sub-call #5)
+
+  Critical blocker: All sub-installer addresses (0x8010b254 etc.) map to file
+  offsets > 42088 (the binary's size). The wairz setup loads only the 42088-byte
+  patch binary, but the sub-installers live beyond that range. The GZF's
+  three-block layout (patch at 0x80100000 + ROM) isn't being used — wairz
+  extracts just the raw binary.
+
+  Let me try properly importing the GZF as a Ghidra archive to get the full
+  three-block view.
+
+● The GZF import tool uses a file UUID. Let me find it from the research files
+  list.
+
+  Called wairz (ctrl+o to expand)
+
+● The GZF is already imported (import_status=completed). Let me get the full
+  import result — this should have Kovah's annotations and all functions from
+  the three-block layout.
+
+  Called wairz (ctrl+o to expand)
+
+● The import has 0 functions extracted. Let me read the AnalyzeBinary.java
+  script to understand what it does, and then try running a Ghidra script
+  directly against the imported GZF to list its actual functions.
+
+  Read 2 files (ctrl+o to expand)
+
+● The comment in ExtractAnnotations.java is the key: "patch firmware addresses 
+  are file-relative; add 0x80100000 to get runtime address." This means in the
+  GZF's Ghidra project, functions are at 0x0-0xadc3 (file-relative), not at
+  runtime addresses. Let me check Kovah's existing function list — it may
+  already name the sub-installer functions.
+
+  Read 1 file (ctrl+o to expand)
+  ⎿  Read ../wairz/ghidra/scripts/DumpLiteralPool.java (63 lines)
+  ⎿  Read ../wairz/ghidra/scripts/DecompileMasterAndSubs.java (86 lines)
+  ⎿  Read ../wairz/ghidra/scripts/DecompileSubInstallers.java (92 lines)
+  ⎿  Read work-in-progress.txt (108 lines)
+  ⎿  Read ../wairz/ghidra/scripts/FindXrefsTo.java (40 lines)
+● Good — the Kovah annotations list only has ONE patch function annotated (the
+  master installer). The sub-installers aren't there. Let me check what memory
+  blocks wairz actually loads when using the GZF, and then try to access the
+  sub-installers from the DATA block.
+
+● Let me run ListMemBlocks.java against the GZF to see the actual memory layout
+  wairz provides.
+
+  Called wairz (ctrl+o to expand)
+
+● Confirmed: wairz always loads the raw 42088-byte rtl8761bu_fw.bin at
+  0x80000000. The GZF's three-block layout is never used. Sub-installers at
+  runtime 0x8010xxxx map to Ghidra 0x8000xxxx, all beyond 0x8000a467.
+
+  I need to try a string-based instruction scan across all 222 functions in the
+  loaded binary (not the EXTEND-opcode-aware approach that failed), plus check
+  the ROM for any store of a function pointer to 0x801212e4. Let me write that
+  script.
+
+● Write(~/wairz/ghidra/scripts/ScanStoreOffsets.java)
+  ⎿  Wrote 85 lines to ../wairz/ghidra/scripts/ScanStoreOffsets.java
+       1 // Scan ALL instructions in the binary for store instructions th
+         at reference
+          neighbors).
+       3 // Uses toString() string matching to bypass the MIPS16e EXTEND 
+         opcode issue
+       5 // Also searches for any direct reference to address 0x801212e4.
+       6 // @category Wairz
+       7 // @author Claude
+       9 import ghidra.app.script.GhidraScript;
+      10 import ghidra.program.model.address.Address;
+     … +93 lines (ctrl+o to expand)
+
+  Called wairz (ctrl+o to expand)
+
+● Three hits — all in the master installer (FUN_80003780) at offsets 0xd8 and
+  0xe0. Zero stores to 0xe4 across all 14474 instructions. The store to
+  bos_base+0xe4 is definitely inside one of the sub-installers that are beyond
+  the binary's end.
+
+  Let me look at this from the raw binary side — check the local firmware file's
+  actual header to understand the patch layout and why sub-installers fall
+  outside the 42088 bytes.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Three stores only in master installer (0xd8 and 0xe0 offsets). The store to
+  0xe4 is definitively in a sub-installer. Let me now understand WHY the
+  sub-installers are out of range by examining the firmware header format, then
+  pivot to analyzing what IS accessible.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The Python script is misparse because the header format is not what the script
+  assumed. Let me do a targeted parse using what we know from CLAUDE.md and the
+  known offsets in the hex dump.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now I understand the structure. The firmware binary has two patches (IC subver
+  0x36E0 and 0x6CA0), and ALL sub-installer runtime addresses (0x8010b254+) 
+  exceed the 42088-byte firmware file. They are definitively not in the raw
+  binary.
+
+  Let me decompile the entry point that IS accessible — 0x8010a001 (file offset
+  0xa001, Ghidra 0x8000a001) — the actual first patch code the ROM calls:
+
+● Write(~/wairz/ghidra/scripts/DecompileEntryAndTable.java)
+  ⎿  Wrote 127 lines to ../wairz/ghidra/scripts/DecompileEntryAndTable.java
+       1 // Decompile the patch entry point at 0x8000a001 (runtime 0x8010
+         a001),
+         ptr_to_install_patches.
+       3 // Also dump the address-pair table starting at 0x800000a0 (runt
+         ime 0x801000a0).
+       5 // @author Claude
+       6 
+       7 import ghidra.app.decompiler.DecompInterface;
+       9 import ghidra.app.decompiler.DecompileResults;
+      10 import ghidra.app.script.GhidraScript;
+     … +143 lines (ctrl+o to expand)
+
+  Called wairz (ctrl+o to expand)
+
+● Excellent results. The address-pair table has 15 entries at file offset 0xa0
+  (pairs of data-struct ptr + MIPS16e fn ptr). The patch entry point (0x8000a001
+  = runtime 0x8010a001) has no function — Ghidra missed it. Let me force-define
+  and decompile it alongside FUN_8000a180:
+
+● Write(~/wairz/ghidra/scripts/DecompilePatchEntry.java)
+  ⎿  Wrote 89 lines to ../wairz/ghidra/scripts/DecompilePatchEntry.java
+       1 // Force-define and decompile the patch entry point at Ghidra 0x
+         8000a000
+         ootstrap).
+       3 // Also decompile FUN_8000a180, FUN_80009c08, FUN_80009de0, FUN_
+         80009980.
+       5 // @author Claude
+       6 
+       7 import ghidra.app.decompiler.DecompInterface;
+       9 import ghidra.app.decompiler.DecompileResults;
+      10 import ghidra.app.script.GhidraScript;
+     … +98 lines (ctrl+o to expand)
+
+  Called wairz (ctrl+o to expand)
+
+● The decompile of 0x8000a000 is garbled — massive EXTEND-instruction decoding
+  failures show Ghidra can't handle that region. FUN_8000a180 has the same
+  problem. The entry-point area uses MIPS16e EXTEND combinations Ghidra doesn't
+  support.
+
+  I have enough findings to document. Let me write the analysis file and update
+  WIP now.
+
+● Write(analysis/reverse_engineering_sub_installers.md)
+  ⎿  Wrote 185 lines to analysis/reverse_engineering_sub_installers.md
+       1 # RTL8761BU — Sub-Installers and Patch Boot Sequence
+       2 
+       3 Source: `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`
+       4 Analysis session: 2026-06-07
+       5 
+       7 
+       8 ## Summary
+       9 
+      10 The master installer `FUN_80103780` calls five sub-installer fun
+         ctions at boot.
+     … +250 lines (ctrl+o to expand)
+
+● Now update work-in-progress.txt:
+
+● Update(work-in-progress.txt)
+  ⎿  Added 30 lines, removed 14 lines
+      26  
+      27  PHASE 2 — MAP ALL INSTALLED HOOKS (IN PROGRESS)
+      28  -------------------------------------------------
+      29 -[NEXT]  Identify the function installed at RAM hook slot 0x8012
+         -12e4                                                           
+      30 -          Which patch function does the master installer store 
+         -there?                                                         
+      31 -          Approach: decompile the relevant sub-installer or sca
+         -n installer stores                                             
+      32 -          for sw X, 0xe4(s1) / sw X, 0xe0(s1)                  
+      29 +[BLOCKED] Identify the function installed at RAM hook slot 0x80
+         +1212e4                                                         
+      30 +          CONFIRMED: master installer does NOT store bos_base+0
+         +xe4 anywhere.                                                  
+      31 +          Full instruction scan (14474 insns) found ZERO stores
+         + to offset 0xe4.                                               
+      32 +          The install must happen inside one of the 5 sub-calle
+         +r functions below.                                             
+      33 +          → see analysis/reverse_engineering_sub_installers.md 
+      34  
+      34 -[TODO]  Analyze second-tier installer                          
+      35 -          patch_that_installs_all_the_string_associated_functio
+         -n_patches__including_LMP                                       
+      36 -          Kovah's name; installed as fptr by master installer. 
+      37 -          Triggers on first LMP PDU or similar boot event.     
+      35 +          Sub-installer RUNTIME addresses (from literal pool, c
+         +orrected):                                                     
+      36 +            sub-call #1: 0x8010B254  (file offset 0xB254 — BEYO
+         +ND binary)                                                     
+      37 +            sub-call #2: 0x8010F7C8  (file offset 0xF7C8 — BEYO
+         +ND binary)                                                     
+      38 +            sub-call #3: 0x8010F304  (file offset 0xF304 — BEYO
+         +ND binary)                                                     
+      39 +            sub-call #4: 0x8010EA1C  (file offset 0xEA1C — BEYO
+         +ND binary)                                                     
+      40 +            sub-call #5: 0x8010E8A8  (file offset 0xE8A8 — BEYO
+         +ND binary)                                                     
+      41  
+      39 -[TODO]  Analyze sub-installer FUN_8010af40 (sub-installer #1)  
+      40 -[TODO]  Analyze sub-installer FUN_8011011c (sub-installer #2)  
+      41 -[TODO]  Analyze sub-installer FUN_8010fc58 (sub-installer #3)  
+      42 -[TODO]  Analyze sub-installer FUN_8010f370 (sub-installer #4)  
+      43 -[TODO]  Analyze sub-installer FUN_8010e81c (sub-installer #5)  
+      44 -[TODO]  Analyze sub-installer FUN_8010eac0 (sub-installer #6)  
+      42 +          BLOCKER: All 5 sub-installers are at file offsets > 4
+         +2088 (= end of                                                 
+      43 +          rtl8761bu_fw.bin). wairz always loads the raw 42088-b
+         +yte binary at                                                  
+      44 +          0x80000000; the GZF's DATA/ROM blocks are never acces
+         +sible.                                                         
+      45 +          Sub-installers likely come from ROM-initialized RAM o
+         +r a larger                                                     
+      46 +          firmware version Kovah analyzed (GZF DATA block = run
+         +time memory dump).                                             
+      47  
+      48 +          NOTE: old analysis docs listed FUN_8010AF40, FUN_8011
+         +011C, etc. — those                                             
+      49 +          addresses were from a different binary version. The c
+         +orrect addresses are                                           
+      50 +          listed above (from DumpLiteralPool.java on this binar
+         +y).                                                            
+      51  
+      52 +[BLOCKED] Analyze sub-installers #1–#5 (all beyond binary — req
+         +uires ROM dump                                                 
+      53 +          or GZF DATA block access)                            
+      54 +                                                               
+      55 +[NEXT]  Analyze second-tier installer                          
+      56 +          patch_that_installs_all_the_string_associated_functio
+         +n_patches__including_LMP                                       
+      57 +          Address-pair table at file 0xA0 (runtime 0x801000A0) 
+         +has 15 entries of                                              
+      58 +          (data_struct_ptr, fn_ptr). The table processor is FUN
+         +_80009980 (size=175)                                           
+      59 +          or another function near end of binary. Some fn_ptrs 
+         +ARE in the binary:                                             
+      60 +          0x8010A174, 0x8010A184, 0x8010A1D8, 0x8010A208, 0x801
+         +0A2B8, 0x8010A304                                              
+      61 +                                                               
+      62 +                                                               
+      63  PHASE 3 — UNDERSTAND THE HARDWARE LAYER
+      64  -----------------------------------------
+      65  [TODO]  Decompile the hardware-write hook installed at 0x801212
+          e4
+
+● Update(work-in-progress.txt)
+  ⎿  Added 5 lines, removed 3 lines
+      62  
+      63  PHASE 3 — UNDERSTAND THE HARDWARE LAYER
+      64  -----------------------------------------
+      65 -[TODO]  Decompile the hardware-write hook installed at 0x801212
+         -e4                                                             
+      66 -          Once Phase 2 identifies the function address, decompi
+         -le it to learn                                                 
+      67 -          exactly which baseband registers it writes and how.  
+      65 +[BLOCKED] Decompile the hardware-write hook installed at 0x8012
+         +12e4                                                           
+      66 +          Cannot identify the function address until sub-instal
+         +ler blocker is                                                 
+      67 +          resolved. Known prototype from hardware-layer analysi
+         +s:                                                             
+      68 +            uint8_t fn(hw_obj_t *obj, uint8_t result_buf[8])   
+      69 +          The libre replacement must provide a compatible stub 
+         +here.                                                          
+      70  
+      71  [TODO]  Analyze ROM functions for connection types 0-3 (hw init
+           chain)
+      72            FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76
+          c
+
+● Update(work-in-progress.txt)
+  ⎿  Added 9 lines
+      123  - Raw rtl8761bu_fw.bin (42088 bytes) = patch only; no ROM; lim
+           ited for analysis
+      124  - config_base and bos_base are runtime pointers; their values 
+           (~0x80121200) come
+      125    from the ROM's BT state allocation, not from the patch itsel
+           f
+      126 +- wairz ALWAYS loads raw binary at 0x80000000; GZF three-block
+          + layout (patch/                                               
+      127 +  data/rom) is NEVER used. Binary covers Ghidra 0x80000000–0x8
+          +000A467 only.                                                 
+      128 +- Firmware format: magic(9) + fw_version(4) + unknown(3) + num
+          +_patches(2) +                                                 
+      129 +  IC_subver[n](2n) + patch_offset[n](4n). 2 patches at 0x30 an
+          +d 0x3780.                                                     
+      130 +- Address mapping in wairz: runtime = Ghidra_addr + 0x00100000
+      131 +- Master installer literal pool: Ghidra 0x800039F4–0x80003BC0 
+      132 +- Patch entry called by ROM: runtime 0x8010A001 (Ghidra 0x8000
+          +A001)                                                         
+      133 +  → Ghidra can't decode this region (MIPS16e EXTEND pcode erro
+          +rs)                                                           
+      134 +- String-assoc address-pair table: file 0xA0 (15 entries, see 
+          +sub_installers.md)                                            
+● Now save memory about the key discovery:
+
+  Recalled 1 memory, wrote 3 memories (ctrl+o to expand)
+
+● Let me do a final check of the updated WIP to confirm it's accurate:
+
+  Read 1 file (ctrl+o to expand)
+
+● The session's work is fully documented. Here's a concise summary of what was
+  established:
+
+  ---
+  What was confirmed:
+  - bos_base+0xe4 (0x801212E4) is definitively not installed by the master 
+  installer — a full 14,474-instruction scan found zero stores to offset 0xe4
+  anywhere in the loaded binary
+  - The store happens in one of 5 sub-installer calls from the master installer
+
+  Why the sub-installers are unreachable:
+  - Their runtime addresses (0x8010B254, 0x8010F7C8, 0x8010F304, 0x8010EA1C,
+  0x8010E8A8) map to file offsets 45652–63432, all beyond the 42,088-byte binary
+  - wairz always loads the raw binary at 0x80000000 — the GZF's DATA/ROM blocks
+  are never accessible
+  - The sub-installers most likely come from ROM-initialized RAM, which is why
+  they aren't in the patch file
+
+  What was discovered:
+  - Firmware header fully parsed: 2 patches (IC 0x36E0 at offset 0x30, IC 0x6CA0
+  at 0x3780)
+  - Corrected sub-installer addresses — old docs had wrong addresses from a
+  different binary version
+  - 15-entry address-pair table at file offset 0xa0 ((data_ptr, fn_ptr) pairs
+  for the "string associations" installer)
+  - 37 functions identified in the late-patch area (0x80009048–0x8000A467),
+  several of which ARE accessible
+
+  New file: analysis/reverse_engineering_sub_installers.md
+
+  Next step (updated in WIP): analyze the second-tier string-association
+  installer — specifically FUN_80009980 and the 6 function pointers in the table
+  that are in the binary (0x8010A174, 0x8010A184, 0x8010A1D8, 0x8010A208,
+  0x8010A2B8, 0x8010A304).
+
+✻ Baked for 47m 21s
