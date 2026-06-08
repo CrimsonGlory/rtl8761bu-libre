@@ -39,7 +39,7 @@ sh  v0,       PTR_DAT_000039d0   ; write low  16 bits to dest B
 jalr PTR_FUN_8010a6c8      ; call early-init
 ```
 
-Reads one 32-bit word and splits it into two 16-bit hardware registers. Likely a clock or transport configuration that must be set before anything else. `FUN_8010a6c8` is the first patch function called; its role is not yet analyzed.
+Reads one 32-bit word and splits it into two 16-bit hardware registers. Likely a clock or transport configuration that must be set before anything else. `FUN_8010a6c8` is the BSS-zeroing early-init — see Section below.
 
 ---
 
@@ -356,6 +356,58 @@ The highest priority next steps are:
 - Decompile `LAB_8010bba4` (the LMP VSC hook) — this is the function the ROM calls for every VSC
 - Decompile `patch_that_installs_all_the_string_associated_function_patches__including_LMP` — the second-tier installer
 - Understand the exact layout of `config_base` and `bos_base` structs
+
+---
+
+## Appendix: Early-Init BSS Zeroing — `FUN_8010a6c8` (2026-06-08)
+
+**Runtime address**: `0x8010a6c8`  
+**Size**: 24 bytes (+ 12-byte literal pool at `0x8010a6e0`–`0x8010a6eb`)  
+**Called from**: master installer at offset `0x379c` (28 bytes into `FUN_80103780`), and patch entry `FUN_8010a000` at `0x8010a01c`
+
+### Decompiled C
+
+```c
+void FUN_8010a6c8(void)
+{
+    memset(0x80109c00, 0, 0x8010a000 - 0x80109c00);   // zero 0x400 = 1024 bytes
+}
+```
+
+The literal pool encodes three constants:
+
+| Symbol | Value | Meaning |
+|--------|-------|---------|
+| `PTR_DAT_8010a6e0` | `0x80109c00` | BSS region start |
+| `PTR_FUN_8010a6e4` | `0x8010a000` | BSS region end (= patch entry point base) |
+| `DAT_8010a6e8`     | `0x8000e98d` | ROM `memset` (MIPS16e, odd = MIPS16e bit) |
+
+The call is: `(*0x8000e98d)(0x80109c00, 0, 0x400)` — ROM `memset` via function pointer.
+
+### Patch RAM Layout (confirmed)
+
+The end-pointer `0x8010a000` being the address of `FUN_8010a000` (patch entry) establishes the BSS boundary:
+
+```
+0x80100000 – 0x80109BFF   patch code section  (master installer, hooks, sub-installers)
+0x80109C00 – 0x80109FFF   BSS / zero-init data  ← zeroed by this function (0x400 bytes)
+0x8010A000 – 0x8010ADC3   patch code section 2 (entry point, late functions, dark firmware)
+```
+
+### Libre Firmware Implication
+
+**Needed but trivial.** The libre master installer must zero `0x80109c00..0x80109fff` before installing any hooks. The simplest implementation is an identical call:
+
+```asm
+la   a0, 0x80109c00
+li   a1, 0
+li   a2, 0x400
+la   t0, 0x8000e98c      ; ROM memset
+jalr t0
+nop
+```
+
+Alternatively, the libre patch binary can place zeros at file offsets `0x9c00–0x9fff` (BSS section), and the chip's ROM firmware-upload handler will copy those zeros verbatim — making the explicit `memset` call redundant (but still harmless to include).
 
 ---
 

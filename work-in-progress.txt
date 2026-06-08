@@ -169,8 +169,24 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           CONCLUSION: 100% ROM. Libre firmware needs ZERO implementation.
           → analysis/reverse_engineering_hardware_layer.md (Section 11 added)
 
-[NEXT]  Analyze early-init function FUN_8010a6c8
-          Called first thing by master installer; purpose unknown
+[DONE]  Analyze early-init function FUN_8010a6c8 (2026-06-08)
+          24-byte BSS-zeroing stub. Calls ROM memset(0x80109c00, 0, 0x400) via
+          literal-pool pointer 0x8000e98d (MIPS16e). Zeroes exactly 1 KB of
+          patch RAM before any hooks are installed.
+          Confirms patch RAM layout:
+            0x80100000-0x80109bff: code section 1 (master installer, hooks)
+            0x80109c00-0x80109fff: BSS / zero-init data  ← what this fn clears
+            0x8010a000-0x8010adc3: code section 2 (entry point, late fns)
+          Callers: master installer at 0x379c (28 bytes in) AND
+                   patch entry FUN_8010a000 at 0x8010a01c.
+          0x8010a000 used as the end-ptr confirms it IS the patch entry base.
+          LIBRE: trivial — zero file offsets 0x9c00-0x9fff OR call ROM memset.
+          → analysis/reverse_engineering_patch_installer.md (Appendix added)
+
+[NEXT]  Analyze patch entry point FUN_8010a000
+          Called by ROM at 0x8010A001 (MIPS16e odd addr); entry to entire patch.
+          Calls BSS init (FUN_8010a6c8) then presumably master installer.
+          Full boot sequence: ROM → entry → BSS init → master installer → hooks.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
