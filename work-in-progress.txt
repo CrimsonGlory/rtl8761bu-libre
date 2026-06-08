@@ -183,10 +183,26 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           LIBRE: trivial — zero file offsets 0x9c00-0x9fff OR call ROM memset.
           → analysis/reverse_engineering_patch_installer.md (Appendix added)
 
-[NEXT]  Analyze patch entry point FUN_8010a000
-          Called by ROM at 0x8010A001 (MIPS16e odd addr); entry to entire patch.
-          Calls BSS init (FUN_8010a6c8) then presumably master installer.
-          Full boot sequence: ROM → entry → BSS init → master installer → hooks.
+[DONE]  Analyze patch entry point FUN_8010a000 (2026-06-08)
+          578-byte MONOLITHIC installer — NOT a thin wrapper. Is the true entry.
+          ROM caller: calls_to_0x8010a001_as_fptr_to_install_patches @ 0x80010a18
+            (COMPUTED_CALL to 0x8010a001, MIPS16e odd addr).
+          Does: config copy → BSS init → 35+ hook installs → 6 sub-installers →
+            copies_config_bdaddr (ROM 0x8000fd38) → chip-rev version check →
+            conditional extra hw init → write 4 to "patch active" global.
+          FUN_80103780 is NOT called — they are parallel variants from different
+            GZF memory blocks (patch block vs data block).
+          Chip-rev check: table at PTR_DAT_8010a3a0[0..15] → bool flag; gates
+            additional hw init for specific silicon revisions.
+          Callees still unknown: FUN_8010a7b8, FUN_8010ad38, FUN_8010b04c,
+            FUN_8010e214, FUN_8010c278, ROM FUN_8003aea0.
+          → analysis/reverse_engineering_patch_installer.md (new section appended)
+
+[NEXT]  Analyze unknown entry callees: FUN_8010a7b8, FUN_8010ad38, FUN_8010b04c,
+          FUN_8010e214, FUN_8010c278 (all called from FUN_8010a000 entry point)
+          Also: ROM FUN_8003aea0 (what ROM service does it invoke?)
+          Goal: determine which are mandatory for basic BT operation vs. optional,
+          to finalize the minimum libre entry point implementation.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

@@ -418,3 +418,178 @@ Alternatively, the libre patch binary can place zeros at file offsets `0x9c00–
 - PC-relative `lw` instructions (`lw v0, 0x23c(pc)`) are the MIPS16e way to load from a local literal pool — each `PTR_*` label in the decompile is one such pool entry
 - The `_nop` after `jalr` is the MIPS branch-delay slot
 - The function does NOT return a value (`undefined` return type) and takes no arguments
+
+---
+
+## Patch Entry Point — `FUN_8010a000` (2026-06-08)
+
+**Runtime address**: `0x8010a000` (ROM calls it at `0x8010A001` — MIPS16e odd-address bit)  
+**Size**: 578 bytes  
+**Block**: data block (Kovah's runtime RAM snapshot), also present as patch block file offset `0xa000`
+
+### What it is
+
+`FUN_8010a000` is the **true patch entry point** — the first patch code the chip executes at
+boot. The previous assumption that it was a thin wrapper delegating to `FUN_80103780` was
+incorrect. It is itself a full 578-byte monolithic installer that:
+
+1. Copies a 32-bit config word into two 16-bit halves
+2. Calls BSS init `FUN_8010a6c8`
+3. Clears bit 0 of `config_base+0xd8` (pre-install safety step)
+4. Installs 35+ function-pointer hooks into `bos_base` and config structs
+5. Calls all 6 sub-installers
+6. Calls ROM `copies_config_bdaddr` (`0x8000fd38`) — reads BD_ADDR from config blob
+7. Performs a chip-revision version check (table lookup at `PTR_DAT_8010a3a0`)
+8. Conditionally calls additional hardware init based on revision
+9. Installs a final batch of hooks
+10. Writes `4` to a global flag (likely "patch active")
+
+### ROM Caller
+
+| Address | Function | Ref type |
+|---------|----------|----------|
+| `0x80010a18` | `calls_to_0x8010a001_as_fptr_to_install_patches` | COMPUTED_CALL |
+
+Kovah named this ROM function explicitly for what it does: extracts `0x8010A001` from a stored
+function pointer and makes a computed call into the patch. This is the bridge between ROM boot
+and the patch firmware.
+
+Other data references (not call sites): VSC FC20 download handler (`VSC_0xfc20__download_patch`
+at `0x8002ff12`/`0x8003031c`), ROM `references_patch_download_mem2/4`, and a RAM word at
+`0x80120050` — all hold `0x8010a000` as the patch load/entry address.
+
+### Complete Boot Sequence
+
+```
+ROM power-on init
+  └─ hardware / clock init
+  └─ patch download via HCI VSC 0xFC20
+       (VSC_0xfc20__download_patch__FUN_8002fee0 @ 0x8002fee0)
+  └─ patch activation:
+       calls_to_0x8010a001_as_fptr_to_install_patches @ 0x80010a18
+         └─ COMPUTED_CALL to 0x8010a001 (MIPS16e)
+              └─ FUN_8010a000 (patch entry, 578 bytes)
+                   ├─ config data copy (32-bit → two 16-bit halves)
+                   ├─ FUN_8010a6c8  — BSS zero init (0x80109c00..0x80109fff)
+                   ├─ clear bit 0 @ config_base+0xd8
+                   ├─ hook bos_base+0xd8 → 0x8010bba4 (LMP VSC)
+                   ├─ hook bos_base+0x20 → 0x8010c1e8
+                   ├─ hook bos_base+0x24 → 0x8010c224
+                   ├─ hook bos_base+0x1c → 0x8010bc74 (via puVar5+0x1c)
+                   ├─ hook bos_base+0x50 → 0x8010f884
+                   ├─ hook bos_base+0x30 → 0x8010c088 (connection handler)
+                   ├─ hook bos_base+0x14 → 0x8010b174
+                   ├─ ... (25+ additional hook installs via literal pool)
+                   ├─ FUN_8010af40   — sub-installer #1 (clears HW reg bit 6)
+                   ├─ FUN_8011011c   — sub-installer #2 (19 fn-ptrs 0x80120600-0x80121100)
+                   ├─ FUN_8010fc58   — sub-installer #3 (FUN_80110ca4 + 1 fn-ptr)
+                   ├─ FUN_8010f370   — sub-installer #4 (10 data-ptrs, 0x28 bytes)
+                   ├─ FUN_8010e81c   — sub-installer #5 (FUN_8010e82c fn-ptr)
+                   ├─ FUN_8010eac0   — sub-installer #6 (writes 0xffffffff, calls via ptr)
+                   ├─ copies_config_bdaddr (ROM 0x8000fd38) — load BD_ADDR
+                   ├─ FUN_8003aea0   — ROM function (purpose TBD)
+                   ├─ FUN_8010e214   — patch fn (purpose TBD)
+                   ├─ FUN_8010a7b8   — patch fn (purpose TBD)
+                   ├─ FUN_8010ad38   — patch fn (purpose TBD)
+                   ├─ FUN_8010b04c   — patch fn (purpose TBD)
+                   ├─ chip-rev check → conditional additional hw init
+                   ├─ FUN_8010c278   — patch fn (purpose TBD, "late init")
+                   └─ write 4 → global "patch active" flag
+  └─ ROM resumes normal operation with patch hooks in place
+```
+
+### Hook Installs in `FUN_8010a000`
+
+The decompile uses two main struct pointers:
+- `puVar2 = PTR_config_base_8010a24c` — the firmware config struct
+- `puVar3 = PTR_PTR_8010a258` — `bos_base` (BT operational state struct, ~`0x80121200`)
+- `puVar5 = PTR_PTR_8010a268` — secondary struct (also part of BT state)
+
+Selected installs (offsets into `puVar3` = `bos_base`):
+
+| Offset | Target | Function installed |
+|--------|--------|--------------------|
+| `+0xd8` | `bos_base+0xd8` | `0x8010bba4` (LMP VSC dispatch) |
+| `+0x20` | `bos_base+0x20` | `0x8010c1e8` |
+| `+0x24` | `bos_base+0x24` | `0x8010c224` |
+| `+0x30` | `bos_base+0x30` | `0x8010c088` (connection handler) |
+| `+0x50` | `bos_base+0x50` | `0x8010f884` |
+| `+0x1c` | `puVar5+0x1c`  | `0x8010bc74` |
+| `+0x14` | `puVar5+0x14`  | `0x8010b174` |
+
+Many more via generic `*(undefined **)PTR_PTR_8010aXXX = PTR_FUN_...` stores (see decompile).
+
+The operation `*(uint *)(puVar2 + 0xd8) & 0xfffffffe` clears the LSBit of the **config struct's**
+`+0xd8` word — separate from the `bos_base+0xd8` hook slot. Similarly, bit 14 of
+`puVar2+0xe0` is cleared (`& 0xffffbfff`).
+
+### Chip Revision Check
+
+```c
+uVar9 = (*DAT_8010a394)();          // read chip ID / revision register
+*PTR_DAT_8010a39c = (char)uVar9;    // save it
+bVar1 = *DAT_8010a398;              // read another byte (expected rev?)
+puVar2[1] = (char)(bVar1 & 0x1f);   // store 5-bit rev field
+cVar11 = false;
+if ((bVar1 & 0x1f) == uVar9) {
+    if (uVar9 < 0x10) {
+        cVar11 = PTR_DAT_8010a3a0[uVar9];   // table lookup [0..15]
+    }
+    cVar11 = (cVar11 == 1);
+}
+// ...
+if (cVar11 && iVar10 == 1) {
+    (*DAT_8010a3bc)();              // extra hw init for this revision
+}
+```
+
+The 16-entry byte table at `PTR_DAT_8010a3a0` maps chip revision IDs (0–15) to a boolean flag.
+This gates additional hardware initialization for specific silicon revisions.
+
+### Relationship to `FUN_80103780`
+
+`FUN_80103780` (`thing_that_calls_thing_that_installs_LMP_Patch`) is **not** called by
+`FUN_8010a000`. The callees list confirms zero overlap. They are parallel entries from the two
+memory block variants in the GZF:
+
+- **patch block** (`0x00000000+`): file offset `0x3780` = `FUN_80103780` — the master installer
+  in the vanilla `rtl8761bu_fw.bin` structure; also calls BSS init (at offset +0x1c). The patch
+  block entry at file offset `0xa000` has MIPS16e EXTEND decode errors in Ghidra and cannot be
+  directly decompiled.
+- **data block** (`0x80100000+`): Kovah's runtime RAM snapshot of a different firmware variant.
+  `FUN_8010a000` here is the fully self-contained monolithic entry point we analyzed.
+
+For the libre firmware, `FUN_8010a000` from the data block is the authoritative reference since
+it is what the chip actually runs (matching address `0x8010a000` = file offset `0xa000`).
+
+### Callees Summary
+
+| Address | Name | Source | Purpose |
+|---------|------|--------|---------|
+| `0x8010a6c8` | `FUN_8010a6c8` | patch | BSS zero init |
+| `0x8010af40` | `FUN_8010af40` | patch | sub-installer #1 |
+| `0x8011011c` | `FUN_8011011c` | patch | sub-installer #2 |
+| `0x8010fc58` | `FUN_8010fc58` | patch | sub-installer #3 |
+| `0x8010f370` | `FUN_8010f370` | patch | sub-installer #4 |
+| `0x8010e81c` | `FUN_8010e81c` | patch | sub-installer #5 |
+| `0x8010eac0` | `FUN_8010eac0` | patch | sub-installer #6 |
+| `0x8000fd38` | `copies_config_bdaddr` | ROM | read BD_ADDR from config blob |
+| `0x8003aea0` | `FUN_8003aea0` | ROM | unknown |
+| `0x8010e214` | `FUN_8010e214` | patch | unknown |
+| `0x8010a7b8` | `FUN_8010a7b8` | patch | unknown |
+| `0x8010ad38` | `FUN_8010ad38` | patch | unknown |
+| `0x8010b04c` | `FUN_8010b04c` | patch | unknown |
+| `0x8010c278` | `FUN_8010c278` | patch | unknown (late init) |
+
+### Libre Firmware Implication
+
+The libre patch entry at `0x8010a000` must:
+1. **BSS init** — call ROM `memset(0x80109c00, 0, 0x400)` (or pre-zero the binary)
+2. **Install LMP VSC hook** — `bos_base+0xd8 = 0x8010bba4` (or libre equivalent)
+3. **Install all other required hooks** — from the table above; many are mandatory for
+   basic BT operation; TBD which are optional
+4. **Call `copies_config_bdaddr`** (`0x8000fd38`) — mandatory for BD_ADDR loading
+5. **Call sub-installers** — all 6 confirmed necessary (from prior analysis)
+6. **Write global flag** — `*ptr = 4` (may be checked by ROM for readiness)
+7. **Unknown callees** (`FUN_8003aea0`, `FUN_8010e214`, `FUN_8010a7b8`, etc.) — must be
+   analyzed before determining if libre stubs or ROM calls suffice
