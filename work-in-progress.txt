@@ -155,11 +155,21 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           CONCLUSION: Libre firmware needs ZERO implementation. ROM manages all of it.
           → analysis/reverse_engineering_hardware_layer.md (Section 10 added)
 
-[NEXT]  Read eSCO packet-type tables
-          PTR_PTR_80044798 and PTR_DAT_8004479c
-          Used by ROM FUN_80044730 (eSCO packet type selector)
+[DONE]  Read eSCO packet-type tables (2026-06-08)
+          FUN_80044730 (ROM, 102 bytes): takes 16-bit packet-type code at param_1+4,
+            computes index = code - 0x10 (valid 0x10..0x1d, 14 entries).
+          Table A @ 0x8007abb0: validity — 0x00=OK, 0x12=unsupported.
+            Valid codes: 0x10, 0x12, 0x13, 0x15, 0x1d.
+          Table B @ 0x8007abc0: codec-type 3-bit selector stored into param_2+0x1d
+            bits[7:5]. Codec values: 0=µ-law/linear, 1=A-law, 2=CVSD, 3=transparent,
+            4=vendor/wideband.
+          Callers (0x80047ca6, 0x80047edc) are both ROM.
+          Confirmed: DAT_8007abd8 (slot interval table for FUN_80050810) lies
+            immediately after these tables in ROM at 0x8007abd8 = 06 06 01 02 03 12 01.
+          CONCLUSION: 100% ROM. Libre firmware needs ZERO implementation.
+          → analysis/reverse_engineering_hardware_layer.md (Section 11 added)
 
-[TODO]  Analyze early-init function FUN_8010a6c8
+[NEXT]  Analyze early-init function FUN_8010a6c8
           Called first thing by master installer; purpose unknown
 
 

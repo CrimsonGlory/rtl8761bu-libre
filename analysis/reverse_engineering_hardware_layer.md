@@ -579,3 +579,103 @@ All five functions are ROM code.  The libre firmware requires zero implementatio
 - Types 0–3 are handled automatically by ROM dispatch whenever the BT stack performs SCO/eSCO setup or renegotiation.
 - The only field the libre firmware must correctly set up before any SCO/eSCO connection is `conn_rec[0x0b]` (capability bitmask) so that `FUN_80050810`'s interval computation produces a valid `conn_rec[0x09]` for `FUN_8004f824`'s budget check.
   That field is populated by the type handlers themselves from the remote capability flags, so no manual initialisation is needed.
+
+---
+
+## 11 — eSCO Packet-Type Selector: `FUN_80044730` (2026-06-08)
+
+**Address:** `0x80044730` (ROM) | **Size:** 102 bytes
+**Callers:** `FUN_80047ca6`, `FUN_80047edc` (both ROM)
+
+### Decompiled C
+
+```c
+char FUN_80044730(int param_1, int param_2)
+{
+    uint  uVar3 = (uint)(ushort)(*(short *)(param_1 + 4) - 0x10);
+    char  cVar4, cVar2;
+
+    if (uVar3 < 0xe) {          // valid index 0..13 → input codes 0x10..0x1d
+        cVar4 = DAT_8007abb0[uVar3];   // Table A: 0x00=OK  0x12=unsupported
+        cVar2 = DAT_8007abc0[uVar3];   // Table B: codec-type selector (3 bits)
+    } else {
+        cVar4 = 0x12;           // out-of-range → error
+        cVar2 = -1;
+    }
+    if (param_2 != 0) {
+        if (cVar4 == 0) {
+            // pack codec type into bits[7:5] of param_2[0x1d]
+            *(byte *)(param_2 + 0x1d) =
+                (*(byte *)(param_2 + 0x1d) & 0x1f) | (cVar2 << 5);
+        } else {
+            possible_logging_function__var_args(2, 0xcb, ...);  // log error
+        }
+    }
+    return cVar4;   // 0 = success, 0x12 = unsupported
+}
+```
+
+### Parameters
+
+| Parameter | Type | Meaning |
+|-----------|------|---------|
+| `param_1` | `int *` | Pointer to packet-type descriptor; `+4` holds 16-bit packet type code |
+| `param_2` | `int *` | Output object; `+0x1d` bits[7:5] receive the 3-bit codec-type |
+
+### Lookup Tables at `0x8007abb0` / `0x8007abc0`
+
+Both tables have 14 entries (indices 0–13), indexed by `(input_code − 0x10)`.
+
+**Table A — validity** (`DAT_8007abb0`, `0x8007abb0`):
+
+| Index | Input code | Table A byte | Result |
+|-------|-----------|-------------|--------|
+| 0 | 0x10 | 0x00 | OK |
+| 1 | 0x11 | 0x12 | unsupported |
+| 2 | 0x12 | 0x00 | OK |
+| 3 | 0x13 | 0x00 | OK |
+| 4 | 0x14 | 0x12 | unsupported |
+| 5 | 0x15 | 0x00 | OK |
+| 6–12 | 0x16–0x1c | 0x12 | unsupported |
+| 13 | 0x1d | 0x00 | OK |
+
+**Table B — codec type** (`DAT_8007abc0`, `0x8007abc0`):
+
+| Index | Input code | Codec type (bits[7:5]) |
+|-------|-----------|----------------------|
+| 0 | 0x10 | 3 |
+| 2 | 0x12 | 2 |
+| 3 | 0x13 | 0 |
+| 5 | 0x15 | 4 |
+| 13 | 0x1d | 1 |
+
+The 3-bit codec-type values (0–4) align with BT air-coding formats:
+
+| Value | Likely format |
+|-------|--------------|
+| 0 | µ-law / linear PCM |
+| 1 | A-law |
+| 2 | CVSD |
+| 3 | Transparent data |
+| 4 | Vendor-specific / wideband |
+
+### ROM data layout at `0x8007ab__`
+
+```
+0x8007abb0: 00 12 00 00 12 00 12 12 12 12 12 12 12 00  ← Table A (14 bytes)
+            00 00                                       ← 2 padding bytes
+0x8007abc0: 03 ff 02 00 ff 04 ff ff ff ff ff ff ff 01  ← Table B (14 bytes)
+            00 00                                       ← 2 padding bytes
+0x8007abd0: ff ff ff ff                                 ← padding / guard
+0x8007abd8: 06 06 01 02 03 12 01 00                    ← DAT_8007abd8 (slot interval
+                                                           contributions for FUN_80050810)
+```
+
+This confirms that the slot-interval table used by `FUN_80050810` (`DAT_8007abd8`) is
+immediately adjacent in ROM memory to the packet-type lookup tables.
+
+### Libre firmware implication
+
+`FUN_80044730` and both tables are 100% ROM.  The callers at `0x80047ca6` and
+`0x80047edc` are also ROM functions dispatched by the BT stack's SCO/eSCO setup path.
+The libre firmware requires **zero implementation** for this subsystem.
