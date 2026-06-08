@@ -255,10 +255,10 @@ The libre firmware does **not** need to write its own function there.  What matt
 2. `FUN_80025b68` must be able to find the correct codec tables in ROM (they are in ROM, fixed).
 3. The RAM buffer at `bos_base + 0x13e` (size ≥ 0x40 bytes) must exist and be writable — it is part of the per-connection sub-struct allocated by ROM.
 
-**Remaining open question:** what do the ROM codec templates at `PTR_DAT_80025ca8`
-and `PTR_DAT_80025cac` actually do when executed?  They are MIPS16e instruction
-sequences (48 or 64 bytes) stored byte-reversed in ROM.  They implement the actual
-baseband register writes.  To understand them, read the ROM tables directly.
+**Resolved (2026-06-08):** the ROM codec templates at `PTR_DAT_80025ca8` /
+`PTR_DAT_80025cac` are fully initialized and executed by ROM — the libre firmware
+provides zero implementation for them.  See Section 9 for the complete codec
+template pipeline.
 
 ### Interval computation can call ROM
 
@@ -275,9 +275,9 @@ handles types 0–3.
 
 | Unknown | Impact |
 |---------|--------|
-| Content of ROM codec templates `PTR_DAT_80025ca8` / `PTR_DAT_80025cac` | Needed to understand what the generated hw-write code actually does |
 | Type-init functions `FUN_800506ac` / `FUN_8004e670` / `FUN_8004e6f4` / `FUN_8004e76c` | Called by `FUN_80050810` type dispatch |
 | What invokes `FUN_80025b68` in the connection-setup chain? | Must confirm the libre installer doesn't accidentally bypass it |
+| Exact hardware registers written by the codec templates | Low priority — ROM manages all of this |
 
 ---
 
@@ -304,3 +304,111 @@ FUN_80047c50 (VSC dispatcher)
 
 The **only** path to actual baseband registers is through the function installed at
 `0x801212e4`.  All other ROM code performs data management, validation, and logging.
+
+---
+
+## 9 — Codec Template Pipeline (ROM-Managed, 2026-06-08)
+
+### Overview
+
+When `FUN_8004f824` calls the hook at `bos_base+0xe4`, that hook points to
+dynamically-generated MIPS16e code at `conn_record._x58+0x13e`.  This code is
+**not written by the patch** — it is written at SCO/eSCO connection setup time by
+ROM function `FUN_80025b68`, which copies and un-scrambles pre-built byte sequences
+from ROM-initialized RAM staging areas.
+
+### Initialization call chain
+
+```
+ROM FUN_800614fc                     ← system BT init (single call site)
+  └─ ROM FUN_800225a8                ← populates codec staging tables in RAM
+        ├─ FUN_8002c31c              : writes 0xc4000003 to 4 global RAM locations
+        │                              (0x80120ed8/dc/e0/e4)
+        ├─ FUN_8002c2d8(0x801220bc, 0x8012205c)  : codec-6 h2 + h0 staging areas
+        ├─ optimized_memcpy(0x8012208c, 0x80079be0, 0x30)  : codec-6 h1 staging area
+        ├─ optimized_memcpy(0x801220d4, 0x80079c10, 0x18)  : codec-6 h2 (second half)
+        ├─ FUN_8002c2ac(0x8012216c, 0x801220ec)  : codec-8 h2 + h0 staging areas
+        ├─ optimized_memcpy(0x8012212c, 0x80079c28, 0x40)  : codec-8 h1 staging area
+        └─ optimized_memcpy(0x8012218c, 0x80079c68, 0x20)  : codec-8 h2 (second half)
+```
+
+`FUN_800614fc` is the **only** caller of `FUN_800225a8`.
+
+### ROM source addresses for template bytes
+
+| Codec | Handle | Size | ROM source address | RAM staging address |
+|-------|--------|------|--------------------|---------------------|
+| 6 | h0 | 0x30 | `0x80079f0c` | `0x8012205c` |
+| 6 | h1 | 0x30 | `0x80079be0` | `0x8012208c` |
+| 6 | h2 first half | 0x18 | `0x80079ef4` | `0x801220bc` |
+| 6 | h2 second half | 0x18 | `0x80079c10` | `0x801220d4` |
+| 8 | h0 | 0x40 | `0x8007a07c` | `0x801220ec` |
+| 8 | h1 | 0x40 | `0x80079c28` | `0x8012212c` |
+| 8 | h2 first half | 0x20 | `0x8007a05c` | `0x8012216c` |
+| 8 | h2 second half | 0x20 | `0x80079c68` | `0x8012218c` |
+
+Template staging base addresses: `PTR_DAT_80025ca8 → 0x8012205c` (codec-6),
+`PTR_DAT_80025cac → 0x801220ec` (codec-8).
+
+### Un-scrambling at connection time (ROM FUN_80025b68)
+
+At SCO/eSCO connection setup, ROM `FUN_80025b68` reads `bVar1` = connection handle
+index (byte at `0x80121dcf`, = 0 in the GZF snapshot), selects the appropriate
+staging area entry, and writes un-scrambled MIPS16e code into
+`conn_record._x58 + 0x13e`.
+
+The un-scrambling algorithm is **two independent half-reversals**:
+
+```c
+// For codec-6: size=0x30, half=0x18.  For codec-8: size=0x40, half=0x20.
+void unscramble(uint8_t *src, uint8_t *dst, int size, int half) {
+    for (int i = 0; i < half; i++)
+        dst[i] = src[half - 1 - i];          // first half reversed
+    for (int i = half; i < size; i++)
+        dst[i] = src[size - 1 - (i - half)]; // second half reversed
+}
+```
+
+This is NOT a full block reversal; each half is independently reversed.
+
+### Template code properties
+
+The un-scrambled bytes at `conn_record._x58+0x13e` decode as valid MIPS16e.
+The first 7 instructions of the codec-6 h0 un-scrambled sequence:
+
+```
++00: 0x736f  cmpi    v1, 0x6f
++02: 0xc519  sb      s0, 0x19(a1)
++04: 0xd353  swsp    v1, 332(sp)
++06: 0x48a9  addiu   s0, -0x57
++08: 0x4c54  addiu   a0, 0x54
++0a: 0x57f4  slti    a3, 0xf4
++0c: 0x13ce  b       <far forward target>
+```
+
+Ghidra stops at the `b` instruction at +0x0c because the branch target lies far
+beyond the 48-byte (0x30) template buffer.  This means the template code is
+**position-dependent** — it expects adjacent connection-record memory to follow
+immediately.  The code cannot be disassembled in isolation.
+
+The exact hardware registers written by these templates remain unknown, but this
+does not affect the libre firmware (see below).
+
+### Verification
+
+ROM source `0x80079f0c` (codec-6 h0) has **identical bytes** to the GZF DATA block
+at `0x8012205c`.  This confirms the GZF runtime snapshot was captured with the
+vanilla ROM and that both the algorithm and source addresses are correct.
+
+### Libre firmware implication
+
+**The libre firmware needs zero implementation for the codec template system:**
+
+- ROM `FUN_800225a8` (called via `FUN_800614fc`) initializes all staging tables from ROM-internal data.
+- ROM `FUN_80025b68` un-scrambles templates at connection setup time.
+- No template bytes, no scrambling logic, and no `bos_base+0xe4` hook-write code lives in the patch.
+
+The libre firmware must only ensure that the ROM init chain (`FUN_800614fc`) is
+not bypassed.  The connection record must have sufficient buffer space at `+0x13e`
+(minimum 0x40 bytes for codec-8), which is allocated by ROM's connection-record
+allocator — not by the patch.

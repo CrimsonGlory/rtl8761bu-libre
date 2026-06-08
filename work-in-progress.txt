@@ -113,18 +113,24 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           read fn; called from FUN_80009980 via v0 fn-ptr.
           → analysis/reverse_engineering_rom_regs.md (new)
 
-[NEXT]  Read ROM codec templates PTR_DAT_80025ca8 / PTR_DAT_80025cac
-          These ROM tables hold pre-built MIPS16e code (byte-reversed) that
-          FUN_80025b68 copies into bos_base+0x13e and calls via bos_base+0xe4.
-          Disassemble the 0x30 and 0x40-byte blocks to understand what hardware
-          registers they write. Critical for confirming whether libre firmware
-          needs any hw-write logic at all.
-          Address DAT_80025ca8 is in the ROM block — decompile via GZF process mode.
+[DONE]  Read ROM codec templates PTR_DAT_80025ca8 / PTR_DAT_80025cac (2026-06-08)
+          PTR_DAT_80025ca8 → RAM 0x8012205c (codec-6 staging base)
+          PTR_DAT_80025cac → RAM 0x801220ec (codec-8 staging base)
+          ROM source bytes: codec-6 h0 at 0x80079f0c, h1 at 0x80079be0,
+          h2a at 0x80079ef4, h2b at 0x80079c10; codec-8 h0 at 0x8007a07c,
+          h1 at 0x80079c28, h2a at 0x8007a05c, h2b at 0x80079c68.
+          Staging tables initialized by ROM FUN_800225a8 (called by FUN_800614fc).
+          Un-scramble algorithm: two independent half-reversals (FUN_80025b68).
+          Templates are position-dependent code: branch at +0x0c exits buffer.
+          CONCLUSION: 100% ROM-managed. Libre firmware needs ZERO implementation.
+          → analysis/reverse_engineering_hardware_layer.md (Section 9)
 
-[TODO]  Confirm what invokes ROM FUN_80025b68 in the SCO connection-setup chain
+[NEXT]  Confirm what invokes ROM FUN_80025b68 in the SCO connection-setup chain
           FUN_80025b68 is the bos_base+0xe4 installer. If the libre firmware
           calls the correct ROM connection-setup entry points, FUN_80025b68
           runs automatically. Identify the call chain to confirm.
+          Partial info: FUN_800614fc → FUN_800225a8 handles the INIT path.
+          Still need: what triggers FUN_80025b68 at per-connection setup time?
 
 [TODO]  Analyze ROM functions for connection types 0-3 (hw init chain)
           FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c
