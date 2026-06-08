@@ -125,14 +125,22 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           CONCLUSION: 100% ROM-managed. Libre firmware needs ZERO implementation.
           → analysis/reverse_engineering_hardware_layer.md (Section 9)
 
-[NEXT]  Confirm what invokes ROM FUN_80025b68 in the SCO connection-setup chain
-          FUN_80025b68 is the bos_base+0xe4 installer. If the libre firmware
-          calls the correct ROM connection-setup entry points, FUN_80025b68
-          runs automatically. Identify the call chain to confirm.
-          Partial info: FUN_800614fc → FUN_800225a8 handles the INIT path.
-          Still need: what triggers FUN_80025b68 at per-connection setup time?
+[DONE]  Confirm what invokes ROM FUN_80025b68 (2026-06-08)
+          CORRECTION: FUN_80025b68 is triggered during SSP (Secure Simple Pairing)
+          IO capability exchange — NOT SCO/eSCO audio setup as previously thought.
+          Three ROM callers identified:
+            ROM LMP_encryption_opcode_handlers @ 0x80028264
+              → FUN_80029364 @ 0x80029364  [state==0x15 → FUN_80025b68]
+              → FUN_800293f0 @ 0x800293f0  [state==0x1d → FUN_80025b68]
+            ROM HCI_Write_Simple_Pairing_Debug_Mode @ 0x800233e8
+              → FUN_80023d14 @ 0x80023d14  → FUN_80025b68
+          Second arg to FUN_80025b68 is role_bit (0=slave/1=master), not conn idx.
+          Role bit selects which template variant is un-scrambled.
+          All callers are ROM functions dispatched by ROM LMP/HCI state machine.
+          CONCLUSION: Libre firmware needs ZERO additional wiring. Runs automatically.
+          → analysis/reverse_engineering_hardware_layer.md (Section 9 updated)
 
-[TODO]  Analyze ROM functions for connection types 0-3 (hw init chain)
+[NEXT]  Analyze ROM functions for connection types 0-3 (hw init chain)
           FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c
           These are called by FUN_80050810 (type-dispatch hook at bos_base+0xe0)
 

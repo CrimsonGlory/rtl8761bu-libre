@@ -313,9 +313,9 @@ The **only** path to actual baseband registers is through the function installed
 
 When `FUN_8004f824` calls the hook at `bos_base+0xe4`, that hook points to
 dynamically-generated MIPS16e code at `conn_record._x58+0x13e`.  This code is
-**not written by the patch** — it is written at SCO/eSCO connection setup time by
-ROM function `FUN_80025b68`, which copies and un-scrambles pre-built byte sequences
-from ROM-initialized RAM staging areas.
+**not written by the patch** — it is written during **Bluetooth SSP (Secure Simple
+Pairing) IO capability exchange** by ROM function `FUN_80025b68`, which copies and
+un-scrambles pre-built byte sequences from ROM-initialized RAM staging areas.
 
 ### Initialization call chain
 
@@ -350,12 +350,35 @@ ROM FUN_800614fc                     ← system BT init (single call site)
 Template staging base addresses: `PTR_DAT_80025ca8 → 0x8012205c` (codec-6),
 `PTR_DAT_80025cac → 0x801220ec` (codec-8).
 
-### Un-scrambling at connection time (ROM FUN_80025b68)
+### Per-pairing call chain for FUN_80025b68 (traced 2026-06-08)
 
-At SCO/eSCO connection setup, ROM `FUN_80025b68` reads `bVar1` = connection handle
-index (byte at `0x80121dcf`, = 0 in the GZF snapshot), selects the appropriate
-staging area entry, and writes un-scrambled MIPS16e code into
-`conn_record._x58 + 0x13e`.
+```
+ROM LMP_encryption_opcode_handlers @ 0x80028264   ← dispatched by ROM LMP state machine
+    ├─ ROM FUN_80029364 @ 0x80029364  [state==0x15]
+    │      send_evt_HCI_IO_Capability_Response(conn_handle, ...)
+    │      └─ FUN_80025b68(conn_handle, role_bit)
+    └─ ROM FUN_800293f0 @ 0x800293f0  [state==0x1d]
+           send_evt_HCI_IO_Capability_Response(conn_handle, ...)
+           └─ FUN_80025b68(conn_handle, role_bit)
+
+ROM HCI_Write_Simple_Pairing_Debug_Mode @ 0x800233e8   ← HCI command handler
+    └─ ROM FUN_80023d14 @ 0x80023d14  [state==0x1e or fallthrough]
+           └─ FUN_80025b68(conn_handle, uVar5)
+```
+
+`role_bit = *(byte *)(lmp_pdu + 4) & 1` — 0 = slave, 1 = master.  This selects
+which staging area variant to un-scramble into the per-connection buffer.
+
+All callers are ROM functions; `LMP_encryption_opcode_handlers` is dispatched by
+the ROM's LMP PDU state machine.  The libre firmware does not call `FUN_80025b68`
+and does not need to install any trigger for it.
+
+### Un-scrambling at pairing time (ROM FUN_80025b68)
+
+ROM `FUN_80025b68(conn_handle, role_bit)` is called after IO capability exchange
+completes.  It selects the appropriate staging area entry based on `role_bit`,
+un-scrambles the pre-built template bytes into `conn_record._x58 + 0x13e`, and
+sets `bos_base+0xe4` to point to that code.
 
 The un-scrambling algorithm is **two independent half-reversals**:
 
