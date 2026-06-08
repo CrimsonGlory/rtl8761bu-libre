@@ -275,8 +275,8 @@ handles types 0–3.
 
 | Unknown | Impact |
 |---------|--------|
-| Type-init functions `FUN_800506ac` / `FUN_8004e670` / `FUN_8004e6f4` / `FUN_8004e76c` | Called by `FUN_80050810` type dispatch |
-| What invokes `FUN_80025b68` in the connection-setup chain? | Must confirm the libre installer doesn't accidentally bypass it |
+| ~~Type-init functions `FUN_800506ac` / `FUN_8004e670` / `FUN_8004e6f4` / `FUN_8004e76c`~~ | **Resolved 2026-06-08 — see Section 10** |
+| ~~What invokes `FUN_80025b68` in the connection-setup chain?~~ | **Resolved 2026-06-08 — see Section 9** |
 | Exact hardware registers written by the codec templates | Low priority — ROM manages all of this |
 
 ---
@@ -435,3 +435,147 @@ The libre firmware must only ensure that the ROM init chain (`FUN_800614fc`) is
 not bypassed.  The connection record must have sufficient buffer space at `+0x13e`
 (minimum 0x40 bytes for codec-8), which is allocated by ROM's connection-record
 allocator — not by the patch.
+
+---
+
+## 10 — Connection-Type Dispatch: `FUN_80050810` and Type Handlers (2026-06-08)
+
+All five functions in this section are **pure ROM** (addresses `0x8004e670`–`0x80050810`).
+The libre firmware needs zero implementation for them.
+
+### Connection-setup parameter struct layout
+
+`FUN_80050810` and its four sub-handlers operate on a "connection parameter object"
+(`hw_obj_t *`) passed as `param_1`.  Fields used across the five functions:
+
+| Offset | Type | Description |
+|--------|------|-------------|
+| `+0x08` | `byte` | conn_type: bits[2:0] = connection type (0–3); bits[4:3] = mode subtype |
+| `+0x09` | `byte` | computed slot interval (written by `FUN_80050810` after dispatch) |
+| `+0x0b` | `byte` | capability bitmask: bits 0–6 map to SCO/eSCO packet-type flags |
+| `+0x11` | `byte` | PDU slot count (clamped by `FUN_8004f824`) |
+| `+0x1c` | `int*` | pointer to parent / existing connection record |
+| `+0x1d` | `byte` | packed codec field (bits[7:2] copied to parent record) |
+| `+0x20` | `ushort` | remote capability flags (0 = no remote caps; non-0 = peer-declared support) |
+| `+0x2b` | `byte` | connection sub-slot counter |
+| `+0x50` | `int*` | pointer to existing SCO/eSCO link slot (NULL → allocate new) |
+
+### `FUN_80050810` — connection-type dispatcher (218 bytes)
+
+```c
+undefined1 FUN_80050810(hw_obj_t *obj)
+{
+    // Optional patch override at 0x801212e0 (hook RAM var from Section 3)
+    code *override = *(code **)0x801212e0;
+    if (override != NULL) {
+        uint8_t tmp[8];
+        if (override(obj, tmp) != 0)
+            return tmp[0];   // hook handled it; use its result
+    }
+
+    // Dispatch on bits[2:0] of obj[0x08]
+    uint8_t conn_type = obj[0x08] & 7;
+    switch (conn_type) {
+        case 0: if (FUN_800506ac(obj) != 0) return 5; break;  // new init
+        case 1: FUN_8004e670(obj); break;                      // accept/copy
+        case 2: FUN_8004e6f4(obj); break;                      // renegotiate
+        case 3: FUN_8004e76c(obj); break;                      // restore
+        default: log_error(..., conn_type); /* type ≥ 4 unsupported */
+    }
+
+    // Post-dispatch: accumulate slot interval from capability bitmask
+    uint8_t interval = 1;
+    for (int bit = 0; bit < 7; bit++)
+        if ((obj[0x0b] >> bit) & 1)
+            interval += DAT_8007abd8[bit];  // interval table, Section 4
+    obj[0x09] = interval;
+
+    // Log: conn_type, mode bits[4:3], capability bitmask, interval
+    log(4, 0xd2, ..., obj[0x08]&7, (obj[0x08]>>3)&3, obj[0x0b], interval);
+    return 0;
+}
+```
+
+**10 ROM callers** including `FUN_80050994`, `FUN_80047304`, `FUN_80047628`,
+`FUN_800509b0`, `FUN_80050610`, `FUN_800508f8`, `FUN_800509ec`, `FUN_80050a90`.
+
+### Type 0 — new SCO/eSCO initiation (`FUN_800506ac`, 354 bytes)
+
+Validates and initialises a brand-new outgoing/incoming SCO or eSCO link.
+
+```
+param_1+0x20 capability bitmask (remote-declared):
+  bit 0 — EV3/HV SCO type A
+  bit 1 — EV3/HV SCO type B
+  bit 2 — EDR / enhanced-rate capability
+  bit 4 — voice-channel indicator
+  bit 5 — "no SCO basic" override
+```
+
+Behaviour:
+1. Returns 5 if neither voice nor SCO is supported (bits 0x10 clear and bits 0x03 == 3).
+2. Clears `+0xb` and bits[4:3] of `+0x08`.
+3. Sets `+0xb` bit 1 if EDR capable (cap bit 2).
+4. Sets `+0xb` bits[3:4] (SCO enabled + extended) based on cap bits 0/1.
+5. If `+0x50 == NULL`: allocates new link slot via `FUN_80050610`;
+   if `+0x50` non-NULL: reuses existing slot (copies codec field from `+0x1d`).
+6. If SCO capable (bVar1): allocates secondary slot via `FUN_800508f8`.
+7. If cap bit 5 set: clears `+0xb` bit 0 (disables basic SCO).
+8. Returns 0 on success, 5 on allocation failure.
+
+### Type 1 — accept / mirror from parent (`FUN_8004e670`, 130 bytes)
+
+Used when the local side is responding to a remote SCO/eSCO request.
+Mirrors parent connection record at `*(param_1+0x1c)`:
+
+- Always sets `+0xb` bit 0 (basic SCO) and bit 3 (eSCO enabled).
+- If parent cap bit 2: also sets `+0xb` bit 1 (EDR).
+- If `+0x20 == 0`: bit 4 cleared; else bit 4 set (extended eSCO).
+- If parent `+0x20` bit 6 set: sets `+0xb` bit 6.
+- If parent `+0x20` bit 5 set: clears `+0xb` bit 0 (no basic SCO).
+- Copies bits[4:3] of parent `+0x08` into own `+0x08` bits[4:3].
+
+### Type 2 — renegotiation (`FUN_8004e6f4`, 118 bytes)
+
+Used when attempting to change parameters on an existing eSCO connection.
+
+Special case: if parent `+0x08` bits[4:3] == `0b01` (SCO-only mode):
+  → Forces `+0xb = 3` (bits 0+1 only), clears bits[4:3] of `+0x08`.
+
+Normal case (eSCO renegotiation):
+- Copies base caps from parent, clearing bits 1 and 3, keeping bit 0.
+- `+0x20 == 0`: bit 4 cleared; else: bit 4 set.
+- Always clears bit 5 (no retransmission for renegotiation).
+- Propagates parent `+0x20` bits 6 and 5 as above.
+- Always clears bits[4:3] of `+0x08`.
+
+### Type 3 — restore / reject-to-base (`FUN_8004e76c`, 72 bytes)
+
+Simplest handler; resets to minimum eSCO-only capability:
+
+- Forces `+0xb` bit 3 (eSCO only); copies other bits from parent with bits[2:0] cleared.
+- If `+0x20 == 0`: keeps bit 3 only; else: also sets bit 4 (extended).
+- Propagates parent `+0x20` bit 6 to `+0xb` bit 6.
+- Clears bits[4:3] of `+0x08`.
+
+### Capability bitmask (`+0x0b`) summary
+
+| Bit | Interval contribution | Estimated BT packet type |
+|-----|-----------------------|--------------------------|
+| 0 | +6 → T=7 | HV3 / EV3 |
+| 1 | +6 → T=7 | EV3 alternate |
+| 2 | +1 → T=2 | HV1 |
+| 3 | +2 → T=3 | HV2 |
+| 4 | +3 → T=4 | 2-EV3 / EV4 |
+| 5 | +18 → T=19 | 3-EV5 / 2-EV5 (EDR high-BW) |
+| 6 | +1 → T=2 | reserved / secondary HV1 |
+
+### Libre firmware implication
+
+All five functions are ROM code.  The libre firmware requires zero implementation:
+
+- The ROM initializes `bos_base+0xe0` to point to `FUN_80050810` (ROM).
+- The override slot at `0x801212e0` defaults to NULL; the libre firmware can leave it NULL.
+- Types 0–3 are handled automatically by ROM dispatch whenever the BT stack performs SCO/eSCO setup or renegotiation.
+- The only field the libre firmware must correctly set up before any SCO/eSCO connection is `conn_rec[0x0b]` (capability bitmask) so that `FUN_80050810`'s interval computation produces a valid `conn_rec[0x09]` for `FUN_8004f824`'s budget check.
+  That field is populated by the type handlers themselves from the remote capability flags, so no manual initialisation is needed.

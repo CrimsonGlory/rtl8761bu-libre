@@ -140,11 +140,22 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           CONCLUSION: Libre firmware needs ZERO additional wiring. Runs automatically.
           → analysis/reverse_engineering_hardware_layer.md (Section 9 updated)
 
-[NEXT]  Analyze ROM functions for connection types 0-3 (hw init chain)
-          FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c
-          These are called by FUN_80050810 (type-dispatch hook at bos_base+0xe0)
+[DONE]  Analyze ROM functions for connection types 0-3 (hw init chain) (2026-06-08)
+          All five functions (FUN_80050810 + four handlers) are pure ROM.
+          FUN_80050810: dispatches on param+0x08 bits[2:0] = connection type (0-3),
+            then computes slot interval from 7-bit capability bitmask (param+0x0b)
+            using DAT_8007abd8, stores in param+0x09.
+          Type 0 (FUN_800506ac): new SCO/eSCO initiation; validates caps, allocates
+            link slots via FUN_80050610 + FUN_800508f8; returns 5 on failure.
+          Type 1 (FUN_8004e670): accept/mirror — copies cap flags from parent record.
+          Type 2 (FUN_8004e6f4): renegotiation — adjusts caps from parent; SCO-only
+            special case forces +0xb = 3.
+          Type 3 (FUN_8004e76c): restore/reject — forces eSCO-only (bit 3 only).
+          Override slot 0x801212e0 (checked first by FUN_80050810): can be NULL.
+          CONCLUSION: Libre firmware needs ZERO implementation. ROM manages all of it.
+          → analysis/reverse_engineering_hardware_layer.md (Section 10 added)
 
-[TODO]  Read eSCO packet-type tables
+[NEXT]  Read eSCO packet-type tables
           PTR_PTR_80044798 and PTR_DAT_8004479c
           Used by ROM FUN_80044730 (eSCO packet type selector)
 
