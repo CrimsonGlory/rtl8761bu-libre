@@ -645,8 +645,37 @@ PHASE 6 — IMPLEMENT
 
 PHASE 7 — TEST
 ---------------
-[NEXT]  Flash libre patch to UB500 dongle via btrtl driver
-[TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
+[DONE]  Diagnose FC20 timeout on TP-Link UB500 (0x2357:0x0604) (2026-06-09)
+          User report: `command 0xfc20 tx timeout` / `download fw command failed (-110)`
+          after driver loaded libre fw (cfg_sz 6, total sz 27814). Root cause:
+          patch_entry was linked at PRAM+0 (runtime 0x8010A000) but ROM loads the
+          EPatch body at 0x80103780 and calls 0x8010A001 (+0x6880). Our code landed
+          at 0x80103780 → ROM jumped to wrong address → hang → HCI timeout.
+          FIX (rebuilt 2026-06-09):
+            rtl8761bu.ld: load base 0x80103780; helpers in .text/.text.hooks;
+              thin patch_entry stub in .text.entry @ +0x6880 (28 B budget).
+            init.S: patch_entry_body holds installer; entry calls it.
+            pad.py: NOP-fill pre-entry gap to exactly 0x6880 bytes.
+            pack.py: 8-byte Realtech header per struct rtl_epatch_header
+              (14 B); fw_version 0x09a98a6b. 9-byte Realtechk was wrong —
+              shifted num_patches → "didn't find patch for chip id 1".
+          Build: 4748 B code / 27808 B PRAM (3.7% free), verify OK.
+          entry@+6880 = ff630162 (MIPS16e prologue). User should retest.
+[BLOCKED]  Flash libre patch to UB500 dongle via btrtl driver (2026-06-09)
+          No UB500 dongle in dev container; user has TP-Link UB500 on NeoPC host.
+          Install rebuilt blobs:
+            sudo cp rtl8761bu-libre/rtl8761bu_fw.bin /lib/firmware/rtl_bt/
+            sudo cp rtl8761bu-libre/rtl8761bu_config.bin /lib/firmware/rtl_bt/
+          Unplug/replug or `rmmod btusb && modprobe btusb`.
+          Success dmesg: fw version 0x09a98a6b, NO fc20 timeout.
+[DONE]  Fix FC20 timeout round 2 (2026-06-09)
+          After header fix, still fc20 timeout. Changes:
+            pack.py: dual-patch layout (42,088 B, matches non-free); 8-byte Realtech.
+            make minimal: P0 entry (patch-active flag only) for smoke test.
+            init.S: zero 0x80120f0c/0x80120c80 before sub-inst #3/#6 indirect calls
+              (garbage DRAM → jalr hang).
+          User: try `make minimal` first; if OK try full `make all` (dual-patch).
+[NEXT]  Verify basic HCI bring-up (hciconfig, hcitool scan) — user retest
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
 [TODO]  Run compliance checks against linux-libre blob policy

@@ -1,0 +1,3 @@
+# Staged flash blobs — promoted by agent before each hardware handoff
+rtl8761bu_fw.bin
+rtl8761bu_config.bin

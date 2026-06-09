@@ -1,109 +1,181 @@
 # Makefile — rtl8761bu-libre
 #
 # Builds a source-only replacement for rtl8761bu_fw.bin.
-# No binary blobs used or required.
 #
 # Usage:
-#   make              — build rtl8761bu_fw.bin + rtl8761bu_config.bin
-#   make verify       — print EPatch header fields for sanity check
-#   make size         — show PRAM usage
-#   make clean        — remove build artefacts
+#   make docker             — clean + full build + verify (use inside Docker)
+#   make minimal            — P0 smoke test (entry @ patch body offset 0)
+#   make verify             — sanity-check header + entry fingerprint
+#
+# FC20 downloads the patch body to 0x8010A000; ROM calls 0x8010A001 (body+0).
 
-# ── Toolchain ──────────────────────────────────────────────────────────
-# Debian/Ubuntu: apt-get install gcc-mipsel-linux-gnu binutils-mipsel-linux-gnu
 CC      := mipsel-linux-gnu-gcc
 OBJCOPY := mipsel-linux-gnu-objcopy
+READELF := mipsel-linux-gnu-readelf
 SIZE    := mipsel-linux-gnu-size
 PYTHON  := python3
 
-# ── Source files ───────────────────────────────────────────────────────
-# All C files in src/ are compiled. Add new hook implementations there.
-SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S,$(wildcard src/*.S))
+# MINIMAL=1 → P0 smoke test; MINIMAL=null → jr $ra only; see src/init_*.S
+ifeq ($(MINIMAL),null)
+SRCS := src/init_null.S
+else ifdef MINIMAL
+SRCS := src/init_minimal.S
+else ifdef PHASE
+SRCS := src/init_phase_$(PHASE).S $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S $(wildcard src/init_phase_*.S),$(wildcard src/*.S))
+else
+SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init_minimal.S src/init_null.S src/init_phase_%.S,$(wildcard src/*.S))
+endif
 
-# ── Compiler flags ─────────────────────────────────────────────────────
-#   -mips32r2      : base ISA (MIPS16e is an extension of MIPS32r2)
-#   (no -mips16)  : Binutils 2.40 BFD bug fires on MIPS16e + -nostdlib;
-#                    compile as plain MIPS32r2 instead
-#   -EL            : little-endian (explicit; mipsel- prefix implies it)
-#   -msoft-float   : no FPU on this chip
-#   -G 0           : do not use $gp for small-data; no GP is set up
-#   -nostdlib      : do not link any standard library
-#   -nostartfiles  : do not inject crt0/crti/crtn from the Linux target
-#   -ffreestanding : bare-metal; do not assume a hosted environment
-#   -fno-pic       : no position-independent code (PRAM is at fixed address)
-#   -fno-builtin   : do not replace calls with compiler built-ins
-#   -Os            : optimise for size (PRAM budget is 27808 bytes)
-CFLAGS  := -mips32r2 -EL -msoft-float -G 0 \
+# LAYOUT=gap — legacy experiment (entry @ +0x6880); wrong for FC20 → 0x8010A000
+ifeq ($(LAYOUT),gap)
+LDSCRIPT      := rtl8761bu-gap.ld
+ENTRY_OFFSET  := 0x6880
+BUILD_PROFILE := $(if $(filter $(MINIMAL),null),null-gap,$(if $(MINIMAL),minimal-gap,full-gap))
+else
+LDSCRIPT      := rtl8761bu.ld
+ENTRY_OFFSET  := 0
+BUILD_PROFILE := $(if $(PHASE),phase-$(PHASE),$(if $(filter $(MINIMAL),null),null,$(if $(MINIMAL),minimal,full)))
+endif
+
+CFLAGS  := -mips32r2 -EL -msoft-float -G 0 -mno-abicalls \
            -nostdlib -nostartfiles -ffreestanding \
            -fno-pic -fno-builtin \
            -Os -Wall -Wextra \
            -Isrc
 
-LDFLAGS := -T rtl8761bu.ld -nostdlib -nostartfiles
+LDFLAGS := -T $(LDSCRIPT) -nostdlib -nostartfiles
 
-# ── EPatch constants ────────────────────────────────────────────────────
-# chip_id  = rom_version + 1 = 2  (dmesg: rom_version=1 for RTL8761BU)
-# fw_version = 0x09a98a6b          (from original EPatch header)
 CHIP_ID    := 2
 FW_VERSION := 0x09a98a6b
-
-# Standard PRAM window for RTL8761BU.
-# pad.py fills unused space with MIPS16e NOPs (00 65) and appends the
-# version footer (0x09A95FD1) at the last 4 bytes.
 PATCH_SIZE := 27808
 
-# ── Targets ────────────────────────────────────────────────────────────
-.PHONY: all clean verify size
+NF_REF ?= ../rtl8761bu-non-free/rtl8761bu_fw.bin
+
+.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid phase-% clean verify size
+
+# Docker builds must see vendor patch0 (chip_id=1 slot).
+DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
+DOCKER_NF_ENV := -e NF_REF=/nf_ref/$(notdir $(NF_REF))
 
 all: rtl8761bu_fw.bin rtl8761bu_config.bin
 
-# Step 1: compile all source files to a single ELF
-build/patch.elf: $(SRCS) rtl8761bu.ld
+# Default Docker entry: discard stale host build/ then build + verify.
+docker: clean all verify
+
+minimal:
+	$(MAKE) clean
+	$(MAKE) MINIMAL=1 all
+
+minimal-null:
+	$(MAKE) clean
+	$(MAKE) MINIMAL=null all
+
+# Splice vendor patch1 prefix + libre tail (bisect).  Example: make hybrid SPLIT=0x400
+SPLIT ?= 0x400
+hybrid: build/patch_padded.bin hybrid.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) hybrid.py build/patch_padded.bin $(NF_REF) $(SPLIT) build/patch_hybrid.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_hybrid.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=hybrid-$(SPLIT)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# Installer phase bisect (stops early + PATCH_FINISH).  Example: make phase-bss
+phase-%:
+	$(MAKE) clean
+	$(MAKE) PHASE=$* all
+
+# libre patch1 prefix + vendor tail.  Example: make libre-hybrid SPLIT=0x200
+libre-hybrid: build/patch_padded.bin hybrid.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) hybrid.py --libre-head build/patch_padded.bin $(NF_REF) $(SPLIT) build/patch_hybrid.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_hybrid.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=libre-hybrid-$(SPLIT)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# Vendor reference image (bisect baseline — must match non-free byte-for-byte)
+test-nf: $(NF_REF) gen_config.py
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
 	@mkdir -p build
+	@echo "profile=test-nf" > build/.profile
+	@echo "entry_offset=0" >> build/.profile
+	cp $(NF_REF) rtl8761bu_fw.bin
+	$(PYTHON) gen_config.py rtl8761bu_config.bin
+	@sha256sum rtl8761bu_fw.bin
+	@cmp -s rtl8761bu_fw.bin $(NF_REF) && echo "test-nf: vendor-identical OK"
+
+# Rebuild when profile (minimal/full × layout) changes
+build/.profile.stamp:
+	@mkdir -p build
+	@stamp="$(BUILD_PROFILE):$(ENTRY_OFFSET)"; \
+	if ! test -f build/.profile.stamp || ! grep -qxF "$$stamp" build/.profile.stamp; then \
+		echo "$$stamp" > build/.profile.stamp; \
+		echo "profile=$(BUILD_PROFILE)" > build/.profile; \
+		echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile; \
+	fi
+
+build/patch.elf: $(SRCS) $(LDSCRIPT) build/.profile.stamp
+	@mkdir -p build
+	@if test -f $@ && ! $(READELF) -h $@ >/dev/null 2>&1; then \
+		echo "patch.elf invalid (stale host artifact?), rebuilding"; \
+		rm -f $@; \
+	fi
+	@echo "profile=$(BUILD_PROFILE)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRCS)
 
-# Step 2: strip ELF to a raw binary
 build/patch.bin: build/patch.elf
-	$(OBJCOPY) -O binary $< $@
+	@$(READELF) -h $< >/dev/null 2>&1 || \
+		(echo "error: $< is not a valid ELF — run 'make clean' or 'make docker'" >&2; exit 1)
+	$(OBJCOPY) -O binary --only-section=.text --only-section=.text.entry \
+		--gap-fill=0x00 $< $@
 
-# Step 3: pad to PATCH_SIZE with MIPS16e NOPs + version footer
 build/patch_padded.bin: build/patch.bin pad.py
-	$(PYTHON) pad.py $< $(PATCH_SIZE) $@
+	$(PYTHON) pad.py $< $(PATCH_SIZE) $@ $(ENTRY_OFFSET)
 
-# Step 4: wrap in EPatch v2 envelope
 rtl8761bu_fw.bin: build/patch_padded.bin pack.py
-	$(PYTHON) pack.py --chip-id $(CHIP_ID) $< $(FW_VERSION) $@
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) $< $(FW_VERSION) $@
 	@echo ""
-	@echo "Built: $@"
-	@echo "Install with:"
+	@echo "Built: $@  profile=$(BUILD_PROFILE)  entry_off=$(ENTRY_OFFSET)"
+	@echo "  make verify   — check entry fingerprint before installing"
 	@echo "  sudo cp $@ /lib/firmware/rtl_bt/rtl8761bu_fw.bin"
 
-# Step 5: generate the 6-byte config from source (no blob needed)
 rtl8761bu_config.bin: gen_config.py
 	$(PYTHON) gen_config.py $@
-	@echo "Built: $@"
-	@echo "Install with:"
-	@echo "  sudo cp $@ /lib/firmware/rtl_bt/rtl8761bu_config.bin"
 
-# ── Utility targets ────────────────────────────────────────────────────
 verify: rtl8761bu_fw.bin
+	@test -f build/.profile || (echo "run make first" && exit 1)
 	@$(PYTHON) -c "\
-import struct; \
+import struct, re; \
+prof=dict(re.findall(r'^(\w+)=(.+)$$', open('build/.profile').read(), re.M)); \
+profile=prof.get('profile','?'); \
+eoff=int(prof.get('entry_offset','0'), 0); \
 d=open('rtl8761bu_fw.bin','rb').read(); \
+assert d[:8]==b'Realtech'; \
 fv=struct.unpack_from('<I',d,8)[0]; \
 n=struct.unpack_from('<H',d,12)[0]; \
-cids=[struct.unpack_from('<H',d,14+i*2)[0] for i in range(n)]; \
-lens=[struct.unpack_from('<H',d,14+n*2+i*2)[0] for i in range(n)]; \
-offs=[struct.unpack_from('<I',d,14+n*4+i*4)[0] for i in range(n)]; \
+off=14; \
+cids=[struct.unpack_from('<H',d,off+i*2)[0] for i in range(n)]; \
+off+=n*2; \
+lens=[struct.unpack_from('<H',d,off+i*2)[0] for i in range(n)]; \
+off+=n*2; \
+offs=[struct.unpack_from('<I',d,off+i*4)[0] for i in range(n)]; \
 ext=struct.unpack_from('<I',d,len(d)-4)[0]; \
+poff=offs[cids.index($(CHIP_ID))]; \
+entry=d[poff+eoff:poff+eoff+4]; \
+print(f'profile    : {profile}'); \
 print(f'magic      : {d[:8]}'); \
 print(f'fw_version : 0x{fv:08x}'); \
-[print(f'  patch[{i}] chip_id={cids[i]} length={lens[i]} offset=0x{offs[i]:x}{\" <- selected\" if cids[i]==$(CHIP_ID) else \"\"}') for i in range(n)]; \
+print(f'file size  : {len(d)}'); \
+[print(f'  patch[{i}] chip_id={cids[i]} len={lens[i]} off=0x{offs[i]:x}{\" *\" if cids[i]==$(CHIP_ID) else \"\"}') for i in range(n)]; \
+print(f'entry@+{eoff:#x}: {entry.hex()}'); \
+print(f'  (check build/.profile for minimal vs full)'); \
 print(f'ext magic  : 0x{ext:08x}  {\"OK\" if ext==0x77fd0451 else \"WRONG\"}'); \
 "
 
 size: build/patch.elf
-	@echo "=== Firmware size ==="
+	@echo "=== Firmware size (profile=$(BUILD_PROFILE)) ==="
 	$(SIZE) $<
 	@$(PYTHON) -c "\
 import os; \
@@ -111,7 +183,7 @@ raw=os.path.getsize('build/patch.bin'); \
 avail=$(PATCH_SIZE); \
 print(f'Code+data : {raw} bytes'); \
 print(f'Budget    : {avail} bytes'); \
-print(f'Free      : {avail-raw-4} bytes  ({(avail-raw-4)/avail*100:.1f}% of PRAM)'); \
+print(f'Free      : {avail-raw-4} bytes'); \
 "
 
 clean:

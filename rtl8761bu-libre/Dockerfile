@@ -7,7 +7,7 @@
 #   docker build -t rtl8761bu-libre .
 #
 # Build the firmware (bind-mount the source tree):
-#   docker run --rm -v "$(pwd)":/work rtl8761bu-libre
+#   docker run --rm -v "$(pwd)":/work rtl8761bu-libre make docker
 #
 # The output files will appear in the host's working directory:
 #   rtl8761bu_fw.bin
@@ -36,5 +36,5 @@ RUN echo 'void f(void){}' \
 
 WORKDIR /work
 
-# Default: build everything.
-CMD ["make", "all"]
+# Default: clean build + verify (avoids stale host build/ artifacts).
+CMD ["make", "docker"]

@@ -1,0 +1,41 @@
+---
+description: Where to stage UB500 test firmware on daas-dev for NeoPC scp workflow
+alwaysApply: true
+---
+
+# Hardware test — stage firmware on daas-dev
+
+User flashes from **daas-dev** → NeoPC via `try_new_firmware.sh` (scp `fw_to_test/` + `/lib/firmware/rtl_bt/`).
+
+## Agent: write flash artifacts here
+
+After build + promote:
+
+```
+/root/rtl8761bu-libre/fw_to_test/rtl8761bu_fw.bin
+/root/rtl8761bu-libre/fw_to_test/rtl8761bu_config.bin
+```
+
+Build in `rtl8761bu-libre/` (nested dir). Save profile siblings as `rtl8761bu_fw.<profile>.bin`.
+Promote with `.cursor/skills/ub500-hardware-test/scripts/promote-test.sh <profile>`.
+
+```bash
+cd /root/rtl8761bu-libre/rtl8761bu-libre
+docker build -t rtl8761bu-libre .
+docker run --rm -v "$(pwd)":/work \
+  -v /root/rtl8761bu-libre/rtl8761bu-non-free:/nf_ref:ro \
+  -e NF_REF=/nf_ref/rtl8761bu_fw.bin \
+  rtl8761bu-libre make <target>
+```
+
+## One test per handoff
+
+Ship **one** profile per message. State clearly:
+
+- **profile** name (`test-nf`, `minimal`, `full`, …)
+- **expected SHA256** of `fw_to_test/rtl8761bu_fw.bin`
+- user runs `try_new_firmware.sh` on NeoPC and pastes `journalctl` output
+
+## Pass criteria
+
+FC20: no `command 0xfc20 tx timeout`. Vendor baseline: `RTL: fw version 0x09a98a6b` + connect works.

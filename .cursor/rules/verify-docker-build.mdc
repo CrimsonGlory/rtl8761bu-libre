@@ -1,0 +1,27 @@
+---
+description: Verify firmware builds in Docker after Makefile/source changes
+globs: rtl8761bu-libre/**/*
+alwaysApply: false
+---
+
+# Verify Docker build after changes
+
+The MIPS cross-compiler runs **inside Docker only**. Host `build/` artifacts are often invalid (e.g. empty `patch.elf` → objcopy "file format not recognized").
+
+After editing firmware sources, linker scripts, `Makefile`, `pack.py`, or `pad.py`:
+
+```bash
+cd rtl8761bu-libre
+docker build -t rtl8761bu-libre .
+docker run --rm -v "$(pwd)":/work rtl8761bu-libre make docker
+```
+
+`make docker` runs `clean all verify` and must succeed before considering the change done.
+
+Variants:
+
+```bash
+docker run --rm -v "$(pwd)":/work rtl8761bu-libre make minimal verify
+```
+
+Do not rely on bare `make all` on the host unless `mipsel-linux-gnu-gcc` is installed.

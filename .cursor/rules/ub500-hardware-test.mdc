@@ -1,0 +1,45 @@
+---
+description: UB500 hardware test loop — agent builds in Docker; user flashes fw_to_test/ and pastes dmesg
+alwaysApply: true
+---
+
+# UB500 hardware testing (Phase 7)
+
+Target: TP-Link UB500 (`idVendor=2357`, `idProduct=0604`, RTL8761BU, `rom_version=1` → `chip_id=2`).
+
+## Agent: build on daas-dev, stage in fw_to_test/
+
+NeoPC scp path (only):
+
+```
+/root/rtl8761bu-libre/fw_to_test/rtl8761bu_fw.bin
+/root/rtl8761bu-libre/fw_to_test/rtl8761bu_config.bin
+```
+
+```bash
+cd /root/rtl8761bu-libre/rtl8761bu-libre
+docker build -t rtl8761bu-libre .
+docker run --rm -v "$(pwd)":/work \
+  -v /root/rtl8761bu-libre/rtl8761bu-non-free:/nf_ref:ro \
+  -e NF_REF=/nf_ref/rtl8761bu_fw.bin \
+  rtl8761bu-libre make <target>
+.cursor/skills/ub500-hardware-test/scripts/promote-test.sh <profile>
+```
+
+**One target per message.** Give expected SHA256 of `fw_to_test/rtl8761bu_fw.bin`. User runs `try_new_firmware.sh` on NeoPC.
+
+Bisect order: `test-nf` → `minimal-null` → `minimal` → `full`.
+
+## User: NeoPC only
+
+```bash
+./try_new_firmware.sh   # scp fw_to_test/ → /lib/firmware/rtl_bt/, replug
+```
+
+Paste `journalctl` output. FC20 pass = no `fc20 tx timeout`. Vendor baseline = `fw version 0x09a98a6b`.
+
+## Result log
+
+Full table + SHA256 index: `.cursor/skills/ub500-hardware-test/results.md`
+
+Agent **must** append every hardware run there (full 64-char SHA256) before handing off the next profile.

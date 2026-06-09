@@ -1,0 +1,5 @@
+/build/
+/rtl8761bu_fw.bin
+/rtl8761bu_config.bin
+/rtl8761bu_fw.*.bin
+/rtl8761bu_config.*.bin

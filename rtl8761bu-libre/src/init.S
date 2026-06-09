@@ -1,12 +1,8 @@
 /*
  * init.S — patch_entry master installer (FUN_8010a000 equivalent)
  *
- * Boot sequence follows Appendix D in reverse_engineering_patch_installer.md:
- *   Phase 0 — config copy, BSS init, config bit clears
- *   Phase 1 — hooks #1–17 + sub-installers #1–2
- *   Phase 2 — sub-installer #3, hooks #18–38, sub-installers #4–6
- *   Phase 3 — ROM reg script, silicon rev, hooks #39–40, TLV, BD_ADDR
- *   Phase 4 — HW probe/BB init, hook #41, RF init, patch-active, hooks #42–44
+ * ROM calls patch_entry @ 0x8010A001 (FC20 loads body to 0x8010A000).
+ * patch_entry @ body+0 (no thin stub — ROM calls 0x8010A001 directly).
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
@@ -14,12 +10,19 @@
 	.set	mips16
 	.include "stub_macros.S"
 
-	.section	.text.entry
+	.section	.text
 	.globl	patch_entry
 	.type	patch_entry, @function
 patch_entry:
 	addiu	$sp, $sp, -8
 	sw	$ra, 4($sp)
+
+	/* Uninit DRAM may be non-zero; sub-installers #3/#6 indirect-call these */
+	move	$a3, $zero
+	LOAD_ADDR $a2, 0x80120f0c
+	sw	$a3, 0($a2)
+	LOAD_ADDR $a2, 0x80120c80
+	sw	$a3, 0($a2)
 
 	/* Phase 0 — config word split from TLV boundary */
 	LOAD_ADDR $a2, 0x801115f8
@@ -131,7 +134,7 @@ skip_bb_init:
 
 	CALL_PATCH fn_rf_init
 
-	LOAD_ADDR $a2, 0x80120538
+	LOAD_ADDR $a2, PATCH_ACTIVE_ADDR
 	li	$v0, 4
 	sw	$v0, 0($a2)
 

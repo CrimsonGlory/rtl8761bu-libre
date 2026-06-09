@@ -2,64 +2,101 @@
 """
 pack.py — wrap a raw patch binary in Realtek EPatch v2 format
 
-Usage: pack.py [--chip-id N] <patch.bin> <fw_version_hex> <output.bin>
+Usage:
+  pack.py [--chip-id N] [--dual] <patch.bin> <fw_version_hex> <output.bin>
 
 The btrtl kernel driver (drivers/bluetooth/btrtl.c) validates:
-  1. Magic bytes "Realtech" at offset 0
-  2. Extension section magic 0x77FD0451 at the last 4 bytes of the file
-  3. chip_id in the patch table matching (rom_version + 1) = 2 for RTL8761BU
-  4. fw_version matching the value reported by the chip (0x09a98a6b)
+  1. First 8 bytes == "Realtech"  (struct rtl_epatch_header.signature)
+  2. Extension magic 0x77FD0451 at the last 4 bytes of the file
+  3. chip_id in the patch table == rom_version + 1 (2 for RTL8761BU)
 
-EPatch v2 header layout (all values little-endian):
-  0x00  8 B   magic "Realtech"
-  0x08  4 B   fw_version
-  0x0C  2 B   num_patches         (we always write 1)
-  0x0E  2 B   chip_id[0]
-  0x10  2 B   patch_length[0]
-  0x12  4 B   patch_offset[0]     (= 0x0030, header is 48 bytes)
-  0x16  ...   zero padding to 0x0030
-
-Extension section (72 bytes appended after all patches):
-  64 B   zeros
-   4 B   chip-family constant  0x00010EFF
-   4 B   magic                 0x77FD0451   ← driver checks this
+struct rtl_epatch_header (14 bytes, packed):
+  0x00  8 B   signature "Realtech"
+  0x08  4 B   fw_version (LE)     — dmesg prints e.g. 0x09a98a6b
+  0x0C  2 B   num_patches
+  0x0E  ...   chip_id[], patch_length[], patch_offset[] (LE)
+  0x30        patch data (zero-padded header)
 """
 
+import os
 import struct
 import sys
 import argparse
 
 MAGIC    = b'Realtech'
-HEADER   = 48          # fixed header size; patch data starts at offset 0x30
-EXT_SIZE = 72          # extension section appended after patch data
+HEADER   = 48
+EXT_SIZE = 72
 
-# Chip-family constant embedded in the extension section.
-# Extracted from the original RTL8761BU firmware extension section.
+# Non-free patch-0 slot (chip_id=1); UB500 selects patch-1 only.
+PATCH0_LEN   = 0x36E0
+PATCH0_OFF   = HEADER
+PATCH1_OFF   = 0x3780
+PATCH_GAP    = PATCH1_OFF - (PATCH0_OFF + PATCH0_LEN)   # 0x70 bytes
+
 CHIP_FAMILY_CONST = 0x00010EFF
 EXT_MAGIC         = 0x77FD0451
+MIPS16E_NOP       = b'\x00\x65'
+
+# Reference non-free image (patch0 is not FC20-downloaded but matches envelope).
+NF_REF = os.environ.get(
+    'NF_REF',
+    os.path.join(os.path.dirname(__file__), '..', 'rtl8761bu-non-free', 'rtl8761bu_fw.bin'),
+)
 
 
-def build_epatch(patch_data: bytes, chip_id: int, fw_version: int) -> bytes:
-    patch_len    = len(patch_data)
-    patch_offset = HEADER            # 0x30
+def _load_patch0() -> bytes:
+    if not os.path.isfile(NF_REF):
+        raise FileNotFoundError(
+            f"patch0 source missing: {NF_REF!r} "
+            f"(set NF_REF to vendor rtl8761bu_fw.bin)"
+        )
+    raw = open(NF_REF, 'rb').read()
+    return raw[PATCH0_OFF:PATCH0_OFF + PATCH0_LEN]
 
-    # ── Header ──────────────────────────────────────────────────────
-    hdr  = MAGIC                                    # 8 B  magic
-    hdr += struct.pack('<I', fw_version)            # 4 B  fw_version
-    hdr += struct.pack('<H', 1)                     # 2 B  num_patches = 1
-    hdr += struct.pack('<H', chip_id)               # 2 B  chip_id[0]
-    hdr += struct.pack('<H', patch_len)             # 2 B  patch_length[0]
-    hdr += struct.pack('<I', patch_offset)          # 4 B  patch_offset[0]
-    hdr += b'\x00' * (HEADER - len(hdr))           # zero padding to 48 B
+
+def _pad_header(meta: bytes) -> bytes:
+    hdr  = MAGIC
+    hdr += meta
+    hdr += b'\x00' * (HEADER - len(hdr))
     assert len(hdr) == HEADER
+    return hdr
 
-    # ── Extension section ────────────────────────────────────────────
+
+def _extension() -> bytes:
     ext  = b'\x00' * 64
     ext += struct.pack('<I', CHIP_FAMILY_CONST)
     ext += struct.pack('<I', EXT_MAGIC)
     assert len(ext) == EXT_SIZE
+    return ext
 
-    return hdr + patch_data + ext
+
+def build_epatch_single(patch_data: bytes, chip_id: int, fw_version: int) -> bytes:
+    meta  = struct.pack('<I', fw_version)
+    meta += struct.pack('<H', 1)
+    meta += struct.pack('<H', chip_id)
+    meta += struct.pack('<H', len(patch_data))
+    meta += struct.pack('<I', HEADER)
+    return _pad_header(meta) + patch_data + _extension()
+
+
+def build_epatch_dual(patch1_data: bytes, fw_version: int) -> bytes:
+    """Match non-free file layout: patch0 @0x30, gap, patch1 @0x3780."""
+    patch0 = _load_patch0()
+    assert len(patch0) == PATCH0_LEN
+
+    meta  = struct.pack('<I', fw_version)
+    meta += struct.pack('<H', 2)
+    meta += struct.pack('<H', 1)                    # chip_id[0]
+    meta += struct.pack('<H', 2)                    # chip_id[1]
+    meta += struct.pack('<H', PATCH0_LEN)
+    meta += struct.pack('<H', len(patch1_data))
+    meta += struct.pack('<I', PATCH0_OFF)
+    meta += struct.pack('<I', PATCH1_OFF)
+
+    body  = patch0
+    body += b'\x00' * PATCH_GAP
+    body += patch1_data
+    return _pad_header(meta) + body + _extension()
 
 
 def main():
@@ -68,17 +105,24 @@ def main():
     ap.add_argument('fw_version', help='Firmware version (hex, e.g. 0x09a98a6b)')
     ap.add_argument('output',     help='Output .bin file')
     ap.add_argument('--chip-id',  type=int, default=2,
-                    help='EPatch chip_id (default: 2 for RTL8761BU)')
+                    help='EPatch chip_id for single-patch mode (default: 2)')
+    ap.add_argument('--dual', action='store_true',
+                    help='Emit two-patch layout matching non-free rtl8761bu_fw.bin')
     args = ap.parse_args()
 
     patch_data = open(args.patch, 'rb').read()
     fw_version = int(args.fw_version, 16)
 
-    out = build_epatch(patch_data, args.chip_id, fw_version)
+    if args.dual:
+        out = build_epatch_dual(patch_data, fw_version)
+    else:
+        out = build_epatch_single(patch_data, args.chip_id, fw_version)
+
     open(args.output, 'wb').write(out)
 
-    print(f"pack: chip_id={args.chip_id}  fw_version=0x{fw_version:08x}  "
-          f"patch={len(patch_data)} B  total={len(out)} B  → {args.output}")
+    print(f"pack: fw_version=0x{fw_version:08x}  patch={len(patch_data)} B  "
+          f"total={len(out)} B  mode={'dual' if args.dual else 'single'}  "
+          f"→ {args.output}")
 
 
 if __name__ == '__main__':
