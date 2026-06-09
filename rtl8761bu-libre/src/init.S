@@ -10,7 +10,7 @@
 	.set	mips16
 	.include "stub_macros.S"
 
-	.section	.text
+	.section	.text.entry
 	.globl	patch_entry
 	.type	patch_entry, @function
 patch_entry:
@@ -130,18 +130,7 @@ patch_entry:
 	nop
 	CALL_PATCH fn_bb_init
 skip_bb_init:
-	INSTALL_HOOK_ABS 0x80120cdc, 0x8010ce0c
-
-	CALL_PATCH fn_rf_init
-
-	LOAD_ADDR $a2, PATCH_ACTIVE_ADDR
-	li	$v0, 4
-	sw	$v0, 0($a2)
-
-	/* hooks #42–44 */
-	INSTALL_HOOK_ABS 0x80121020, 0x8010ae4c
-	INSTALL_HOOK_ABS 0x80121220, 0x8010bda0
-	INSTALL_HOOK_ABS 0x8012167c, 0x8010e350
+	CALL_PATCH patch_entry_tail
 
 	lw	$a0, 4($sp)
 	addiu	$sp, $sp, 8

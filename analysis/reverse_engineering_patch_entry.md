@@ -34,7 +34,7 @@ vendor tail). File offsets are patch-body relative (runtime = `0x8010A000 + off`
 | Code body diffs `[0, 0x242)` | **570 / 578** |
 | Pool diffs `[0x242, 0x61e)` | **923** |
 
-Libre `nm` layout (wrong):
+Libre `nm` layout before PE-0 (wrong):
 
 ```
 0x8010a000  patch_entry     0x61e
@@ -42,8 +42,28 @@ Libre `nm` layout (wrong):
 0x8010a71c  sub_installer_1 0x30   ← vendor @ 0x724
 ```
 
-Libre **omits** `[0x05D8, 0x0724)` helper code entirely and places early bootstrap
+Libre **omitted** `[0x05D8, 0x0724)` helper code entirely and placed early bootstrap
 ~0xE0 bytes too low.
+
+### PE-0 linker anchors (2026-06-09)
+
+`rtl8761bu.ld` anchors prefix subsections; `patch_entry_tail.S` holds the
+`skip_bb_init` epilogue @ `0x764`; `patch_entry_helpers.S` incbins vendor
+`[0x5d8, 0x724)`.
+
+Libre `nm` after PE-0:
+
+```
+0x8010a000  patch_entry          0x5b0  (+ 0x28 NOP pad → 0x5d8)
+0x8010a5d8  patch_entry_helpers  0x14c
+0x8010a724  sub_installer_1      0x30
+0x8010a754  fn_bss_init          0x10
+0x8010a764  patch_entry_tail     0x8c
+```
+
+`make diff-prefix` (full profile): **1427/1892** prefix diffs (was 1808/1892).
+Regions with **0 diffs**: helpers, `sub_installer_1`, `fn_bss_init`.
+Remaining gap: `[0, 0x5d8)` code + pools (PE-1 / PE-2).
 
 ---
 

@@ -14,17 +14,16 @@
 #endif
 
 #ifndef VENDOR_EARLY_PREFIX
+	.section	.text.bss_init
 	.globl	fn_bss_init
 	.type	fn_bss_init, @function
 fn_bss_init:
-	/* Vendor FUN_8010a6c8 @ file 0x754 in patch block; pool @ +0x18. */
+	/* Vendor FUN_8010a6c8 @ file 0x754 (16 B); literal pool in patch_entry region. */
 	.byte	0xfd, 0x63, 0x05, 0x62, 0x05, 0xb2, 0x06, 0xb6
 	.byte	0x82, 0x67, 0x5b, 0xe6, 0x05, 0xb2, 0x40, 0xea
-	.word	0x80109c00
-	.word	0x8010a000
-	.word	0x8000e98d
 	.size	fn_bss_init, . - fn_bss_init
 
+	.section	.text.sub_inst1
 	.globl	sub_installer_1
 	.type	sub_installer_1, @function
 sub_installer_1:
@@ -39,6 +38,7 @@ sub_installer_1:
 #endif /* !VENDOR_EARLY_PREFIX */
 
 #ifndef VENDOR_EARLY_PREFIX
+	.section	.text.hooks
 	.include	"sub_installer_2_body.S"
 #endif
 

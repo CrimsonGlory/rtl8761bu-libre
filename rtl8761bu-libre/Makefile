@@ -24,7 +24,9 @@ else ifdef PHASE
 SRCS := src/init_phase_$(PHASE).S $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S $(wildcard src/init_phase_*.S),$(wildcard src/*.S))
 else
 SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init_minimal.S src/init_null.S \
-	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S,$(wildcard src/*.S))
+	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S \
+	src/patch_entry_helpers.S src/patch_entry_tail.S,$(wildcard src/*.S))
+PATCH_PREFIX_SRCS := src/patch_entry_helpers.S src/patch_entry_tail.S
 endif
 
 # LAYOUT=gap — legacy experiment (entry @ +0x6880); wrong for FC20 → 0x8010A000
@@ -235,11 +237,20 @@ build/vendor_prefix.bin: $(NF_REF) scripts/extract_vendor_prefix.py
 	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) $(VENDOR_EARLY_PREFIX) $@
 
 VENDOR_PREFIX_DEP := build/vendor_prefix.bin
+VENDOR_HELPERS_DEP :=
 else
 VENDOR_PREFIX_DEP :=
+# PE-0: helper cluster [0x5d8,0x724) for anchored prefix layout
+build/vendor_helpers.bin: $(NF_REF) scripts/extract_vendor_prefix.py
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	@mkdir -p build
+	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x14c $@ 0x5d8
+
+VENDOR_HELPERS_DEP := build/vendor_helpers.bin
+SRCS += $(PATCH_PREFIX_SRCS)
 endif
 
-build/patch.elf: $(SRCS) $(LDSCRIPT) build/.profile.stamp $(VENDOR_PREFIX_DEP)
+build/patch.elf: $(SRCS) $(LDSCRIPT) build/.profile.stamp $(VENDOR_PREFIX_DEP) $(VENDOR_HELPERS_DEP)
 	@mkdir -p build
 	@if test -f $@ && ! $(READELF) -h $@ >/dev/null 2>&1; then \
 		echo "patch.elf invalid (stale host artifact?), rebuilding"; \
