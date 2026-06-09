@@ -297,9 +297,73 @@ BT stack internal message identifiers.
 7. `FUN_8010d9f4` — LC RX: pass through to ROM
 
 ### Key identities needed
-- ROM `assoc_w_tLMP` handler address (stored at `PTR_assoc_w_tLMP_1_8010e1f8`)
-- ROM `assoc_w_tLC_TX` handler address
-- ROM `assoc_w_tLC_RX` handler address
-- ROM `assoc_w_tHCI_EVT` handler address
-- ROM `assoc_w_tLMP_CH` handler address
-- Dispatch struct base pointer address (`0x8012ae8c`)
+~~All resolved (2026-06-09). See Section: ROM Original Handler Addresses below.~~
+
+---
+
+## ROM Original Handler Addresses (resolved 2026-06-09)
+
+Script: `FindStoreOffset.java` (repurposed) — GZF process mode
+
+Each patch handler stores the ROM original in its literal pool and tail-calls it.
+All pool slots were read directly from the DATA block.
+
+| Pool slot | Owner patch fn | Raw ptr | ROM fn addr | Kovah name | Size |
+|-----------|---------------|---------|-------------|------------|------|
+| `0x8010ccb0` | `FUN_8010cc94` (pre-hook call, no explicit args) | `0x800138cd` | `0x800138cc` | `unknown_fptr_index0` | 680 B |
+| `0x8010ccb4` | `FUN_8010cc94` (main call, with `param_1`) | `0x8010ca21` | `0x8010ca20` | `new_func_for_unknown_fptr_index0` | 534 B |
+| `0x8010d164` | `FUN_8010d154` (LMP_CH pass-through) | `0x80066e69` | `0x80066e68` | `assoc_w_tLMP_CH` | 200 B |
+| `0x8010da68` | `FUN_8010d9f4` (LC_RX interceptor) | `0x80042189` | `0x80042188` | `assoc_w_tLC_RX` | 634 B |
+| `0x8010daa0` | `FUN_8010da70` (LC_TX interceptor) | `0x80042421` | `0x80042420` | `assoc_w_tLC_TX` | 418 B |
+| `0x8010dd18` | `FUN_8010daa4` (HCI_EVT interceptor) | `0x80020bed` | `0x80020bec` | `assoc_w_tHCI_EVT` | 718 B |
+| `0x8010e1f8` | `FUN_8010dfb0` (LMP interceptor) | `0x80071635` | `0x80071634` | `assoc_w_tLMP` | 462 B |
+
+All raw pointers have bit 0 set (MIPS16e odd address convention).
+
+### Naming convention clarified
+
+Kovah uses the **same label** for both the ROM original and the struct slot:
+- `assoc_w_tLMP` in ROM (`0x80071634`) is the function the patch **overrides** at struct[`+0x48`]
+- The patch function `FUN_8010dfb0` intercepts calls and tail-calls back to ROM `assoc_w_tLMP`
+- Likewise for LC_RX, LC_TX, HCI_EVT, LMP_CH
+
+The only exception is the index-0 slot where `FUN_8010cc94` is a **sequencer** (not interceptor):
+it calls ROM `unknown_fptr_index0` first (without forwarding `param_1` explicitly) then calls
+`new_func_for_unknown_fptr_index0` (a **patch function**, not ROM) with `param_1`.
+
+### Critical discovery: `new_func_for_unknown_fptr_index0` is a PATCH function
+
+`0x8010ca20` is in the DATA block (runtime `0x80100000+`) — this is a 534-byte **patch**
+function, not a ROM function. It is called by `FUN_8010cc94` as the "actual handler" after
+the ROM original runs. It handles internal opcode `0x67` only:
+- Maintains a count (2000 ms / 200-tick thresholds) for AFH/coexistence monitoring
+- Reads `PTR_struct_of_at_least_0x300_size` (`bos`-class struct) at `+0x16a`
+- Checks HW register `0x2d` for channel quality
+- Manages a 9-step counter (`PTR_DAT_8010cc74`) and fires a cleanup fn at step 9
+- Monitors BLE connection quality via a 200-tick counter
+- Fires a diagnostic log if stuck condition detected (after 200 ticks in same state)
+
+This function requires real libre implementation.
+
+### ROM handler dispatch coverage
+
+| ROM fn | Addr | Key opcodes handled |
+|--------|------|---------------------|
+| `unknown_fptr_index0` | `0x800138cc` | Switch on `param_1[4]-100`: cases 0,2,3,4,5,6,7,8,0xa,0xb,0xc,0xd,0x10,0x11 |
+| `assoc_w_tLMP_CH` | `0x80066e68` | `0x3ea`, `0x3ed`, `0x3ee` (LMP channel sub-opcodes) |
+| `assoc_w_tLC_RX` | `0x80042188` | `0x2be`, `0x2c1`, `0x2c4`, `0x2c5`, `0x2c8`, `0x2c9`, `0x2ca`, `0x2cd`, `0x2d0`, `0x2d1`, `0x2d3`, `0x4b7` |
+| `assoc_w_tLC_TX` | `0x80042420` | `1`, `0x320`, `0x321`, `0x323`, `0x326`, `0x328`, `0x329`, `0x32a`, `0x32c`, `0x32d`, `0x32e`, `0x32f`, `0x330`, `0x4b6` |
+| `assoc_w_tHCI_EVT` | `0x80020bec` | `0x1f6`, `0x1f8`, `0x1f9`, `0x1fa`, `0x1fb`, `0x1fc`, `0x1fd`, `0x452`, `0x453`, `0x454`, `0x455` |
+| `assoc_w_tLMP` | `0x80071634` | Large LMP opcode dispatcher (opcodes `0x259`–`0x26d`+) |
+
+### Updated libre requirements
+
+For the libre implementation:
+
+1. All **ROM** original handlers are called via their fixed addresses — no reimplementation needed.
+2. `new_func_for_unknown_fptr_index0` (`0x8010ca20`, 534 B) **must be reimplemented** — it is a
+   patch function handling opcode `0x67` (AFH/coexistence quality monitoring). Required for proper
+   AFH operation; can be stubbed to a no-op for minimal BT.
+3. The sequencer `FUN_8010cc94` must call ROM `0x800138cc` first, then `new_func_for_unknown_fptr_index0`.
+4. All five other patch interceptors (`FUN_8010d154`, `FUN_8010d9f4`, `FUN_8010da70`, `FUN_8010daa4`,
+   `FUN_8010dfb0`) call ROM at the addresses above as their tail-call / pass-through target.

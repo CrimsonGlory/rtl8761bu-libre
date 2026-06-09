@@ -443,13 +443,42 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
         FUN_8010e27c decompiled (52B), all 6 protocol handlers decompiled.
         → analysis/reverse_engineering_protocol_dispatch_layer.md (new)
 
-[NEXT]  Identify the ROM original handlers for the 5 protocol types
-        FUN_8010e27c overwrites struct[+0x00/0x18/0x30/0x3c/0x48/0x60] with patch
-        handlers, each of which tail-calls the ROM original via literal pool.
-        Need to identify these ROM fns (PTR_assoc_w_tLMP_1_8010e1f8 etc.) so we
-        can call them from the libre implementation.
-        Options: (a) dump the 6 literal pool "ROM original" ptr slots and resolve,
-                 (b) decompile ROM 0x80009990 more fully to see what it registers.
+[DONE]  Identify the ROM original handlers for the 5 protocol types (2026-06-09)
+        ALL 7 literal pool ROM-original ptr slots resolved (script: FindStoreOffset.java
+        repurposed as DumpROMOriginalHandlers; GZF process mode):
+          Pool 0x8010ccb0 → ROM  0x800138cc  unknown_fptr_index0 (680B)
+            (called first by FUN_8010cc94, no explicit args — it's the pre-hook)
+          Pool 0x8010ccb4 → PATCH 0x8010ca20 new_func_for_unknown_fptr_index0 (534B)
+            *** SURPRISE: this is a PATCH function, not ROM ***
+            Called second by FUN_8010cc94 with param_1.
+            Handles opcode 0x67: AFH/BLE coexistence quality monitor.
+            200/2000-tick thresholds, HW reg 0x2d poll, 9-step cleanup counter.
+            Requires real libre implementation (or stub for minimal BT).
+          Pool 0x8010d164 → ROM  0x80066e68  assoc_w_tLMP_CH (200B)
+            Opcodes 0x3ea, 0x3ed, 0x3ee (LMP channel sub-protocol)
+          Pool 0x8010da68 → ROM  0x80042188  assoc_w_tLC_RX (634B)
+            Opcodes 0x2be/2c1/2c4/2c5/2c8/2c9/2ca/2cd/2d0/2d1/2d3/4b7
+          Pool 0x8010daa0 → ROM  0x80042420  assoc_w_tLC_TX (418B)
+            Opcodes 1/320/321/323/326/328/32a/32c/32d/32e/32f/330/4b6
+          Pool 0x8010dd18 → ROM  0x80020bec  assoc_w_tHCI_EVT (718B)
+            Opcodes 0x1f6/1f8/1f9/1fa/1fb/1fc/1fd/452/453/454/455
+          Pool 0x8010e1f8 → ROM  0x80071634  assoc_w_tLMP (462B)
+            Large LMP opcode dispatcher (0x259–0x26d+)
+        Kovah naming convention confirmed: ROM functions share the same label as
+        the dispatch-struct slot they originally occupied. The patch's "assoc_w_*"
+        functions intercept, do patch logic, then tail-call the ROM original.
+        Exception: struct[+0x00] (FUN_8010cc94) is a SEQUENCER, not interceptor:
+          calls ROM original FIRST, then the new patch handler (0x8010ca20).
+        → analysis/reverse_engineering_protocol_dispatch_layer.md (Section added)
+
+
+[NEXT]  Decompile new_func_for_unknown_fptr_index0 (FUN_8010ca20, 534B)
+        Newly discovered patch function. Called by FUN_8010cc94 as main handler
+        for the index-0 dispatch slot. Handles opcode 0x67: AFH/coexistence monitor.
+        Decompile fully to understand all data refs and sub-calls so libre can
+        implement or stub it accurately.
+        Also: identify what FUN_8010cc94 is actually doing with the pre-hook
+        (ROM unknown_fptr_index0 @ 0x800138cc) — does it need param forwarding?
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
