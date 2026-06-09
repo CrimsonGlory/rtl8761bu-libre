@@ -26,9 +26,9 @@ else
 SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S \
 	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S \
 	src/patch_entry_code.S src/patch_entry_pool.S \
-	src/patch_entry_helpers.S src/patch_entry_tail.S,$(wildcard src/*.S))
+	src/patch_entry_helpers.S src/patch_entry_si2.S src/patch_entry_tail.S,$(wildcard src/*.S))
 PATCH_PREFIX_SRCS := src/patch_entry_code.S src/patch_entry_pool.S \
-	src/patch_entry_helpers.S src/patch_entry_tail.S
+	src/patch_entry_helpers.S src/patch_entry_si2.S src/patch_entry_tail.S
 endif
 
 # LAYOUT=gap — legacy experiment (entry @ +0x6880); wrong for FC20 → 0x8010A000
@@ -67,7 +67,7 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix
+.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix
 
 # Docker builds must see vendor patch0 (chip_id=1 slot).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -149,6 +149,20 @@ inject-t3: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_RE
 	$(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
 	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
 	@echo "profile=full-inject-t3" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# PE-5b: libre patch_entry prefix [0,0x764) + T3 inject + vendor tail [0xE4C,footer)
+full-inject-t3-pe5-vendor-tail:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t3-pe5-vendor-tail
+
+inject-t3-pe5-vendor-tail: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_TAIL_FILL=1 $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t3-pe5-vendor-tail" > build/.profile
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
 	@sha256sum rtl8761bu_fw.bin
 

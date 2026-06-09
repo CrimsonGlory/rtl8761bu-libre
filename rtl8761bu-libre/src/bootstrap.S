@@ -37,10 +37,8 @@ sub_installer_1:
 	.size	sub_installer_1, . - sub_installer_1
 #endif /* !VENDOR_EARLY_PREFIX */
 
-#ifndef VENDOR_EARLY_PREFIX
+	/* sub_installer_2 @ 0x764: patch_entry_si2.S or installer_vendor_early.S */
 	.section	.text.hooks
-	.include	"sub_installer_2_body.S"
-#endif
 
 	.globl	sub_installer_3
 	.type	sub_installer_3, @function

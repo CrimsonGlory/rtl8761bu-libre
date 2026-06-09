@@ -112,7 +112,25 @@ Generator: `scripts/gen_patch_entry_pool_asm.py` (one-shot from vendor slice; ch
 
 `make diff-prefix`: pool **0/918** diffs; prefix `[0, 0x764)` **0/1892**.
 
-Next: PE-5 drop `VENDOR_EARLY_PREFIX` (hardware verify prefix without vendor overlay).
+### PE-5 hardware + si2 anchor fix (2026-06-09)
+
+`387e9916…` FC20 **timeout**: `[0,0x764)` matched vendor (`diff-prefix` 0/1892) but
+linker placed `patch_entry_tail` @ `0x764` while vendor `FUN_8010a000` calls
+`sub_installer_2` via pool `DAT_8010a27c` → runtime `0x8010A764`.
+
+Fix: `src/patch_entry_si2.S` (`.text.si2` @ `0x764`); `patch_entry_tail` follows @
+`0x820`.
+
+**Hardware (2026-06-09)**:
+
+| SHA | FC20 | HCI | Connect |
+|-----|------|-----|---------|
+| `c14e18f5…` | OK | `0x2036` hang | — |
+| `7f051e64…` (`full-inject-t3-pe5-vendor-tail`) | OK | OK | **OK** `88:C9:E8:6B:F9:1E` |
+
+Libre prefix `[0,0x764)` verified without `VENDOR_EARLY_PREFIX`. Production interim:
+libre `patch_entry_*` + `VENDOR_TAIL_FILL` `[0xE4C,…)`. Next RE: `[0x820,0xE4C)` (replace
+`patch_entry_tail` macros); then libre tail.
 
 ---
 

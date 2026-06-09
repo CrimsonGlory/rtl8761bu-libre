@@ -711,8 +711,14 @@ PHASE 7 — TEST
           scripts/gen_patch_entry_pool_asm.py for regeneration; removed vendor_entry_pool.bin.
           make diff-prefix: pool 0/918; prefix [0,0x764) 0/1892 match.
           → analysis/reverse_engineering_patch_entry.md (PE-2 section)
-[NEXT]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX
-[TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
+[DONE]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX (2026-06-09)
+          387e9916… FC20 timeout → si2 @ 0x764 fix (patch_entry_si2.S).
+          c14e18f5… FC20 OK; HCI 0x2036 hang (libre NOP tail).
+          7f051e64… **connect OK** `88:C9:E8:6B:F9:1E`: libre `[0,0x764)` via patch_entry_* +
+          `make full-inject-t3-pe5-vendor-tail` (vendor tail `[0xE4C,…)` interim).
+          Remaining libre gap: `[0x820,0xE4C)` vs 4099 (patch_entry_tail); tail still vendor.
+          → analysis/reverse_engineering_patch_entry.md (PE-5 section)
+[NEXT]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
 [TODO]  Run compliance checks against linux-libre blob policy

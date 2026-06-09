@@ -10,7 +10,8 @@
  *   [0x05D8, 0x0724) helper functions (vendor blob interim, PE-3)
  *   [0x0724, 0x0754) sub_installer_1
  *   [0x0754, 0x0764) fn_bss_init
- *   [0x0764, …)     patch_entry tail + hook bodies
+ *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
+ *   [0x0821, …)     patch_entry tail + hook bodies
  */
 
 ENTRY(patch_entry)
@@ -31,8 +32,9 @@ SECTIONS {
         . = __prefix_start + 0x754;
         *(.text.bss_init)
         . = __prefix_start + 0x764;
-        __prefix_end = .;
+        *(.text.si2)
         *(.text.entry.tail)
+        __prefix_end = .;
         *(.text.hooks)
         *(.text)
         *(.rodata .rodata.*)
