@@ -63,7 +63,7 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size
+.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix
 
 # Docker builds must see vendor patch0 (chip_id=1 slot).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -267,6 +267,11 @@ rtl8761bu_fw.bin: build/patch_padded.bin pack.py
 
 rtl8761bu_config.bin: gen_config.py
 	$(PYTHON) gen_config.py $@
+
+# Byte-diff libre patch.bin vs vendor patch1 prefix (patch_entry RE progress)
+diff-prefix: build/patch.bin scripts/diff_vendor_prefix.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) scripts/diff_vendor_prefix.py build/patch.bin --vendor-fw $(NF_REF)
 
 verify: rtl8761bu_fw.bin
 	@test -f build/.profile || (echo "run make first" && exit 1)

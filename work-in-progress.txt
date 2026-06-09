@@ -689,7 +689,8 @@ PHASE 7 — TEST
           SHA 4099d4bd… (differs from split764 inject 51340e31… — libre [0x764,0xE4C) layout).
 [DONE]  Hardware full-inject-t3-vendor-tail (4099d4bd…) connect OK (2026-06-09)
           FC20 OK, fw 0x09a98a6b, connect 88:C9:E8:6B:F9:1E. Production profile confirmed.
-[NEXT]  Incremental libre patch_entry RE [0,0x764) to replace vendor .incbin prefix
+[NEXT]  patch_entry RE phase PE-0: linker anchors + helper region [0x5d8,0x724)
+          See analysis/reverse_engineering_patch_entry.md; make diff-prefix
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
