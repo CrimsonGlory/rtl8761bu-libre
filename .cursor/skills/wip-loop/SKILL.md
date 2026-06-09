@@ -19,16 +19,22 @@ instead of manually opening a new agent after each step.
 | **Worker** | Task subagent (`generalPurpose`) | Execute exactly one `[NEXT]` item |
 | **Supervisor** | This agent (outer) | Snapshot state, launch worker, commit, decide loop/stop |
 
-## Worker prompt (verbatim)
+## Worker prompts
 
-Pass this exact text to each subagent:
+**Default** — use when `work-in-progress.txt` has at least one `[NEXT]` line:
 
 ```
 Check work-in-progress.txt continue with NEXT step
 ```
 
+**First TODO** — use when there is no `[NEXT]` but at least one `[TODO]` remains (typical after a worker added `[DONE]` but forgot to promote the first `[TODO]` to `[NEXT]`):
+
+```
+Check work-in-progress.txt and work on the first [TODO] item
+```
+
 Add project context only if the subagent needs it (repo root, `CLAUDE.md`, wairz for Ghidra).
-Do not change the worker prompt unless the user asks.
+Do not change these prompts unless the user asks.
 
 ## Supervisor loop
 
@@ -43,11 +49,17 @@ Repeat until a stop condition fires:
 
 ### 2. Launch worker
 
+Pick the prompt before launching:
+
+- `[NEXT]` exists → **default** worker prompt
+- no `[NEXT]` but `[TODO]` exists → **first TODO** worker prompt
+- neither → stop (`STOP_REASON=no_work`)
+
 Use the **Task** tool:
 
 - `subagent_type`: `generalPurpose`
-- `description`: short label for the current `[NEXT]` line (read from `work-in-progress.txt`)
-- `prompt`: the worker prompt above, plus any minimal paths the subagent needs
+- `description`: short label for the current `[NEXT]` or first `[TODO]` line (read from `work-in-progress.txt`)
+- `prompt`: the chosen worker prompt above, plus any minimal paths the subagent needs
 
 Wait for the subagent to finish before continuing.
 
@@ -62,11 +74,15 @@ Parse `SHOULD_COMMIT`, `SHOULD_CONTINUE`, `STOP_REASON`, and `DONE_DELTA`.
 | `STOP_REASON` | Meaning |
 |---------------|---------|
 | `continue` | `[DONE]` rose by ≥1, `[NEXT]` still exists → commit, then loop |
-| `complete` | `[DONE]` rose by ≥1, no `[NEXT]` left → commit, then stop |
+| `todo_continue` | `[DONE]` rose by ≥1, no `[NEXT]`, but `[TODO]` remains (worker did not promote first `[TODO]` to `[NEXT]`) → commit, then loop with **first TODO** prompt |
+| `complete` | `[DONE]` rose by ≥1, no `[NEXT]` and no `[TODO]` left → commit, then stop |
 | `no_progress` | `[DONE]` did not rise → stop without commit |
 | `blocked` | `[BLOCKED]` count rose → stop without commit; report to user |
+| `failed` | `[FAILED]` count rose → stop without commit; report to user |
 
 **Progress rule:** `[DONE]` must increase by **at least 1**. Multiple new `[DONE]` lines in one step is fine.
+
+**Forgot-to-promote rule:** If the worker added `[DONE]` but left the first item as `[TODO]` (no `[BLOCKED]` / `[FAILED]`), treat it as progress: commit and continue. The next iteration automatically uses the **first TODO** prompt (step 2).
 
 ### 4. Commit (when `SHOULD_COMMIT=yes`)
 
@@ -106,10 +122,14 @@ Run the wip-loop skill. Max 5 iterations.
 
 ## Manual single step (unchanged workflow)
 
-For one step without the loop, paste only the worker prompt:
+For one step without the loop, paste the default worker prompt, or the **first TODO** prompt if there is no `[NEXT]`:
 
 ```
 Check work-in-progress.txt continue with NEXT step
 ```
 
-Then commit yourself after verifying `[NEXT]` moved to `[DONE]`.
+```
+Check work-in-progress.txt and work on the first [TODO] item
+```
+
+Then commit yourself after verifying the active item moved to `[DONE]` and the next `[TODO]` became `[NEXT]` (when applicable).

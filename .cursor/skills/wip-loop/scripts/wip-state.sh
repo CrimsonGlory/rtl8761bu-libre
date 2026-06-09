@@ -15,7 +15,9 @@ count_tag() {
 read_counts() {
   echo "DONE=$(count_tag DONE)"
   echo "NEXT=$(count_tag NEXT)"
+  echo "TODO=$(count_tag TODO)"
   echo "BLOCKED=$(count_tag BLOCKED)"
+  echo "FAILED=$(count_tag FAILED)"
 }
 
 get_var() {
@@ -54,22 +56,30 @@ case "$cmd" in
     before_done="$(get_var "$2" DONE)"
     before_next="$(get_var "$2" NEXT)"
     before_blocked="$(get_var "$2" BLOCKED)"
+    before_failed="$(get_var "$2" FAILED)"
 
     after_done="$(count_tag DONE)"
     after_next="$(count_tag NEXT)"
+    after_todo="$(count_tag TODO)"
     after_blocked="$(count_tag BLOCKED)"
+    after_failed="$(count_tag FAILED)"
 
     done_delta=$((after_done - before_done))
     blocked_delta=$((after_blocked - before_blocked))
+    failed_delta=$((after_failed - before_failed))
 
     echo "DONE_BEFORE=$before_done"
     echo "DONE_AFTER=$after_done"
     echo "DONE_DELTA=$done_delta"
     echo "NEXT_BEFORE=$before_next"
     echo "NEXT_AFTER=$after_next"
+    echo "TODO_AFTER=$after_todo"
     echo "BLOCKED_BEFORE=$before_blocked"
     echo "BLOCKED_AFTER=$after_blocked"
     echo "BLOCKED_DELTA=$blocked_delta"
+    echo "FAILED_BEFORE=$before_failed"
+    echo "FAILED_AFTER=$after_failed"
+    echo "FAILED_DELTA=$failed_delta"
 
     if (( blocked_delta > 0 )); then
       echo "SHOULD_COMMIT=no"
@@ -78,11 +88,23 @@ case "$cmd" in
       exit 1
     fi
 
+    if (( failed_delta > 0 )); then
+      echo "SHOULD_COMMIT=no"
+      echo "SHOULD_CONTINUE=no"
+      echo "STOP_REASON=failed"
+      exit 1
+    fi
+
     if (( done_delta >= 1 )); then
       echo "SHOULD_COMMIT=yes"
       if (( after_next >= 1 )); then
         echo "SHOULD_CONTINUE=yes"
         echo "STOP_REASON=continue"
+        exit 0
+      fi
+      if (( after_todo >= 1 )); then
+        echo "SHOULD_CONTINUE=yes"
+        echo "STOP_REASON=todo_continue"
         exit 0
       fi
       echo "SHOULD_CONTINUE=no"
