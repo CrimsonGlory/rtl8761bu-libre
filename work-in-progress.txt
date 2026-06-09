@@ -316,12 +316,55 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
                        FUN_8005ca00
           → analysis/reverse_engineering_sco_esco_layer.md (Group D added)
 
-[NEXT]  Resolve FUN_8010b4d0 unresolved tail-call (Ghidra UNRECOVERED_JUMPTABLE at 0x8010b5b4)
-          The value at 0x8010b5b4 = 0x6305ef00 (NOT_PTR). Likely a MIPS16e switch-case
-          jumptable or computed branch that Ghidra cannot analyze statically.
-          Method: Manual byte decode of the last 8 bytes of FUN_8010b4d0:
-                  `49 e3 40 f2 74 aa 8c eb` — decode as MIPS16e to find the jump target.
-          Alternative: Try wairz emulation if available.
+[DONE]  Resolve FUN_8010b4d0 unresolved tail-call (2026-06-08)
+          RESOLVED — FALSE ALARM. The "UNRECOVERED_JUMPTABLE" at 0x8010b5b4 is simply
+          `jr a3` = standard MIPS16e function return. Full epilogue:
+            8010b5ae: lw a3, 0x24(sp)   ; restore saved ra (was: sw ra,0x24(sp) in prologue)
+            8010b5b0: lw s1, 0x20(sp)   ; restore s1
+            8010b5b2: lw s0, 0x1c(sp)   ; restore s0
+            8010b5b4: jr a3             ; RETURN (Ghidra lost track that a3=saved ra)
+            8010b5b6: addiu sp, 0x28    ; delay-slot: restore stack
+          The 8 bytes `49 e3 40 f2 74 aa 8c eb` (at 0x8010b514-0x8010b51b) are the last
+          bytes of the 76-byte function body: addu + lhu v1,0x254(v0) + and — normal ops.
+          The value 0x6305ef00 at 0x8010b5b4 is two MIPS16e instruction words (jr + addiu).
+          FUN_8010b4d0 is FULLY RESOLVED — no switch table, no indirect jump.
+
+          COMPLETE DECOMPILE (from AnalyzeB4D0Tail.java via GZF process mode):
+          Function: void FUN_8010b4d0(int cap_pdu, undefined4 p2, uint conn_idx)
+          - param_3 (conn_idx) &= 0xff; offset = conn_idx * 0x1ac
+          - conn_rec = large2_base_8010b5b8 + offset   (0x80123a20-based array)
+          - Copies cap_pdu fields into conn_rec: +0x3c (byte), +0x3e (u16), +0x40 (u16)
+          - Sets conn_rec+0x90 bit 1 ("pending")
+          - If cap_flags[conn]+0x254 bit 1 set: call cancel_fn (ROM 0x8001d4a0,odd), clear bit
+          - If not-active (conn_rec+0x90 & 1 == 0):
+              If no timers (conn_rec+0x7c==0 && +0x78==0):
+                conn_rec+0x7c = 0x20; call (**0x8012082c)(conn_idx, 6); set active bit
+                ts = ROM FUN_8005e23c(); ROM FUN_8005d26c(ts, conn_idx)
+                ROM FUN_8005ca00(conn_rec, 0xc, 2); update conn_rec+0x8f bit4
+              else: conn_rec+0x8f |= 0x10
+          - else (already active): call (**0x80120958)(conn_rec, 0x20, 1)
+          - return
+
+          TWO NEW LITERAL POOL ENTRIES (previously missed):
+            0x8010b5c4 → 0x8012082c  RAM fn-ptr slot (double-indirect call)
+            0x8010b5d4 → 0x80120958  RAM fn-ptr slot (double-indirect call)
+          FULL POOL: b5b8=0x80123a20 (struct[1].f0), b5bc=0x8012382c (struct base),
+            b5c0=0x8001d4a1 (ROM:cancel/send_HCI_event), b5c4=0x8012082c (ind fn ptr),
+            b5c8=0x8005e23d (ROM:get_ts), b5cc=0x8005d26d (ROM:record_ts),
+            b5d0=0x8005ca01 (ROM:set_cap_bit), b5d4=0x80120958 (ind fn ptr)
+          NEW function FUN_8010b5d8 starts immediately after the literal pool.
+          → analysis/reverse_engineering_sco_esco_layer.md (FUN_8010b4d0 section updated)
+
+
+[NEXT]  Decompile FUN_8010b5d8 (discovered at end of FUN_8010b4d0 literal pool, 2026-06-08)
+          Address: 0x8010b5d8 (DATA block). Prologue: addiu sp,-0x20 / sw ra,0x1c(sp) /
+          sw s1,0x18(sp) / sw s0,0x14(sp). Size unknown — appears to be a normal function
+          with s0/s1/ra saved. Use DecompileAddr.java or a new script.
+
+[TODO]  Identify functions at RAM fn-ptr slots 0x8012082c and 0x80120958
+          FUN_8010b4d0 double-indirect calls: (**0x8012082c)(conn_idx, 6) and
+          (**0x80120958)(conn_rec, 0x20, 1). Need to know what fns are installed there
+          by the master installer (to complete the FUN_8010b4d0 libre implementation).
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

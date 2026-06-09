@@ -5,9 +5,11 @@ Covers 26 functions from the DATA block across four analysis passes:
 - **Group B** (Appendix D hook targets): 5 functions installed as first-batch hooks
 - **Group C** (2026-06-08 second pass): 9 functions — `FUN_80110868` + 8 from `FUN_8010a84c` pool
 - **Group D** (2026-06-08 third pass): 2 PATCH functions from `FUN_8010ce0c` AFH init chain
+- **Tail-call resolution** (2026-06-08): `FUN_8010b4d0` fully resolved; `jr a3` = normal return
 
 All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.java` /
-`DecompileHookFnsBatch.java` against GZF `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
+`DecompileHookFnsBatch.java` / `AnalyzeB4D0Tail.java` against GZF
+`2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
 
 ---
 
@@ -50,7 +52,7 @@ All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.ja
 | `FUN_8010e350` | 1174B | **REAL** | AFH quality ranking engine (79 channels) |
 | `FUN_8010bda0` | 114B | **REAL** | SCO/eSCO negotiation acceptance validator |
 | `FUN_8010c09c` | 76B | **REAL** | Baseband register capability gate |
-| `FUN_8010b4d0` | 76B | **REAL** | eSCO slot allocation trigger (partial — unresolved tail call) |
+| `FUN_8010b4d0` | 76B | **REAL** | eSCO slot allocation trigger (FULLY RESOLVED 2026-06-08) |
 
 ### Group D — AFH Init Chain PATCH Functions (2026-06-08)
 
@@ -1126,69 +1128,108 @@ control, and retransmission features. Clearing them disables those features for 
 
 ---
 
-### FUN_8010b4d0 (76B) — eSCO Slot Allocation Trigger
+### FUN_8010b4d0 (76B) — eSCO Slot Allocation Trigger ✓ FULLY RESOLVED (2026-06-08)
 
 **Role:** Receives incoming eSCO capability data (packet type fields from an LMP PDU),
 stores it in the per-connection struct, and triggers slot allocation if the connection
-is not yet active. Has an unresolved tail-call indirect jump at the end.
+is not yet active. Operates on the 0x80123a20-based stride-0x1ac struct array.
 
-**Decompile (condensed):**
+**Resolution of "UNRECOVERED_JUMPTABLE":** The Ghidra warning at `0x8010b5b4` is a
+false alarm. The bytes `00 ef` = `jr a3` — a standard MIPS16e function return.
+The function prologue saved `ra` to `sp+0x24`; the epilogue restores it into `a3` and
+returns via `jr a3`. Ghidra lost track that `a3 = saved_ra`.
+
+Full epilogue (MIPS16e):
+```
+8010b5ae: lw  a3, 0x24(sp)   ; restore saved ra into a3
+8010b5b0: lw  s1, 0x20(sp)   ; restore s1
+8010b5b2: lw  s0, 0x1c(sp)   ; restore s0
+8010b5b4: jr  a3             ; RETURN (jr a3, not jr ra)
+8010b5b6: addiu sp, 0x28     ; delay-slot: restore stack pointer
+```
+
+**Full decompile (from Ghidra via AnalyzeB4D0Tail.java, 2026-06-08):**
 ```c
 void FUN_8010b4d0(int cap_pdu, undefined4 p2, uint conn_idx) {
     conn_idx &= 0xff;
-    uint offset = conn_idx * 0x1ac;
-    undefined2 *conn = conn_base + offset;
+    int offset = conn_idx * 0x1ac;
 
-    // Store capability fields from PDU into connection record
-    conn[0x1e] = *(byte*)(cap_pdu + 1);         // packet type byte
-    conn[0x1f] = *(ushort*)(cap_pdu + 2);        // field A
-    conn[0x20] = *(ushort*)(cap_pdu + 4);        // field B
-    *(byte*)(conn + 0x48) |= 2;                  // set "pending" bit
+    // conn = &struct2_array[conn_idx]  (0x80123a20-based, stride 0x1ac)
+    undefined2 *conn = (undefined2 *)(0x80123a20 + offset);
 
-    // Cancel any queued timer for this connection
-    if (*(ushort*)(conn + 0x254) & 2) {
-        (*cancel_fn)(0, *conn, conn_idx + 10);
-        conn[0x254] &= ~2;
+    // Store capability fields from incoming LMP PDU into connection struct
+    // (byte offsets: conn+0x3c, conn+0x3e, conn+0x40)
+    *(byte  *)(conn + 0x1e) = *(byte  *)(cap_pdu + 1);    // +0x3c: pkt-type byte
+    conn[0x1f]              = *(ushort *)(cap_pdu + 2);    // +0x3e: field A (u16)
+    conn[0x20]              = *(ushort *)(cap_pdu + 4);    // +0x40: field B (u16)
+    *(byte  *)(conn + 0x48) |= 2;                          // +0x90: set "pending" bit 1
+
+    // Check cap-flags (struct1 array, 0x8012382c-based) for pending timer
+    ushort *cap_base = (ushort *)0x8012382c;
+    if ((*(ushort *)(cap_base + offset/2 + 0x12a) & 2) != 0) {  // struct1[conn]+0x254
+        // Cancel timer: ROM FUN_8001d4a0 (send_HCI_Read_Remote_Version_Info_Complete)
+        (*FUN_8001d4a0)(0, *conn, conn_idx + 10);
+        *(ushort *)(cap_base + offset/2 + 0x12a) &= 0xfffd;     // clear bit 1
     }
 
-    if ((*(byte*)(conn + 0x48) & 1) == 0) {      // not yet active
-        if (conn[0x3e] == 0 && conn[0x3c] == 0) { // no timers pending
-            conn[0x3e] = 0x20;                    // set slot count
-            (*indirect_call)(conn_idx, 6);         // trigger connection with type=6
-            *(byte*)(conn + 0x48) |= 1;           // mark active
-            uint ts = (*get_timestamp)();
-            (*record_fn)(ts, conn_idx);
-            (*set_timer)(conn, 0xc, 2);           // start timers
-            // Update bit 4 of conn[0x8f] based on timer state
+    if ((*(byte *)(conn + 0x48) & 1) == 0) {    // not yet active (bit 0 of +0x90 clear)
+        if ((*(int *)(conn + 0x3e) == 0) &&      // +0x7c: no timer B
+            (*(int *)(conn + 0x3c) == 0)) {      // +0x78: no timer A
+            *(int *)(conn + 0x3e) = 0x20;        // +0x7c = 0x20 (slot count)
+            (**(code **)0x8012082c)(conn_idx, 6);// indirect: connection trigger (type 6)
+            *(byte *)(conn + 0x48) |= 1;         // +0x90: mark active (bit 0)
+            uint ts = (*FUN_8005e23c)();          // ROM: get connection config struct
+            (*FUN_8005d26c)(ts, conn_idx);        // ROM: insert ptr at struct+0x134
+            (*FUN_8005ca00)(conn, 0xc, 2);        // ROM: set cap bit at struct+0x84/0x88
+            if ((*(byte *)((int)conn + 0x8f) & 0x10) == 0)
+                return;                           // bit 4 clear: done
+            *(byte *)((int)conn + 0x8f) &= 0xef; // clear bit 4
         } else {
-            conn[0x8f] |= 0x10;
+            *(byte *)((int)conn + 0x8f) |= 0x10; // set bit 4 (deferred)
         }
     } else {
-        (*update_active_fn)(conn, 0x20, 1);       // update existing active record
+        (**(code **)0x80120958)(conn, 0x20, 1);  // indirect: update active record
     }
-    (*UNRECOVERED_JUMPTABLE)();  // tail-call to next handler (indirect jump)
+    // Standard MIPS16e epilogue: lw a3,0x24(sp); lw s1; lw s0; jr a3; addiu sp,0x28
 }
 ```
 
-**Unresolved tail call:** Ghidra cannot statically resolve the indirect jump target.
-This is likely `jr $t9` to a function pointer loaded from a literal pool address that was
-not captured in the literal pool dump. The tail call goes to a "connection continue" handler.
+**Struct fields (byte offsets within 0x1ac-stride array at 0x80123a20):**
 
-**Literal pool (key values):**
+| Offset | Size | Content |
+|--------|------|---------|
+| `+0x3c` | byte | Packet-type byte from LMP PDU |
+| `+0x3e` | u16 | PDU field A |
+| `+0x40` | u16 | PDU field B |
+| `+0x78` | u32 | Timer A (0 = no timer) |
+| `+0x7c` | u32 | Timer B (set to 0x20 on trigger) |
+| `+0x8f` | byte | State flag byte (bit 4 = deferred) |
+| `+0x90` | byte | Status flags (bit 0 = active, bit 1 = pending) |
 
-| Symbol | Value | Role |
-|--------|-------|------|
-| `PTR_base_of_0x1ac_struct_array_..._8010b5b8` | `0x8012????` | Connection struct array base |
-| `PTR_base_of_0x1ac_struct_array_..._8010b5bc` | `0x8012????` | Same or parallel array |
-| `DAT_8010b5c0` | fn ptr | Cancel/dequeue timer |
-| `PTR_DAT_8010b5c4` | fn ptr ptr | Connection trigger (indirect) |
-| `DAT_8010b5c8` | fn ptr | Get timestamp |
-| `DAT_8010b5cc` | fn ptr | Record timestamp + conn_idx |
-| `DAT_8010b5d0` | fn ptr | Set timer |
-| `PTR_DAT_8010b5d4` | fn ptr ptr | Update active connection (indirect) |
+`+0x254` (in the **0x8012382c**-based array) = capability/timer flags halfword (bit 1 = cancel pending).
 
-**Libre:** Must implement — stores eSCO capability data and triggers slot allocation.
-The unresolved tail call needs manual resolution via disassembly of the literal pool.
+**Full literal pool:**
+
+| Pool addr | Value | Role |
+|-----------|-------|------|
+| `0x8010b5b8` | `0x80123a20` | Base of struct2 array (stride 0x1ac, 10 elements) — `[1].field0` offset |
+| `0x8010b5bc` | `0x8012382c` | Base of struct1 array (stride 0x1ac) — for cap-flags at +0x254 |
+| `0x8010b5c0` | `0x8001d4a1` | ROM `FUN_8001d4a0` (odd = MIPS16e): send HCI_Read_Remote_Version_Info_Complete |
+| `0x8010b5c4` | `0x8012082c` | RAM fn-ptr slot — double-indirect call: `(**0x8012082c)(conn_idx, 6)` |
+| `0x8010b5c8` | `0x8005e23d` | ROM `FUN_8005e23c` (odd): access config at 0xa5 / copy LMP company ID |
+| `0x8010b5cc` | `0x8005d26d` | ROM `FUN_8005d26c` (odd): insert ptr into 0x1ac struct at offset +0x134 |
+| `0x8010b5d0` | `0x8005ca01` | ROM `FUN_8005ca00` (odd): set bit in capacity bitmask at +0x84/+0x88 |
+| `0x8010b5d4` | `0x80120958` | RAM fn-ptr slot — double-indirect call: `(**0x80120958)(conn, 0x20, 1)` |
+
+The two RAM fn-ptr slots (`0x8012082c`, `0x80120958`) are installed by the master installer
+and point to ROM or patch functions for connection trigger and active-record update.
+
+**New function discovered:** `FUN_8010b5d8` starts at `0x8010b5d8` (immediately after this
+function's literal pool). Prologue: `addiu sp,-0x20 / sw ra,0x1c(sp) / sw s1 / sw s0`.
+
+**Libre:** Must implement. All 3 ROM calls go to fixed addresses. The 2 double-indirect
+calls need the fn-ptr slots (`0x8012082c`, `0x80120958`) populated by the installer.
+Function semantics are fully clear from the decompile.
 
 ---
 
@@ -1236,7 +1277,20 @@ The unresolved tail call needs manual resolution via disassembly of the literal 
 | `DAT_8010d144` = `FUN_8000c3f4` | `FUN_8010ce0c` | **RESOLVED** — ROM 414B; AFH channel map updater |
 | `DAT_8010d14c` = `FUN_800122b8` | `FUN_8010ce0c` | **RESOLVED** — ROM 64B; extracts AFH cap param (arg=1) |
 | `DAT_8010d150` = `FUN_8010ccb8` | `FUN_8010ce0c` | **RESOLVED** — PATCH 264B; AFH HW reg configurator (see Group D) |
-| unresolved tail | `FUN_8010b4d0` | **STILL UNRESOLVED** — Ghidra "Too many branches" at 0x8010b5b4 |
+| `jr a3` epilogue | `FUN_8010b4d0` | **RESOLVED (2026-06-08)** — `jr a3` = normal MIPS16e return (a3 = saved ra); NOT a jump table |
+
+### RAM function-pointer slots (double-indirect, identity TBD)
+
+| RAM slot addr | Caller | Call prototype | Status |
+|---------------|--------|----------------|--------|
+| `0x8012082c` | `FUN_8010b4d0` | `fn(conn_idx, 6)` — connection trigger type-6 | Installed by master installer; target unknown |
+| `0x80120958` | `FUN_8010b4d0` | `fn(conn_rec, 0x20, 1)` — update active record | Installed by master installer; target unknown |
+
+### Newly discovered PATCH functions (not yet analyzed)
+
+| Address | Discovered from | Prologue | Notes |
+|---------|-----------------|----------|-------|
+| `FUN_8010b5d8` | After `FUN_8010b4d0` literal pool | `addiu sp,-0x20 / sw ra,0x1c / sw s1 / sw s0` | Size unknown; full function |
 
 All ROM functions (`0x8000xxxx` – `0x8007xxxx`) are **called by address** from the libre
 firmware — no reimplementation needed.
@@ -1414,7 +1468,7 @@ ROM calls: `FUN_80011510` (read), `FUN_80011608` (write), `FUN_80011a74` (final)
 |----------|-----------------|-----------|-------------|----------|
 | `FUN_8010c09c` | ~15 | 2 | 0 | MEDIUM (capability gate) |
 | `FUN_8010bda0` | ~40 | 2 | 0 | MEDIUM (SCO validator) |
-| `FUN_8010b4d0` | ~40 | 5 | 0 | MEDIUM (slot trigger; partial) |
+| `FUN_8010b4d0` | ~50 | 5 | 0 | MEDIUM (slot trigger; fully resolved) |
 | `FUN_80110868` | ~120 | 1 | 0 | HIGH (codec ring buffer) |
 | `FUN_8010fa34` | ~60 | 3 | 0 | HIGH (AFH 79-ch merger) |
 | `FUN_8010fb08` | ~100 | 4 | 0 | HIGH (BLE 40-ch aggregator) |
