@@ -527,8 +527,16 @@ PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
 
 PHASE 5 — DESIGN THE LIBRE REPLACEMENT
 ----------------------------------------
-[NEXT]  Define libre patch binary layout (header + code structure)
-[TODO]  Decide which ROM hooks are mandatory vs. optional
+[DONE]  Define libre patch binary layout (header + code structure) (2026-06-09)
+          Single-patch EPatch v2 envelope (chip_id=2, 27,808 B @ file 0x30,
+          9-byte "Realtechk" magic, 72 B extension). PRAM entry @ 0x8010A000,
+          section model (.text.entry / .text.hooks / .rodata), boot order,
+          hook-install map, tiered growth strategy (single-patch through T2).
+          pack.py needs 9-byte magic fix (documented). Load-base 0x80103780 vs
+          0x8010A000 flagged for hardware confirmation.
+          → analysis/reverse_engineering_libre_patch_layout.md (new)
+
+[NEXT]  Decide which ROM hooks are mandatory vs. optional
 [TODO]  Design stub implementations for non-critical functions
 [TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
 [TODO]  Write design document for libre patch architecture
