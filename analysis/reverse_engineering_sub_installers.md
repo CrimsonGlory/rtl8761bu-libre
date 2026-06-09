@@ -285,24 +285,16 @@ See `reverse_engineering_hardware_layer.md` and `reverse_engineering_rom_regs.md
 
 ## What the Libre Replacement Must Provide (Revised)
 
-The `bos_base+0xe4` hook is installed by ROM `FUN_80025b68` at connection time.
-The libre firmware does **not** need to install it.  Requirements are:
-
-1. Ensure the SCO/eSCO connection setup path reaches ROM `FUN_80025b68`
-2. The RAM buffer at `bos_base + 0x13e` (≥ 0x40 bytes) must exist (ROM allocates this)
-3. Decode ROM codec templates (`PTR_DAT_80025ca8`, `PTR_DAT_80025cac`) to confirm
-   they only call ROM functions and don't depend on patch code
-
-The remaining unknown is whether the code templates in ROM call into the non-free
-firmware for any sub-operations.  If they call only ROM functions, the libre firmware
-needs no hardware-write hook at all.
+The per-connection `crypto_struct+0xe4` hook is installed by ROM `FUN_80025b68` at
+SSP pairing time.  The global `bos_base+0xe4` slot at `0x801212e4` is separate and
+stays NULL.  The libre firmware does **not** need to install either.  See
+`reverse_engineering_hardware_layer.md` Section 12 for full decompile + verdict.
 
 ---
 
 ## Next Steps (Phase 2 Remaining)
 
 - [ ] Analyze patch 0 (file `0x30`–`0x3780`) — different IC subversion variant
-- [ ] Read ROM codec templates `PTR_DAT_80025ca8` / `PTR_DAT_80025cac` — disassemble
-      the 48/64-byte MIPS16e code blocks to confirm they are self-contained ROM calls
-- [ ] Identify what calls ROM `FUN_80025b68` in the connection-setup chain
-- [ ] Document exact prototype and behavior of hardware-write hook
+- [x] Read ROM codec templates — unscramble algorithm + first-insn decode confirmed (2026-06-09)
+- [x] Identify what calls ROM `FUN_80025b68` — SSP IO-cap exchange (2026-06-08)
+- [x] Document exact prototype and behavior of hardware-write hook — Section 12 (2026-06-09)

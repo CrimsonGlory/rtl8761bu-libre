@@ -72,7 +72,8 @@ LMP_eSCO_link_req encoding.
 
 - **Location:** `0x801212e4` (RAM)
 - **Type:** `uint8_t (*)(hw_obj_t *obj, uint8_t *result_buf)`
-- **Installed by:** ROM `FUN_80025b68` at SCO/eSCO connection setup time (**not** the patch)
+- **Installed by:** nothing in analyzed firmware (stays NULL); see Section 12 for the
+  separate per-connection hook installed by ROM `FUN_80025b68` during SSP pairing
 - **ROM default:** `NULL` until `FUN_80025b68` runs
 - **Effect if NULL:** ROM fallback runs (validation only; no hardware registers written)
 - **Effect if set:** called with `(obj, result_buf)`; executes runtime-generated MIPS16e code
@@ -248,12 +249,14 @@ In a system with no patch loaded:
 
 ### Critical (revised 2026-06-08)
 
-The `0x801212e4` hook is **installed by ROM `FUN_80025b68`**, not by the patch.
-The libre firmware does **not** need to write its own function there.  What matters is:
+The global `0x801212e4` hook is **never populated** in the analyzed firmware (see
+Section 12).  Per-connection JIT code lives at `crypto_struct+0x13e`, installed by
+ROM `FUN_80025b68` during SSP pairing.  The libre firmware does **not** need to
+write either hook.  What matters is:
 
-1. The SCO/eSCO connection setup chain must reach ROM `FUN_80025b68`.
-2. `FUN_80025b68` must be able to find the correct codec tables in ROM (they are in ROM, fixed).
-3. The RAM buffer at `bos_base + 0x13e` (size ≥ 0x40 bytes) must exist and be writable — it is part of the per-connection sub-struct allocated by ROM.
+1. The SSP pairing path must reach ROM `FUN_80025b68` (automatic via ROM LMP state machine).
+2. `FUN_80025b68` must find codec tables in ROM (fixed addresses, initialized by `FUN_800225a8`).
+3. Per-connection `crypto_struct+0x13e` buffer (≥ 0x40 bytes) must exist — ROM allocates it.
 
 **Resolved (2026-06-08):** the ROM codec templates at `PTR_DAT_80025ca8` /
 `PTR_DAT_80025cac` are fully initialized and executed by ROM — the libre firmware
@@ -679,3 +682,130 @@ immediately adjacent in ROM memory to the packet-type lookup tables.
 `FUN_80044730` and both tables are 100% ROM.  The callers at `0x80047ca6` and
 `0x80047edc` are also ROM functions dispatched by the BT stack's SCO/eSCO setup path.
 The libre firmware requires **zero implementation** for this subsystem.
+
+---
+
+## 12 — Hardware-Write Hook: Final Resolution (2026-06-09)
+
+The Phase 3 BLOCKED item ("decompile the hardware-write hook at `0x801212e4`") is
+**resolved**.  There is no single patch function to decompile.  Two distinct `+0xe4`
+hook mechanisms exist; only the per-connection one carries real generated code.
+
+### 12.1 — Global hook: `0x801212e4` (`bos_base+0xe4`)
+
+**Reader:** ROM `FUN_8004f824` @ `0x8004f824` (106 B), via literal pool
+`PTR_DAT_8004f890 → 0x801212e4`.
+
+```c
+undefined1 FUN_8004f824(hw_obj_t *obj)
+{
+    uint8_t result[8];
+    code *hook = *(code **)0x801212e4;
+
+    if (hook != NULL) {
+        if (hook(obj, result) != 0)
+            return result[0];          // hook handled — use its return byte
+        // hook returned 0 → fall through to ROM clamp below
+    }
+    if ((obj[0x08] & 7) == 0)
+        return 5;                        // conn type unset
+    if (obj[0x09] + obj[0x11] + 1 > 0xFF)
+        obj[0x11] = 0xFE - obj[0x09];   // clamp slot budget
+    return 0;
+}
+```
+
+**Prototype (if ever non-NULL):**
+
+```c
+/* Returns non-zero if handled; writes status byte to result_buf[0]. */
+uint8_t hw_write_hook(hw_obj_t *obj, uint8_t result_buf[8]);
+```
+
+**Writer:** none.  Full-GZF `ScanStoreOffsets.java` scan (213,799 insns) found
+**zero** `sw` targets to `0x801212e4`.  GZF DATA-block snapshot: `*0x801212e4 = 0`
+(NULL).  The non-free patch does not install here either.
+
+**Libre implication:** leave `0x801212e4` NULL.  `FUN_8004f824` then performs
+validation/clamping only.  **No stub required.**
+
+### 12.2 — Per-connection hook: `crypto_struct+0xe4` → `+0x13e`
+
+**Installer:** ROM `FUN_80025b68` @ `0x80025b68` (300 B), triggered during **SSP IO
+capability exchange** (see Section 9).
+
+```c
+void FUN_80025b68(uint conn_idx, /* role_bit in a1 selects template variant */)
+{
+    crypto_struct *cs = conn_array[conn_idx & 0xffff]._x58;
+
+    cs[0xe0] = FUN_800240a4(conn_idx);   // codec-type byte
+    cs[0xe1] = 1;
+    cs[0xe2] = (cs[0x214] ? 2 : 1);
+    *(void **)(cs + 0xe4) = cs + 0x13e;   // hook → in-struct code buffer
+    cs[0xe3] = (cs[0x214] ? 0x40 : 0x30); // template size
+
+    FUN_80024218(conn_idx, role_template_ptr);  // may call LMP__268 gateway
+
+    if (cs[0x50] == 1) {
+        // Un-scramble codec template into cs+0x13e (half-reversal, see Section 9)
+        if (cs[0x1f1] == 6)  copy_unscramble(PTR_DAT_80025ca8 + role*0x30, cs+0x13e, 0x30);
+        if (cs[0x1f1] == 8)  copy_unscramble(PTR_DAT_80025cac + role*0x40, cs+0x13e, 0x40);
+        FUN_800688b0(conn_idx, cs+0xe0, ...);   // queue LMP-side dispatch
+    } else {
+        FUN_80068428(conn_idx, cs+0xe0, ...);   // alternate path
+    }
+    set_arg1_1_to_arg2(cs, tag);
+}
+```
+
+This is **not** the same address as global `0x801212e4`.  `FUN_80025b68` writes
+`sw v0, 0xe4(s0)` where `s0` is the per-connection `crypto_struct` pointer loaded
+from `conn_rec+0x58` — not `bos_base`.
+
+### 12.3 — Template code (the actual "hook body")
+
+| Property | codec-6 | codec-8 |
+|----------|---------|---------|
+| Template size | `0x30` (48 B) | `0x40` (64 B) |
+| Half size | `0x18` | `0x20` |
+| Staging base | `PTR_DAT_80025ca8 → 0x8012205c` | `PTR_DAT_80025cac → 0x801220ec` |
+| ROM source (h0) | `0x80079f0c` | `0x8007a07c` |
+| Role selector | `config[0x47]` byte | same |
+
+**Codec-6 h0 — first MIPS16e instructions after unscramble** (verified against ROM
+`0x80079f0c` staging bytes, identical to GZF DATA block):
+
+```
++00: 0x736f  cmpi    v1, 0x6f
++02: 0xc519  sb      s0, 0x19(a1)
++04: 0xd353  swsp    v1, 332(sp)
++06: 0x48a9  addiu   s0, -0x57
++08: 0x4c54  addiu   a0, 0x54
++0a: 0x57f4  slti    a3, 0xf4
++0c: 0x13ce  b       <far target beyond 0x30 buffer>
+```
+
+The branch at `+0x0c` targets memory **outside** the 48-byte buffer.  The templates
+are **position-dependent**: they rely on conn-record memory immediately following
+`+0x13e`.  Ghidra cannot decompile them as standalone functions.
+
+The exact baseband registers programmed remain unknown but are **100% ROM-managed**
+via the template/staging pipeline (Section 9).
+
+### 12.4 — Correction to Section 7
+
+Section 7 stated that `FUN_80025b68` installs the hook at `bos_base+0xe4`.  That was
+imprecise: it installs `crypto_struct+0xe4 → crypto_struct+0x13e` per connection.
+The global `0x801212e4` slot used by `FUN_8004f824` is a separate, currently-unused
+indirection point that neither patch nor ROM populates in the analyzed firmware.
+
+### 12.5 — Libre firmware verdict
+
+| Component | Libre action |
+|-----------|--------------|
+| Global `0x801212e4` | Leave NULL (default) |
+| `FUN_80025b68` codec templates | Zero — ROM only |
+| Per-connection `+0x13e` buffer | Zero — ROM allocates in `crypto_struct` |
+| `FUN_8004f824` / `FUN_80050810` | Call ROM directly |
+| Phase 6 "implement hw-write hook" | **Removed — not needed** |

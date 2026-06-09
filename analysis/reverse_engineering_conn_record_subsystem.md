@@ -806,7 +806,7 @@ These are **distinct** from the conn_rec pool (`PTR_PTR_8004fd2c` / `PTR_PTR_800
 
 | Item | Needed for |
 |------|------------|
-| Non-free hook at `0x801212e4` — what registers it writes | **Critical** for libre HW implementation |
+| ~~Non-free hook at `0x801212e4`~~ | **Resolved 2026-06-09** — global slot stays NULL; per-conn JIT is ROM-managed (hw layer §12) |
 | `FUN_800506ac` / `FUN_8004e670` / `FUN_8004e6f4` / `FUN_8004e76c` | Type 0–3 hardware init |
 | Raw bytes of `PTR_PTR_80044798` + `PTR_DAT_8004479c` | Complete eSCO packet-type table values |
 | Confirm `PTR_PTR_8005057c` == `PTR_PTR_8004fd2c` | Verify single vs dual free list |

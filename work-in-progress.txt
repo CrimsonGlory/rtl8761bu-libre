@@ -122,11 +122,24 @@ PHASE 2 — LATE-PATCH FUNCTIONS (decompiled 2026-06-08)
 
 PHASE 3 — UNDERSTAND THE HARDWARE LAYER
 -----------------------------------------
-[BLOCKED] Decompile the hardware-write hook installed at 0x801212e4
-          Cannot identify the function address until sub-installer blocker is
-          resolved. Known prototype from hardware-layer analysis:
-            uint8_t fn(hw_obj_t *obj, uint8_t result_buf[8])
-          The libre replacement must provide a compatible stub here.
+[DONE]  Decompile the hardware-write hook installed at 0x801212e4 (2026-06-09)
+          RESOLVED — not a single decompilable patch function. Two distinct +0xe4
+          mechanisms clarified via FUN_80025b68 + FUN_8004f824 decompile
+          (AnalyzeHwWriteHook.java, GZF process mode):
+          (A) GLOBAL hook slot 0x801212e4 (bos_base+0xe4): read by ROM FUN_8004f824
+              via PTR_DAT_8004f890. Zero stores in patch OR ROM → stays NULL in GZF
+              snapshot. When NULL, FUN_8004f824 runs slot-budget clamp only (no HW
+              register writes). Libre: leave NULL — no stub required.
+          (B) PER-CONNECTION hook crypto_struct+0xe4: written by ROM FUN_80025b68
+              at 0x80025bb0 → points to crypto_struct+0x13e (same conn's code buf).
+              Template MIPS16e (0x30 codec-6 / 0x40 codec-8) copied from ROM staging
+              tables PTR_DAT_80025ca8/cac with half-reversal unscramble. Triggered
+              during SSP IO-cap exchange (not SCO setup). Position-dependent code —
+              branch at +0x0c exits buffer; cannot decompile in isolation.
+          Codec-6 h0 unscrambled first insns: cmpi v1,0x6f; sb s0,0x19(a1); swsp…
+          FUN_80024218 post-install: conditional LMP__268 patch-gateway call.
+          CONCLUSION: Libre firmware needs ZERO implementation for either hook path.
+          → analysis/reverse_engineering_hardware_layer.md (Section 12 added)
 
 [DONE]  Analyze hardware register read/write functions (2026-06-08)
           ROM 0x8001136c (read): index in bits[21:16], returns bits[15:0].
@@ -525,7 +538,7 @@ PHASE 6 — IMPLEMENT
 ---------------------
 [TODO]  Implement master installer (MIPS16e asm)
 [TODO]  Implement LMP VSC hook + dispatcher
-[TODO]  Implement hardware-write hook (bos_base+0xe4)
+[TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
 [TODO]  Implement minimum required sub-installers
 [TODO]  Implement version check (trivially "always OK" for known HW)
 [TODO]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
