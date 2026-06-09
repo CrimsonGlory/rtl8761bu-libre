@@ -86,8 +86,22 @@ Makefile extracts `build/vendor_entry_code.bin` / `vendor_entry_pool.bin` via
 | `[0x724, 0x754)` sub_inst_1 | 0/48 |
 | `[0x754, 0x764)` bss_init | 0/16 |
 
-Next: PE-3 RE helper fns (replace `vendor_helpers.bin`); PE-2 libre consolidated
-pool (replace `vendor_entry_pool.bin`); PE-5 drop `VENDOR_EARLY_PREFIX`.
+### PE-3 helper functions (2026-06-09)
+
+`src/patch_entry_helpers.S`: libre `.byte` transcription of `[0x5d8, 0x724)` — no
+`vendor_helpers.bin` incbin. Ghidra decompile (`DecompileAddr.java` GZF process mode):
+
+| File range | Symbol | Size | Role |
+|------------|--------|------|------|
+| `[0x5d8, 0x636)` | `fn_a5d8` | 94 B | `FUN_8010a5d8` — codec reg `0x1FE` via `*0x8012048c`; MMIO `0xb000a030` bit 6 |
+| `[0x638, 0x64c)` | `pool_a5d8` | 20 B | MMIO / mask / HW-write fn-ptr / `0xb60010ce` |
+| `[0x64c, 0x658)` | `pool_a5d8_pad` | 14 B | Alignment + duplicate pool tail |
+| `[0x658, 0x724)` | `fn_a6ec` | 204 B | `FUN_8010a6ec` prefix — eSCO slot allocator; literal pool `@ 0x7b0` is **past** `0x724` |
+
+`make diff-prefix`: **0/332** helper diffs; prefix `[0, 0x764)` still **0/1892**.
+
+Next: PE-2 libre consolidated pool (replace `vendor_entry_pool.bin`); PE-5 drop
+`VENDOR_EARLY_PREFIX`.
 
 ---
 

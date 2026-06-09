@@ -700,9 +700,13 @@ PHASE 7 — TEST
           PE-2 pool interim: patch_entry_pool.S vendor [0x242,0x5d8) (0/918 diffs).
           make diff-prefix: prefix [0,0x764) 0/1892 match; entry fb630962.
           → analysis/reverse_engineering_patch_entry.md (PE-1 section)
-[NEXT]  patch_entry RE phase PE-3: RE helper functions [0x5d8,0x724)
-          Replace vendor_helpers.bin with libre MIPS16e; make diff-prefix
-[TODO]  patch_entry RE phase PE-2: libre consolidated literal pool [0x242,0x5d8)
+[DONE]  patch_entry RE phase PE-3: RE helper functions [0x5d8,0x724) (2026-06-09)
+          src/patch_entry_helpers.S: fn_a5d8 (94B codec reg 0x1FE) + pool +
+          fn_a6ec (204B eSCO slot allocator prefix); Ghidra decompile 0x8010a5d8/
+          0x8010a6ec. Removed vendor_helpers.bin incbin + Makefile extract rule.
+          make diff-prefix: helpers 0/332; prefix [0,0x764) 0/1892 match.
+          → analysis/reverse_engineering_patch_entry.md (PE-3 section)
+[NEXT]  patch_entry RE phase PE-2: libre consolidated literal pool [0x242,0x5d8)
 [TODO]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement

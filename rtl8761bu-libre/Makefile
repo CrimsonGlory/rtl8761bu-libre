@@ -253,14 +253,8 @@ build/vendor_entry_pool.bin: $(NF_REF) scripts/extract_vendor_prefix.py
 	@mkdir -p build
 	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x396 $@ 0x242
 
-# PE-0: helper cluster [0x5d8,0x724) for anchored prefix layout
-build/vendor_helpers.bin: $(NF_REF) scripts/extract_vendor_prefix.py
-	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
-	@mkdir -p build
-	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x14c $@ 0x5d8
-
-VENDOR_HELPERS_DEP := build/vendor_entry_code.bin build/vendor_entry_pool.bin \
-	build/vendor_helpers.bin
+# PE-3: helper cluster [0x5d8,0x724) — libre src/patch_entry_helpers.S (no incbin)
+VENDOR_HELPERS_DEP := build/vendor_entry_code.bin build/vendor_entry_pool.bin
 SRCS += $(PATCH_PREFIX_SRCS)
 endif
 
