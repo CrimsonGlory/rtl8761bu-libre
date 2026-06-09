@@ -560,12 +560,19 @@ PHASE 5 — DESIGN THE LIBRE REPLACEMENT
           (0x8000fd38) syncs config_base+0x30 to global BD_ADDR.
           gen_config.py corrected + --bdaddr option added.
           → analysis/reverse_engineering_config_blob.md (new)
-[TODO]  Write design document for libre patch architecture
+[DONE]  Write design document for libre patch architecture (2026-06-09)
+          Master architecture doc synthesizing all Phase 5 specs: ROM-vs-patch
+          layering, memory map, 5-component model (entry/sub-installers/hooks/
+          protocol-dispatch/config), source tree layout, PROFILE=P0–P4 builds,
+          implementation roadmap, verification matrix, risk register, explicit
+          non-goals. Current init.S is P0 skeleton; Phase 6 rewrites patch_entry
+          to FUN_8010a000 boot sequence. pack.py 9-byte magic fix flagged.
+          → analysis/reverse_engineering_libre_patch_architecture.md (new)
 
 
 PHASE 6 — IMPLEMENT
 ---------------------
-[TODO]  Implement master installer (MIPS16e asm)
+[NEXT]  Implement master installer (MIPS16e asm)
 [TODO]  Implement LMP VSC hook + dispatcher
 [TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
 [TODO]  Implement minimum required sub-installers
