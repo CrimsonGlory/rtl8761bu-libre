@@ -51,7 +51,7 @@ PATCH_SIZE := 27808
 
 NF_REF ?= ../rtl8761bu-non-free/rtl8761bu_fw.bin
 
-.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid phase-% clean verify size
+.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size
 
 # Docker builds must see vendor patch0 (chip_id=1 slot).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -91,6 +91,91 @@ libre-hybrid: build/patch_padded.bin hybrid.py $(NF_REF)
 	$(PYTHON) hybrid.py --libre-head build/patch_padded.bin $(NF_REF) $(SPLIT) build/patch_hybrid.bin
 	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_hybrid.bin $(FW_VERSION) rtl8761bu_fw.bin
 	@echo "profile=libre-hybrid-$(SPLIT)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# Libre installer + vendor T1 hook bodies at native patch1 offsets (connect test)
+full-inject-t1:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t1
+
+inject-t1: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t1" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# Libre installer + vendor T1+T2 hook bodies (all INSTALL_HOOK stubs except LMP hooks)
+full-inject-t2:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t2
+
+inject-t2: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t2" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# T1+T2+T3: all hook bodies vendor-injected (libre installer + callees only)
+full-inject-t3:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t3
+
+inject-t3: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	$(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t3" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# inject-t3 + vendor patch1 prefix (master installer + early bodies @ [0,0xE4C))
+full-inject-t3-vendor-inst:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t3-vendor-inst
+
+inject-t3-vendor-inst: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_INSTALLER_PREFIX=1 $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t3-vendor-inst" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# inject-t3 + vendor tail [0xE4C,footer) — libre installer, vendor NOP-region code
+full-inject-t3-vendor-tail:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t3-vendor-tail
+
+inject-t3-vendor-tail: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_TAIL_FILL=1 $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t3-vendor-tail" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# Vendor patch1 body (prefix + tail); libre pack header only — connect sanity / tail bisect
+full-vendor-patch1:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-vendor-patch1
+
+inject-vendor-patch1: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_INSTALLER_PREFIX=1 VENDOR_TAIL_FILL=1 $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	@$(PYTHON) -c "import sys; nf=open('$(NF_REF)','rb').read(); inj=open('build/patch_injected.bin','rb').read(); ok=nf[0x3780:0x3780+27808]==inj; print('inject-vendor-patch1: patch1 body matches vendor OK' if ok else 'inject-vendor-patch1: WARN patch1 body differs from vendor'); sys.exit(0)"
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-vendor-patch1" > build/.profile
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
 	@sha256sum rtl8761bu_fw.bin
 

@@ -42,12 +42,12 @@ fn_e27c:
 	jr	$ra
 	nop
 	.align	2
-1:	.word	fn_cc94 + 1
-2:	.word	fn_d9f4 + 1
-3:	.word	fn_daa4 + 1
-4:	.word	fn_da70 + 1
-5:	.word	fn_dfb0 + 1
-6:	.word	fn_d154 + 1
+1:	.word	0x8010cc95
+2:	.word	0x8010d9f5
+3:	.word	0x8010daa5
+4:	.word	0x8010da71
+5:	.word	0x8010dfb1
+6:	.word	0x80066e69
 	.size	fn_e27c, . - fn_e27c
 
 	.globl	fn_hw_probe

@@ -1,6 +1,5 @@
 # UB500 test queue — ACTIVE = fw_to_test/rtl8761bu_fw.bin
-# Full log: .cursor/skills/ub500-hardware-test/results.md
+# NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
- done    test-nf                    148baa25c3db17148047e2ca970b62b0a7a75b960b4762ea20f045b7977cff76
- done    full (libre)               34eab8a992068cd1a7132e42f548212a86a8615fc3c17f5a51bdbfb7c5db299c
-# Next dev work: P1 hook implementations (not another flash of same SHA)
+DONE  full-inject-t3-vendor-tail  88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f  rtl8761bu_fw.full-inject-t3-vendor-tail.bin
+NEXT  installer-bisect  — vendor prefix [0,SPLIT) + libre [SPLIT,0xE4C) + vendor tail (SPLIT=0x800…)

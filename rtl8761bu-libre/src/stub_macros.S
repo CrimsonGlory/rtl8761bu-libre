@@ -69,3 +69,16 @@
 	.word	\handler + 1
 .Lih_end_\@:
 	.endm
+
+	/* handler_runtime: even MIPS16e address in patch1 (body injected from vendor) */
+	.macro INSTALL_HOOK_ABS slot_addr, handler_runtime
+	LOAD_ADDR $a2, \slot_addr
+	lw	$a3, .Lihabs_\@
+	sw	$a3, 0($a2)
+	b	.Lihabs_end_\@
+	nop
+	.align	2
+.Lihabs_\@:
+	.word	\handler_runtime + 1
+.Lihabs_end_\@:
+	.endm

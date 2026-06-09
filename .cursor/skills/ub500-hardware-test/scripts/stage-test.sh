@@ -4,7 +4,7 @@
 # Usage:
 #   stage-test.sh <profile> [profile ...]
 #
-# Profiles: test-nf | minimal-null | minimal | full | hybrid | libre-hybrid
+# Profiles: test-nf | minimal-null | minimal | full | full-inject-t1 | full-inject-t2 | full-inject-t3 | full-inject-t3-vendor-inst | hybrid | libre-hybrid
 # hybrid SPLIT=0x400       → vendor[:N] + libre[N:]
 # libre-hybrid SPLIT=0x200 → libre[:N] + vendor[N:]
 
@@ -41,6 +41,12 @@ build_profile() {
     minimal-null) make_cmd="make clean && make minimal-null" ;;
     minimal)      make_cmd="make clean && make minimal" ;;
     full)         make_cmd="make docker" ;;
+    full-inject-t1) make_cmd="make full-inject-t1" ;;
+    full-inject-t2) make_cmd="make full-inject-t2" ;;
+    full-inject-t3) make_cmd="make full-inject-t3" ;;
+    full-inject-t3-vendor-inst) make_cmd="make full-inject-t3-vendor-inst" ;;
+    full-vendor-patch1) make_cmd="make full-vendor-patch1" ;;
+    full-inject-t3-vendor-tail) make_cmd="make full-inject-t3-vendor-tail" ;;
     hybrid*)
       local split="${spec#hybrid }"
       make_cmd="make clean && make docker && make ${split} hybrid"

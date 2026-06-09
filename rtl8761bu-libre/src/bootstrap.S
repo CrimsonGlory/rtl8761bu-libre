@@ -67,25 +67,25 @@ sub_installer_2:
 	nop
 	.align	2
 2:
-	.word	0x80121100, sub2_fn_00
-	.word	0x801210f4, sub2_fn_01
-	.word	0x801205f8, sub2_fn_02
-	.word	0x801205b0, sub2_fn_03
-	.word	0x801205a0, sub2_fn_04
-	.word	0x801205ac, sub2_fn_05
-	.word	0x8012063c, sub2_fn_06
-	.word	0x80120644, sub2_fn_07
-	.word	0x80120628, sub2_fn_08
-	.word	0x80120634, sub2_fn_09
-	.word	0x80120624, sub2_fn_10
-	.word	0x80120608, sub2_fn_11
-	.word	0x80120648, sub2_fn_12
-	.word	0x801205d0, sub2_fn_13
-	.word	0x801205d8, sub2_fn_14
-	.word	0x801205e0, sub2_fn_15
-	.word	0x801205c4, sub2_fn_16
-	.word	0x801205fc, sub2_fn_17
-	.word	0x80120600, sub2_fn_18
+	.word	0x80121100, 0x801102f0
+	.word	0x801210f4, 0x801100bc
+	.word	0x801205f8, 0x80110724
+	.word	0x801205b0, 0x8011021c
+	.word	0x801205a0, 0x8010ff08
+	.word	0x801205ac, 0x801106bc
+	.word	0x8012063c, 0x801105e8
+	.word	0x80120644, 0x8010ff28
+	.word	0x80120628, 0x801105bc
+	.word	0x80120634, 0x8010fed8
+	.word	0x80120624, 0x8010ffcc
+	.word	0x80120608, 0x80110310
+	.word	0x80120648, 0x8011006c
+	.word	0x801205d0, 0x80110700
+	.word	0x801205d8, 0x8011057c
+	.word	0x801205e0, 0x80110044
+	.word	0x801205c4, 0x8010fe84
+	.word	0x801205fc, 0x80110640
+	.word	0x80120600, 0x80110364
 	.word	0, 0
 	.size	sub_installer_2, . - sub_installer_2
 
@@ -94,7 +94,7 @@ sub_installer_2:
 sub_installer_3:
 	addiu	$sp, $sp, -8
 	sw	$ra, 4($sp)
-	INSTALL_HOOK 0x80120f08, fn_10ca4
+	INSTALL_HOOK_ABS 0x80120f08, 0x80110350
 	LOAD_ADDR $a2, 0x80120f0c
 	lw	$v0, 0($a2)
 	beqz	$v0, 1f
@@ -145,7 +145,7 @@ sub_installer_4:
 	.globl	sub_installer_5
 	.type	sub_installer_5, @function
 sub_installer_5:
-	INSTALL_HOOK 0x80120c88, fn_e82c
+	INSTALL_HOOK_ABS 0x80120c88, 0x8010e82c
 	jr	$ra
 	nop
 	.size	sub_installer_5, . - sub_installer_5
