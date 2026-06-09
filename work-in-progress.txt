@@ -400,9 +400,24 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           FUN_8004f25c, FUN_800511b8, FUN_80050b2c, FUN_80050ff8, FUN_8004f374,
           FUN_80052c1c, FUN_8004e808, FUN_80051124.
 
-[NEXT]  Decompile FUN_8010bb54 (starts at 0x8010bb54, immediately after FUN_8010b7f0 pool)
-        Address: 0x8010bb54 (DATA block). First bytes: fd 63 05 62 (0x63fd, 0x6205).
-        Size unknown. Prologue byte pattern suggests small function.
+[DONE]  Decompile FUN_8010bb54 (2026-06-08)
+        FUN_8010bb54 (74B) — eSCO packet-type compatibility validator:
+          Takes (esco_params_t *pdu): pdu[3]=conn_idx, pdu[4]=flags.
+          Calls ROM FUN_8004e2d0 (30B, new) to look up conn_rec by index.
+          Returns 0x12 (LMP "unsupported feature") if:
+            flags & 0x10 not set AND (flags & 3 == 3  OR
+            conn_rec+0x2c nonzero with flags bit 1 OR
+            conn_rec+0x2e nonzero with flags bit 0).
+          Returns 0 (accept) otherwise.
+          Literal pool: 1 word at 0x8010bba0 → ROM FUN_8004e2d0.
+          Next function: FUN_8010bba4 (LMP VSC hook, already analyzed).
+        → analysis/reverse_engineering_sco_esco_layer.md (Group G added)
+
+[NEXT]  Investigate MIPS16e handler stubs region 0x8010A160–0x8010A34C
+        36 × 8-byte bteqz/lw/bteqz/addiu case-chain entries; 6 of 15 fn_ptrs
+        from address-pair table target here. Ghidra cannot decode (EXTEND pcode
+        errors). Options: (a) manual byte decode of all 36 entries, (b) enumerate
+        what opcode values each stub corresponds to using xref analysis.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

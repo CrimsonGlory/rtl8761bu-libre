@@ -1977,3 +1977,84 @@ the master installer before this function is called.
 | `0x80051124` | unnamed | 66B | Cleanup handler |
 
 **Grand total updated: 28 functions need real MIPS16e code (~2350 insns estimated).**
+
+---
+
+## Group G — eSCO Parameter Validator (2026-06-08)
+
+### `FUN_8010bb54` — eSCO packet-type compatibility validator (74B)
+
+**Address:** `0x8010bb54` (DATA block, patch runtime)
+**Size:** 74 bytes (body `0x8010bb54–0x8010bb9c`, pool 1 word at `0x8010bba0`)
+**Next function:** `FUN_8010bba4` (LMP VSC hook, already analyzed)
+
+**Prototype:**
+```c
+uint8_t FUN_8010bb54(esco_params_t *pdu)
+```
+
+**Decompile (cleaned):**
+```c
+uint8_t FUN_8010bb54(esco_params_t *pdu)
+{
+    // pdu+3 = conn_index byte; pdu+4 = flags byte
+    conn_rec_t *cr = (*lookup_conn_by_index)(pdu[3]);  // ROM FUN_8004e2d0
+    uint8_t flags = pdu[4];
+
+    if (flags & 0x10)                        // override flag: always accept
+        return 0;
+
+    // Reject if both bits 0+1 set (invalid combo)
+    if ((flags & 3) == 3)
+        return 0x12;
+
+    // Reject if existing conn record has conflicting timing fields
+    if (cr != NULL &&
+        ((cr->field_0x2c != 0 && (flags & 2)) ||
+         (cr->field_0x2e != 0 && (flags & 1))))
+        return 0x12;
+
+    return 0;
+}
+```
+
+**Semantics:**
+- Called to validate whether an incoming LMP eSCO request can proceed given current
+  connection state.
+- `pdu[3]`: connection index byte (passed to ROM lookup fn).
+- `pdu[4]` flag bits:
+  - bit 4 (`0x10`): "bypass" — always accept regardless of other flags.
+  - bits 0–1: packet capability flags. Both set simultaneously is an illegal combination.
+  - bit 1: requires `conn_rec+0x2c` to be zero (no conflict for tx side).
+  - bit 0: requires `conn_rec+0x2e` to be zero (no conflict for rx side).
+- `conn_rec+0x2c` and `+0x2e` are 16-bit timing/bandwidth fields; non-zero means an
+  incompatible resource is already allocated.
+- Returns `0x12` = LMP error "unsupported feature or parameter value" → triggers LMP
+  reject PDU upstream.
+- Returns `0` = accept, caller proceeds with eSCO setup.
+
+**Literal pool (`0x8010bba0`):**
+
+| Address | Value | Resolved |
+|---------|-------|---------|
+| `0x8010bba0` | `0x8004e2d1` | ROM `FUN_8004e2d0` (30B) — conn lookup by index |
+
+**New ROM function:**
+
+| Address | Size | Role |
+|---------|------|------|
+| `0x8004e2d0` | 30B | Connection record lookup by index byte |
+
+**Libre assessment:** Requires real implementation. Logic is straightforward boolean
+validator — copy the 4 branches verbatim. ROM call at `0x8004e2d0` invoked via the
+literal-pool pointer; libre must install this pointer at `0x8010bba0` during init.
+
+---
+
+### Group G Implementation Matrix
+
+| Function | Size | ROM calls | Returns | Priority |
+|----------|------|-----------|---------|----------|
+| `FUN_8010bb54` | 74B | 1 (ROM `FUN_8004e2d0`) | 0 or 0x12 | MEDIUM (eSCO validator) |
+
+**Grand total updated: 29 functions need real MIPS16e code (~2370 insns estimated).**
