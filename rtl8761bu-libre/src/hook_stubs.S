@@ -22,7 +22,6 @@
 
 	STUB_RET	fn_b118
 	STUB_RET	fn_b174
-	STUB_RET	fn_bba4
 	STUB_RET	fn_be20
 	STUB_RET	fn_c1e8
 	STUB_RET	fn_c224
@@ -57,7 +56,6 @@
 	STUB_RET	fn_a5ac
 	STUB_RET	fn_c854
 	STUB_RET	fn_c09c
-	STUB_RET	fn_bc74
 	STUB_RET	fn_ce0c
 	STUB_RET	fn_10ddc
 	STUB_RET	fn_bda0

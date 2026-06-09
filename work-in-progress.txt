@@ -582,9 +582,24 @@ PHASE 6 — IMPLEMENT
           installs 6 protocol-dispatch ptrs. Build: 3852 B code / 27808 B PRAM (86% free).
           Known gaps: config bit-clears omitted (MIPS16e no and); sub-inst #1 missing
           bit-6 mask; RF init case-0 table only; TLV loop skipped when remaining=0.
-[NEXT]  Implement LMP VSC hook + dispatcher
+[DONE]  Implement LMP VSC hook + dispatcher (2026-06-09)
+          src/lmp_vsc.S: three functions decompiled from GZF + built in Docker:
+          FUN_8010bb54 (81B) — eSCO packet-type validator; ROM conn lookup
+            0x8004e2d1; returns 0 accept / 0x12 reject; pool via fn_bb54+1
+            in gateway slot bc5c.
+          FUN_8010bba4 (209B) — LMP VSC gateway (bos+0xd8 / LMP 0x268); 8-word
+            literal pool @ fn_bba4+0xb0 verified vs GZF bc54-bc70: alloc
+            0x80044589, large2 0x8012382c, validator, conn 0x8004e2d1,
+            ROM leaf 0x80047c51 (FUN_80047c50), cleanup 0x80050305,
+            header 0x80044565, send 0x8001d071. Seven-phase gateway per
+            reverse_engineering_lmp_vsc_hook.md; ROM dispatcher NOT reimplemented.
+          FUN_8010bc74 (108B) — bos+0x1c companion dispatcher; pool @ +0x5c:
+            struct 0x80123394, alloc 0x80044589, RAM indir 0x80120650,
+            header/send ROM fns. Removed fn_bba4/fn_bc74 from hook_stubs.S.
+          Build: 4236 B code / 27808 B PRAM (84.8% free), was 3852 B.
+          → analysis/reverse_engineering_lmp_vsc_hook.md (impl note in WIP)
+[NEXT]  Implement minimum required sub-installers
 [TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
-[TODO]  Implement minimum required sub-installers
 [TODO]  Implement version check (trivially "always OK" for known HW)
 [TODO]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
 [TODO]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
