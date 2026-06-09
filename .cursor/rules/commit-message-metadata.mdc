@@ -1,0 +1,40 @@
+---
+description: Commit message metadata after Co-authored-by (model and options)
+alwaysApply: true
+---
+
+# Commit Message Metadata
+
+When creating git commits that include a `Co-authored-by` trailer, add model and option metadata **immediately after** that line.
+
+## Format
+
+```
+<commit subject and body>
+
+Co-authored-by: Cursor <cursoragent@cursor.com>
+Model: <model display name>
+<option>: <value>
+<option>: <value>
+```
+
+- Use the model's display name (e.g. `Composer 2.5`, `Sonnet 4.6`), not internal slugs.
+- List each relevant option on its own line as `Key: value`.
+- Include only options that were set or are meaningful for the session (e.g. MAX Mode, Fast, Effort, Thinking, Context).
+
+## Examples
+
+```
+Co-authored-by: Cursor <cursoragent@cursor.com>
+Model: Composer 2.5
+MAX Mode: true
+Fast: false
+```
+
+```
+Co-authored-by: Cursor <cursoragent@cursor.com>
+Model: Sonnet 4.6
+Effort: High
+Thinking: true
+Context: 200K
+```

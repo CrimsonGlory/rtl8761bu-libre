@@ -81,22 +81,63 @@ Most complex handler. Requires:
 ## Handler: `unknown_fptr_index0` — FUN_8010cc94 (26 bytes, struct offset +0x00)
 
 ### Purpose
-Minimal pre-hook: runs a side-effect callback before delegating to original handler.
+**Sequencer**, not interceptor. Calls ROM original first, then the patch add-on.
+
+Disassembly confirms `param_1` is forwarded to **both** callees via MIPS `a0`
+(Ghidra decompiler omits the implicit first argument on the ROM call):
+
+```
+8010cc94: addiu sp,-0x18
+8010cc96: sw ra,0x14(sp)
+8010cc98: sw s0,0x10(sp)
+8010cc9a: lw v0,0x18(pc)          ; → 0x800138cd (ROM unknown_fptr_index0)
+8010cc9c: jalr v0                 ; ROM(param_1)  — a0 still = param_1
+8010cc9e: _move s0,a0              ; delay slot: save param_1
+8010cca0: lw v0,0x14(pc)          ; → 0x8010ca21 (patch handler)
+8010cca2: jalr v0                 ; patch(param_1)
+8010cca4: _move a0,s0              ; delay slot: restore param_1
+```
 
 ```c
 void FUN_8010cc94(void *param_1) {
-    (*DAT_8010ccb0)();          // pre-hook (no args)
-    (*DAT_8010ccb4)(param_1);   // original handler (with args)
+    unknown_fptr_index0(param_1);           // ROM @ 0x800138cc
+    new_func_for_unknown_fptr_index0(param_1); // PATCH @ 0x8010ca20
 }
 ```
 
 ### Literal pool (at 0x8010ccb0–0x8010ccb7)
-- `0x8010ccb0` → pre-hook fn ptr (identity TBD — likely init/setup)
-- `0x8010ccb4` → original index-0 handler (ROM)
+| Slot | Value | Target |
+|------|-------|--------|
+| `0x8010ccb0` | `0x800138cd` | ROM `unknown_fptr_index0` @ `0x800138cc` (680 B) |
+| `0x8010ccb4` | `0x8010ca21` | PATCH `new_func_for_unknown_fptr_index0` @ `0x8010ca20` (534 B) |
+
+### ROM `unknown_fptr_index0` dispatch
+
+Switch on internal message type at `param_1[8]` (16-bit), offset by −100:
+
+| Case (`type−100`) | Raw type | Handler |
+|-------------------|----------|---------|
+| 0 | 100 (`0x64`) | `unknown_referencing_default_name_8` |
+| 2 | 102 | `FUN_8000f4a0` |
+| 3 | 103 | `FUN_80013840` |
+| 4 | 104 | `FUN_80072020` |
+| 5 | 105 | `FUN_80035640` / `FUN_800356bc` |
+| 6 | 106 | indirect call via `param_1[0]` |
+| 7 | 107 | `FUN_8007718c` |
+| 8 | 108 | slot-scheduling fall-through (complex) |
+| 10 | 110 | `FUN_800386d0` |
+| 11 | 111 | callback dispatch via `PTR_PTR_80013bac` |
+| 12 | 112 | indirect via `PTR_DAT_80013bb4` |
+| 13 | 113 | `FUN_800559a0` |
+| 16 | 116 | indirect via `PTR_DAT_80013bb8` |
+| 17 | 117 | `FUN_80056ca8` + conn record update |
+
+**Type `0x67` (103 decimal) is NOT in the ROM switch** — it hits `default: return`.
+The patch handler `FUN_8010ca20` is the sole handler for type `0x67`.
 
 ### Libre notes
-Trivial to implement. The pre-hook at `DAT_8010ccb0` needs identification. If the
-pre-hook is benign (or a no-op in the libre case), this handler can delegate directly.
+Trivial 26-byte sequencer: call ROM `0x800138cc`, then patch `0x8010ca20`.
+Both calls receive the same `param_1` pointer.
 
 ---
 
@@ -290,11 +331,12 @@ BT stack internal message identifiers.
 2. `FUN_8010dfb0` — LMP handler (SSP + eSCO activation path)
 3. `FUN_8010daa4` — HCI event handler (AFH, LE, interrupts)
 4. `FUN_8010d154` — LMP_CH passthrough (trivial)
-5. `FUN_8010cc94` — index-0 pre-hook (needs pre-hook fn identified)
+5. `FUN_8010cc94` — index-0 sequencer (ROM then patch; both get `param_1`)
 
-### Can stub (basic BT only, no eSCO audio)
-6. `FUN_8010da70` — LC TX: pass through to ROM
-7. `FUN_8010d9f4` — LC RX: pass through to ROM
+### Can stub (basic BT only)
+6. `FUN_8010ca20` — type-0x67 monitor: empty return (AFH/coexistence degraded; full impl needs 7 BSS counters + ROM sub-calls)
+7. `FUN_8010da70` — LC TX: pass through to ROM
+8. `FUN_8010d9f4` — LC RX: pass through to ROM
 
 ### Key identities needed
 ~~All resolved (2026-06-09). See Section: ROM Original Handler Addresses below.~~
@@ -361,9 +403,150 @@ This function requires real libre implementation.
 For the libre implementation:
 
 1. All **ROM** original handlers are called via their fixed addresses — no reimplementation needed.
-2. `new_func_for_unknown_fptr_index0` (`0x8010ca20`, 534 B) **must be reimplemented** — it is a
-   patch function handling opcode `0x67` (AFH/coexistence quality monitoring). Required for proper
-   AFH operation; can be stubbed to a no-op for minimal BT.
-3. The sequencer `FUN_8010cc94` must call ROM `0x800138cc` first, then `new_func_for_unknown_fptr_index0`.
+2. `new_func_for_unknown_fptr_index0` (`0x8010ca20`, 534 B) **must be reimplemented** — see
+   full decompile in Section below. Required for proper AFH/coexistence; can be stubbed for minimal BT.
+3. The sequencer `FUN_8010cc94` must call ROM `0x800138cc` first, then `new_func_for_unknown_fptr_index0`,
+   passing `param_1` to both.
 4. All five other patch interceptors (`FUN_8010d154`, `FUN_8010d9f4`, `FUN_8010da70`, `FUN_8010daa4`,
    `FUN_8010dfb0`) call ROM at the addresses above as their tail-call / pass-through target.
+
+---
+
+## Handler: `new_func_for_unknown_fptr_index0` — FUN_8010ca20 (534 bytes)
+
+Analysis session: 2026-06-09. Script: `DecompileCA20CC94.java` (GZF process mode).
+
+### Purpose
+
+Periodic **AFH / BLE coexistence quality monitor**. Invoked on every index-0 dispatch
+message after the ROM handler returns. Only acts when internal message type at
+`param_1[8]` equals `0x67` (timer/tick message not handled by ROM).
+
+### Message struct (inferred from both handlers)
+
+| Offset | Field | Used by |
+|--------|-------|---------|
+| `+0x00` | indirect fn ptr or flags | ROM case 6 |
+| `+0x04` | conn handle / sub-fields | ROM cases 5, 13, 16 |
+| `+0x08` | **internal message type** (16-bit) | ROM switch (`type−100`); patch checks `== 0x67` |
+| `+0x0d` | byte arg | ROM case 16 |
+
+### Logic flow (opcode `0x67` only)
+
+```
+param_1[8] == 0x67?
+  no → return immediately
+  yes ↓
+
+1. TICK COUNTER (ushort @ 0x8012b944 via pool 0x8010cc38)
+   if counter > 2000 → reset, fire diagnostic log (ROM 0x80074fa8)
+   counter++
+
+2. BLE COEXISTENCE STUCK DETECTOR
+   if both BLE structs inactive (PTR_80124e84[4]==0, PTR_80124e54[4]==0, bit0 of [6]==0):
+     mirror bit0 of [6] into byte @ 0x8012b828
+   else:
+     track conn id from list head PTR_80124e18 → +4 → +0xc
+     compare with last id @ 0x8012b824; increment stuck byte @ 0x8012b828 on match
+     if stuck byte > 200:
+       diagnostic log (level 2, tag 0xfa)
+       if BLE struct +0x1c != -1:
+         struct[6] |= 0x0c
+         ROM LMP__25C @ 0x80009a30(conn_handle, 0)
+         ROM LMP__268 @ 0x80009a6c(conn_handle, 3)
+
+3. AFH HW REGISTER POLL (if bos_struct[0x16a] & 1)
+   read BB reg 0x2d via PATCH FUN_8010a5d8 (codec reg reader)
+   if (value >> 8 & 0xf) == 5:
+     increment byte counter @ 0x8012b81c
+     at counter == 9:
+       ROM FUN_8003ce50(0)
+       ROM FUN_8003ce50(bos_struct[0x16a])
+   else:
+     reset counter @ 0x8012b81c to 0
+
+4. BLE CONNECTION TIMING STUCK DETECTOR
+   active if any of:
+     bos_struct[0x16e] != 0
+     conn_array[0x1d4] != 0          (base 0x8012382c)
+     conn_array[0x44] & 1
+     PTR_80124e84[4] != 0
+   sample MMIO 0xb000a33c (HW timing counter)
+   compare with last sample @ 0x8012b820
+   if delta is 0x3fe or −0x402 → increment stuck byte @ 0x8012b81d
+   if stuck byte > 200:
+     diagnostic log (magic 0xdead)
+     ROM FUN_80043038()              (recovery/cleanup)
+
+5. increment ushort @ 0x8012b80c (global tick)
+```
+
+### Literal pool (0x8010cc38–0x8010cc90)
+
+| Pool addr | Points to | Role |
+|-----------|-----------|------|
+| `0x8010cc38` | `0x8012b944` | Main 2000-tick ushort counter |
+| `0x8010cc3c` | `0x80111068` | Log format string table |
+| `0x8010cc40` | `0x801234b4` | Log argument data block |
+| `0x8010cc44` | `0x80074fa8` | ROM `possible_logging_function?_var_args` |
+| `0x8010cc48` | `0x80124e84` | BLE connection struct A |
+| `0x8010cc4c` | `0x80124e54` | BLE connection struct B |
+| `0x8010cc50` | `0x80124e18` | BLE connection list head |
+| `0x8010cc54` | `0x8012b824` | Last-seen BLE conn id (int) |
+| `0x8010cc58` | `0x8012b828` | BLE stuck-state byte counter |
+| `0x8010cc5c` | `0x80009a04` | ROM timestamp/getter fn |
+| `0x8010cc60` | `0x00dead55` | Debug magic constant for logs |
+| `0x8010cc64` | `0x80009a30` | ROM `LMP__25C_called1` |
+| `0x8010cc68` | `0x80009a6c` | ROM `LMP__268__most_common_for_VSCs2_checks_fptr_patch` |
+| `0x8010cc6c` | `0x801259ec` | `struct_of_at_least_0x300_size` (bos-class) |
+| `0x8010cc70` | `0x8010a5d8` | PATCH `FUN_8010a5d8` (codec/MMIO reg reader) |
+| `0x8010cc74` | `0x8012b81c` | AFH 9-step byte counter |
+| `0x8010cc78` | `0x8003ce50` | ROM cleanup fn (fired at step 9) |
+| `0x8010cc7c` | `0x8012382c` | `base_of_0x1ac_struct_array_0xA_large2` |
+| `0x8010cc80` | `0xb000a33c` | MMIO HW timing register |
+| `0x8010cc84` | `0x8012b820` | Last MMIO timing sample |
+| `0x8010cc88` | `0x8012b81d` | BLE timing stuck byte counter |
+| `0x8010cc8c` | `0x80043038` | ROM recovery/cleanup fn |
+| `0x8010cc90` | `0x8012b80c` | Global ushort tick counter |
+
+### BSS globals required (all zero-init)
+
+| RAM addr | Size | Purpose |
+|----------|------|---------|
+| `0x8012b80c` | 2 | Global tick counter |
+| `0x8012b81c` | 1 | AFH 9-step counter |
+| `0x8012b81d` | 1 | BLE timing stuck counter |
+| `0x8012b820` | 4 | Last MMIO timing sample |
+| `0x8012b824` | 4 | Last BLE conn id |
+| `0x8012b828` | 1 | BLE coexistence stuck counter |
+| `0x8012b944` | 2 | Main 2000-tick counter |
+
+ROM-populated structs (`0x801259ec`, `0x8012382c`, `0x80124e84`, etc.) are
+runtime-allocated by ROM — libre firmware reads them, does not initialize them.
+
+### Sub-call summary
+
+| Callee | Addr | Patch/ROM | When |
+|--------|------|-----------|------|
+| `possible_logging_function?_var_args` | `0x80074fa8` | ROM | Diagnostic logs (levels 2/3, tag `0xfa`) |
+| `FUN_80009a04` | `0x80009a04` | ROM | Timestamp for log args |
+| `LMP__25C_called1` | `0x80009a30` | ROM | BLE stuck recovery (conn handle) |
+| `LMP__268__...` | `0x80009a6c` | ROM | BLE stuck recovery (mode 3) |
+| `FUN_8010a5d8` | `0x8010a5d8` | **PATCH** | Read BB reg 0x2d |
+| `FUN_8003ce50` | `0x8003ce50` | ROM | AFH cleanup at 9th consecutive poll |
+| `FUN_80043038` | `0x80043038` | ROM | BLE timing stuck recovery |
+
+### Libre implementation options
+
+**Minimal stub** (basic BT, no AFH tuning):
+```c
+void new_func_for_unknown_fptr_index0(int *msg) {
+    (void)msg;  /* or: if (*(short *)(msg + 2) != 0x67) return; */
+}
+```
+
+**Full implementation** requires:
+- 7 BSS counters (table above), zeroed at init
+- ROM calls at fixed addresses for logging, LMP recovery, cleanup
+- PATCH `FUN_8010a5d8` for register 0x2d read (already analyzed in sco_esco layer)
+- No tail-call to ROM — function returns after patch-only work
