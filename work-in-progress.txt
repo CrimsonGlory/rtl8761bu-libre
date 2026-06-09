@@ -251,14 +251,35 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           New functions identified: FUN_8010ce0c/fa34/f950/fb08/e350/bda0/c09c/b4d0
           → analysis/reverse_engineering_patch_installer.md (Appendix D+E added)
 
-[NEXT]  Analyze remaining small functions in DATA block 0xa000 region:
-          FUN_8010a410 (86B), FUN_8010a4ac (68B), FUN_8010a49c (10B), FUN_8010a550 (54B),
-          FUN_8010a594 (14B), FUN_8010a5ac (36B), FUN_8010a5d8 (94B), FUN_8010a6ec (180B),
-          FUN_8010a84c (450B), FUN_8010aa58 (96B) — all are hook targets or entry helpers.
-          Goal: determine which are trivial stubs vs. require real implementation.
-          Also: analyze 5 new unknown hook targets from Appendix D:
-            FUN_8010b118, FUN_8010b3d8, FUN_8010b0a4, FUN_8010c780, FUN_8010c63c
-          These are installed in the first hook batch and likely handle LMP/HCI events.
+[DONE]  Analyze remaining small functions in DATA block 0xa000 region (2026-06-08)
+          10 + 5 = 15 functions decompiled. Only 2 are trivial stubs; 13 require real code.
+          KEY FINDINGS:
+            FUN_8010a49c (10B) — trivial: *(0x8012b803) = 0
+            FUN_8010a594 (14B) — trivial: *(0xb6001080) = 0x80
+            FUN_8010a410 (86B) — HW reg 0x11C configurator (eSCO codec mode bits)
+            FUN_8010a4ac (68B) — eSCO readiness gate (6-condition check)
+            FUN_8010a550 (54B) — Set eSCO-active flag
+            FUN_8010a5ac (36B) — Timing compensation adder (stride-0x1ac struct)
+            FUN_8010a5d8 (94B) — Codec reg 0x1FE configurator (MMIO 0xb000a030/0xb60010ce)
+            FUN_8010a6ec (180B) — eSCO slot buffer allocator (uses ROM table 0x8007abd8)
+            FUN_8010a84c (450B) — SCO/eSCO connection response handler (10+ ROM calls)
+            FUN_8010aa58 (96B) — SCO connection continuation handler (phase 2)
+            FUN_8010b118 (82B) — Slot interval allocator (ROM 0x80056609/56661)
+            FUN_8010b3d8 (206B) — ACL slot scheduler (interrupt-protected, residual calc)
+            FUN_8010b0a4 (108B) — ACL packet type flag corrector (MMIO 0xb6001214)
+            FUN_8010c780 (34B) — Subsystem initializer (calls 3 fns + sets flag)
+            FUN_8010c63c (278B) — Retransmission counter / ACL packet handler
+          → analysis/reverse_engineering_sco_esco_layer.md (new)
+          New unknown fn: FUN_80110869 (called by FUN_8010c780, in DATA block)
+
+[NEXT]  Analyze FUN_80110869 (patch DATA block, called by FUN_8010c780):
+          Address: 0x80110869 (MIPS16e odd ptr → entry at 0x80110868?)
+          Caller: FUN_8010c780 (subsystem initializer, first of 3 init calls)
+          Goal: understand what subsystem it initializes; classify as trivial or real.
+          Also: continue identifying new hook targets from FUN_8010a84c literal pool:
+            FUN_8010ce0c, FUN_8010fa34, FUN_8010f950, FUN_8010fb08,
+            FUN_8010e350, FUN_8010bda0, FUN_8010c09c, FUN_8010b4d0
+          (listed in Appendix D of patch_installer.md)
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
