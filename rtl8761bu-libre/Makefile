@@ -23,7 +23,8 @@ SRCS := src/init_minimal.S
 else ifdef PHASE
 SRCS := src/init_phase_$(PHASE).S $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S $(wildcard src/init_phase_*.S),$(wildcard src/*.S))
 else
-SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init_minimal.S src/init_null.S src/init_phase_%.S,$(wildcard src/*.S))
+SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init_minimal.S src/init_null.S \
+	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S,$(wildcard src/*.S))
 endif
 
 # LAYOUT=gap — legacy experiment (entry @ +0x6880); wrong for FC20 → 0x8010A000
@@ -50,6 +51,17 @@ FW_VERSION := 0x09a98a6b
 PATCH_SIZE := 27808
 
 NF_REF ?= ../rtl8761bu-non-free/rtl8761bu_fw.bin
+
+# Vendor patch1 prefix length for .incbin early installer (see installer_vendor_early.S).
+# UB500 connect needs vendor bytes [0,0x764); omit init.S and early bootstrap when set.
+VENDOR_EARLY_PREFIX ?=
+ifdef VENDOR_EARLY_PREFIX
+VENDOR_EARLY_SRCS := src/installer_vendor_early.S src/bootstrap.S src/callees.S \
+	src/hook_stubs.S src/lmp_vsc.S src/shims.S src/version_check.S src/bdaddr.S
+SRCS := $(VENDOR_EARLY_SRCS)
+CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
+BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
+endif
 
 .PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size
 
@@ -150,10 +162,10 @@ inject-t3-vendor-inst: build/patch_padded.bin inject_vendor.py vendor_t1_manifes
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
 	@sha256sum rtl8761bu_fw.bin
 
-# inject-t3 + vendor tail [0xE4C,footer) — libre installer, vendor NOP-region code
+# inject-t3 + vendor tail [0xE4C,footer) — vendor early prefix [0,0x764) via .incbin + libre si2+
 full-inject-t3-vendor-tail:
 	$(MAKE) clean
-	$(MAKE) all
+	$(MAKE) all VENDOR_EARLY_PREFIX=0x764
 	$(MAKE) inject-t3-vendor-tail
 
 inject-t3-vendor-tail: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
@@ -216,7 +228,18 @@ build/.profile.stamp:
 		echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile; \
 	fi
 
-build/patch.elf: $(SRCS) $(LDSCRIPT) build/.profile.stamp
+ifdef VENDOR_EARLY_PREFIX
+build/vendor_prefix.bin: $(NF_REF) scripts/extract_vendor_prefix.py
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	@mkdir -p build
+	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) $(VENDOR_EARLY_PREFIX) $@
+
+VENDOR_PREFIX_DEP := build/vendor_prefix.bin
+else
+VENDOR_PREFIX_DEP :=
+endif
+
+build/patch.elf: $(SRCS) $(LDSCRIPT) build/.profile.stamp $(VENDOR_PREFIX_DEP)
 	@mkdir -p build
 	@if test -f $@ && ! $(READELF) -h $@ >/dev/null 2>&1; then \
 		echo "patch.elf invalid (stale host artifact?), rebuilding"; \

@@ -1,8 +1,8 @@
 # Byte-split bisect state — workers read/write; supervisor resumes from here.
 version: "1"
-status: "active"
-profile: "full-inject-t3-vendor-tail-split"
-make_target: "full-inject-t3-vendor-tail-split"
+status: "complete"
+profile: "full-inject-t3-vendor-tail"
+make_target: "full-inject-t3-vendor-tail"
 fail_lo: "0x0"
 pass_hi: "0x764"
 min_interval: "0x10"
@@ -13,7 +13,8 @@ pending_split:
 pending_sha256:
 last_split: "0x764"
 last_result: "connect_ok"
+last_sha256: "4099d4bd6e809cb860f12ebd741b19033a2f660af0bf106d5a08ed0b30beb25c"
 found_lo: "0x770"
 found_hi: "0x780"
-notes: "CONNECT OK at SPLIT=0x764 (51340e31…). Libre bugs only in [0,0x764). SPLIT bisect below 0x764 blocked by FC20 cliff (0x770 fail). Next: RE/fix patch_entry+early installer vs vendor."
-updated_at: "2026-06-09T22:44:02Z"
+notes: "CONNECT OK full-inject-t3-vendor-tail (4099d4bd…) — vendor [0,0x764) .incbin + libre si2@764 + T3 + vendor tail. No inject split needed. Next: incremental libre patch_entry RE to drop NF_REF prefix."
+updated_at: "2026-06-09T20:00:00Z"

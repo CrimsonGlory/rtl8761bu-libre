@@ -683,7 +683,13 @@ PHASE 7 — TEST
 [DONE]  Installer prefix bisect SPLIT=0x764 (2026-06-09)
           vendor [0,0x764) + libre si2+ → connect OK (51340e31…, fw 0x09a98a6b).
           Connect-critical libre gap: [0,0x764) only (patch_entry … sub_installer_1).
-[NEXT]  RE/fix libre patch_entry + early installer [0,0x764) vs vendor bytes
+[DONE]  Vendor early prefix build-time [0,0x764) (2026-06-09)
+          installer_vendor_early.S .incbin + sub_installer_2 @ file 0x764 (same .o).
+          make full-inject-t3-vendor-tail → prefix 0 diffs vs vendor; tail 0 diffs post-inject.
+          SHA 4099d4bd… (differs from split764 inject 51340e31… — libre [0x764,0xE4C) layout).
+[DONE]  Hardware full-inject-t3-vendor-tail (4099d4bd…) connect OK (2026-06-09)
+          FC20 OK, fw 0x09a98a6b, connect 88:C9:E8:6B:F9:1E. Production profile confirmed.
+[NEXT]  Incremental libre patch_entry RE [0,0x764) to replace vendor .incbin prefix
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
