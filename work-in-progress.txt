@@ -378,10 +378,31 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
               pending flags fires LMP__25B__most_common_for_VSCs1(conn_rec+0x68)
           → analysis/reverse_engineering_sco_esco_layer.md (Group E added)
 
-[NEXT]  Decompile FUN_8010b7d4 (starts immediately after FUN_8010b64c literal pool)
-          Address: 0x8010b7d4 (DATA block). First bytes observed: 0x620763fc 0x677d6a00
-          (little-endian MIPS16e instruction words). Size unknown. Use DecompileAddr.java
-          or a new script with hardcoded address.
+[DONE]  Decompile FUN_8010b7d4 + FUN_8010b7f0 (2026-06-08)
+        FUN_8010b7d4 (22B) — ACL connection slot lookup wrapper:
+          Creates 12-byte stack buffer, calls ROM FUN_8001acd8(param_1, &buf).
+          ROM FUN_8001acd8 (104B): copies BD_ADDR, calls Kovah-annotated
+          look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot,
+          returns conn_index in param_2. Error codes 2 (no slot) or 0xc (busy).
+          LIBRE: thin wrapper, calls ROM at fixed address.
+        FUN_8010b7f0 (~772B) — LMP eSCO packet processor:
+          184-byte stack frame, saves ra/s1/s0. 24 pool entries at 0x8010baf4-bb53.
+          Validates buffer capacity, parses eSCO params (via FUN_8010a6ec),
+          writes eSCO timing to MMIO 0xb60011fa/fc/fe (type-7 only).
+          Calls ROM FUN_80056988 (738B, general LMP handler), runs eSCO state
+          machine, dispatches via table 0x80121284[type*4], validates HW timing
+          counter (mask 0x04000000), calls cleanup chain.
+          Pool resolved: all 24 entries → 9 ROM fns + 3 MMIO addrs + 2 data ptrs.
+          Epilogue: jr a3 at 0x8010baf0 (standard false-positive pattern).
+          LIBRE: requires real implementation (~300 insns).
+        → analysis/reverse_engineering_sco_esco_layer.md (Group F added)
+        New ROM fns: FUN_8001acd8, FUN_8002143c, FUN_8001ac74, FUN_80056988,
+          FUN_8004f25c, FUN_800511b8, FUN_80050b2c, FUN_80050ff8, FUN_8004f374,
+          FUN_80052c1c, FUN_8004e808, FUN_80051124.
+
+[NEXT]  Decompile FUN_8010bb54 (starts at 0x8010bb54, immediately after FUN_8010b7f0 pool)
+        Address: 0x8010bb54 (DATA block). First bytes: fd 63 05 62 (0x63fd, 0x6205).
+        Size unknown. Prologue byte pattern suggests small function.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

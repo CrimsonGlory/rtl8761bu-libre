@@ -1761,3 +1761,219 @@ All ROM calls go to fixed addresses in the 0x80000000–0x8007ffff range.
 |----------|---------------------|--------|
 | `0x8012082c` | `0x8004ce45` | ROM `FUN_8004ce44` — stores eSCO type byte + fires slot alloc |
 | `0x80120958` | `0x8005d365` | ROM `FUN_8005d364` — clears pending flag + fires LMP handler |
+
+---
+
+## Group F — FUN_8010b7d4 + FUN_8010b7f0 (2026-06-08)
+
+### FUN_8010b7d4 (22 bytes) — ACL connection slot lookup wrapper
+
+Pool: `DAT_8010b7ec = 0x8001acd9` → ROM `FUN_8001acd8` (104B), MIPS16e.
+
+```c
+void FUN_8010b7d4(undefined4 param_1)
+{
+  undefined2 local_10 [6];   // 12-byte stack buffer
+  local_10[0] = 0;
+  (*DAT_8010b7ec)(param_1, local_10);   // → ROM FUN_8001acd8
+  return;
+}
+```
+
+**What it does:** Creates a 12-byte zero-initialized stack buffer and delegates to ROM
+`FUN_8001acd8` with the original argument and a pointer to the buffer.
+
+**ROM `FUN_8001acd8` (104B):** ACL connection slot lookup by BD_ADDR:
+```c
+int FUN_8001acd8(int param_1, ushort *param_2)
+{
+  big_ol_struct *pbVar1;
+  int iVar2;
+  uint uVar3;
+  ushort local_20 [2];
+  undefined1 auStack_1c [16];
+
+  optimized_memcpy(auStack_1c, param_1 + 3, 6);        // copy BD_ADDR
+  iVar2 = FUN_8002143c(param_1 + 3);                   // check ACL state
+  if (iVar2 == 0) {
+    look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot(auStack_1c, local_20);
+    uVar3 = (uint)local_20[0];
+    if (uVar3 == 0xff) {
+      iVar2 = 2;                                         // no free slot
+    } else {
+      pbVar1 = PTR_big_ol_struct_8001ad40;
+      if (pbVar1[uVar3]._x58_crypto_struct_at_least_0x27_big[1] == '\0') {
+        *param_2 = local_20[0];                          // return conn_index
+        pbVar1[uVar3].field_0x216 = 0;                  // clear field
+        iVar2 = FUN_8001ac74();                          // setup
+      } else {
+        iVar2 = 0xc;                                     // conn record busy
+      }
+    }
+  }
+  return iVar2;
+}
+```
+
+**Logic:**
+1. Copies 6-byte BD_ADDR from `param_1+3`
+2. Calls `FUN_8002143c` — gate check on ACL state (returns non-zero on failure)
+3. Calls Kovah-annotated `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot` — scans connection records for matching/available slot
+4. If not found (0xff): return error 2
+5. If found but `_x58_crypto_struct_at_least_0x27_big[1]` set: return error 0xc (conn busy)
+6. Else: write `conn_index` into caller's buffer, clear field_0x216, call setup fn
+
+**Libre assessment:** Thin wrapper. Calls only pure ROM functions. The libre implementation
+calls ROM `FUN_8001acd8` at its fixed address; zero additional code needed beyond the
+wrapper itself.
+
+---
+
+### FUN_8010b7f0 (~772 bytes) — LMP eSCO packet processor
+
+Body: `0x8010b7f0–0x8010baf2` (~772B). Stack frame = 184 bytes (0xb8).
+Saves: ra → `+0xb4`, s1 → `+0xb0`, s0 → `+0xac`. Spills: a2/a3 to `+0xc0/+0xc4`.
+
+**Literal pool** (`0x8010baf4–0x8010bb53`, 24 entries):
+
+| Pool addr | Value | Resolved |
+|-----------|-------|----------|
+| `0x8010baf4` | `0x80121270` | RAM global (conn slot count / config) |
+| `0x8010baf8` | `0x80111068` | DATA block table |
+| `0x8010bafc` | `0x80074fa9` | ROM `possible_logging_function?_var_args` (204B) |
+| `0x8010bb00` | `0x8010a6ed` | PATCH `FUN_8010a6ec` (180B) — eSCO param parser |
+| `0x8010bb04` | `0x80124e54` | RAM `PTR_PTR_80124e54` (conn struct ptr-of-ptr) |
+| `0x8010bb08` | `0x80124e66` | RAM data (+0x12 offset data) |
+| `0x8010bb0c` | `0x8000e85d` | ROM `optimized_memcpy` (100B) |
+| `0x8010bb10` | `0xb60011fa` | MMIO: eSCO timing reg 0 |
+| `0x8010bb14` | `0xb60011fc` | MMIO: eSCO timing reg 1 |
+| `0x8010bb18` | `0xb60011fe` | MMIO: eSCO timing reg 2 |
+| `0x8010bb1c` | `0x80056989` | ROM `FUN_80056988` (738B) — general LMP handler |
+| `0x8010bb20` | `0x80124e84` | RAM `PTR_PTR_80124e84` (conn state ptr-of-ptr) |
+| `0x8010bb24` | `0x8004f25d` | ROM `FUN_8004f25c` (186B) — eSCO request handler |
+| `0x8010bb28` | `0x800511b9` | ROM `FUN_800511b8` (36B) — state transition |
+| `0x8010bb2c` | `0x80050b2d` | ROM `FUN_80050b2c` (470B) — packet validator A |
+| `0x8010bb30` | `0x80050ff9` | ROM `FUN_80050ff8` (222B) — packet validator B |
+| `0x8010bb34` | `0x80120880` | RAM fn-ptr slot (double-indirect function dispatch) |
+| `0x8010bb38` | `0x80121284` | RAM dispatch table base (`[type*4]`) |
+| `0x8010bb3c` | `0x80120494` | RAM fn-ptr slot (hardware counter reader) |
+| `0x8010bb40` | `0x04000000` | Mask constant (bit 26) for timing check |
+| `0x8010bb44` | `0x8004f375` | ROM `FUN_8004f374` (368B) — debug dump fn |
+| `0x8010bb48` | `0x80052c1d` | ROM `FUN_80052c1c` (72B) — conditional handler |
+| `0x8010bb4c` | `0x8004e809` | ROM `FUN_8004e808` (14B) — teardown stub |
+| `0x8010bb50` | `0x80051125` | ROM `FUN_80051124` (66B) — cleanup handler |
+
+Next function: **`FUN_8010bb54`** starts immediately after the pool.
+
+**What it does (decompile summary):**
+
+```c
+void FUN_8010b7f0(byte *param_1, uint param_2, int param_3, uint param_4)
+{
+  // 1. Validate buffer capacity
+  puVar4 = (undefined1 *)(param_1[1] + 3 & 0xfffe);   // compute even header size
+  puStack_38 = puVar4 + (uint)(byte)*PTR_DAT_8010baf4 * 2 + 6;
+  if ((undefined1 *)(param_2 & 0xffff) < puStack_38) {
+    (*DAT_8010bafc)(2, 0xfa, &DAT_0000441f, 0xc8f);   // log error
+    return;
+  }
+  if (param_1[1] == 0) { log error 0x4426, return; }
+  if (param_3 == 0) return;
+
+  // 2. Parse eSCO parameters
+  puStack_2c = (ushort *)(param_1 + (int)puVar4);
+  (*DAT_8010bb00)(param_1, auStack_80, auStack_64);    // FUN_8010a6ec: parse fields
+  uStack_24 = *puStack_2c >> 3 & uStack_1c;            // extract packet field
+  uStack_30 = param_4 ^ (param_4 ^ uStack_24) & 0x1fff;  // timing calc
+  if (uStack_24 < (param_4 & 0x1fff)) uStack_30 += 0x2000;
+
+  // 3. For eSCO type 7: write timing to MMIO
+  if (... type==7 && PTR_PTR_8010bb04.field5 & 1 && (*param_1 & 0xf)==7
+          && (param_1[2] & 0x3f) != 0 && (param_1[3] & 1)) {
+    (*DAT_8010bb0c)(PTR_DAT_80124e66, param_1+4, 6);   // optimized_memcpy: copy BD_ADDR
+    *DAT_8010bb10 = *(u16*)(PTR_PTR_8010bb04 + 0x12); // MMIO 0xb60011fa
+    *DAT_8010bb14 = *(u16*)(PTR_PTR_8010bb04 + 0x14); // MMIO 0xb60011fc
+    *DAT_8010bb18 = *(u16*)(PTR_PTR_8010bb04 + 0x16); // MMIO 0xb60011fe
+  }
+
+  // 4. General LMP handler
+  uStack_20 = (*DAT_8010bb1c)(param_1, puVar4, auStack_80);  // FUN_80056988
+
+  // 5. eSCO type 7 state machine
+  if ((*param_1 & 0xf) == 7) {
+    iVar5 = *(int*)(PTR_PTR_8010bb20 + 0x20);          // get saved state
+    if (iVar5 == 0) {
+      // No saved state: validate packet, optionally call FUN_8004f25c + FUN_800511b8
+      // Run validators FUN_80050b2c, FUN_80050ff8
+      // Track eSCO retransmit state field +0x1d: 0→1 if qualified, 1→2
+    } else {
+      *(PTR_PTR_8010bb20 + 0x20) = 0;                  // clear saved state
+    }
+  }
+
+  // 6. Type-based dispatch
+  if (*(fn_ptr*)(PTR_DAT_8010bb38 + (*param_1 & 0xf) * 4) != NULL)
+    (*dispatch_table[type])(param_1, puStack_2c, acStack_88, iStackX_8);
+
+  // 7. Timing validation
+  uVar3 = (**(fn_ptr*)PTR_DAT_8010bb3c)();             // read HW counter
+  if (((uVar3 >> 1) - uStack_30) & DAT_8010bb40)       // mask 0x04000000
+    (*DAT_8010bafc)(2, 0xfa, &DAT_000044df, 0xd58);    // log timing mismatch
+
+  // 8. Debug / cleanup
+  if (*(PTR_PTR_8010bb20 + 8) & 8)
+    (*DAT_8010bafc)(1, 0xfa, ...);
+    (*DAT_8010bb44)(param_1, auStack_80, iStackX_8);   // FUN_8004f374: debug dump
+
+  // 9. Conditional final calls
+  if (acStack_88[0] && PTR_PTR_8010bb20[4])
+    (*DAT_8010bb48)(...);                               // FUN_80052c1c
+  else if (*(PTR_PTR_8010bb20 + 0x20) == 0)
+    (*DAT_8010bb4c)(*(iStackX_8 + 0x14));              // FUN_8004e808: teardown
+    *(iStackX_8 + 0x14) = 0;
+
+  if (iStack_34 != 0)
+    (*DAT_8010bb50)(iStack_34);                        // FUN_80051124: cleanup
+}
+```
+
+**Epilogue** (standard `jr a3` pattern at `0x8010baf0`):
+- `0x8010bae6`: `lw s0, 0xac(sp)`
+- `0x8010bae8`: `lw s1, 0xb0(sp)`
+- `0x8010baea`: `lw a3, 0xb4(sp)` (ra restored into a3)
+- `0x8010baec`: `lw s1, 0xb0(sp)` (may be reordered)
+- `0x8010baf0`: `jr a3` (Ghidra mis-identifies as jump table)
+- `0x8010baf2`: `addiu sp, 0xb8` (delay slot)
+
+**Libre assessment:** Requires real implementation (~300 insns). All ROM callees at fixed
+addresses. MMIO writes to `0xb60011fa/fc/fe` program eSCO timing hardware. The dispatch
+table at `0x80121284` and fn-ptr slots at `0x80120880/0x80120494` must be populated by
+the master installer before this function is called.
+
+---
+
+### Group F Implementation Matrix
+
+| Function | Size | ROM calls | MMIO writes | Priority |
+|----------|------|-----------|-------------|----------|
+| `FUN_8010b7d4` | 22B | 1 (ROM `FUN_8001acd8`) | 0 | LOW (thin wrapper) |
+| `FUN_8010b7f0` | ~772B | 9 ROM + 1 patch | 3 (0xb60011fa/fc/fe) | HIGH (LMP eSCO processor) |
+
+**New ROM functions identified:**
+
+| Address | Name | Size | Role |
+|---------|------|------|------|
+| `0x8001acd8` | unnamed | 104B | ACL connection slot lookup by BD_ADDR |
+| `0x8002143c` | unnamed | ? | ACL state gate check |
+| `0x8001ac74` | unnamed | ? | Connection record setup |
+| `0x80056988` | unnamed | 738B | General LMP packet handler |
+| `0x8004f25c` | unnamed | 186B | eSCO request handler |
+| `0x800511b8` | unnamed | 36B | eSCO state transition |
+| `0x80050b2c` | unnamed | 470B | LMP packet validator A |
+| `0x80050ff8` | unnamed | 222B | LMP packet validator B |
+| `0x8004f374` | unnamed | 368B | Debug dump fn |
+| `0x80052c1c` | unnamed | 72B | Conditional eSCO handler |
+| `0x8004e808` | unnamed | 14B | Teardown stub |
+| `0x80051124` | unnamed | 66B | Cleanup handler |
+
+**Grand total updated: 28 functions need real MIPS16e code (~2350 insns estimated).**
