@@ -1,5 +1,6 @@
 /*
- * callees.S — entry-point callees (e27c, TLV, silicon, HW probe, BB, RF).
+ * callees.S — entry-point callees (e27c, HW probe, BB, RF).
+ * TLV + BD_ADDR sync live in bdaddr.S.
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -48,15 +49,6 @@ fn_e27c:
 5:	.word	fn_dfb0 + 1
 6:	.word	fn_d154 + 1
 	.size	fn_e27c, . - fn_e27c
-
-	.globl	fn_tlv_applier
-	.type	fn_tlv_applier, @function
-fn_tlv_applier:
-	LOAD_ADDR $a2, 0x80111600
-	lhu	$v0, 0($a2)
-	jr	$ra
-	nop
-	.size	fn_tlv_applier, . - fn_tlv_applier
 
 	.globl	fn_hw_probe
 	.type	fn_hw_probe, @function

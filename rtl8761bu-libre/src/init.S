@@ -106,7 +106,7 @@ patch_entry:
 	INSTALL_HOOK 0x801206c8, fn_bc74
 
 	CALL_PATCH fn_tlv_applier
-	CALL_ROM 0x8000fd39
+	CALL_PATCH fn_bdaddr_sync
 
 	LOAD_ADDR $a2, 0x8012b814
 	lbu	$a3, 1($a2)

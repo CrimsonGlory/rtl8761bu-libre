@@ -621,8 +621,17 @@ PHASE 6 — IMPLEMENT
             for bos_state[1] in {5,6,8}; else require supported && fn_hw_probe==1.
           Build: 4556 B code / 27808 B PRAM (83.6% free), was 4252 B.
           → src/version_check.S (new)
-[NEXT]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
-[TODO]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
+[DONE]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38) (2026-06-09)
+          src/bdaddr.S (new): fn_tlv_applier (FUN_8010a7b8, 114B decompile) walks
+          TLV blob @ 0x801115fc (magic 0x8723ab55, remaining @ 0x80111600),
+          applies records with offset < 0x411 via ROM optimized_memcpy @ 0x8000e85d
+          to config_base 0x80120070. Default config (total_len=0) is no-op.
+          fn_bdaddr_sync tail-calls ROM copies_config_bdaddr @ 0x8000fd39
+          (syncs config_base+0x30 → global HCI BD_ADDR). init.S Phase 3:
+          TLV applier then bdaddr_sync (replaces bare CALL_ROM). BD_ADDR override
+          via gen_config.py --bdaddr applies TLV offset 0x0030 before ROM sync.
+          Build: 4780 B code / 27808 B PRAM (82.8% free), was 4556 B.
+[NEXT]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
 
 
 PHASE 7 — TEST
