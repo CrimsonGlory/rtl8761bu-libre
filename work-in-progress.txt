@@ -572,8 +572,17 @@ PHASE 5 — DESIGN THE LIBRE REPLACEMENT
 
 PHASE 6 — IMPLEMENT
 ---------------------
-[NEXT]  Implement master installer (MIPS16e asm)
-[TODO]  Implement LMP VSC hook + dispatcher
+[DONE]  Implement master installer (MIPS16e asm) (2026-06-09)
+          Replaced P0 skeleton init.S with FUN_8010a000-equivalent patch_entry:
+          Phase 0 config copy + BSS init (ROM memset 0x80109C00); all 44 DRAM hook
+          installs per Appendix D; 6 sub-installers; ROM reg-script @ 0x801205B4;
+          silicon/TLV/BD_ADDR/HW-probe/BB-init/RF-init chain; *0x80120538=4.
+          New sources: stub_macros.S, bootstrap.S, callees.S, hook_stubs.S, shims.S.
+          Hook handlers are return-stubs (63 fns); shims for c088/d154/cc94; fn_e27c
+          installs 6 protocol-dispatch ptrs. Build: 3852 B code / 27808 B PRAM (86% free).
+          Known gaps: config bit-clears omitted (MIPS16e no and); sub-inst #1 missing
+          bit-6 mask; RF init case-0 table only; TLV loop skipped when remaining=0.
+[NEXT]  Implement LMP VSC hook + dispatcher
 [TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
 [TODO]  Implement minimum required sub-installers
 [TODO]  Implement version check (trivially "always OK" for known HW)

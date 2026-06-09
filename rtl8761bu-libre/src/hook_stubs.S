@@ -1,0 +1,93 @@
+/*
+ * hook_stubs.S — minimal MIPS16e stubs for hook targets not yet fully implemented.
+ * Each stub returns immediately; the master installer still installs them so ROM
+ * dispatch slots are non-NULL. Full implementations replace these in later phases.
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+	.set	mips16
+	.include "stub_macros.S"
+
+	.macro STUB_RET name
+	.globl	\name
+	.type	\name, @function
+\name:
+	jr	$ra
+	nop
+	.size	\name, . - \name
+	.endm
+
+	.section	.text.hooks
+
+	STUB_RET	fn_b118
+	STUB_RET	fn_b174
+	STUB_RET	fn_bba4
+	STUB_RET	fn_be20
+	STUB_RET	fn_c1e8
+	STUB_RET	fn_c224
+	STUB_RET	fn_b3d8
+	STUB_RET	fn_b0a4
+	STUB_RET	fn_c198
+	STUB_RET	fn_d1f4
+	STUB_RET	fn_c780
+	STUB_RET	fn_c63c
+	STUB_RET	fn_b7f0
+	STUB_RET	fn_dd1c
+	STUB_RET	fn_d890
+	STUB_RET	fn_d618
+	STUB_RET	fn_a594
+	STUB_RET	fn_c0f4
+	STUB_RET	fn_a4ac
+	STUB_RET	fn_a49c
+	STUB_RET	fn_bce0
+	STUB_RET	fn_c49c
+	STUB_RET	fn_c43c
+	STUB_RET	fn_d168
+	STUB_RET	fn_fa34
+	STUB_RET	fn_f950
+	STUB_RET	fn_fb08
+	STUB_RET	fn_abd0
+	STUB_RET	fn_f884
+	STUB_RET	fn_f85c
+	STUB_RET	fn_a550
+	STUB_RET	fn_c160
+	STUB_RET	fn_c178
+	STUB_RET	fn_b4d0
+	STUB_RET	fn_a5ac
+	STUB_RET	fn_c854
+	STUB_RET	fn_c09c
+	STUB_RET	fn_bc74
+	STUB_RET	fn_ce0c
+	STUB_RET	fn_10ddc
+	STUB_RET	fn_bda0
+	STUB_RET	fn_e350
+	STUB_RET	fn_10ca4
+	STUB_RET	fn_e82c
+	STUB_RET	fn_eac0_callee
+	STUB_RET	fn_dfb0
+	STUB_RET	fn_daa4
+	STUB_RET	fn_da70
+	STUB_RET	fn_d9f4
+	STUB_RET	fn_ca20
+
+	/* sub-installer #2 targets — stubs until individually implemented */
+	STUB_RET	sub2_fn_00
+	STUB_RET	sub2_fn_01
+	STUB_RET	sub2_fn_02
+	STUB_RET	sub2_fn_03
+	STUB_RET	sub2_fn_04
+	STUB_RET	sub2_fn_05
+	STUB_RET	sub2_fn_06
+	STUB_RET	sub2_fn_07
+	STUB_RET	sub2_fn_08
+	STUB_RET	sub2_fn_09
+	STUB_RET	sub2_fn_10
+	STUB_RET	sub2_fn_11
+	STUB_RET	sub2_fn_12
+	STUB_RET	sub2_fn_13
+	STUB_RET	sub2_fn_14
+	STUB_RET	sub2_fn_15
+	STUB_RET	sub2_fn_16
+	STUB_RET	sub2_fn_17
+	STUB_RET	sub2_fn_18

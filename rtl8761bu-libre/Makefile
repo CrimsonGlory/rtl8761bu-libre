@@ -18,7 +18,7 @@ PYTHON  := python3
 
 # ── Source files ───────────────────────────────────────────────────────
 # All C files in src/ are compiled. Add new hook implementations there.
-SRCS := $(wildcard src/*.c) $(wildcard src/*.S)
+SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S,$(wildcard src/*.S))
 
 # ── Compiler flags ─────────────────────────────────────────────────────
 #   -mips32r2      : base ISA (MIPS16e is an extension of MIPS32r2)
@@ -36,7 +36,8 @@ SRCS := $(wildcard src/*.c) $(wildcard src/*.S)
 CFLAGS  := -mips32r2 -EL -msoft-float -G 0 \
            -nostdlib -nostartfiles -ffreestanding \
            -fno-pic -fno-builtin \
-           -Os -Wall -Wextra
+           -Os -Wall -Wextra \
+           -Isrc
 
 LDFLAGS := -T rtl8761bu.ld -nostdlib -nostartfiles
 
