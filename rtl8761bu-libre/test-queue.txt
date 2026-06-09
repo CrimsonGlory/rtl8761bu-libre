@@ -2,3 +2,4 @@
 # NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
 done    full-inject-t3-vendor-tail  4099d4bd6e809cb860f12ebd741b19033a2f660af0bf106d5a08ed0b30beb25c  connect OK
+ACTIVE  full-inject-t3  387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d  PE-5 libre prefix pending

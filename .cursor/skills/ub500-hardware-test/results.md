@@ -19,6 +19,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t1 | `e0a0db248b76141d34dfa82e3978c24c2cd5e8718c3488f0aa73644ecdd1e190` | OK (FC20) | `0xa1889623`; **connect FAIL** `br-connection-page-timeout` (same as full) | 2026-06-09 |
 | full-inject-t2 | `c812cf41776e479865aa0c386b75ea788edfc7b554b77479892009930f044670` | OK (FC20) | `0xa98c822b`; **connect FAIL** `br-connection-page-timeout` (same as full / T1) | 2026-06-09 |
 | full-inject-t3 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | OK (FC20) | `0x890c96a3`; **connect FAIL** `br-connection-page-timeout` (all hooks vendor-injected) | 2026-06-09 |
+| full-inject-t3 (PE-5 libre prefix) | `387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d` | **pending** | libre `[0,0x764)` via `patch_entry_*`; `diff-prefix` 0/1892; no `VENDOR_EARLY_PREFIX`; T3 hook inject + vendor tail | 2026-06-09 |
 | full-inject-t3-vendor-inst | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | OK (FC20) | `0x09a98a6b`; **HCI hang** `0x2036`/`-110` tx timeout; ~15 KB NOP tail still libre | 2026-06-09 |
 | full-inject-t3-vendor-tail | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | OK (FC20) | `0x8d8c8223`; HCI OK; **connect FAIL** `page-timeout` (same as T3) | 2026-06-09 |
 | full-inject-t3-vendor-tail (sub_installer_2 fix) | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | OK (FC20) | `0xa18c9623`; HCI OK; **connect FAIL** `page-timeout` | 2026-06-09 |
@@ -64,6 +65,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `e0a0db248b76141d34dfa82e3978c24c2cd5e8718c3488f0aa73644ecdd1e190` | full-inject-t1 | FC20 **PASS**; connect **FAIL** |
 | `c812cf41776e479865aa0c386b75ea788edfc7b554b77479892009930f044670` | full-inject-t2 | FC20 **PASS**; connect **FAIL** |
 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | full-inject-t3 | FC20 **PASS**; connect **FAIL** |
+| `387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d` | full-inject-t3 PE-5 | **pending** (hardware) |
 | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | full-inject-t3-vendor-inst | FC20 **PASS**; HCI **FAIL** |
 | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | full-inject-t3-vendor-tail (pre-fix) | FC20 **PASS**; connect **FAIL** |
 | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | full-inject-t3-vendor-tail (si2 fix) | FC20 **PASS**; connect **FAIL** |
@@ -127,6 +129,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t1 | `e0a0db248b76141d34dfa82e3978c24c2cd5e8718c3488f0aa73644ecdd1e190` | FC20 **PASS**; connect **FAIL** | vendor T1 bodies injected; ~20 T2 hooks still `STUB_RET` | 2026-06-09 |
 | full-inject-t2 | `c812cf41776e479865aa0c386b75ea788edfc7b554b77479892009930f044670` | FC20 **PASS**; connect **FAIL** | T1+T2 inject; libre LMP hooks only | 2026-06-09 |
 | full-inject-t3 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | FC20 **PASS**; connect **FAIL** | all hooks vendor; libre installer remains | 2026-06-09 |
+| full-inject-t3 (PE-5 libre prefix) | `387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d` | **pending** | libre prefix `[0,0x764)`; `diff-prefix` 0/1892; no `VENDOR_EARLY_PREFIX` | 2026-06-09 |
 | full-inject-t3-vendor-inst | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | FC20 **PASS**; HCI **FAIL** | vendor prefix only; libre NOP tail | 2026-06-09 |
 | full-inject-t3-vendor-tail (pre-fix) | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | FC20 **PASS**; connect **FAIL** | libre installer + vendor tail | 2026-06-09 |
 | full-inject-t3-vendor-tail (si2 fix) | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | FC20 **PASS**; connect **FAIL** | vendor 28 B si2 loop; `[0,0x764)` still libre | 2026-06-09 |
