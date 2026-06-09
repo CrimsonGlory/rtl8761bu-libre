@@ -1,16 +1,18 @@
 # RTL8761BU — SCO/eSCO Layer & Slot Scheduler (2026-06-08)
 
-Covers 15 functions from the DATA block decompiled in the `[NEXT]` pass:
+Covers 24 functions from the DATA block across three analysis passes:
 - **Group A** (0xa000 region helpers): 10 functions near the patch entry point
 - **Group B** (Appendix D hook targets): 5 functions installed as first-batch hooks
+- **Group C** (2026-06-08 second pass): 9 functions — `FUN_80110868` + 8 from `FUN_8010a84c` pool
 
-All decompiled via `DecompileSmallFunctions.java`, `DecompileSmallFunctions2.java`,
-`DecompileSmallFunctions3.java`, `DecompileHookTargets.java`, and `DecompileC63c.java`
-against GZF `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
+All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.java` /
+`DecompileHookFnsBatch.java` against GZF `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
 
 ---
 
 ## Summary Table
+
+### Group A — 0xa000 Region Helpers
 
 | Function | Size | Classification | Description |
 |----------|------|----------------|-------------|
@@ -24,13 +26,32 @@ against GZF `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
 | `FUN_8010a6ec` | 180B | **REAL** | eSCO slot buffer allocator |
 | `FUN_8010a84c` | 450B | **REAL** | SCO/eSCO connection response handler |
 | `FUN_8010aa58` | 96B | **REAL** | SCO connection continuation handler |
+
+### Group B — Appendix D Hook Targets
+
+| Function | Size | Classification | Description |
+|----------|------|----------------|-------------|
 | `FUN_8010b118` | 82B | **REAL** | Slot interval allocator (ROM API wrapper) |
 | `FUN_8010b3d8` | 206B | **REAL** | ACL slot scheduler (interrupt-protected) |
 | `FUN_8010b0a4` | 108B | **REAL** | ACL packet type flag corrector |
 | `FUN_8010c780` | 34B | **REAL** | Subsystem initializer (3 fn calls + flag) |
 | `FUN_8010c63c` | 278B | **REAL** | Retransmission counter / ACL packet handler |
 
-Only 2 of 15 functions are trivial stubs. The remaining 13 require real implementation.
+### Group C — Second-Pass Hook Targets (2026-06-08)
+
+| Function | Size | Classification | Description |
+|----------|------|----------------|-------------|
+| `FUN_80110868` | 322B | **REAL** | eSCO codec frame ring-buffer scheduler |
+| `FUN_8010ce0c` | 728B | **REAL** | AFH capability mapper + HW init chain |
+| `FUN_8010fa34` | 184B | **REAL** | AFH 79-channel map merger (AND + min-20) |
+| `FUN_8010f950` | 174B | **REAL** | AFH channel classification + VSC fc95 trigger |
+| `FUN_8010fb08` | 292B | **REAL** | BLE/narrow-band AFH 5-byte channel aggregator |
+| `FUN_8010e350` | 1174B | **REAL** | AFH quality ranking engine (79 channels) |
+| `FUN_8010bda0` | 114B | **REAL** | SCO/eSCO negotiation acceptance validator |
+| `FUN_8010c09c` | 76B | **REAL** | Baseband register capability gate |
+| `FUN_8010b4d0` | 76B | **REAL** | eSCO slot allocation trigger (partial — unresolved tail call) |
+
+Only 2 of 24 functions are trivial stubs. The remaining 22 require real implementation.
 
 ---
 
@@ -621,11 +642,541 @@ Field `0x14bc` in the stride-0x1ac struct is the **sequence counter** for ACL pa
 
 ---
 
+## Group C — Second-Pass Hook Targets (2026-06-08)
+
+Decompiled via `DecompileNewHookFns.java` and `DecompileHookFnsBatch.java`.
+
+---
+
+### FUN_80110868 (322B) — eSCO Codec Frame Ring-Buffer Scheduler
+
+Called by `FUN_8010c780` (the subsystem initializer) as its first action.
+MIPS16e odd pointer `0x80110869` → entry at even address `0x80110868`.
+
+**Role:** Flushes pending eSCO codec frame descriptors into an 8-slot, 0x10-byte-per-slot ring
+buffer. Runs as an infinite loop until no more pending frames exist.
+
+**Decompile (condensed):**
+```c
+void FUN_80110868(void) {
+    ushort *ring_base = DAT_801109ac;           // ring state struct
+    ushort uVar1 = *DAT_801109ac;               // capability word A
+    ushort uVar2 = *DAT_801109b0;               // capability word B
+
+    // Sanity checks — log and clear overflow bits
+    if ((short)uVar1 < 0)                       // bit 15 set = overflow flag
+        (*log_fn)(2,0xf8,0x1d7,0xe05,2,...);
+        *ring_base = uVar1 & 0x7fff;            // clear overflow bit
+    if (uVar2 & 0x10)                           // bit 4 = another overflow flag
+        (*log_fn)(2,0xf8,0x1de,0xe05,...);
+        (*fn_ptr_bc)(0xac, uVar2 & 0xffef);     // clear bit 4, pass opcode 0xac
+
+    PTR_DAT_801109c0[0x83] = 0;                 // clear mode flag byte
+
+    do {
+        byte *slot = base + base[0x80] * 0x10;  // current ring slot (stride 16)
+
+        if ((*DAT_801109c4 & 1) == 0) {         // mode 0 (e.g. SCO encode path)
+            if ((*DAT_801109e0 & 1) == 0) return; // no pending → done
+            slot[6] = *DAT_801109e4;             // fill frame field +6
+            slot[8] = *DAT_801109e8;             // fill frame field +8
+            slot[10] = *DAT_801109ac;            // fill frame field +10 (cap word A)
+            uVar3 = *DAT_801109ec; uVar7 = *DAT_801109f0;
+            *slot |= 1;                          // mark slot valid
+            PTR_DAT_801109f4[0x164] &= 0xfe;    // clear pending bit at struct+0x164
+        } else {                                 // mode 1 (e.g. SCO decode path)
+            if ((*DAT_801109c8 & 1) == 0) return;
+            slot[0xc] = *DAT_801109cc;
+            slot[0xe] = *DAT_801109d0;
+            uVar3 = *DAT_801109d4; slot[10] = *DAT_801109d8; uVar7 = *DAT_801109dc;
+            *slot &= 0xfe;                       // clear valid bit (mode 1 uses inverse)
+            base[0x83] = 1;                      // set mode flag
+        }
+        slot[4] = uVar7;  slot[2] = uVar3;       // fill frame fields +2, +4
+        base[0x80] = (base[0x80] + 1) & 7;       // advance ring head (mod 8)
+        base[0x82]++;                             // increment total frame count
+    } while (true);                              // loop until no pending data
+}
+```
+
+**Ring buffer layout** (stride 16 bytes, 8 slots, head at `base[0x80]`):
+
+| Offset | Content |
+|--------|---------|
+| `+0` | mode/valid flag byte |
+| `+2` | frame field A (from `*DAT_801109ec` or `*DAT_801109d4`) |
+| `+4` | frame field B (from `*DAT_801109f0` or `*DAT_801109dc`) |
+| `+6` | field C (mode 0 only, from `*DAT_801109e4`) |
+| `+8` | field D (mode 0 only, from `*DAT_801109e8`) |
+| `+a` | capability word A (`*DAT_801109ac`) |
+| `+c` | field E (mode 1 only, from `*DAT_801109cc`) |
+| `+e` | field F (mode 1 only, from `*DAT_801109d0`) |
+
+**Key literal pool addresses:**
+
+| Symbol | Value | Role |
+|--------|-------|------|
+| `DAT_801109ac` | runtime RAM | capability word A (16-bit) / ring state base |
+| `DAT_801109b0` | runtime RAM | capability word B (16-bit) |
+| `DAT_801109b8` | fn ptr | debug/log function |
+| `PTR_DAT_801109bc` | fn ptr | handler for opcode 0xac |
+| `PTR_DAT_801109c0` | RAM struct | ring buffer state struct |
+| `DAT_801109c4/c8` | RAM | mode-0 / mode-1 "pending" flags |
+| `DAT_801109e0/e4/e8` | RAM | mode-0 source data |
+| `DAT_801109c8/cc/d0` | RAM | mode-1 source data |
+| `PTR_DAT_801109f4` | RAM struct | external state struct (pending bit at +0x164) |
+
+**Libre:** Must implement — manages the codec frame ring buffer that drives eSCO audio.
+The mode selector and two data paths correspond to two codec directions (encode/decode or
+two different codec configurations). The `& 7` wrap gives an 8-slot circular buffer.
+
+---
+
+### FUN_8010ce0c (728B) — AFH Capability Mapper + Hardware Init Chain
+
+**Role:** Reads the 16-bit BT AFH host channel classification word from `config_base+0x44`,
+maps individual bits into hardware register space, programs baseband registers 0x15c and
+0x1fc, then calls a chain of 4–5 initialization functions to arm the AFH engine.
+
+**Decompile (condensed):**
+```c
+void FUN_8010ce0c(void) {
+    // If chip type == 6: enable register-4 bit 0x200 (mode gating)
+    if ((*PTR_DAT_8010d0e4 & 0x1e) == 6) {
+        uint r4 = (*hw_read)(4);
+        (*hw_write)(4, r4 | 0x200, 1);
+    }
+
+    uint32 cap_reg = *DAT_8010d0f0;                    // 32-bit capability register
+    uint16 ch_class = *(uint16*)(config_base + 0x44);  // host channel classification
+
+    if (config_base[0x46] & 8) {                       // if enhanced AFH capable
+        byte codec_byte = config_base[0xec];
+        uint16 codec2 = *(uint16*)(config_base + 0xd2);
+
+        // Map ch_class bits [0..9] → cap_reg bits [0x10..0x19]
+        cap_reg = scatter_bits(cap_reg, ch_class, masks);
+
+        // Read and reprogram registers 0x15c and 0x1fc
+        uint r15c = (*hw_read)(0x15c, 2);
+        uint r1fc = (*hw_read)(0x1fc, 2);
+        uint new_15c = remap_codec_bits(r15c, codec_byte, codec2[0..3], codec2[4..7]) & mask;
+        uint new_1fc = remap_codec_bits(r1fc, codec_byte, codec2[8..11], codec2[12..]) & mask;
+        (*hw_write)(0x15c, new_15c | extra_bits, 2);
+        (*hw_write)(0x1fc, new_1fc | extra_bits, 2);
+        *DAT_8010d128 = (*DAT_8010d128 & mask) | ((ch_class >> 13 & 1) << 0x1d);
+    }
+
+    if ((*PTR_DAT_8010d0e4 & 0x1e) == 2 && !(config_base[0x3f] & 0x10))
+        cap_reg |= DAT_8010d130;
+    *DAT_8010d0f0 = cap_reg;
+
+    if (PTR_DAT_8010d134[0x10b] == 0)                  // debug gate
+        (*log_fn)(4,0xfa,0x2a4_line,...,ch_class);
+
+    // AFH init chain
+    (*DAT_8010d140)();              // AFH module init 1
+    (*DAT_8010d144)();              // AFH module init 2
+    *(PTR_DAT_8010d148 + 0x40) = 0; // clear a struct field
+    (*DAT_8010d14c)(1);             // trigger AFH with arg=1
+    (*DAT_8010d150)();              // AFH module init 3
+}
+```
+
+The **bit-scatter** pattern maps each bit i (0–9) of `ch_class` into bit position `0x10+i` of
+`cap_reg`, using per-bit mask constants. This is the standard HCI-to-HW AFH channel
+classification encoding.
+
+Registers 0x15c and 0x1fc are baseband codec capability registers — their bit fields
+correspond to specific codec configurations (µ-law, A-law, CVSD, transparent, wideband).
+
+**Libre:** Must implement — core of the AFH initialization path. All 5 tail functions
+(at `DAT_8010d140/d144/d14c/d150`) are still unknown and need identification.
+
+---
+
+### FUN_8010fa34 (184B) — AFH 79-Channel Map Merger
+
+**Role:** Merges a remote channel map (10 bytes = 79 BT channels) with the local map using
+bitwise AND (intersection), enforces the BT-spec minimum of 20 usable channels, and copies
+the result to an output buffer.
+
+**Decompile (condensed):**
+```c
+undefined4 FUN_8010fa34(undefined4 dst, undefined4 p2, char trigger) {
+    if (*init_flag == 0) {
+        // First call: copy reference map to both local and working map
+        memcpy(local_map, ref_map_10bytes, 10);
+        memcpy(working_map, ref_map_10bytes, 10);
+        init_flag[2] = 1;  init_flag[4] = 1;
+    } else {
+        // Merge: working = ref AND local AND mask
+        memcpy(working_map, ref_map_10bytes, 10);
+        working_map &= local_map;                    // AND with local
+        working_map &= PTR_DAT_8010faf8;             // AND with allowed mask
+
+        // Enforce minimum 20 channels
+        uint good = (*popcount_fn)(working_map, 0);
+        if (good < 20)
+            memcpy(working_map, local_map, 10);      // fall back to unfiltered local
+    }
+    // Copy result to destination
+    (*memcpy_fn)(dst, working_map, 10);
+    *init_flag = 1;
+    if (trigger == 1) (*notify_fn)();
+    return 1;
+}
+```
+
+The two state paths (first-call init vs. merge) and the `< 20` fallback implement
+the AFH channel map update procedure per Bluetooth Core Spec §4.2.27.
+
+**Key data:**
+- `PTR_PTR_8010faf0` → dual pointers to local map (`+0`) and working map (`+0xc`)
+- `PTR_DAT_8010faf4` → 10-byte reference channel map (default allow-all or classification result)
+- `PTR_DAT_8010faf8` → 10-byte hardware-forbidden-channel mask
+
+**Libre:** Must implement — standard BT AFH channel map management. Logic is well-defined
+by the BT specification.
+
+---
+
+### FUN_8010f950 (174B) — AFH Channel Classification Handler + VSC fc95 Trigger
+
+**Role:** Called when new channel quality data arrives. Logs the 10-byte channel map,
+runs a classification step, and if a scan has not yet been started, triggers the chip's
+"start AFH scan" command (via `PTR_VSC_0xfc95_called2_1_8010fa2c`).
+
+**Decompile (condensed):**
+```c
+undefined4 FUN_8010f950(char *mode_flag) {
+    (*reset_or_ack_fn)();                                    // acknowledge / reset trigger
+    (*log_fn)(3,0xf7,0x2a4,0x688, 10, hdr,                 // log 10-byte channel map
+              ch_map[0],...,ch_map[9]);
+
+    undefined4 tmp = 0;  byte tmp2 = 0;
+    (*classify_fn)(&tmp, working_map_ptr);                   // classify quality
+    (*memcpy5)(&tmp, working_map_ptr, 5);                   // copy 5-byte result
+
+    // Handle mode transitions
+    if (*mode_flag == 1 || *mode_flag == 0)
+        (*transition_fn)();                                  // trigger mode transition
+
+    // Start AFH scan if not already running (sentinel = -1)
+    if (*(int*)scan_started_ptr == -1) {
+        (*PTR_VSC_0xfc95_called2_1_8010fa2c)
+              (0, scan_started_ptr, PTR_LAB_80066d9c, 0, *(undefined4*)notify_ptr);
+        (*schedule_fn)(*(undefined4*)scan_started_ptr, *(undefined4*)notify_ptr);
+    }
+    return 1;
+}
+```
+
+`PTR_VSC_0xfc95_called2_1_8010fa2c` is Kovah's annotation for the VSC 0xfc95 "start scan"
+call — this is the chip's vendor command to initiate channel quality measurement.
+
+**Libre:** Must implement — triggers the chip's AFH scan when channel quality data is ready.
+The VSC 0xfc95 command is sent via a function pointer installed at runtime; libre firmware
+must install the same pointer (to ROM's VSC dispatch or a stub that calls the ROM fn).
+
+---
+
+### FUN_8010fb08 (292B) — 5-Byte (BLE/Narrow-Band) Channel Map Aggregator
+
+**Role:** Aggregates a 5-byte channel map by ANDing three source maps (local, peer, and
+an additional mask), enforces a minimum threshold of 2 usable channels, and tracks
+consecutive failure count. The 5-byte = 40-channel format matches **BLE channel maps**.
+
+**Decompile (condensed):**
+```c
+undefined4 FUN_8010fb08(void) {
+    if (state[1] == 0) {
+        // First-time init: copy default map to two arrays
+        memcpy(map_a, ref_map_5bytes, 5);  // into array at struct+0x14
+        memcpy(map_b, ref_map_5bytes, 5);  // into array at struct+0x20
+        state[2] = 1; state[4] = 1;
+    } else {
+        // Merge: map_b = ref AND map_a AND map_c
+        memcpy(map_b, ref_map_5bytes, 5);
+        map_b &= map_a;                     // AND with local (struct+0x14)
+        map_b &= map_c;                     // AND with extra mask (struct+0x18)
+        map_b &= map_d;                     // AND with peer map (struct+0x1c)
+
+        uint good = (*popcount_fn)(map_b, 1);
+        if (good < 2)                       // minimum 2 channels (BLE spec)
+            (*memcpy5)(map_b, map_c, 5);    // fall back to map_c
+    }
+
+    if (state[1] != 0) {
+        // Check if map changed
+        if ((*compare_fn)(ref_map, map_b, 5) == 0) {
+            // No change: increment failure counter
+            struct[0x3e]++;
+            (*log_fn)(5,0xf7,0x261,...,struct[0x3e]);
+        } else {
+            // Map changed: reset counter, update
+            struct[0x3e] = 0;
+            (*log_fn)(5,0xf7,0x24f,...,0);
+            if (struct_array[0x1478] & 1)
+                (*notify_fn)(map_b, 2);      // notify change
+            (*memcpy5)(ref_map, map_b, 5);   // save as new reference
+        }
+    }
+    state[1] = 1;
+    return 1;
+}
+```
+
+**Key observations:**
+- 5-byte maps = 40-bit BLE channel map (channels 0-39 per BLE spec)
+- Minimum threshold of 2 (BLE Core Spec requires ≥ 2 data channels)
+- Three-source AND mirrors the BLE channel map merge: local + peer + HCI-mandated
+- The `struct_array[0x1478]` flag (with `PTR_base_of_0x1ac_struct_array_0xA_large2_8010fc50`)
+  indicates this is embedded within the per-connection eSCO/ACL structure
+
+**Libre:** Must implement — BLE channel map aggregation logic. The BLE channel map exchange
+happens via LL_CHANNEL_MAP_IND (BLE v4.0+).
+
+---
+
+### FUN_8010e350 (1174B) — AFH Channel Quality Ranking Engine
+
+**Role:** The core AFH algorithm. Takes an 80-element quality array, applies weighted
+combination with connection-tracking history, ranks all 79 usable Bluetooth channels by
+quality, selects the best N (minimum 20), applies hardware forbidden-channel mask, and
+outputs the final 10-byte AFH channel bitmap.
+
+**Decompile (condensed):**
+```c
+undefined4 FUN_8010e350(int conn, short target_count, undefined4 quality_src,
+                         int output_map, int *selected_count) {
+    if (*(int*)(conn + 0x1c) < 9) {         // too few samples
+        memset(output_map, 0xff, 10);        // output: all channels
+        output_map[9] = 0x7f;               // 79 channels, top bit clear
+        (conn+0x18) = 0; (conn+0x14) = 0x20;
+        *selected_count = 0x4f;             // all 79
+        return 1;
+    }
+
+    // Compute thresholds from connection record
+    int upper_thresh = *(char*)(conn + conn[10] + 4) << 7;  // signed, scaled
+    int lower_thresh = *(char*)(conn + 0x10) * -0x10000 >> 10;  // negative limit
+    int limit = *(char*)(conn + 0x11);                           // override limit
+
+    // Step 1: decode + weight current measurements
+    short quality[80];
+    (*decode_fn)(quality_src, quality);          // decode from packed format
+    bool use_history = *(char*)(conn + 0xd);
+    for (int i = 0; i < 80; i++)
+        quality[i] = use_history * 0x80 * quality[i] + *(short*)(conn + (i+12)*2 + 8);
+
+    // Step 2: rank channels (sort quality array, keep track of original indices)
+    short sorted[80];  short idx[80];
+    (*rank_fn)(quality, sorted, 0, 78);
+
+    // Step 3: select top N (scan from highest to find threshold crossing)
+    int N = 79;  // default: all channels
+    for (int i = 78; i >= 0; i--)
+        if (upper_thresh < target_count * 0x80 - sorted[i]) { N = i+1; break; }
+
+    // Step 4: secondary threshold (lower quality floor)
+    for (int i = 78; i >= 0; i--)
+        if (sorted[i] < lower_thresh) {
+            // adjust N
+            if (i+1 < 20 || -limit < total_good) goto use_20;
+            N = (i+1 < N) ? i-4 : N-5;
+            break;
+        }
+use_20:
+    if (N < 20) N = 20;                        // enforce BT minimum
+    if (*(char*)(conn + 0xe) != 0) N = *(char*)(conn + 0xe);  // hard override
+
+    // Step 5: build output bitmap from top-N channel indices
+    byte enable[80] = {0};
+    for (int i = 0; i < N; i++) enable[idx[i]] = 1;
+    (*bitmap_fn)(enable, output_map);           // convert channel list → 10-byte bitmap
+
+    // Step 6: apply hardware forbidden-channel mask
+    for (int i = 0; i < 10; i++) output_map[i] &= PTR_DAT_8010e814[i];
+
+    // Step 7: enforce minimum again after masking
+    byte good = (*popcount_fn)(output_map);
+    if (good < 20) {
+        // Add channels from sorted list that are not forbidden
+        int need = 20 - good;
+        for (int i = 0; i < 80 && need > 0; i++) {
+            int ch = idx[i];
+            if (ch is in forbidden mask AND not yet set) { enable[ch]=1; need--; }
+        }
+        (*bitmap_fn)(enable, output_map);
+        (*log_fn)(..., need_added);
+    }
+
+    *selected_count = (*popcount_fn)(output_map);
+    return 1;
+}
+```
+
+**Key function pointers (from literal pool):**
+
+| Symbol | Role |
+|--------|------|
+| `DAT_8010e7f8` | Decode packed quality measurements |
+| `DAT_8010e7fc` | Some transform (possibly FFT/Hadamard for channel quality) |
+| `DAT_8010e800` | Sort channels by quality (produces ranked index array) |
+| `DAT_8010e804` | Count channels above threshold |
+| `DAT_8010e808` | Validate + adjust N against connection record |
+| `DAT_8010e810` | Convert channel enable-list to 10-byte bitmap |
+| `DAT_8010e814` | Hardware forbidden-channel mask (10 bytes, ROM or RAM) |
+| `DAT_8010e818` | Popcount of 10-byte bitmap |
+| `DAT_8010e800` | Channel ranking sort |
+
+**Libre:** Critical — this IS the AFH algorithm. Must be implemented in full.
+The connection record (`conn`) provides per-link quality history at `+8 + (i+12)*2`,
+thresholds at `+0x10, +0x11, +0xd`, and sample count at `+0x1c`.
+The forbidden-channel mask at `DAT_8010e814` must match the hardware's RF constraints.
+
+---
+
+### FUN_8010bda0 (114B) — SCO/eSCO Negotiation Acceptance Validator
+
+**Role:** Called when an incoming SCO/eSCO connection setup request arrives. Validates
+whether the local state allows accepting it; rejects (LMP_NOT_ACCEPTED) or accepts and
+updates the connection record.
+
+**Decompile (condensed):**
+```c
+undefined4 FUN_8010bda0(int conn, undefined2 *pdu, undefined1 *result) {
+    uint type = *(byte*)(pdu + 2);  // connection type field from PDU
+    bool can_accept = (*(byte*)(conn + 0x20) & 2) != 0;  // SCO-enable flag
+    bool esco_exception = (type == 3 && *(char*)(pdu + 3) != 0);
+
+    if (!can_accept && !esco_exception) {
+        // Reject: set error + send LMP_NOT_ACCEPTED (opcode 0xe)
+        *result = 0x12;                        // error: Unsupported Feature or Similar
+        (*lmp_reject_fn)(*pdu, tmp_buf);       // build reject PDU using first 2 bytes
+        tmp_buf[0] = *result;
+        (*lmp_send_fn)(0xe, tmp_buf, 4);       // send LMP PDU, opcode 0xe, 4 bytes
+        return 1;                              // handled (rejected)
+    }
+
+    // Accept: update connection record
+    if (*(int*)(conn + 0x50) != 0 && *(int*)(*(int*)(conn+0x50) + 0x24) != 0) {
+        int link = (*get_link_fn)(conn);       // get linked record
+        if ((*(byte*)(conn + 0x20) & 0x10) && type == 3)
+            *(undefined1*)(link + 0x11) = 0;  // clear field for type-3 eSCO
+    }
+    return 0;                                  // handled (accepted)
+}
+```
+
+The `0x12` error reason is HCI_ERROR_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE.
+LMP opcode `0xe` is `LMP_MAX_SLOTS` — this may be a Realtek-specific rejection encoding,
+or there's a sub-function `lmp_reject_fn` that builds the actual LMP_NOT_ACCEPTED PDU.
+
+**Libre:** Must implement — gateway for SCO/eSCO acceptance. Logic is straightforward once
+the connection-state flag semantics are understood.
+
+---
+
+### FUN_8010c09c (76B) — Baseband Per-Link Feature Gate
+
+**Role:** If a specific capability is not declared in config (config+0x7a bit 5 clear),
+clears certain feature bits from baseband hardware register 0x0f at a given connection
+index. Acts as a capability downgrade for connections that don't support the feature.
+
+**Decompile:**
+```c
+undefined4 FUN_8010c09c(int param_1) {
+    if ((PTR_config_base[0x7a] & 0x20) == 0) {  // if capability bit NOT set
+        uint val = (*hw_read)(*(byte*)(param_1+2), 0xf);  // read reg 0x0f at conn index
+        (*hw_write)(*(byte*)(param_1+2), 0xf, val & 0xffffce03);  // clear bits 2–8, 12–13
+        // Mask 0xce03 = 1100 1110 0000 0011 → clears bits 2,3,4,5,6,7,8,12,13
+    }
+    return 0;
+}
+```
+
+Bits 2–8 and 12–13 of register 0x0f (per-link) control enhanced data rate, SCO power
+control, and retransmission features. Clearing them disables those features for the link.
+
+**Libre:** Must implement — programs per-link feature bits. Logic is simple once
+`hw_read`/`hw_write` fn-ptrs are wired.
+
+---
+
+### FUN_8010b4d0 (76B) — eSCO Slot Allocation Trigger
+
+**Role:** Receives incoming eSCO capability data (packet type fields from an LMP PDU),
+stores it in the per-connection struct, and triggers slot allocation if the connection
+is not yet active. Has an unresolved tail-call indirect jump at the end.
+
+**Decompile (condensed):**
+```c
+void FUN_8010b4d0(int cap_pdu, undefined4 p2, uint conn_idx) {
+    conn_idx &= 0xff;
+    uint offset = conn_idx * 0x1ac;
+    undefined2 *conn = conn_base + offset;
+
+    // Store capability fields from PDU into connection record
+    conn[0x1e] = *(byte*)(cap_pdu + 1);         // packet type byte
+    conn[0x1f] = *(ushort*)(cap_pdu + 2);        // field A
+    conn[0x20] = *(ushort*)(cap_pdu + 4);        // field B
+    *(byte*)(conn + 0x48) |= 2;                  // set "pending" bit
+
+    // Cancel any queued timer for this connection
+    if (*(ushort*)(conn + 0x254) & 2) {
+        (*cancel_fn)(0, *conn, conn_idx + 10);
+        conn[0x254] &= ~2;
+    }
+
+    if ((*(byte*)(conn + 0x48) & 1) == 0) {      // not yet active
+        if (conn[0x3e] == 0 && conn[0x3c] == 0) { // no timers pending
+            conn[0x3e] = 0x20;                    // set slot count
+            (*indirect_call)(conn_idx, 6);         // trigger connection with type=6
+            *(byte*)(conn + 0x48) |= 1;           // mark active
+            uint ts = (*get_timestamp)();
+            (*record_fn)(ts, conn_idx);
+            (*set_timer)(conn, 0xc, 2);           // start timers
+            // Update bit 4 of conn[0x8f] based on timer state
+        } else {
+            conn[0x8f] |= 0x10;
+        }
+    } else {
+        (*update_active_fn)(conn, 0x20, 1);       // update existing active record
+    }
+    (*UNRECOVERED_JUMPTABLE)();  // tail-call to next handler (indirect jump)
+}
+```
+
+**Unresolved tail call:** Ghidra cannot statically resolve the indirect jump target.
+This is likely `jr $t9` to a function pointer loaded from a literal pool address that was
+not captured in the literal pool dump. The tail call goes to a "connection continue" handler.
+
+**Literal pool (key values):**
+
+| Symbol | Value | Role |
+|--------|-------|------|
+| `PTR_base_of_0x1ac_struct_array_..._8010b5b8` | `0x8012????` | Connection struct array base |
+| `PTR_base_of_0x1ac_struct_array_..._8010b5bc` | `0x8012????` | Same or parallel array |
+| `DAT_8010b5c0` | fn ptr | Cancel/dequeue timer |
+| `PTR_DAT_8010b5c4` | fn ptr ptr | Connection trigger (indirect) |
+| `DAT_8010b5c8` | fn ptr | Get timestamp |
+| `DAT_8010b5cc` | fn ptr | Record timestamp + conn_idx |
+| `DAT_8010b5d0` | fn ptr | Set timer |
+| `PTR_DAT_8010b5d4` | fn ptr ptr | Update active connection (indirect) |
+
+**Libre:** Must implement — stores eSCO capability data and triggers slot allocation.
+The unresolved tail call needs manual resolution via disassembly of the literal pool.
+
+---
+
 ## New Unknown Functions Identified
+
+### ROM functions (called by address — no reimplementation needed)
 
 | Address | Caller | Notes |
 |---------|--------|-------|
-| `0x80110869` | `FUN_8010c780` | Patch DATA fn; appears to be a sub-initializer |
 | `0x80060dd9` | `FUN_8010a84c` | ROM: read pending SCO request |
 | `0x80036421` | `FUN_8010a84c` | ROM: allocate connection handle |
 | `0x80036df9` | `FUN_8010a84c`, `FUN_8010aa58` | ROM: SCO state machine (Kovah: `called_by_fHCI_Remote_Name_Request_5_1`) |
@@ -637,13 +1188,23 @@ Field `0x14bc` in the stride-0x1ac struct is the **sequence counter** for ACL pa
 | `0x80056609` | `FUN_8010b118`, `FUN_8010b3d8`, `FUN_8010b0a4` | ROM: BT slot allocator A |
 | `0x80056661` | `FUN_8010b118`, `FUN_8010b3d8` | ROM: BT slot allocator B |
 | `0x80056291` | `FUN_8010b3d8` | ROM: slot availability check |
-| `0x800083ed` | `FUN_8010c780` | ROM fn (init) |
-| `0x80007af1` | `FUN_8010c780` | ROM fn (init) |
+| `0x800083ed` | `FUN_8010c780` | ROM fn (init #2 in subsystem init) |
+| `0x80007af1` | `FUN_8010c780` | ROM fn (init #3 in subsystem init) |
 | `0x8004f241` | `FUN_8010c63c` | ROM: get ACL buffer |
 | `0x8004f999` | `FUN_8010c63c` | ROM: get buffer from queue |
 | `0x800098d9` | `FUN_8010c63c` | ROM: ACL packet submit |
 | `0x80051119` | `FUN_8010c63c` | ROM: ACL post-submit notifier |
 | `0x800519d9` | `FUN_8010c63c` | ROM: process next ACL packet |
+
+### Patch DATA functions still needing identification
+
+| Address | Caller | Notes |
+|---------|--------|-------|
+| `DAT_8010d140` | `FUN_8010ce0c` | AFH init tail-call #1 (unknown fn ptr) |
+| `DAT_8010d144` | `FUN_8010ce0c` | AFH init tail-call #2 (unknown fn ptr) |
+| `DAT_8010d14c` | `FUN_8010ce0c` | AFH init tail-call #3 (called with arg=1) |
+| `DAT_8010d150` | `FUN_8010ce0c` | AFH init tail-call #4 (unknown fn ptr) |
+| unresolved tail | `FUN_8010b4d0` | Jump target at end of function (indirect) |
 
 All ROM functions (`0x8000xxxx` – `0x8007xxxx`) are **called by address** from the libre
 firmware — no reimplementation needed.
@@ -668,6 +1229,8 @@ firmware — no reimplementation needed.
 
 ## Libre Firmware Implementation Matrix
 
+### Group A + B (15 functions, previously assessed)
+
 | Function | Lines of MIPS16e | ROM calls | MMIO writes | Priority |
 |----------|-----------------|-----------|-------------|----------|
 | `FUN_8010a49c` | ~3 | 0 | 0 | LOW (trivial) |
@@ -686,5 +1249,19 @@ firmware — no reimplementation needed.
 | `FUN_8010a84c` | ~150 | 10 | 0 | HIGH (connection) |
 | `FUN_8010c63c` | ~100 | 5 | 1 | HIGH (ACL flow ctrl) |
 
-Total: 13 functions need real MIPS16e code (~620 insns estimated).
+### Group C (9 functions, newly analyzed 2026-06-08)
+
+| Function | Lines of MIPS16e | ROM calls | MMIO writes | Priority |
+|----------|-----------------|-----------|-------------|----------|
+| `FUN_8010c09c` | ~15 | 2 | 0 | MEDIUM (capability gate) |
+| `FUN_8010bda0` | ~40 | 2 | 0 | MEDIUM (SCO validator) |
+| `FUN_8010b4d0` | ~40 | 5 | 0 | MEDIUM (slot trigger; partial) |
+| `FUN_80110868` | ~120 | 1 | 0 | HIGH (codec ring buffer) |
+| `FUN_8010fa34` | ~60 | 3 | 0 | HIGH (AFH 79-ch merger) |
+| `FUN_8010fb08` | ~100 | 4 | 0 | HIGH (BLE 40-ch aggregator) |
+| `FUN_8010f950` | ~60 | 5 | 0 | HIGH (AFH trigger) |
+| `FUN_8010ce0c` | ~250 | 6 | 3 | HIGH (AFH HW init) |
+| `FUN_8010e350` | ~450 | 8 | 0 | CRITICAL (AFH engine) |
+
+**Grand total: 22 functions need real MIPS16e code (~1800 insns estimated across all groups).**
 All ROM calls go to fixed addresses in the 0x80000000–0x8007ffff range.

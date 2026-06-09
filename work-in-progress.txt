@@ -272,14 +272,33 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           → analysis/reverse_engineering_sco_esco_layer.md (new)
           New unknown fn: FUN_80110869 (called by FUN_8010c780, in DATA block)
 
-[NEXT]  Analyze FUN_80110869 (patch DATA block, called by FUN_8010c780):
-          Address: 0x80110869 (MIPS16e odd ptr → entry at 0x80110868?)
-          Caller: FUN_8010c780 (subsystem initializer, first of 3 init calls)
-          Goal: understand what subsystem it initializes; classify as trivial or real.
-          Also: continue identifying new hook targets from FUN_8010a84c literal pool:
-            FUN_8010ce0c, FUN_8010fa34, FUN_8010f950, FUN_8010fb08,
-            FUN_8010e350, FUN_8010bda0, FUN_8010c09c, FUN_8010b4d0
-          (listed in Appendix D of patch_installer.md)
+[DONE]  Analyze FUN_80110869 + 8 hook targets from FUN_8010a84c pool (2026-06-08)
+          Scripts: DecompileNewHookFns.java + DecompileHookFnsBatch.java
+          ALL 9 functions are REAL — none trivial. Key findings:
+          FUN_80110868 (322B) — eSCO codec frame ring-buffer scheduler (8-slot, stride 0x10)
+            Infinite loop flushing pending codec frames; two modes (encode/decode paths)
+          FUN_8010ce0c (728B) — AFH capability mapper: scatters ch_class bits into HW cap
+            register; programs BB regs 0x15c/0x1fc; calls AFH init chain (4 tail-calls)
+          FUN_8010fa34 (184B) — AFH 79-ch map merger: AND local+remote, enforce min 20
+          FUN_8010f950 (174B) — AFH channel quality handler + VSC fc95 "start scan" trigger
+          FUN_8010fb08 (292B) — BLE 40-ch map aggregator: AND 3 maps, min 2, failure count
+          FUN_8010e350 (1174B) — AFH quality ranking engine: rank 79 channels, pick top N≥20,
+            apply HW forbidden mask, enforce min after masking
+          FUN_8010bda0 (114B) — SCO/eSCO acceptance validator: reject (LMP 0xe/err 0x12)
+            if conn flags wrong, else update conn record
+          FUN_8010c09c (76B) — per-link capability gate: clears bits 2-8,12-13 of BB reg 0xf
+          FUN_8010b4d0 (76B) — eSCO slot allocation trigger: stores cap data, fires conn;
+            UNRESOLVED tail-call indirect jump at end
+          → analysis/reverse_engineering_sco_esco_layer.md (Group C added)
+          New unknowns: 4 AFH init tail-calls from ce0c (DAT_8010d140/d144/d14c/d150)
+                        + unresolved jumptable in b4d0
+
+[NEXT]  Identify the 4 AFH init tail-call functions from FUN_8010ce0c literal pool:
+          DAT_8010d140, DAT_8010d144, DAT_8010d14c (arg=1), DAT_8010d150
+          Goal: resolve what each fn-ptr targets (runtime address → function identity)
+          Also: resolve the unresolved tail-call in FUN_8010b4d0 via literal pool dump
+          Method: DiagAddr or DumpLiteralPool script on range 0x8010d140-0x8010d154
+                  and on 0x8010b5b0-0x8010b5d8 (b4d0 literal pool)
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
