@@ -977,3 +977,260 @@ The 2-entry reg-cmd array at runtime RAM `0x80120264`:
 | `0x800115c8` | `FUN_800115c8` | RF register read — reads 16-bit register space; arg is reg index; returns register value. Used by `FUN_8010c260` to read variant register `0xfd`. |
 
 This is distinct from the known register access functions at `0x8001136c`/`0x8001139c` (baseband MMIO) and `0x80011510` (used by HW variant probe). The RTL8761BU has at least three separate hardware register access paths in ROM.
+
+---
+
+## Appendix D — Complete `FUN_8010a000` Hook Install Map (2026-06-08)
+
+Full decompile of the 578-byte DATA-block entry point. Script: `DataBlockAnalysis.java` +
+`DumpEntryLiteralPool.java` on `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
+
+### Runtime struct bases (DATA block variant)
+
+| Variable | Pool addr | Value | Description |
+|----------|-----------|-------|-------------|
+| `config_base` | `0x8010a24c` | `0x80120070` | Firmware config struct (BT params, "RRTK_BT_5.0" at +0x49) |
+| `puVar3` (bos_base) | `0x8010a258` | `0x801206ac` | BT operational state struct base |
+| `puVar5` (sec_base) | `0x8010a268` | `0x80120830` | Secondary BT struct base |
+| secondary_ptr | `0x8010a378` | `0x80120960` | Third BT struct (connection handler struct) |
+
+These are the DATA-block variant values; the vanilla binary variant may differ.
+
+### Complete execution sequence
+
+#### Phase 0 — Config data copy (pool a244–a250)
+- Reads a 32-bit word from `0x801115f8` (the TLV blob start boundary, which holds
+  runtime config), splits into two 16-bit halves, writes to `0x80120062` (high) and
+  `0x80120060` (low).
+- Calls `FUN_8010a6c8` (BSS zeroing init) via pool[a254].
+- Clears bit 0 of `config_base+0xd8` (`0x80120148`) — 4-byte store pattern.
+
+#### Phase 1 — First batch of hook installs + sub-installers #1/#2
+
+| # | RAM slot | Function installed | Pool (fn/slot) |
+|---|----------|--------------------|----------------|
+| 1 | `0x80121318` | `FUN_8010b118` | a260 / a264 |
+| 2 | `puVar5+0x14` = `0x80120844` | `LAB_8010b174` | a268 / a26c |
+| 3 | `puVar3+0xd8` = `0x80120784` | `LAB_8010bba4` (**LMP VSC**) | a258 / a270 |
+| 4 | `0x801286c0` | `LAB_8010be20` | a25c / a274 |
+| — | — | **Call `FUN_8010af40`** (sub-installer #1) | a278 |
+| — | — | **Call `FUN_8011011c`** (sub-installer #2) | a27c |
+| 5 | `puVar3+0x20` = `0x801206cc` | `LAB_8010c1e8` | a280 |
+| 6 | `puVar3+0x24` = `0x801206d0` | `LAB_8010c224` | a284 |
+| 7 | `0x8012088c` | `FUN_8010b3d8` | a288 / a28c |
+| 8 | `0x80121368` | `FUN_8010b0a4` | a290 / a294 |
+| 9 | `0x8012136c` | `FUN_8010c198` | a298 / a29c |
+| 10 | `0x80121360` | `FUN_8010d1f4` | a2a0 / a2a4 |
+| 11 | `0x80121344` | `FUN_8010c780` | a2a8 / a2ac |
+| 12 | `0x80125550` | `FUN_8010c63c` | a2b0 / a2b4 |
+| 13 | `puVar5+0x1c` = `0x8012084c` | `LAB_8010b7f0` | a2b8 |
+| 14 | `0x80120c9c` | `patch_that_installs_..._LMP` | a2bc / a2c0 |
+| 15 | `0x80120de8` | `FUN_8010dd1c` | a2c4 / a2c8 |
+| 16 | `0x80120f10` | `FUN_8010d890` | a2cc / a2d0 |
+| 17 | `0x80120dbc` | `FUN_8010d618` | a2d4 / a2d8 |
+
+Then: clears bit 14 of `config_base+0xe0` (`0x80120150`).
+
+#### Phase 2 — Sub-installer #3 + more hook installs
+
+| # | RAM slot | Function installed | Pool (fn/slot) |
+|---|----------|--------------------|----------------|
+| — | — | **Call `FUN_8010fc58`** (sub-installer #3) | a2dc |
+| 18 | `0x80120f3c` | `FUN_8010a594` | a2e0 / a2e4 |
+| 19 | `0x80120cf8` | `FUN_8010c0f4` | a2e8 / a2ec |
+| 20 | `0x80121414` | `FUN_8010a4ac` | a2f0 / a2f4 |
+| 21 | `0x801213dc` | `FUN_8010a49c` | a2f8 / a2fc |
+| — | — | `config_base[0x128] = 0` (zero byte) | — |
+| 22 | `0x80121348` | `FUN_8010bce0` | a300 / a304 |
+| 23 | `0x80120590` | `FUN_8010c49c` | a308 / a30c |
+| 24 | `0x8012067c` | `FUN_8010c43c` | a310 / a314 |
+| 25 | `0x80120f4c` | `FUN_8010d168` | a318 / a31c |
+| 26 | `0x801213e8` | `FUN_8010fa34` | a320 / a324 |
+| 27 | `0x801213c8` | `FUN_8010f950` | a328 / a32c |
+| 28 | `0x80121458` | `FUN_8010fb08` | a330 / a334 |
+| 29 | `0x80121410` | `FUN_8010abd0` | a338 / a33c |
+| 30 | `puVar3+0x50` = `0x801206fc` | `LAB_8010f884` | a340 |
+| 31 | `0x80120a0c` | `FUN_8010f85c` | a344 / a348 |
+| 32 | `0x80120cd4` | `FUN_8010a550` | a34c / a350 |
+| 33 | `0x80120cf4` | `FUN_8010c160` | a354 / a358 |
+| 34 | `0x80120824` | `FUN_8010c178` | a35c / a360 |
+| — | — | **Call `FUN_8010f370`** (sub-installer #4) | a364 |
+| — | — | **Call `FUN_8010e81c`** (sub-installer #5) | a368 |
+| — | — | **Call `FUN_8010eac0`** (sub-installer #6) | a36c |
+| 35 | `puVar3+0x30` = `0x801206dc` | `LAB_8010c088` (**conn handler**) | a370 |
+| 36 | `secondary+0x30` = `0x80120990` | `LAB_8010b4d0` | a374 / a378 |
+| 37 | `0x80121370` | `FUN_8010a5ac` | a37c / a380 |
+| 38 | `0x80120bfc` | `FUN_8010c854` | a384 / a388 |
+
+#### Phase 3 — ROM call, chip-revision gate, final installs
+
+```
+(**(code **)0x801205b4)(0x80120264, 2)     — ROM FUN_8003aea0 register script
+(*DAT_8010a394)()                           — FUN_8010e214  silicon revision detector
+```
+
+Chip revision table lookup (`PTR_DAT_8010a3a0` = `0x80111188`): 16 entries, gate
+additional hw-init for specific silicon versions.
+
+| # | RAM slot | Function installed | Pool (fn/slot) |
+|---|----------|--------------------|----------------|
+| 39 | `0x80121334` | `FUN_8010c09c` | a3a4 / a3a8 |
+| 40 | `puVar3+0x1c` = `0x801206c8` | `LAB_8010bc74` | a3ac |
+
+```
+(*DAT_8010a3b0)()   — FUN_8010a7b8  TLV config applier
+(*DAT_8010a3b4)()   — copies_config_bdaddr (ROM 0x8000fd38)
+```
+
+Chip-rev conditional gate (`puVar2[1]` bits check; bypassed for revisions 8/6/5):
+```
+iVar10 = (*DAT_8010a3b8)()   — FUN_8010ad38  HW variant probe
+if (iVar10 == 1): (*DAT_8010a3bc)()   — FUN_8010b04c  BB reg init (conditional)
+```
+
+| # | RAM slot | Function installed | Pool (fn/slot) |
+|---|----------|--------------------|----------------|
+| 41 | `0x80120cdc` | `FUN_8010ce0c` | a3c0 / a3c4 |
+
+```
+(*DAT_8010a3c8)()   — FUN_8010c278  RF channel init
+*(0x80120538) = 4   — "patch active" flag
+```
+
+| # | RAM slot | Function installed | Pool (fn/slot) |
+|---|----------|--------------------|----------------|
+| 42 | `0x80121020` | `FUN_80110ddc` | a3d0 / a3d4 |
+| 43 | `0x80121220` | `FUN_8010bda0` | a3d8 / a3dc |
+| 44 | `0x8012167c` | `FUN_8010e350` | a3e0 / a3e4 |
+
+#### Summary
+
+| Category | Count |
+|----------|-------|
+| Direct fn-ptr hook installs | 44 |
+| Sub-installer calls | 6 |
+| ROM / utility calls | 5 (`FUN_8003aea0`, `FUN_8010e214`, `FUN_8010a7b8`, `copies_config_bdaddr`, `FUN_8010c278`) |
+| Conditional calls | 2 (`FUN_8010ad38` probe + optional `FUN_8010b04c`) |
+| Data writes | 3 (config_base+0xd8, +0xe0, config_base[0x128]=0, patch active=4) |
+
+**Total: 44 direct hook installs** targeting RAM slots in `0x80120000–0x80126000`.
+
+### Notable new functions identified
+
+| Address | Size | Likely role |
+|---------|------|-------------|
+| `FUN_8010a594` | 14 B | Very small, likely a stub or shim |
+| `FUN_8010a4ac` | 68 B | Unknown |
+| `FUN_8010a49c` | 10 B | Very small, likely stub |
+| `FUN_8010a550` | 54 B | Unknown |
+| `FUN_8010a5ac` | 36 B | Unknown |
+| `FUN_8010a5d8` | 94 B | Unknown (not installed directly) |
+| `FUN_8010ce0c` | ? | Newly identified; installed after RF init |
+| `FUN_8010fa34` | ? | Newly identified |
+| `FUN_8010f950` | ? | Newly identified |
+| `FUN_8010fb08` | ? | Newly identified |
+| `FUN_8010e350` | ? | Newly identified (last install) |
+| `FUN_8010bda0` | ? | Newly identified |
+| `FUN_80110ddc` | ? | Newly identified |
+| `FUN_8010c09c` | ? | Newly identified |
+| `LAB_8010b4d0` | ? | Secondary struct+0x30; connection-related |
+
+---
+
+## Appendix E — `FUN_8010a7b8` TLV Config Applier — Complete Details (2026-06-08)
+
+Script: `DataBlockAnalysis.java` + `DumpEntryLiteralPool.java`.
+
+### Full Decompile (DATA block, confirmed)
+
+```c
+void FUN_8010a7b8(void) {
+    undefined *config_base = PTR_config_base_8010a83c;  // 0x80120070
+    // Guard 1: blob non-empty (start <= end)
+    if (PTR_DAT_8010a830 <= PTR_DAT_8010a82c) {         // 0x801115f8 <= 0x80113ff0
+        // Guard 2: magic matches
+        if (DAT_8010a838 == *(int *)PTR_DAT_8010a834) { // 0x8723ab55 == *(0x801115fc)
+            ushort *entry = (ushort *)PTR_DAT_8010a840;  // TLV start = 0x80111602
+            uint remaining = *(ushort *)(PTR_DAT_8010a834 + 4); // *(0x80111600) = count
+            while (remaining != 0) {
+                if (PTR_DAT_8010a844 < entry + 1) return;  // bounds check (end = 0x80113fff)
+                uint rec_len = (byte)entry[1] + 3;          // type(2) + len(1) + data
+                if (remaining < rec_len) return;
+                if (PTR_DAT_8010a844 < (ushort *)((int)entry + rec_len)) return;
+                if (*entry < 0x411) {                        // type < 0x411
+                    (*DAT_8010a848)(config_base + *entry,    // dst = config_base + type
+                                   (int)entry + 3);          // src = entry data
+                }
+                entry = (ushort *)((int)entry + rec_len);
+                remaining -= rec_len;  // (& 0xffff) masked
+            }
+        }
+    }
+}
+```
+
+**`DAT_8010a848`** = `0x8000e85d` = ROM `optimized_memcpy` (MIPS16e).
+
+### Resolved Literal Pool (DATA block, 0x8010a82c–0x8010a848)
+
+| Pool addr | Value | Role |
+|-----------|-------|------|
+| `0x8010a82c` | `0x80113ff0` | `PTR_DAT_8010a82c` — TLV blob END boundary |
+| `0x8010a830` | `0x801115f8` | `PTR_DAT_8010a830` — TLV blob START boundary |
+| `0x8010a834` | `0x801115fc` | `PTR_DAT_8010a834` — pointer to magic field |
+| `0x8010a838` | `0x8723ab55` | `DAT_8010a838` — expected magic constant |
+| `0x8010a83c` | `0x80120070` | `PTR_config_base_8010a83c` — runtime config_base |
+| `0x8010a840` | `0x80111602` | `PTR_DAT_8010a840` — TLV entries start pointer |
+| `0x8010a844` | `0x80113fff` | `PTR_DAT_8010a844` — TLV entries end bound |
+| `0x8010a848` | `0x8000e85d` | `DAT_8010a848` — apply fn = ROM `optimized_memcpy` |
+
+### TLV Blob Structure
+
+```
+Address     Content
+─────────────────────────────────────────────────────
+0x801115f4  (4 bytes pre-header, purpose unknown)
+0x801115f8  [blob START boundary — compared by guard 1]
+0x801115f8  22 d9 c6 df  — 4 bytes (sub-magic or config version; not checked by TLV fn)
+0x801115fc  55 ab 23 87  — LE32 magic = 0x8723ab55  (checked by guard 2)
+0x80111600  xx xx        — LE16 remaining count  (0x0000 in DATA snapshot = no records)
+0x80111602  [TLV entries start]
+  Entry format: [uint16 type LE][uint8 len][len bytes data...]
+  type < 0x411 → offset into config_base; apply = memcpy(config_base+type, data, len)
+  type ≥ 0x411 → record skipped
+0x80113ff0  [blob END boundary — upper limit for guard 1]
+0x80113fff  [TLV entries end bound — used in bounds-check within loop]
+```
+
+**Blob size**: `0x80113ff0 - 0x801115f8` = `0x00282a08 - 0x00111600 = ~40 KB` available for TLV records.
+
+### `config_base` Content (`0x80120070`, first 128 bytes)
+
+```
++0x00:  00 01 00 a5  00 5a 62 02  00 c2 01 00  1d 70 00 00
++0x10:  50 d5 ea 19  e0 1b f1 af  58 01 a4 0b  b6 e8 ff 01
++0x20:  38 60 01 88  0c 03 df 73  d2 69 00 ff  58 02 00 00
++0x30:  f0 24 41 4c  e0 00 64 1e  01 03 24 03  03 02 40 80
++0x40:  36 01 00 00  b5 22 28 00  00 52 52 54  4b 5f 42 54
++0x50:  5f 35 2e 30  00 ff ff ff  ff ff ff ff  ff ff ff ff
++0x60:  ff ff ff ff  ff ff ff ff  ff ff dc dc  03 08 03 07
++0x70:  00 ff dc dc  dc dc 00 02  05 03 3f 00  ff ff ff ff
+```
+
+- **`+0x49`**: `52 52 54 4b 5f 42 54 5f 35 2e 30` = ASCII `"RRTK_BT_5.0"` — firmware identity string
+  (null-terminated at +0x54)
+- This struct is populated by ROM before the patch entry runs.
+
+### Libre Firmware Implications
+
+| Item | Status | Action |
+|------|--------|--------|
+| TLV blob area (`0x80111xxx`) | ROM populates from btrtl config | Set remaining=0 if no overrides needed |
+| `config_base` (`0x80120070`) | ROM-initialized at runtime | Do not embed; load from ROM-allocated struct |
+| Apply function | ROM `optimized_memcpy` at `0x8000e85c` | Call via ROM address |
+| TLV loop | ~60 lines of MIPS16e | Implement; can be trivially omitted if remaining=0 |
+
+The DATA block snapshot has `remaining=0` at `0x80111600`, meaning no TLV patches were
+active in that captured state. If the libre firmware leaves remaining=0, `FUN_8010a7b8`
+will return immediately with no effect on config_base. This is safe if config_base is
+correctly pre-initialized by ROM (which it is).

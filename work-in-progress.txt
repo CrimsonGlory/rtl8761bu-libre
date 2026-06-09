@@ -234,13 +234,31 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
             no data needs embedding.
           → analysis/reverse_engineering_patch_installer.md (Appendix C added)
 
-[NEXT]  Analyze FUN_8010a7b8 (TLV config applier) in full detail:
-          Identify the config blob address/format and the fn-ptr used for memcpy patches.
-          Goal: understand what config_base + record_type fields are being patched so the
-          libre firmware can provide correct config blob or replicate the TLV loop.
-          Also: identify all fn-ptrs installed in FUN_8010a000 (the 35+ hook installs seen
-          in the decompile) — which ROM slots they write to and what functions are installed.
-          This is needed to design the minimum libre entry point.
+[DONE]  Analyze FUN_8010a7b8 (TLV config applier) in full detail (2026-06-08)
+          Scripts: DataBlockAnalysis.java + DumpEntryLiteralPool.java
+          RESOLVED — complete literal pool + full decompile:
+            config_base = RAM 0x80120070 (ROM-initialized; "RRTK_BT_5.0" at +0x49)
+            TLV blob: start=0x801115f8, magic@0x801115fc=0x8723ab55, count@0x80111600
+            TLV entries: 0x80111602-0x80113fff (~40KB available)
+            Apply fn: ROM optimized_memcpy @ 0x8000e85c
+            In DATA snapshot: remaining=0 (no active TLV records; function is a no-op)
+            LIBRE: Can skip TLV loop by leaving remaining=0; config_base is ROM-initialized
+          All 44 fn-ptr hook installs in FUN_8010a000 enumerated with exact RAM slots:
+            44 direct installs targeting 0x80120xxx-0x80126xxx RAM slots
+            6 sub-installer calls (FUN_8010af40/fc58/f370/e81c/eac0 + FUN_8011011c)
+            ROM calls: FUN_8003aea0, copies_config_bdaddr, FUN_8010c278
+            Conditional: FUN_8010ad38 probe → FUN_8010b04c (chip-rev gated)
+          New functions identified: FUN_8010ce0c/fa34/f950/fb08/e350/bda0/c09c/b4d0
+          → analysis/reverse_engineering_patch_installer.md (Appendix D+E added)
+
+[NEXT]  Analyze remaining small functions in DATA block 0xa000 region:
+          FUN_8010a410 (86B), FUN_8010a4ac (68B), FUN_8010a49c (10B), FUN_8010a550 (54B),
+          FUN_8010a594 (14B), FUN_8010a5ac (36B), FUN_8010a5d8 (94B), FUN_8010a6ec (180B),
+          FUN_8010a84c (450B), FUN_8010aa58 (96B) — all are hook targets or entry helpers.
+          Goal: determine which are trivial stubs vs. require real implementation.
+          Also: analyze 5 new unknown hook targets from Appendix D:
+            FUN_8010b118, FUN_8010b3d8, FUN_8010b0a4, FUN_8010c780, FUN_8010c63c
+          These are installed in the first hook batch and likely handle LMP/HCI events.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

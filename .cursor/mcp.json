@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "wairz": {
+      "command": "docker",
+      "args": [
+        "exec",
+        "-i",
+        "wairz-backend-1",
+        "uv",
+        "run",
+        "wairz-mcp",
+        "--project-id",
+        "80293bad-8d43-4f71-a6d5-cb5e526c98f6"
+      ]
+    }
+  }
+}
