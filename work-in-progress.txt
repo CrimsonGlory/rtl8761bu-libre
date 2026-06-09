@@ -356,15 +356,32 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           → analysis/reverse_engineering_sco_esco_layer.md (FUN_8010b4d0 section updated)
 
 
-[NEXT]  Decompile FUN_8010b5d8 (discovered at end of FUN_8010b4d0 literal pool, 2026-06-08)
-          Address: 0x8010b5d8 (DATA block). Prologue: addiu sp,-0x20 / sw ra,0x1c(sp) /
-          sw s1,0x18(sp) / sw s0,0x14(sp). Size unknown — appears to be a normal function
-          with s0/s1/ra saved. Use DecompileAddr.java or a new script.
+[DONE]  Decompile FUN_8010b5d8 + FUN_8010b64c + ROM pair (2026-06-08)
+          Scripts: DecompileB5D8.java + DumpB5D8Pool.java + DumpB64CPool.java +
+                   DecompileRomPair.java
+          FUN_8010b5d8 (100B) — eSCO connection activator:
+            Sets conn_rec+0x90|=1 (active), calls ROM access_config+assign_pointer,
+            sets conn_rec+0x78|=0x20, clears +0x8f bit 4, calls **0x8012082c(conn_idx,6),
+            conditionally calls FUN_8005ca00(conn_rec,0x0c,1). Returns 1.
+          FUN_8010b64c (344B) — LMP eSCO link request initiator:
+            Looks up conn by handle (ROM lookup_up_to_3_bos...), validates eSCO packet
+            type from table@0x80111198, builds LMP opcode 0x25 (LMP_eSCO_link_req) PDU
+            with params from config_base+0xa4 and DAT_80120060, sends via send_LMP_pkt,
+            marks opcode 0x26 pending, sends HCI Command Status, then either calls
+            FUN_8010b5d8 directly or sets deferred flag at conn_rec+0x8f|=0x10.
+            Literal pool ends at 0x8010b7d0; next function at 0x8010b7d4.
+          RAM slots RESOLVED (completes FUN_8010b4d0 TODO):
+            *0x8012082c = 0x8004ce45 → ROM FUN_8004ce44 (38B):
+              stores val(=6) into conn_rec[conn_idx*0x1ac+0x8e], calls FUN_8004ca7c(idx,1)
+            *0x80120958 = 0x8005d365 → ROM FUN_8005d364 (196B):
+              clears bit param_2 from conn_rec+0x78(mode=1)/+0x7c(mode=2); if no more
+              pending flags fires LMP__25B__most_common_for_VSCs1(conn_rec+0x68)
+          → analysis/reverse_engineering_sco_esco_layer.md (Group E added)
 
-[TODO]  Identify functions at RAM fn-ptr slots 0x8012082c and 0x80120958
-          FUN_8010b4d0 double-indirect calls: (**0x8012082c)(conn_idx, 6) and
-          (**0x80120958)(conn_rec, 0x20, 1). Need to know what fns are installed there
-          by the master installer (to complete the FUN_8010b4d0 libre implementation).
+[NEXT]  Decompile FUN_8010b7d4 (starts immediately after FUN_8010b64c literal pool)
+          Address: 0x8010b7d4 (DATA block). First bytes observed: 0x620763fc 0x677d6a00
+          (little-endian MIPS16e instruction words). Size unknown. Use DecompileAddr.java
+          or a new script with hardcoded address.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE

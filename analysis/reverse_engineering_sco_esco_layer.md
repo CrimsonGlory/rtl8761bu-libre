@@ -1,11 +1,13 @@
 # RTL8761BU — SCO/eSCO Layer & Slot Scheduler (2026-06-08)
 
-Covers 26 functions from the DATA block across four analysis passes:
+Covers 28 functions from the DATA block across five analysis passes:
 - **Group A** (0xa000 region helpers): 10 functions near the patch entry point
 - **Group B** (Appendix D hook targets): 5 functions installed as first-batch hooks
 - **Group C** (2026-06-08 second pass): 9 functions — `FUN_80110868` + 8 from `FUN_8010a84c` pool
 - **Group D** (2026-06-08 third pass): 2 PATCH functions from `FUN_8010ce0c` AFH init chain
 - **Tail-call resolution** (2026-06-08): `FUN_8010b4d0` fully resolved; `jr a3` = normal return
+- **Group E** (2026-06-08 fourth pass): 2 PATCH functions discovered past `FUN_8010b4d0` literal pool;
+  2 ROM functions called via RAM fn-ptr slots fully resolved
 
 All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.java` /
 `DecompileHookFnsBatch.java` / `AnalyzeB4D0Tail.java` against GZF
@@ -61,7 +63,20 @@ All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.ja
 | `FUN_8010ad88` | 40B | **REAL** | BB reg 0x104 bit extractor: returns 4-bit AFH cap mode |
 | `FUN_8010ccb8` | 264B | **REAL** | AFH HW reg configurator: programs BB regs 0x15c/0x1fc via masks |
 
-Only 2 of 26 functions are trivial stubs. The remaining 24 require real implementation.
+### Group E — LMP eSCO Link Pair + Resolved RAM Slots (2026-06-08)
+
+| Function | Block | Size | Classification | Description |
+|----------|-------|------|----------------|-------------|
+| `FUN_8010b5d8` | PATCH | 100B | **REAL** | eSCO connection activator (sets active flag, kicks conn timer) |
+| `FUN_8010b64c` | PATCH | 344B | **REAL** | LMP eSCO link request initiator (sends LMP opcode 0x25) |
+| `FUN_8004ce44` | ROM | 38B | ROM | Stores 6 into `conn_rec+0x8e`, calls `FUN_8004ca7c` — via RAM slot 0x8012082c |
+| `FUN_8005d364` | ROM | 196B | ROM | Clears pending flag from `conn_rec+0x78/7c`; fires `LMP__25B__most_common_for_VSCs1` — via RAM slot 0x80120958 |
+
+RAM slot resolutions (completes `FUN_8010b4d0` TODO):
+- `*0x8012082c = 0x8004ce45` → ROM `FUN_8004ce44` (MIPS16e)
+- `*0x80120958 = 0x8005d365` → ROM `FUN_8005d364` (MIPS16e)
+
+Only 2 of 28 functions are trivial stubs. The remaining 26 require real implementation.
 
 ---
 
@@ -1424,6 +1439,254 @@ ROM calls: `FUN_80011510` (read), `FUN_80011608` (write), `FUN_80011a74` (final)
 
 ---
 
+## Group E — LMP eSCO Link Pair + Resolved RAM Slots (2026-06-08)
+
+Scripts: `DecompileB5D8.java`, `DumpB5D8Pool.java`, `DumpB64CPool.java`, `DecompileRomPair.java`
+
+### FUN_8010b5d8 (100B) — eSCO Connection Activator
+
+Discovered at end of `FUN_8010b4d0`'s literal pool. Prologue: `addiu sp,-0x20 / sw ra / sw s1 / sw s0`.
+
+**Decompile:**
+```c
+undefined4 FUN_8010b5d8(int conn_rec)
+{
+    uint8_t conn_idx = *(uint8_t *)(conn_rec + 2);
+    *(uint8_t *)(conn_rec + 0x90) |= 1;               // set "active" bit
+
+    void *val = access_config_at_0xa5_and_0x1ac_stuct_stuff();  // ROM 0x8005e23c
+    assign_pointer_to_0x1AC_offset_0x134(val, conn_idx);        // ROM 0x8005d26c
+
+    *(uint32_t *)(conn_rec + 0x78) |= 0x20;            // set pending-slot flag
+    *(uint8_t  *)(conn_rec + 0x8f) &= ~0x10;           // clear retry-deferred flag
+
+    (**0x8012082c)(conn_idx, 6);                        // FUN_8004ce44: store 6 in conn_rec[idx]+0x8e
+
+    if (*(uint8_t *)(conn_rec + 0x90) & 2)             // if "eSCO-capable" bit set
+        FUN_8005ca00(conn_rec, 0x0c, 1);               // ROM: set cap bit 0x0c
+
+    return 1;
+}
+```
+
+**Literal pool** (@ 0x8010b63c):
+| Address | Value | Target |
+|---------|-------|--------|
+| `0x8010b63c` | `0x8005e23d` | ROM `access_config_at_0xa5_and_0x1ac_stuct_stuff` (MIPS16e) |
+| `0x8010b640` | `0x8005d26d` | ROM `assign_pointer_to_0x1AC_offset_0x134` (MIPS16e) |
+| `0x8010b644` | `0x8012082c` | RAM fn-ptr slot → ROM `FUN_8004ce44` |
+| `0x8010b648` | `0x8005ca01` | ROM `FUN_8005ca00` (set cap bit) |
+
+**Role:** Second half of the eSCO slot-allocation pair with `FUN_8010b4d0`. `b4d0` sets the "pending"
+bit and fires timers; `b5d8` is called when the connection is ready to activate — marks it active,
+records config, sets the slot flag, and kicks the connection via `FUN_8004ce44`.
+
+**`FUN_8010b64c` calls `FUN_8010b5d8` directly** (via pool entry at `0x8010b7d0`) when the
+connection is not yet active and no timers are pending.
+
+**Libre:** Must implement. ~35 lines MIPS16e. All calls go to ROM fn-ptrs already present.
+
+---
+
+### FUN_8010b64c (344B) — LMP eSCO Link Request Initiator
+
+Starts at `0x8010b64c` immediately after `FUN_8010b5d8`'s literal pool.
+Prologue: `addiu sp,-0x40 / sw ra,0x3c(sp) / sw s1,0x38(sp) / sw s0,0x34(sp)`.
+
+**Decompile (with pool resolved):**
+```c
+uint FUN_8010b64c(undefined2 *param_1)
+{
+    uint  conn_handle = *(uint16_t *)((char *)param_1 + 3);
+    uint  conn_idx;
+    uint16_t local_buf[2];
+    int   conn_rec_ptr = 0;
+    uint  status = 0xc;   // default: "not supported"
+
+    int rc = lookup_up_to_3_bos_array_indices_by_connection_handle(  // ROM 0x80060740
+                 conn_handle, local_buf);
+
+    if (rc == 0) {
+        conn_idx = (uint)local_buf[0];
+
+        // Check eSCO packet-type table:
+        // big_ol_struct_8012dc50[conn_idx * 0x2b8 + 0xb2] − 4  →  index into table@0x80111198
+        uint idx = (uint8_t)(big_ol_struct_8012dc50[conn_idx * 0x2b8 + 0xb2] - 4);
+        if (idx < 0xc) {
+            status = (uint)(uint8_t)table_80111198[idx];
+            if (status == 0) {
+                // Build 7-byte LMP_eSCO_link_req PDU (opcode 0x25) on stack
+                uint8_t pdu[7];
+                pdu[0] = 0x25;                                   // LMP opcode: LMP_eSCO_link_req
+                pdu[2] = struct_of_at_least_0x300_size[0x145];   // eSCO interval/params from struct
+                pdu[3] = (uint8_t)(config_base[0xa4]);           // eSCO window lo
+                pdu[4] = (uint8_t)(config_base[0xa4] >> 8);      // eSCO window hi
+                pdu[5] = (uint8_t)(DAT_80120060);                // eSCO packet type lo
+                pdu[6] = (uint8_t)(DAT_80120060 >> 8);           // eSCO packet type hi
+
+                send_LMP_pkt(conn_idx, pdu, 7, 3, 100, 0);       // ROM 0x800611e4
+
+                // Mark LMP opcode 0x26 as pending in conn_rec[conn_idx]+0x30/0xa4
+                uint32_t flags = big_ol_struct_8012dc50[conn_idx * 0x2b8 + 0x30];
+                flags |= get_status_bits_by_LMP_Opcode(0x26, 0); // ROM 0x800605a8
+                big_ol_struct_8012dc50[conn_idx * 0x2b8 + 0x30] = flags;
+                big_ol_struct_8012dc50[conn_idx * 0x2b8 + 0xa4] |= 8;
+            }
+        }
+    } else {
+        // Connection handle not found: try alternate lookup
+        if (config_base[0x7a] & 2)
+            status = put_0x1f4_struct_pointer_from_index_arg1_into_arg2(  // ROM 0x80046620
+                         conn_handle, &conn_rec_ptr);
+    }
+
+    if (*(uint16_t *)(config_base + 0x7a) & 2) {
+        send_evt_HCI_Command_Status(*param_1, status);            // ROM 0x8001e5d8
+        if (conn_rec_ptr != 0) {
+            if ((*(uint8_t *)(conn_rec_ptr + 0x90) & 2) == 0) {  // not "eSCO capable" pending
+                *(uint16_t *)(conn_rec_ptr + 0x60) |= 2;
+                if (status == 0 && (*(uint8_t *)(conn_rec_ptr + 0x90) & 1) == 0) {
+                    if (*(int *)(conn_rec_ptr + 0x7c) == 0 &&
+                        *(int *)(conn_rec_ptr + 0x78) == 0) {
+                        FUN_8010b5d8(conn_rec_ptr);              // PATCH: activate now
+                    } else {
+                        *(uint8_t *)(conn_rec_ptr + 0x8f) |= 0x10;  // defer
+                    }
+                }
+            } else {
+                send_evt_HCI_Read_Remote_Version_Information_Complete(  // ROM 0x8001d4a0
+                    status, conn_handle, *(uint8_t *)(conn_rec_ptr + 2) + 10);
+            }
+        }
+    }
+    return status;
+}
+```
+
+**Literal pool** (@ 0x8010b7a4 — 13 entries):
+| Address | Value | Target |
+|---------|-------|--------|
+| `0x8010b7a4` | `0x80060741` | ROM `lookup_up_to_3_bos_array_indices_by_connection_handle` |
+| `0x8010b7a8` | `0x80120070` | `config_base` (ROM-initialized RAM) |
+| `0x8010b7ac` | `0x80046621` | ROM `put_0x1f4_struct_pointer_from_index_arg1_into_arg2` |
+| `0x8010b7b0` | `0x8012dc50` | `big_ol_struct_8012dc50` (eSCO conn records, stride 0x2b8) |
+| `0x8010b7b4` | `0x80111198` | `PTR_DAT_80111198` → table `[0x0c, 0x0c, 0x0c, 0x00, ...]` |
+| `0x8010b7b8` | `0x801259ec` | `struct_of_at_least_0x300_size` (eSCO params struct) |
+| `0x8010b7bc` | `0x80120060` | `DAT_80120060` (eSCO packet type config word) |
+| `0x8010b7c0` | `0x800611e5` | ROM `send_LMP_pkt` |
+| `0x8010b7c4` | `0x800605a9` | ROM `get_status_bits_by_LMP_Opcode` |
+| `0x8010b7c8` | `0x8001e5d9` | ROM `send_evt_HCI_Command_Status` |
+| `0x8010b7cc` | `0x8001d4a1` | ROM `send_evt_HCI_Read_Remote_Version_Information_Complete` |
+| `0x8010b7d0` | `0x8010b5d9` | PATCH `FUN_8010b5d8` (MIPS16e) — call-back to activator |
+
+Pool ends at `0x8010b7d0`. Next function starts at `0x8010b7d4`.
+
+**Role:** HCI→LMP bridge for eSCO setup. Receives an HCI command with a connection handle,
+validates the eSCO packet type against a small ROM table, sends the LMP_eSCO_link_req
+PDU (opcode 0x25) with parameters from config and global structs, and either activates
+the connection immediately (via `FUN_8010b5d8`) or defers via a pending flag.
+
+The packet-type validation table at `0x80111198` starts with bytes `0x00, 0x0c, 0x0c, 0x0c, ...`
+(index 0 = valid/OK; indices 1–3 = 0x0c = unsupported).
+
+**New ROM functions identified:**
+| Function | Block | Size | Role |
+|----------|-------|------|------|
+| `FUN_80060740` | ROM | — | Lookup up to 3 BOS array indices by connection handle |
+| `FUN_80046620` | ROM | — | Get pointer to 0x1f4-stride struct from index; store into arg2 |
+| `FUN_800611e4` | ROM | — | `send_LMP_pkt(conn_idx, buf, len, ?, retries, ?)` |
+| `FUN_800605a8` | ROM | — | `get_status_bits_by_LMP_Opcode(opcode, mode)` → status bitmask |
+| `FUN_8001e5d8` | ROM | — | `send_evt_HCI_Command_Status(opcode, status)` |
+
+**Libre:** Must implement. ~110 lines MIPS16e. All ROM calls via ROM addresses.
+Packet-type table at DATA `0x80111198` — safe to copy verbatim.
+
+---
+
+### FUN_8004ce44 (ROM, 38B) — Connection Record Type Setter
+
+Called via double-indirect: `(**0x8012082c)(conn_idx, 6)` from both `FUN_8010b5d8` and
+`FUN_8010b4d0`.
+
+**Decompile:**
+```c
+void FUN_8004ce44(uint conn_idx, uint8_t val)
+{
+    // _x1F4_struct base is PTR_base_of_0x1ac_struct_array_0xA_large2_1__field0_0x0_8004ce6c
+    conn_rec_array[(conn_idx & 0xff) * 0x1ac + 0x8e] = val;   // store val (=6) at +0x8e
+    FUN_8004ca7c(conn_idx & 0xff, 1);                          // fire eSCO slot allocation
+    return;
+}
+```
+
+**RAM slot:** `*0x8012082c = 0x8004ce45` (ROM, MIPS16e odd address).
+
+**Role:** Stores the eSCO type/priority byte (6) into the connection record at offset `+0x8e`,
+then calls `FUN_8004ca7c` which handles the actual eSCO slot allocation. The literal `6` likely
+corresponds to an eSCO connection type code.
+
+**Libre:** This is a ROM function. The libre firmware only needs to ensure RAM slot `0x8012082c`
+holds the correct value (set by the master installer). No reimplementation needed.
+
+---
+
+### FUN_8005d364 (ROM, 196B) — Pending Flag Clearer + LMP Trigger
+
+Called via double-indirect: `(**0x80120958)(conn_rec, 0x20, 1)` from `FUN_8010b4d0`
+(the "already active" path).
+
+**Decompile:**
+```c
+void FUN_8005d364(int conn_rec, uint mask, int mode)
+{
+    // Optional guard via fn-ptr at PTR_DAT_8005d428
+    if (*PTR_DAT_8005d428 != NULL && (*(*PTR_DAT_8005d428))() != 0) return;
+
+    uint flags78 = *(uint *)(conn_rec + 0x78);
+    uint flags7c = *(uint *)(conn_rec + 0x7c);
+
+    if (mode == 1) {
+        *(uint *)(conn_rec + 0x78) = ~mask & flags78;  // clear 'mask' bits from +0x78
+        if ((mask & flags78) == 0)                     // log if bit wasn't set
+            possible_logging_function__var_args(2, 0xcc, 0xce, 0xd7e, 5, ...);
+    } else if (mode == 2) {
+        *(uint *)(conn_rec + 0x7c) = ~mask & flags7c;  // clear 'mask' bits from +0x7c
+        if ((mask & flags7c) == 0)
+            possible_logging_function__var_args(2, 0xcc, 0xce, 0xd7e, 5, ...);
+    } else {
+        if ((mask & flags78) == 0)
+            *(uint *)(conn_rec + 0x7c) = ~mask & flags7c;
+        else
+            *(uint *)(conn_rec + 0x78) = ~mask & flags78;
+    }
+
+    // If no more pending flags (ignoring bits 0-1):
+    if (((*(uint *)(conn_rec + 0x7c) | *(uint *)(conn_rec + 0x78)) & 0xfffffffc) == 0)
+        LMP__25B__most_common_for_VSCs1(conn_rec + 0x68);   // fire LMP handler
+
+    if (*(int *)(conn_rec + 0x80) != 0)
+        possible_logger_called_if_no_patch3(..., conn_rec, 0x4b7, 0);
+
+    return;
+}
+```
+
+**RAM slot:** `*0x80120958 = 0x8005d365` (ROM, MIPS16e odd address).
+
+**Role:** Clears one pending flag from `conn_rec+0x78` (mode=1) or `conn_rec+0x7c` (mode=2).
+When all pending flags are gone (bits [31:2] clear), fires
+`LMP__25B__most_common_for_VSCs1(conn_rec+0x68)` — the primary LMP VSC dispatch handler.
+Acts as the "last pending work cleared → proceed" synchronization point in the eSCO setup
+state machine.
+
+Called from `FUN_8010b4d0` as `(fn)(conn_rec, 0x20, 1)` → clears bit 0x20 from `conn_rec+0x78`.
+`conn_rec+0x78` was set to `0x20` earlier in `FUN_8010b4d0` as a pending-slot marker.
+
+**Libre:** ROM function — no reimplementation. Ensure RAM slot `0x80120958` is populated
+by the master installer.
+
+---
+
 ## Runtime Data Structures Identified
 
 | Address | Stride | Field | Use |
@@ -1483,5 +1746,18 @@ ROM calls: `FUN_80011510` (read), `FUN_80011608` (write), `FUN_80011a74` (final)
 | `FUN_8010ad88` | ~15 | 1 | 0 | HIGH (AFH cap bit extractor) |
 | `FUN_8010ccb8` | ~100 | 3 | 3 | HIGH (AFH HW reg configurator) |
 
-**Grand total: 24 functions need real MIPS16e code (~1850 insns estimated across all groups).**
+### Group E (2 PATCH functions — LMP eSCO pair, 2026-06-08)
+
+| Function | Lines of MIPS16e | ROM calls | MMIO writes | Priority |
+|----------|-----------------|-----------|-------------|----------|
+| `FUN_8010b5d8` | ~35 | 4 | 0 | MEDIUM (eSCO activator; completes b4d0 pair) |
+| `FUN_8010b64c` | ~110 | 6 | 0 | HIGH (LMP eSCO link request initiator) |
+
+**Grand total: 26 functions need real MIPS16e code (~1990 insns estimated across all groups).**
 All ROM calls go to fixed addresses in the 0x80000000–0x8007ffff range.
+
+**RAM slot resolutions (from Group E analysis):**
+| RAM slot | Value (GZF snapshot) | Target |
+|----------|---------------------|--------|
+| `0x8012082c` | `0x8004ce45` | ROM `FUN_8004ce44` — stores eSCO type byte + fires slot alloc |
+| `0x80120958` | `0x8005d365` | ROM `FUN_8005d364` — clears pending flag + fires LMP handler |
