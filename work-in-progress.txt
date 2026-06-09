@@ -56,15 +56,30 @@ PHASE 2 — MAP ALL INSTALLED HOOKS (IN PROGRESS)
 
 [DONE]  Analyze second-tier installer
           patch_that_installs_all_the_string_associated_function_patches__including_LMP
-          → analysis/reverse_engineering_string_assoc_installer.md
-          KEY FINDING: The "installer" IS the address-pair table at file 0xa0 (the
-          DATA). It is processed by ROM function interesting_string_user_fptr_-
-          registration_function @ ROM 0x80009990 — NOT accessible in wairz.
-          Full scan of binary: ZERO references to 0x801000A0 anywhere. Table
-          processor is definitively in ROM.
-          7 of 15 fn_ptrs are in binary (0x8010A174-0x8010A34C); all point into
-          a MIPS16e handler-stub region (0x8010A160-0x8010A34C) that Ghidra cannot
-          decode but manual decode shows 8-byte case-chain dispatch entries.
+          CORRECTION (2026-06-08): Earlier analysis was WRONG. The installer is
+          NOT the address-pair table — it is FUN_8010e27c (runtime 0x8010e27c),
+          a 52-byte function that directly installs 6 protocol dispatch handlers
+          by writing fn-ptrs to fixed struct offsets (base: 0x8012ae8c).
+          Called by ROM 0x80009990 hook mechanism (not table processor).
+          Also programs 3 BB registers (0x40/0x6b/0x6c) during installation.
+          → analysis/reverse_engineering_string_assoc_installer.md (revised)
+          → analysis/reverse_engineering_protocol_dispatch_layer.md (new)
+
+          6 protocol dispatch handlers installed:
+            struct[+0x48] → FUN_8010dfb0 (530B) assoc_w_tLMP:
+              handles opcodes 0x480/0x489 (SSP), 0x270 (eSCO link), 0x259/0x26f
+            struct[+0x00] → FUN_8010cc94 ( 26B) unknown_fptr_index0:
+              pre-hook + original handler sequencing
+            struct[+0x3c] → FUN_8010da70 ( 44B) assoc_w_tLC_TX:
+              intercepts LC TX opcode 0x32e (eSCO codec TX)
+            struct[+0x18] → FUN_8010d9f4 ( 98B) assoc_w_tLC_RX:
+              intercepts LC RX opcode 0x2cd (eSCO codec RX)
+            struct[+0x30] → FUN_8010daa4 (518B) assoc_w_tHCI_EVT:
+              intercepts HCI events: 0xe (cmd_complete+scan), 0x1 (inquiry_cmplt+AFH),
+              0x3 (conn_cmplt), 0x3e (LE meta), 0x5/0x4/0x14 (disc/auth/role), etc.
+            struct[+0x60] → FUN_8010d154 ( 16B) assoc_w_tLMP_CH__passthrough:
+              pure passthrough to ROM
+
           Also decompiled 7 late-patch functions (see below).
 
 
@@ -91,10 +106,18 @@ PHASE 2 — LATE-PATCH FUNCTIONS (decompiled 2026-06-08)
           8-element circular buffer, 12-byte frames, two write modes (SCO parity).
 [DONE]  FUN_80009824 (runtime 0x80109824, size=180) — eSCO retransmission timer
           Checks packet counter vs threshold; handles retry and teardown logic.
-[BLOCKED] MIPS16e handler stubs @ 0x8010A160-0x8010A280
-          Manual decode shows 8-byte bteqz/lw/bteqz/addiu pattern (case-chain).
-          36 entries, 6 of 15 fn_ptrs from address-pair table enter here.
-          Ghidra EXTEND decoder fails; exact semantics require emulator/ROM dump.
+[DONE]   MIPS16e handler stubs @ 0x8010A160-0x8010A280 (2026-06-08)
+          RESOLVED — misidentification. The "stubs" are the CODE BODY of FUN_8010a000
+          (patch entry, 578 bytes). GZF DATA BLOCK correctly decoded by Ghidra; the
+          repeating 8-byte bteqz/lw/bteqz/addiu pattern is FUN_8010a000's MIPS16e
+          comparison logic (parameter checks + case branches). Literal pool starts at
+          0x8010a244. Old import mode failed due to EXTEND pcode errors without full
+          memory context; GZF PROCESS MODE resolves correctly.
+          Address-pair table at file 0xa0 (fn_ptrs 0x8010A174/A184/A1D8/A208/A2B8/
+          A304/A34C) → these fn_ptrs point INTO FUN_8010a000's code body, NOT to
+          standalone handler entry points. Table purpose UNRESOLVED (separate from
+          the 6 protocol handlers above; fn_ptrs lack MIPS16e prologues).
+          → analysis/reverse_engineering_string_assoc_installer.md (revised)
 
 
 PHASE 3 — UNDERSTAND THE HARDWARE LAYER
@@ -413,11 +436,20 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           Next function: FUN_8010bba4 (LMP VSC hook, already analyzed).
         → analysis/reverse_engineering_sco_esco_layer.md (Group G added)
 
-[NEXT]  Investigate MIPS16e handler stubs region 0x8010A160–0x8010A34C
-        36 × 8-byte bteqz/lw/bteqz/addiu case-chain entries; 6 of 15 fn_ptrs
-        from address-pair table target here. Ghidra cannot decode (EXTEND pcode
-        errors). Options: (a) manual byte decode of all 36 entries, (b) enumerate
-        what opcode values each stub corresponds to using xref analysis.
+[DONE]  Investigate MIPS16e handler stubs region 0x8010A160–0x8010A34C (2026-06-08)
+        RESOLVED — see entry above (stubs = FUN_8010a000 code body, not dispatch table)
+
+[DONE]  Analyze protocol dispatch layer / string_assoc_installer (2026-06-08)
+        FUN_8010e27c decompiled (52B), all 6 protocol handlers decompiled.
+        → analysis/reverse_engineering_protocol_dispatch_layer.md (new)
+
+[NEXT]  Identify the ROM original handlers for the 5 protocol types
+        FUN_8010e27c overwrites struct[+0x00/0x18/0x30/0x3c/0x48/0x60] with patch
+        handlers, each of which tail-calls the ROM original via literal pool.
+        Need to identify these ROM fns (PTR_assoc_w_tLMP_1_8010e1f8 etc.) so we
+        can call them from the libre implementation.
+        Options: (a) dump the 6 literal pool "ROM original" ptr slots and resolve,
+                 (b) decompile ROM 0x80009990 more fully to see what it registers.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
@@ -474,10 +506,14 @@ NOTES
 - Master installer literal pool: Ghidra 0x800039F4–0x80003BC0 (patch block = file addr)
 - Patch entry called by ROM: runtime 0x8010A001 (Ghidra 0x8000A001)
   → Ghidra can't decode this region (MIPS16e EXTEND pcode errors)
-- String-assoc address-pair table: file 0xA0 (15 entries, see sub_installers.md
-  and string_assoc_installer.md). Table processor = ROM fn @ 0x80009990.
-  7 of 15 fn_ptrs in vanilla binary (0x8010A174/A184/A1D8/A208/A2B8/A304/A34C).
-  Handler stubs: 0x8010A160-0x8010A34C — 8-byte bteqz/lw/bteqz/addiu pattern.
+- String-assoc installer: FUN_8010e27c (52B) installs 6 protocol dispatch handlers
+  into dispatch struct at 0x8012ae8c. Called by ROM 0x80009990 hook mechanism.
+  See analysis/reverse_engineering_protocol_dispatch_layer.md.
+- Address-pair table at file 0xA0 (runtime 0x801000A0): UNRESOLVED PURPOSE.
+  fn_ptrs (0x8010A174/A184/A1D8/A208/A2B8/A304/A34C) point INTO FUN_8010a000's
+  code body. Data BLOCK shows zeros at that address. Not processed by FUN_8010e27c.
+- MIPS16e handler stubs region was a MISIDENTIFICATION: 0x8010A160-0x8010A2FF is
+  the CODE BODY of FUN_8010a000 (patch entry). GZF PROCESS MODE decodes correctly.
 - Vanilla vs GZF: rtl8761bu_fw.bin = 42088 bytes; GZF patch block = 44484 bytes.
   Extra 2396 bytes at 0x8010A468-0x8010ADC3 = Kovah's "dark firmware" (analysis
   code). GZF also contains 'rom' block (ROM dump via VSC FC61) and 'data' block

@@ -1,253 +1,234 @@
 # RTL8761BU — String-Associated Function Installer Analysis
 
 Source: `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`
-Analysis session: 2026-06-08
+Analysis sessions: 2026-06-08 (initial, partially incorrect), revised 2026-06-08
+
+---
+
+## CORRECTION NOTICE
+
+An earlier version of this document contained significant errors. The summary below
+reflects the corrected understanding based on GZF PROCESS MODE analysis.
+
+The main error: the "installer" was incorrectly identified as the address-pair table
+at file offset 0xa0. In reality, the true installer is **`FUN_8010e27c`** (a patch
+function), which directly installs 6 protocol-level dispatch handlers by writing
+function pointers to struct offsets — it does NOT process the address-pair table.
 
 ---
 
 ## Summary
 
 Kovah's label `patch_that_installs_all_the_string_associated_function_patches__including_LMP`
-refers to the **address-pair table at file offset 0xa0** (runtime `0x801000A0`). This
-table IS the patch — it is the data the ROM uses when registering LMP/protocol handler
-functions. The "installer" that processes this table is a ROM function
-(`interesting_string_user_fptr_registration_function` at ROM `0x80009990`), which is NOT
-accessible from the 42088-byte `rtl8761bu_fw.bin` binary.
+refers to **`FUN_8010e27c`** (runtime `0x8010e27c`), a 52-byte patch function that:
 
-No function in the accessible patch binary has any reference to `0x801000A0`. A full
-scan of all 4-byte-aligned positions in the binary confirmed zero occurrences of
-`0x801000A0` or any value in the `0x80100000–0x80100200` range in any literal pool.
+1. Installs 6 protocol dispatch handlers (function pointers) into the BT stack's
+   central message-type dispatch struct (base loaded from `PTR_PTR_8010e310`)
+2. Performs hardware register configuration (BB regs 0x40/0x6b/0x6c)
+3. Writes two pairs of constant data to RAM locations
+
+The 6 handler functions cover: LMP message processing, an index-0 handler, Link
+Controller TX, Link Controller RX, HCI event processing, and LMP channel passthrough.
+
+`FUN_8010e27c` is called indirectly by ROM function
+`interesting_string_user_fptr_registration_function @ ROM 0x80009990` via a hook
+slot in the BT state struct. The ROM installs the hook by reading the patch entry
+`FUN_8010a000`'s literal pool.
 
 ---
 
-## Architecture: What "Installs" the String-Associated Patches
+## Architecture
 
 ```
-[ROM: interesting_string_user_fptr_registration_function @ 0x80009990]
+ROM: interesting_string_user_fptr_registration_function @ 0x80009990
           │
-          │ reads 15-entry address-pair table at runtime 0x801000A0
-          │
+          │ calls hook installed at hook slot (ptr from bos_struct area)
           ▼
-[Patch DATA: address-pair table @ file 0xa0, runtime 0x801000A0]
+PATCH: FUN_8010e27c  (= string_assoc_installer)
           │
-          │ each entry: (data_struct_ptr, fn_ptr)
-          │ data_struct_ptr → RAM LMP PDU descriptor (0x8012xxxx)
-          │ fn_ptr → MIPS16e handler stub in patch (0x8010A174–0x8010A304)
+          │ writes 6 fn-ptrs into dispatch struct (base = PTR_PTR_8010e310)
           │
-          ▼
-[Patch CODE: MIPS16e handler stubs @ 0x8010A160–0x8010A2FF]
-```
-
-The address-pair table and the handler stubs are BOTH part of the patch binary.
-The ROM function reads the table and wires up each (descriptor, handler) pair
-into the BT stack's LMP dispatch machinery.
-
----
-
-## Address-Pair Table (file 0xa0, runtime 0x801000A0)
-
-15 entries of `(data_ptr, fn_ptr)` where:
-- `data_ptr` → RAM struct describing an LMP PDU type (`0x8012xxxx`)
-- `fn_ptr` → MIPS16e code stub in the patch (`0x8010xxxx`, even address = MIPS16e)
-
-| Table addr (Ghidra) | data_ptr | fn_ptr | Status |
-|---------------------|----------|--------|--------|
-| `0x800000A0` | `0x8010A02C` | `0x8012005A` | header / sentinel |
-| `0x800000A8` | `0x80120058` | `0x8010C960` | out-of-binary |
-| `0x800000B0` | `0x801211A4` | `0x8010A34C` | **in binary** |
-| `0x800000B8` | `0x8012141C` | `0x8010AC9C` | out-of-binary |
-| `0x800000C0` | `0x80120D54` | `0x8010AA5C` | out-of-binary |
-| `0x800000C8` | `0x80120E98` | `0x8010A5E8` | out-of-binary |
-| `0x800000D0` | `0x80120FC0` | `0x8010A4C0` | out-of-binary |
-| `0x800000D8` | `0x80120E70` | `0x8010A184` | **in binary** |
-| `0x800000E0` | `0x801214D0` | `0x8010A174` | **in binary** |
-| `0x800000E8` | `0x80121498` | `0x8010CA78` | out-of-binary |
-| `0x800000F0` | `0x80121744` | `0x8010A1D8` | **in binary** |
-| `0x800000F8` | `0x80120FFC` | `0x8010A208` | **in binary** |
-| `0x80000100` | `0x8012506C` | `0x8010A304` | **in binary** |
-| `0x80000108` | `0x80121184` | `0x8010A2B8` | **in binary** |
-| `0x80000110` | `0x80121180` | `0x8010C9D0` | out-of-binary |
-
-Seven fn_ptrs (0x8010A174, 0x8010A184, 0x8010A1D8, 0x8010A208, 0x8010A2B8,
-0x8010A304, 0x8010A34C) map to Ghidra addresses 0x8000A174–0x8000A34C, which
-fall within the 42088-byte patch binary. The remaining eight are beyond file end.
-
----
-
-## Handler Stub Region (file 0xa160–0xa2FF, runtime 0x8010A160–0x8010A2FF)
-
-### Raw bytes (Ghidra 0x8000A160–0x8000A280)
-
-The region has a highly repetitive 8-byte structure:
-```
-8000a160: 12 20 b0 9e 11 20 23 00   → words: 0x2012 | 0x9eb0 | 0x2011 | 0x0023
-8000a168: 12 20 30 9f 11 20 22 00   → words: 0x2012 | 0x9f30 | 0x2011 | 0x0022
-8000a170: 12 20 20 9e 11 20 21 00   → words: 0x2012 | 0x9e20 | 0x2011 | 0x0021
-8000a178: 12 20 a0 9e 11 20 20 00   → words: 0x2012 | 0x9ea0 | 0x2011 | 0x0020
-8000a180: 12 20 20 9f 11 20 1f 00   → words: 0x2012 | 0x9f20 | 0x2011 | 0x001f
-...  (pattern continues, index counting from 0x23 down to 0x00)
-8000a280: 12 20 00 03 10 20 00 40   → end of repetitive region
-```
-
-**Ghidra cannot decode this region** — `FUN_8000a180` (the only function Ghidra
-defines there) has no decoded instructions, only address-range ownership.
-
-### Manual MIPS16e decoding of the 8-byte pattern
-
-Each 8-byte block = four MIPS16e instructions:
-
-| Offset | Word | Decoded |
-|--------|------|---------|
-| +0 | `0x2012` | `bteqz +36` (I8/BTEQZ, imm=0x12, branch if T=0) |
-| +2 | `0x9eXX` / `0x9fXX` | `lw rX, off(rY)` (LW GR-relative, varies per entry) |
-| +4 | `0x2011` | `bteqz +34` (I8/BTEQZ, imm=0x11) |
-| +6 | `0x00ZZ` | `addiu s1, ZZ` (ADDIU RX, ZZ counts 0x23→0x00) |
-
-This is a **case-chain dispatch** pattern: each 8-byte block tests a condition (T
-bit from prior SLTI/SLTIU), conditionally loads from memory, and adds a case-
-specific value to s1. The 36 entries (index 0x23 to 0x00) map to 36 LMP PDU types
-or similar protocol discriminants.
-
-### fn_ptr entry points within the region
-
-The seven accessible fn_ptrs from the address-pair table enter this dispatch chain
-at specific offsets (not necessarily at block boundaries):
-
-| fn_ptr (runtime) | Ghidra | Bytes at entry |
-|------------------|--------|----------------|
-| `0x8010A174` | `0x8000A174` | `11 20` = `0x2011` = `bteqz +34` |
-| `0x8010A184` | `0x8000A184` | `11 20` = `0x2011` = `bteqz +34` |
-| `0x8010A1D8` | `0x8000A1D8` | `12 20` = `0x2012` = `bteqz +36` |
-| `0x8010A208` | `0x8000A208` | `12 20` = `0x2012` = `bteqz +36` |
-| `0x8010A2B8` | `0x8000A2B8` | varies (late region, less structured) |
-| `0x8010A304` | `0x8000A304` | varies (after 0x8000A280, different structure) |
-| `0x8010A34C` | `0x8000A34C` | file 0xa34c — post-dispatch handler code |
-
-All seven fn_ptrs enter the dispatch chain at different points (corresponding to the
-LMP PDU subtype handled by each installed handler). The BTEQZ-chain acts as a
-multi-way branch selecting which offset to add to s1.
-
-### Post-dispatch region (after 0x8000A280)
-
-At 0x8000A280+, the byte pattern becomes varied (non-repetitive), suggesting this
-is actual function code — likely the handler implementations that execute after the
-dispatch table selects the correct case. Ghidra also fails to decode this region.
-
----
-
-## Late-Patch Functions — What They Are
-
-The seven functions in the 0x80009000–0x8000a000 range that CAN be decompiled
-(using ADJSP prologue detection) are NOT related to the string-association installer.
-They implement hardware and audio subsystem functionality:
-
-### FUN_80009980 (runtime 0x80109980, size=175) — Hardware register configuration
-```c
-void FUN_80009980(void) {
-    // Clears/sets control bits in registers at 0xb000a0bc, 0xb000a05c
-    // (kseg1 MMIO: physical 0x1000a0bc, 0x1000a05c)
-    pcVar1 = _thunk_FUN_8000a180;  // register-read  fn from ROM (via thunk)
-    pcVar2 = pcRam80009aa8;         // register-write fn from ROM
-    // Read-modify-write loop for 7 hardware registers (indices 0,3,5,6,2,0,...)
-    // Reads eSCO codec params from struct at iRam80009ab4+0x168, +0x16a
-}
-```
-- s0 = ROM register-read fn at runtime ~`0x8001136c` (accessed via thunk)
-- s1 = ROM register-write fn at runtime ~`0x8001139c`
-- Targets: 7 hardware baseband registers (indices 0,2,3,5,6)
-- Reads codec params from `bos_struct+0x168` and `bos_struct+0x16a`
-
-### FUN_80009c08 (runtime 0x80109c08, size=448) — eSCO connection type negotiator
-```c
-undefined4 FUN_80009c08(param_1, char connected, undefined1 param_3, int conn_rec) {
-    // Selects eSCO packet type based on connection type at conn_rec+0x28:
-    //   0xA000 / 0xB000 → HV3/EV3 class
-    //   0xE000 / 0xF000 → EV4/EV5 class (with extended table at +0x250)
-    // Checks capability flags at conn_rec+0x250 (bits: 0x10, 0x8, 0x4, 0x2)
-    // Checks negotiated bandwidth at conn_rec+0x26
-    // Returns packet type code via call to pcRam80009dd4(connected, param_3)
-}
-```
-- Connection type field (`conn_rec+0x28`): distinguishes SCO/eSCO variants
-- Capability word (`conn_rec+0x250`): indicates supported packet types
-- Return code path: calls two function pointers (primary/alternate)
-- Packet type codes: `0x3`, `0x4`, `0x8`, `0xa`, `0xb`, `0x3a`–`0x4b` (eSCO subtypes)
-
-### FUN_80009de0 (runtime 0x80109de0, size=164) — Bit-count checksum
-```c
-uint FUN_80009de0(int param_1) {
-    // Hamming-weight (popcount) checksum over first 10 bytes of param_1:
-    //   - popcount of 4-byte words at param_1[0..7] (LE, via 4 sb-loads each)
-    //   - popcount of 2-byte value at param_1[8..9]
-    // Returns 8-bit sum of all set bits
-    // Uses standard popcount constants: 0x55555555, 0x33333333, 0x0f0f0f0f, 0x01010101
-}
-```
-Likely used for **LMP PDU header validation** or firmware integrity checking.
-
-### FUN_80009200 (runtime 0x80109200, size=322) — Bitfield-to-register encoder
-```c
-void FUN_80009200(byte *packed_cfg, uint count, uint reg_base) {
-    // bit_positions[] = {7, 11, 15}  (groups of 2 bits at those bit offsets)
-    // Loop `count` times:
-    //   - Reads 2 bits from packed_cfg at each of 3 bit positions
-    //   - Constructs 16-bit value `local_14` from the 3 groups
-    //   - Writes to hardware register via pcRam80009344(reg_addr, 0, value)
-    //   - Reads back via pcRam80009348(alt_reg_addr, 0)
-    //   - Clears/sets bit groups via pcRam8000934c
-}
-```
-Decodes a packed bitfield configuration array and programs hardware registers.
-Likely a PCM/I2S codec or RF parameter initializer.
-
-### FUN_80009550 (runtime 0x80109550, size=226) — Audio codec sample reader
-```c
-void FUN_80009550(void) {
-    // Loops 64 times: calls pcRam8000963c(channel, local_20) to get samples
-    // Builds packed result buffer
-    // Calls logging/debug fn pcRam80009648(3, 0xfd, 0x217, 0x4e53, 8, ...)
-    // 0x4e53 = 'NS' and 0x4e54 = 'NT' — likely codec debug tags
-}
-```
-
-### FUN_800096d4 (runtime 0x801096d4, size=258) — Audio circular buffer writer
-```c
-void FUN_800096d4(void) {
-    // Writes to an 8-element circular buffer (index at iRam+0x80, count at +0x82)
-    // Each element: 12 bytes of audio/connection parameters
-    // Two modes (parity bit in flag):
-    //   - Mode 0: fills offsets 0x6, 0x8, 0xa, 0xc, 0xe
-    //   - Mode 1: fills offsets 0xc, 0xe (offset 10-byte audio frame)
-    // Tracks sequence number at iRam+0x83 and index at iRam+0x80 (mod 8)
-}
-```
-
-### FUN_80009824 (runtime 0x80109824, size=180) — eSCO retransmission timer
-```c
-void FUN_80009824(void) {
-    // Checks eSCO packet counter vs threshold uRam80009950
-    // If exceeded: handles retry (calls pcRam80009954 for type 3, pcRam80009958 otherwise)
-    // Checks hardware register mask uRam8000995c
-    // If set: calls connection setup/teardown via pcRam80009960(1/0, ...)
-    // Bit manipulation at conn_rec+0x44, +0x45 (packet type flags)
-}
+          ├─ struct[+0x00] = FUN_8010cc94  (unknown_fptr_index0)
+          ├─ struct[+0x18] = FUN_8010d9f4  (assoc_w_tLC_RX)
+          ├─ struct[+0x30] = FUN_8010daa4  (assoc_w_tHCI_EVT)
+          ├─ struct[+0x3c] = FUN_8010da70  (assoc_w_tLC_TX)
+          ├─ struct[+0x48] = FUN_8010dfb0  (assoc_w_tLMP)
+          └─ struct[+0x60] = FUN_8010d154  (assoc_w_tLMP_CH__passthrough)
 ```
 
 ---
 
-## Table Processor: Confirmed NOT in Accessible Binary
+## `FUN_8010e27c` Decompile (52 bytes)
 
-A complete scan found:
-- **Zero** instances of `0x801000A0` in any 4-byte-aligned position (whole binary)
-- **Zero** instances of any value in `0x80100000–0x80100200` range in literal pools
-- **Zero** Ghidra xrefs to `0x800000A0`
-- Only one instruction matching the pattern (`FUN_800009c0:0x800009c2 beqz 0x80000a08`) — a branch target, unrelated to the table
+```c
+void FUN_8010e27c(void) {
+    // Struct base loaded from PTR_PTR_8010e310 (double-indirect)
+    code **dispatch_struct = *PTR_PTR_8010e310;
 
-The table processor is confirmed to be a ROM function at `0x80009990`
-(`interesting_string_user_fptr_registration_function` per Kovah's annotation).
-This ROM function is not accessible from wairz (the raw binary covers only the
-patch at `0x80000000–0x8000A467`; ROM functions at ≥ `0x80008000` are beyond the
-patch file).
+    // Install 6 protocol dispatch handlers:
+    dispatch_struct[0x00/4] = FUN_8010cc94;   // unknown index-0 handler
+    dispatch_struct[0x18/4] = FUN_8010d9f4;   // assoc_w_tLC_RX
+    dispatch_struct[0x30/4] = FUN_8010daa4;   // assoc_w_tHCI_EVT
+    dispatch_struct[0x3c/4] = FUN_8010da70;   // assoc_w_tLC_TX
+    dispatch_struct[0x48/4] = FUN_8010dfb0;   // assoc_w_tLMP
+    dispatch_struct[0x60/4] = FUN_8010d154;   // assoc_w_tLMP_CH__passthrough
+
+    // HW register init:
+    (*pcVar2)(0x40, 1, 2);                    // write 2 to BB reg 0x40
+    rVal = (*pcVar1)(0x6b);                   // read BB reg 0x6b
+    (*pcVar2)(0x6b, 1, (rVal & ~0x1fff) | 0xa000); // set bits 15,13
+    rVal = (*pcVar1)(0x6c);                   // read BB reg 0x6c
+    (*pcVar2)(0x6c, 1, (rVal & ~7) | 5);      // set bits 2,0
+    (*pcVar2)(0x40, 1, 0);                    // write 0 to BB reg 0x40 (reset)
+
+    // Initialize two RAM data pairs:
+    *(PTR_DAT_8010e334) = DAT_8010e330;
+    *(PTR_DAT_8010e33c) = DAT_8010e338;
+    *(PTR_DAT_8010e34c) = DAT_8010e348;
+}
+```
+
+Literal pool of `FUN_8010e27c` (0x8010e30c–0x8010e34c):
+| Pool addr | Value | Label |
+|-----------|-------|-------|
+| `0x8010e310` | `0x8012ae8c` | dispatch struct double-ptr |
+| `0x8010e314` | `0x8010dfb1` | `patch_replaces->assoc_w_tLMP` |
+| `0x8010e318` | `0x8010cc95` | `patch_replaces->unknown_fptr_index0` |
+| `0x8010e31c` | `0x8010da71` | `patch_replaces->assoc_w_tLC_TX` |
+| `0x8010e320` | `0x8010d9f5` | `patch_replaces->assoc_w_tLC_RX` |
+| `0x8010e324` | `0x8010daa5` | `patch_replaces->assoc_w_tHCI_EVT` |
+| `0x8010e328` | `0x8010d155` | `patch_replaces->assoc_w_tLMP_CH__passthrough` |
+| `0x8010e32c` | `0x8010af71` | `FUN_8010af70` (sub-installer #1) |
+| `0x8010e330` | `0x8010d2e9` | `FUN_8010d2e8` |
+| `0x8010e334` | `0x80122518` | RAM data slot (write target) |
+| `0x8010e338` | `0x8010c7b5` | `FUN_8010c7b4` |
+| `0x8010e33c` | `0x801216e8` | RAM data slot (write target) |
+| `0x8010e340` | `0x8003bd95` | ROM `FUN_8003bd94` |
+| `0x8010e344` | `0x8003bbf1` | ROM `VSC_0xfd49_FUN_8003bbf0` |
+| `0x8010e348` | `0x8010a64d` | `FUN_8010a64c` |
+| `0x8010e34c` | `0x80120dc0` | RAM data slot (write target) |
+
+---
+
+## The 6 Protocol Dispatch Handlers
+
+### `assoc_w_tLMP` — FUN_8010dfb0 (530 bytes)
+
+LMP protocol message interceptor. Dispatches on internal opcode `param_1[2]`:
+
+| Opcode | Meaning | Action |
+|--------|---------|--------|
+| `0x480` | SSP confirm/verify (LMP_SIMPLE_PAIRING_CONFIRM class) | Handles crypto state; checks `conn_rec._x58` for values `0x1c0e`/`0xc`; conditionally clears/sets feature page bit 5 |
+| `0x489` | SSP related (LMP_DHKey variant) | Same crypto state path |
+| `0x270` | eSCO link state (`0x138`) | Checks conn flags; if pending eSCO (`+0x8f & 0x10`) with no timers → calls `FUN_8010b5d8` (eSCO activator) |
+| `0x259` | LMP_ACCEPTED (opcode `0x12c`) | If special state: sets dword in struct at `+0x10` = 3 |
+| `0x26f` | eSCO timeout (`0x137`) | If AFH cap conditions met: calls ROM `FUN_80055204` (disable scan) + `FUN_800512a4`(3,0) |
+| (fall-through) | All other opcodes | Tail-calls ROM `PTR_assoc_w_tLMP_1_8010e1f8` (original LMP handler) |
+
+Post-call cleanup: if saved flag + opcode 0x480/0x489 → calls `FUN_8010d37c`(conn_handle).
+Returns after: sets feature page bit 5 back if flag.
+
+### `unknown_fptr_index0` — FUN_8010cc94 (26 bytes)
+
+Simple sequenced caller:
+```c
+void FUN_8010cc94(void *param_1) {
+    (*DAT_8010ccb0)();         // call hook fn (no args)
+    (*DAT_8010ccb4)(param_1);  // call original handler
+}
+```
+Pre-hook pattern: runs a side-effect before delegating to original.
+
+### `assoc_w_tLC_TX` — FUN_8010da70 (44 bytes)
+
+Link Controller TX interceptor. Dispatches on `param_1[2]`:
+
+| Opcode | Meaning | Action |
+|--------|---------|--------|
+| `0x32e` | eSCO TX frame | Calls `(*DAT_8010da9c)(buf[0x19], buf[0x1a], &stack_buf)` — codec encode; if returns 0, skip |
+| (fall-through) | All other LC TX | Calls `(*DAT_8010daa0)(param_1)` — original LC_TX handler |
+
+Intercepts the eSCO codec transmit path for codec type `0x32e`.
+
+### `assoc_w_tLC_RX` — FUN_8010d9f4 (98 bytes)
+
+Link Controller RX interceptor. Dispatches on `param_1[2]`:
+
+| Opcode | Meaning | Action |
+|--------|---------|--------|
+| `0x2cd` | eSCO RX frame | Looks up conn by handle from `PTR_DAT_8010da58`; reads `conn_rec+0x50`; if not -1: saves it, zeroes to -1, calls original then post-hook |
+| (fall-through) | All other LC RX | Calls `(*DAT_8010da68)(param_1)` — original LC_RX handler |
+
+Saves and clears a timer/state field at `conn_rec+0x50` around the original handler call.
+
+### `assoc_w_tHCI_EVT` — FUN_8010daa4 (518 bytes)
+
+HCI event interceptor — the most complex. Dispatches on first byte `*param_1[0]`:
+
+| HCI event | Code | Action |
+|-----------|------|--------|
+| Command Complete | `0xe` | Sub-dispatch on HCI opcode (bytes 3-4): `0x402` → if payload[5]==0xc and scan flag clear → cancel scan; else clear scan flag; `0x2002` → patch payload bytes[6:7] = `0x1b, 0x00` |
+| Inquiry Complete | `0x1` | If scan state active: calls `VSC_0xfc95_called2` (AFH scan complete), then calls `FUN_8010dd10(handle, count*0x500)`; fires `FUN_8010dd14(HCI_cmd, *param_1)` |
+| Connection Complete | `0x3` | Interrupt-masked: calls `(*DAT_8010dcf0)(opcode, 1)` (register conn event); calls enable_interrupts |
+| Disconnect Complete | `0x5` | Calls `(*DAT_8010dcf8)(pbVar8)` |
+| Auth Complete | `0x7`/`0x4` | `0x4`→calls `(*DAT_8010dcf8)`, `0x7` → handled specially |
+| LE Meta | `0x3e` | Sub-event 1/10→`uVar7=1`; sub-event 2/13→check counter; sub-event 3→`uVar7=0`; calls `(*pcVar5)(pbVar8, uVar7)` |
+| `0x2c` | Mode Change | Interrupt-masked register write |
+| `0x14` | Role Change | calls `(*DAT_8010dcfc)(pbVar8)` |
+| `0x53` | Unknown | If `*PTR_scan_flag == '\0'` → calls `(*DAT_8010dce8)()` |
+| (fall-through) | All others | Falls to `(*DAT_8010dd18)(param_1)` — original HCI_EVT handler |
+
+All paths ultimately call `(*DAT_8010dd18)(param_1)` as the original HCI event handler.
+
+### `assoc_w_tLMP_CH__passthrough` — FUN_8010d154 (16 bytes)
+
+Pure passthrough:
+```c
+void FUN_8010d154(void) {
+    (*DAT_8010d164)();  // call original LMP_CH handler
+}
+```
+No interception — simply delegates to original ROM handler.
+
+---
+
+## Relationship to Address-Pair Table (file 0xa0)
+
+The address-pair table at file offset 0xa0 (runtime `0x801000A0`) is a **separate
+mechanism** from the 6 protocol dispatch handlers above.
+
+The old analysis incorrectly claimed that `FUN_8010e27c` processes this table.
+In reality:
+- `FUN_8010e27c` writes directly to struct offsets — it does NOT iterate the table
+- The DATA BLOCK (Kovah's runtime snapshot) shows address `0x801000A0` as all zeros
+- The fn_ptrs listed in the old analysis (0x8010A174, etc.) point INTO the code body
+  of `FUN_8010a000` — they are NOT callable function entry points (they lack prologues)
+
+**Current status**: The table at file 0xa0 purpose is UNRESOLVED. Possibilities:
+1. It is processed by ROM code that we have not yet analyzed
+2. It is static initialization data, used at boot then zeroed
+3. The table format interpretation from the old analysis was incorrect
+
+This is a lower priority than the 6 confirmed protocol dispatch handlers above,
+which implement the main protocol interception surface.
+
+---
+
+## Old "Handler Stubs" Region — Corrected
+
+The old analysis identified `0x8010A160–0x8010A34C` as a "MIPS16e handler stubs"
+region (36 × 8-byte `bteqz/lw/bteqz/addiu` entries). This was a **misidentification**.
+
+The GZF DATA BLOCK shows that `FUN_8010a000` (the patch entry function, 578 bytes)
+spans `0x8010a000–0x8010a241`. The bytes at `0x8010A160–0x8010A241` are the **code
+body of FUN_8010a000**, not a separate dispatch table.
+
+The repeating 8-byte patterns in that region are standard MIPS16e compare-and-branch
+instruction sequences used in the large installer. Ghidra failed to decode these in
+old import mode due to `EXTEND pcode errors`, but in GZF PROCESS MODE (with full
+memory context) the function decompiles correctly.
+
+The literal pool of `FUN_8010a000` starts at `0x8010a244` (after the 578-byte body).
 
 ---
 
@@ -257,68 +238,36 @@ patch file).
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Address-pair table at runtime `0x801000A0` | Required | 15 entries, ROM reads it |
-| Handler stubs at `0x8010A160–0x8010A2FF` | Required (partial) | 7 of 15 fn_ptrs in binary; 8 are beyond binary |
-| Hardware register init (`FUN_80009980`) | Required | Must program 7 baseband registers using ROM register r/w fns |
-| eSCO negotiator (`FUN_80009c08`) | Required | Selects eSCO packet type for each connection |
-| Checksum fn (`FUN_80009de0`) | Likely required | Called for LMP PDU validation |
-| Audio buffer fns (`FUN_800096d4`, `FUN_80009824`) | Required for audio | eSCO audio path |
+| `FUN_8010e27c` (string_assoc_installer) | **Required** | Installs 6 protocol handlers into dispatch struct |
+| `FUN_8010dfb0` (assoc_w_tLMP) | **Required** | 530-byte LMP interceptor (SSP + eSCO) |
+| `FUN_8010cc94` (unknown_fptr_index0) | **Required** | 26-byte pre-hook caller |
+| `FUN_8010da70` (assoc_w_tLC_TX) | **Required for eSCO audio** | 44-byte codec TX intercept |
+| `FUN_8010d9f4` (assoc_w_tLC_RX) | **Required for eSCO audio** | 98-byte codec RX intercept |
+| `FUN_8010daa4` (assoc_w_tHCI_EVT) | **Required** | 518-byte HCI event interceptor |
+| `FUN_8010d154` (assoc_w_tLMP_CH__passthrough) | **Required (passthrough only)** | 16-byte delegator |
+| BB register init (0x40, 0x6b, 0x6c) in `FUN_8010e27c` | **Required** | HW configuration |
+| Address-pair table at `0x801000A0` | **UNRESOLVED** | Purpose unclear |
 
-### What can be stubbed
+### BB register init (HW config in FUN_8010e27c)
 
-The 8 out-of-binary fn_ptrs can likely be replaced with minimal stubs (return 0 or
-no-op) if only basic HCI bring-up (not audio) is required for linux-libre compliance.
+- Reg `0x40`: write 2 (enable mode), then write 0 (reset) — likely clock or mode enable
+- Reg `0x6b`: set bits 15,13 (mask: `0x1fff`, OR: `0xa000`)
+- Reg `0x6c`: set bits 2,0 (mask: `~7`, OR: `5`)
 
-### Handler stub template (8-byte pattern)
+Purpose: likely enables specific LMP/eSCO features in the baseband controller.
+The registers 0x6b/0x6c are distinct from the AFH and codec registers seen elsewhere.
 
-Each MIPS16e handler stub in the dispatch chain is 8 bytes. A stub for a new entry
-can follow the same `bteqz / lw / bteqz / addiu` pattern with the appropriate index
-and register loads. The exact semantics require dynamic analysis (not available from
-static analysis alone).
+### Handler tail-calls
 
----
+All 6 handlers end by calling the **original ROM handler** (stored in their respective
+literal pool). The libre implementation must:
+1. Obtain the ROM function pointer (from ROM at the known address)
+2. Store it in the correct literal pool slot
+3. Call it as the tail-call in each handler
 
-## Vanilla vs Kovah Firmware
-
-The GZF (`2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`) differs from the
-redistributed `rtl8761bu_fw.bin` in a significant way: Kovah appended his own
-analysis code ("dark firmware") to the patch binary.
-
-| Item | Vanilla `rtl8761bu_fw.bin` | GZF patch block |
-|------|---------------------------|-----------------|
-| File size | 42088 bytes (`0xa468`) | 44484 bytes (`0xadc4`) |
-| Runtime end | `0x8010A467` | `0x8010ADC3` |
-| Extra region | — | `0x8010A468–0x8010ADC3` (2396 bytes, `0x95c`) |
-| Entry modified | No | Likely: jump to `0x8010A468` hooked at `0x8010A001` |
-
-The 2396-byte extra region at `0x8010A468–0x8010ADC3` is Kovah's analysis code,
-not part of the Realtek firmware. It does not exist in any Realtek release.
-
-The GZF additionally contains two memory blocks not in the vanilla binary:
-- **`data` block** (`0x80100000–0x8013FFFF`): runtime RAM snapshot taken from
-  Kovah's running chip — this is where the sub-installer functions exist
-  (e.g., `0x8010B254`, `0x8010F7C8`); these addresses live in RAM, initialized
-  by ROM before the patch boots.
-- **`rom` block** (`0x80000000–0x8007FFFF`): the ROM dump Kovah extracted via
-  HCI VSC `0xFC61` — contains all ROM functions including
-  `interesting_string_user_fptr_registration_function` @ `0x80009990` and the
-  register r/w fns at `0x8001136c` / `0x8001139c`.
-
-**wairz limitation**: `run_ghidra_headless` always resolves the GZF to its
-associated raw binary (vanilla 42088 bytes) and re-imports it fresh at
-`0x80000000`. The GZF's `data` and `rom` blocks are encoded inside the GZF
-(which is a ZIP/Ghidra project archive) but are never loaded. The ROM and DATA
-content is present in the GZF file; it just cannot be accessed through wairz's
-current import path. Interactive Ghidra GUI opening the GZF directly is the
-only known way to access those blocks.
-
----
-
-## Blockers Remaining
-
-| Blocker | Root cause |
-|---------|-----------|
-| 9 of 15 fn_ptrs beyond binary | Require ROM dump or GZF DATA block |
-| MIPS16e handler stubs undecoded | Ghidra 12.1.2 EXTEND decoder fails in this region |
-| ROM table processor not accessible | wairz always loads raw binary, not GZF ROM block |
-| Full LMP PDU type mapping unknown | Requires tracing ROM dispatch chain |
+The original ROM handlers are identified by Kovah's naming:
+- `PTR_assoc_w_tLMP_1_8010e1f8` → ROM LMP handler
+- `DAT_8010daa0` → original LC_TX handler
+- `DAT_8010da68` → original LC_RX handler
+- `DAT_8010dd18` → original HCI_EVT handler
+- `DAT_8010d164` → original LMP_CH handler
