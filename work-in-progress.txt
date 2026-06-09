@@ -536,8 +536,15 @@ PHASE 5 — DESIGN THE LIBRE REPLACEMENT
           0x8010A000 flagged for hardware confirmation.
           → analysis/reverse_engineering_libre_patch_layout.md (new)
 
-[NEXT]  Decide which ROM hooks are mandatory vs. optional
-[TODO]  Design stub implementations for non-critical functions
+[DONE]  Decide which ROM hooks are mandatory vs. optional (2026-06-09)
+          Classified all hook categories: global RAM (ROM-NULL), 6 bos_base slots,
+          44 FUN_8010a000 DRAM installs (22 T1 / 14 T2 / 7 T3 / 1 T4), protocol
+          dispatch (5 IMPL + 3 SHIM + ca20 STUB/IMPL), sub-installers, omit list.
+          New decompiles: FUN_8010c088 (16B ROM shim), FUN_8010c1e8 (44B HCI wrapper),
+          FUN_8010d618 (422B HCI msg dispatcher). Profiles P0–P4 defined.
+          → analysis/reverse_engineering_mandatory_hooks.md (new)
+
+[NEXT]  Design stub implementations for non-critical functions
 [TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
 [TODO]  Write design document for libre patch architecture
 
