@@ -675,7 +675,16 @@ PHASE 7 — TEST
             init.S: zero 0x80120f0c/0x80120c80 before sub-inst #3/#6 indirect calls
               (garbage DRAM → jalr hang).
           User: try `make minimal` first; if OK try full `make all` (dual-patch).
-[NEXT]  Verify basic HCI bring-up (hciconfig, hcitool scan) — user retest
+[DONE]  Fix sub_installer_2 vendor compact loop @ [0x770,0x780) (2026-06-09)
+          bootstrap.S: 28 B vendor machine code + libre pool @ +0x1c.
+          UB500 retest 7feb8b00…: FC20 OK, fw 0xa18c9623, connect still page-timeout.
+          [0x770,0x780) matches vendor; SPLIT=0x780 still needs vendor [0,0x780).
+          → remaining connect gap: libre patch_entry / early installer [0,0x764).
+[DONE]  Installer prefix bisect SPLIT=0x764 (2026-06-09)
+          vendor [0,0x764) + libre si2+ → connect OK (51340e31…, fw 0x09a98a6b).
+          Connect-critical libre gap: [0,0x764) only (patch_entry … sub_installer_1).
+[NEXT]  RE/fix libre patch_entry + early installer [0,0x764) vs vendor bytes
+[TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
 [TODO]  Run compliance checks against linux-libre blob policy

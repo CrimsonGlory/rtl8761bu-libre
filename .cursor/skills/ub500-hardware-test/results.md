@@ -21,6 +21,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t3 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | OK (FC20) | `0x890c96a3`; **connect FAIL** `br-connection-page-timeout` (all hooks vendor-injected) | 2026-06-09 |
 | full-inject-t3-vendor-inst | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | OK (FC20) | `0x09a98a6b`; **HCI hang** `0x2036`/`-110` tx timeout; ~15 KB NOP tail still libre | 2026-06-09 |
 | full-inject-t3-vendor-tail | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | OK (FC20) | `0x8d8c8223`; HCI OK; **connect FAIL** `page-timeout` (same as T3) | 2026-06-09 |
+| full-inject-t3-vendor-tail (sub_installer_2 fix) | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | OK (FC20) | `0xa18c9623`; HCI OK; **connect FAIL** `page-timeout` | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `SPLIT=0x800` | `58855f9557ed7d55e71860b75ee84a5765600f6647d30c2775cb14dbe246581f` | OK (FC20) | `0x09a98a6b`; **connect OK** `88:C9:E8:6B:F9:1E` | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `SPLIT=0x400` | `ab71eca65612b305082712ade125628f8a194c936bdd7cc6a80850f8d97cf982` | **FC20 timeout** | `0xfc20` tx timeout; no controller | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `SPLIT=0x600` | `99fd26eaa76a10eb7d0e0d68aedc11a3da321edcd97c777c1335e12751fbbae2` | **FC20 timeout** | same `0xfc20` failure | 2026-06-09 |
@@ -29,6 +30,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t3-vendor-tail-split `SPLIT=0x740` | `94883f070d306dbbd847bb8641a314c14a53f9e3788c07fecc546966bf2ba54d` | **FC20 timeout** | `0xfc20` failure | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `SPLIT=0x760` | `1e377bdcf316c213c623ea81d06319aee7b7562c128232c7c12dee34364ae87f` | **FC20 timeout** | `0xfc20` failure | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `SPLIT=0x770` | `b301298f333da74b5ed43bcdd834be935cb45ef79f9075f290c0d00a93977d40` | **FC20 timeout** | `0xfc20` failure | 2026-06-09 |
+| full-inject-t3-vendor-tail-split `SPLIT=0x764` | `51340e31896ac68521afa47adedcb70cd4ff45ec52bc058c8e1fbf2e5e768dd4` | OK (FC20) | `0x09a98a6b`; **connect OK** `88:C9:E8:6B:F9:1E` | 2026-06-09 |
 | hybrid `SPLIT=0x400` | `66854b39ab47a71fd93b1745311353b4ccd65eefc6e58d3c07aada9bfe0382d4` | **timeout** | vendor[:0x400] + libre[0x400:] | 2026-06-09 |
 | hybrid `SPLIT=0x800` | `101a07bce607a9f003b6f26f11bd0eb4f6cbc496c022fd0546e53d23ea9c26e5` | **timeout** | vendor[:0x800] + libre[0x800:] | 2026-06-09 |
 | hybrid `SPLIT=0xc00` | `c1700f25ef1a4e884081a0d937dc10f0467e9e45c8da7206adc155d37ae24147` | **timeout** | vendor[:0xc00] + libre[0xc00:] | 2026-06-09 |
@@ -62,7 +64,8 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `c812cf41776e479865aa0c386b75ea788edfc7b554b77479892009930f044670` | full-inject-t2 | FC20 **PASS**; connect **FAIL** |
 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | full-inject-t3 | FC20 **PASS**; connect **FAIL** |
 | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | full-inject-t3-vendor-inst | FC20 **PASS**; HCI **FAIL** |
-| `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | full-inject-t3-vendor-tail | FC20 **PASS**; connect **FAIL** |
+| `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | full-inject-t3-vendor-tail (pre-fix) | FC20 **PASS**; connect **FAIL** |
+| `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | full-inject-t3-vendor-tail (si2 fix) | FC20 **PASS**; connect **FAIL** |
 | `58855f9557ed7d55e71860b75ee84a5765600f6647d30c2775cb14dbe246581f` | tail-split `0x800` | FC20 **PASS**; connect **OK** |
 | `ab71eca65612b305082712ade125628f8a194c936bdd7cc6a80850f8d97cf982` | tail-split `0x400` | FC20 **FAIL** |
 | `99fd26eaa76a10eb7d0e0d68aedc11a3da321edcd97c777c1335e12751fbbae2` | tail-split `0x600` | FC20 **FAIL** |
@@ -71,6 +74,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `94883f070d306dbbd847bb8641a314c14a53f9e3788c07fecc546966bf2ba54d` | tail-split `0x740` | FC20 **FAIL** |
 | `1e377bdcf316c213c623ea81d06319aee7b7562c128232c7c12dee34364ae87f` | tail-split `0x760` | FC20 **FAIL** |
 | `b301298f333da74b5ed43bcdd834be935cb45ef79f9075f290c0d00a93977d40` | tail-split `0x770` | FC20 **FAIL** |
+| `51340e31896ac68521afa47adedcb70cd4ff45ec52bc058c8e1fbf2e5e768dd4` | tail-split `0x764` | FC20 **PASS**; connect **OK** |
 | `74fec1169d1879c5868a6ffb1e4b98f91f67c5601732c94ad658ea5e867e5c6f` | full (macro fix) | FAIL |
 | `9cfd8d5e3992aeba8d3e3bca0e0e763923259f7ef2e9ba972010d59d00ce5171` | full (macro bug) | FAIL |
 
@@ -95,6 +99,8 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 17. **Installer bisect `SPLIT=0x600` / `0x700`** — FC20 fails.
 18. **Installer bisect `SPLIT=0x780`** — FC20 + connect OK with **1920 B** vendor prefix.
 19. **Installer bisect through `SPLIT=0x770`** — FC20 fails until `0x780`. **Critical vendor bytes: `[0x770,0x780)`** — **16 B** at runtime **`0x8010A770`–`0x8010A780`** (libre installer bug localized).
+20. **`sub_installer_2` vendor-loop fix** (`7feb8b00…`) — `[0x770,0x780)` now matches vendor; FC20 OK; connect still **page-timeout**. Fix necessary but **not sufficient** for full libre installer. **`SPLIT=0x780`** still needs vendor **`[0,0x780)`** — remaining connect bugs in **`[0,0x764)`** (patch_entry through early hooks / sub-inst #1).
+21. **`SPLIT=0x764`** (`51340e31…`) — vendor **`[0,0x764)`** + libre **`[0x764,0xE4C)`** (fixed si2) + vendor tail + T3 → **connect OK**; `fw version 0x09a98a6b`. **Connect-critical libre bugs confined to `[0,0x764)`** (`patch_entry` … `sub_installer_1`). Libre from `sub_installer_2` onward (with si2 fix) suffices. FC20 cliff: `0x770` fail, `0x764` pass.
 
 ## Pending queue
 
@@ -119,7 +125,8 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t2 | `c812cf41776e479865aa0c386b75ea788edfc7b554b77479892009930f044670` | FC20 **PASS**; connect **FAIL** | T1+T2 inject; libre LMP hooks only | 2026-06-09 |
 | full-inject-t3 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | FC20 **PASS**; connect **FAIL** | all hooks vendor; libre installer remains | 2026-06-09 |
 | full-inject-t3-vendor-inst | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | FC20 **PASS**; HCI **FAIL** | vendor prefix only; libre NOP tail | 2026-06-09 |
-| full-inject-t3-vendor-tail | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | FC20 **PASS**; connect **FAIL** | libre installer + vendor tail | 2026-06-09 |
+| full-inject-t3-vendor-tail (pre-fix) | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | FC20 **PASS**; connect **FAIL** | libre installer + vendor tail | 2026-06-09 |
+| full-inject-t3-vendor-tail (si2 fix) | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | FC20 **PASS**; connect **FAIL** | vendor 28 B si2 loop; `[0,0x764)` still libre | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `0x800` | `58855f9557ed7d55e71860b75ee84a5765600f6647d30c2775cb14dbe246581f` | FC20 **PASS**; connect **OK** | vendor prefix 2 KiB | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `0x400` | `ab71eca65612b305082712ade125628f8a194c936bdd7cc6a80850f8d97cf982` | FC20 **FAIL** | prefix too short | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `0x600` | `99fd26eaa76a10eb7d0e0d68aedc11a3da321edcd97c777c1335e12751fbbae2` | FC20 **FAIL** | prefix too short | 2026-06-09 |
@@ -128,5 +135,6 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t3-vendor-tail-split `0x740` | `94883f070d306dbbd847bb8641a314c14a53f9e3788c07fecc546966bf2ba54d` | FC20 **FAIL** | critical in [0x740,0x780) | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `0x760` | `1e377bdcf316c213c623ea81d06319aee7b7562c128232c7c12dee34364ae87f` | FC20 **FAIL** | critical in [0x760,0x780) | 2026-06-09 |
 | full-inject-t3-vendor-tail-split `0x770` | `b301298f333da74b5ed43bcdd834be935cb45ef79f9075f290c0d00a93977d40` | FC20 **FAIL** | critical in [0x770,0x780) 16 B | 2026-06-09 |
+| full-inject-t3-vendor-tail-split `0x764` | `51340e31896ac68521afa47adedcb70cd4ff45ec52bc058c8e1fbf2e5e768dd4` | FC20 **PASS**; connect **OK** | vendor early prefix; libre from si2 | 2026-06-09 |
 
 See also `rtl8761bu-libre/test-queue.txt`.

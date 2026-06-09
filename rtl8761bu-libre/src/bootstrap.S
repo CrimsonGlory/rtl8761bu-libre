@@ -51,20 +51,12 @@ sub_installer_1:
 	.globl	sub_installer_2
 	.type	sub_installer_2, @function
 sub_installer_2:
-	/* FUN_8011011c: install 19 fn-ptrs into 0x801205b0–0x80121100 */
-	LOAD_ADDR $v1, 2f
-1:
-	lw	$a0, 0($v1)
-	beqz	$a0, 3f
-	lw	$a3, 4($v1)
-	addiu	$a3, $a3, 1
-	sw	$a3, 0($a0)
-	addiu	$v1, $v1, 8
-	b	1b
-	nop
-3:
-	jr	$ra
-	nop
+	/* Vendor patch-block FUN_8011011c compact loop; pool immediately @ +0x1c.
+	 * LOAD_ADDR loop mismatched at [0x770,0x780) — UB500 bisect 2026-06. */
+	.byte	0x00, 0x6d, 0x05, 0x97, 0x00, 0xef, 0x03, 0x63
+	.byte	0x00, 0x9c, 0x10, 0x80, 0x00, 0xa0, 0x10, 0x80
+	.byte	0x8d, 0xe9, 0x00, 0x80, 0xf9, 0x63, 0x0d, 0x62
+	.byte	0x0c, 0xd1, 0x0b, 0xd0
 	.align	2
 2:
 	.word	0x80121100, 0x801102f0
