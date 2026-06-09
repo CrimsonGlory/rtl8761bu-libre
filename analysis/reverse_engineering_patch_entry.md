@@ -65,6 +65,30 @@ Libre `nm` after PE-0:
 Regions with **0 diffs**: helpers, `sub_installer_1`, `fn_bss_init`.
 Remaining gap: `[0, 0x5d8)` code + pools (PE-1 / PE-2).
 
+### PE-1 entry code + PE-2 pool interim (2026-06-09)
+
+`src/patch_entry_code.S` incbins vendor `FUN_8010a000` code `[0, 0x242)`;
+`src/patch_entry_pool.S` incbins vendor literal pool `[0x242, 0x5d8)` (PE-2 interim).
+`src/init.S` excluded from default build (semantic reference retained).
+
+Makefile extracts `build/vendor_entry_code.bin` / `vendor_entry_pool.bin` via
+`scripts/extract_vendor_prefix.py`.
+
+`make diff-prefix` (full profile): **0/1892** prefix diffs — connect-critical
+`[0, 0x764)` byte-identical to vendor patch1. Entry fingerprint `fb630962`
+(vendor prologue `addiu sp,-0x28`).
+
+| Region | Diffs |
+|--------|-------|
+| `[0, 0x242)` code | 0/578 |
+| `[0x242, 0x5d8)` pool | 0/918 |
+| `[0x5d8, 0x724)` helpers | 0/332 |
+| `[0x724, 0x754)` sub_inst_1 | 0/48 |
+| `[0x754, 0x764)` bss_init | 0/16 |
+
+Next: PE-3 RE helper fns (replace `vendor_helpers.bin`); PE-2 libre consolidated
+pool (replace `vendor_entry_pool.bin`); PE-5 drop `VENDOR_EARLY_PREFIX`.
+
 ---
 
 ## `FUN_8010a000` — semantic map (Ghidra)

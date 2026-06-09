@@ -23,10 +23,12 @@ SRCS := src/init_minimal.S
 else ifdef PHASE
 SRCS := src/init_phase_$(PHASE).S $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S $(wildcard src/init_phase_*.S),$(wildcard src/*.S))
 else
-SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init_minimal.S src/init_null.S \
+SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S \
 	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S \
+	src/patch_entry_code.S src/patch_entry_pool.S \
 	src/patch_entry_helpers.S src/patch_entry_tail.S,$(wildcard src/*.S))
-PATCH_PREFIX_SRCS := src/patch_entry_helpers.S src/patch_entry_tail.S
+PATCH_PREFIX_SRCS := src/patch_entry_code.S src/patch_entry_pool.S \
+	src/patch_entry_helpers.S src/patch_entry_tail.S
 endif
 
 # LAYOUT=gap — legacy experiment (entry @ +0x6880); wrong for FC20 → 0x8010A000
@@ -240,13 +242,25 @@ VENDOR_PREFIX_DEP := build/vendor_prefix.bin
 VENDOR_HELPERS_DEP :=
 else
 VENDOR_PREFIX_DEP :=
+# PE-1/PE-2: FUN_8010a000 code + literal pool [0,0x5d8)
+build/vendor_entry_code.bin: $(NF_REF) scripts/extract_vendor_prefix.py
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	@mkdir -p build
+	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x242 $@ 0
+
+build/vendor_entry_pool.bin: $(NF_REF) scripts/extract_vendor_prefix.py
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	@mkdir -p build
+	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x396 $@ 0x242
+
 # PE-0: helper cluster [0x5d8,0x724) for anchored prefix layout
 build/vendor_helpers.bin: $(NF_REF) scripts/extract_vendor_prefix.py
 	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
 	@mkdir -p build
 	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x14c $@ 0x5d8
 
-VENDOR_HELPERS_DEP := build/vendor_helpers.bin
+VENDOR_HELPERS_DEP := build/vendor_entry_code.bin build/vendor_entry_pool.bin \
+	build/vendor_helpers.bin
 SRCS += $(PATCH_PREFIX_SRCS)
 endif
 

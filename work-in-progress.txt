@@ -695,8 +695,15 @@ PHASE 7 — TEST
           init.S → .text.entry (0x5b0 + pad); fn_bss_init trimmed to 16 B vendor body.
           make diff-prefix: 1427/1892 prefix diffs (was 1808); helpers/si1/bss 0 diffs.
           → analysis/reverse_engineering_patch_entry.md (PE-0 section)
-[NEXT]  patch_entry RE phase PE-1: transcribe FUN_8010a000 code [0,0x242)
-          See analysis/reverse_engineering_patch_entry.md; make diff-prefix
+[DONE]  patch_entry RE phase PE-1: transcribe FUN_8010a000 code [0,0x242) (2026-06-09)
+          patch_entry_code.S + vendor_entry_code.bin incbin; init.S excluded from build.
+          PE-2 pool interim: patch_entry_pool.S vendor [0x242,0x5d8) (0/918 diffs).
+          make diff-prefix: prefix [0,0x764) 0/1892 match; entry fb630962.
+          → analysis/reverse_engineering_patch_entry.md (PE-1 section)
+[NEXT]  patch_entry RE phase PE-3: RE helper functions [0x5d8,0x724)
+          Replace vendor_helpers.bin with libre MIPS16e; make diff-prefix
+[TODO]  patch_entry RE phase PE-2: libre consolidated literal pool [0x242,0x5d8)
+[TODO]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
