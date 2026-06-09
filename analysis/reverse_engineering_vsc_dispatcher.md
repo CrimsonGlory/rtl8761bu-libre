@@ -343,4 +343,6 @@ ROM: LMP__268__most_common_for_VSCs2_checks_fptr_patch (0x80009a6c)
 
 **The `PTR_DAT_80047f18` hook** at ROM address `0x80047f18` is currently NULL in Kovah's analysis. If it is populated in a future firmware version, it intercepts power-level clamping — worth watching.
 
+**Opcode routing**: This function is the *only* target of `DAT_8010bc64`; it does not dispatch by opcode. Vendor LMP opcode **0x268** reaches it via `LMP__268` → `FUN_8010bba4` → `*DAT_8010bc64`. Full LMP + HCI VSC opcode tables: `reverse_engineering_lmp_vsc_opcode_map.md`.
+
 **Next steps**: decompile `FUN_80044730` (eSCO validation, called twice) and `FUN_8005058c` (connection record allocator) to complete the picture of synchronous connection setup.

@@ -488,16 +488,24 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
         → analysis/reverse_engineering_protocol_dispatch_layer.md (sections updated)
 
 
-[NEXT]  Enumerate all LMP opcodes handled by the VSC dispatcher
-        Start from FUN_8010bba4 (LMP VSC hook) and the opcode dispatch table
-        documented in reverse_engineering_vsc_dispatcher.md. Produce a complete
-        opcode→handler map and flag which require patch implementation vs ROM.
+[DONE]  Enumerate all LMP opcodes handled by the VSC dispatcher (2026-06-09)
+        Scripts: expanded DecompilePostDispatch.java + DecompileAddr.java 0x80030f1c
+        KEY FINDING: DAT_8010bc64 is NOT an opcode router — single ROM leaf FUN_80047c50.
+        LMP vendor opcodes 0x25B/25C/266/268/271 mapped; only 0x268 uses patch gateway
+        FUN_8010bba4 (bos+0xd8). HCI OGF 0x3F router @ 0x80030f1c: 73 opcodes listed.
+        HCI 0xFC67 bridges to LMP__25B + LMP__268. Gateway literal pool fully resolved.
+        → analysis/reverse_engineering_lmp_vsc_opcode_map.md (new)
+
+
+[NEXT]  Determine minimum set required for basic BT operation vs. full feature set
+        Use opcode map + prior hook-install enumeration (FUN_8010a000 Appendix D)
+        to classify: mandatory patch code, ROM-call-only, optional/stub.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
 ---------------------------------------------
-[TODO]  Enumerate all LMP opcodes handled by the VSC dispatcher
-[TODO]  Enumerate all HCI VSC opcodes handled (opcode table from dispatcher)
+[DONE]  Enumerate all LMP opcodes handled by the VSC dispatcher (see above)
+[DONE]  Enumerate all HCI VSC opcodes handled (73 opcodes in 0x80030f1c router)
 [TODO]  Determine minimum set required for basic BT operation vs. full feature set
 
 
