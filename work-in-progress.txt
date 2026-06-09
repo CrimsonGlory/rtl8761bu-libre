@@ -718,7 +718,18 @@ PHASE 7 — TEST
           `make full-inject-t3-pe5-vendor-tail` (vendor tail `[0xE4C,…)` interim).
           Remaining libre gap: `[0x820,0xE4C)` vs 4099 (patch_entry_tail); tail still vendor.
           → analysis/reverse_engineering_patch_entry.md (PE-5 section)
-[NEXT]  Verify basic HCI bring-up (hciconfig, hcitool scan)
+[DONE]  Document Phase 7 HCI bring-up verification (2026-06-09)
+          Pass criteria (FC20 / hciconfig / hcitool scan), NeoPC command sequence,
+          profile selection, partial evidence table. Explicit scan not yet logged on NeoPC.
+          → analysis/reverse_engineering_phase7_hci_bringup.md
+[NEXT]  Verify basic HCI bring-up on NeoPC (hciconfig, hcitool scan)
+          HARDWARE HANDOFF — user action required.
+          Profile: full-inject-t3-pe5-vendor-tail
+          SHA256: 7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab
+          Staged: fw_to_test/rtl8761bu_fw.bin (matches SHA above).
+          Partial evidence: FC20 OK + connect OK on same profile; inquiry/scan not recorded.
+          User: ./try_new_firmware.sh → procedure §4 in phase7 doc → paste journalctl +
+          hciconfig -a + hcitool scan. Agent logs results.md and marks [DONE] on pass.
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
 [TODO]  Run compliance checks against linux-libre blob policy
