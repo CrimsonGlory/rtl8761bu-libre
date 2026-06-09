@@ -142,6 +142,9 @@ Air / LMP
 
 ## Minimum vs full libre surface
 
+> **Full classification** (T0–T4 tiers, all 44 hooks, size estimates, implementation
+> order): see `reverse_engineering_minimum_feature_set.md`.
+
 ### Minimum BT (scan, connect, basic ACL)
 
 | Surface | Required in patch? |

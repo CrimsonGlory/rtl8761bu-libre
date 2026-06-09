@@ -497,16 +497,19 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
         → analysis/reverse_engineering_lmp_vsc_opcode_map.md (new)
 
 
-[NEXT]  Determine minimum set required for basic BT operation vs. full feature set
-        Use opcode map + prior hook-install enumeration (FUN_8010a000 Appendix D)
-        to classify: mandatory patch code, ROM-call-only, optional/stub.
+[DONE]  Determine minimum set required for basic BT operation vs. full feature set (2026-06-09)
+        Classified into T0 (ROM-only) / T1 (minimal ACL) / T2 (eSCO) / T3 (AFH) / T4 (full).
+        44 hook installs + 6 sub-installers + protocol dispatch + opcode map cross-ref.
+        T1 ~48 functions (~1700–2200 insns est.); T2 +~1990; T3 +~1100; 20 hooks still
+        unanalyzed (T1-conservative). Open: sub-installer #2's 19 targets, address-pair table.
+        → analysis/reverse_engineering_minimum_feature_set.md (new)
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
 ---------------------------------------------
 [DONE]  Enumerate all LMP opcodes handled by the VSC dispatcher (see above)
 [DONE]  Enumerate all HCI VSC opcodes handled (73 opcodes in 0x80030f1c router)
-[TODO]  Determine minimum set required for basic BT operation vs. full feature set
+[DONE]  Determine minimum set required for basic BT operation vs. full feature set (see above)
 
 
 PHASE 5 — DESIGN THE LIBRE REPLACEMENT
