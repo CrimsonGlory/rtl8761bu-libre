@@ -58,14 +58,6 @@ fn_tlv_applier:
 	nop
 	.size	fn_tlv_applier, . - fn_tlv_applier
 
-	.globl	fn_silicon_rev
-	.type	fn_silicon_rev, @function
-fn_silicon_rev:
-	li	$v0, 0xff
-	jr	$ra
-	nop
-	.size	fn_silicon_rev, . - fn_silicon_rev
-
 	.globl	fn_hw_probe
 	.type	fn_hw_probe, @function
 fn_hw_probe:

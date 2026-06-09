@@ -100,7 +100,7 @@ patch_entry:
 	jalr	$a3
 	nop
 
-	CALL_PATCH fn_silicon_rev
+	CALL_PATCH fn_version_check
 
 	INSTALL_HOOK 0x80121334, fn_c09c
 	INSTALL_HOOK 0x801206c8, fn_bc74
@@ -108,6 +108,19 @@ patch_entry:
 	CALL_PATCH fn_tlv_applier
 	CALL_ROM 0x8000fd39
 
+	LOAD_ADDR $a2, 0x8012b814
+	lbu	$a3, 1($a2)
+	move	$v1, $a3
+	li	$a3, 0x1f
+	and	$a3, $v1
+	li	$v1, 8
+	beq	$a3, $v1, skip_bb_init
+	li	$v1, 6
+	beq	$a3, $v1, skip_bb_init
+	li	$v1, 5
+	beq	$a3, $v1, skip_bb_init
+	lbu	$a3, 2($a2)
+	beqz	$a3, skip_bb_init
 	CALL_PATCH fn_hw_probe
 	li	$a2, 1
 	bne	$v0, $a2, skip_bb_init

@@ -611,8 +611,17 @@ PHASE 6 — IMPLEMENT
           fn_10ca4/fn_e82c remain return-stubs (178B/8B originals; T4 decompile pending).
           Build: 4252 B code / 27808 B PRAM (84.7% free), was 4236 B.
 [TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
-[NEXT]  Implement version check (trivially "always OK" for known HW)
-[TODO]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
+[DONE]  Implement version check (trivially "always OK" for known HW) (2026-06-09)
+          fn_silicon_rev (FUN_8010e214, 96B): ROM FUN_8000b820 @ 0x8000b821 reads
+            HW fields 0x7e/0x7f; mode byte @ MMIO 0xb000a013; 5-bit group scan.
+          fn_version_check: stores bos_state @ 0x8012b814 ([0]=detected rev,
+            [1]=MMIO 0xb000a0a6 & 0x1f, [2]=supported); chip-rev table from GZF
+            0x80111188 (16 bytes: revs 0/1/2/4/5/6/8 = 1); P1 always-OK fallback
+            forces supported=1 when table lookup fails. init.S bb_init gate: skip
+            for bos_state[1] in {5,6,8}; else require supported && fn_hw_probe==1.
+          Build: 4556 B code / 27808 B PRAM (83.6% free), was 4252 B.
+          → src/version_check.S (new)
+[NEXT]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
 [TODO]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
 
 
