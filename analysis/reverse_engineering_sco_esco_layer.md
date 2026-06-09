@@ -1,9 +1,10 @@
 # RTL8761BU — SCO/eSCO Layer & Slot Scheduler (2026-06-08)
 
-Covers 24 functions from the DATA block across three analysis passes:
+Covers 26 functions from the DATA block across four analysis passes:
 - **Group A** (0xa000 region helpers): 10 functions near the patch entry point
 - **Group B** (Appendix D hook targets): 5 functions installed as first-batch hooks
 - **Group C** (2026-06-08 second pass): 9 functions — `FUN_80110868` + 8 from `FUN_8010a84c` pool
+- **Group D** (2026-06-08 third pass): 2 PATCH functions from `FUN_8010ce0c` AFH init chain
 
 All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.java` /
 `DecompileHookFnsBatch.java` against GZF `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
@@ -51,7 +52,14 @@ All decompiled via various `Decompile*.java` scripts and `DecompileNewHookFns.ja
 | `FUN_8010c09c` | 76B | **REAL** | Baseband register capability gate |
 | `FUN_8010b4d0` | 76B | **REAL** | eSCO slot allocation trigger (partial — unresolved tail call) |
 
-Only 2 of 24 functions are trivial stubs. The remaining 22 require real implementation.
+### Group D — AFH Init Chain PATCH Functions (2026-06-08)
+
+| Function | Size | Classification | Description |
+|----------|------|----------------|-------------|
+| `FUN_8010ad88` | 40B | **REAL** | BB reg 0x104 bit extractor: returns 4-bit AFH cap mode |
+| `FUN_8010ccb8` | 264B | **REAL** | AFH HW reg configurator: programs BB regs 0x15c/0x1fc via masks |
+
+Only 2 of 26 functions are trivial stubs. The remaining 24 require real implementation.
 
 ---
 
@@ -790,8 +798,21 @@ classification encoding.
 Registers 0x15c and 0x1fc are baseband codec capability registers — their bit fields
 correspond to specific codec configurations (µ-law, A-law, CVSD, transparent, wideband).
 
-**Libre:** Must implement — core of the AFH initialization path. All 5 tail functions
-(at `DAT_8010d140/d144/d14c/d150`) are still unknown and need identification.
+**AFH init chain — RESOLVED (2026-06-08):**
+
+| Pool addr | Value | Function | Block | Size | Role |
+|-----------|-------|----------|-------|------|------|
+| `DAT_8010d140` | `0x800117a5` | `FUN_800117a4` | ROM | 14B | ORs `0xfc00` into global — enables AFH channel mask bits [15:10] |
+| `DAT_8010d144` | `0x8000c3f5` | `FUN_8000c3f4` | ROM | 414B | AFH channel map updater: checks config flags, updates maps, calls classifier |
+| `DAT_8010d148` | `0x80121908` | `DAT_80121908` | RAM | — | Data pointer (struct field to zero), NOT a function call |
+| `DAT_8010d14c` | `0x800122b9` | `FUN_800122b8` | ROM | 64B | AFH cap-param extractor: reads config[0x46-0x47], extracts bits[11:8] (arg=1) |
+| `DAT_8010d150` | `0x8010ccb9` | `FUN_8010ccb8` | **PATCH** | 264B | **AFH HW register configurator** — programs BB regs 0x15c and 0x1fc |
+
+`*(PTR_DAT_8010d148 + 0x40) = 0` — the d148 entry is a struct base address; the code
+zeros a field at struct+0x40, not a function call.
+
+**Libre:** Must implement — core of the AFH initialization path. The three ROM tail-calls
+are called by address; only `FUN_8010ccb8` (PATCH, 264B) requires libre implementation.
 
 ---
 
@@ -1190,6 +1211,17 @@ The unresolved tail call needs manual resolution via disassembly of the literal 
 | `0x80056291` | `FUN_8010b3d8` | ROM: slot availability check |
 | `0x800083ed` | `FUN_8010c780` | ROM fn (init #2 in subsystem init) |
 | `0x80007af1` | `FUN_8010c780` | ROM fn (init #3 in subsystem init) |
+| `0x80011510` | `FUN_8010ccb8`, `FUN_8010ad88`, `FUN_80011a74` | ROM: BB reg-read (new interface; polls MMIO) |
+| `0x80011608` | `FUN_8010ccb8`, `FUN_80012e38` | ROM: BB reg-write (interrupt-protected; MMIO latched) |
+| `0x80011a74` | `FUN_8010ccb8` | ROM: BB reg 0xfc mode-bit setter/clearer |
+| `0x800122b8` | `FUN_8010ce0c` (via d14c) | ROM: AFH cap param extractor → FUN_80012e38 |
+| `0x80012e38` | `FUN_800122b8` | ROM: clear bits[7:6] in BB regs 0x170/0x174/0x178/0x17c |
+| `0x800117a4` | `FUN_8010ce0c` (via d140) | ROM: OR `0xfc00` into AFH global |
+| `0x8000c3f4` | `FUN_8010ce0c` (via d144) | ROM: AFH channel map updater (414B) |
+| `0x8001d4a0` | `FUN_8010b4d0` | ROM: send HCI_Read_Remote_Version_Info_Complete (event 0x0c) |
+| `0x8005e23c` | `FUN_8010b4d0` | ROM: get ACL config struct (returns ptr, copies LMP company ID) |
+| `0x8005d26c` | `FUN_8010b4d0` | ROM: insert ptr into 0x1ac struct at offset +0x134 (linked list) |
+| `0x8005ca00` | `FUN_8010b4d0` | ROM: set bit in capacity bitmask at struct+0x84/+0x88 |
 | `0x8004f241` | `FUN_8010c63c` | ROM: get ACL buffer |
 | `0x8004f999` | `FUN_8010c63c` | ROM: get buffer from queue |
 | `0x800098d9` | `FUN_8010c63c` | ROM: ACL packet submit |
@@ -1200,14 +1232,141 @@ The unresolved tail call needs manual resolution via disassembly of the literal 
 
 | Address | Caller | Notes |
 |---------|--------|-------|
-| `DAT_8010d140` | `FUN_8010ce0c` | AFH init tail-call #1 (unknown fn ptr) |
-| `DAT_8010d144` | `FUN_8010ce0c` | AFH init tail-call #2 (unknown fn ptr) |
-| `DAT_8010d14c` | `FUN_8010ce0c` | AFH init tail-call #3 (called with arg=1) |
-| `DAT_8010d150` | `FUN_8010ce0c` | AFH init tail-call #4 (unknown fn ptr) |
-| unresolved tail | `FUN_8010b4d0` | Jump target at end of function (indirect) |
+| `DAT_8010d140` = `FUN_800117a4` | `FUN_8010ce0c` | **RESOLVED** — ROM 14B; ORs `0xfc00` into global |
+| `DAT_8010d144` = `FUN_8000c3f4` | `FUN_8010ce0c` | **RESOLVED** — ROM 414B; AFH channel map updater |
+| `DAT_8010d14c` = `FUN_800122b8` | `FUN_8010ce0c` | **RESOLVED** — ROM 64B; extracts AFH cap param (arg=1) |
+| `DAT_8010d150` = `FUN_8010ccb8` | `FUN_8010ce0c` | **RESOLVED** — PATCH 264B; AFH HW reg configurator (see Group D) |
+| unresolved tail | `FUN_8010b4d0` | **STILL UNRESOLVED** — Ghidra "Too many branches" at 0x8010b5b4 |
 
 All ROM functions (`0x8000xxxx` – `0x8007xxxx`) are **called by address** from the libre
 firmware — no reimplementation needed.
+
+---
+
+## Group D — AFH Init Chain PATCH Functions (2026-06-08)
+
+Discovered by resolving the `FUN_8010ce0c` literal pool (DAT_8010d140–d150). Two of the
+four tail-calls are PATCH functions requiring libre implementation.
+
+---
+
+### FUN_8010ad88 (40B, PATCH) — BB Register 0x104 AFH Capability Extractor
+
+**Role:** Reads baseband register 0x104 and extracts 4 bits that represent the current
+AFH channel capability mode. Called by `FUN_8010ccb8` to get a 4-bit selector that
+gets embedded into BB regs 0x15c / 0x1fc.
+
+**Decompile:**
+```c
+uint FUN_8010ad88(void) {
+    uint uVar1 = (*DAT_8010adb0)(0x104, 2);  // read BB reg 0x104 via FUN_80011510
+    return ((0x80000000 & uVar1) >> 0x1c) | ((uVar1 & 0xe00) >> 9);
+    //  = {bit[31], bits[11:9]} of BB reg 0x104 → 4-bit AFH capability code
+}
+```
+
+**Literal pool:**
+
+| Address | Value | Role |
+|---------|-------|------|
+| `0x8010adb0` | `0x80011511` | → `FUN_80011510` (ROM, 98B) = BB reg-read fn |
+| `0x8010adb4` | `0x80000000` | mask = bit 31 (Ghidra mislabels as `PTR_FUN_8010adb4`) |
+
+**Bit extraction:** `{bit[31], bit[11], bit[10], bit[9]}` of BB reg 0x104.
+These 4 bits are an AFH channel classification mode selector that tells FUN_8010ccb8
+what region of reg 0x15c to populate.
+
+**Libre:** Must implement. Two-instruction body: call ROM FUN_80011510(0x104, 2), then
+compute `(result >> 28 & 1) | (result >> 9 & 7)`.
+
+---
+
+### FUN_8010ccb8 (264B, PATCH) — AFH Hardware Register Configurator
+
+**Role:** The AFH hardware initialization function. Reads two MMIO registers and two
+baseband registers, applies a cascade of AND masks and OR values to configure AFH channel
+capability bitfields, then writes the results back. Finally calls ROM FUN_80011a74 to
+set/clear a mode bit in BB reg 0xfc.
+
+**Decompile:**
+```c
+void FUN_8010ccb8(void) {
+    // Read current state
+    uint mmio1 = *(uint*)0xb000a050;    // MMIO AFH capability state 1
+    uint mmio2 = *(uint*)0xb000a05c;    // MMIO AFH capability state 2 (read; not modified)
+    uint reg15c = FUN_80011510(0x15c, 2);  // read BB reg 0x15c
+    uint reg1fc = FUN_80011510(0x1fc, 2);  // read BB reg 0x1fc
+
+    // Compute new MMIO1 value (clears bits 20, 18, 17, 16, 12)
+    uint new_mmio1 = mmio1 & 0xffffefff & 0xffefffff & 0xfffbffff & 0xfffdffff & 0xfffeffff;
+
+    // Configure BB reg 0x15c:
+    //   Clear bits [11:8] and bit[5]; set bits 11,9,8,4,2,1 (= | 0xb16)
+    //   Then clear bits [23:20], set bits 23,21,20 (= | 0x00b00000)
+    //   Insert 4-bit AFH cap from FUN_8010ad88 into bits [15:12]
+    //   Then clear bits [25:24]
+    uint cap4 = FUN_8010ad88();
+    uint new_15c = ((reg15c & 0xfffff0df | 0xb16) & 0xff0fffff | 0x00b00000);
+    new_15c = (new_15c & 0xffff0fff | ((cap4 & 0xf) << 12)) & 0xfcffffff;
+    new_15c |= 0x01000000;  // set bit 24
+
+    // MMIO1: apply 5 more masks
+    new_mmio1 &= 0xfdffffff & 0xffdfffff & 0xffbfffff & 0xff7fffff;
+
+    // Configure BB reg 0x1fc (same mask pattern as 0x15c but no cap4 insertion)
+    uint new_1fc = (reg1fc & 0xfffff0df | 0xb16) & 0xff0fffff | 0x00b00000;
+
+    // Commit
+    *(uint*)0xb000af04 = 0xff00;            // write AFH bitmap clear
+    *(uint*)0xb000a050 = new_mmio1;         // write MMIO AFH state 1
+    *(uint*)0xb000a05c = mmio2;             // restore MMIO AFH state 2 (unchanged)
+    FUN_80011608(0x15c, new_15c, 2);        // write BB reg 0x15c
+    FUN_80011608(0x1fc, new_1fc, 2);        // write BB reg 0x1fc
+    FUN_80011a74();                          // set/clear bit[12] of BB reg 0xfc
+}
+```
+
+**Literal pool summary:**
+
+| Pool addr | Value | Role |
+|-----------|-------|------|
+| `0x8010cdc0` | `0xb000a050` | MMIO: AFH capability state register 1 |
+| `0x8010cdc4` | `0xb000a05c` | MMIO: AFH capability state register 2 |
+| `0x8010cdc8` | `0x80011511` | → `FUN_80011510` (ROM, 98B) = BB reg-read fn |
+| `0x8010cdcc` | `0xffefffff` | AND mask: clears bit 20 of MMIO1 |
+| `0x8010cdd0` | `0xfffbffff` | AND mask: clears bit 18 |
+| `0x8010cdd4` | `0xfffdffff` | AND mask: clears bit 17 |
+| `0x8010cdd8` | `0xfffeffff` | AND mask: clears bit 16 |
+| `0x8010cddc` | `0xff0fffff` | AND mask: clears bits [23:20] of reg |
+| `0x8010cde0` | `0x00b00000` | OR mask: sets bits 23, 21, 20 |
+| `0x8010cde4` | `0x8010ad89` | → `FUN_8010ad88` (PATCH, 40B) = BB reg 0x104 extractor |
+| `0x8010cde8` | `0xfcffffff` | AND mask: clears bits [25:24] |
+| `0x8010cdec` | `0xfdffffff` | AND mask: clears bit 25 of MMIO1 |
+| `0x8010cdf0` | `0xffdfffff` | AND mask: clears bit 21 |
+| `0x8010cdf4` | `0xffbfffff` | AND mask: clears bit 22 |
+| `0x8010cdf8` | `0xff7fffff` | AND mask: clears bit 23 |
+| `0x8010cdfc` | `0xb000af04` | MMIO: AFH bitmap clear register |
+| `0x8010ce00` | `0x01000000` | constant: bit 24 |
+| `0x8010ce04` | `0x80011609` | → `FUN_80011608` (ROM, 110B) = BB reg-write fn |
+| `0x8010ce08` | `0x80011a75` | → `FUN_80011a74` (ROM, 56B) = BB reg 0xfc mode bit |
+
+**New ROM functions identified:**
+
+| Function | Block | Size | Role |
+|----------|-------|------|------|
+| `FUN_80011510` | ROM | 98B | BB reg-read: encodes `(param_2 << 27) \| param_1`; polls MMIO until ready |
+| `FUN_80011608` | ROM | 110B | BB reg-write: interrupt-protected; polls MMIO; handles 8-bit alignment |
+| `FUN_80011a74` | ROM | 56B | Reads BB reg 0xfc; conditionally sets/clears bit[12] based on global state |
+| `FUN_800122b8` | ROM | 64B | AFH cap extractor: reads config[0x46-0x47]; extracts 4 bits → `FUN_80012e38` |
+| `FUN_80012e38` | ROM | 70B | Clears bits[7:6] of BB regs 0x170, 0x174, 0x178, 0x17c |
+| `FUN_800117a4` | ROM | 14B | ORs `0xfc00` into global (AFH upper-channel mask enable) |
+| `FUN_8000c3f4` | ROM | 414B | AFH channel map update: checks config flags, updates local/working maps |
+
+All seven are ROM functions — **zero libre reimplementation needed**.
+
+**Libre:** Must implement both `FUN_8010ad88` and `FUN_8010ccb8`.
+All mask constants are hardware config data — safe to copy verbatim from the binary.
+ROM calls: `FUN_80011510` (read), `FUN_80011608` (write), `FUN_80011a74` (final), `FUN_8010ad88` (4-bit extractor).
 
 ---
 
@@ -1263,5 +1422,12 @@ firmware — no reimplementation needed.
 | `FUN_8010ce0c` | ~250 | 6 | 3 | HIGH (AFH HW init) |
 | `FUN_8010e350` | ~450 | 8 | 0 | CRITICAL (AFH engine) |
 
-**Grand total: 22 functions need real MIPS16e code (~1800 insns estimated across all groups).**
+### Group D (2 PATCH functions from AFH init chain, 2026-06-08)
+
+| Function | Lines of MIPS16e | ROM calls | MMIO writes | Priority |
+|----------|-----------------|-----------|-------------|----------|
+| `FUN_8010ad88` | ~15 | 1 | 0 | HIGH (AFH cap bit extractor) |
+| `FUN_8010ccb8` | ~100 | 3 | 3 | HIGH (AFH HW reg configurator) |
+
+**Grand total: 24 functions need real MIPS16e code (~1850 insns estimated across all groups).**
 All ROM calls go to fixed addresses in the 0x80000000–0x8007ffff range.

@@ -293,12 +293,35 @@ PHASE 3 — UNDERSTAND THE HARDWARE LAYER
           New unknowns: 4 AFH init tail-calls from ce0c (DAT_8010d140/d144/d14c/d150)
                         + unresolved jumptable in b4d0
 
-[NEXT]  Identify the 4 AFH init tail-call functions from FUN_8010ce0c literal pool:
-          DAT_8010d140, DAT_8010d144, DAT_8010d14c (arg=1), DAT_8010d150
-          Goal: resolve what each fn-ptr targets (runtime address → function identity)
-          Also: resolve the unresolved tail-call in FUN_8010b4d0 via literal pool dump
-          Method: DiagAddr or DumpLiteralPool script on range 0x8010d140-0x8010d154
-                  and on 0x8010b5b0-0x8010b5d8 (b4d0 literal pool)
+[DONE]  Identify the 4 AFH init tail-call functions from FUN_8010ce0c literal pool (2026-06-08)
+          Scripts: ResolveAFHPtrs.java + DecompileAFHInitFns.java + DumpCCB8Pool.java +
+                   DecompileAFHHelpers.java + DumpAD88Pool.java
+          RESOLVED:
+            DAT_8010d140 → FUN_800117a4 (ROM, 14B): ORs 0xfc00 into global (AFH mask enable)
+            DAT_8010d144 → FUN_8000c3f4 (ROM, 414B): AFH channel map updater
+            DAT_8010d148 → DAT_80121908 (data label): struct base, zeroed at +0x40 (not a fn)
+            DAT_8010d14c → FUN_800122b8 (ROM, 64B): AFH cap extractor (arg=1 → bits[11:8])
+            DAT_8010d150 → FUN_8010ccb8 (PATCH, 264B): AFH HW reg configurator ← NEEDS IMPL
+          FUN_8010b4d0 literal pool resolved (b4d0 = eSCO slot allocation trigger):
+            0x8010b5b8 → base_of_0x1ac_struct_array_0xA_large2[1].field0_0x0 (data)
+            0x8010b5bc → base_of_0x1ac_struct_array_0xA_large2 (data)
+            0x8010b5c0 → send_evt_HCI_Read_Remote_Version_Information_Complete (ROM, 134B)
+            0x8010b5c8 → access_config_at_0xa5_and_0x1ac_stuct_stuff (ROM, 118B)
+            0x8010b5cc → assign_pointer_to_0x1AC_offset_0x134 (ROM, 88B)
+            0x8010b5d0 → FUN_8005ca00 (ROM, 48B): set bit in capacity bitmask
+            UNRESOLVED: tail-call at end of b4d0 — Ghidra "Too many branches" at 0x8010b5b4
+          New PATCH functions found: FUN_8010ccb8 (264B) + FUN_8010ad88 (40B)
+          New ROM fns: FUN_80011510, FUN_80011608, FUN_80011a74, FUN_800122b8, FUN_80012e38,
+                       FUN_800117a4, FUN_8000c3f4, FUN_8001d4a0, FUN_8005e23c, FUN_8005d26c,
+                       FUN_8005ca00
+          → analysis/reverse_engineering_sco_esco_layer.md (Group D added)
+
+[NEXT]  Resolve FUN_8010b4d0 unresolved tail-call (Ghidra UNRECOVERED_JUMPTABLE at 0x8010b5b4)
+          The value at 0x8010b5b4 = 0x6305ef00 (NOT_PTR). Likely a MIPS16e switch-case
+          jumptable or computed branch that Ghidra cannot analyze statically.
+          Method: Manual byte decode of the last 8 bytes of FUN_8010b4d0:
+                  `49 e3 40 f2 74 aa 8c eb` — decode as MIPS16e to find the jump target.
+          Alternative: Try wairz emulation if available.
 
 
 PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
