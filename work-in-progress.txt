@@ -544,7 +544,14 @@ PHASE 5 — DESIGN THE LIBRE REPLACEMENT
           FUN_8010d618 (422B HCI msg dispatcher). Profiles P0–P4 defined.
           → analysis/reverse_engineering_mandatory_hooks.md (new)
 
-[NEXT]  Design stub implementations for non-critical functions
+[DONE]  Design stub implementations for non-critical functions (2026-06-09)
+          8 stub patterns (ROM-NULL, OMIT-INSTALL, SHIM-POOL/ARGS, EMPTY-RET,
+          TRIVIAL-FX). Per-function specs for protocol dispatch shims (d154,
+          da70/d9f4 P1 passthrough, ca20 P1 empty-ret), bos+0x30 c088 SHIM,
+          bos+0xd8 OMIT-T1, tier-gated OMIT matrix, asm macros, src layout,
+          Makefile PROFILE=P1|P2|P3, size budget ~150 B, verification plan.
+          → analysis/reverse_engineering_stub_implementations.md (new)
+
 [TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
 [TODO]  Write design document for libre patch architecture
 
