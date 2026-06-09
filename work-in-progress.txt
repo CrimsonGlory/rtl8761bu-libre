@@ -631,12 +631,21 @@ PHASE 6 — IMPLEMENT
           TLV applier then bdaddr_sync (replaces bare CALL_ROM). BD_ADDR override
           via gen_config.py --bdaddr applies TLV offset 0x0030 before ROM sync.
           Build: 4780 B code / 27808 B PRAM (82.8% free), was 4556 B.
-[NEXT]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
+[DONE]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/) (2026-06-09)
+          Docker build (debian:bookworm-slim + gcc-mipsel-linux-gnu 12.2) clean:
+            make clean all verify size — zero errors, one benign ld warning
+            (.note.gnu.build-id discarded).
+          Output: rtl8761bu_fw.bin (27,928 B EPatch v2), rtl8761bu_config.bin (6 B).
+          PRAM: 4780 B code + 23,024 B NOP pad + 4 B footer = 27,808 B (82.8% free).
+          verify: magic Realtech, fw_version 0x09a98a6b, chip_id=2 @ 0x30, ext 0x77fd0451 OK.
+          Non-free ref header bytes 0-11 match; libre is single-patch (27,808 B) vs
+          non-free dual-patch (42,088 B total). Sources: 8× .S (init, bootstrap, callees,
+          hook_stubs, shims, lmp_vsc, version_check, bdaddr) + stub_macros.S.
 
 
 PHASE 7 — TEST
 ---------------
-[TODO]  Flash libre patch to UB500 dongle via btrtl driver
+[NEXT]  Flash libre patch to UB500 dongle via btrtl driver
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable
