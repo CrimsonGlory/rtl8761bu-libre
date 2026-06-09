@@ -1,4 +1,4 @@
 # UB500 test queue — ACTIVE = fw_to_test/rtl8761bu_fw.bin
 # NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
-ACTIVE  full-inject-t3-vendor-tail-split SPLIT=0x400  ab71eca65612b305082712ade125628f8a194c936bdd7cc6a80850f8d97cf982  rtl8761bu_fw.full-inject-t3-vendor-tail-split-SPLIT=0x400.bin
+ACTIVE  full-inject-t3-vendor-tail-split SPLIT=0x770  b301298f333da74b5ed43bcdd834be935cb45ef79f9075f290c0d00a93977d40  rtl8761bu_fw.full-inject-t3-vendor-tail-split-SPLIT=0x770.bin

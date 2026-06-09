@@ -1,0 +1,19 @@
+# Byte-split bisect state — workers read/write; supervisor resumes from here.
+version: "1"
+status: "interval_found"
+profile: "full-inject-t3-vendor-tail-split"
+make_target: "full-inject-t3-vendor-tail-split"
+fail_lo: "0x770"
+pass_hi: "0x780"
+min_interval: "0x10"
+metric: "connect"
+installer_end: "0xe4c"
+patch1_base: "0x8010a000"
+pending_split:
+pending_sha256:
+last_split: "0x770"
+last_result: "fail"
+found_lo: "0x770"
+found_hi: "0x780"
+notes: "UB500 2026-06: critical 16 B in sub_installer_2 tail; fix bootstrap.S vs vendor FUN_8011011c @ 0x770"
+updated_at: "2026-06-09T00:00:00Z"

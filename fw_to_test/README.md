@@ -16,3 +16,9 @@ Built profiles (libre, vendor baseline, bisect phases) live under `rtl8761bu-lib
 
 Do not place vendor reference blobs here except via `make test-nf` promotion — keeps
 libre tree free of non-free bytes at the scp path.
+
+### Bisect state
+
+`bisect-state.yaml` holds the active byte-split bisect (`fail_lo` / `pass_hi`,
+pending SPLIT/SHA). Workers update it; the wip-loop supervisor resumes from it
+without re-parsing chat. See `.cursor/skills/byte-split-bisect/SKILL.md`.

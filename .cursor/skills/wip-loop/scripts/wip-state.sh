@@ -25,11 +25,23 @@ get_var() {
   grep -E "^${key}=" "$file" | head -n1 | cut -d= -f2-
 }
 
+bisect_mode() {
+  local next_line
+  next_line="$(grep -m1 '^\[NEXT\]' "$WIP_FILE" 2>/dev/null | sed 's/^\[NEXT\][[:space:]]*//' || true)"
+  if echo "$next_line" | grep -qiE 'bisect.*installer[[:space:]]+prefix|installer[[:space:]]+prefix[[:space:]]+bisect|byte[- ]split[[:space:]]+bisect|SPLIT[[:space:]]+bisect'; then
+    echo "BISECT_MODE=yes"
+    echo "BISECT_LINE=$next_line"
+  else
+    echo "BISECT_MODE=no"
+  fi
+}
+
 usage() {
   cat <<'EOF'
 Usage: wip-state.sh count
        wip-state.sh snapshot <file>
        wip-state.sh delta <snapshot-file>
+       wip-state.sh bisect-mode
 
 Environment:
   WIP_FILE   Path to work-in-progress.txt (default: repo root)
@@ -44,6 +56,9 @@ cmd="${1:-}"
 case "$cmd" in
   count)
     read_counts
+    ;;
+  bisect-mode)
+    bisect_mode
     ;;
   snapshot)
     [[ $# -eq 2 ]] || { usage; exit 2; }

@@ -19,9 +19,53 @@ instead of manually opening a new agent after each step.
 | **Worker** | Task subagent (`generalPurpose`) | Execute exactly one `[NEXT]` item |
 | **Supervisor** | This agent (outer) | Snapshot state, launch worker, commit, decide loop/stop |
 
+## Bisect `[NEXT]` lines
+
+When the active `[NEXT]` line matches an installer-prefix / byte-split bisect task
+(check with `wip-state.sh bisect-mode`), use the **bisect worker** instead of the
+default WIP prompt:
+
+```
+Byte-split bisect worker (wip-loop step).
+
+Read .cursor/skills/byte-split-bisect/SKILL.md.
+Load fw_to_test/bisect-state.yaml via split-bisect-state.sh show.
+Execute the [NEXT] line in work-in-progress.txt.
+
+If interval already found (status=interval_found): write FINAL REPORT to analysis/,
+mark [NEXT] → [DONE], promote next [TODO] → [NEXT] if applicable.
+Else if no hardware paste in this prompt: compute next SPLIT, stage, stage-pending,
+return HANDOFF (do not mark [DONE]).
+If hardware result provided: log results.md, apply-result, then stage next or finalize.
+
+Update bisect-state.yaml after every mutation.
+```
+
+**Matching `[NEXT]` examples** (case-insensitive):
+
+- `Bisect installer prefix for connect`
+- `byte-split bisect sub_installer_2`
+- `SPLIT bisect until interval <= 0x10`
+
+After a bisect worker finishes, evaluate with:
+
+```bash
+.cursor/skills/byte-split-bisect/scripts/split-bisect-state.sh post-worker
+```
+
+| `STOP_REASON` | Supervisor action |
+|---------------|-------------------|
+| `bisect_handoff` | Stop loop; show user pending SHA from `bisect-state.yaml`; **do not** treat as `no_progress` |
+| `bisect_complete` | Run normal `wip-state.sh delta`; commit if `[DONE]` rose |
+| `bisect_no_handoff` | Fall through to normal `delta` (worker error or non-bisect outcome) |
+
+When user returns with NeoPC paste, resume wip-loop — same `[NEXT]` stays active
+until the worker marks `[DONE]` on `interval_found`.
+
 ## Worker prompts
 
-**Default** — use when `work-in-progress.txt` has at least one `[NEXT]` line:
+**Default** — use when `work-in-progress.txt` has at least one `[NEXT]` line
+and `bisect-mode` is `no`:
 
 ```
 Check work-in-progress.txt continue with NEXT step
@@ -49,9 +93,14 @@ Repeat until a stop condition fires:
 
 ### 2. Launch worker
 
+```bash
+.cursor/skills/wip-loop/scripts/wip-state.sh bisect-mode
+```
+
 Pick the prompt before launching:
 
-- `[NEXT]` exists → **default** worker prompt
+- `[NEXT]` exists + `BISECT_MODE=yes` → **bisect worker** prompt (above)
+- `[NEXT]` exists + `BISECT_MODE=no` → **default** worker prompt
 - no `[NEXT]` but `[TODO]` exists → **first TODO** worker prompt
 - neither → stop (`STOP_REASON=no_work`)
 
@@ -65,6 +114,17 @@ Wait for the subagent to finish before continuing.
 
 ### 3. Evaluate progress
 
+If bisect worker ran:
+
+```bash
+.cursor/skills/byte-split-bisect/scripts/split-bisect-state.sh post-worker
+```
+
+When `STOP_REASON` is `bisect_handoff` or `bisect_complete`, use that output for
+commit/continue (skip `delta` for handoff; for `bisect_complete` also run `delta`).
+
+Otherwise:
+
 ```bash
 .cursor/skills/wip-loop/scripts/wip-state.sh delta /tmp/wip-before.txt
 ```
@@ -77,6 +137,8 @@ Parse `SHOULD_COMMIT`, `SHOULD_CONTINUE`, `STOP_REASON`, and `DONE_DELTA`.
 | `todo_continue` | `[DONE]` rose by ≥1, no `[NEXT]`, but `[TODO]` remains (worker did not promote first `[TODO]` to `[NEXT]`) → commit, then loop with **first TODO** prompt |
 | `complete` | `[DONE]` rose by ≥1, no `[NEXT]` and no `[TODO]` left → commit, then stop |
 | `no_progress` | `[DONE]` did not rise → stop without commit |
+| `bisect_handoff` | Bisect worker staged SPLIT; user must flash NeoPC → stop, commit if results updated |
+| `bisect_complete` | Critical interval found; `[DONE]` should rise → commit, stop |
 | `blocked` | `[BLOCKED]` count rose → stop without commit; report to user |
 | `failed` | `[FAILED]` count rose → stop without commit; report to user |
 
