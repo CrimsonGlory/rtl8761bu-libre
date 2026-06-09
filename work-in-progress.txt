@@ -706,8 +706,12 @@ PHASE 7 — TEST
           0x8010a6ec. Removed vendor_helpers.bin incbin + Makefile extract rule.
           make diff-prefix: helpers 0/332; prefix [0,0x764) 0/1892 match.
           → analysis/reverse_engineering_patch_entry.md (PE-3 section)
-[NEXT]  patch_entry RE phase PE-2: libre consolidated literal pool [0x242,0x5d8)
-[TODO]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX
+[DONE]  patch_entry RE phase PE-2: libre consolidated literal pool [0x242,0x5d8) (2026-06-09)
+          src/patch_entry_pool.S: 918 B .byte block (not .word — section align fix).
+          scripts/gen_patch_entry_pool_asm.py for regeneration; removed vendor_entry_pool.bin.
+          make diff-prefix: pool 0/918; prefix [0,0x764) 0/1892 match.
+          → analysis/reverse_engineering_patch_entry.md (PE-2 section)
+[NEXT]  patch_entry RE phase PE-5: hardware verify prefix without VENDOR_EARLY_PREFIX
 [TODO]  Verify basic HCI bring-up (hciconfig, hcitool scan)
 [TODO]  Verify BT 5.1 feature advertisement
 [TODO]  Test audio (SCO/eSCO) if applicable

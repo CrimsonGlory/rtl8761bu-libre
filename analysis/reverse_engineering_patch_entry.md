@@ -65,10 +65,10 @@ Libre `nm` after PE-0:
 Regions with **0 diffs**: helpers, `sub_installer_1`, `fn_bss_init`.
 Remaining gap: `[0, 0x5d8)` code + pools (PE-1 / PE-2).
 
-### PE-1 entry code + PE-2 pool interim (2026-06-09)
+### PE-1 entry code (2026-06-09)
 
-`src/patch_entry_code.S` incbins vendor `FUN_8010a000` code `[0, 0x242)`;
-`src/patch_entry_pool.S` incbins vendor literal pool `[0x242, 0x5d8)` (PE-2 interim).
+`src/patch_entry_code.S` incbins vendor `FUN_8010a000` code `[0, 0x242)`.
+Literal pool PE-2 libre source: `src/patch_entry_pool.S` (was vendor incbin interim).
 `src/init.S` excluded from default build (semantic reference retained).
 
 Makefile extracts `build/vendor_entry_code.bin` / `vendor_entry_pool.bin` via
@@ -100,8 +100,19 @@ Makefile extracts `build/vendor_entry_code.bin` / `vendor_entry_pool.bin` via
 
 `make diff-prefix`: **0/332** helper diffs; prefix `[0, 0x764)` still **0/1892**.
 
-Next: PE-2 libre consolidated pool (replace `vendor_entry_pool.bin`); PE-5 drop
-`VENDOR_EARLY_PREFIX`.
+### PE-2 consolidated literal pool (2026-06-09)
+
+`src/patch_entry_pool.S`: libre **918 B `.byte` block** (not `.word` — `.word` raises
+ELF section alignment to 4 and inserts 2 B padding after the 578 B entry code, breaking
+PC-relative `lw` offsets). Annotated rows of 16 bytes; semantics per Appendix D in
+`reverse_engineering_patch_installer.md`.
+
+Generator: `scripts/gen_patch_entry_pool_asm.py` (one-shot from vendor slice; checked-in
+`.S` is source of truth). Removed `build/vendor_entry_pool.bin` Makefile extract rule.
+
+`make diff-prefix`: pool **0/918** diffs; prefix `[0, 0x764)` **0/1892**.
+
+Next: PE-5 drop `VENDOR_EARLY_PREFIX` (hardware verify prefix without vendor overlay).
 
 ---
 

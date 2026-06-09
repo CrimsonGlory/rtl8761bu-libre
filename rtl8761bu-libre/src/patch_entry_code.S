@@ -13,4 +13,7 @@
 	.type		patch_entry, @function
 patch_entry:
 	.incbin		"build/vendor_entry_code.bin"
-	.size		patch_entry, . - patch_entry
+	.set		patch_entry_end, .
+	.size		patch_entry, patch_entry_end - patch_entry
+	/* Pool @ +0x242 must follow with no align padding (vendor PC-relative lw). */
+	.balign		1

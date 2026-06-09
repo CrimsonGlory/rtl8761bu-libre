@@ -242,19 +242,16 @@ VENDOR_PREFIX_DEP := build/vendor_prefix.bin
 VENDOR_HELPERS_DEP :=
 else
 VENDOR_PREFIX_DEP :=
-# PE-1/PE-2: FUN_8010a000 code + literal pool [0,0x5d8)
+# PE-1: FUN_8010a000 code [0,0x242) vendor incbin; PE-2 pool is libre patch_entry_pool.S
 build/vendor_entry_code.bin: $(NF_REF) scripts/extract_vendor_prefix.py
 	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
 	@mkdir -p build
 	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x242 $@ 0
 
-build/vendor_entry_pool.bin: $(NF_REF) scripts/extract_vendor_prefix.py
-	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
-	@mkdir -p build
-	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x396 $@ 0x242
+# PE-2: literal pool [0x242,0x5d8) — libre src/patch_entry_pool.S (no incbin)
 
 # PE-3: helper cluster [0x5d8,0x724) — libre src/patch_entry_helpers.S (no incbin)
-VENDOR_HELPERS_DEP := build/vendor_entry_code.bin build/vendor_entry_pool.bin
+VENDOR_HELPERS_DEP := build/vendor_entry_code.bin
 SRCS += $(PATCH_PREFIX_SRCS)
 endif
 
