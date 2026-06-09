@@ -527,7 +527,7 @@ PHASE 4 — MAP ALL REQUIRED LMP / HCI SURFACE
 
 PHASE 5 — DESIGN THE LIBRE REPLACEMENT
 ----------------------------------------
-[TODO]  Define libre patch binary layout (header + code structure)
+[NEXT]  Define libre patch binary layout (header + code structure)
 [TODO]  Decide which ROM hooks are mandatory vs. optional
 [TODO]  Design stub implementations for non-critical functions
 [TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
