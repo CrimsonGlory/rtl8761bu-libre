@@ -363,7 +363,7 @@ two-section layout.
 ```
 
 Driver appends this to the final FC20 download chunk. BD_ADDR override uses extended TLV
-format (documented in Phase 5 `[TODO]` BD_ADDR task).
+format — see `reverse_engineering_config_blob.md` §5.
 
 ---
 

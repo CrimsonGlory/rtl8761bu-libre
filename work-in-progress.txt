@@ -552,7 +552,14 @@ PHASE 5 — DESIGN THE LIBRE REPLACEMENT
           Makefile PROFILE=P1|P2|P3, size budget ~150 B, verification plan.
           → analysis/reverse_engineering_stub_implementations.md (new)
 
-[TODO]  Document BD_ADDR config blob format (from btrtl.c + RE)
+[DONE]  Document BD_ADDR config blob format (from btrtl.c + RE) (2026-06-09)
+          Kernel struct rtl_vendor_config (magic 0x8723ab55, total_len, entries).
+          Default 6 B = header only (total_len=0); BD_ADDR @ offset 0x0030, len 6,
+          LSB-first on wire. btrtl appends cfg to FC20 download (252 B chunks).
+          On-chip: ROM stores blob → FUN_8010a7b8 TLV applier → ROM copies_config_bdaddr
+          (0x8000fd38) syncs config_base+0x30 to global BD_ADDR.
+          gen_config.py corrected + --bdaddr option added.
+          → analysis/reverse_engineering_config_blob.md (new)
 [TODO]  Write design document for libre patch architecture
 
 

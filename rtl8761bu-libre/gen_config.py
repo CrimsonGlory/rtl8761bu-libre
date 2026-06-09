@@ -5,56 +5,90 @@ gen_config.py — generate rtl8761bu_config.bin from source
 The RTL8761BU firmware download consists of the patch binary followed
 by a small config TLV appended to the last VSC 0x20 chunk.
 
-The config format (Realtek vendor-specific, partially documented via
-Kovah's leaked-documentation references in the HardwearioNL 2025 talk):
+Format matches Linux drivers/bluetooth/btrtl.h:
 
-  Byte 0-1: type marker  0x55AB
-  Byte 2-3: config entry type/offset (LE uint16)
-  Byte 4-5: value (LE uint16)
+  struct rtl_vendor_config {
+      __le32 signature;   // 0x8723ab55  → bytes 55 AB 23 87
+      __le16 total_len;   // sum of (4 + entry.len) for all entries
+      struct rtl_vendor_config_entry entry[];
+  };
+  struct rtl_vendor_config_entry {
+      __le16 offset;      // byte offset into chip config_base
+      __u8   len;
+      __u8   data[];
+  };
 
-The original RTL8761BU config is 6 bytes: 55 AB 23 87 00 00
-  type=0x55AB, entry=0x8723 (system-config bitmask register), value=0x0000
+Default (no overrides): 6 bytes — signature + total_len=0.
+  55 AB 23 87 00 00
 
-0x0000 means "use ROM defaults for all system config bits".
+BD_ADDR override: entry at offset 0x0030, len 6, address bytes LSB-first.
 
-BDADDR can be set by using entry offset 0x0030 with a 6-byte value.
-This file generates the default (no override) config.
-
-Usage: gen_config.py <output.bin>
+Usage:
+  gen_config.py <output.bin>
+  gen_config.py --bdaddr AA:BB:CC:DD:EE:FF <output.bin>
 """
 
+import argparse
 import struct
 import sys
 
-# Realtek config format:
-#   Bytes 0-1: literal marker  0x55 0xAB  (NOT a LE uint16 — stored as-is)
-#   Bytes 2-3: LE uint16 entry offset
-#   Bytes 4-5: LE uint16 entry value
-CONFIG_MARKER     = b'\x55\xab'  # fixed 2-byte literal
-SYSCONFIG_OFFSET  = 0x8723       # system config bitmask register offset
-SYSCONFIG_VALUE   = 0x0000       # all bits default (no override)
+RTL_CONFIG_MAGIC = 0x8723AB55
+BDADDR_OFFSET = 0x0030
+
+
+def _entry_wire(offset: int, data: bytes) -> bytes:
+    if not 0 <= offset <= 0xFFFF:
+        raise ValueError(f"offset out of range: {offset:#x}")
+    if not 1 <= len(data) <= 255:
+        raise ValueError(f"entry length must be 1..255, got {len(data)}")
+    return struct.pack('<HB', offset, len(data)) + data
 
 
 def gen_default_config() -> bytes:
-    """Generate the 6-byte default system config (no BDADDR override)."""
-    return (CONFIG_MARKER
-            + struct.pack('<H', SYSCONFIG_OFFSET)
-            + struct.pack('<H', SYSCONFIG_VALUE))
+    """6-byte header: magic + total_len=0 (ROM defaults, no patches)."""
+    return struct.pack('<IH', RTL_CONFIG_MAGIC, 0)
+
+
+def gen_bdaddr_config(mac: str) -> bytes:
+    """
+    Build config with one BD_ADDR entry at config_base+0x30.
+
+    mac: colon-separated hex, MSB-first (e.g. AA:BB:CC:DD:EE:FF).
+    Wire order is LSB-first per Realtek convention.
+    """
+    parts = mac.replace('-', ':').split(':')
+    if len(parts) != 6:
+        raise ValueError(f"expected 6 octets, got {len(parts)} in {mac!r}")
+    try:
+        octets = [int(p, 16) for p in parts]
+    except ValueError as e:
+        raise ValueError(f"invalid MAC {mac!r}") from e
+    if any(o < 0 or o > 0xFF for o in octets):
+        raise ValueError(f"octet out of range in {mac!r}")
+
+    entry = _entry_wire(BDADDR_OFFSET, bytes(reversed(octets)))
+    total_len = len(entry)
+    return struct.pack('<IH', RTL_CONFIG_MAGIC, total_len) + entry
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <output.bin>", file=sys.stderr)
-        sys.exit(1)
+    ap = argparse.ArgumentParser(description='Generate rtl8761bu_config.bin')
+    ap.add_argument('output', help='Output .bin path')
+    ap.add_argument('--bdaddr', metavar='MAC',
+                    help='Override public BD_ADDR (AA:BB:CC:DD:EE:FF)')
+    args = ap.parse_args()
 
-    cfg = gen_default_config()
-    assert len(cfg) == 6, f"Config size error: {len(cfg)} != 6"
+    if args.bdaddr:
+        cfg = gen_bdaddr_config(args.bdaddr)
+    else:
+        cfg = gen_default_config()
 
-    open(sys.argv[1], 'wb').write(cfg)
-    print(f"gen_config: {cfg.hex()} → {sys.argv[1]}")
-    print(f"  marker=0x{CONFIG_MARKER.hex()}  "
-          f"offset=0x{SYSCONFIG_OFFSET:04x}  "
-          f"value=0x{SYSCONFIG_VALUE:04x}")
+    open(args.output, 'wb').write(cfg)
+    print(f"gen_config: {cfg.hex()} → {args.output}")
+    if args.bdaddr:
+        print(f"  BD_ADDR override @ config_base+0x{BDADDR_OFFSET:04x}")
+    else:
+        print(f"  magic=0x{RTL_CONFIG_MAGIC:08x}  total_len=0 (ROM defaults)")
 
 
 if __name__ == '__main__':
