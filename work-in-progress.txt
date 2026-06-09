@@ -598,9 +598,20 @@ PHASE 6 — IMPLEMENT
             header/send ROM fns. Removed fn_bba4/fn_bc74 from hook_stubs.S.
           Build: 4236 B code / 27808 B PRAM (84.8% free), was 3852 B.
           → analysis/reverse_engineering_lmp_vsc_hook.md (impl note in WIP)
-[NEXT]  Implement minimum required sub-installers
+[DONE]  Implement minimum required sub-installers (2026-06-09)
+          bootstrap.S: all 6 sub-installers verified vs GZF decompile (DecompileSubInstallers.java):
+          #1 FUN_8010af40 — fixed BB reg 0x108 read/mask/write (bit-6 clear via
+            neg 0x41 & read; was missing mask). ROM r/w 0x8001136d/0x8001139d.
+          #2 FUN_8011011c — table loop installs 19 odd fn-ptrs to 0x801205b0–0x80121100;
+            targets are STUB_RET (P1 OK per mandatory_hooks §6; full impl = P4).
+          #3 FUN_8010fc58 — INSTALL_HOOK 0x80120f08→fn_10ca4; calls *0x80120f0c if set.
+          #4 FUN_8010f370 — 10 data-ptrs into struct @0x80120a70 (large2/config/table).
+          #5 FUN_8010e81c — INSTALL_HOOK 0x80120c88→fn_e82c.
+          #6 FUN_8010eac0 — *0x8012b800=0xffffffff; calls *0x80120c80 if non-NULL.
+          fn_10ca4/fn_e82c remain return-stubs (178B/8B originals; T4 decompile pending).
+          Build: 4252 B code / 27808 B PRAM (84.7% free), was 4236 B.
 [TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
-[TODO]  Implement version check (trivially "always OK" for known HW)
+[NEXT]  Implement version check (trivially "always OK" for known HW)
 [TODO]  Wire up BD_ADDR reader via ROM copies_config_bdaddr (0x8000fd38)
 [TODO]  Build with existing Makefile + MIPS16e toolchain (rtl8761bu-libre/)
 

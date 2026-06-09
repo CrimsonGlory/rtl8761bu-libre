@@ -24,37 +24,43 @@ fn_bss_init:
 	.globl	sub_installer_1
 	.type	sub_installer_1, @function
 sub_installer_1:
-	addiu	$sp, $sp, -8
-	sw	$ra, 4($sp)
-	li	$a0, 0x108
+	/* FUN_8010af40: read BB reg 0x108, clear bit 6, write back */
+	addiu	$sp, $sp, -0x18
+	sw	$ra, 0x14($sp)
+	sw	$s0, 0x10($sp)
+	li	$s0, 0xff
+	addiu	$s0, $s0, 9		/* reg index 0x108 */
+	move	$a0, $s0
 	li	$a1, 2
 	LOAD_ADDR $a3, 0x8001136d
 	jalr	$a3
 	nop
-	move	$a2, $v0
-	li	$a0, 0x108
-	li	$a1, 2
+	li	$a1, 0x41
+	neg	$a1, $a1		/* mask 0xffffffbf — clear bit 6 */
+	and	$a1, $v0
+	move	$a0, $s0
+	li	$a2, 2
 	LOAD_ADDR $a3, 0x8001139d
 	jalr	$a3
 	nop
-	lw	$a0, 4($sp)
-	addiu	$sp, $sp, 8
-	move	$ra, $a0
-	jr	$ra
-	nop
+	lw	$a3, 0x14($sp)
+	lw	$s0, 0x10($sp)
+	jr	$a3
+	addiu	$sp, $sp, 0x18
 	.size	sub_installer_1, . - sub_installer_1
 
 	.globl	sub_installer_2
 	.type	sub_installer_2, @function
 sub_installer_2:
-	LOAD_ADDR $s0, 2f
+	/* FUN_8011011c: install 19 fn-ptrs into 0x801205b0–0x80121100 */
+	LOAD_ADDR $v1, 2f
 1:
-	lw	$a2, 0($s0)
-	beqz	$a2, 3f
-	lw	$a3, 4($s0)
+	lw	$a0, 0($v1)
+	beqz	$a0, 3f
+	lw	$a3, 4($v1)
 	addiu	$a3, $a3, 1
-	sw	$a3, 0($a2)
-	addiu	$s0, $s0, 8
+	sw	$a3, 0($a0)
+	addiu	$v1, $v1, 8
 	b	1b
 	nop
 3:
