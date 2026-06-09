@@ -51,7 +51,7 @@ PATCH_SIZE := 27808
 
 NF_REF ?= ../rtl8761bu-non-free/rtl8761bu_fw.bin
 
-.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size
+.PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size
 
 # Docker builds must see vendor patch0 (chip_id=1 slot).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -162,6 +162,22 @@ inject-t3-vendor-tail: build/patch_padded.bin inject_vendor.py vendor_t1_manifes
 	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
 	@echo "profile=full-inject-t3-vendor-tail" > build/.profile
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# inject-t3 + vendor tail + partial vendor installer prefix [0,SPLIT) (bisect)
+SPLIT ?= 0x800
+full-inject-t3-vendor-tail-split:
+	$(MAKE) clean
+	$(MAKE) all
+	$(MAKE) inject-t3-vendor-tail-split
+
+inject-t3-vendor-tail-split: build/patch_padded.bin inject_vendor.py vendor_t1_manifest.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_TAIL_FILL=1 VENDOR_PREFIX_SPLIT=$(SPLIT) $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=full-inject-t3-vendor-tail-split-$(SPLIT)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@echo "split=$(SPLIT)" >> build/.profile
 	@sha256sum rtl8761bu_fw.bin
 
 # Vendor patch1 body (prefix + tail); libre pack header only — connect sanity / tail bisect

@@ -28,7 +28,11 @@ docker build -t "$IMAGE" "$ROOT" >/dev/null
 
 profile_file_name() {
   local spec="$1"
-  case "$spec" in hybrid*|libre-hybrid*) echo "${spec// /-}" ;; phase-*) echo "$spec" ;; *) echo "$spec" ;; esac
+  case "$spec" in
+    hybrid*|libre-hybrid*|full-inject-t3-vendor-tail-split*) echo "${spec// /-}" ;;
+    phase-*) echo "$spec" ;;
+    *) echo "$spec" ;;
+  esac
 }
 
 build_profile() {
@@ -47,6 +51,10 @@ build_profile() {
     full-inject-t3-vendor-inst) make_cmd="make full-inject-t3-vendor-inst" ;;
     full-vendor-patch1) make_cmd="make full-vendor-patch1" ;;
     full-inject-t3-vendor-tail) make_cmd="make full-inject-t3-vendor-tail" ;;
+    full-inject-t3-vendor-tail-split*)
+      local split="${spec#full-inject-t3-vendor-tail-split }"
+      make_cmd="make full-inject-t3-vendor-tail-split ${split}"
+      ;;
     hybrid*)
       local split="${spec#hybrid }"
       make_cmd="make clean && make docker && make ${split} hybrid"

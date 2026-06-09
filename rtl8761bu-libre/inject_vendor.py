@@ -52,13 +52,19 @@ def main():
     v_body = vendor[PATCH1_OFF:PATCH1_OFF + PATCH1_LEN]
     use_prefix = os.environ.get("VENDOR_INSTALLER_PREFIX", "").lower() in ("1", "yes", "true")
     use_tail = os.environ.get("VENDOR_TAIL_FILL", "").lower() in ("1", "yes", "true")
+    prefix_split = 0
+    if use_prefix:
+        prefix_split = VENDOR_INSTALLER_PREFIX_LEN
+    elif os.environ.get("VENDOR_PREFIX_SPLIT"):
+        prefix_split = int(os.environ["VENDOR_PREFIX_SPLIT"], 0)
 
     overlays = VENDOR_OVERLAY + T2_VENDOR_OVERLAY + T3_VENDOR_OVERLAY
     merged = 0
     for runtime, size in overlays:
         merged += _apply_overlay(libre, v_body, runtime, size, "overlay")
 
-    relocs = [] if use_prefix else VENDOR_RELOC
+    # Full vendor installer owns FUN_80110ddc @ native offset; skip reloc to 0xAE4C.
+    relocs = [] if prefix_split >= VENDOR_INSTALLER_PREFIX_LEN else VENDOR_RELOC
     for dest, src, size in relocs:
         src_off = src - PATCH1_BASE
         dest_off = dest - PATCH1_BASE
@@ -70,10 +76,10 @@ def main():
         merged += size
 
     prefix_len = 0
-    if use_prefix:
-        prefix_len = VENDOR_INSTALLER_PREFIX_LEN
-        if prefix_len > PATCH1_LEN:
-            raise SystemExit(f"prefix len {prefix_len} > patch")
+    if prefix_split:
+        if prefix_split > VENDOR_INSTALLER_PREFIX_LEN:
+            raise SystemExit(f"prefix split {prefix_split:#x} > {VENDOR_INSTALLER_PREFIX_LEN:#x}")
+        prefix_len = prefix_split
         libre[0:prefix_len] = v_body[0:prefix_len]
         merged += prefix_len
 
