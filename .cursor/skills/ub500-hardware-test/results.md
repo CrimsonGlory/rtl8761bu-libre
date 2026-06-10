@@ -154,3 +154,9 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t3-vendor-tail-split `0x764` | `51340e31896ac68521afa47adedcb70cd4ff45ec52bc058c8e1fbf2e5e768dd4` | FC20 **PASS**; connect **OK** | vendor early prefix; libre from si2 | 2026-06-09 |
 
 See also `rtl8761bu-libre/test-queue.txt`.
+
+## Pending hardware (awaiting NeoPC paste)
+
+| Profile | SHA256 (`rtl8761bu_fw.bin`) | Staged | Notes |
+|---------|------------------------------|--------|-------|
+| **p1-libre** | `67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a` | 2026-06-10 | **100% libre** single-patch 27,928 B; `make compliance-ci` PASS; 17,136 B code + 10,668 B NOP pad (no vendor tail/inject). T1 hooks transcribed; T2+ still `STUB_RET` (19 sub2 + 14 T2). Pass: FC20 OK, `fw version 0x09a98a6b`, `hciconfig` UP, connect `88:C9:E8:6B:F9:1E`. Fail bisect: FC20 → entry/prefix; HCI `0x2036` → NOP tail; page-timeout → T2 stubs. |

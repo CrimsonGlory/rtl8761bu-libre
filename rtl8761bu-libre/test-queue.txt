@@ -1,6 +1,7 @@
 # UB500 test queue — ACTIVE = fw_to_test/rtl8761bu_fw.bin
 # NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
+ACTIVE  p1-libre  67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a  pure-libre P1 smoke (FC20+HCI+connect)
 done    full-inject-t3-vendor-tail  4099d4bd6e809cb860f12ebd741b19033a2f660af0bf106d5a08ed0b30beb25c  connect OK
 done    full-inject-t3 PE-5  387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d  FC20 FAIL si2 offset
 done    full-inject-t3 PE-5 si2  c14e18f59573fd5777a9bec7554248578edb9d7c779f12821b0bd824dfff3286  FC20 OK HCI 0x2036 FAIL
