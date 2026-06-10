@@ -2494,3 +2494,28 @@ Installed at RAM slot `0x80121370` (paired with `FUN_8010c854` @ `0x80120bfc`).
 **Libre:** `src/t2_hooks.S` — pool alias `fn_a5ac` @ `patch_entry_pool+0x36a`
 (PRAM+`0x05AC`, 36 B byte-identical in PE-2 pool). Removed `STUB_RET` from
 `hook_stubs.S`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group R — Timing / eSCO State Dispatcher (2026-06-10)
+
+### `FUN_8010c854` (460 B) — paired timing hook @ `0x80120bfc`
+
+Ghidra body 358 B + literal pool 102 B (`0x8010C9BC`–`0x8010CA20`, abuts
+`FUN_8010ca20`). Early-out if `param_1[2]==0`. Status byte `param_1[2]`:
+bit0 pending gate via `DAT_8010c9bc`; bit2 → indirect `DAT_8010c9c0` or ROM
+`0x80011b6d` cleanup; bit7 on byte @ `param_1+6` → clears BOS `+0x16a`,
+calls `DAT_8010c9d0`/`d4`/`dc`. When status clears: masks `param_1+6` from
+`config_base+0x3e/0x3f/0x41`, optional `DAT_8010c9e4`, then `DAT_8010c9e8` +
+HCI log evt `0xfa` via `DAT_8010c9f0` (9 args). Returns 1 on log path, 0 else.
+
+**Literal pool @ +0x166:** `0x8010c9bc`…`0x8010c9f0` — ROM `0x80011b6d`,
+`config_base` `0x80120070`, BOS `0x80121200`, log template `0x2789`/`0x9ba`.
+
+Installed at RAM slot `0x80120bfc` (installer installs with `fn_a5ac` @
+`0x80121370`).
+
+**Libre:** `src/t2_hooks.S` — 460 B GZF byte-identical transcription; section
+`.text.fn_c854` in `.text.hooks` (native `0x8010C854` past 27,808 B FC20
+window). `init.S`: `INSTALL_HOOK 0x80120bfc, fn_c854` (was `INSTALL_HOOK_ABS`).
+Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.

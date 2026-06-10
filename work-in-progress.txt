@@ -987,8 +987,14 @@ T2 hook installs (replace stubs):
           adds byte @ 0x8012081b to *param_1; pool @ +0x24. Installed @ RAM
           0x80121370. Removed hook_stubs.S STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group Q)
-[NEXT]  fn_c854 (460 B) — timing (installed with a5ac)
-[TODO]  fn_c09c (76 B) — per-link BB reg 0xf gate
+[DONE]  fn_c854 (460 B) — timing (installed with a5ac) (2026-06-10)
+          src/t2_hooks.S: GZF byte-identical [0x8010C854,0x8010CA20) — 358 B body +
+          102 B literal pool; native runtime past 27,808 B FC20 window → .text.hooks.
+          Decompile: FUN_8010c854 — eSCO/timing status dispatcher (param_1[2] bits
+          0/2/7), ROM ind calls + HCI evt 0xfa log; pool @ +0x166 (0x8010c9bc…f0).
+          init.S: INSTALL_HOOK 0x80120bfc, fn_c854 (was ABS). Removed STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group R)
+[NEXT]  fn_c09c (76 B) — per-link BB reg 0xf gate
 [TODO]  fn_bda0 (114 B) — SCO/eSCO acceptance validator
 
 T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):

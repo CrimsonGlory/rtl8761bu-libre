@@ -92,7 +92,7 @@ patch_entry:
 	INSTALL_HOOK_ABS 0x801206dc, 0x8010c088
 	INSTALL_HOOK 0x80120990, fn_b4d0
 	INSTALL_HOOK_ABS 0x80121370, 0x8010a5ac
-	INSTALL_HOOK_ABS 0x80120bfc, 0x8010c854
+	INSTALL_HOOK 0x80120bfc, fn_c854
 
 	/* Phase 3 — ROM register script + silicon rev + hooks #39–40 */
 	LOAD_ADDR $a0, 0x80120264
