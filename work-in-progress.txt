@@ -944,8 +944,15 @@ T2 hook installs (replace stubs):
           0x8010BB09; pool refs @ +0x00..+0x20. Installed @ RAM 0x80121348.
           Removed tail mislabel @ 0xBF8 + hook_stubs.S STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group K)
-[NEXT]  fn_abd0 (316 B) — between eSCO and AFH groups
-[TODO]  fn_f884 (204 B) — bos+0x50
+[DONE]  fn_abd0 (316 B) — between eSCO and AFH groups (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0xBD0 (runtime 0x8010ABD0);
+          316 B byte-identical transcription; linker splits installer_tail @
+          0xBD0/0xD0C (gen_patch_entry_tail_asm.py). Decompile: FUN_8010abd0 —
+          feature-page bit3 gate, large2 stride 0x2b8 audio-path dispatch, ROM
+          log evt 0xfa + three indirect callees; pool @ +0x3c..+0x5c. Installed
+          @ RAM 0x80121410. Removed STUB_RET + tail mislabel @ 0xC14.
+          → reverse_engineering_sco_esco_layer.md (Group L)
+[NEXT]  fn_f884 (204 B) — bos+0x50
 [TODO]  fn_a550 (54 B) — eSCO-active flag
 [TODO]  fn_c160 (18 B), fn_c178 (24 B) — eSCO slot region
 [TODO]  fn_b4d0 (76 B) — eSCO slot allocation trigger (secondary+0x30)

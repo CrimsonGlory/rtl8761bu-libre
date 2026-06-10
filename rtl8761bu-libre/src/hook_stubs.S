@@ -27,13 +27,12 @@
 	/* fn_c780 @ PRAM+0x2780, fn_c63c @ PRAM+0x263C — t1_hooks.S */
 	/* fn_dd1c @ PRAM+0x3D1C, fn_d890 @ PRAM+0x3890, fn_d618 @ PRAM+0x3618 — t1_hooks.S */
 	/* fn_a594 @ PRAM+0x0594, fn_a49c @ PRAM+0x049C — t1_hooks.S (pool overlay) */
-	/* fn_a4ac @ PRAM+0x04AC, fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S */
+	/* fn_a4ac @ PRAM+0x04AC, fn_bce0 @ PRAM+0x1CE0, fn_abd0 @ PRAM+0xBD0 — t2_hooks.S */
 	/* fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S */
 	STUB_RET	fn_d168
 	STUB_RET	fn_fa34
 	STUB_RET	fn_f950
 	STUB_RET	fn_fb08
-	STUB_RET	fn_abd0
 	STUB_RET	fn_f884
 	STUB_RET	fn_f85c
 	STUB_RET	fn_a550

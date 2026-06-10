@@ -2298,3 +2298,58 @@ When `param_2` bit 7 is set, tail-calls patch fn @ `0x8010BB09`. Returns whether
 linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from `hook_stubs.S`; tail
 mislabel @ `0xBF8` restored to gap bytes. Tier **T2** (`IMPL-T2` in
 `mandatory_hooks.md`).
+
+---
+
+## Group L — eSCO Audio-Path Conn Dispatcher (2026-06-10)
+
+### `FUN_8010abd0` (316 B) — feature-page gate + large2 audio dispatch
+
+**Install slot:** RAM `0x80121410` (`FUN_8010a000` Phase 1 batch, hook #29).
+**PRAM body:** runtime `0x8010ABD0` (file offset `0xBD0` in patch1 — inside
+installer tail `[0x820,0xE4C)`, **not** the mislabeled tail symbol at file
+`0xC14` / runtime `0x8010AC14`).
+
+**Decompile (Ghidra GZF process mode, `DecompileFunction.java` @ `FUN_8010abd0`):**
+
+```c
+undefined4 FUN_8010abd0(byte *param_1)  /* conn index */
+{
+  if ((feature_page[5] & 8) == 0) return 1;
+  idx = *param_1;
+  if (large2[idx * 0x2b8 + 0xd0] == 0) {
+    (*ind_fn_18)(conn_word_at_pool_c, idx);
+    return 1;
+  }
+  /* branches on global gate + conn +0x50 / +0x219 / +0x215 / +0x21a */
+  /* ROM log evt 0xfa + up to three indirect callees; always returns 1 */
+}
+```
+
+**Semantics:** T2 hook between eSCO cluster and AFH group. Gates on feature-page
+byte `+5` bit 3 (`0x8`). Uses `large2` stride `0x2b8`: `+0xd0` active flag,
+`+0x50` slot state (`-1` = special path), `+0x219`/`+0x215` codec-mode bytes,
+`+0x21a` buffer for ROM compare fn. Clears/increments halfword table via
+`PTR_PTR_8010ad0c`. Multiple paths emit ROM `possible_logging_function` with
+HCI internal evt `0xfa` and call `DAT_8010ad18` / `DAT_8010ad30` /
+`DAT_8010ad34` (send/cleanup chain).
+
+**Literal pool (vendor patch1, body off `+0x13c` region):**
+
+| Body off | Runtime | Role |
+|----------|---------|------|
+| `+0x3c` | `0x8012382c` | large2 base |
+| `+0x40` | `0x80120060` | config / conn word |
+| `+0x44` | `0x8012b764` | global gate struct |
+| `+0x48` | `0x8012b768` | secondary gate +0xc |
+| `+0x4c` | `0x800611E5` | ROM log/dispatch |
+| `+0x50` | `0x8001D4A1` | ROM HCI evt send |
+| `+0x54` | `0x8004B654` | ROM compare / validate |
+| `+0x58` | `0x8004B71D` | ROM cleanup |
+| `+0x5c` | `0x8004B5F1` | ROM send helper |
+
+**Libre:** `src/t2_hooks.S` — 316 B byte-identical transcription @ PRAM+`0xBD0`;
+linker splits `installer_tail` / `fn_abd0` / `installer_tail_cont` in
+`rtl8761bu.ld` (`[0xBD0,0xD0C)` gap). `gen_patch_entry_tail_asm.py` omits
+abd0 bytes + mislabels `fn_d168`…`fn_bb54` prefix. Removed `STUB_RET` from
+`hook_stubs.S`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).

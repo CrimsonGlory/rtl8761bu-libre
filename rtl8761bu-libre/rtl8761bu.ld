@@ -20,6 +20,7 @@
  *   [0x17F0, …)     fn_b7f0 LMP eSCO packet processor (t2_hooks.S)
  *   [0x1CE0, …)     fn_bce0 eSCO slot capability mask (t2_hooks.S)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
+ *   [0x0BD0, …)     fn_abd0 eSCO audio-path dispatcher (t2_hooks.S, overlays tail)
  *   [0x20F4, …)     fn_c0f4 eSCO-adjacent capability gate (t2_hooks.S)
  *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
@@ -60,6 +61,10 @@ SECTIONS {
         *(.text.si2)
         . = __prefix_start + 0x820;
         *(.text.installer_tail)
+        . = __prefix_start + 0xBD0;
+        KEEP(*(.text.fn_abd0))
+        . = __prefix_start + 0xD0C;
+        *(.text.installer_tail_cont)
         . = __prefix_start + 0xE4C;
         __prefix_end = .;
 
