@@ -921,8 +921,14 @@ T2 hook installs (replace stubs):
           0xb60011fa/fc/fe, ROM FUN_80056988 state machine; 24-word pool @ +0x304.
           Removed mislabeled tail symbol @ 0xBD8 + hook_stubs.S STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group F impl note)
-[NEXT]  fn_c0f4 — eSCO-adjacent slot
-[TODO]  fn_a4ac (68 B) — eSCO readiness gate
+[DONE]  fn_c0f4 (108 B) — eSCO-adjacent capability gate (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x20F4 (runtime 0x8010C0F4);
+          108 B byte-identical transcription (82 B body + pool); linker scatter
+          in rtl8761bu.ld. Decompile: FUN_8010c0f4 — global flag bits 0x4/0x8
+          dispatch ROM ind calls + cleanup; clears bit7 of *param_1; pool @ +0x48.
+          Removed tail mislabel @ 0xBEC + hook_stubs.S STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group I)
+[NEXT]  fn_a4ac (68 B) — eSCO readiness gate
 [TODO]  fn_bce0 — eSCO slot region
 [TODO]  fn_abd0 (316 B) — between eSCO and AFH groups
 [TODO]  fn_f884 (204 B) — bos+0x50

@@ -2116,3 +2116,55 @@ next handler via literal pool @ body `+0x24` → `0x8010EAB1` (patch callee in t
 
 **Libre:** `src/t2_hooks.S` — 64 B byte-identical transcription @ PRAM+`0x1174`;
 linker scatter in `rtl8761bu.ld`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group I — eSCO-Adjacent Capability Gate (2026-06-10)
+
+### `FUN_8010c0f4` (108 B) — global flag dispatch + conn cap bit clear
+
+**Install slot:** RAM `0x80120cf8` (pool `0x8010a2e8` / `0x8010a2ec` in `FUN_8010a000`
+Phase 1 batch, hook #19). **PRAM body:** runtime `0x8010C0F4` (file offset `0x20F4` in
+patch1 — gap between `fn_be20` @ `0x1E20` and `fn_c198` @ `0x2198`; **not** the
+mislabeled tail symbol at file `0xBEC` / runtime `0x8010ABEC`).
+
+**Decompile (Ghidra GZF process mode, `DecompileAddr.java` @ `0x8010c0f4`):**
+
+```c
+undefined4 FUN_8010c0f4(uint *param_1)
+{
+  ushort uVar1;
+
+  uVar1 = *UNK_8010c148;
+  if ((uVar1 & 4) != 0) {
+    (*DAT_8010c14c)();
+  }
+  if ((uVar1 & 8) != 0) {
+    (*UNK_8010c150)();
+    (*DAT_8010c158)(*(undefined4 *)PTR_DAT_8010c154, 0);
+    *PTR_DAT_8010c15c = 0;
+  }
+  *param_1 = *param_1 & 0xffffff7f;
+  return 0;
+}
+```
+
+**Semantics:** eSCO-adjacent gate on a conn/capability dword (`param_1`). Reads a
+global 16-bit status word from the literal pool; when bit 2 (`0x4`) is set, calls a
+ROM/patch indirection; when bit 3 (`0x8`) is set, runs a two-step cleanup (indirect
+call + second handler with `(ptr, 0)` + zeroes a global byte). Always clears bit 7
+(`0x80`) of `*param_1` before return. Body 82 B; literal pool @ `+0x54` through
+`0x8010C160`.
+
+**Literal pool (vendor patch1 bytes, PC-relative `lw` targets):**
+
+| Body off | Runtime | Role |
+|----------|---------|------|
+| `+0x48` | `0x80123394` | global flags halfword (`lhu` source) |
+| `+0x4C` | `0x80044589` | ROM alloc/indirect fn (bit-2 path) |
+| `+0x50` | `0x80120650` | RAM indirect fn (bit-3 path, call 1) |
+| `+0x54` | `0x80044565` | ROM header helper |
+| `+0x58` | `0x8001D071` | ROM send fn (bit-3 path, call 2) |
+
+**Libre:** `src/t2_hooks.S` — 108 B byte-identical transcription @ PRAM+`0x20F4`;
+linker scatter in `rtl8761bu.ld`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
