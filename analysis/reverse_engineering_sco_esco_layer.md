@@ -2685,3 +2685,21 @@ pool word `0x8010a469` @ PRAM+`0x3f30` (`fn_dd1c_gap.S`).
 **Libre:** `t2_hooks.S` exports `fn_a410` alias @ `patch_entry_pool+0x226`
 (PRAM+`0x468`, vendor byte-identical). `fn_dd1c_gap.S` fills `[0x3D80,0x3FB0)` so
 dd1c/dfb0 pools resolve. Tier **T2**.
+
+---
+
+## Group X — Codec Frame Ring-Buffer Scheduler (2026-06-10)
+
+### `FUN_80110868` (322 B) — eSCO codec frame ring-buffer flush loop
+
+**GZF:** `0x80110868`–`0x801109AA` (DATA block; MIPS16e odd entry `0x80110869`).
+**Role:** 8-slot ring (stride 16 B); encode/decode paths flush pending codec frame
+descriptors until no pending data. See §FUN_80110868 decompile above.
+
+**Callers:** `FUN_8010c780` subsystem init — first indirect call via literal pool
+`0x8010C7A4` (`fn_c780_pool.S` → `fn_10868+1`).
+
+**Libre:** `src/t2_hooks.S` — 322 B GZF byte-identical (`.text.fn_10868` past FC20
+window @ runtime `0x8010FF9A`). `fn_c780_epilogue.S` (2 B vendor @ PRAM+`0x27A2`) +
+`fn_c780_pool.S` (4-word pool @ PRAM+`0x27A4`). `DumpFn10868.java` for regeneration.
+Tier **T2** callee (not a DRAM hook install).

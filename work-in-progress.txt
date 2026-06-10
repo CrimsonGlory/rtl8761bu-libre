@@ -1053,14 +1053,26 @@ T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
           when ready. Callee only (not DRAM hook). Linker scatter in rtl8761bu.ld.
           make docker verify OK; prefix [0x163C,0x17D4) 0/408 diffs vs vendor.
           → reverse_engineering_sco_esco_layer.md (Group P2b)
-[NEXT]  fn_10868 (322 B) — codec frame ring-buffer scheduler
+[DONE]  fn_10868 (322 B) — codec frame ring-buffer scheduler (2026-06-10)
+          src/t2_hooks.S: GZF byte-identical 322 B (DumpFn10868.java);
+          section .text.fn_10868 past FC20 @ runtime 0x8010FF9A. fn_c780_epilogue.S
+          (2 B @ PRAM+0x27A2) + fn_c780_pool.S (pool @ 0x27A4 → fn_10868+1, ROM
+          0x800083ed/0x80007af1, flag 0x8012133b). Callee from fn_c780. Tier T2.
+          → reverse_engineering_sco_esco_layer.md (Group X)
 
 Explicitly omit for P2 (T3 — defer to Phase 8.4):
           fn_fa34, fn_f950, fn_fb08, fn_ce0c, fn_e350, fn_d168, fn_f85c;
           full fn_ca20 (type 0x67 coexistence monitor).
 
-[TODO]  Makefile profile p2-libre (or make all = P2): no inject_vendor, no NF_REF
-[TODO]  pad.py NOP fill to 27,808 B from libre code only
+[DONE]  Makefile profile p2-libre (or make all = P2): no inject_vendor, no NF_REF (2026-06-10)
+          PROFILE ?= p2-libre default; BUILD_PROFILE=p2-libre; explicit targets
+          `make p2-libre` / `make p1-libre`; profile-siblings → rtl8761bu_fw.<profile>.bin.
+          compliance_check.py LIBRE_RELEASE_PROFILE=p2-libre (legacy alias `full`).
+          Build: 23,168 B code + 4,636 B NOP pad; make compliance-ci PASS (single-patch).
+          SHA256 `8a5893981c90e9f7f939d2807e575da30ab6f707121ac861d932a719e0c635c0`
+          → staged `fw_to_test/` as profile p2-libre (T1+T2 transcribed; T3 stub).
+
+[NEXT]  pad.py NOP fill to 27,808 B from libre code only
 [TODO]  Hardware P2 acceptance: FC20 OK, HCI, ACL, BT 5.1, A2DP and/or SCO/eSCO
 [TODO]  make compliance → SHIP: YES on P2 profile artifact
 

@@ -50,7 +50,7 @@
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
- *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 (t2_hooks.S; past FC20)
+ *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 / fn_10868 (t2_hooks.S; past FC20)
  */
 
 ENTRY(patch_entry)
@@ -132,6 +132,10 @@ SECTIONS {
         KEEP(*(.text.fn_c63c))
         . = __prefix_start + 0x2780;
         KEEP(*(.text.fn_c780))
+        . = __prefix_start + 0x27A2;
+        KEEP(*(.text.fn_c780_epilogue))
+        . = __prefix_start + 0x27A4;
+        KEEP(*(.text.fn_c780_pool))
         . = __prefix_start + 0x2A20;
         KEEP(*(.text.fn_ca20))
         . = __prefix_start + 0x31F4;
