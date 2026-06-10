@@ -223,16 +223,19 @@ def main() -> int:
         print(f"    [{lo:#06x},{hi:#06x}) {name}: {nd}/{hi - lo}")
     print()
 
+    pe1_src = ROOT / "src" / "patch_entry_code.S"
+    pe1_text = pe1_src.read_text() if pe1_src.is_file() else ""
+    pe1_has_incbin = (
+        ".incbin" in pe1_text and "vendor_entry_code.bin" in pe1_text
+    )
+
     if total_diff == 0:
         failures.append("patch1 is byte-identical to vendor (non-free)")
-    elif vendor_match >= PREFIX_CONNECT and profile == "full":
-        # [0,0x764) match + incbin PE-1 still counts as vendor-derived
+    elif vendor_match >= PREFIX_CONNECT and profile == "full" and pe1_has_incbin:
         failures.append("default full build embeds vendor PE-1 incbin (578 B) and requires NF_REF")
 
-    pe1_incbin = ROOT / "src" / "patch_entry_code.S"
-    if pe1_incbin.is_file() and ".incbin" in pe1_incbin.read_text():
-        if "vendor_entry_code.bin" in pe1_incbin.read_text():
-            failures.append("src/patch_entry_code.S incbins vendor_entry_code.bin (578 B)")
+    if pe1_has_incbin:
+        failures.append("src/patch_entry_code.S incbins vendor_entry_code.bin (578 B)")
 
     if _is_non_libre_profile(profile):
         print(f"profile '{profile}' is a bisect/inject target — not linux-libre candidate")

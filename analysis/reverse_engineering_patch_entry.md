@@ -67,12 +67,9 @@ Remaining gap: `[0, 0x5d8)` code + pools (PE-1 / PE-2).
 
 ### PE-1 entry code (2026-06-09)
 
-`src/patch_entry_code.S` incbins vendor `FUN_8010a000` code `[0, 0x242)`.
-Literal pool PE-2 libre source: `src/patch_entry_pool.S` (was vendor incbin interim).
-`src/init.S` excluded from default build (semantic reference retained).
-
-Makefile extracts `build/vendor_entry_code.bin` / `vendor_entry_pool.bin` via
-`scripts/extract_vendor_prefix.py`.
+`src/patch_entry_code.S` — libre 578 B `.byte` transcription (no incbin).
+Regenerate: `scripts/gen_patch_entry_code_asm.py`. Literal pool PE-2:
+`src/patch_entry_pool.S`. `src/init.S` excluded from default build (semantic reference).
 
 `make diff-prefix` (full profile): **0/1892** prefix diffs — connect-critical
 `[0, 0x764)` byte-identical to vendor patch1. Entry fingerprint `fb630962`

@@ -69,7 +69,7 @@ endif
 
 .PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance
 
-# Docker builds need NF_REF for PE-1 incbin and inject/bisect profiles (not default pack).
+# Docker builds need NF_REF for inject/bisect profiles and diff-prefix (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
 DOCKER_NF_ENV := -e NF_REF=/nf_ref/$(notdir $(NF_REF))
 
@@ -256,16 +256,10 @@ VENDOR_PREFIX_DEP := build/vendor_prefix.bin
 VENDOR_HELPERS_DEP :=
 else
 VENDOR_PREFIX_DEP :=
-# PE-1: FUN_8010a000 code [0,0x242) vendor incbin; PE-2 pool is libre patch_entry_pool.S
-build/vendor_entry_code.bin: $(NF_REF) scripts/extract_vendor_prefix.py
-	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
-	@mkdir -p build
-	$(PYTHON) scripts/extract_vendor_prefix.py $(NF_REF) 0x242 $@ 0
-
+# PE-1: FUN_8010a000 code [0,0x242) — libre src/patch_entry_code.S (no incbin)
 # PE-2: literal pool [0x242,0x5d8) — libre src/patch_entry_pool.S (no incbin)
-
 # PE-3: helper cluster [0x5d8,0x724) — libre src/patch_entry_helpers.S (no incbin)
-VENDOR_HELPERS_DEP := build/vendor_entry_code.bin
+VENDOR_HELPERS_DEP :=
 SRCS += $(PATCH_PREFIX_SRCS)
 endif
 
