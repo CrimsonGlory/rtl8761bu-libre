@@ -847,9 +847,21 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           108 B byte-identical transcription; linker scatter in rtl8761bu.ld.
           Decompile: FUN_8010b0a4 — MMIO 0xb6001214 + ROM 0x80056609; pool @ +0x6c.
           Removed mislabeled tail symbol @ 0xBC8 + hook_stubs.S STUB_RET.
-[NEXT]  fn_c198, fn_d1f4 — early install batch (decompile may adjust tier)
-[TODO]  fn_c780 (34 B) — subsystem init (3 ROM calls)
-[TODO]  fn_c63c (278 B) — ACL retransmission handler
+[DONE]  fn_c198, fn_d1f4 — early install batch (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x2198 / 0x31F4 (runtime
+          0x8010C198 / 0x8010D1F4); 62 B + 218 B byte-identical to vendor
+          patch1; linker scatter in rtl8761bu.ld. Decompile: FUN_8010c198 —
+          param bit1 gate, clears globals + double-indirect ROM calls; pool
+          @ +0x3c. FUN_8010d1f4 — conn-list timing matcher, MMIO 0x400 +
+          HCI evt 0xfa; pool @ +0xdc (218 B per GZF, not 76 B manifest).
+          Removed tail mislabel @ 0xBCC + hook_stubs.S STUB_RET. Tier: T1.
+[DONE]  fn_c780 (34 B) — subsystem init (3 ROM calls) (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x2780 (runtime 0x8010C780);
+          34 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010c780 — FUN_80110869 + ROM 0x800083ed/0x80007af1,
+          sets *0x8012133b=1; pool @ +0x24. Removed tail mislabel @ 0xBD0 +
+          hook_stubs.S STUB_RET. Tier: T1.
+[NEXT]  fn_c63c (278 B) — ACL retransmission handler
 [TODO]  fn_dd1c, fn_d890, fn_d618 (422 B) — HCI internal msg dispatcher
 [TODO]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
 [TODO]  fn_c49c, fn_c43c — infrastructure ptr region

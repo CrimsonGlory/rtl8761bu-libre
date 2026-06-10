@@ -17,8 +17,11 @@
  *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
+ *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
+ *   [0x31F4, …)     fn_d1f4 conn timing matcher (t1_hooks.S)
  *   [0x2224, …)     fn_c224 bos+0x24 HCI handler (t1_hooks.S)
+ *   [0x2780, …)     fn_c780 subsystem init (t1_hooks.S)
  *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
@@ -61,12 +64,18 @@ SECTIONS {
         KEEP(*(.text.fn_b5d8))
         . = __prefix_start + 0x1E20;
         KEEP(*(.text.fn_be20))
+        . = __prefix_start + 0x2198;
+        KEEP(*(.text.fn_c198))
         . = __prefix_start + 0x21E8;
         KEEP(*(.text.fn_c1e8))
         . = __prefix_start + 0x2224;
         KEEP(*(.text.fn_c224))
+        . = __prefix_start + 0x2780;
+        KEEP(*(.text.fn_c780))
         . = __prefix_start + 0x2A20;
         KEEP(*(.text.fn_ca20))
+        . = __prefix_start + 0x31F4;
+        KEEP(*(.text.fn_d1f4))
         . = __prefix_start + 0x39F4;
         KEEP(*(.text.fn_d9f4))
         . = __prefix_start + 0x3A70;
