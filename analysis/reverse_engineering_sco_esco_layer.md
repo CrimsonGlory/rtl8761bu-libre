@@ -2473,3 +2473,24 @@ window (`PRAM+0xB4D0` > `0x6CA0`). `src/t2_hooks.S` — 264 B byte-identical
 transcription (GZF `AnalyzeB4D0Tail.java`); section `.text.fn_b4d0` links in
 `.text.hooks`. `init.S` uses `INSTALL_HOOK` (linked addr+1), not
 `INSTALL_HOOK_ABS`. Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.
+
+---
+
+## Group Q — Timing Compensation Adder (2026-06-10)
+
+### `FUN_8010a5ac` (36 B) — stride-0x1ac timing adjustment
+
+```c
+void FUN_8010a5ac(short *param_1, uint param_2) {
+    if (large2[(param_2 & 0xff) * 0x1ac + 0x21a] != 0)
+        *param_1 += (byte)*(0x8012081b);
+}
+```
+
+**Literal pool @ +0x24:** `0x8012382c` (large2 base), `0x8012081b` (adjustment byte).
+
+Installed at RAM slot `0x80121370` (paired with `FUN_8010c854` @ `0x80120bfc`).
+
+**Libre:** `src/t2_hooks.S` — pool alias `fn_a5ac` @ `patch_entry_pool+0x36a`
+(PRAM+`0x05AC`, 36 B byte-identical in PE-2 pool). Removed `STUB_RET` from
+`hook_stubs.S`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).

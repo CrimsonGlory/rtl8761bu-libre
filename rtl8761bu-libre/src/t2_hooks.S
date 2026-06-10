@@ -57,6 +57,12 @@
  * then large2[5].field_0x4b = 3 via pool @ 0x8010c194 (8 B gap [0x2190,0x2198)).
  * Installed at RAM slot 0x80120824. Tier T2.
  *
+ * fn_a5ac @ PRAM+0x05AC (runtime 0x8010A5AC): timing compensation adder (36 B).
+ * Decompile: FUN_8010a5ac (Ghidra 2026-06-08) — if large2 stride 0x1ac field
+ * +0x21a nonzero, adds byte @ 0x8012081b to *param_1; pool @ +0x24 (0x8012382c,
+ * 0x8012081b). Body in patch_entry_pool @ +0x36a (PE-2 pool [0x5AC,0x5D0)).
+ * Installed at RAM slot 0x80121370. Tier T2.
+ *
  * fn_b4d0 (264 B, GZF 0x8010B4D0–0x8010B5D8): eSCO slot allocation trigger.
  * Decompile: FUN_8010b4d0 (Ghidra 2026-06-08) — copies cap PDU into large2 stride
  * 0x1ac, sets pending bit, ROM cancel/timer + indirect *0x8012082c / *0x80120958;
@@ -77,6 +83,11 @@
 	.set		fn_a550, patch_entry_pool + 0x30e
 	.type		fn_a550, @function
 	.size		fn_a550, 54
+
+	.globl		fn_a5ac
+	.set		fn_a5ac, patch_entry_pool + 0x36a
+	.type		fn_a5ac, @function
+	.size		fn_a5ac, 36
 
 	.section	.text.fn_b174, "ax"
 	.globl	fn_b174

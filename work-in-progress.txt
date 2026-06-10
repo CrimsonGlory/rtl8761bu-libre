@@ -980,8 +980,14 @@ T2 hook installs (replace stubs):
           large2 stride 0x1ac, pending bit, ROM cancel, *0x8012082c / *0x80120958.
           Removed hook_stubs.S STUB_RET. Build: docker verify OK.
           → reverse_engineering_sco_esco_layer.md (Group P)
-[NEXT]  fn_a5ac (36 B) — timing compensation
-[TODO]  fn_c854 (460 B) — timing (installed with a5ac)
+[DONE]  fn_a5ac (36 B) — timing compensation (2026-06-10)
+          src/t2_hooks.S: pool alias @ patch_entry_pool+0x36a (PRAM+0x05AC,
+          runtime 0x8010A5AC); 36 B byte-identical in PE-2 pool [0x5AC,0x5D0).
+          Decompile: FUN_8010a5ac — large2 stride 0x1ac field +0x21a gate,
+          adds byte @ 0x8012081b to *param_1; pool @ +0x24. Installed @ RAM
+          0x80121370. Removed hook_stubs.S STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group Q)
+[NEXT]  fn_c854 (460 B) — timing (installed with a5ac)
 [TODO]  fn_c09c (76 B) — per-link BB reg 0xf gate
 [TODO]  fn_bda0 (114 B) — SCO/eSCO acceptance validator
 
