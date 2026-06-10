@@ -2869,3 +2869,24 @@ ROM `FUN_800122b8`(1), and PATCH `FUN_8010ccb8` (HW reg configurator).
 sections; linker scatter in `rtl8761bu.ld` between `fn_ca20` and `fn_d168`.
 Removed `STUB_RET fn_ce0c` from `hook_stubs.S`. Prefix `[0x2CB8,0x3168)` 0/1200
 diffs vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
+
+---
+
+## Group AE — AFH Quality Ranking Engine (2026-06-10)
+
+### `FUN_8010e350` (1174 B)
+
+**Install slot:** RAM `0x8012167c` (`FUN_8010a000` hook #44; pool `a3e0` / `a3e4`).
+**PRAM layout:** `fn_e350_pre_gap` @ PRAM+`0x41C2` (398 B vendor bridge after
+`fn_dfb0` pool tail); `fn_e350` @ `0x4350` (1174 B body + embedded literal pool);
+`fn_e350_post_gap` @ `0x47E6` (4214 B vendor region before `fn_f85c`).
+
+**Semantics (Ghidra decompile):** Core AFH algorithm — decode 80-element quality
+array, weight with per-link history, rank 79 BT channels, select top N (min 20),
+build 10-byte AFH bitmap, apply hardware forbidden-channel mask, re-enforce
+minimum after masking. See §FUN_8010e350 above for full pseudocode.
+
+**Libre:** `src/t3_hooks.S` (regenerate via `scripts/gen_fn_e350_asm.py`);
+linker scatter in `rtl8761bu.ld` between `fn_dfb0` and `fn_f85c`. Removed
+`STUB_RET fn_e350` from `hook_stubs.S`. Prefix `[0x41C2,0x585C)` 0/5786 diffs
+vs NF_REF (`pre_gap` 0/398, `fn_e350` 0/1174, `post_gap` 0/4214). Tier **T3**.

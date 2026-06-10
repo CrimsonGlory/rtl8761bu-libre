@@ -53,6 +53,9 @@
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
  *   [0x3D80, …)     fn_dd1c_gap vendor pools + dd1c tail (fn_dd1c_gap.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
+ *   [0x41C2, …)     fn_e350_pre_gap vendor pool bridge (t3_hooks.S)
+ *   [0x4350, …)     fn_e350 AFH quality ranking engine (t3_hooks.S)
+ *   [0x47E6, …)     fn_e350_post_gap vendor region (t3_hooks.S)
  *   [0x585C, …)     fn_f85c AFH readiness gate (t3_hooks.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  *   [0x5950, …)     fn_f950 AFH quality + VSC FC95 trigger (t3_hooks.S)
@@ -179,6 +182,12 @@ SECTIONS {
         KEEP(*(.text.fn_dd1c_gap))
         . = __prefix_start + 0x3FB0;
         KEEP(*(.text.fn_dfb0))
+        . = __prefix_start + 0x41C2;
+        KEEP(*(.text.fn_e350_pre_gap))
+        . = __prefix_start + 0x4350;
+        KEEP(*(.text.fn_e350))
+        . = __prefix_start + 0x47E6;
+        KEEP(*(.text.fn_e350_post_gap))
         . = __prefix_start + 0x585C;
         KEEP(*(.text.fn_f85c))
         . = __prefix_start + 0x5884;

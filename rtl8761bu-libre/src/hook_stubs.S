@@ -31,9 +31,9 @@
 	/* fn_c160 @ PRAM+0x2160, fn_c178 @ PRAM+0x2178, fn_c854 — t2_hooks.S */
 	/* fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S */
 	/* fn_ccb8 @ PRAM+0x2CB8, fn_ce0c @ PRAM+0x2E0C — t3_hooks.S (init-chain callee + hook) */
-	/* fn_d168 @ PRAM+0x3168, fn_f85c @ PRAM+0x585C, fn_f950 @ PRAM+0x5950, fn_fa34 @ PRAM+0x5A34, fn_fb08 @ PRAM+0x5B08 — t3_hooks.S */
+	/* fn_d168 @ PRAM+0x3168, fn_e350 @ PRAM+0x4350, fn_f85c @ PRAM+0x585C, fn_f950 @ PRAM+0x5950, fn_fa34 @ PRAM+0x5A34, fn_fb08 @ PRAM+0x5B08 — t3_hooks.S */
 	STUB_RET	fn_10ddc
-	STUB_RET	fn_e350
+	/* fn_e350 @ PRAM+0x4350 — t3_hooks.S */
 	STUB_RET	fn_10ca4
 	STUB_RET	fn_e82c
 	STUB_RET	fn_eac0_callee
