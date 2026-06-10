@@ -2790,3 +2790,37 @@ in `{0,1}` (`DAT_8010fa1c`). When `*PTR_DAT_8010fa20 == -1` (scan not started), 
 PRAM+`0x5950` + 54 B `fn_f950_gap`; linker scatter in `rtl8761bu.ld` between
 `fn_f884` and `fn_fa34`. Removed `STUB_RET` from `hook_stubs.S`. Prefix
 `[0x5950,0x5A34)` 0/228 match vs NF_REF. Tier **T3**.
+
+---
+
+## Group AB — BLE 40-Channel Map Aggregator (2026-06-10)
+
+### `FUN_8010fb08` (292 B) — 5-byte BLE channel map AND + min-2 enforcement
+
+**Install slot:** RAM `0x80121458` (`FUN_8010a000` Phase 1 hook #28; pool refs
+`a330` / `a334` in `patch_entry_pool.S`).
+**PRAM body:** runtime `0x8010FB08` (file offset `0x5B08` in patch1); follows
+`FUN_8010FA34` @ PRAM+`0x5A34` + 28 B vendor literal-pool tail @ PRAM+`0x5AEC`
+(`fn_fa34_gap`).
+
+**Layout:** ~260 B MIPS16e body + 32 B literal pool @ body `+0x124`
+(`0x8010FC2C`…`0x8010FC54`).
+
+**Semantics (Ghidra decompile, `DecompileFunction.java` FUN_8010fb08):** First call
+(`state[1]==0`): copy 5-byte reference map to struct+`0x14` and +`0x20`, set state
+flags. Subsequent calls: working map = ref ∩ local (+`0x14`) ∩ extra mask (+`0x18`) ∩
+peer (+`0x1c`); popcount via `DAT_8010fc38`; if `< 2` channels (BLE Core Spec minimum)
+fall back to extra mask via 5-byte `memcpy` (`DAT_8010fc3c`). When `state[1]!=0`:
+compare ref vs working (`DAT_8010fc44`); on no change increment failure counter at
+struct+`0x3e` and log (`DAT_8010fc4c`, evt `0xf7`/`0x261`); on change reset counter,
+log `0x24f`, optionally notify (`DAT_8010fc54`) when
+`large2[0x1478] & 1`, save new reference. Returns 1.
+
+**Pool @ +0x124:** `PTR_DAT_8010fc2c` (state bytes), `PTR_PTR_8010fc30` (struct ptr),
+`PTR_DAT_8010fc34` (reference 5-byte map), popcount/memcpy/compare/log/notify ROM
+fn-ptrs, `PTR_base_of_0x1ac_struct_array_0xA_large2_8010fc50`.
+
+**Libre:** `src/t3_hooks.S` — 292 B byte-identical vendor transcription @
+PRAM+`0x5B08` + 28 B `fn_fa34_gap`; linker scatter in `rtl8761bu.ld` after
+`fn_fa34`. Removed `STUB_RET` from `hook_stubs.S`. Prefix `[0x5AEC,0x5C2C)` 0/320
+match vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).

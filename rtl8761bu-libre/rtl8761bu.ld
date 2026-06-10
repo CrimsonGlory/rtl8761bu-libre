@@ -53,6 +53,8 @@
  *   [0x5950, …)     fn_f950 AFH quality + VSC FC95 trigger (t3_hooks.S)
  *   [0x59FE, …)     fn_f950_gap vendor pool tail (t3_hooks.S)
  *   [0x5A34, …)     fn_fa34 AFH 79-ch map merger (t3_hooks.S)
+ *   [0x5AEC, …)     fn_fa34_gap vendor pool tail (t3_hooks.S)
+ *   [0x5B08, …)     fn_fb08 BLE 40-ch map aggregator (t3_hooks.S)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
  *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 / fn_10868 (t2_hooks.S; past FC20)
  */
@@ -172,6 +174,10 @@ SECTIONS {
         KEEP(*(.text.fn_f950_gap))
         . = __prefix_start + 0x5A34;
         KEEP(*(.text.fn_fa34))
+        . = __prefix_start + 0x5AEC;
+        KEEP(*(.text.fn_fa34_gap))
+        . = __prefix_start + 0x5B08;
+        KEEP(*(.text.fn_fb08))
 
         *(.text.hooks)
         *(.text)
