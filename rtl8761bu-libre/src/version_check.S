@@ -5,7 +5,6 @@
  * fn_version_check: stores bos_state @ 0x8012b814, table lookup, always-OK
  *   fallback for known RTL8761BU hardware (P1).
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

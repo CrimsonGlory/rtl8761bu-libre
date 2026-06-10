@@ -13,7 +13,6 @@
  * BD_ADDR override: offset 0x0030, len 6 → config_base+0x30 (0x801200a0).
  * copies_config_bdaddr propagates that field into the global HCI BD_ADDR.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

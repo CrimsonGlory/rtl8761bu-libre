@@ -1,5 +1,4 @@
 /*
- * SPDX-License-Identifier: GPL-2.0-or-later
  * init_null.S — absolute minimum: return to ROM immediately.
  * Bisect: if this still FC20-times out, the bug is not patch_entry logic.
  */

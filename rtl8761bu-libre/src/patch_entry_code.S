@@ -6,7 +6,6 @@
  * Literal pool @ +0x242 in patch_entry_pool.S (PC-relative lw targets).
  *
  * Regenerate: scripts/gen_patch_entry_code_asm.py
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

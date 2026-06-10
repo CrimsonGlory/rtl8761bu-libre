@@ -5,7 +5,6 @@
  * file offset 0x763; libre linker layout does not match vendor encoding.
  * Built with VENDOR_EARLY_PREFIX=0x764 and NF_REF; replaces init.S patch_entry.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.section	.text

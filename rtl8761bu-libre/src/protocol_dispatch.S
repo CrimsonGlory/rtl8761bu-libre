@@ -22,7 +22,6 @@
  * STUB-T1 empty return (P1/P2); full 534 B impl deferred to T3.
  * Called from fn_cc94 sequencer after ROM unknown_fptr_index0.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

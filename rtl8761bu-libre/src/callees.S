@@ -1,7 +1,6 @@
 /*
  * callees.S — entry-point callees (e27c, HW probe, BB, RF).
  * TLV + BD_ADDR sync live in bdaddr.S.
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

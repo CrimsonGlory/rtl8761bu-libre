@@ -5,7 +5,6 @@
  * Stock master installer is ~578 B at body+0; this only sets patch-active.
  * Post-patch ROM may still need hooks — use `make test-nf` to bisect.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

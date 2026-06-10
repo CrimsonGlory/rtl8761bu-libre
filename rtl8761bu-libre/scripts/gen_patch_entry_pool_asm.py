@@ -138,7 +138,6 @@ def emit_pool(blob: bytes) -> str:
         " * analysis/reverse_engineering_patch_installer.md for slot semantics.",
         " *",
         " * Regenerate: scripts/gen_patch_entry_pool_asm.py",
-        " * SPDX-License-Identifier: GPL-2.0-or-later",
         " */",
         "",
         "\t.section\t.text.entry",

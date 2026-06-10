@@ -6,7 +6,6 @@
  * ROM leaf VSC handler FUN_80047c50 is called through the gateway pool;
  * no reimplementation of the 700-byte ROM dispatcher.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

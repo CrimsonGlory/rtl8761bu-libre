@@ -1,6 +1,5 @@
 /*
  * bootstrap.S — BSS init, sub-installers #1–#6.
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

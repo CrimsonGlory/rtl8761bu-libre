@@ -16,7 +16,7 @@ firmware loaded by the kernel (`request_firmware` / `btrtl` FC20 download), that
 | Shipped `.bin` contains no proprietary bytes | **FAIL** (see below) |
 | Build from Free source only | **PARTIAL** — default `make all` still pulls vendor bytes |
 | No build-time dependency on non-free inputs for release builds | **FAIL** — `NF_REF` required for PE-1 incbin |
-| SPDX / GPL-2.0-or-later on all sources | **PASS** (after 2026-06-09 header sweep) |
+| Chosen licence on all sources | **PENDING** — no licence selected yet |
 | Reproducible output from clean tree | **PASS** — `make all` SHA256 stable in Docker |
 
 Silicon ROM (`0x80000000`) is **not** a linux-libre blob — only the filesystem-loaded
@@ -84,13 +84,8 @@ vendor patch0 via `pack.py --dual`.
 
 ## License headers
 
-All `src/*.S`, `scripts/*.py`, and top-level `*.py` now carry:
-
-```
-SPDX-License-Identifier: GPL-2.0-or-later
-```
-
-Verified by `make compliance` / `compliance_check.py`.
+No project licence has been chosen yet. SPDX headers were removed on 2026-06-10
+pending that decision.
 
 ---
 

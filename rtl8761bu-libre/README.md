@@ -1,6 +1,6 @@
 # rtl8761bu-libre
 
-Free (GPL-2.0-or-later) replacement firmware for the Realtek RTL8761BU
+Replacement firmware for the Realtek RTL8761BU
 Bluetooth 5.0 chip, as found in the TP-Link UB500 USB dongle and similar
 devices.  Intended for use with linux-libre.
 
@@ -166,7 +166,7 @@ important to check before declaring this a complete deblob.
 
 ## Licence
 
-SPDX-License-Identifier: GPL-2.0-or-later
+No licence has been chosen yet.
 
 This project contains no binary blobs.  The ROM function addresses
 referred to in `src/init.c` are addresses of functions in the chip's

@@ -1,6 +1,5 @@
 /*
  * stub_macros.S — shared MIPS16e macros for rtl8761bu-libre
- * SPDX-License-Identifier: GPL-2.0-or-later
  *
  * Literal pools use \@ (requires .altmacro) so multiple expansions in one
  * function do not merge pools and corrupt loaded addresses.

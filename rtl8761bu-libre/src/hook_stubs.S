@@ -3,7 +3,6 @@
  * Each stub returns immediately; the master installer still installs them so ROM
  * dispatch slots are non-NULL. Full implementations replace these in later phases.
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

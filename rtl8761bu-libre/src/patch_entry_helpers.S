@@ -8,7 +8,6 @@
  * fn_a6ec (204 B): eSCO slot buffer allocator; PC-relative pool for ROM
  *   0x8007abd8 + optimized_memcpy lies past file 0x724 (patch_entry tail).
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

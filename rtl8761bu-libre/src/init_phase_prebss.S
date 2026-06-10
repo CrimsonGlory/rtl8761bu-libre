@@ -1,5 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later
- * phase-prebss: prologue + config-word split, no fn_bss_init */
+/*
+ * phase-prebss: prologue + config-word split, no fn_bss_init
+ */
 	.set	mips16
 	.include "stub_macros.S"
 	.section	.text

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-2.0-or-later
 """
 inject_vendor.py — overlay vendor T1 hook bodies into libre patch_padded.bin
 

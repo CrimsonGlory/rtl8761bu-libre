@@ -71,7 +71,6 @@
  * residual eSCO adjustment via 0x80056291. Pool @ +0xD0.
  * Decompile: FUN_8010b3d8 (Ghidra 2026-06-08).
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

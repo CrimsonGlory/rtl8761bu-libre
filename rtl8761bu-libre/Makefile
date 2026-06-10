@@ -313,7 +313,7 @@ diff-prefix: build/patch.bin scripts/diff_vendor_prefix.py $(NF_REF)
 	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
 	$(PYTHON) scripts/diff_vendor_prefix.py build/patch.bin --vendor-fw $(NF_REF)
 
-# Audit non-free bytes, NF_REF deps, SPDX headers (see analysis/reverse_engineering_linux_libre_compliance.md)
+# Audit non-free bytes, NF_REF deps (see analysis/reverse_engineering_linux_libre_compliance.md)
 compliance: scripts/compliance_check.py
 	$(PYTHON) scripts/compliance_check.py \
 	  $(if $(wildcard $(NF_REF)),--nf-ref $(NF_REF),--no-nf-ref) \

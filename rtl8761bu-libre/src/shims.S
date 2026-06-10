@@ -1,6 +1,5 @@
 /*
  * shims.S — ROM tail-call shims and mandatory small dispatch helpers.
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

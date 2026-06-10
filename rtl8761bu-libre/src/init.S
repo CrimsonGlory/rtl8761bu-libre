@@ -4,7 +4,6 @@
  * ROM calls patch_entry @ 0x8010A001 (FC20 loads body to 0x8010A000).
  * patch_entry @ body+0 (no thin stub — ROM calls 0x8010A001 directly).
  *
- * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 	.set	mips16

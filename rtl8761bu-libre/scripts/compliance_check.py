@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-2.0-or-later
 """Audit rtl8761bu-libre builds against GNU Linux-libre blob policy.
 
 Linux-libre accepts only firmware built from Free source; non-free bytes
@@ -44,8 +43,6 @@ REGIONS = [
     ("patch_entry_tail", 0x0820, VENDOR_INSTALLER_LEN),
     ("tail / NOP pad", VENDOR_INSTALLER_LEN, PATCH1_LEN),
 ]
-
-SPDX_RE = re.compile(r"SPDX-License-Identifier:\s*GPL-2\.0-or-later", re.I)
 
 # Profiles that ship non-free bytes by design (bisect / hardware only).
 NON_LIBRE_PROFILES = frozenset(
@@ -103,21 +100,6 @@ def _is_non_libre_profile(name: str) -> bool:
     if name in NON_LIBRE_PROFILES:
         return True
     return any(name.startswith(p) for p in NON_LIBRE_PROFILE_PREFIXES)
-
-
-def _spdx_audit(root: Path) -> tuple[list[Path], list[Path]]:
-    patterns = ("src/*.S", "scripts/*.py", "*.py")
-    checked: list[Path] = []
-    missing: list[Path] = []
-    for pat in patterns:
-        for path in sorted(root.glob(pat)):
-            if path.name == "compliance_check.py":
-                continue
-            checked.append(path)
-            text = path.read_text(encoding="utf-8", errors="replace")
-            if not SPDX_RE.search(text):
-                missing.append(path)
-    return checked, missing
 
 
 def _region_diffs(vendor: bytes, libre: bytes) -> list[tuple[str, int, int, int]]:
@@ -271,17 +253,6 @@ def main() -> int:
     print()
 
     failures: list[str] = []
-
-    # --- SPDX ---
-    checked, missing = _spdx_audit(ROOT)
-    print(f"SPDX GPL-2.0-or-later: {len(checked) - len(missing)}/{len(checked)} files")
-    if missing:
-        failures.append(f"SPDX missing in {len(missing)} file(s)")
-        for p in missing:
-            print(f"  MISSING: {p.relative_to(ROOT)}")
-    else:
-        print("  OK — all tracked sources licensed")
-    print()
 
     # --- Makefile: release must not depend on NF_REF ---
     mk_failures = _audit_makefile_nf_ref(ROOT)

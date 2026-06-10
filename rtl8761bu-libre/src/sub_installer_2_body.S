@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later
+/*
  * sub_installer_2 @ file 0x764 — vendor FUN_8011011c compact loop (188 B).
  * Regenerate: scripts/gen_sub_installer_2_asm.py
  */

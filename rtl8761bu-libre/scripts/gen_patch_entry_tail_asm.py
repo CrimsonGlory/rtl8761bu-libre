@@ -114,7 +114,6 @@ def emit_tail(blob: bytes) -> str:
         " * objects that previously mismatched layout in [0x820, 0xE4C).",
         " *",
         " * Regenerate: scripts/gen_patch_entry_tail_asm.py",
-        " * SPDX-License-Identifier: GPL-2.0-or-later",
         " */",
         "",
         "\t.set\tmips16",

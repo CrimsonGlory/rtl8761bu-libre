@@ -428,7 +428,7 @@ Objdump: `patch_entry` at `0x8010a000`. Last 4 PRAM bytes = `d1 5f a9 09`.
 | ACL without `bos+0xd8` | P1 | Connect OK; eSCO VSC fails gracefully |
 | SCO / eSCO audio | P2 | Bidirectional headset audio |
 | AFH under Wi-Fi | P3 | Stable connection vs reference firmware |
-| linux-libre policy | P1+ | No binary blobs; GPL-2.0-or-later sources |
+| linux-libre policy | P1+ | No binary blobs; licence TBD |
 
 ### 6.3 Regression tooling
 

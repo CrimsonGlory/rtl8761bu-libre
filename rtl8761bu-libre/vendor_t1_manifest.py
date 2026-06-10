@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-2.0-or-later
 """
 vendor_t1_manifest.py — T1 hook bodies to overlay from vendor patch1 (NF_REF).
 

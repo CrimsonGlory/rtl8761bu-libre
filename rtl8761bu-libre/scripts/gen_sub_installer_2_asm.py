@@ -14,8 +14,7 @@ def emit(blob: bytes) -> str:
     if len(blob) != SI2_SIZE:
         raise SystemExit(f"si2 size {len(blob)} != {SI2_SIZE}")
     lines = [
-        "/* SPDX-License-Identifier: GPL-2.0-or-later",
-        " * sub_installer_2 @ file 0x764 — vendor FUN_8011011c compact loop (188 B).",
+        "/* sub_installer_2 @ file 0x764 — vendor FUN_8011011c compact loop (188 B).",
         " * Regenerate: scripts/gen_sub_installer_2_asm.py",
         " */",
         "\t.globl\tsub_installer_2",

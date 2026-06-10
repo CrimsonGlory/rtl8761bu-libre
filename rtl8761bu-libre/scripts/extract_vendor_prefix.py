@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-2.0-or-later
 """Extract patch1 prefix bytes from vendor rtl8761bu_fw.bin for .incbin overlay."""
 import sys
 
