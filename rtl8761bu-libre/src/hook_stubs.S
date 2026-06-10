@@ -64,8 +64,8 @@
 	STUB_RET	fn_e82c
 	STUB_RET	fn_eac0_callee
 	/* fn_daa4 @ PRAM+0x3AA4 — protocol_dispatch.S */
-	STUB_RET	fn_da70
-	STUB_RET	fn_d9f4
+	/* fn_d9f4 @ PRAM+0x39F4 — protocol_dispatch.S */
+	/* fn_da70 @ PRAM+0x3A70 — protocol_dispatch.S */
 	STUB_RET	fn_ca20
 
 	/* sub-installer #2 targets — stubs until individually implemented */

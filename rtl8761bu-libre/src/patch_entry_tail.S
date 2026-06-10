@@ -431,17 +431,8 @@ fn_eac0_callee:
 	/* 0x0c54 / 0x8010ac54 — hook body */
 	/* fn_dfb0 @ PRAM+0x3FB0 — see protocol_dispatch.S */
 	/* fn_daa4 @ PRAM+0x3AA4 — see protocol_dispatch.S */
-	.globl		fn_da70
-	.type		fn_da70, @function
-fn_da70:
-	/* 0x0c60 / 0x8010ac60 — hook body */
-	/* 0x0c60 / 0x8010ac60 */
-	.byte	0x73, 0xc0, 0x40, 0xf1, 0x6c, 0xa0, 0x6d, 0xea, 0x40, 0xf1, 0x4c, 0xc0, 0x00, 0x6b, 0x13, 0x97
-
-	.globl		fn_d9f4
-	.type		fn_d9f4, @function
-fn_d9f4:
-	/* 0x0c64 / 0x8010ac64 — hook body */
+	/* fn_d9f4 @ PRAM+0x39F4 — see protocol_dispatch.S */
+	/* fn_da70 @ PRAM+0x3A70 — see protocol_dispatch.S */
 	.globl		fn_ca20
 	.type		fn_ca20, @function
 fn_ca20:

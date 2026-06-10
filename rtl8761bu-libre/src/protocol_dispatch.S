@@ -9,6 +9,12 @@
  * Libre MIPS16e transcription byte-identical to vendor (530 B).
  * Decompile: FUN_8010dfb0 / assoc_w_tLMP (Ghidra 2026-06-09).
  *
+ * fn_d9f4 @ PRAM+0x39F4 (runtime 0x8010D9F4): LC RX intercept — SHIM-T1 P1.
+ * Tail-calls ROM assoc_w_tLC_RX @ 0x80042188 (odd 0x80042189); $a0 = msg ptr.
+ *
+ * fn_da70 @ PRAM+0x3A70 (runtime 0x8010DA70): LC TX intercept — SHIM-T1 P1.
+ * Tail-calls ROM assoc_w_tLC_TX @ 0x80042420 (odd 0x80042421); $a0 = msg ptr.
+ *
  * fn_b5d8 @ PRAM+0x15D8: minimal stub until eSCO activator is implemented;
  * dfb0 opcode 0x270 calls it; return 0 → fall through to ROM LMP handler.
  *
@@ -25,6 +31,32 @@ fn_b5d8:
 	jr	$ra
 	nop
 	.size	fn_b5d8, . - fn_b5d8
+
+	.section	.text.fn_d9f4, "ax"
+	.globl	fn_d9f4
+	.type	fn_d9f4, @function
+fn_d9f4:
+	lw	$v0, 1f
+	jalr	$v0
+	nop
+	jr	$ra
+	nop
+	.align	2
+1:	.word	0x80042189
+	.size	fn_d9f4, . - fn_d9f4
+
+	.section	.text.fn_da70, "ax"
+	.globl	fn_da70
+	.type	fn_da70, @function
+fn_da70:
+	lw	$v0, 1f
+	jalr	$v0
+	nop
+	jr	$ra
+	nop
+	.align	2
+1:	.word	0x80042421
+	.size	fn_da70, . - fn_da70
 
 	.section	.text.fn_daa4, "ax"
 	.globl	fn_daa4
