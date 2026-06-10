@@ -430,10 +430,7 @@ fn_e82c:
 fn_eac0_callee:
 	/* 0x0c54 / 0x8010ac54 — hook body */
 	/* fn_dfb0 @ PRAM+0x3FB0 — see protocol_dispatch.S */
-	.globl		fn_daa4
-	.type		fn_daa4, @function
-fn_daa4:
-	/* 0x0c5c / 0x8010ac5c — hook body */
+	/* fn_daa4 @ PRAM+0x3AA4 — see protocol_dispatch.S */
 	.globl		fn_da70
 	.type		fn_da70, @function
 fn_da70:

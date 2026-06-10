@@ -13,6 +13,7 @@
  *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
  *   [0x0820, 0x0E4C) patch_entry tail
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
+ *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  */
 
@@ -43,6 +44,8 @@ SECTIONS {
         /* Vendor-fixed offsets (fn_e27c literal pool → 0x8010xxxx) */
         . = __prefix_start + 0x15D8;
         KEEP(*(.text.fn_b5d8))
+        . = __prefix_start + 0x3AA4;
+        KEEP(*(.text.fn_daa4))
         . = __prefix_start + 0x3FB0;
         KEEP(*(.text.fn_dfb0))
 

@@ -802,8 +802,11 @@ Today: most targets are STUB_RET in hook_stubs.S.
           530 B byte-identical transcription; linker scatter in rtl8761bu.ld.
           fn_b5d8 @ PRAM+0x15D8: minimal return-0 stub (full activator still TODO).
           Removed mislabeled fn_dfb0 symbol from patch_entry_tail.S [0xC58].
-[NEXT]  Protocol dispatch: fn_daa4 (518 B, IMPL-T1) — HCI events inquiry/conn/LE
-[TODO]  Protocol dispatch: fn_da70 / fn_d9f4 — SHIM-T1 ROM tail-calls (not stubs)
+[DONE]  Protocol dispatch: fn_daa4 (518 B, IMPL-T1) — HCI events inquiry/conn/LE (2026-06-09)
+          src/protocol_dispatch.S: vendor-fixed @ PRAM+0x3AA4 (runtime 0x8010DAA4);
+          518 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Removed mislabeled fn_daa4 symbol from patch_entry_tail.S [0xC5C].
+[NEXT]  Protocol dispatch: fn_da70 / fn_d9f4 — SHIM-T1 ROM tail-calls (not stubs)
 [TODO]  Protocol dispatch: fn_ca20 — STUB-T1 OK for P2 (empty return); full = T3
 [DONE]  Protocol dispatch: fn_e27c partial, fn_cc94, fn_d154 — callees.S / shims.S
 [DONE]  SHIM-T1: fn_c088 — shims.S

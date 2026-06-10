@@ -63,7 +63,7 @@
 	STUB_RET	fn_10ca4
 	STUB_RET	fn_e82c
 	STUB_RET	fn_eac0_callee
-	STUB_RET	fn_daa4
+	/* fn_daa4 @ PRAM+0x3AA4 — protocol_dispatch.S */
 	STUB_RET	fn_da70
 	STUB_RET	fn_d9f4
 	STUB_RET	fn_ca20
