@@ -1959,6 +1959,14 @@ the master installer before this function is called.
 | `FUN_8010b7d4` | 22B | 1 (ROM `FUN_8001acd8`) | 0 | LOW (thin wrapper) |
 | `FUN_8010b7f0` | ~772B | 9 ROM + 1 patch | 3 (0xb60011fa/fc/fe) | HIGH (LMP eSCO processor) |
 
+### Implementation note — fn_b7f0 (2026-06-10)
+
+Libre build: `src/t2_hooks.S` @ PRAM+`0x17F0` (runtime `0x8010B7F0`), 772 B
+byte-identical vendor transcription; linker scatter in `rtl8761bu.ld`. Removed
+mislabeled tail symbol from `patch_entry_tail.S` (native offset is outside
+installer tail `[0x820,0xE4C)`). `hook_stubs.S` STUB_RET dropped. Installed at
+RAM slot `0x8012084c` (sec_base+0x1c). Tier: **IMPL-T2**.
+
 **New ROM functions identified:**
 
 | Address | Name | Size | Role |

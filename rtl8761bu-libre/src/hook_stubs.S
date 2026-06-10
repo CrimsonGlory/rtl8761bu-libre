@@ -20,12 +20,11 @@
 	.section	.text.hooks
 
 	/* fn_b0a4 @ PRAM+0x10A4, fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S */
-	/* fn_b174 @ PRAM+0x1174 — t2_hooks.S */
+	/* fn_b174 @ PRAM+0x1174, fn_b7f0 @ PRAM+0x17F0 — t2_hooks.S */
 	/* fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	/* fn_c198 @ PRAM+0x2198, fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S */
 	/* fn_d1f4 @ PRAM+0x31F4 — t1_hooks.S */
 	/* fn_c780 @ PRAM+0x2780, fn_c63c @ PRAM+0x263C — t1_hooks.S */
-	STUB_RET	fn_b7f0
 	/* fn_dd1c @ PRAM+0x3D1C, fn_d890 @ PRAM+0x3890, fn_d618 @ PRAM+0x3618 — t1_hooks.S */
 	/* fn_a594 @ PRAM+0x0594, fn_a49c @ PRAM+0x049C — t1_hooks.S (pool overlay) */
 	STUB_RET	fn_c0f4

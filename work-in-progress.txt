@@ -914,8 +914,14 @@ T2 hook installs (replace stubs):
           Decompile: FUN_8010b174 — sec_struct +0x1c clamp (<0x65 → 100/0);
           tail-call pool @ +0x24 → 0x8010eab1. Removed mislabeled tail @ 0xBB0
           + hook_stubs STUB_RET. → reverse_engineering_sco_esco_layer.md (Group H).
-[NEXT]  fn_b7f0 (772 B) — LMP eSCO packet processor
-[TODO]  fn_c0f4 — eSCO-adjacent slot
+[DONE]  fn_b7f0 (772 B) — LMP eSCO packet processor (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x17F0 (runtime 0x8010B7F0);
+          772 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010b7f0 — eSCO param parse via fn_a6ec, MMIO timing
+          0xb60011fa/fc/fe, ROM FUN_80056988 state machine; 24-word pool @ +0x304.
+          Removed mislabeled tail symbol @ 0xBD8 + hook_stubs.S STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group F impl note)
+[NEXT]  fn_c0f4 — eSCO-adjacent slot
 [TODO]  fn_a4ac (68 B) — eSCO readiness gate
 [TODO]  fn_bce0 — eSCO slot region
 [TODO]  fn_abd0 (316 B) — between eSCO and AFH groups
