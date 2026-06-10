@@ -1029,8 +1029,14 @@ T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
           fn_dd1c_gap.S: vendor [0x3D80,0x3FB0) pools incl. 0x8010a469 → fn_a410+1
           @ 0x3f30; linker scatter in rtl8761bu.ld. GZF entry 0x8010a410 vs EPatch
           body @ +0x468 documented. → reverse_engineering_sco_esco_layer.md (Group W)
-[NEXT]  fn_b7d4 (22 B) — ACL slot lookup wrapper
-[TODO]  fn_b5d8 (100 B) — eSCO connection activator
+[DONE]  fn_b7d4 (22 B) — ACL slot lookup wrapper (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x17D4 (runtime 0x8010B7D4);
+          28 B byte-identical transcription (22 B body + 4 B pool @ +0x18 → ROM
+          FUN_8001acd8 @ 0x8001acd9); linker scatter before fn_b7f0 @ 0x17F0.
+          Decompile: FUN_8010b7d4 — 12-byte stack buf + ROM ACL slot lookup;
+          callee from fn_b64c eSCO link path (not DRAM hook install). Tier: T2.
+          → reverse_engineering_sco_esco_layer.md (Group F impl note)
+[NEXT]  fn_b5d8 (100 B) — eSCO connection activator
 [TODO]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
 [TODO]  fn_10868 (322 B) — codec frame ring-buffer scheduler
 

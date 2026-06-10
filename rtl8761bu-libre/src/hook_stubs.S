@@ -20,7 +20,7 @@
 	.section	.text.hooks
 
 	/* fn_b0a4 @ PRAM+0x10A4, fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S */
-	/* fn_b174 @ PRAM+0x1174, fn_b7f0 @ PRAM+0x17F0, fn_c09c @ PRAM+0x209C, fn_c0f4 @ PRAM+0x20F4, fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S */
+	/* fn_b174 @ PRAM+0x1174, fn_b7d4 @ PRAM+0x17D4, fn_b7f0 @ PRAM+0x17F0, fn_c09c @ PRAM+0x209C, fn_c0f4 @ PRAM+0x20F4, fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S */
 	/* fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	/* fn_c198 @ PRAM+0x2198, fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S */
 	/* fn_d1f4 @ PRAM+0x31F4 — t1_hooks.S */

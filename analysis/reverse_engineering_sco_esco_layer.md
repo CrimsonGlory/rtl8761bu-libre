@@ -1968,6 +1968,14 @@ the master installer before this function is called.
 | `FUN_8010b7d4` | 22B | 1 (ROM `FUN_8001acd8`) | 0 | LOW (thin wrapper) |
 | `FUN_8010b7f0` | ~772B | 9 ROM + 1 patch | 3 (0xb60011fa/fc/fe) | HIGH (LMP eSCO processor) |
 
+### Implementation note — fn_b7d4 (2026-06-10)
+
+Libre build: `src/t2_hooks.S` @ PRAM+`0x17D4` (runtime `0x8010B7D4`), 28 B
+byte-identical vendor transcription (22 B body + 4 B literal pool @ +0x18 → ROM
+`FUN_8001acd8` @ `0x8001acd9`); linker scatter in `rtl8761bu.ld` before
+`fn_b7f0` @ `0x17F0`. Thin wrapper: 12-byte stack buffer + ROM ACL slot lookup.
+Callee from `fn_b64c` eSCO link path (not a direct DRAM hook install). Tier: **IMPL-T2**.
+
 ### Implementation note — fn_b7f0 (2026-06-10)
 
 Libre build: `src/t2_hooks.S` @ PRAM+`0x17F0` (runtime `0x8010B7F0`), 772 B
