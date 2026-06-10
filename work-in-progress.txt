@@ -1044,8 +1044,16 @@ T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
           FUN_8005ca00; pool @ +0x64. Callers: fn_b64c, fn_dfb0 opcode 0x270.
           Removed return-0 stub from protocol_dispatch.S.
           → reverse_engineering_sco_esco_layer.md (Group P2)
-[NEXT]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
-[TODO]  fn_10868 (322 B) — codec frame ring-buffer scheduler
+[DONE]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25) (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x164C (runtime 0x8010B64C);
+          392 B byte-identical [0x164C,0x17D4) incl. 13-word literal pool;
+          16 B fn_b5d8_pool_tail @ PRAM+0x163C fills vendor gap before body.
+          Decompile: FUN_8010b64c — conn-handle lookup, eSCO pkt-type table
+          @0x80111198, LMP opcode 0x25 PDU + HCI Command Status; calls fn_b5d8
+          when ready. Callee only (not DRAM hook). Linker scatter in rtl8761bu.ld.
+          make docker verify OK; prefix [0x163C,0x17D4) 0/408 diffs vs vendor.
+          → reverse_engineering_sco_esco_layer.md (Group P2b)
+[NEXT]  fn_10868 (322 B) — codec frame ring-buffer scheduler
 
 Explicitly omit for P2 (T3 — defer to Phase 8.4):
           fn_fa34, fn_f950, fn_fb08, fn_ce0c, fn_e350, fn_d168, fn_f85c;

@@ -17,6 +17,8 @@
  *   [0x1118, …)     fn_b118 slot interval allocator (t1_hooks.S)
  *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
  *   [0x15D8, …)     fn_b5d8 eSCO connection activator (t2_hooks.S)
+ *   [0x163C, …)     fn_b5d8_pool_tail literal pool continuation (t2_hooks.S)
+ *   [0x164C, …)     fn_b64c LMP eSCO link request (t2_hooks.S)
  *   [0x17D4, …)     fn_b7d4 ACL slot lookup wrapper (t2_hooks.S)
  *   [0x17F0, …)     fn_b7f0 LMP eSCO packet processor (t2_hooks.S)
  *   [0x1CE0, …)     fn_bce0 eSCO slot capability mask (t2_hooks.S)
@@ -90,6 +92,10 @@ SECTIONS {
         KEEP(*(.text.fn_b3d8))
         . = __prefix_start + 0x15D8;
         KEEP(*(.text.fn_b5d8))
+        . = __prefix_start + 0x163C;
+        KEEP(*(.text.fn_b5d8_pool_tail))
+        . = __prefix_start + 0x164C;
+        KEEP(*(.text.fn_b64c))
         . = __prefix_start + 0x17D4;
         KEEP(*(.text.fn_b7d4))
         . = __prefix_start + 0x17F0;

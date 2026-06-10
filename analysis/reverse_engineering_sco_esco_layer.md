@@ -2516,6 +2516,26 @@ vendor-fixed linker scatter @ PRAM+`0x15D8`. Replaced 4 B return-0 stub in
 
 ---
 
+## Group P2b — LMP eSCO Link Request Initiator (2026-06-10)
+
+### `FUN_8010b64c` (344 B body + 48 B pool) — HCI→LMP opcode 0x25 bridge
+
+**PRAM body:** runtime `0x8010B64C` (PRAM+`0x164C`, within FC20 window).
+**Layout:** 16 B vendor literal-pool tail @ PRAM+`0x163C` (between `fn_b5d8` and
+`fn_b64c`); 392 B total `[0x164C,0x17D4)` including 13-word pool ending
+`0x8010b7d0` → `fn_b5d8+1`.
+
+**Semantics:** See §FUN_8010b64c above — connection-handle lookup, eSCO packet-type
+table @ `0x80111198`, builds 7-byte LMP_eSCO_link_req PDU (opcode `0x25`),
+`send_LMP_pkt`, HCI Command Status, calls `fn_b5d8` when conn ready (no timers).
+
+**Libre:** `src/t2_hooks.S` — 392 B vendor byte-identical transcription;
+linker scatter @ PRAM+`0x163C` (pool tail) and `0x164C` (body+pool). Callee only
+(not a DRAM hook install). `make diff-prefix`: b64c region 0/392 diffs vs vendor
+patch1. Tier **T2**.
+
+---
+
 ## Group Q — Timing Compensation Adder (2026-06-10)
 
 ### `FUN_8010a5ac` (36 B) — stride-0x1ac timing adjustment
