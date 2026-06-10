@@ -39,7 +39,7 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     # 0x0BC8: tail bytes only — fn_b0a4 is @ PRAM+0x10A4 (t1_hooks.S), not 0x8010abc8
     # fn_c198 @ PRAM+0x2198 — t1_hooks.S (not tail 0xBCC)
     # fn_c780 @ PRAM+0x2780 — t1_hooks.S (not tail 0xBD0)
-    0x0BD4: ("fn_c63c", "hook body"),
+    # fn_c63c @ PRAM+0x263C — t1_hooks.S (not tail 0xBD4)
     0x0BD8: ("fn_b7f0", "hook body"),
     0x0BDC: ("fn_dd1c", "hook body"),
     0x0BE0: ("fn_d890", "hook body"),

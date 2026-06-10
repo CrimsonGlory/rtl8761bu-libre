@@ -861,8 +861,13 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           Decompile: FUN_8010c780 — FUN_80110869 + ROM 0x800083ed/0x80007af1,
           sets *0x8012133b=1; pool @ +0x24. Removed tail mislabel @ 0xBD0 +
           hook_stubs.S STUB_RET. Tier: T1.
-[NEXT]  fn_c63c (278 B) — ACL retransmission handler
-[TODO]  fn_dd1c, fn_d890, fn_d618 (422 B) — HCI internal msg dispatcher
+[DONE]  fn_c63c (278 B) — ACL retransmission handler (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x263C (runtime 0x8010C63C);
+          278 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010c63c — ACL seq counter vs struct+0x14bc, MMIO
+          0xb6001176 flow-control bits, ROM ACL buffer get/submit chain; pool @ +0x118.
+          Removed mislabeled tail symbol @ 0xBD4 + hook_stubs.S STUB_RET. Tier: T1.
+[NEXT]  fn_dd1c, fn_d890, fn_d618 (422 B) — HCI internal msg dispatcher
 [TODO]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
 [TODO]  fn_c49c, fn_c43c — infrastructure ptr region
 

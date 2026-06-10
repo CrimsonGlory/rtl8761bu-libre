@@ -25,8 +25,7 @@
 	/* fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	/* fn_c198 @ PRAM+0x2198, fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S */
 	/* fn_d1f4 @ PRAM+0x31F4 — t1_hooks.S */
-	/* fn_c780 @ PRAM+0x2780 — t1_hooks.S */
-	STUB_RET	fn_c63c
+	/* fn_c780 @ PRAM+0x2780, fn_c63c @ PRAM+0x263C — t1_hooks.S */
 	STUB_RET	fn_b7f0
 	STUB_RET	fn_dd1c
 	STUB_RET	fn_d890

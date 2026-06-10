@@ -21,6 +21,7 @@
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
  *   [0x31F4, …)     fn_d1f4 conn timing matcher (t1_hooks.S)
  *   [0x2224, …)     fn_c224 bos+0x24 HCI handler (t1_hooks.S)
+ *   [0x263C, …)     fn_c63c ACL retransmission handler (t1_hooks.S)
  *   [0x2780, …)     fn_c780 subsystem init (t1_hooks.S)
  *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
@@ -70,6 +71,8 @@ SECTIONS {
         KEEP(*(.text.fn_c1e8))
         . = __prefix_start + 0x2224;
         KEEP(*(.text.fn_c224))
+        . = __prefix_start + 0x263C;
+        KEEP(*(.text.fn_c63c))
         . = __prefix_start + 0x2780;
         KEEP(*(.text.fn_c780))
         . = __prefix_start + 0x2A20;
