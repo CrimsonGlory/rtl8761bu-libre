@@ -2422,3 +2422,34 @@ clear; capability word `*0x8012194c` bit 3 set; `param_1` bit 17 set. Returns 0.
 **Libre:** `src/t2_hooks.S` — pool alias `fn_a550` @ `patch_entry_pool+0x30e`
 (PRAM+`0x0550`, 54 B from PE-2 pool). Removed `STUB_RET` from `hook_stubs.S`.
 Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group O — eSCO Slot Region Pair (2026-06-10)
+
+### `FUN_8010c160` (18 B) — indirect-call stub
+
+**Install slot:** RAM `0x80120cf4` (`FUN_8010a000` Phase 1 hook #33).
+**PRAM body:** runtime `0x8010C160` (PRAM+`0x2160`).
+
+**Semantics (Ghidra decompile):** Single tail-call `(*DAT_8010c174)()` then
+return 0. Literal pool word at runtime `0x8010c174` sits in the 6-byte vendor
+gap `[0x2172,0x2178)` immediately after the 18-byte body (PC-relative `lw`).
+
+**Libre:** `src/t2_hooks.S` — 18 B body @ PRAM+`0x2160` + 6 B gap pool
+(`fn_c160_gap`). Linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from
+`hook_stubs.S`. Tier **T2**.
+
+### `FUN_8010c178` (24 B) — large2 slot state setter
+
+**Install slot:** RAM `0x80120824` (`FUN_8010a000` Phase 1 hook #34).
+**PRAM body:** runtime `0x8010C178` (PRAM+`0x2178`).
+
+**Semantics (Ghidra decompile):** Indirect call via pool @ `0x8010c190`, then
+writes byte `3` to `large2[5].field_0x4b` (stride-0x1ac struct array base
+from pool @ `0x8010c194`). Pool words live in the 8-byte vendor gap
+`[0x2190,0x2198)` before `FUN_8010c198`.
+
+**Libre:** `src/t2_hooks.S` — 24 B body @ PRAM+`0x2178` + 8 B gap pool
+(`fn_c178_gap`). Linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from
+`hook_stubs.S`. Tier **T2**.

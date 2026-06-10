@@ -964,8 +964,16 @@ T2 hook installs (replace stubs):
           Decompile: FUN_8010a550 — four-condition gate sets *0x80120ccd=1;
           pool @ +0x38 (flag/MMIO/cap ptrs). Installed @ RAM 0x80120cd4.
           Removed hook_stubs.S STUB_RET. → reverse_engineering_sco_esco_layer.md (Group N)
-[NEXT]  fn_c160 (18 B), fn_c178 (24 B) — eSCO slot region
-[TODO]  fn_b4d0 (76 B) — eSCO slot allocation trigger (secondary+0x30)
+[DONE]  fn_c160 (18 B), fn_c178 (24 B) — eSCO slot region (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x2160 / 0x2178 (runtime
+          0x8010C160 / 0x8010C178); 18 B + 24 B byte-identical transcription;
+          6 B + 8 B inter-fn gap pools (fn_c160_gap / fn_c178_gap) preserve
+          literal pools @ 0x8010c174 / 0x8010c190; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010c160 — indirect call via pool, return 0; installed
+          @ RAM 0x80120cf4. FUN_8010c178 — indirect call + large2[5].+0x4b=3;
+          installed @ RAM 0x80120824. Removed hook_stubs STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group O)
+[NEXT]  fn_b4d0 (76 B) — eSCO slot allocation trigger (secondary+0x30)
 [TODO]  fn_a5ac (36 B) — timing compensation
 [TODO]  fn_c854 (460 B) — timing (installed with a5ac)
 [TODO]  fn_c09c (76 B) — per-link BB reg 0xf gate

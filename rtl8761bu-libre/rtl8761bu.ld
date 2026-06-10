@@ -22,6 +22,10 @@
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
  *   [0x0BD0, …)     fn_abd0 eSCO audio-path dispatcher (t2_hooks.S, overlays tail)
  *   [0x20F4, …)     fn_c0f4 eSCO-adjacent capability gate (t2_hooks.S)
+ *   [0x2160, …)     fn_c160 eSCO slot indirect-call stub (t2_hooks.S)
+ *   [0x2172, …)     fn_c160_gap literal pool tail (t2_hooks.S)
+ *   [0x2178, …)     fn_c178 eSCO slot state setter (t2_hooks.S)
+ *   [0x2190, …)     fn_c178_gap literal pool (t2_hooks.S)
  *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
  *   [0x31F4, …)     fn_d1f4 conn timing matcher (t1_hooks.S)
@@ -88,6 +92,14 @@ SECTIONS {
         KEEP(*(.text.fn_be20))
         . = __prefix_start + 0x20F4;
         KEEP(*(.text.fn_c0f4))
+        . = __prefix_start + 0x2160;
+        KEEP(*(.text.fn_c160))
+        . = __prefix_start + 0x2172;
+        KEEP(*(.text.fn_c160_gap))
+        . = __prefix_start + 0x2178;
+        KEEP(*(.text.fn_c178))
+        . = __prefix_start + 0x2190;
+        KEEP(*(.text.fn_c178_gap))
         . = __prefix_start + 0x2198;
         KEEP(*(.text.fn_c198))
         . = __prefix_start + 0x21E8;
