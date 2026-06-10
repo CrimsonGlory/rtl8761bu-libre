@@ -1,0 +1,23 @@
+# Linux-libre compliance gate — default make all must not regress patch0,
+# embed new .incbin, or ship a non-libre profile.
+name: compliance
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rtl8761bu-libre
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t rtl8761bu-libre .
+
+      - name: make compliance-ci
+        run: docker run --rm -v "$PWD":/work rtl8761bu-libre make compliance-ci

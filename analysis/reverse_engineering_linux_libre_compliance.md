@@ -121,7 +121,8 @@ Ordered by impact:
 5. **NF_REF** — Restrict to `test-nf` / `diff-prefix` / bisect targets; default `make all`
    must not read non-free tree.
 
-6. **CI** — Add `make compliance --strict` in Docker; fail on new incbin or patch0 regression.
+6. **CI** — `make compliance-ci` in Docker (`.github/workflows/compliance.yml`);
+   `--release --strict` fails on new `.incbin`, patch0 regression, or non-`full` profile.
 
 ---
 
@@ -130,12 +131,15 @@ Ordered by impact:
 ```bash
 cd rtl8761bu-libre
 docker build -t rtl8761bu-libre .
+docker run --rm -v "$(pwd)":/work rtl8761bu-libre make compliance-ci
+
+# Optional vendor diff (bisect / regression against NF_REF)
 docker run --rm -v "$(pwd)":/work \
   -v /path/to/rtl8761bu-non-free:/nf_ref:ro \
   -e NF_REF=/nf_ref/rtl8761bu_fw.bin \
-  rtl8761bu-libre make clean all compliance
+  rtl8761bu-libre make clean all compliance STRICT=1
 
-# Hardware validation profile
+# Hardware validation profile (not linux-libre)
 docker run --rm -v "$(pwd)":/work \
   -v /path/to/rtl8761bu-non-free:/nf_ref:ro \
   -e NF_REF=/nf_ref/rtl8761bu_fw.bin \
@@ -143,7 +147,7 @@ docker run --rm -v "$(pwd)":/work \
   'PATCH=build/patch_injected.bin' compliance
 ```
 
-Expected verdict for current tree: **LINUX-LIBRE: FAIL** with enumerated blockers.
+CI / `make compliance-ci`: **LINUX-LIBRE: PASS** on current libre release tree.
 
 ---
 

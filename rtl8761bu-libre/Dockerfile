@@ -9,6 +9,9 @@
 # Build the firmware (bind-mount the source tree):
 #   docker run --rm -v "$(pwd)":/work rtl8761bu-libre make docker
 #
+# CI / linux-libre compliance gate (no NF_REF required):
+#   docker run --rm -v "$(pwd)":/work rtl8761bu-libre make compliance-ci
+#
 # The output files will appear in the host's working directory:
 #   rtl8761bu_fw.bin
 #   rtl8761bu_config.bin

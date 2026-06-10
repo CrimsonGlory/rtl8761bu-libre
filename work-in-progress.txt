@@ -776,8 +776,10 @@ Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
           gate in compliance_check.py; NF_REF only on test-nf, diff-prefix, inject-*,
           hybrid-*, phase-*, VENDOR_EARLY_PREFIX bisect. pack.py reads NF_REF only
           with --vendor-patch0.
-[NEXT]  Compliance gate: CI make compliance --strict in Docker
-          Fail on new .incbin, patch0 regression, or non-libre profile as default.
+[DONE]  Compliance gate: CI make compliance --strict in Docker (2026-06-09)
+          make compliance-ci (docker + --no-nf-ref --release --strict);
+          .github/workflows/compliance.yml; incbin/pack/profile gates in
+          compliance_check.py. Fail on new .incbin, patch0 regression, non-full profile.
 
 --- Phase 8.1 — Prefix / installer skeleton (P1+P2 shared) ---
 
@@ -795,7 +797,7 @@ Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
 22 T1 DRAM hooks + 6 bos_base/struct slots + protocol dispatch core.
 Today: most targets are STUB_RET in hook_stubs.S.
 
-[TODO]  Protocol dispatch: fn_dfb0 (530 B, IMPL-T1) — LMP intercept SSP/eSCO
+[NEXT]  Protocol dispatch: fn_dfb0 (530 B, IMPL-T1) — LMP intercept SSP/eSCO
 [TODO]  Protocol dispatch: fn_daa4 (518 B, IMPL-T1) — HCI events inquiry/conn/LE
 [TODO]  Protocol dispatch: fn_da70 / fn_d9f4 — SHIM-T1 ROM tail-calls (not stubs)
 [TODO]  Protocol dispatch: fn_ca20 — STUB-T1 OK for P2 (empty return); full = T3

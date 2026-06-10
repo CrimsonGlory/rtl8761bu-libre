@@ -76,7 +76,7 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker release minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance
+.PHONY: all docker release minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci
 
 # Docker builds need NF_REF for inject/bisect profiles and diff-prefix (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -89,6 +89,10 @@ docker: clean all verify
 
 # Linux-libre release path — no NF_REF mount required in Docker.
 release: docker
+
+# CI gate: clean build + verify + strict compliance (no NF_REF, full profile).
+compliance-ci: docker
+	$(PYTHON) scripts/compliance_check.py --no-nf-ref --release --strict
 
 minimal:
 	$(MAKE) clean
@@ -313,7 +317,8 @@ diff-prefix: build/patch.bin scripts/diff_vendor_prefix.py $(NF_REF)
 compliance: scripts/compliance_check.py
 	$(PYTHON) scripts/compliance_check.py \
 	  $(if $(wildcard $(NF_REF)),--nf-ref $(NF_REF),--no-nf-ref) \
-	  $(if $(PATCH),--patch $(PATCH),) $(if $(STRICT),--strict,)
+	  $(if $(PATCH),--patch $(PATCH),) \
+	  $(if $(RELEASE),--release,) $(if $(STRICT),--strict,)
 
 verify: rtl8761bu_fw.bin
 	@test -f build/.profile || (echo "run make first" && exit 1)

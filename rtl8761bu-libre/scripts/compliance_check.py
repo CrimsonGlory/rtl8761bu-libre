@@ -82,6 +82,13 @@ RELEASE_MAKEFILE_RULES = (
     "minimal-null:",
 )
 
+# Bisect-only .incbin paths — any other .incbin in src/ fails --release audit.
+ALLOWED_INCBIN: dict[str, frozenset[str]] = {
+    "src/installer_vendor_early.S": frozenset({"build/vendor_prefix.bin"}),
+}
+
+LIBRE_RELEASE_PROFILE = "full"
+
 
 def _read_profile(path: Path) -> str:
     if not path.is_file():
@@ -149,6 +156,61 @@ def _pe1_has_vendor_incbin(root: Path) -> bool:
     return ".incbin" in text and "vendor_entry_code.bin" in text
 
 
+def _parse_incbin_targets(text: str) -> list[str]:
+    """Return quoted paths from .incbin directives in assembly source."""
+    return re.findall(r'\.incbin\s+"([^"]+)"', text)
+
+
+def _audit_incbin(root: Path) -> list[str]:
+    """Fail on new vendor .incbin outside the bisect-only allowlist."""
+    failures: list[str] = []
+    for path in sorted((root / "src").glob("*.S")):
+        rel = path.relative_to(root).as_posix()
+        targets = _parse_incbin_targets(path.read_text(encoding="utf-8", errors="replace"))
+        if not targets:
+            continue
+        allowed = ALLOWED_INCBIN.get(rel, frozenset())
+        for target in targets:
+            if target not in allowed:
+                failures.append(f"unexpected .incbin in {rel}: {target!r}")
+    return failures
+
+
+def _audit_release_profile(profile: str) -> list[str]:
+    if profile != LIBRE_RELEASE_PROFILE:
+        return [
+            f"default release profile is {profile!r}, expected {LIBRE_RELEASE_PROFILE!r}"
+        ]
+    if _is_non_libre_profile(profile):
+        return [f"profile {profile!r} is bisect/inject — not linux-libre release default"]
+    return []
+
+
+def _audit_makefile_pack_release(root: Path) -> list[str]:
+    """Default rtl8761bu_fw.bin rule must use single-patch pack (no --dual / vendor patch0)."""
+    mk_path = root / "Makefile"
+    if not mk_path.is_file():
+        return ["Makefile missing"]
+    failures: list[str] = []
+    in_rule = False
+    for line in mk_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("rtl8761bu_fw.bin:"):
+            in_rule = True
+            if "--dual" in line or "--vendor-patch0" in line:
+                failures.append(f"release pack rule must be single-patch: {line.strip()}")
+            continue
+        if in_rule:
+            if stripped and not stripped.startswith("$") and not stripped.startswith("\t"):
+                if not stripped.startswith("#"):
+                    break
+            if "pack.py" in line:
+                if "--dual" in line or "--vendor-patch0" in line:
+                    failures.append(f"release pack rule must be single-patch: {line.strip()}")
+                break
+    return failures
+
+
 def _git_clean(root: Path) -> bool | None:
     try:
         r = subprocess.run(
@@ -174,6 +236,11 @@ def main() -> int:
     ap.add_argument("--fw", type=Path, help="built rtl8761bu_fw.bin")
     ap.add_argument("--patch", type=Path, help="patch1 body (padded or injected)")
     ap.add_argument("--strict", action="store_true", help="exit 1 if linux-libre FAIL")
+    ap.add_argument(
+        "--release",
+        action="store_true",
+        help="CI gate: enforce full profile, no new .incbin, single-patch ship layout",
+    )
     args = ap.parse_args()
 
     profile = args.profile or _read_profile(ROOT / "build" / ".profile")
@@ -226,6 +293,41 @@ def main() -> int:
     else:
         print("Makefile NF_REF gate: OK — default make all/docker does not use NF_REF")
     print()
+
+    if args.release:
+        incbin_failures = _audit_incbin(ROOT)
+        if incbin_failures:
+            failures.extend(incbin_failures)
+            print("incbin gate: FAIL")
+            for f in incbin_failures:
+                print(f"  - {f}")
+        else:
+            allowed_n = sum(len(v) for v in ALLOWED_INCBIN.values())
+            print(
+                f"incbin gate: OK — no unexpected .incbin "
+                f"({allowed_n} bisect-only path(s) allowlisted)"
+            )
+        print()
+
+        pack_failures = _audit_makefile_pack_release(ROOT)
+        if pack_failures:
+            failures.extend(pack_failures)
+            print("pack.py release gate: FAIL")
+            for f in pack_failures:
+                print(f"  - {f}")
+        else:
+            print("pack.py release gate: OK — make all uses single-patch (no --vendor-patch0)")
+        print()
+
+        profile_failures = _audit_release_profile(profile)
+        if profile_failures:
+            failures.extend(profile_failures)
+            print("release profile gate: FAIL")
+            for f in profile_failures:
+                print(f"  - {f}")
+        else:
+            print(f"release profile gate: OK — profile={LIBRE_RELEASE_PROFILE}")
+        print()
 
     # --- NF_REF (optional for libre release; required for bisect/inject profiles) ---
     nf_present = nf_ref is not None and nf_ref.is_file()
