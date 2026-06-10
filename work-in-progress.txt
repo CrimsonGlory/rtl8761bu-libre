@@ -746,6 +746,154 @@ PHASE 7 — TEST
           → analysis/reverse_engineering_linux_libre_compliance.md
 
 
+PHASE 8 — LIBRE SHIP (linux-libre compliance → P2 → P4)
+--------------------------------------------------------
+Hardware validation today: profile full-inject-t3-pe5-vendor-tail (7f051e64…)
+— libre prefix [0,0x764) + vendor tail [0xE4C,…). NOT a linux-libre candidate.
+Ship goal: `make compliance` → SHIP: YES + UB500 retest without inject/NF_REF.
+
+Tier defs: analysis/reverse_engineering_minimum_feature_set.md
+Hook verdicts: analysis/reverse_engineering_mandatory_hooks.md
+Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
+
+--- Phase 8.0 — Compliance gates (any libre ship) ---
+
+[NEXT]  Compliance gate: patch0 — stop copying 14,048 B from NF_REF
+          pack.py --dual embeds vendor patch0 @0x30 (chip_id=1). UB500 uses patch1
+          only. Ship single-patch envelope or libre NOP stub for patch0 slot.
+[TODO]  Compliance gate: PE-1 — remove vendor incbin [0,0x242)
+          Transcribe FUN_8010a000 prologue to patch_entry_code.S; delete
+          build/vendor_entry_code.bin Makefile rule. Today: 578 B vendor via .incbin.
+[TODO]  Compliance gate: installer tail [0x820,0xE4C)
+          Finish patch_entry_tail.S libre bodies (~1246/1580 B still differ vs vendor).
+          Entry boot + hook-install sequence must match vendor semantics.
+[TODO]  Compliance gate: default make all with no NF_REF
+          Release build must not read rtl8761bu-non-free/. Restrict NF_REF to
+          test-nf, diff-prefix, inject-*, hybrid-*, bisect profiles only.
+[TODO]  Compliance gate: CI make compliance --strict in Docker
+          Fail on new .incbin, patch0 regression, or non-libre profile as default.
+
+--- Phase 8.1 — Prefix / installer skeleton (P1+P2 shared) ---
+
+[DONE]  PE-2 literal pool [0x242,0x5d8) — patch_entry_pool.S (2026-06-09)
+[DONE]  PE-3 helpers [0x5d8,0x724) — fn_a5d8, fn_a6ec (2026-06-09)
+[DONE]  sub_installer_1 + fn_bss_init [0x724,0x764) (2026-06-09)
+[DONE]  sub_installer_2 compact loop — sub_installer_2_body.S (2026-06-09)
+[DONE]  Sub-installers #3–#6 — bootstrap.S (2026-06-09)
+[DONE]  Entry callees: silicon rev, TLV, BD_ADDR, HW probe, BB, RF (2026-06-09)
+[TODO]  PE-1 entry prologue [0,0x242) — see compliance gate above
+[TODO]  Installer epilogue + phased hook installs — patch_entry_tail.S (in progress)
+
+--- Phase 8.2 — P1 (T1) hooks & protocol dispatch (required base for P2) ---
+
+22 T1 DRAM hooks + 6 bos_base/struct slots + protocol dispatch core.
+Today: most targets are STUB_RET in hook_stubs.S.
+
+[TODO]  Protocol dispatch: fn_dfb0 (530 B, IMPL-T1) — LMP intercept SSP/eSCO
+[TODO]  Protocol dispatch: fn_daa4 (518 B, IMPL-T1) — HCI events inquiry/conn/LE
+[TODO]  Protocol dispatch: fn_da70 / fn_d9f4 — SHIM-T1 ROM tail-calls (not stubs)
+[TODO]  Protocol dispatch: fn_ca20 — STUB-T1 OK for P2 (empty return); full = T3
+[DONE]  Protocol dispatch: fn_e27c partial, fn_cc94, fn_d154 — callees.S / shims.S
+[DONE]  SHIM-T1: fn_c088 — shims.S
+[DONE]  IMPL-T2 gateway (needed for P2 but done early): fn_bba4, fn_bb54 — lmp_vsc.S
+[DONE]  bos+0x1c: fn_bc74 — lmp_vsc.S
+
+T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
+[TODO]  fn_b118 (82 B) — slot interval allocator
+[TODO]  fn_be20 — global dispatch @ 0x801286c0
+[TODO]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair
+[TODO]  fn_b3d8 (206 B) — ACL slot scheduler
+[TODO]  fn_b0a4 (108 B) — ACL packet-type flag corrector
+[TODO]  fn_c198, fn_d1f4 — early install batch (decompile may adjust tier)
+[TODO]  fn_c780 (34 B) — subsystem init (3 ROM calls)
+[TODO]  fn_c63c (278 B) — ACL retransmission handler
+[TODO]  fn_dd1c, fn_d890, fn_d618 (422 B) — HCI internal msg dispatcher
+[TODO]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
+[TODO]  fn_c49c, fn_c43c — infrastructure ptr region
+
+T1 decompile queue (may downgrade tier): c224, be20, c198, d1f4, dd1c, d890,
+          c49c, c43c — wairz DecompileAddr.java before transcribe.
+
+[TODO]  Hardware P1 smoke: ACL connect on pure-libre image (no inject tail)
+          After 8.0 + enough 8.2 for FC20 + hciconfig + connect. Bisect unknowns.
+
+--- Phase 8.3 — P2 libre ship (T2 audio / eSCO) ---
+
+P2 = P1 + ~14 IMPL-T2 hooks + eSCO cluster callees. Omit T3 AFH for P2.
+A2DP already PASS on inject profile 7f051e64…; retest on 100% libre build.
+
+T2 hook installs (replace stubs):
+[TODO]  fn_b174 (64 B) — sec_base+0x14
+[TODO]  fn_b7f0 (772 B) — LMP eSCO packet processor
+[TODO]  fn_c0f4 — eSCO-adjacent slot
+[TODO]  fn_a4ac (68 B) — eSCO readiness gate
+[TODO]  fn_bce0 — eSCO slot region
+[TODO]  fn_abd0 (316 B) — between eSCO and AFH groups
+[TODO]  fn_f884 (204 B) — bos+0x50
+[TODO]  fn_a550 (54 B) — eSCO-active flag
+[TODO]  fn_c160 (18 B), fn_c178 (24 B) — eSCO slot region
+[TODO]  fn_b4d0 (76 B) — eSCO slot allocation trigger (secondary+0x30)
+[TODO]  fn_a5ac (36 B) — timing compensation
+[TODO]  fn_c854 (460 B) — timing (installed with a5ac)
+[TODO]  fn_c09c (76 B) — per-link BB reg 0xf gate
+[TODO]  fn_bda0 (114 B) — SCO/eSCO acceptance validator
+
+T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
+[DONE]  fn_a6ec, fn_a5d8 — patch_entry_helpers.S
+[TODO]  fn_a84c (450 B) — SCO/eSCO connection response
+[TODO]  fn_aa58 (96 B) — SCO continuation handler
+[TODO]  fn_a410 (86 B) — HW reg 0x11C codec mode
+[TODO]  fn_b7d4 (22 B) — ACL slot lookup wrapper
+[TODO]  fn_b5d8 (100 B) — eSCO connection activator
+[TODO]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
+[TODO]  fn_10868 (322 B) — codec frame ring-buffer scheduler
+
+Explicitly omit for P2 (T3 — defer to Phase 8.4):
+          fn_fa34, fn_f950, fn_fb08, fn_ce0c, fn_e350, fn_d168, fn_f85c;
+          full fn_ca20 (type 0x67 coexistence monitor).
+
+[TODO]  Makefile profile p2-libre (or make all = P2): no inject_vendor, no NF_REF
+[TODO]  pad.py NOP fill to 27,808 B from libre code only
+[TODO]  Hardware P2 acceptance: FC20 OK, HCI, ACL, BT 5.1, A2DP and/or SCO/eSCO
+[TODO]  make compliance → SHIP: YES on P2 profile artifact
+
+--- Phase 8.4 — P3 AFH / coexistence (required for P4, optional for P2) ---
+
+[TODO]  fn_d168 (140 B) — near AFH slots
+[TODO]  fn_fa34 (184 B) — 79-channel map merger
+[TODO]  fn_f950 (174 B) — channel quality + HCI VSC 0xFC95 trigger
+[TODO]  fn_fb08 (292 B) — BLE 40-channel map aggregator
+[TODO]  fn_f85c (40 B) — AFH region
+[TODO]  fn_ce0c (728 B) — AFH capability mapper + init chain
+[TODO]  fn_e350 (1174 B) — AFH quality ranking engine
+[TODO]  fn_ca20 full impl (534 B) — type 0x67 coexistence monitor (was STUB-T1)
+[TODO]  Hardware P3: Wi-Fi colocation / BLE dual-mode stress (bench optional)
+
+--- Phase 8.5 — P4 libre ship (full parity in 27,808 B PRAM window) ---
+
+P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
+
+[TODO]  Sub-installer #2: implement sub2_fn_00 … sub2_fn_18 (19 targets)
+          Installer loop done; all 19 bodies still STUB_RET. Decompile each via
+          GZF (vendor_t1_manifest.py offsets). Conservative: IMPL-T4; hardware
+          may prove subset optional for P2/P3.
+[TODO]  fn_10ddc (~448 B, hook #42) — only T4-marked direct install; relocated
+          to 0x8010AE4C (overlaps libre installer at native offset). RE purpose.
+[TODO]  fn_10ca4 (178 B) — sub-inst #3 target; runtime past nominal patch1 end
+[TODO]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)
+[TODO]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
+[TODO]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
+
+[TODO]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM
+[TODO]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
+[TODO]  Hardware P4 matrix: AFH under Wi-Fi, BLE coexistence, reconnect stress
+[TODO]  make compliance → SHIP: YES on P4 profile; document SHA256 in results.md
+
+Implementation order (summary):
+  8.0 compliance gates → 8.1 prefix finish → 8.2 T1 hooks + dispatch →
+  P1 hardware → 8.3 T2 eSCO → P2 SHIP → 8.4 T3 AFH → 8.5 P4 parity.
+
+
 NOTES
 -----
 - All addresses are runtime (patch at 0x80100000, ROM at 0x80000000)
