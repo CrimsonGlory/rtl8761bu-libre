@@ -830,8 +830,13 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           140 B byte-identical transcription (code + literal pool); linker scatter
           in rtl8761bu.ld. Decompile: FUN_8010be20 — large2 idle-path gate,
           ROM BD_ADDR sync + HCI evt 0xe. Removed mislabeled tail label @ 0xabb4.
-[NEXT]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair
-[TODO]  fn_b3d8 (206 B) — ACL slot scheduler
+[DONE]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x21E8 / 0x2224 (runtime 0x8010C1E8 /
+          0x8010C224); 44 B + 60 B byte-identical to vendor patch1; linker scatter
+          in rtl8761bu.ld. Decompile: FUN_8010c1e8 — ROM pre-hook + large2[0].+0x28
+          bit0 gate + secondary ind call; c224 paired slot (vendor bytes differ from
+          GZF DATA snapshot). Removed tail mislabels + hook_stubs.S STUB_RET.
+[NEXT]  fn_b3d8 (206 B) — ACL slot scheduler
 [TODO]  fn_b0a4 (108 B) — ACL packet-type flag corrector
 [TODO]  fn_c198, fn_d1f4 — early install batch (decompile may adjust tier)
 [TODO]  fn_c780 (34 B) — subsystem init (3 ROM calls)
@@ -840,7 +845,7 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
 [TODO]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
 [TODO]  fn_c49c, fn_c43c — infrastructure ptr region
 
-T1 decompile queue (may downgrade tier): c224, be20, c198, d1f4, dd1c, d890,
+T1 decompile queue (may downgrade tier): c198, d1f4, dd1c, d890,
           c49c, c43c — wairz DecompileAddr.java before transcribe.
 
 [TODO]  Hardware P1 smoke: ACL connect on pure-libre image (no inject tail)
