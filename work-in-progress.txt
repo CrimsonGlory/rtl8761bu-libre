@@ -876,8 +876,12 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           FUN_8010dd1c — types 0x401/0x403/0x405/0x419/0x41d/0xc3f/0x203c router.
           Removed tail mislabels @ 0xBDC/0xBE0/0xBE4 + hook_stubs.S STUB_RET.
           Tier: T1.
-[NEXT]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
-[TODO]  fn_c49c, fn_c43c — infrastructure ptr region
+[DONE]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear (2026-06-10)
+          Bodies in patch_entry_pool.S @ PRAM+0x049C/+0x0594 (vendor-identical);
+          t1_hooks.S exports fn_a49c/fn_a594 aliases; removed hook_stubs STUB_RET
+          + tail mislabels @ 0xBE8/0xBF4. fn_a49c: *0x8012b803=0; fn_a594: MMIO
+          0xb6001080=0x80. Tier: T1.
+[NEXT]  fn_c49c, fn_c43c — infrastructure ptr region
 
 T1 decompile queue (may downgrade tier): c49c, c43c — wairz before transcribe.
 

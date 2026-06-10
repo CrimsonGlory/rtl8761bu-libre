@@ -46,6 +46,14 @@
  * Calls FUN_80110869 + ROM 0x800083ed/0x80007af1; sets flag @ 0x8012133b.
  * Pool @ +0x24. Decompile: FUN_8010c780 (Ghidra 2026-06-10).
  *
+ * fn_a49c @ PRAM+0x049C (runtime 0x8010A49C): flag clear (10 B).
+ * Clears byte @ 0x8012b803. Body in patch_entry_pool @ +0x25a (PE-2 pool).
+ * Decompile: FUN_8010a49c (Ghidra 2026-06-08).
+ *
+ * fn_a594 @ PRAM+0x0594 (runtime 0x8010A594): MMIO reset trigger (14 B).
+ * Writes 0x80 to MMIO 0xb6001080. Body in patch_entry_pool @ +0x352.
+ * Decompile: FUN_8010a594 (Ghidra 2026-06-08).
+ *
  * fn_b0a4 @ PRAM+0x10A4 (runtime 0x8010B0A4): ACL packet-type flag corrector (108 B).
  * MMIO table @ 0xb6001214; ROM slot alloc 0x80056609. Pool @ +0x6c.
  * Decompile: FUN_8010b0a4 (Ghidra 2026-06-08).
@@ -59,6 +67,19 @@
  */
 
 	.set	mips16
+
+	/* Bodies transcribed in patch_entry_pool.S; alias for INSTALL_HOOK / debug. */
+	.extern	patch_entry_pool
+
+	.globl	fn_a49c
+	.set	fn_a49c, patch_entry_pool + 0x25a
+	.type	fn_a49c, @function
+	.size	fn_a49c, 10
+
+	.globl	fn_a594
+	.set	fn_a594, patch_entry_pool + 0x352
+	.type	fn_a594, @function
+	.size	fn_a594, 14
 
 	.section	.text.fn_b0a4, "ax"
 	.globl	fn_b0a4
