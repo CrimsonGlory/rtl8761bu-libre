@@ -77,7 +77,7 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     # fn_daa4 @ PRAM+0x3AA4 — protocol_dispatch.S (not tail offset 0xC5C)
     # fn_d9f4 @ PRAM+0x39F4 — protocol_dispatch.S (not tail offset 0xC64)
     # fn_da70 @ PRAM+0x3A70 — protocol_dispatch.S (not tail offset 0xC60)
-    0x0C68: ("fn_ca20", "hook body"),
+    # fn_ca20 @ PRAM+0x2A20 — protocol_dispatch.S (not tail offset 0xC68)
     0x0C6C: ("sub2_fn_00", "sub_installer_2 target"),
     0x0C70: ("sub2_fn_01", "sub_installer_2 target"),
     0x0C74: ("sub2_fn_02", "sub_installer_2 target"),

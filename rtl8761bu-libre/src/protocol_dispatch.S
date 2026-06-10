@@ -18,6 +18,10 @@
  * fn_b5d8 @ PRAM+0x15D8: minimal stub until eSCO activator is implemented;
  * dfb0 opcode 0x270 calls it; return 0 → fall through to ROM LMP handler.
  *
+ * fn_ca20 @ PRAM+0x2A20 (runtime 0x8010CA20): type-0x67 coexistence monitor —
+ * STUB-T1 empty return (P1/P2); full 534 B impl deferred to T3.
+ * Called from fn_cc94 sequencer after ROM unknown_fptr_index0.
+ *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -31,6 +35,14 @@ fn_b5d8:
 	jr	$ra
 	nop
 	.size	fn_b5d8, . - fn_b5d8
+
+	.section	.text.fn_ca20, "ax"
+	.globl	fn_ca20
+	.type	fn_ca20, @function
+fn_ca20:
+	jr	$ra
+	nop
+	.size	fn_ca20, . - fn_ca20
 
 	.section	.text.fn_d9f4, "ax"
 	.globl	fn_d9f4

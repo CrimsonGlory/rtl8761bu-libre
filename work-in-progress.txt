@@ -810,14 +810,18 @@ Today: most targets are STUB_RET in hook_stubs.S.
           src/protocol_dispatch.S: vendor-fixed @ PRAM+0x39F4 (d9f4) / 0x3A70 (da70);
           SHIM-ARGS jalr → ROM 0x80042189 (LC RX) / 0x80042421 (LC TX); linker scatter
           in rtl8761bu.ld; removed tail stubs + hook_stubs.S STUB_RET.
-[NEXT]  Protocol dispatch: fn_ca20 — STUB-T1 OK for P2 (empty return); full = T3
+[DONE]  Protocol dispatch: fn_ca20 — STUB-T1 OK for P2 (empty return); full = T3 (2026-06-09)
+          src/protocol_dispatch.S: vendor-fixed @ PRAM+0x2A20 (runtime 0x8010CA20);
+          4 B empty-return stub (jr $ra); linker scatter in rtl8761bu.ld;
+          removed duplicate from hook_stubs.S / patch_entry_tail.S @ wrong 0xAC68;
+          tail [0xC60,0xC70) vendor bytes restored; full 534 B impl = T3 (Phase 8.4).
 [DONE]  Protocol dispatch: fn_e27c partial, fn_cc94, fn_d154 — callees.S / shims.S
 [DONE]  SHIM-T1: fn_c088 — shims.S
 [DONE]  IMPL-T2 gateway (needed for P2 but done early): fn_bba4, fn_bb54 — lmp_vsc.S
 [DONE]  bos+0x1c: fn_bc74 — lmp_vsc.S
 
 T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
-[TODO]  fn_b118 (82 B) — slot interval allocator
+[NEXT]  fn_b118 (82 B) — slot interval allocator
 [TODO]  fn_be20 — global dispatch @ 0x801286c0
 [TODO]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair
 [TODO]  fn_b3d8 (206 B) — ACL slot scheduler

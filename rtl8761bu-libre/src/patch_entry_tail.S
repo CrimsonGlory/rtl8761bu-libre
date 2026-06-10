@@ -433,10 +433,10 @@ fn_eac0_callee:
 	/* fn_daa4 @ PRAM+0x3AA4 — see protocol_dispatch.S */
 	/* fn_d9f4 @ PRAM+0x39F4 — see protocol_dispatch.S */
 	/* fn_da70 @ PRAM+0x3A70 — see protocol_dispatch.S */
-	.globl		fn_ca20
-	.type		fn_ca20, @function
-fn_ca20:
-	/* 0x0c68 / 0x8010ac68 — hook body */
+	/* fn_ca20 @ PRAM+0x2A20 — see protocol_dispatch.S (not tail offset 0xC68) */
+	/* 0x0c60 / 0x8010ac60 */
+	.byte	0x73, 0xc0, 0x40, 0xf1, 0x6c, 0xa0, 0x6d, 0xea, 0x40, 0xf1, 0x4c, 0xc0, 0x00, 0x6b, 0x13, 0x97
+
 	.globl		sub2_fn_00
 	.type		sub2_fn_00, @function
 sub2_fn_00:

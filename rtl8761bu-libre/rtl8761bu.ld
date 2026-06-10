@@ -13,6 +13,7 @@
  *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
  *   [0x0820, 0x0E4C) patch_entry tail
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
+ *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
@@ -46,6 +47,8 @@ SECTIONS {
         /* Vendor-fixed offsets (fn_e27c literal pool → 0x8010xxxx) */
         . = __prefix_start + 0x15D8;
         KEEP(*(.text.fn_b5d8))
+        . = __prefix_start + 0x2A20;
+        KEEP(*(.text.fn_ca20))
         . = __prefix_start + 0x39F4;
         KEEP(*(.text.fn_d9f4))
         . = __prefix_start + 0x3A70;

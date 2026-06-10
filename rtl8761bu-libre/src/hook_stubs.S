@@ -66,7 +66,7 @@
 	/* fn_daa4 @ PRAM+0x3AA4 — protocol_dispatch.S */
 	/* fn_d9f4 @ PRAM+0x39F4 — protocol_dispatch.S */
 	/* fn_da70 @ PRAM+0x3A70 — protocol_dispatch.S */
-	STUB_RET	fn_ca20
+	/* fn_ca20 @ PRAM+0x2A20 — protocol_dispatch.S STUB-T1 */
 
 	/* sub-installer #2 targets — stubs until individually implemented */
 	STUB_RET	sub2_fn_00
