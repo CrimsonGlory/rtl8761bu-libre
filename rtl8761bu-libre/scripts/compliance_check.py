@@ -9,8 +9,8 @@ block mainline inclusion until removed.
 Usage:
   compliance_check.py [--profile NAME] [--nf-ref PATH] [--fw PATH] [--patch PATH]
 
-Defaults read build/.profile, rtl8761bu_fw.bin, build/patch_injected.bin or
-build/patch_padded.bin, and ../rtl8761bu-non-free/rtl8761bu_fw.bin.
+Defaults read build/.profile, rtl8761bu_fw.bin, and build/patch_injected.bin or
+build/patch_padded.bin. NF_REF is optional for libre release audits (--no-nf-ref).
 Exit 0 = audit completed (may still print FAIL verdicts); exit 2 on error.
 """
 
@@ -62,7 +62,25 @@ NON_LIBRE_PROFILES = frozenset(
     )
     if p
 )
-NON_LIBRE_PROFILE_PREFIXES = ("hybrid-", "full-inject-t3-vendor-tail-split-", "full-vendor-early-", "phase-")
+NON_LIBRE_PROFILE_PREFIXES = (
+    "hybrid-",
+    "libre-hybrid-",
+    "full-inject-t3-vendor-tail-split-",
+    "full-vendor-early-",
+    "phase-",
+)
+
+# Default `make all` / `make docker` rules — must not list $(NF_REF).
+RELEASE_MAKEFILE_RULES = (
+    "all:",
+    "docker:",
+    "rtl8761bu_fw.bin:",
+    "build/patch.elf:",
+    "build/patch.bin:",
+    "build/patch_padded.bin:",
+    "minimal:",
+    "minimal-null:",
+)
 
 
 def _read_profile(path: Path) -> str:
@@ -106,6 +124,31 @@ def _region_diffs(vendor: bytes, libre: bytes) -> list[tuple[str, int, int, int]
     return out
 
 
+def _audit_makefile_nf_ref(root: Path) -> list[str]:
+    """Verify release targets do not depend on NF_REF / non-free tree."""
+    mk_path = root / "Makefile"
+    if not mk_path.is_file():
+        return ["Makefile missing"]
+    failures: list[str] = []
+    for line in mk_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("#") or not stripped:
+            continue
+        if not any(stripped.startswith(rule) for rule in RELEASE_MAKEFILE_RULES):
+            continue
+        if "NF_REF" in line or "rtl8761bu-non-free" in line:
+            failures.append(f"release rule must not use NF_REF: {line.strip()}")
+    return failures
+
+
+def _pe1_has_vendor_incbin(root: Path) -> bool:
+    pe1 = root / "src" / "patch_entry_code.S"
+    if not pe1.is_file():
+        return False
+    text = pe1.read_text(encoding="utf-8", errors="replace")
+    return ".incbin" in text and "vendor_entry_code.bin" in text
+
+
 def _git_clean(root: Path) -> bool | None:
     try:
         r = subprocess.run(
@@ -122,14 +165,27 @@ def _git_clean(root: Path) -> bool | None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--profile", help="override build/.profile name")
-    ap.add_argument("--nf-ref", type=Path, help="vendor reference firmware")
+    ap.add_argument("--nf-ref", type=Path, help="vendor reference firmware (bisect/diff only)")
+    ap.add_argument(
+        "--no-nf-ref",
+        action="store_true",
+        help="clean-room audit: skip vendor tree even if present",
+    )
     ap.add_argument("--fw", type=Path, help="built rtl8761bu_fw.bin")
     ap.add_argument("--patch", type=Path, help="patch1 body (padded or injected)")
     ap.add_argument("--strict", action="store_true", help="exit 1 if linux-libre FAIL")
     args = ap.parse_args()
 
     profile = args.profile or _read_profile(ROOT / "build" / ".profile")
-    nf_ref = args.nf_ref or (ROOT.parent / "rtl8761bu-non-free" / "rtl8761bu_fw.bin")
+    default_nf = ROOT.parent / "rtl8761bu-non-free" / "rtl8761bu_fw.bin"
+    if args.no_nf_ref:
+        nf_ref: Path | None = None
+    elif args.nf_ref is not None:
+        nf_ref = args.nf_ref
+    elif default_nf.is_file():
+        nf_ref = default_nf
+    else:
+        nf_ref = None
     fw_path = args.fw or (ROOT / "rtl8761bu_fw.bin")
     patch_path = args.patch
     if patch_path is None:
@@ -142,7 +198,7 @@ def main() -> int:
 
     print("=== linux-libre compliance audit ===")
     print(f"profile     : {profile}")
-    print(f"nf_ref      : {nf_ref}")
+    print(f"nf_ref      : {nf_ref or '(not used — clean-room release audit)'}")
     print(f"fw          : {fw_path}")
     print(f"patch1 body : {patch_path}")
     print()
@@ -160,13 +216,26 @@ def main() -> int:
         print("  OK — all tracked sources licensed")
     print()
 
-    # --- NF_REF availability ---
-    if not nf_ref.is_file():
-        failures.append(f"NF_REF missing: {nf_ref}")
-        print(f"NF_REF: MISSING ({nf_ref})")
-        print("  make all requires vendor rtl8761bu_fw.bin for PE-1 incbin")
+    # --- Makefile: release must not depend on NF_REF ---
+    mk_failures = _audit_makefile_nf_ref(ROOT)
+    if mk_failures:
+        failures.extend(mk_failures)
+        print("Makefile NF_REF gate: FAIL")
+        for f in mk_failures:
+            print(f"  - {f}")
     else:
-        print(f"NF_REF: present ({nf_ref.stat().st_size} B)")
+        print("Makefile NF_REF gate: OK — default make all/docker does not use NF_REF")
+    print()
+
+    # --- NF_REF (optional for libre release; required for bisect/inject profiles) ---
+    nf_present = nf_ref is not None and nf_ref.is_file()
+    if nf_present:
+        print(f"NF_REF: present ({nf_ref.stat().st_size} B) — vendor diff enabled")
+    elif _is_non_libre_profile(profile):
+        failures.append("NF_REF missing — required for inject/bisect profile audit")
+        print(f"NF_REF: MISSING (expected at {default_nf})")
+    else:
+        print("NF_REF: not used — release build does not read rtl8761bu-non-free/")
     print()
 
     if not fw_path.is_file() or not patch_path.is_file():
@@ -176,12 +245,6 @@ def main() -> int:
         _print_verdict(profile, failures, args.strict)
         return 2
 
-    if not nf_ref.is_file():
-        _print_verdict(profile, failures, args.strict)
-        return 2
-
-    vendor_fw = nf_ref.read_bytes()
-    vendor_p1 = vendor_fw[PATCH1_OFF : PATCH1_OFF + PATCH1_LEN]
     libre_p1 = patch_path.read_bytes()
     out_fw = fw_path.read_bytes()
 
@@ -195,7 +258,8 @@ def main() -> int:
     # --- envelope / patch0 ---
     if len(out_fw) == SINGLE_FW_SIZE:
         print(f"envelope: single-patch ({SINGLE_FW_SIZE} B) — no patch0 slot")
-    else:
+    elif nf_present:
+        vendor_fw = nf_ref.read_bytes()
         patch0_vendor = vendor_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
         patch0_out = out_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
         patch0_match = patch0_out == patch0_vendor
@@ -209,33 +273,43 @@ def main() -> int:
         else:
             label = "differs from NF_REF (non-vendor)"
         print(f"patch0 @0x30 ({PATCH0_LEN} B): {label}")
+    else:
+        patch0_out = out_fw[PATCH0_OFF : PATCH0_OFF + min(PATCH0_LEN, len(out_fw) - PATCH0_OFF)]
+        nop_stub = MIPS16E_NOP * (PATCH0_LEN // 2)
+        if patch0_out == nop_stub[: len(patch0_out)]:
+            print(f"patch0 @0x30: libre MIPS16e NOP stub (NF_REF not consulted)")
+        else:
+            failures.append("dual-patch envelope without NF_REF — cannot verify patch0")
+            print("patch0 @0x30: dual layout — NF_REF required to classify patch0")
     print()
 
-    # --- patch1 vs vendor ---
-    total_diff = sum(1 for i in range(min(len(vendor_p1), len(libre_p1))) if vendor_p1[i] != libre_p1[i])
-    vendor_match = len(vendor_p1) - total_diff
-    pct = 100.0 * vendor_match / PATCH1_LEN
-    print(f"patch1 @0x3780: {vendor_match}/{PATCH1_LEN} bytes match vendor ({pct:.1f}%)")
-    print(f"  sha256 libre : {hashlib.sha256(libre_p1).hexdigest()}")
-    print(f"  sha256 vendor: {hashlib.sha256(vendor_p1).hexdigest()}")
-    print("  regions (diffs / size):")
-    for name, lo, hi, nd in _region_diffs(vendor_p1, libre_p1):
-        print(f"    [{lo:#06x},{hi:#06x}) {name}: {nd}/{hi - lo}")
-    print()
-
-    pe1_src = ROOT / "src" / "patch_entry_code.S"
-    pe1_text = pe1_src.read_text() if pe1_src.is_file() else ""
-    pe1_has_incbin = (
-        ".incbin" in pe1_text and "vendor_entry_code.bin" in pe1_text
-    )
-
-    if total_diff == 0:
-        failures.append("patch1 is byte-identical to vendor (non-free)")
-    elif vendor_match >= PREFIX_CONNECT and profile == "full" and pe1_has_incbin:
-        failures.append("default full build embeds vendor PE-1 incbin (578 B) and requires NF_REF")
-
+    pe1_has_incbin = _pe1_has_vendor_incbin(ROOT)
     if pe1_has_incbin:
         failures.append("src/patch_entry_code.S incbins vendor_entry_code.bin (578 B)")
+
+    # --- patch1 vs vendor (optional when NF_REF available) ---
+    if nf_present:
+        vendor_fw = nf_ref.read_bytes()
+        vendor_p1 = vendor_fw[PATCH1_OFF : PATCH1_OFF + PATCH1_LEN]
+        total_diff = sum(
+            1 for i in range(min(len(vendor_p1), len(libre_p1))) if vendor_p1[i] != libre_p1[i]
+        )
+        vendor_match = len(vendor_p1) - total_diff
+        pct = 100.0 * vendor_match / PATCH1_LEN
+        print(f"patch1 @0x3780: {vendor_match}/{PATCH1_LEN} bytes match vendor ({pct:.1f}%)")
+        print(f"  sha256 libre : {hashlib.sha256(libre_p1).hexdigest()}")
+        print(f"  sha256 vendor: {hashlib.sha256(vendor_p1).hexdigest()}")
+        print("  regions (diffs / size):")
+        for name, lo, hi, nd in _region_diffs(vendor_p1, libre_p1):
+            print(f"    [{lo:#06x},{hi:#06x}) {name}: {nd}/{hi - lo}")
+        print()
+        if total_diff == 0:
+            failures.append("patch1 is byte-identical to vendor (non-free)")
+        elif vendor_match >= PREFIX_CONNECT and profile == "full" and pe1_has_incbin:
+            failures.append("default full build embeds vendor PE-1 incbin (578 B)")
+    else:
+        print(f"patch1 @0x3780: sha256 {hashlib.sha256(libre_p1).hexdigest()} (no vendor diff)")
+        print()
 
     if _is_non_libre_profile(profile):
         print(f"profile '{profile}' is a bisect/inject target — not linux-libre candidate")
@@ -271,7 +345,7 @@ def _print_verdict(profile: str, failures: list[str], strict: bool) -> None:
         print("  1. patch0: use single-patch ship or libre NOP stub (--dual without --vendor-patch0)")
         print("  2. Transcribe PE-1 [0,0x242) — remove patch_entry_code.S incbin")
         print("  3. Complete libre [0x820,0xE4C) tail + [0xE4C,…) hook bodies (drop inject_vendor)")
-        print("  4. Add SPDX to remaining sources; drop NF_REF from default make deps")
+        print("  4. Keep NF_REF off default make deps (test-nf / inject / hybrid / diff-prefix only)")
     if strict and failures:
         sys.exit(1)
 

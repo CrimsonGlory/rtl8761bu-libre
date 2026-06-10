@@ -771,10 +771,12 @@ Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
           (gen_patch_entry_tail_asm.py, gen_sub_installer_2_asm.py); linker anchors
           @ 0x820/0xE4C; INSTALLER_TAIL_TRANSCRIBED drops duplicate bdaddr/callees/
           hook_stubs/lmp_vsc. make diff-prefix --limit 0xE4C: 0/3660; tail 0/1580.
-[NEXT]  Compliance gate: default make all with no NF_REF
-          Release build must not read rtl8761bu-non-free/. Restrict NF_REF to
-          test-nf, diff-prefix, inject-*, hybrid-*, bisect profiles only.
-[TODO]  Compliance gate: CI make compliance --strict in Docker
+[DONE]  Compliance gate: default make all with no NF_REF (2026-06-09)
+          `make docker`/`make release` succeed without NF_REF mount; Makefile NF_REF
+          gate in compliance_check.py; NF_REF only on test-nf, diff-prefix, inject-*,
+          hybrid-*, phase-*, VENDOR_EARLY_PREFIX bisect. pack.py reads NF_REF only
+          with --vendor-patch0.
+[NEXT]  Compliance gate: CI make compliance --strict in Docker
           Fail on new .incbin, patch0 regression, or non-libre profile as default.
 
 --- Phase 8.1 — Prefix / installer skeleton (P1+P2 shared) ---

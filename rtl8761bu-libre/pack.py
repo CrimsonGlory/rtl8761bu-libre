@@ -38,11 +38,12 @@ CHIP_FAMILY_CONST = 0x00010EFF
 EXT_MAGIC         = 0x77FD0451
 MIPS16E_NOP       = b'\x00\x65'
 
-# Reference non-free image (patch0 is not FC20-downloaded but matches envelope).
-NF_REF = os.environ.get(
-    'NF_REF',
-    os.path.join(os.path.dirname(__file__), '..', 'rtl8761bu-non-free', 'rtl8761bu_fw.bin'),
-)
+def _nf_ref_path() -> str:
+    """Bisect-only path; default make all never calls this."""
+    return os.environ.get(
+        'NF_REF',
+        os.path.join(os.path.dirname(__file__), '..', 'rtl8761bu-non-free', 'rtl8761bu_fw.bin'),
+    )
 
 
 def _libre_patch0_stub() -> bytes:
@@ -52,12 +53,13 @@ def _libre_patch0_stub() -> bytes:
 
 
 def _load_vendor_patch0() -> bytes:
-    if not os.path.isfile(NF_REF):
+    nf_ref = _nf_ref_path()
+    if not os.path.isfile(nf_ref):
         raise FileNotFoundError(
-            f"patch0 source missing: {NF_REF!r} "
-            f"(set NF_REF to vendor rtl8761bu_fw.bin)"
+            f"patch0 source missing: {nf_ref!r} "
+            f"(set NF_REF to vendor rtl8761bu_fw.bin; --vendor-patch0 is bisect-only)"
         )
-    raw = open(NF_REF, 'rb').read()
+    raw = open(nf_ref, 'rb').read()
     return raw[PATCH0_OFF:PATCH0_OFF + PATCH0_LEN]
 
 
