@@ -2746,7 +2746,7 @@ Removed `STUB_RET` from `hook_stubs.S`. `make diff-prefix` @ `[0x3168,0x31F4)`:
 **Install slot:** RAM `0x801213e8` (`FUN_8010a000` Phase 1 hook #26; pool refs
 `a320` / `a324` in `patch_entry_pool.S`).
 **PRAM body:** runtime `0x8010FA34` (file offset `0x5A34` in patch1); follows
-`FUN_8010F884` @ PRAM+`0x5884` with `FUN_8010F950` @ PRAM+`0x5950` still pending.
+`FUN_8010F950` @ PRAM+`0x5950` + 54 B vendor gap @ `0x59FE` after `FUN_8010F884`.
 
 **Layout:** ~152 B MIPS16e body + 32 B literal pool @ body `+0xB8` (`0x8010FAEC`…).
 
@@ -2761,6 +2761,32 @@ when `trigger==1`. Implements BT Core Spec §4.2.27 AFH map update.
 notify fn-ptrs.
 
 **Libre:** `src/t3_hooks.S` — 184 B byte-identical vendor transcription @
-PRAM+`0x5A34`; linker scatter in `rtl8761bu.ld` after `fn_f884`. Removed
-`STUB_RET` from `hook_stubs.S`. Prefix `[0x5A34,0x5AEC)` 0/184 match vs NF_REF.
+PRAM+`0x5A34`; linker scatter in `rtl8761bu.ld` after `fn_f950`/`fn_f950_gap`.
+Removed `STUB_RET` from `hook_stubs.S`. Prefix `[0x5A34,0x5AEC)` 0/184 match vs NF_REF.
 Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
+
+---
+
+## Group AA — AFH Channel Quality + VSC FC95 Trigger (2026-06-10)
+
+### `FUN_8010f950` (174 B) — channel classification + AFH scan start
+
+**Install slot:** RAM `0x801213c8` (`FUN_8010a000` Phase 1 hook #27; pool refs
+`a328` / `a32c` in `patch_entry_pool.S`).
+**PRAM body:** runtime `0x8010F950` (file offset `0x5950` in patch1); immediately
+after `FUN_8010F884` @ PRAM+`0x5884`. 54 B vendor literal-pool tail @ PRAM+`0x59FE`
+(`fn_f950_gap`) before `FUN_8010FA34`.
+
+**Layout:** ~142 B MIPS16e body + 32 B literal pool @ body `+0xAE` (`0x8010FA00`…).
+
+**Semantics (Ghidra decompile, `DecompileFunction.java` FUN_8010f950):** On channel
+quality update: reset/ack via `DAT_8010fa00`; log 10-byte map (`DAT_8010fa10`); classify
+via `DAT_8010fa14` + 5-byte `memcpy` (`DAT_8010fa18`); mode transition on `*param_1`
+in `{0,1}` (`DAT_8010fa1c`). When `*PTR_DAT_8010fa20 == -1` (scan not started), call
+`PTR_VSC_0xfc95_called2_1_8010fa2c` (HCI VSC **0xFC95** AFH scan) then schedule via
+`DAT_8010fa30`. Returns 1.
+
+**Libre:** `src/t3_hooks.S` — 174 B byte-identical vendor transcription @
+PRAM+`0x5950` + 54 B `fn_f950_gap`; linker scatter in `rtl8761bu.ld` between
+`fn_f884` and `fn_fa34`. Removed `STUB_RET` from `hook_stubs.S`. Prefix
+`[0x5950,0x5A34)` 0/228 match vs NF_REF. Tier **T3**.

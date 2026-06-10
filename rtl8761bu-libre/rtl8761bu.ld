@@ -50,6 +50,8 @@
  *   [0x3D80, …)     fn_dd1c_gap vendor pools + dd1c tail (fn_dd1c_gap.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
+ *   [0x5950, …)     fn_f950 AFH quality + VSC FC95 trigger (t3_hooks.S)
+ *   [0x59FE, …)     fn_f950_gap vendor pool tail (t3_hooks.S)
  *   [0x5A34, …)     fn_fa34 AFH 79-ch map merger (t3_hooks.S)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
  *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 / fn_10868 (t2_hooks.S; past FC20)
@@ -164,6 +166,10 @@ SECTIONS {
         KEEP(*(.text.fn_dfb0))
         . = __prefix_start + 0x5884;
         KEEP(*(.text.fn_f884))
+        . = __prefix_start + 0x5950;
+        KEEP(*(.text.fn_f950))
+        . = __prefix_start + 0x59FE;
+        KEEP(*(.text.fn_f950_gap))
         . = __prefix_start + 0x5A34;
         KEEP(*(.text.fn_fa34))
 
