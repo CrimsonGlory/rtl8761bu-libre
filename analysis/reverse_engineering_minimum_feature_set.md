@@ -293,7 +293,7 @@ flowchart TD
 
 1. Decompile **20 unanalyzed** `FUN_8010a000` hook targets — may downgrade some from T1.
 2. Decompile **19 functions** installed by sub-installer #2.
-3. Resolve **address-pair table** purpose (7 fn-ptrs into `FUN_8010a000` body).
+3. ~~Resolve **address-pair table** purpose~~ — **OMIT** (2026-06-10): `reverse_engineering_address_pair_table_omit.md`.
 4. Confirm whether T1 can omit `bos+0xd8` for ACL-only (no eSCO) on real hardware.
 
 ---

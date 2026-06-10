@@ -1203,8 +1203,14 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           FUN_8010e82c: *global=0, return 0; sub_installer_5 → RAM 0x80120c88.
           scripts/gen_fn_e82c_asm.py; prefix [0x482c,0x4834) 8/8 vs vendor.
           → reverse_engineering_sub_installers.md (sub-inst #5 libre note)
-[NEXT]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
-[TODO]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
+[DONE]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs) (2026-06-10)
+          GZF FindTableProcessor: zero xrefs/pool refs to 0x801000A0; DATA block zeros.
+          15 vendor entries parsed — only 4 fn_ptrs mid-instruction in FUN_8010a000 body;
+          FUN_8010e27c installs protocol dispatch separately (not table walk).
+          Single-patch loads @ 0x80103780 — runtime 0x801000A0 outside FC20 window.
+          PE5 connect OK without table. Verdict: OMIT P1–P4, no libre embed.
+          → analysis/reverse_engineering_address_pair_table_omit.md (new)
+[NEXT]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
 
 [TODO]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM
 [TODO]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
@@ -1237,9 +1243,9 @@ NOTES
 - String-assoc installer: FUN_8010e27c (52B) installs 6 protocol dispatch handlers
   into dispatch struct at 0x8012ae8c. Called by ROM 0x80009990 hook mechanism.
   See analysis/reverse_engineering_protocol_dispatch_layer.md.
-- Address-pair table at file 0xA0 (runtime 0x801000A0): UNRESOLVED PURPOSE.
-  fn_ptrs (0x8010A174/A184/A1D8/A208/A2B8/A304/A34C) point INTO FUN_8010a000's
-  code body. Data BLOCK shows zeros at that address. Not processed by FUN_8010e27c.
+- Address-pair table at file 0xA0 (runtime 0x801000A0): OMIT for libre (2026-06-10).
+  No consumer in ROM/patch; DATA block zeros; outside single-patch FC20 window.
+  → analysis/reverse_engineering_address_pair_table_omit.md
 - MIPS16e handler stubs region was a MISIDENTIFICATION: 0x8010A160-0x8010A2FF is
   the CODE BODY of FUN_8010a000 (patch entry). GZF PROCESS MODE decodes correctly.
 - Vanilla vs GZF: rtl8761bu_fw.bin = 42088 bytes; GZF patch block = 44484 bytes.

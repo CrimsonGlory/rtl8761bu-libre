@@ -204,13 +204,10 @@ In reality:
 - The fn_ptrs listed in the old analysis (0x8010A174, etc.) point INTO the code body
   of `FUN_8010a000` — they are NOT callable function entry points (they lack prologues)
 
-**Current status**: The table at file 0xa0 purpose is UNRESOLVED. Possibilities:
-1. It is processed by ROM code that we have not yet analyzed
-2. It is static initialization data, used at boot then zeroed
-3. The table format interpretation from the old analysis was incorrect
-
-This is a lower priority than the 6 confirmed protocol dispatch handlers above,
-which implement the main protocol interception surface.
+**Current status (2026-06-10)**: **INTENTIONAL OMIT** for libre firmware. GZF
+`FindTableProcessor.java` found zero consumers; DATA block zeros at runtime;
+hardware connect OK without the table. See
+`reverse_engineering_address_pair_table_omit.md` for full verdict.
 
 ---
 

@@ -352,7 +352,7 @@ profiled images.
 [ ] TRIVIAL: a49c, a594
 [ ] IMPL: e27c, dfb0, daa4, cc94 + 22 T1 hooks + 6 sub-installers
 [ ] SKIP: TLV active records (remaining=0)
-[ ] OMIT: address-pair table
+[x] OMIT: address-pair table — `reverse_engineering_address_pair_table_omit.md` (2026-06-10)
 ```
 
 ### P2 eSCO audio

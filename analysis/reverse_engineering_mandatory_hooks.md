@@ -183,7 +183,7 @@ installer stub is still **IMPL-T1**.
 
 | Item | Verdict | Notes |
 |------|---------|-------|
-| Address-pair table @ file `0xA0` | **OMIT-T1** | Not processed by `FUN_8010e27c`; DATA block zeros; purpose unresolved |
+| Address-pair table @ file `0xA0` | **OMIT** | Confirmed 2026-06-10: zero xrefs, no consumer; see `reverse_engineering_address_pair_table_omit.md` |
 | `FUN_80103780` master installer | **OMIT** | Parallel variant; runtime entry is `FUN_8010a000` |
 | Late-patch block `FUN_80109980`…`80109824` | **OMIT-T3** | In vanilla bin tail; GZF "dark firmware"; not in 27,808 B PRAM window |
 | `bos+0xd8` NULL | **NULL-T1** | Test on hardware; ROM timeout fallback for LMP `0x268` |
@@ -234,8 +234,8 @@ still needing decompile before sign-off.
 
 ### P4 — Full parity
 
-**Add:** Sub-installer #2's 19 targets + `FUN_80110ddc` + address-pair table (if proven
-required) + late-patch functions.
+**Add:** Sub-installer #2's 19 targets + `FUN_80110ddc` + late-patch functions.
+Address-pair table **omitted** (see `reverse_engineering_address_pair_table_omit.md`).
 
 ---
 
@@ -267,7 +267,7 @@ For `patch_entry` replicating `FUN_8010a000`:
    if any slot is on the ACL critical path.
 3. Hardware test: confirm **P1 works with `bos+0xd8` NULL** (ACL-only, no eSCO).
 4. ~~Resolve **`FUN_80110ddc`** (hook #42)~~ — **DONE** (2026-06-10): eSCO packet-type selector; `t4_hooks.S`.
-5. **Address-pair table** — remain omitted until purpose known.
+5. ~~**Address-pair table**~~ — **DONE** (2026-06-10): intentional OMIT; `reverse_engineering_address_pair_table_omit.md`.
 
 ---
 
