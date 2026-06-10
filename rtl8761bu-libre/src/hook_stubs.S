@@ -32,8 +32,7 @@
 	STUB_RET	fn_c0f4
 	STUB_RET	fn_a4ac
 	STUB_RET	fn_bce0
-	STUB_RET	fn_c49c
-	STUB_RET	fn_c43c
+	/* fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S */
 	STUB_RET	fn_d168
 	STUB_RET	fn_fa34
 	STUB_RET	fn_f950

@@ -881,11 +881,16 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           t1_hooks.S exports fn_a49c/fn_a594 aliases; removed hook_stubs STUB_RET
           + tail mislabels @ 0xBE8/0xBF4. fn_a49c: *0x8012b803=0; fn_a594: MMIO
           0xb6001080=0x80. Tier: T1.
-[NEXT]  fn_c49c, fn_c43c — infrastructure ptr region
+[DONE]  fn_c49c, fn_c43c — infrastructure ptr region (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x249C / 0x243C (runtime
+          0x8010C49C / 0x8010C43C); 96 B + 100 B byte-identical to vendor patch1
+          (c43c abuts c49c; 4 B prologue shared in vendor layout);
+          linker scatter in rtl8761bu.ld. Decompile: FUN_8010c43c — BB reg 0x120
+          mask + ROM tail-call (pool @ +0x54); FUN_8010c49c — conn-record stats
+          path with per-idx struct + ROM ind calls (pool @ +0x168). Removed tail
+          mislabels @ 0xBFC/0xC00 + hook_stubs.S STUB_RET. Tier: T1.
 
-T1 decompile queue (may downgrade tier): c49c, c43c — wairz before transcribe.
-
-[TODO]  Hardware P1 smoke: ACL connect on pure-libre image (no inject tail)
+[NEXT]  Hardware P1 smoke: ACL connect on pure-libre image (no inject tail)
           After 8.0 + enough 8.2 for FC20 + hciconfig + connect. Bisect unknowns.
 
 --- Phase 8.3 — P2 libre ship (T2 audio / eSCO) ---

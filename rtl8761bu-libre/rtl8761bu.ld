@@ -6,7 +6,7 @@
  * patch_entry must therefore be the first bytes of the 27,808-byte image.
  *
  * Connect-critical prefix layout (file offsets, runtime 0x8010A000+):
- *   [0x0000, 0x05D8) patch_entry + literal pools
+ *   [0x0000, 0x05D8) patch_entry + literal pools (fn_a49c/a594 in pool)
  *   [0x05D8, 0x0724) helper functions (vendor blob interim, PE-3)
  *   [0x0724, 0x0754) sub_installer_1
  *   [0x0754, 0x0764) fn_bss_init
@@ -26,6 +26,8 @@
  *   [0x2224, …)     fn_c224 bos+0x24 HCI handler (t1_hooks.S)
  *   [0x263C, …)     fn_c63c ACL retransmission handler (t1_hooks.S)
  *   [0x2780, …)     fn_c780 subsystem init (t1_hooks.S)
+ *   [0x243C, …)     fn_c43c infrastructure ptr region (t1_hooks.S)
+ *   [0x249C, …)     fn_c49c infrastructure ptr region (t1_hooks.S)
  *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
@@ -74,6 +76,10 @@ SECTIONS {
         KEEP(*(.text.fn_c1e8))
         . = __prefix_start + 0x2224;
         KEEP(*(.text.fn_c224))
+        . = __prefix_start + 0x243C;
+        KEEP(*(.text.fn_c43c))
+        . = __prefix_start + 0x249C;
+        KEEP(*(.text.fn_c49c))
         . = __prefix_start + 0x263C;
         KEEP(*(.text.fn_c63c))
         . = __prefix_start + 0x2780;

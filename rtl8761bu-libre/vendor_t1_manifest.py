@@ -56,7 +56,7 @@ VENDOR_OVERLAY: list[tuple[int, int]] = [
     (0x8010A49C, 10),
     (0x8010BCE0, 0x8010BD40 - 0x8010BCE0),
     (0x8010C49C, 0x8010C500 - 0x8010C49C),
-    (0x8010C43C, 0x8010C4A0 - 0x8010C43C),
+    (0x8010C43C, 0x8010C49C - 0x8010C43C),  # 96 B; abuts c49c (4 B shared in vendor manifest)
     (0x8010E27C, 52),  # protocol dispatch installer body
     (0x8010CA20, 0x8010CA80 - 0x8010CA20),
     (0x8010DFB0, 0x8010E020 - 0x8010DFB0),
