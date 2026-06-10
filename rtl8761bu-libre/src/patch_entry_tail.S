@@ -244,10 +244,8 @@ fn_b174:
 
 	/* fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S (not tail @ 0xbc4) */
 	/* 0x0bc4 / 0x8010abc4 */
-	.globl		fn_b0a4
-	.type		fn_b0a4, @function
-fn_b0a4:
-	/* 0x0bc8 / 0x8010abc8 — hook body */
+	/* fn_b0a4 @ PRAM+0x10A4 — t1_hooks.S (not tail @ 0xbc8) */
+	/* 0x0bc8 / 0x8010abc8 */
 	.globl		fn_c198
 	.type		fn_c198, @function
 fn_c198:

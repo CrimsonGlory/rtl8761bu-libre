@@ -31,12 +31,12 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     0x0AEC: ("fn_hw_probe", "FUN_8010aa60 — silicon / HW probe"),
     0x0AF2: ("fn_bb_init", "FUN_8010aa66 — baseband register init"),
     0x0B5E: ("fn_rf_init", "FUN_8010aad2 — RF register table init"),
-    # fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8, fn_be20 @ PRAM+0x1E20 — t1_hooks.S
+    # fn_b0a4 @ PRAM+0x10A4, fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S
     0x0BB0: ("fn_b174", "hook body"),
     # 0x0BB4: mislabeled fn_be20 in tail — runtime 0x8010abb4 is fn_b174 cluster
     # fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S (not tail 0xBB8)
     # 0x0BC4: tail bytes only — fn_b3d8 is @ PRAM+0x13D8 (t1_hooks.S), not 0x8010abc4
-    0x0BC8: ("fn_b0a4", "hook body"),
+    # 0x0BC8: tail bytes only — fn_b0a4 is @ PRAM+0x10A4 (t1_hooks.S), not 0x8010abc8
     0x0BCC: ("fn_c198", "hook body"),
     0x0BD0: ("fn_c780", "hook body"),
     0x0BD4: ("fn_c63c", "hook body"),
