@@ -421,7 +421,16 @@ machine `0x80036df9`, same buffer `0x8012b840`, but checks flag `0x8012b942` (vs
 `0x8012b943` in a84c) and sets state=1 instead of 2 on success. These two functions
 handle the two phases of an SCO/eSCO connection negotiation.
 
-**Libre:** Must implement — complement to `FUN_8010a84c` (Group U); `fn_aa58` next in WIP.
+**Libre:** Implemented — complement to `FUN_8010a84c` (Group U); see Group V.
+
+---
+
+## Group V — `fn_aa58` libre implementation (2026-06-10)
+
+**Libre:** `src/t2_hooks.S` — 132 B GZF byte-identical (96 B body + 36 B pool @ +0x60;
+GZF `DumpFnAa58.java` / `DiagAddr.java`); section `.text.fn_aa58` links past FC20
+window immediately after `fn_a84c`. `src/fn_d618_pool.S` @ PRAM+`0x37C0` —
+`DAT_8010d7e0 = fn_aa58+1` (was hardcoded `0x8010aa59`). Tier **T2**.
 
 ---
 
@@ -2588,5 +2597,40 @@ without displacing `fn_abd0` and installer tail.
 **Libre:** `src/t2_hooks.S` — 450 B GZF byte-identical (GZF `DumpFnA84c.java`);
 section `.text.fn_a84c` links past FC20 window (runtime `0x8010FA80` in current
 `full` profile). `src/fn_d618_pool.S` @ PRAM+`0x37C0` — GZF pool with
-`DAT_8010d7dc = fn_a84c+1` (replaces prior zero-fill). `DAT_8010d7e0` still
-literal `0x8010aa59` until `fn_aa58` lands. Tier **T2**.
+`DAT_8010d7dc = fn_a84c+1` (replaces prior zero-fill). `DAT_8010d7e0 = fn_aa58+1`
+(see Group V). Tier **T2**.
+
+---
+
+## Group W — HW Reg 0x11C Codec Mode (2026-06-10)
+
+**FUN_8010a410** (86 B) — eSCO codec control register writer.
+
+**Decompile (GZF `DumpDecompileA410.java`):**
+
+```c
+void FUN_8010a410(void) {
+    if (bos_base[0x16e] != 0) {
+        uint16 reg = *MMIO_0xb600011c;
+        if (config_flag[0x30] == 0)
+            reg = (reg | 0x40) | (high_byte << 2);  /* set bits 6 + 1 */
+        else
+            reg = (reg & ~0x40) & ~(high_byte << 2);
+        (*hw_reg_write_fn)(0x11c, reg);           /* *0x8012048c */
+    }
+}
+```
+
+**Literal pool (+0x58):** `0x801259ec`, `0xb600011c`, `0x8012b764`, `0x8012048c`.
+
+**Layout note:** GZF DATA labels entry `0x8010a410`; vendor EPatch places the
+same 86 B body at **PRAM+0x468** (bytes `[0x410,0x468)` remain entry literal pool).
+Overlaps tail of `fn_a49c` / prologue of `fn_a4ac` in the flat address map — same
+physical bytes, multiple symbols.
+
+**Callers:** `FUN_8010dd1c` extended tail (`0x8010dea2`, `0x8010df06` in GZF) via
+pool word `0x8010a469` @ PRAM+`0x3f30` (`fn_dd1c_gap.S`).
+
+**Libre:** `t2_hooks.S` exports `fn_a410` alias @ `patch_entry_pool+0x226`
+(PRAM+`0x468`, vendor byte-identical). `fn_dd1c_gap.S` fills `[0x3D80,0x3FB0)` so
+dd1c/dfb0 pools resolve. Tier **T2**.

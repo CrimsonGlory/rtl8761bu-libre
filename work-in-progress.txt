@@ -1017,9 +1017,19 @@ T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
           fn_d618_pool.S @ PRAM+0x37C0: DAT_8010d7dc = fn_a84c+1. Decompile:
           FUN_8010a84c — pending @ 0x8012b943, ROM SCO read/state/LMP reject;
           pool @ 0x8010aa10…54. → reverse_engineering_sco_esco_layer.md (Group U)
-[NEXT]  fn_aa58 (96 B) — SCO continuation handler
-[TODO]  fn_a410 (86 B) — HW reg 0x11C codec mode
-[TODO]  fn_b7d4 (22 B) — ACL slot lookup wrapper
+[DONE]  fn_aa58 (96 B) — SCO continuation handler (2026-06-10)
+          src/t2_hooks.S: 132 B GZF byte-identical (96 B body + 36 B pool);
+          section .text.fn_aa58 past FC20 window after fn_a84c. Decompile:
+          FUN_8010aa58 — phase-2 SCO path (flag 0x8012b942, ROM 0x80036df9,
+          success bos+4=3 / *0x8012b83c=1). fn_d618_pool DAT_8010d7e0 → fn_aa58+1.
+          → reverse_engineering_sco_esco_layer.md (Group V)
+[DONE]  fn_a410 (86 B) — HW reg 0x11C codec mode (2026-06-10)
+          t2_hooks.S: pool alias @ patch_entry_pool+0x226 (PRAM+0x468, runtime
+          0x8010A468); 86 B vendor-identical (GZF FUN_8010a410 decompile).
+          fn_dd1c_gap.S: vendor [0x3D80,0x3FB0) pools incl. 0x8010a469 → fn_a410+1
+          @ 0x3f30; linker scatter in rtl8761bu.ld. GZF entry 0x8010a410 vs EPatch
+          body @ +0x468 documented. → reverse_engineering_sco_esco_layer.md (Group W)
+[NEXT]  fn_b7d4 (22 B) — ACL slot lookup wrapper
 [TODO]  fn_b5d8 (100 B) — eSCO connection activator
 [TODO]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
 [TODO]  fn_10868 (322 B) — codec frame ring-buffer scheduler

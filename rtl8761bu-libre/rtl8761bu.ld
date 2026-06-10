@@ -43,10 +43,11 @@
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
+ *   [0x3D80, …)     fn_dd1c_gap vendor pools + dd1c tail (fn_dd1c_gap.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
- *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c (t2_hooks.S; past FC20 / overlay)
+ *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 (t2_hooks.S; past FC20)
  */
 
 ENTRY(patch_entry)
@@ -140,6 +141,8 @@ SECTIONS {
         KEEP(*(.text.fn_daa4))
         . = __prefix_start + 0x3D1C;
         KEEP(*(.text.fn_dd1c))
+        . = __prefix_start + 0x3D80;
+        KEEP(*(.text.fn_dd1c_gap))
         . = __prefix_start + 0x3FB0;
         KEEP(*(.text.fn_dfb0))
         . = __prefix_start + 0x5884;
