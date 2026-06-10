@@ -19,8 +19,10 @@
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
  *   [0x17F0, …)     fn_b7f0 LMP eSCO packet processor (t2_hooks.S)
  *   [0x1CE0, …)     fn_bce0 eSCO slot capability mask (t2_hooks.S)
+ *   [0x1DA0, …)     fn_bda0 SCO/eSCO acceptance validator (t2_hooks.S)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
  *   [0x0BD0, …)     fn_abd0 eSCO audio-path dispatcher (t2_hooks.S, overlays tail)
+ *   [0x209C, …)     fn_c09c per-link BB reg 0xf gate (t2_hooks.S)
  *   [0x20F4, …)     fn_c0f4 eSCO-adjacent capability gate (t2_hooks.S)
  *   [0x2160, …)     fn_c160 eSCO slot indirect-call stub (t2_hooks.S)
  *   [0x2172, …)     fn_c160_gap literal pool tail (t2_hooks.S)
@@ -89,8 +91,12 @@ SECTIONS {
         KEEP(*(.text.fn_b7f0))
         . = __prefix_start + 0x1CE0;
         KEEP(*(.text.fn_bce0))
+        . = __prefix_start + 0x1DA0;
+        KEEP(*(.text.fn_bda0))
         . = __prefix_start + 0x1E20;
         KEEP(*(.text.fn_be20))
+        . = __prefix_start + 0x209C;
+        KEEP(*(.text.fn_c09c))
         . = __prefix_start + 0x20F4;
         KEEP(*(.text.fn_c0f4))
         . = __prefix_start + 0x2160;

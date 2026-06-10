@@ -104,7 +104,7 @@ patch_entry:
 
 	CALL_PATCH fn_version_check
 
-	INSTALL_HOOK_ABS 0x80121334, 0x8010c09c
+	INSTALL_HOOK 0x80121334, fn_c09c
 	INSTALL_HOOK_ABS 0x801206c8, 0x8010bc74
 
 	CALL_PATCH fn_tlv_applier

@@ -2519,3 +2519,48 @@ Installed at RAM slot `0x80120bfc` (installer installs with `fn_a5ac` @
 `.text.fn_c854` in `.text.hooks` (native `0x8010C854` past 27,808 B FC20
 window). `init.S`: `INSTALL_HOOK 0x80120bfc, fn_c854` (was `INSTALL_HOOK_ABS`).
 Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.
+
+---
+
+## Group S — Per-Link BB Reg 0xf Gate (2026-06-10)
+
+### `FUN_8010c09c` (76 B) — capability downgrade on BB register 0x0f
+
+If `config_base+0x7a` bit 5 is clear, reads baseband register `0x0f` at
+connection index `*(byte*)(param_1+2)` via ROM hw-read fn-ptr in literal pool,
+then writes `val & 0xce03` (clears feature bits 2–8 and 12–13). Returns 0.
+
+**Literal pool @ +0x48:** `config_base` `0x80120070`, mask `0xce03`, ROM
+hw-read `0x8001136d`, hw-write `0x8001139d`.
+
+Installed at RAM slot `0x80121334` (early install batch in patch entry tail).
+
+**Libre:** `src/t2_hooks.S` — 76 B vendor byte-identical transcription;
+vendor-fixed linker scatter @ PRAM+`0x209C` (runtime `0x8010C09C`, within FC20
+window). `init.S`: `INSTALL_HOOK 0x80121334, fn_c09c` (was `INSTALL_HOOK_ABS`).
+Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.
+
+---
+
+## Group T — SCO/eSCO Acceptance Validator (2026-06-10)
+
+### `FUN_8010bda0` (114 B) — incoming SCO/eSCO setup gate
+
+Validates whether local state permits accepting an incoming SCO/eSCO negotiation.
+If `conn+0x20` bit 1 (SCO-enable) is clear and the PDU is not the eSCO type-3
+exception path (`type==3` with nonzero byte @ `pdu+3`), returns reject: sets
+`*result=0x12` (unsupported feature), builds reject buffer via ROM helper, sends
+LMP opcode `0xe` (4-byte PDU). Accept path: when `conn+0x50` chain and
+`+0x24` are set and `conn+0x20` bit 4 with `type==3`, clears byte `+0x11` on
+the linked record via ROM lookup fn-ptr in pool.
+
+**Literal pool @ +0x72:** ROM LMP reject builder, LMP send `0x8001d071`, linked
+record getter `0x8004e2d1`, scratch `0x8012382c`.
+
+Installed at RAM slot `0x80121220` (hook install #43; pool entries
+`0x8010a3d8` / `0x8010a3dc` in PE-2 literal pool).
+
+**Libre:** `src/t2_hooks.S` — 114 B vendor byte-identical transcription;
+vendor-fixed linker scatter @ PRAM+`0x1DA0` (runtime `0x8010BDA0`, within FC20
+window). Install remains in transcribed `patch_entry` pool/tail (native handler
+addr). Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.

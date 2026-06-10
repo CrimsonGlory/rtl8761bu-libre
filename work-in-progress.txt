@@ -994,12 +994,24 @@ T2 hook installs (replace stubs):
           0/2/7), ROM ind calls + HCI evt 0xfa log; pool @ +0x166 (0x8010c9bc…f0).
           init.S: INSTALL_HOOK 0x80120bfc, fn_c854 (was ABS). Removed STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group R)
-[NEXT]  fn_c09c (76 B) — per-link BB reg 0xf gate
-[TODO]  fn_bda0 (114 B) — SCO/eSCO acceptance validator
+[DONE]  fn_c09c (76 B) — per-link BB reg 0xf gate (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x209C (runtime 0x8010C09C);
+          76 B byte-identical transcription; linker scatter before fn_c0f4.
+          Decompile: FUN_8010c09c — config+0x7a bit5 gate, ROM hw r/w BB reg 0xf
+          at conn index, mask 0xce03; pool @ +0x48. init.S: INSTALL_HOOK
+          0x80121334, fn_c09c. Removed hook_stubs STUB_RET.
+          → reverse_engineering_sco_esco_layer.md (Group S)
+[DONE]  fn_bda0 (114 B) — SCO/eSCO acceptance validator (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x1DA0 (runtime 0x8010BDA0);
+          114 B byte-identical transcription; linker scatter between fn_bce0 and
+          fn_be20 in rtl8761bu.ld. Decompile: FUN_8010bda0 — SCO-enable flag gate,
+          LMP reject 0x12/opcode 0xe on deny, linked-record update on type-3 eSCO;
+          pool @ +0x72. Installed @ RAM 0x80121220 (hook #43, PE-2 pool a3d8/a3dc).
+          Removed hook_stubs.S STUB_RET. → reverse_engineering_sco_esco_layer.md (Group T)
 
 T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
 [DONE]  fn_a6ec, fn_a5d8 — patch_entry_helpers.S
-[TODO]  fn_a84c (450 B) — SCO/eSCO connection response
+[NEXT]  fn_a84c (450 B) — SCO/eSCO connection response
 [TODO]  fn_aa58 (96 B) — SCO continuation handler
 [TODO]  fn_a410 (86 B) — HW reg 0x11C codec mode
 [TODO]  fn_b7d4 (22 B) — ACL slot lookup wrapper

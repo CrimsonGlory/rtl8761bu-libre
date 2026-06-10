@@ -20,14 +20,14 @@
 	.section	.text.hooks
 
 	/* fn_b0a4 @ PRAM+0x10A4, fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S */
-	/* fn_b174 @ PRAM+0x1174, fn_b7f0 @ PRAM+0x17F0, fn_c0f4 @ PRAM+0x20F4, fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S */
+	/* fn_b174 @ PRAM+0x1174, fn_b7f0 @ PRAM+0x17F0, fn_c09c @ PRAM+0x209C, fn_c0f4 @ PRAM+0x20F4, fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S */
 	/* fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	/* fn_c198 @ PRAM+0x2198, fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S */
 	/* fn_d1f4 @ PRAM+0x31F4 — t1_hooks.S */
 	/* fn_c780 @ PRAM+0x2780, fn_c63c @ PRAM+0x263C — t1_hooks.S */
 	/* fn_dd1c @ PRAM+0x3D1C, fn_d890 @ PRAM+0x3890, fn_d618 @ PRAM+0x3618 — t1_hooks.S */
 	/* fn_a594 @ PRAM+0x0594, fn_a49c @ PRAM+0x049C — t1_hooks.S (pool overlay) */
-	/* fn_a4ac @ PRAM+0x04AC, fn_a550 @ PRAM+0x0550, fn_a5ac @ PRAM+0x05AC, fn_bce0 @ PRAM+0x1CE0, fn_abd0 @ PRAM+0xBD0, fn_f884 @ PRAM+0x5884, fn_b4d0 — t2_hooks.S */
+	/* fn_a4ac @ PRAM+0x04AC, fn_a550 @ PRAM+0x0550, fn_a5ac @ PRAM+0x05AC, fn_bce0 @ PRAM+0x1CE0, fn_bda0 @ PRAM+0x1DA0, fn_abd0 @ PRAM+0xBD0, fn_f884 @ PRAM+0x5884, fn_b4d0 — t2_hooks.S */
 	/* fn_c160 @ PRAM+0x2160, fn_c178 @ PRAM+0x2178, fn_c854 — t2_hooks.S */
 	/* fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S */
 	STUB_RET	fn_d168
@@ -35,10 +35,8 @@
 	STUB_RET	fn_f950
 	STUB_RET	fn_fb08
 	STUB_RET	fn_f85c
-	STUB_RET	fn_c09c
 	STUB_RET	fn_ce0c
 	STUB_RET	fn_10ddc
-	STUB_RET	fn_bda0
 	STUB_RET	fn_e350
 	STUB_RET	fn_10ca4
 	STUB_RET	fn_e82c
