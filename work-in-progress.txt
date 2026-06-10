@@ -1172,11 +1172,14 @@ Explicitly omit for P2 (T3 — defer to Phase 8.4): all transcribed in Phase 8.4
 
 P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
 
-[NEXT]  Sub-installer #2: implement sub2_fn_00 … sub2_fn_18 (19 targets)
-          Installer loop done; all 19 bodies still STUB_RET. Decompile each via
-          GZF (vendor_t1_manifest.py offsets). Conservative: IMPL-T4; hardware
-          may prove subset optional for P2/P3.
-[TODO]  fn_10ddc (~448 B, hook #42) — only T4-marked direct install; relocated
+[DONE]  Sub-installer #2: implement sub2_fn_00 … sub2_fn_18 (19 targets) (2026-06-10)
+          src/sub2_hooks.S: 548 B vendor byte-identical @ native PRAM 0x8010FE84–
+          0x80110740; scripts/gen_sub2_hooks_asm.py; linker scatter in rtl8761bu.ld.
+          Relocated overlapping T2 callees (fn_b4d0/fn_aa58/fn_c854/fn_a84c/fn_10868).
+          verify: 19/19 regions match vendor patch1; make docker + compliance-ci PASS.
+          PRAM code 27680 B (+548 vs stubs); patch1 sha 9809d666…; fw sha 0220415a….
+          → analysis/reverse_engineering_sub_installers.md (libre impl table)
+[NEXT]  fn_10ddc (~448 B, hook #42) — only T4-marked direct install; relocated
           to 0x8010AE4C (overlaps libre installer at native offset). RE purpose.
 [TODO]  fn_10ca4 (178 B) — sub-inst #3 target; runtime past nominal patch1 end
 [TODO]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)

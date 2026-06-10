@@ -42,23 +42,4 @@
 	/* fn_da70 @ PRAM+0x3A70 — protocol_dispatch.S */
 	/* fn_ca20 @ PRAM+0x2A20 — protocol_dispatch.S (534 B IMPL-T3) */
 
-	/* sub-installer #2 targets — stubs until individually implemented */
-	STUB_RET	sub2_fn_00
-	STUB_RET	sub2_fn_01
-	STUB_RET	sub2_fn_02
-	STUB_RET	sub2_fn_03
-	STUB_RET	sub2_fn_04
-	STUB_RET	sub2_fn_05
-	STUB_RET	sub2_fn_06
-	STUB_RET	sub2_fn_07
-	STUB_RET	sub2_fn_08
-	STUB_RET	sub2_fn_09
-	STUB_RET	sub2_fn_10
-	STUB_RET	sub2_fn_11
-	STUB_RET	sub2_fn_12
-	STUB_RET	sub2_fn_13
-	STUB_RET	sub2_fn_14
-	STUB_RET	sub2_fn_15
-	STUB_RET	sub2_fn_16
-	STUB_RET	sub2_fn_17
-	STUB_RET	sub2_fn_18
+	/* sub-installer #2 targets (19) — sub2_hooks.S @ vendor-fixed PRAM offsets */

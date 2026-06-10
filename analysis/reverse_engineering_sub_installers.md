@@ -195,6 +195,47 @@ Installs 19 function pointers into RAM locations (all in the 0x80120600–0x8012
 
 None of these destination addresses is `0x801212e4`.
 
+#### Libre implementation (2026-06-10)
+
+All 19 handler bodies transcribed byte-identically from vendor patch1 into
+`src/sub2_hooks.S` (`sub2_fn_00` … `sub2_fn_18`). Regenerator:
+`scripts/gen_sub2_hooks_asm.py`. Linker scatter in `rtl8761bu.ld` places each
+section at native PRAM offset (runtime `0x8010FE84`–`0x80110740`); `sub_installer_2`
+literal pool already points at these addresses (+1 MIPS16e).
+
+| Libre symbol | Runtime | Size | DRAM slot (even) |
+|--------------|---------|------|------------------|
+| sub2_fn_00 | 0x801102F0 | 32 | 0x80121100 |
+| sub2_fn_01 | 0x801100BC | 20 | 0x801210F4 |
+| sub2_fn_02 | 0x80110724 | 28 | 0x801205F8 |
+| sub2_fn_03 | 0x8011021C | 36 | 0x801205B0 |
+| sub2_fn_04 | 0x8010FF08 | 32 | 0x801205A0 |
+| sub2_fn_05 | 0x801106BC | 28 | 0x801205AC |
+| sub2_fn_06 | 0x801105E8 | 24 | 0x8012063C |
+| sub2_fn_07 | 0x8010FF28 | 32 | 0x80120644 |
+| sub2_fn_08 | 0x801105BC | 28 | 0x80120628 |
+| sub2_fn_09 | 0x8010FED8 | 32 | 0x80120634 |
+| sub2_fn_10 | 0x8010FFCC | 28 | 0x80120624 |
+| sub2_fn_11 | 0x80110310 | 32 | 0x80120608 |
+| sub2_fn_12 | 0x8011006C | 28 | 0x80120648 |
+| sub2_fn_13 | 0x80110700 | 28 | 0x801205D0 |
+| sub2_fn_14 | 0x8011057C | 28 | 0x801205D8 |
+| sub2_fn_15 | 0x80110044 | 28 | 0x801205E0 |
+| sub2_fn_16 | 0x8010FE84 | 28 | 0x801205C4 |
+| sub2_fn_17 | 0x80110640 | 28 | 0x801205FC |
+| sub2_fn_18 | 0x80110364 | 28 | 0x80120600 |
+
+548 B total code. `make diff-prefix` equivalent: 19/19 regions 0 diffs vs vendor
+patch1 at native offsets (2026-06-10).
+
+**Linker note:** T2 callees `fn_a84c` / `fn_c854` / `fn_10868` / `fn_b4d0` /
+`fn_aa58` previously packed into `0x8010FD60+` overlapped this region; relocated
+to `0x8010FD60` (b4d0), `0x8010FF48` (aa58 gap), `0x80106740+` (c854/a84c/10868).
+DRAM installs use symbol `+1` — relocation is safe.
+
+Per-function decompile summaries remain T4 follow-up (Ghidra DATA block); bodies
+are vendor-identical pending individual RE tickets.
+
 ### Sub-installer #3 — FUN_8010fc58 (22 bytes): Single fn-ptr install + call
 
 ```c

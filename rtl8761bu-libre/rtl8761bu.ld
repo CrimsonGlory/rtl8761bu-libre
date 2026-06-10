@@ -64,8 +64,12 @@
  *   [0x5A34, …)     fn_fa34 AFH 79-ch map merger (t3_hooks.S)
  *   [0x5AEC, …)     fn_fa34_gap vendor pool tail (t3_hooks.S)
  *   [0x5B08, …)     fn_fb08 BLE 40-ch map aggregator (t3_hooks.S)
+ *   [0x5C2C, …)     shims / version_check / lmp_vsc (.text.hooks)
+ *   [0x5D60, …)     fn_b4d0 (relocated; sub2 uses native 0x5E84+)
+ *   [0x5E84, …)     sub2_fn_00..18 (sub2_hooks.S; sub-inst #2 targets)
+ *   [0x5F48, …)     fn_aa58 (relocated into sub2 interstitial gap)
+ *   [0x6740, …)     fn_c854 / fn_a84c / fn_10868 (relocated post-sub2)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
- *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c / fn_aa58 / fn_10868 (t2_hooks.S; past FC20)
  */
 
 ENTRY(patch_entry)
@@ -207,6 +211,57 @@ SECTIONS {
         KEEP(*(.text.fn_fb08))
 
         *(.text.hooks)
+        . = __prefix_start + 0x5D60;
+        KEEP(*(.text.fn_b4d0))
+
+        /* sub-installer #2 targets — vendor-fixed @ 0x8010FE84–0x80110740 */
+        . = __prefix_start + 0x5E84;
+        KEEP(*(.text.sub2_fn_16))
+        . = __prefix_start + 0x5ED8;
+        KEEP(*(.text.sub2_fn_09))
+        . = __prefix_start + 0x5F08;
+        KEEP(*(.text.sub2_fn_04))
+        . = __prefix_start + 0x5F28;
+        KEEP(*(.text.sub2_fn_07))
+        . = __prefix_start + 0x5F48;
+        KEEP(*(.text.fn_aa58))
+        . = __prefix_start + 0x5FCC;
+        KEEP(*(.text.sub2_fn_10))
+        . = __prefix_start + 0x6044;
+        KEEP(*(.text.sub2_fn_15))
+        . = __prefix_start + 0x606C;
+        KEEP(*(.text.sub2_fn_12))
+        . = __prefix_start + 0x60BC;
+        KEEP(*(.text.sub2_fn_01))
+        . = __prefix_start + 0x621C;
+        KEEP(*(.text.sub2_fn_03))
+        . = __prefix_start + 0x62F0;
+        KEEP(*(.text.sub2_fn_00))
+        . = __prefix_start + 0x6310;
+        KEEP(*(.text.sub2_fn_11))
+        . = __prefix_start + 0x6364;
+        KEEP(*(.text.sub2_fn_18))
+        . = __prefix_start + 0x657C;
+        KEEP(*(.text.sub2_fn_14))
+        . = __prefix_start + 0x65BC;
+        KEEP(*(.text.sub2_fn_08))
+        . = __prefix_start + 0x65E8;
+        KEEP(*(.text.sub2_fn_06))
+        . = __prefix_start + 0x6640;
+        KEEP(*(.text.sub2_fn_17))
+        . = __prefix_start + 0x66BC;
+        KEEP(*(.text.sub2_fn_05))
+        . = __prefix_start + 0x6700;
+        KEEP(*(.text.sub2_fn_13))
+        . = __prefix_start + 0x6724;
+        KEEP(*(.text.sub2_fn_02))
+        . = __prefix_start + 0x6740;
+        KEEP(*(.text.fn_c854))
+        . = __prefix_start + 0x690C;
+        KEEP(*(.text.fn_a84c))
+        . = __prefix_start + 0x6ACE;
+        KEEP(*(.text.fn_10868))
+
         *(.text)
         *(.rodata .rodata.*)
         . = ALIGN(4);
