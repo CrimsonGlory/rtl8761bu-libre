@@ -2736,3 +2736,31 @@ Pool words `DAT_8010d1dc`…`DAT_8010d1f0` also hold AFH channel bitmask constan
 PRAM+`0x3168`; linker scatter in `rtl8761bu.ld` between `fn_ca20` and `fn_d1f4`.
 Removed `STUB_RET` from `hook_stubs.S`. `make diff-prefix` @ `[0x3168,0x31F4)`:
 0/140 match vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
+
+---
+
+## Group Z — AFH 79-Channel Map Merger (2026-06-10)
+
+### `FUN_8010fa34` (184 B) — AFH channel map AND + min-20 enforcement
+
+**Install slot:** RAM `0x801213e8` (`FUN_8010a000` Phase 1 hook #26; pool refs
+`a320` / `a324` in `patch_entry_pool.S`).
+**PRAM body:** runtime `0x8010FA34` (file offset `0x5A34` in patch1); follows
+`FUN_8010F884` @ PRAM+`0x5884` with `FUN_8010F950` @ PRAM+`0x5950` still pending.
+
+**Layout:** ~152 B MIPS16e body + 32 B literal pool @ body `+0xB8` (`0x8010FAEC`…).
+
+**Semantics (Ghidra decompile, documented § FUN_8010fa34 above):** On first call
+copies 10-byte reference map to local/working buffers; on subsequent calls ANDs
+reference ∩ local ∩ hardware-forbidden mask, popcounts usable channels, falls back
+to unfiltered local if count `< 20`, copies 10-byte result to `dst`, optional notify
+when `trigger==1`. Implements BT Core Spec §4.2.27 AFH map update.
+
+**Pool @ +0xB8:** `PTR_PTR_8010faf0` (local + working map ptrs), `PTR_DAT_8010faf4`
+(reference map), `PTR_DAT_8010faf8` (forbidden mask), ROM `memcpy` / popcount /
+notify fn-ptrs.
+
+**Libre:** `src/t3_hooks.S` — 184 B byte-identical vendor transcription @
+PRAM+`0x5A34`; linker scatter in `rtl8761bu.ld` after `fn_f884`. Removed
+`STUB_RET` from `hook_stubs.S`. Prefix `[0x5A34,0x5AEC)` 0/184 match vs NF_REF.
+Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
