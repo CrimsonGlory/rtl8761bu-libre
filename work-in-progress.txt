@@ -1179,9 +1179,15 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           verify: 19/19 regions match vendor patch1; make docker + compliance-ci PASS.
           PRAM code 27680 B (+548 vs stubs); patch1 sha 9809d666…; fw sha 0220415a….
           → analysis/reverse_engineering_sub_installers.md (libre impl table)
-[NEXT]  fn_10ddc (~448 B, hook #42) — only T4-marked direct install; relocated
-          to 0x8010AE4C (overlaps libre installer at native offset). RE purpose.
-[TODO]  fn_10ca4 (178 B) — sub-inst #3 target; runtime past nominal patch1 end
+[DONE]  fn_10ddc (~448 B, hook #42) — only T4-marked direct install (2026-06-10)
+          src/t4_hooks.S: GZF FUN_80110ddc decompile — eSCO packet-type selector
+          (large2 stride 0x2b8, conn types 0xA000/B000/E000/F000, cap-bit matrix
+          → type 0x3–0x4b, ROM LMP opcode 0x286 tail). Relocated PRAM+0x0E4C
+          (native 0x09F8 overlaps installer tail); fn_10ddc_gap [0x100C,0x10A4);
+          pool 0x8010a3f4 → 0x8010ae4d. Installed @ RAM 0x80121020 (hook #42).
+          make docker + compliance-ci PASS; fn@E4C 0/448 vs vendor native.
+          → reverse_engineering_sco_esco_layer.md (Group AF)
+[NEXT]  fn_10ca4 (178 B) — sub-inst #3 target; runtime past nominal patch1 end
 [TODO]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)
 [TODO]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
 [TODO]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)

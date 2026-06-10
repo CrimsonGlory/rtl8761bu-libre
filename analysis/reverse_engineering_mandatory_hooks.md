@@ -128,7 +128,7 @@ requiring a real implementation (SHIM counts as implemented).
 | 39 | `0x80121334` | `FUN_8010c09c` | 76 B | T2 | **IMPL-T2** | Per-link BB reg `0xf` gate |
 | 40 | `bos+0x1c` | `LAB_8010bc74` | ? | T1 | **IMPL-T1** | bos_base hook |
 | 41 | `0x80120cdc` | `FUN_8010ce0c` | 728 B | T3 | **IMPL-T3** | AFH capability mapper |
-| 42 | `0x80121020` | `FUN_80110ddc` | ? | T4 | **IMPL-T4** | Late install; purpose unknown |
+| 42 | `0x80121020` | `FUN_80110ddc` | 448 B | T4 | **IMPL-T4** | eSCO packet-type selector (relocated @ PRAM+0x0E4C) |
 | 43 | `0x80121220` | `FUN_8010bda0` | 114 B | T2 | **IMPL-T2** | SCO/eSCO acceptance validator |
 | 44 | `0x8012167c` | `FUN_8010e350` | 1174 B | T3 | **IMPL-T3** | AFH quality ranking engine |
 
@@ -266,7 +266,7 @@ For `patch_entry` replicating `FUN_8010a000`:
 2. Decompile **sub-installer #2**'s 19 targets — required for P4; may affect P1
    if any slot is on the ACL critical path.
 3. Hardware test: confirm **P1 works with `bos+0xd8` NULL** (ACL-only, no eSCO).
-4. Resolve **`FUN_80110ddc`** (hook #42) — only T4-marked direct install.
+4. ~~Resolve **`FUN_80110ddc`** (hook #42)~~ — **DONE** (2026-06-10): eSCO packet-type selector; `t4_hooks.S`.
 5. **Address-pair table** — remain omitted until purpose known.
 
 ---

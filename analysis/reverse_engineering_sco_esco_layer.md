@@ -2890,3 +2890,46 @@ minimum after masking. See §FUN_8010e350 above for full pseudocode.
 linker scatter in `rtl8761bu.ld` between `fn_dfb0` and `fn_f85c`. Removed
 `STUB_RET fn_e350` from `hook_stubs.S`. Prefix `[0x41C2,0x585C)` 0/5786 diffs
 vs NF_REF (`pre_gap` 0/398, `fn_e350` 0/1174, `post_gap` 0/4214). Tier **T3**.
+
+---
+
+## Group AF — eSCO Packet-Type Selector `FUN_80110ddc` (2026-06-10)
+
+### `FUN_80110ddc` (448 B) — hook #42, only T4-marked direct install
+
+**Ghidra:** `DecompileAddr.java` @ `0x80110ddc` (GZF DATA block, 448 B).
+
+**Install slot:** RAM `0x80121020` (`FUN_8010a000` hook #42; pool `a3d0` / `a3d4`
+→ `0x8010a3f4` = `fn_10ddc+1`).
+
+**Native vs relocated PRAM:** Vendor places the body at PRAM+`0x09F8` inside the
+installer-tail / sub-installer overlap region (same physical bytes also cover
+`sub_installer_5`…`fn_rf_init` entry points — entered only via fixed offsets, not
+fall-through). Libre links the 448 B transcription at **PRAM+`0x0E4C`** with
+`fn_10ddc_gap` @ [`0x100C`,`0x10A4`) (152 B vendor bridge before `fn_b0a4`).
+Pool word @ `0x8010a3f4` updated `0x8010a9f9` → `0x8010ae4d`.
+
+**Semantics:** Late-install eSCO **packet-type negotiator** (sibling to
+`FUN_80109c08` / `fn_a4ac` readiness gate). On call `(param_1, param_2≠0,
+param_3, conn_rec*)`:
+
+1. Index `conn_rec+0x2c` into **large2** stride-`0x2b8` (`0x8012382c`); read
+   `+0xd0` flag and `+0x250` capability halfword.
+2. If `+0xd0==1`, set base nibble mask `0xc0` (merged into result).
+3. ROM BB register read index `0x290`; abort if read fails or global enable
+   (`*PTR_DAT_80110fa4)==0`.
+4. Gate on `conn_rec+0x36==0`; load per-link caps `+0x250` and connection type
+   `+0x28` (`0xA000` ACL, `0xB000`, `0xE000` eSCO, `0xF000`).
+5. Large `if/else` on cap bits (`0x2/0x4/0x8/0x10/0x100/0x200/0x400/0x800`) and
+   timing halfword `conn_rec+0x26` thresholds → packet-type code in `s0`
+   (`0x3/0x4/0x8/0xa/0xb/0x3a–0x4b`, etc.).
+6. Tail: ROM helper `DAT_80110fa8(param_2,param_3)`; then indirect call via
+   `DAT_80110fac` or `DAT_80110fb0` with LMP opcode `0x286` and merged type.
+
+**Literal pool (embedded, PC-relative):** `PTR_big_ol_struct` → `0x8012382c`;
+`DAT_80110fa0` ROM HW read; `DAT_80110fa4` enable flag; `DAT_80110fa8` cap
+classifier; `DAT_80110fac` / `DAT_80110fb0` ROM LMP TX helpers.
+
+**Libre:** `src/t4_hooks.S` (`scripts/gen_fn_10ddc_asm.py`); linker scatter @
+PRAM+`0x0E4C`; `patch_entry_pool.S` pool fix. `fn@0x0E4C` 0/448 diffs vs vendor
+native `0x09F8`; gap 0/152. Tier **T4** (`IMPL-T4` in `mandatory_hooks.md`).

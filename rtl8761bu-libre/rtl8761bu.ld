@@ -12,6 +12,8 @@
  *   [0x0754, 0x0764) fn_bss_init
  *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
  *   [0x0820, 0x0E4C) patch_entry tail
+ *   [0x0E4C, 0x100C) fn_10ddc eSCO packet-type selector (t4_hooks.S; relocated)
+ *   [0x100C, 0x10A4) fn_10ddc_gap vendor bridge (t4_hooks.S)
  *   [0x1174, …)     fn_b174 sec_base+0x14 hook (t2_hooks.S)
  *   [0x10A4, …)     fn_b0a4 ACL packet-type flag corrector (t1_hooks.S)
  *   [0x1118, …)     fn_b118 slot interval allocator (t1_hooks.S)
@@ -98,6 +100,9 @@ SECTIONS {
         . = __prefix_start + 0xD0C;
         *(.text.installer_tail_cont)
         . = __prefix_start + 0xE4C;
+        KEEP(*(.text.fn_10ddc))
+        . = __prefix_start + 0x100C;
+        KEEP(*(.text.fn_10ddc_gap))
         __prefix_end = .;
 
         /* Vendor-fixed offsets (fn_e27c literal pool → 0x8010xxxx) */
