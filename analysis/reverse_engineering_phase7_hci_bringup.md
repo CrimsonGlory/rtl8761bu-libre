@@ -3,8 +3,8 @@
 **Goal**: Confirm the libre firmware exposes a working Bluetooth controller to
 userspace after FC20 load — not merely that the patch downloads without timeout.
 
-**Scope (this step)**: `hciconfig`, `hcitool scan` / inquiry. ACL connect is already
-exercised on the production profile; BT 5.1 feature advertisement is the next WIP item.
+**Scope**: `hciconfig`, `hcitool scan`, BT 5.1 feature verification, A2DP audio.
+SCO/eSCO voice and linux-libre compliance are noted separately.
 
 ---
 
@@ -65,19 +65,80 @@ explicitly.
 
 ---
 
-## 3. Partial evidence (2026-06-09)
+## 3. Verified results (2026-06-09)
 
-From `.cursor/skills/ub500-hardware-test/results.md` on profile `7f051e64…`:
+Profile `7f051e64…` on NeoPC — **signed off** (Tier A–C):
 
 | Test | Result |
 |------|--------|
 | FC20 | **PASS** |
 | `fw version` | `0x09a98a6b` |
-| `bluetoothctl connect` | **PASS** → `88:C9:E8:6B:F9:1E` |
-| `hciconfig` / `hcitool scan` | **Not recorded** |
+| `hciconfig hci0` | **PASS** — `UP RUNNING`, BD_ADDR `A8:29:48:6A:97:9D` |
+| HCI / LMP | **5.1** (0xa); LMP subversion `0x8a6b` |
+| `hcitool scan` | **PASS** — `08:28:02:B2:5D:5E ADMIRAL TV` |
+| `bluetoothctl connect` | **PASS** after `hciconfig up` + retry; 1st attempt often `page-timeout` |
 
-**Status**: HCI bring-up is **not signed off** until Tier B + C are run on NeoPC and
-logged in `results.md`.
+**Quirk**: immediate connect after USB replug frequently fails with
+`br-connection-page-timeout`; `sudo hciconfig hci0 up` then retry succeeds. Same
+behaviour may affect `try_new_firmware.sh` auto-connect — not a firmware load failure.
+
+**Status**: HCI bring-up **complete**. BT 5.1 feature verification **complete** (§7).
+
+---
+
+## 7. BT 5.1 feature verification (2026-06-09)
+
+Profile `7f051e64…`, same NeoPC session as §3.
+
+### Pass criteria
+
+| Check | Source | Pass |
+|-------|--------|------|
+| HCI version ≥ 5.1 | `hciconfig -a` | **5.1** (0xa), revision 0x9a9 |
+| LMP version ≥ 5.1 | `hciconfig -a` | **5.1** (0xa), subversion 0x8a6b |
+| Dual-role capable | `bluetoothctl show` | central + peripheral |
+| LE extended advertising | `bluetoothctl show` | SupportedInstances: **4** |
+| LE PHY beyond 1M | `bluetoothctl show` | Secondary channels: **2M**, **Coded** |
+| Adv data elements | `bluetoothctl show` | tx-power, appearance, local-name |
+
+### Observed `bluetoothctl show` (excerpt)
+
+```
+Controller A8:29:48:6A:97:9D (public)
+        Powered: yes
+        Roles: central
+        Roles: peripheral
+Advertising Features:
+        SupportedInstances: 0x04 (4)
+        SupportedIncludes: tx-power
+        SupportedIncludes: appearance
+        SupportedIncludes: local-name
+        SupportedSecondaryChannels: 1M
+        SupportedSecondaryChannels: 2M
+        SupportedSecondaryChannels: Coded
+```
+
+RTL8761BU silicon is BT **5.1** (not 5.3/5.4 as some dongle packaging claims).
+Libre patch does not regress version reporting or LE capability advertisement vs
+vendor baseline (`fw version 0x09a98a6b`).
+
+**Status**: BT 5.1 feature advertisement **signed off**.
+
+---
+
+## 8. Audio playback (2026-06-09)
+
+Profile `7f051e64…`, same NeoPC session.
+
+| Test | Result |
+|------|--------|
+| Headset pairing | Pre-existing (paired under vendor blob) |
+| A2DP music playback | **PASS** — user confirms audio works on libre fw |
+| SCO/eSCO voice (HFP/HSP) | **Not tested** — music path only |
+
+Libre patch includes eSCO negotiator `FUN_80109c08` @ `0x80109c08`; A2DP success
+indicates ACL + audio profile stack is functional. Voice-call / eSCO slot budget
+remains unverified on hardware.
 
 ---
 
@@ -86,10 +147,12 @@ logged in `results.md`.
 Device: TP-Link UB500 (`2357:0604`). Firmware is already staged on daas-dev.
 
 ```bash
-# On NeoPC — flash staged blobs
+# On NeoPC — flash staged blobs (Tier A is in script output; connect at end is optional)
 ./try_new_firmware.sh
+# If auto-connect fails with page-timeout, continue — ensure target BT peer is on/range
+# only if you want to re-test connect. Tier B+C below are the sign-off tests.
 
-# Tier A — kernel
+# Tier A — kernel (if not already captured from script)
 journalctl -k -b --no-pager | grep -E 'RTL|fc20|hci0|Bluetooth'
 
 # Tier B — controller up

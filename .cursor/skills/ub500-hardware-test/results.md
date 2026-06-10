@@ -22,6 +22,10 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | full-inject-t3 (PE-5 libre prefix) | `387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d` | **FC20 timeout** | libre `[0,0x764)` byte-match but `sub_installer_2` linked @ 0x8d0 not 0x764; `patch_entry_tail` wrongly @ 0x764 | 2026-06-09 |
 | full-inject-t3 (PE-5 si2 @ 0x764 fix) | `c14e18f59573fd5777a9bec7554248578edb9d7c779f12821b0bd824dfff3286` | OK (FC20) | `0x09a98a6b`; **HCI hang** `0x2036`/`-110` (libre NOP tail; same as vendor-inst) | 2026-06-09 |
 | full-inject-t3 (PE-5 libre prefix + vendor tail) | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | OK (FC20) | `0x09a98a6b`; **connect OK** `88:C9:E8:6B:F9:1E`; libre `[0,0x764)` + vendor tail `[0xE4C,…)` | 2026-06-09 |
+| full-inject-t3 (PE-5 libre prefix + vendor tail) **retry** | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | OK (FC20) | `0x09a98a6b`; MGMT 1.22; **connect FAIL** `br-connection-page-timeout` (target `88:C9:E8:6B:F9:1E` likely off/range); Tier B/C not run | 2026-06-09 |
+| full-inject-t3 (PE-5) **HCI bring-up sign-off** | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | OK (FC20) | Tier B **PASS** (`UP RUNNING`, BD_ADDR `A8:29:48:6A:97:9D`, HCI/LMP 5.1); Tier C **PASS** (`hcitool scan` → `ADMIRAL TV`); connect OK after `hciconfig up` + retry (1st attempt page-timeout) | 2026-06-09 |
+| full-inject-t3 (PE-5) **BT 5.1 features** | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | OK | HCI/LMP **5.1**; `bluetoothctl show`: central+peripheral; LE adv 2M+Coded PHY, 4 instances, tx-power/appearance/local-name | 2026-06-09 |
+| full-inject-t3 (PE-5) **A2DP audio** | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | OK | Headset paired under vendor blob; **music playback OK** on libre fw (user confirm) | 2026-06-09 |
 | full-inject-t3-vendor-inst | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | OK (FC20) | `0x09a98a6b`; **HCI hang** `0x2036`/`-110` tx timeout; ~15 KB NOP tail still libre | 2026-06-09 |
 | full-inject-t3-vendor-tail | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | OK (FC20) | `0x8d8c8223`; HCI OK; **connect FAIL** `page-timeout` (same as T3) | 2026-06-09 |
 | full-inject-t3-vendor-tail (sub_installer_2 fix) | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | OK (FC20) | `0xa18c9623`; HCI OK; **connect FAIL** `page-timeout` | 2026-06-09 |
@@ -69,7 +73,7 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `b686bc64649986169a8239fdcc11d4ae2f571d8a4b5095e2c87c91b8397d2a91` | full-inject-t3 | FC20 **PASS**; connect **FAIL** |
 | `387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d` | full-inject-t3 PE-5 | FC20 **FAIL** (si2 wrong offset) |
 | `c14e18f59573fd5777a9bec7554248578edb9d7c779f12821b0bd824dfff3286` | full-inject-t3 PE-5 si2 fix | FC20 **PASS**; HCI **FAIL** `0x2036` |
-| `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | PE-5 libre prefix + vendor tail | FC20 **PASS**; connect **OK** |
+| `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` | PE-5 libre prefix + vendor tail | FC20 **PASS**; HCI **PASS**; BT 5.1 **PASS**; A2DP audio **PASS** |
 | `91fe1b2da26fb3c726d6bbb3d9293679820cc54bd0ce1702d267cf76c3d4eb63` | full-inject-t3-vendor-inst | FC20 **PASS**; HCI **FAIL** |
 | `88dd6722353760489bfe3b1d1286404b15a5adeee8d657b0de61e17efdc37d0f` | full-inject-t3-vendor-tail (pre-fix) | FC20 **PASS**; connect **FAIL** |
 | `7feb8b00be4c065c1ef90390d1d0aecd802d9b95b586e0aa34e82be899af93f7` | full-inject-t3-vendor-tail (si2 fix) | FC20 **PASS**; connect **FAIL** |

@@ -722,17 +722,19 @@ PHASE 7 — TEST
           Pass criteria (FC20 / hciconfig / hcitool scan), NeoPC command sequence,
           profile selection, partial evidence table. Explicit scan not yet logged on NeoPC.
           → analysis/reverse_engineering_phase7_hci_bringup.md
-[NEXT]  Verify basic HCI bring-up on NeoPC (hciconfig, hcitool scan)
-          HARDWARE HANDOFF — user action required.
-          Profile: full-inject-t3-pe5-vendor-tail
-          SHA256: 7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab
-          Staged: fw_to_test/rtl8761bu_fw.bin (matches SHA above).
-          Partial evidence: FC20 OK + connect OK on same profile; inquiry/scan not recorded.
-          User: ./try_new_firmware.sh → procedure §4 in phase7 doc → paste journalctl +
-          hciconfig -a + hcitool scan. Agent logs results.md and marks [DONE] on pass.
-[TODO]  Verify BT 5.1 feature advertisement
-[TODO]  Test audio (SCO/eSCO) if applicable
-[TODO]  Run compliance checks against linux-libre blob policy
+[DONE]  Verify basic HCI bring-up on NeoPC (2026-06-09)
+          Profile 7f051e64…: Tier B PASS (UP RUNNING, BD_ADDR A8:29:48:6A:97:9D,
+          HCI/LMP 5.1); Tier C PASS (hcitool scan → ADMIRAL TV); connect OK after
+          hciconfig up + retry (1st try page-timeout quirk). → phase7 doc §3, results.md
+[DONE]  Verify BT 5.1 feature advertisement (2026-06-09)
+          Profile 7f051e64…: HCI/LMP 5.1 (hciconfig); bluetoothctl show — dual role,
+          LE adv 4 instances, 2M+Coded PHY, tx-power/appearance/local-name. → phase7 §7
+[DONE]  Test audio (SCO/eSCO) if applicable (2026-06-09)
+          Profile 7f051e64…: A2DP music playback PASS (headset paired under vendor blob).
+          SCO/eSCO voice path not explicitly tested. → phase7 §8, results.md
+[NEXT]  Run compliance checks against linux-libre blob policy
+          Audit libre build for non-free bytes remaining (vendor tail [0xE4C,…), NF_REF
+          build-time deps, reproducibility, license headers).
 
 
 NOTES
