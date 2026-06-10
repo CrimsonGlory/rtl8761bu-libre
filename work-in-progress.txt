@@ -1187,8 +1187,16 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           pool 0x8010a3f4 → 0x8010ae4d. Installed @ RAM 0x80121020 (hook #42).
           make docker + compliance-ci PASS; fn@E4C 0/448 vs vendor native.
           → reverse_engineering_sco_esco_layer.md (Group AF)
-[NEXT]  fn_10ca4 (178 B) — sub-inst #3 target; runtime past nominal patch1 end
-[TODO]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)
+[DONE]  fn_10ca4 (178 B) — sub-inst #3 target (2026-06-10)
+          src/t4_hooks.S: vendor-fixed @ PRAM+0x6350 (runtime 0x80110350);
+          178 B byte-identical transcription; GZF labels same body @ 0x80110CA4
+          (4 B past FC20). sub2_fn_18 alias @ fn_10ca4+0x14 (was duplicate 28 B
+          in sub2_hooks.S). Decompile: FUN_80110ca4 — bos eSCO/AFH gate, config
+          codec copy, OR bitmask into bos+0x138; pool @ +0xB4.
+          scripts/gen_fn_10ca4_asm.py; linker scatter in rtl8761bu.ld.
+          make docker + compliance-ci PASS; prefix [0x6350,0x6402) 0/178 vs vendor.
+          → reverse_engineering_sub_installers.md (sub-inst #3 libre note)
+[NEXT]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)
 [TODO]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
 [TODO]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
 

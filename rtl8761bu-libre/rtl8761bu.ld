@@ -70,6 +70,7 @@
  *   [0x5D60, …)     fn_b4d0 (relocated; sub2 uses native 0x5E84+)
  *   [0x5E84, …)     sub2_fn_00..18 (sub2_hooks.S; sub-inst #2 targets)
  *   [0x5F48, …)     fn_aa58 (relocated into sub2 interstitial gap)
+ *   [0x6350, 0x6402) fn_10ca4 sub-inst #3 target (t4_hooks.S; sub2_fn_18 @ +0x14)
  *   [0x6740, …)     fn_c854 / fn_a84c / fn_10868 (relocated post-sub2)
  *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
  */
@@ -244,8 +245,8 @@ SECTIONS {
         KEEP(*(.text.sub2_fn_00))
         . = __prefix_start + 0x6310;
         KEEP(*(.text.sub2_fn_11))
-        . = __prefix_start + 0x6364;
-        KEEP(*(.text.sub2_fn_18))
+        . = __prefix_start + 0x6350;
+        KEEP(*(.text.fn_10ca4))
         . = __prefix_start + 0x657C;
         KEEP(*(.text.sub2_fn_14))
         . = __prefix_start + 0x65BC;

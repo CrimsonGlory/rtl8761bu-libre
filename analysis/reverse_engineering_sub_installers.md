@@ -225,8 +225,12 @@ literal pool already points at these addresses (+1 MIPS16e).
 | sub2_fn_17 | 0x80110640 | 28 | 0x801205FC |
 | sub2_fn_18 | 0x80110364 | 28 | 0x80120600 |
 
-548 B total code. `make diff-prefix` equivalent: 19/19 regions 0 diffs vs vendor
-patch1 at native offsets (2026-06-10).
+520 B standalone sub2 bodies + `sub2_fn_18` alias (`fn_10ca4+0x14`, see below).
+18/18 non-overlapping regions 0 diffs vs vendor patch1 (2026-06-10).
+
+**`sub2_fn_18` overlap resolved (2026-06-10):** entry @ `0x80110364` lies inside
+`FUN_80110ca4` (`fn_10ca4` @ PRAM+`0x6350`, 178 B). Duplicate 28 B section removed
+from `sub2_hooks.S`; `.set sub2_fn_18, fn_10ca4 + 0x14` in `t4_hooks.S`.
 
 **Linker note:** T2 callees `fn_a84c` / `fn_c854` / `fn_10868` / `fn_b4d0` /
 `fn_aa58` previously packed into `0x8010FD60+` overlapped this region; relocated
@@ -244,6 +248,16 @@ void FUN_8010fc58(void) {
     (*DAT_8010fc78)();                                        // call another fn via ptr
 }
 ```
+
+**Libre impl (2026-06-10):** `fn_10ca4` in `src/t4_hooks.S` — 178 B vendor-identical
+@ PRAM+`0x6350` (runtime `0x80110350`). GZF labels the same bytes @ `0x80110CA4`
+(4 B past the 27,808 B FC20 window). `patch_entry_tail.S` `sub_installer_3` installs
+`0x80110351` → RAM `0x80120f08`. Decompile (`FUN_80110ca4`): BT-state flag gate
+(`bos+0x164` bit 3); on clear path calls `*DAT_80110d5c` then optionally copies
+eSCO codec params from `config_base+0x1e4/0x1e7` into `bos+0x16a/0x168`; else
+validates large2/AFH idle gates; ORs `0x80110d68` or `0x80110d7c` into `bos+0x138`;
+sets `*param_1=0`, returns 1. Pool @ +`0xB4` (`0x80110D58`…). Regenerator:
+`scripts/gen_fn_10ca4_asm.py`. Verify: prefix [`0x6350`,`0x6402`) 178/178 vs vendor.
 
 ### Sub-installer #4 — FUN_8010f370 (44 bytes): Data-pointer array installer
 
