@@ -1,8 +1,10 @@
 # UB500 test queue — ACTIVE = fw_to_test/rtl8761bu_fw.bin
 # NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
-ACTIVE  p2-libre  8a5893981c90e9f7f939d2807e575da30ab6f707121ac861d932a719e0c635c0  pure-libre P2 (T1+T2; FC20+HCI+ACL+A2DP/eSCO)
-queued  p1-libre  67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a  pure-libre P1 smoke (superseded by p2-libre)
+ACTIVE  p4-libre  ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56  pure-libre P4 (T1+T2+T3+T4+sub2; FC20+HCI+ACL+A2DP+AFH+BLE+reconnect)
+queued  p3-libre  e8c15f3ac6662d43792bebdc28d8f60a1fac935061a5760b8be62149aa8643e2  pure-libre P3 (superseded by p4-libre)
+queued  p2-libre  addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb  pure-libre P2 (superseded by p4-libre)
+queued  p1-libre  67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a  pure-libre P1 smoke (superseded by p4-libre)
 done    full-inject-t3-vendor-tail  4099d4bd6e809cb860f12ebd741b19033a2f660af0bf106d5a08ed0b30beb25c  connect OK
 done    full-inject-t3 PE-5  387e9916d5f5939b6beef8ded8efbd8c5c2bf29f54ac3eff8d854db6028c828d  FC20 FAIL si2 offset
 done    full-inject-t3 PE-5 si2  c14e18f59573fd5777a9bec7554248578edb9d7c779f12821b0bd824dfff3286  FC20 OK HCI 0x2036 FAIL

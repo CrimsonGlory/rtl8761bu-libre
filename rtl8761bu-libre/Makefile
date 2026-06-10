@@ -9,8 +9,8 @@
 #   make verify             — sanity-check header + entry fingerprint
 #
 # Linux-libre release profiles (single-patch, no inject_vendor / NF_REF):
-#   PROFILE=p2-libre (default) — T1+T2+T3 hooks transcribed; sub2 targets still stub
-#   PROFILE=p1-libre           — alias for bisect history (same tree when T2 done)
+#   PROFILE=p4-libre (default) — full parity: T1+T2+T3+T4 + sub2 (100% libre bodies)
+#   PROFILE=p3-libre / p2-libre / p1-libre — tier labels (same source tree; siblings only)
 #
 # FC20 downloads the patch body to 0x8010A000; ROM calls 0x8010A001 (body+0).
 
@@ -47,8 +47,8 @@ BUILD_PROFILE := $(if $(filter $(MINIMAL),null),null-gap,$(if $(MINIMAL),minimal
 else
 LDSCRIPT      := rtl8761bu.ld
 ENTRY_OFFSET  := 0
-# Default release = P2 (T1+T2 libre bodies). Override: make PROFILE=p1-libre
-PROFILE       ?= p2-libre
+# Default release = P4 (full libre parity). Override: make PROFILE=p2-libre
+PROFILE       ?= p4-libre
 BUILD_PROFILE := $(if $(PHASE),phase-$(PHASE),$(if $(filter $(MINIMAL),null),null,$(if $(MINIMAL),minimal,$(PROFILE))))
 endif
 
@@ -83,7 +83,7 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker release p1-libre p2-libre minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci profile-siblings
+.PHONY: all docker release p1-libre p2-libre p3-libre p4-libre minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci profile-siblings
 
 # Docker builds need NF_REF for inject/bisect profiles and diff-prefix (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -91,23 +91,30 @@ DOCKER_NF_ENV := -e NF_REF=/nf_ref/$(notdir $(NF_REF))
 
 all: rtl8761bu_fw.bin rtl8761bu_config.bin profile-siblings
 
-# Default Docker entry: discard stale host build/ then P2 libre build + verify.
+# Default Docker entry: discard stale host build/ then P4 libre build + verify.
 docker: clean all verify
 
 # Linux-libre release path — no NF_REF mount required in Docker.
 release: docker
 
-# Explicit P2 libre ship (same as default `make all`; saves rtl8761bu_fw.p2-libre.bin).
+# Explicit tier libre ship targets (same source tree; profile siblings for staging).
+p4-libre:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p4-libre all verify
+
+p3-libre:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p3-libre all verify
+
 p2-libre:
 	$(MAKE) clean
 	$(MAKE) PROFILE=p2-libre all verify
 
-# P1 bisect label — same source tree once T2 bodies are transcribed.
 p1-libre:
 	$(MAKE) clean
 	$(MAKE) PROFILE=p1-libre all verify
 
-# CI gate: clean build + verify + strict compliance (no NF_REF, p2-libre profile).
+# CI gate: clean build + verify + strict compliance (no NF_REF, p4-libre profile).
 compliance-ci: docker
 	$(PYTHON) scripts/compliance_check.py --no-nf-ref --release --strict
 
@@ -142,6 +149,9 @@ libre-hybrid: build/patch_padded.bin hybrid.py $(NF_REF)
 	@echo "profile=libre-hybrid-$(SPLIT)" > build/.profile
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
 	@sha256sum rtl8761bu_fw.bin
+
+# --- Bisect / hardware only (NF_REF + inject_vendor.py — NOT linux-libre release) ---
+# VENDOR_TAIL_FILL / VENDOR_INSTALLER_PREFIX env vars apply only below.
 
 # Libre installer + vendor T1 hook bodies at native patch1 offsets (connect test)
 full-inject-t1:

@@ -1226,9 +1226,23 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           Protocol dispatch 7/7 IMPL or SHIM; sub2 19/19 IMPL; fn_10ca4/fn_e82c IMPL.
           make docker + compliance-ci PASS; patch1 61d465d6…; fw ea7a5742….
           → analysis/reverse_engineering_p4_hook_audit.md (new)
-[NEXT]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
-[TODO]  Hardware P4 matrix: AFH under Wi-Fi, BLE coexistence, reconnect stress
-[TODO]  make compliance → SHIP: YES on P4 profile; document SHA256 in results.md
+[DONE]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile (2026-06-10)
+          Default PROFILE=p4-libre; explicit p3-libre/p4-libre targets. inject-* moved
+          under Makefile "Bisect only" section. compliance_check.py release gate blocks
+          inject_vendor/VENDOR_TAIL_FILL/patch_injected on release rules; libre audits
+          use patch_padded.bin only. inject_vendor.py docstring marked bisect-only.
+          → analysis/reverse_engineering_linux_libre_compliance.md (inject retirement)
+[BLOCKED]  Hardware P4 matrix: AFH under Wi-Fi, BLE coexistence, reconnect stress (2026-06-10)
+          Awaiting NeoPC try_new_firmware.sh + journalctl/connect paste (no UB500 on daas-dev).
+          **STAGED** — profile `p4-libre` (100% libre parity: T1+T2+T3+T4 + sub2 19/19).
+          SHA256 `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56`
+          → `fw_to_test/rtl8761bu_fw.bin`. Config unchanged (6c28a3f0…).
+          `make compliance-ci`: LINUX-LIBRE PASS (single-patch 27,928 B; patch1 61d465d6…).
+          PRAM 27,680 B code + 124 B NOP pad; 43 IMPL + 1 SHIM hooks; 0 STUB_RET.
+          Pass: FC20 OK, fw 0x09a98a6b, HCI UP, connect, A2DP/SCO, AFH under Wi-Fi,
+          BLE coexistence (fn_ca20), reconnect stress (10× disconnect/reconnect).
+          Resume: user paste → [DONE] or bisect T4 callee gap.
+[NEXT]  make compliance → SHIP: YES on P4 profile; document SHA256 in results.md
 
 Implementation order (summary):
   8.0 compliance gates → 8.1 prefix finish → 8.2 T1 hooks + dispatch →

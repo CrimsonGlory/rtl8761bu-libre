@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-inject_vendor.py — overlay vendor T1 hook bodies into libre patch_padded.bin
+inject_vendor.py — BISECT ONLY — overlay vendor hook bodies into libre patch_padded.bin
+
+Not used by linux-libre release profiles (make all / release / p4-libre).
+Invoked only from Makefile inject-* / hybrid-* targets with NF_REF mounted.
 
 Usage:
   inject_vendor.py <libre_padded.bin> <vendor_fw.bin> <output.bin>
+
+Environment (bisect):
+  VENDOR_TAIL_FILL=1       — copy vendor patch1 [0xE4C, footer)
+  VENDOR_INSTALLER_PREFIX=1 — copy vendor prefix [0, 0xE4C)
+  VENDOR_PREFIX_SPLIT=0xNN — partial vendor prefix (byte-split bisect)
 
 Reads vendor_t1_manifest.VENDOR_OVERLAY; copies bytes from vendor patch1
 at native offsets.  Requires NF_REF vendor image for reference bodies.

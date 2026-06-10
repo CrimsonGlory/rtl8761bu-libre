@@ -146,6 +146,30 @@ CI / `make compliance-ci`: **LINUX-LIBRE: PASS** on current libre release tree.
 
 ---
 
+## inject_vendor retirement (2026-06-10)
+
+`inject_vendor.py` and `VENDOR_TAIL_FILL` are **bisect-only** — not used by any
+linux-libre release profile.
+
+| Release target | Uses inject? |
+|----------------|--------------|
+| `make all` / `docker` / `release` | No — `pack.py` single-patch on `patch_padded.bin` |
+| `make p4-libre` (default `PROFILE`) | No |
+| `make p1-libre` … `p3-libre` | No (tier labels; same libre tree) |
+| `make compliance-ci` | No — audits `patch_padded.bin` only |
+| `make full-inject-*` / `hybrid` / `test-nf` | Yes — hardware bisect only |
+
+`compliance_check.py --release` enforces:
+
+- Release Makefile rules must not reference `inject_vendor`, `VENDOR_TAIL_FILL`,
+  `VENDOR_INSTALLER_PREFIX`, or `patch_injected.bin`.
+- Default profile is `p4-libre` (full libre parity; P4 hook audit complete).
+
+All hook bodies formerly overlaid via `VENDOR_TAIL_FILL` are transcribed in source
+(`t1_hooks.S`, `t2_hooks.S`, `t3_hooks.S`, `t4_hooks.S`, `sub2_hooks.S`).
+
+---
+
 ## Related docs
 
 | File | Topic |

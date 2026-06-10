@@ -67,10 +67,17 @@ NON_LIBRE_PROFILE_PREFIXES = (
     "phase-",
 )
 
-# Default `make all` / `make docker` rules — must not list $(NF_REF).
+# Default `make all` / release rules — must not list $(NF_REF) or inject_vendor.
 RELEASE_MAKEFILE_RULES = (
     "all:",
     "docker:",
+    "release:",
+    "compliance-ci:",
+    "p1-libre:",
+    "p2-libre:",
+    "p3-libre:",
+    "p4-libre:",
+    "profile-siblings:",
     "rtl8761bu_fw.bin:",
     "build/patch.elf:",
     "build/patch.bin:",
@@ -79,14 +86,26 @@ RELEASE_MAKEFILE_RULES = (
     "minimal-null:",
 )
 
+# Forbidden in release Makefile rules (bisect-only via inject-* / hybrid-* targets).
+RELEASE_FORBIDDEN_TOKENS = (
+    "NF_REF",
+    "rtl8761bu-non-free",
+    "inject_vendor",
+    "VENDOR_TAIL_FILL",
+    "VENDOR_INSTALLER_PREFIX",
+    "patch_injected.bin",
+)
+
 # Bisect-only .incbin paths — any other .incbin in src/ fails --release audit.
 ALLOWED_INCBIN: dict[str, frozenset[str]] = {
     "src/installer_vendor_early.S": frozenset({"build/vendor_prefix.bin"}),
 }
 
-LIBRE_RELEASE_PROFILE = "p2-libre"
-# Legacy alias from before Phase 8.3 profile naming.
-LIBRE_RELEASE_PROFILE_ALIASES = frozenset({"full", "p2-libre"})
+LIBRE_RELEASE_PROFILE = "p4-libre"
+# Tier labels share one libre source tree; all are valid release siblings.
+LIBRE_RELEASE_PROFILE_ALIASES = frozenset(
+    {"full", "p1-libre", "p2-libre", "p3-libre", "p4-libre"}
+)
 
 
 def _read_profile(path: Path) -> str:
@@ -115,8 +134,8 @@ def _region_diffs(vendor: bytes, libre: bytes) -> list[tuple[str, int, int, int]
     return out
 
 
-def _audit_makefile_nf_ref(root: Path) -> list[str]:
-    """Verify release targets do not depend on NF_REF / non-free tree."""
+def _audit_makefile_release_rules(root: Path) -> list[str]:
+    """Verify release targets do not depend on NF_REF or inject_vendor overlays."""
     mk_path = root / "Makefile"
     if not mk_path.is_file():
         return ["Makefile missing"]
@@ -127,8 +146,10 @@ def _audit_makefile_nf_ref(root: Path) -> list[str]:
             continue
         if not any(stripped.startswith(rule) for rule in RELEASE_MAKEFILE_RULES):
             continue
-        if "NF_REF" in line or "rtl8761bu-non-free" in line:
-            failures.append(f"release rule must not use NF_REF: {line.strip()}")
+        for token in RELEASE_FORBIDDEN_TOKENS:
+            if token in line:
+                failures.append(f"release rule must not use {token}: {line.strip()}")
+                break
     return failures
 
 
@@ -240,12 +261,16 @@ def main() -> int:
     fw_path = args.fw or (ROOT / "rtl8761bu_fw.bin")
     patch_path = args.patch
     if patch_path is None:
-        for candidate in (ROOT / "build" / "patch_injected.bin", ROOT / "build" / "patch_padded.bin"):
-            if candidate.is_file():
-                patch_path = candidate
-                break
+        padded = ROOT / "build" / "patch_padded.bin"
+        injected = ROOT / "build" / "patch_injected.bin"
+        if _is_non_libre_profile(profile) and injected.is_file():
+            patch_path = injected
+        elif padded.is_file():
+            patch_path = padded
+        elif injected.is_file():
+            patch_path = injected
         else:
-            patch_path = ROOT / "build" / "patch_padded.bin"
+            patch_path = padded
 
     print("=== linux-libre compliance audit ===")
     print(f"profile     : {profile}")
@@ -256,16 +281,34 @@ def main() -> int:
 
     failures: list[str] = []
 
-    # --- Makefile: release must not depend on NF_REF ---
-    mk_failures = _audit_makefile_nf_ref(ROOT)
+    # --- Makefile: release must not depend on NF_REF / inject_vendor ---
+    mk_failures = _audit_makefile_release_rules(ROOT)
     if mk_failures:
         failures.extend(mk_failures)
-        print("Makefile NF_REF gate: FAIL")
+        print("Makefile release gate: FAIL")
         for f in mk_failures:
             print(f"  - {f}")
     else:
-        print("Makefile NF_REF gate: OK — default make all/docker does not use NF_REF")
+        print(
+            "Makefile release gate: OK — default make all/docker/release "
+            "does not use NF_REF or inject_vendor"
+        )
     print()
+
+    if (
+        args.release
+        and patch_path.is_file()
+        and patch_path.name == "patch_injected.bin"
+        and profile in LIBRE_RELEASE_PROFILE_ALIASES
+    ):
+        failures.append(
+            "release audit must use build/patch_padded.bin, not patch_injected.bin"
+        )
+        print("patch body gate: FAIL — inject overlay artifact used for libre profile")
+        print()
+    elif args.release and profile in LIBRE_RELEASE_PROFILE_ALIASES:
+        print("patch body gate: OK — libre profile uses patch_padded.bin (no inject overlay)")
+        print()
 
     if args.release:
         incbin_failures = _audit_incbin(ROOT)
@@ -423,7 +466,7 @@ def _print_verdict(profile: str, failures: list[str], strict: bool) -> None:
         print("Remediation (summary):")
         print("  1. patch0: use single-patch ship or libre NOP stub (--dual without --vendor-patch0)")
         print("  2. Transcribe PE-1 [0,0x242) — remove patch_entry_code.S incbin")
-        print("  3. Complete libre [0x820,0xE4C) tail + [0xE4C,…) hook bodies (drop inject_vendor)")
+        print("  3. Complete libre hook bodies — inject_vendor is bisect-only (inject-* targets)")
         print("  4. Keep NF_REF off default make deps (test-nf / inject / hybrid / diff-prefix only)")
     if strict and failures:
         sys.exit(1)
