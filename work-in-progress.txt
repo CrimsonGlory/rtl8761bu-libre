@@ -1220,8 +1220,13 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           P2 A2DP + P4 compliance-ci PASS without block. Verdict: OMIT P1–P4.
           → analysis/reverse_engineering_late_patch_block_omit.md (new)
 
-[NEXT]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM
-[TODO]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
+[DONE]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM (2026-06-10)
+          scripts/audit_hook_installs.py: 43 IMPL + 1 SHIM (fn_c088); 0 STUB_RET among
+          hooks. Only orphan stub: fn_eac0_callee (sub-inst #6 optional callee, not a hook).
+          Protocol dispatch 7/7 IMPL or SHIM; sub2 19/19 IMPL; fn_10ca4/fn_e82c IMPL.
+          make docker + compliance-ci PASS; patch1 61d465d6…; fw ea7a5742….
+          → analysis/reverse_engineering_p4_hook_audit.md (new)
+[NEXT]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
 [TODO]  Hardware P4 matrix: AFH under Wi-Fi, BLE coexistence, reconnect stress
 [TODO]  make compliance → SHIP: YES on P4 profile; document SHA256 in results.md
 
