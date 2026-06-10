@@ -20,7 +20,7 @@
 
 	.section	.text.hooks
 
-	STUB_RET	fn_b118
+	/* fn_b118 @ PRAM+0x1118 — t1_hooks.S */
 	STUB_RET	fn_b174
 	STUB_RET	fn_be20
 	STUB_RET	fn_c1e8
