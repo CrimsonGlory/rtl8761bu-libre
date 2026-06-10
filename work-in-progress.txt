@@ -1210,9 +1210,17 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           Single-patch loads @ 0x80103780 — runtime 0x801000A0 outside FC20 window.
           PE5 connect OK without table. Verdict: OMIT P1–P4, no libre embed.
           → analysis/reverse_engineering_address_pair_table_omit.md (new)
-[NEXT]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
+[DONE]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window) (2026-06-10)
+          Seven fns in GZF code section 1 (0x80109200..0x80109E83), all below
+          PRAM base 0x8010A000 — not loaded by FC20 single-patch. FindXrefsTo.java
+          GZF scan: 9 xrefs (80109c08 callers in DATA snapshot, ROM 800145e0→9200);
+          **zero** literal-pool words in vendor or libre patch1 body (27,808 B).
+          No FUN_8010a000 hook install targets section 1. Libre coverage: fn_10ddc
+          (eSCO negotiator, hook #42), fn_a5d8/a6ec + entry callees (HW init).
+          P2 A2DP + P4 compliance-ci PASS without block. Verdict: OMIT P1–P4.
+          → analysis/reverse_engineering_late_patch_block_omit.md (new)
 
-[TODO]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM
+[NEXT]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM
 [TODO]  Retire inject_vendor.py / VENDOR_TAIL_FILL from any release profile
 [TODO]  Hardware P4 matrix: AFH under Wi-Fi, BLE coexistence, reconnect stress
 [TODO]  make compliance → SHIP: YES on P4 profile; document SHA256 in results.md

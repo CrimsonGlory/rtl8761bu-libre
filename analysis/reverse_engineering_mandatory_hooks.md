@@ -185,7 +185,7 @@ installer stub is still **IMPL-T1**.
 |------|---------|-------|
 | Address-pair table @ file `0xA0` | **OMIT** | Confirmed 2026-06-10: zero xrefs, no consumer; see `reverse_engineering_address_pair_table_omit.md` |
 | `FUN_80103780` master installer | **OMIT** | Parallel variant; runtime entry is `FUN_8010a000` |
-| Late-patch block `FUN_80109980`…`80109824` | **OMIT-T3** | In vanilla bin tail; GZF "dark firmware"; not in 27,808 B PRAM window |
+| Late-patch block `FUN_80109980`…`80109824` | **OMIT** | Confirmed 2026-06-10: below PRAM `0x8010A000`; zero patch1 pool refs; see `reverse_engineering_late_patch_block_omit.md` |
 | `bos+0xd8` NULL | **NULL-T1** | Test on hardware; ROM timeout fallback for LMP `0x268` |
 | `FUN_8010ca20` empty stub | **STUB-T1** | Degrades Wi-Fi/BLE coexistence only |
 | TLV loop active records | **SKIP** | Leave `remaining=0`; `FUN_8010a7b8` becomes no-op |
@@ -234,7 +234,8 @@ still needing decompile before sign-off.
 
 ### P4 — Full parity
 
-**Add:** Sub-installer #2's 19 targets + `FUN_80110ddc` + late-patch functions.
+**Add:** Sub-installer #2's 19 targets + `FUN_80110ddc` (transcribed as `fn_10ddc`).
+Late-patch block **omitted** (see `reverse_engineering_late_patch_block_omit.md`).
 Address-pair table **omitted** (see `reverse_engineering_address_pair_table_omit.md`).
 
 ---
