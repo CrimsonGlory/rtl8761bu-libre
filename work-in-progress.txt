@@ -610,7 +610,13 @@ PHASE 6 — IMPLEMENT
           #6 FUN_8010eac0 — *0x8012b800=0xffffffff; calls *0x80120c80 if non-NULL.
           fn_10ca4/fn_e82c remain return-stubs (178B/8B originals; T4 decompile pending).
           Build: 4252 B code / 27808 B PRAM (84.7% free), was 4236 B.
-[TODO]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed
+[DONE]  ~~Implement hardware-write hook (bos_base+0xe4)~~ NOT NEEDED — ROM-managed (2026-06-09)
+          No libre implementation. Global RAM slot 0x801212e4 (bos_base+0xe4) stays
+          NULL — ROM FUN_8004f824 uses clamp-only fallback (zero patch stores).
+          Per-connection crypto_struct+0xe4 JIT is 100% ROM (FUN_80025b68 @ SSP IO-cap).
+          Phase 3 §12 + mandatory_hooks ROM-NULL already document; bootstrap omits install.
+          → analysis/reverse_engineering_hardware_layer.md (Section 12)
+          → analysis/reverse_engineering_mandatory_hooks.md (global RAM hooks table)
 [DONE]  Implement version check (trivially "always OK" for known HW) (2026-06-09)
           fn_silicon_rev (FUN_8010e214, 96B): ROM FUN_8000b820 @ 0x8000b821 reads
             HW fields 0x7e/0x7f; mode byte @ MMIO 0xb000a013; 5-bit group scan.
