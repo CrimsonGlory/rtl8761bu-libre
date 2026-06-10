@@ -2168,3 +2168,56 @@ call + second handler with `(ptr, 0)` + zeroes a global byte). Always clears bit
 
 **Libre:** `src/t2_hooks.S` — 108 B byte-identical transcription @ PRAM+`0x20F4`;
 linker scatter in `rtl8761bu.ld`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group J — eSCO Readiness Gate (2026-06-10)
+
+### `FUN_8010a4ac` (68 B) — six-condition conn-record gate
+
+**Install slot:** RAM `0x80121414` (pool `0x8010a2ae` / `0x8010a2b2` in `FUN_8010a000`
+Phase 1 batch, hook #20). **PRAM body:** runtime `0x8010A4AC` (file offset `0x4AC` in
+patch1 — embedded in the PE-2 literal pool between `fn_a49c` @ `0x49C` and pool
+continuation @ `0x4F0`; **not** the mislabeled tail symbol at file `0xBF0` /
+runtime `0x8010ABF0`).
+
+**Decompile (Ghidra GZF process mode, `DecompileFunction.java` @ `FUN_8010a4ac`):**
+
+```c
+undefined4 FUN_8010a4ac(byte *param_1, undefined4 param_2, undefined1 *param_3)
+{
+  if ((((PTR_big_ol_struct_8010a4f0[(uint)*param_1 * 0x2b8 + 0xb2] == '\x0f') &&
+       (PTR_big_ol_struct_8010a4f0[(uint)*param_1 * 0x2b8 + 0xc1] == '\0')) &&
+      (PTR_struct_of_at_least_0x300_size_8010a4f4[0x171] == '\0')) &&
+     (((1 < (byte)PTR_struct_of_at_least_0x300_size_8010a4f4[0x16e] &&
+       (PTR_DAT_8010a4f8[0x30] != '\0')) && (*PTR_DAT_8010a4fc == '\0')))) {
+    *param_3 = 0;
+    return 1;
+  }
+  return 0;
+}
+```
+
+**Semantics:** eSCO readiness gate keyed by conn index in `*param_1`. All six
+conditions must pass to return 1 (and zero `*param_3`):
+
+1. `conn_table[idx*0x2b8 + 0xb2] == 0x0f` — conn state “eSCO active”
+2. `conn_table[idx*0x2b8 + 0xc1] == 0` — eSCO not busy
+3. `bos_base[0x171] == 0` — no pending eSCO setup
+4. `bos_base[0x16e] >= 2` — mode threshold
+5. `config_struct[0x30] != 0` — config flag set (`0x8012b764`)
+6. `*0x8012b803 == 0` — reset/busy flag clear (same byte cleared by `fn_a49c`)
+
+**Literal pool (PC-relative `lw` targets, body ends @ `0x8010A4F0`):**
+
+| Runtime | Role |
+|---------|------|
+| `0x8012DC50` | conn record table base (stride `0x2b8`) |
+| `0x801259EC` | bos_base / main BT struct |
+| `0x8012B764` | config struct ptr |
+| `0x8012B803` | reset/busy flag byte |
+
+**Libre:** `src/t2_hooks.S` — symbol alias `fn_a4ac = patch_entry_pool + 0x26a`
+(68 B vendor bytes already in `patch_entry_pool.S` @ file `0x4AC`). Removed
+`STUB_RET` from `hook_stubs.S`; tail mislabel @ `0xBF0` restored to gap bytes.
+Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).

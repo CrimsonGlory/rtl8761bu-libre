@@ -928,8 +928,15 @@ T2 hook installs (replace stubs):
           dispatch ROM ind calls + cleanup; clears bit7 of *param_1; pool @ +0x48.
           Removed tail mislabel @ 0xBEC + hook_stubs.S STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group I)
-[NEXT]  fn_a4ac (68 B) — eSCO readiness gate
-[TODO]  fn_bce0 — eSCO slot region
+[DONE]  fn_a4ac (68 B) — eSCO readiness gate (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x04AC (runtime 0x8010A4AC);
+          68 B pool alias patch_entry_pool+0x26a (byte-identical; body spans
+          PE-2 pool [0x4AC,0x4F0)). Decompile: FUN_8010a4ac — six-condition gate
+          on conn stride 0x2b8 (+0xb2==0x0f, +0xc1==0, bos+0x171/0x16e, config
+          @0x8012b764+0x30, reset @0x8012b803==0); returns 1 + *p3=0. Removed
+          hook_stubs STUB_RET + tail mislabel @ 0xBF0. Tier: T2.
+          → reverse_engineering_sco_esco_layer.md (Group J)
+[NEXT]  fn_bce0 — eSCO slot region
 [TODO]  fn_abd0 (316 B) — between eSCO and AFH groups
 [TODO]  fn_f884 (204 B) — bos+0x50
 [TODO]  fn_a550 (54 B) — eSCO-active flag

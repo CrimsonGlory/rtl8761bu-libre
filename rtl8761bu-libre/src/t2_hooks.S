@@ -16,9 +16,22 @@
  * reads global flags @ pool+0x48; if bit2 set calls ROM ind fn; if bit3 set runs
  * cleanup chain; clears bit7 of *param_1. Pool @ +0x48.
  * Installed at RAM slot 0x80120cf8.
+ *
+ * fn_a4ac @ PRAM+0x04AC (runtime 0x8010A4AC): eSCO readiness gate (68 B).
+ * Decompile: FUN_8010a4ac (Ghidra 2026-06-10) — six-condition gate on conn
+ * record (stride 0x2b8): state +0xb2==0x0f, +0xc1==0, bos+0x171/0x16e,
+ * config flag @ 0x8012b764+0x30, reset byte @ 0x8012b803==0; returns 1 + *p3=0.
+ * Body in patch_entry_pool @ +0x26a (PE-2 pool, between fn_a49c and fn_a594).
+ * Installed at RAM slot 0x80121414.
  */
 
 	.set	mips16
+
+	.globl		patch_entry_pool
+	.globl		fn_a4ac
+	.set		fn_a4ac, patch_entry_pool + 0x26a
+	.type		fn_a4ac, @function
+	.size		fn_a4ac, 68
 
 	.section	.text.fn_b174, "ax"
 	.globl	fn_b174
