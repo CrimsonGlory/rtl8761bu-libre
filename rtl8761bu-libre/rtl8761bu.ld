@@ -12,6 +12,7 @@
  *   [0x0754, 0x0764) fn_bss_init
  *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
  *   [0x0820, 0x0E4C) patch_entry tail
+ *   [0x1174, …)     fn_b174 sec_base+0x14 hook (t2_hooks.S)
  *   [0x10A4, …)     fn_b0a4 ACL packet-type flag corrector (t1_hooks.S)
  *   [0x1118, …)     fn_b118 slot interval allocator (t1_hooks.S)
  *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
@@ -64,6 +65,8 @@ SECTIONS {
         KEEP(*(.text.fn_b0a4))
         . = __prefix_start + 0x1118;
         KEEP(*(.text.fn_b118))
+        . = __prefix_start + 0x1174;
+        KEEP(*(.text.fn_b174))
         . = __prefix_start + 0x13D8;
         KEEP(*(.text.fn_b3d8))
         . = __prefix_start + 0x15D8;

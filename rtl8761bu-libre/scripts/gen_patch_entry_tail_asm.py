@@ -32,8 +32,7 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     0x0AF2: ("fn_bb_init", "FUN_8010aa66 — baseband register init"),
     0x0B5E: ("fn_rf_init", "FUN_8010aad2 — RF register table init"),
     # fn_b0a4 @ PRAM+0x10A4, fn_b118 @ PRAM+0x1118, fn_b3d8 @ PRAM+0x13D8 — t1_hooks.S
-    0x0BB0: ("fn_b174", "hook body"),
-    # 0x0BB4: mislabeled fn_be20 in tail — runtime 0x8010abb4 is fn_b174 cluster
+    # fn_b174 @ PRAM+0x1174 — t2_hooks.S (not tail 0xBB0 gap bytes)
     # fn_c1e8 @ PRAM+0x21E8, fn_c224 @ PRAM+0x2224 — t1_hooks.S (not tail 0xBB8)
     # 0x0BC4: tail bytes only — fn_b3d8 is @ PRAM+0x13D8 (t1_hooks.S), not 0x8010abc4
     # 0x0BC8: tail bytes only — fn_b0a4 is @ PRAM+0x10A4 (t1_hooks.S), not 0x8010abc8

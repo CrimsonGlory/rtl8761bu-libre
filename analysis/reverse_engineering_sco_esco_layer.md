@@ -2058,3 +2058,53 @@ literal-pool pointer; libre must install this pointer at `0x8010bba0` during ini
 | `FUN_8010bb54` | 74B | 1 (ROM `FUN_8004e2d0`) | 0 or 0x12 | MEDIUM (eSCO validator) |
 
 **Grand total updated: 29 functions need real MIPS16e code (~2370 insns estimated).**
+
+---
+
+## Group H — sec_base+0x14 Hook (2026-06-10)
+
+### `FUN_8010b174` (64 B) — secondary struct field clamp + tail-call
+
+**Install slot:** `sec_base+0x14` → RAM `0x80120844` (pool `0x8010a268` / `0x8010a26c` in
+`FUN_8010a000` Phase 1 batch, hook #2). **PRAM body:** `0x8010B174` (file offset
+`0x1174` in patch1 — gap between installer tail `0xE4C` and `fn_b0a4` @ `0x10A4`; **not**
+the mislabeled tail symbol at file `0xBB0`).
+
+**Decompile (Ghidra GZF process mode, `DecompileFunction.java`):**
+
+```c
+void FUN_8010b174(int param_1, undefined2 param_2, undefined4 param_3,
+                  undefined4 param_4, undefined1 param_5, undefined1 param_6)
+{
+  if (*(ushort *)(param_1 + 0x1c) < 0x65) {
+    *(undefined1 *)(param_1 + 0x1c) = 100;   /* 0x64 */
+    *(undefined1 *)(param_1 + 0x1d) = 0;
+  }
+  (*DAT_8010b1b4)(param_1, param_2, param_3, param_4, param_5, param_6);
+  return;
+}
+```
+
+**Semantics:** Pre-hook on the secondary BT struct (`sec_base` / `puVar5`). When the
+16-bit quantity at `param_1+0x1c` is below 101 (`0x65`), clamp the low byte to 100
+(`0x64`) and clear `+0x1d`. Forwards all six register arguments unchanged to the
+next handler via literal pool @ body `+0x24` → `0x8010EAB1` (patch callee in the
+`0xE4C` gap region).
+
+**Literal pool (vendor patch1 bytes):**
+
+| Body off | Value | Role |
+|----------|-------|------|
+| `+0x08` | `0x8012B84C` | data |
+| `+0x0C` | `0x80125DD0` | data |
+| `+0x10` | `0x8012DC50` | data |
+| `+0x14` | `0x80063225` | ROM |
+| `+0x18` | `0x801259E8` | data |
+| `+0x1C` | `0x80125DB8` | data |
+| `+0x20` | `0x80110714` | patch |
+| `+0x24` | `0x8010EAB1` | **tail-call target** |
+| `+0x28` | `0x80074FA9` | ROM |
+| `+0x30` | `0x8010ED79` | patch |
+
+**Libre:** `src/t2_hooks.S` — 64 B byte-identical transcription @ PRAM+`0x1174`;
+linker scatter in `rtl8761bu.ld`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).

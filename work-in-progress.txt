@@ -908,8 +908,13 @@ P2 = P1 + ~14 IMPL-T2 hooks + eSCO cluster callees. Omit T3 AFH for P2.
 A2DP already PASS on inject profile 7f051e64…; retest on 100% libre build.
 
 T2 hook installs (replace stubs):
-[NEXT]  fn_b174 (64 B) — sec_base+0x14
-[TODO]  fn_b7f0 (772 B) — LMP eSCO packet processor
+[DONE]  fn_b174 (64 B) — sec_base+0x14 (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x1174 (runtime 0x8010B174);
+          64 B byte-identical transcription; linker scatter after fn_b118.
+          Decompile: FUN_8010b174 — sec_struct +0x1c clamp (<0x65 → 100/0);
+          tail-call pool @ +0x24 → 0x8010eab1. Removed mislabeled tail @ 0xBB0
+          + hook_stubs STUB_RET. → reverse_engineering_sco_esco_layer.md (Group H).
+[NEXT]  fn_b7f0 (772 B) — LMP eSCO packet processor
 [TODO]  fn_c0f4 — eSCO-adjacent slot
 [TODO]  fn_a4ac (68 B) — eSCO readiness gate
 [TODO]  fn_bce0 — eSCO slot region
