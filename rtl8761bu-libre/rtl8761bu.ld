@@ -43,6 +43,10 @@
  *   [0x243C, …)     fn_c43c infrastructure ptr region (t1_hooks.S)
  *   [0x249C, …)     fn_c49c infrastructure ptr region (t1_hooks.S)
  *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
+ *   [0x2CB8, …)     fn_ccb8 AFH HW reg configurator (t3_hooks.S; ce0c callee)
+ *   [0x2DC0, …)     fn_ce0c_pre_gap vendor pool bridge (t3_hooks.S)
+ *   [0x2E0C, …)     fn_ce0c AFH capability mapper (t3_hooks.S)
+ *   [0x30E4, …)     fn_ce0c_gap vendor literal-pool tail (t3_hooks.S)
  *   [0x3168, …)     fn_d168 AFH HW register init (t3_hooks.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
@@ -145,6 +149,14 @@ SECTIONS {
         KEEP(*(.text.fn_c780_pool))
         . = __prefix_start + 0x2A20;
         KEEP(*(.text.fn_ca20))
+        . = __prefix_start + 0x2CB8;
+        KEEP(*(.text.fn_ccb8))
+        . = __prefix_start + 0x2DC0;
+        KEEP(*(.text.fn_ce0c_pre_gap))
+        . = __prefix_start + 0x2E0C;
+        KEEP(*(.text.fn_ce0c))
+        . = __prefix_start + 0x30E4;
+        KEEP(*(.text.fn_ce0c_gap))
         . = __prefix_start + 0x3168;
         KEEP(*(.text.fn_d168))
         . = __prefix_start + 0x31F4;

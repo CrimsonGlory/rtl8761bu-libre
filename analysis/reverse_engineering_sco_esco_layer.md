@@ -2847,3 +2847,25 @@ by default. If byte at `(*PTR_PTR_8010f87c)[0x28]` has bit 0 clear, tail-calls
 PRAM+`0x585C`; linker scatter in `rtl8761bu.ld` before `fn_f884`. Removed
 `STUB_RET` from `hook_stubs.S`. Prefix `[0x585C,0x5884)` 0/40 match vs NF_REF.
 Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
+
+---
+
+## Group AD — AFH Capability Mapper + Init Chain (2026-06-10)
+
+### `FUN_8010ce0c` (728 B) + `FUN_8010ccb8` (264 B callee)
+
+**Install slot:** RAM `0x80120cdc` (`FUN_8010a000` hook #41; pool `a3c0` / `a3c4`).
+**PRAM layout:** `fn_ccb8` @ PRAM+`0x2CB8` (264 B, init-chain PATCH callee);
+`fn_ce0c_pre_gap` @ `0x2DC0` (76 B vendor bridge); `fn_ce0c` @ `0x2E0C` (728 B
+body); `fn_ce0c_gap` @ `0x30E4` (132 B literal-pool tail for `d140`…`d154`).
+
+**Semantics (Ghidra decompile):** Reads HCI channel-classification word @
+`config_base+0x44`, scatters bits into the 32-bit capability register, programs
+BB regs `0x15c` / `0x1fc`, then runs the AFH init chain: ROM `FUN_800117a4`
+(mask enable), `FUN_8000c3f4` (map updater), zero struct field @ `DAT_80121908`,
+ROM `FUN_800122b8`(1), and PATCH `FUN_8010ccb8` (HW reg configurator).
+
+**Libre:** `src/t3_hooks.S` — byte-identical vendor transcription for all four
+sections; linker scatter in `rtl8761bu.ld` between `fn_ca20` and `fn_d168`.
+Removed `STUB_RET fn_ce0c` from `hook_stubs.S`. Prefix `[0x2CB8,0x3168)` 0/1200
+diffs vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
