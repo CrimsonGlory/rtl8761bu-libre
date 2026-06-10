@@ -836,8 +836,13 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           in rtl8761bu.ld. Decompile: FUN_8010c1e8 — ROM pre-hook + large2[0].+0x28
           bit0 gate + secondary ind call; c224 paired slot (vendor bytes differ from
           GZF DATA snapshot). Removed tail mislabels + hook_stubs.S STUB_RET.
-[NEXT]  fn_b3d8 (206 B) — ACL slot scheduler
-[TODO]  fn_b0a4 (108 B) — ACL packet-type flag corrector
+[DONE]  fn_b3d8 (206 B) — ACL slot scheduler (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x13D8 (runtime 0x8010B3D8);
+          206 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010b3d8 — IRQ-protected slot alloc + eSCO residual.
+          Pool @ +0xD0 (ROM 0x80009104/0x80056609/0x80056661/0x80056291).
+          Removed tail mislabel @ 0xBC4 + hook_stubs.S STUB_RET.
+[NEXT]  fn_b0a4 (108 B) — ACL packet-type flag corrector
 [TODO]  fn_c198, fn_d1f4 — early install batch (decompile may adjust tier)
 [TODO]  fn_c780 (34 B) — subsystem init (3 ROM calls)
 [TODO]  fn_c63c (278 B) — ACL retransmission handler

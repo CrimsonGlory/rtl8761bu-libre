@@ -13,6 +13,7 @@
  *   [0x0764, …)     sub_installer_2 (vendor entry calls here)
  *   [0x0820, 0x0E4C) patch_entry tail
  *   [0x1118, …)     fn_b118 slot interval allocator (t1_hooks.S)
+ *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
@@ -51,6 +52,8 @@ SECTIONS {
         /* Vendor-fixed offsets (fn_e27c literal pool → 0x8010xxxx) */
         . = __prefix_start + 0x1118;
         KEEP(*(.text.fn_b118))
+        . = __prefix_start + 0x13D8;
+        KEEP(*(.text.fn_b3d8))
         . = __prefix_start + 0x15D8;
         KEEP(*(.text.fn_b5d8))
         . = __prefix_start + 0x1E20;
