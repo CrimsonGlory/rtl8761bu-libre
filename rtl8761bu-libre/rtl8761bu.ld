@@ -45,7 +45,8 @@
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
- *   (.text.hooks)   fn_b4d0 / fn_c854 — past FC20 window (t2_hooks.S)
+ *   [0x37C0, …)     fn_d618 literal pool (fn_d618_pool.S)
+ *   (.text.hooks)   fn_b4d0 / fn_c854 / fn_a84c (t2_hooks.S; past FC20 / overlay)
  */
 
 ENTRY(patch_entry)
@@ -127,6 +128,8 @@ SECTIONS {
         KEEP(*(.text.fn_d1f4))
         . = __prefix_start + 0x3618;
         KEEP(*(.text.fn_d618))
+        . = __prefix_start + 0x37C0;
+        KEEP(*(.text.fn_d618_pool))
         . = __prefix_start + 0x3890;
         KEEP(*(.text.fn_d890))
         . = __prefix_start + 0x39F4;

@@ -48,7 +48,9 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     # fn_dd1c @ PRAM+0x3D1C, fn_d890 @ PRAM+0x3890, fn_d618 @ PRAM+0x3618 — t1_hooks.S
     # (not tail 0xBDC / 0xBE0 / 0xBE4 mislabels)
     # fn_a594 @ PRAM+0x0594, fn_a49c @ PRAM+0x049C — t1_hooks.S (not tail 0xBE8/0xBF4)
+    # fn_c09c @ PRAM+0x209C — t2_hooks.S (vendor-fixed before fn_c0f4)
     # fn_c0f4 @ PRAM+0x20F4 — t2_hooks.S (not tail 0xBEC mislabel)
+    # fn_c160 @ PRAM+0x2160, fn_c178 @ PRAM+0x2178 — t2_hooks.S (+ gap pools)
     # fn_a4ac @ PRAM+0x04AC — t2_hooks.S pool alias (not tail 0xBF0 mislabel)
     # fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S (not tail 0xBF8 mislabel)
     # fn_abd0 @ PRAM+0xBD0 — t2_hooks.S overlays tail [0xBD0,0xD0C); not 0xC14 mislabel
@@ -94,6 +96,9 @@ def _emit_blob_rows(
             sym_idx += 1
 
         chunk = blob[i : i + row]
+        chunk = chunk[: fo_max - fo]
+        if not chunk:
+            break
         rt = TAIL_RT + (fo - TAIL_OFF)
         hdr = f"0x{fo:04x} / 0x{rt:08x}"
         lines.append(f"\t/* {hdr} */")

@@ -421,7 +421,7 @@ machine `0x80036df9`, same buffer `0x8012b840`, but checks flag `0x8012b942` (vs
 `0x8012b943` in a84c) and sets state=1 instead of 2 on success. These two functions
 handle the two phases of an SCO/eSCO connection negotiation.
 
-**Libre:** Must implement — complement to FUN_8010a84c.
+**Libre:** Must implement — complement to `FUN_8010a84c` (Group U); `fn_aa58` next in WIP.
 
 ---
 
@@ -2564,3 +2564,29 @@ Installed at RAM slot `0x80121220` (hook install #43; pool entries
 vendor-fixed linker scatter @ PRAM+`0x1DA0` (runtime `0x8010BDA0`, within FC20
 window). Install remains in transcribed `patch_entry` pool/tail (native handler
 addr). Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.
+
+---
+
+## Group U — SCO/eSCO Connection Response (2026-06-10)
+
+### `FUN_8010a84c` (450 B) — incoming SCO/eSCO accept/reject
+
+Primary handler when `*0x8012b943 == 1`: ROM `0x80060dd9` reads pending request;
+success path copies caps into conn stride `0x2b8`, `0x80036421` allocates handle,
+`0x80036df9` advances SCO state machine; reject path builds 11-byte LMP PDU via
+`0x8001d071`. Literal pool @ `0x8010AA10`–`0x8010AA54` (18 words).
+
+**Call path:** `FUN_8010d618` (HCI internal msg types `0x402`/`0x404`/`0x408`) when
+`*0x8012b83c != 0` indirect-calls `DAT_8010d7dc` / `DAT_8010d7e0` (GZF:
+`0x8010a84d` / `0x8010aa59`).
+
+**Layout note:** GZF body @ `0x8010A84C` (`d0 63 5f 62…`) is **not** in vendor
+`rtl8761bu_fw.bin` (vendor `0x84C` = installer-tail glue). Native span
+`0x84C`–`0xAA0E` overlaps `fn_abd0` @ `0xBD0` — cannot scatter at PRAM+`0x84C`
+without displacing `fn_abd0` and installer tail.
+
+**Libre:** `src/t2_hooks.S` — 450 B GZF byte-identical (GZF `DumpFnA84c.java`);
+section `.text.fn_a84c` links past FC20 window (runtime `0x8010FA80` in current
+`full` profile). `src/fn_d618_pool.S` @ PRAM+`0x37C0` — GZF pool with
+`DAT_8010d7dc = fn_a84c+1` (replaces prior zero-fill). `DAT_8010d7e0` still
+literal `0x8010aa59` until `fn_aa58` lands. Tier **T2**.

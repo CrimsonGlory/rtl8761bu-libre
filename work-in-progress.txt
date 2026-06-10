@@ -1011,8 +1011,13 @@ T2 hook installs (replace stubs):
 
 T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
 [DONE]  fn_a6ec, fn_a5d8 — patch_entry_helpers.S
-[NEXT]  fn_a84c (450 B) — SCO/eSCO connection response
-[TODO]  fn_aa58 (96 B) — SCO continuation handler
+[DONE]  fn_a84c (450 B) — SCO/eSCO connection response (2026-06-10)
+          src/t2_hooks.S: 450 B GZF byte-identical (DumpFnA84c.java); section
+          .text.fn_a84c past FC20 (native 0x8010A84C overlaps fn_abd0 @ 0xBD0).
+          fn_d618_pool.S @ PRAM+0x37C0: DAT_8010d7dc = fn_a84c+1. Decompile:
+          FUN_8010a84c — pending @ 0x8012b943, ROM SCO read/state/LMP reject;
+          pool @ 0x8010aa10…54. → reverse_engineering_sco_esco_layer.md (Group U)
+[NEXT]  fn_aa58 (96 B) — SCO continuation handler
 [TODO]  fn_a410 (86 B) — HW reg 0x11C codec mode
 [TODO]  fn_b7d4 (22 B) — ACL slot lookup wrapper
 [TODO]  fn_b5d8 (100 B) — eSCO connection activator
