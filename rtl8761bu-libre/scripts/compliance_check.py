@@ -28,6 +28,9 @@ PATCH1_OFF = 0x3780
 PATCH1_LEN = 0x6CA0
 PATCH0_LEN = 0x36E0
 PATCH0_OFF = 0x30
+SINGLE_FW_SIZE = 0x30 + PATCH1_LEN + 72   # 27,928 B libre ship layout
+DUAL_FW_SIZE = 42088
+MIPS16E_NOP = b"\x00\x65"
 PREFIX_CONNECT = 0x764
 VENDOR_INSTALLER_LEN = 0xE4C
 TAIL_END = PATCH1_LEN - 4
@@ -184,16 +187,28 @@ def main() -> int:
 
     if len(libre_p1) != PATCH1_LEN:
         failures.append(f"patch1 size {len(libre_p1)} != {PATCH1_LEN}")
-    if len(out_fw) != 42088:
-        failures.append(f"fw size {len(out_fw)} != 42088 (expected dual-patch layout)")
+    if len(out_fw) not in (SINGLE_FW_SIZE, DUAL_FW_SIZE):
+        failures.append(
+            f"fw size {len(out_fw)} not {SINGLE_FW_SIZE} (single) or {DUAL_FW_SIZE} (dual)"
+        )
 
-    # --- patch0 (always non-free when copied from NF_REF) ---
-    patch0_vendor = vendor_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
-    patch0_out = out_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
-    patch0_match = patch0_out == patch0_vendor
-    print(f"patch0 @0x30 ({PATCH0_LEN} B): {'copied from NF_REF' if patch0_match else 'differs from NF_REF'}")
-    if patch0_match:
-        failures.append(f"patch0 is verbatim vendor ({PATCH0_LEN} B non-free in shipped fw)")
+    # --- envelope / patch0 ---
+    if len(out_fw) == SINGLE_FW_SIZE:
+        print(f"envelope: single-patch ({SINGLE_FW_SIZE} B) — no patch0 slot")
+    else:
+        patch0_vendor = vendor_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
+        patch0_out = out_fw[PATCH0_OFF : PATCH0_OFF + PATCH0_LEN]
+        patch0_match = patch0_out == patch0_vendor
+        nop_stub = MIPS16E_NOP * (PATCH0_LEN // 2)
+        patch0_is_stub = patch0_out == nop_stub
+        if patch0_match:
+            label = "copied from NF_REF"
+            failures.append(f"patch0 is verbatim vendor ({PATCH0_LEN} B non-free in shipped fw)")
+        elif patch0_is_stub:
+            label = "libre MIPS16e NOP stub"
+        else:
+            label = "differs from NF_REF (non-vendor)"
+        print(f"patch0 @0x30 ({PATCH0_LEN} B): {label}")
     print()
 
     # --- patch1 vs vendor ---
@@ -250,7 +265,7 @@ def _print_verdict(profile: str, failures: list[str], strict: bool) -> None:
             print(f"  - {f}")
         print()
         print("Remediation (summary):")
-        print("  1. Replace pack.py patch0 copy with libre chip_id=1 stub or single-patch ship")
+        print("  1. patch0: use single-patch ship or libre NOP stub (--dual without --vendor-patch0)")
         print("  2. Transcribe PE-1 [0,0x242) — remove patch_entry_code.S incbin")
         print("  3. Complete libre [0x820,0xE4C) tail + [0xE4C,…) hook bodies (drop inject_vendor)")
         print("  4. Add SPDX to remaining sources; drop NF_REF from default make deps")

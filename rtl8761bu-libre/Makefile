@@ -69,7 +69,7 @@ endif
 
 .PHONY: all docker minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance
 
-# Docker builds must see vendor patch0 (chip_id=1 slot).
+# Docker builds need NF_REF for PE-1 incbin and inject/bisect profiles (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
 DOCKER_NF_ENV := -e NF_REF=/nf_ref/$(notdir $(NF_REF))
 
@@ -289,7 +289,7 @@ build/patch_padded.bin: build/patch.bin pad.py
 	$(PYTHON) pad.py $< $(PATCH_SIZE) $@ $(ENTRY_OFFSET)
 
 rtl8761bu_fw.bin: build/patch_padded.bin pack.py
-	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) $< $(FW_VERSION) $@
+	$(PYTHON) pack.py --chip-id $(CHIP_ID) $< $(FW_VERSION) $@
 	@echo ""
 	@echo "Built: $@  profile=$(BUILD_PROFILE)  entry_off=$(ENTRY_OFFSET)"
 	@echo "  make verify   — check entry fingerprint before installing"

@@ -45,7 +45,13 @@ NF_REF = os.environ.get(
 )
 
 
-def _load_patch0() -> bytes:
+def _libre_patch0_stub() -> bytes:
+    """chip_id=1 slot filler — UB500 selects patch1 only; not FC20-downloaded."""
+    assert PATCH0_LEN % 2 == 0
+    return MIPS16E_NOP * (PATCH0_LEN // 2)
+
+
+def _load_vendor_patch0() -> bytes:
     if not os.path.isfile(NF_REF):
         raise FileNotFoundError(
             f"patch0 source missing: {NF_REF!r} "
@@ -80,9 +86,9 @@ def build_epatch_single(patch_data: bytes, chip_id: int, fw_version: int) -> byt
     return _pad_header(meta) + patch_data + _extension()
 
 
-def build_epatch_dual(patch1_data: bytes, fw_version: int) -> bytes:
-    """Match non-free file layout: patch0 @0x30, gap, patch1 @0x3780."""
-    patch0 = _load_patch0()
+def build_epatch_dual(patch1_data: bytes, fw_version: int, *, vendor_patch0: bool = False) -> bytes:
+    """Two-patch layout: libre NOP stub (or vendor) @0x30, gap, patch1 @0x3780."""
+    patch0 = _load_vendor_patch0() if vendor_patch0 else _libre_patch0_stub()
     assert len(patch0) == PATCH0_LEN
 
     meta  = struct.pack('<I', fw_version)
@@ -108,14 +114,16 @@ def main():
     ap.add_argument('--chip-id',  type=int, default=2,
                     help='EPatch chip_id for single-patch mode (default: 2)')
     ap.add_argument('--dual', action='store_true',
-                    help='Emit two-patch layout matching non-free rtl8761bu_fw.bin')
+                    help='Emit two-patch layout (patch0 stub + patch1 @0x3780)')
+    ap.add_argument('--vendor-patch0', action='store_true',
+                    help='Copy patch0 from NF_REF (bisect only; not linux-libre)')
     args = ap.parse_args()
 
     patch_data = open(args.patch, 'rb').read()
     fw_version = int(args.fw_version, 16)
 
     if args.dual:
-        out = build_epatch_dual(patch_data, fw_version)
+        out = build_epatch_dual(patch_data, fw_version, vendor_patch0=args.vendor_patch0)
     else:
         out = build_epatch_single(patch_data, args.chip_id, fw_version)
 
