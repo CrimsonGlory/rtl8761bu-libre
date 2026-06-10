@@ -288,6 +288,15 @@ void FUN_8010e81c(void) {
 }
 ```
 
+**Libre impl (2026-06-10):** callee `fn_e82c` (`FUN_8010e82c`, 8 B) is **not** a
+separate linked section — vendor bytes already live inside `fn_e350_post_gap` @
+PRAM+`0x482c` (runtime `0x8010E82C`, offset +`0x46` into the post-gap bridge
+transcribed in `t3_hooks.S`). `t4_hooks.S` exports `.set fn_e82c,
+fn_e350_post_gap + 0x46`. `sub_installer_5` (`bootstrap.S`) installs
+`0x8010E82D` → RAM `0x80120c88`. Decompile: clears one byte at a pc-relative
+global (`*PTR_DAT_8010e838 = 0`), returns 0. Verify:
+`scripts/gen_fn_e82c_asm.py`; prefix [`0x482c`,`0x4834`) 8/8 vs vendor.
+
 ### Sub-installer #6 — FUN_8010eac0 (24 bytes): Write -1 + call
 
 ```c

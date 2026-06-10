@@ -187,3 +187,12 @@ fn_10ca4:
 
 	.globl		sub2_fn_18
 	.set	sub2_fn_18, fn_10ca4 + 0x14
+
+/*
+ * fn_e82c @ PRAM+0x482c (runtime 0x8010E82C) — sub-inst #5 callee.
+ * 8 B body embedded in fn_e350_post_gap bridge (+0x46); not a separate section.
+ * Decompile: *global=0; return 0. sub_installer_5 → RAM 0x80120c88.
+ * Verify: scripts/gen_fn_e82c_asm.py
+ */
+	.globl		fn_e82c
+	.set		fn_e82c, fn_e350_post_gap + 0x46

@@ -1196,8 +1196,14 @@ P4 = P2 + P3 + T4 unknowns + sub-installer #2 targets + remaining callees.
           scripts/gen_fn_10ca4_asm.py; linker scatter in rtl8761bu.ld.
           make docker + compliance-ci PASS; prefix [0x6350,0x6402) 0/178 vs vendor.
           → reverse_engineering_sub_installers.md (sub-inst #3 libre note)
-[NEXT]  fn_e82c — sub-inst #6 callee (8 B original; currently stub)
-[TODO]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
+[DONE]  fn_e82c — sub-inst #5 callee (8 B original; currently stub) (2026-06-10)
+          Not a separate section: vendor bytes @ PRAM+0x482c already in
+          fn_e350_post_gap (+0x46) from Phase 8.4. t4_hooks.S: .set fn_e82c,
+          fn_e350_post_gap + 0x46; removed hook_stubs STUB_RET. Decompile
+          FUN_8010e82c: *global=0, return 0; sub_installer_5 → RAM 0x80120c88.
+          scripts/gen_fn_e82c_asm.py; prefix [0x482c,0x4834) 8/8 vs vendor.
+          → reverse_engineering_sub_installers.md (sub-inst #5 libre note)
+[NEXT]  Address-pair table @ file 0xA0 — OMIT until purpose proven (7 fn-ptrs)
 [TODO]  Late-patch block FUN_80109980…80109824 — OMIT (outside 27,808 B FC20 window)
 
 [TODO]  P4 completeness audit: all 44 FUN_8010a000 hook installs non-stub or SHIM

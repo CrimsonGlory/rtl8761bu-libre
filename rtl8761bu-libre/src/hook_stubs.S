@@ -34,8 +34,8 @@
 	/* fn_d168 @ PRAM+0x3168, fn_e350 @ PRAM+0x4350, fn_f85c @ PRAM+0x585C, fn_f950 @ PRAM+0x5950, fn_fa34 @ PRAM+0x5A34, fn_fb08 @ PRAM+0x5B08 — t3_hooks.S */
 	/* fn_10ddc @ PRAM+0x0E4C — t4_hooks.S (relocated from native 0x09F8) */
 	/* fn_10ca4 @ PRAM+0x6350 — t4_hooks.S (sub-inst #3; sub2_fn_18 @ +0x14) */
+	/* fn_e82c @ PRAM+0x482c — t4_hooks.S alias into fn_e350_post_gap (+0x46) */
 	/* fn_e350 @ PRAM+0x4350 — t3_hooks.S */
-	STUB_RET	fn_e82c
 	STUB_RET	fn_eac0_callee
 	/* fn_daa4 @ PRAM+0x3AA4 — protocol_dispatch.S */
 	/* fn_d9f4 @ PRAM+0x39F4 — protocol_dispatch.S */
