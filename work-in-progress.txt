@@ -766,10 +766,12 @@ Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
           patch_entry_code.S: 578 B libre .byte transcription (gen_patch_entry_code_asm.py);
           deleted build/vendor_entry_code.bin Makefile rule + NF_REF dep on default make.
           make diff-prefix: PE-1 0/578; entry fingerprint fb630962.
-[NEXT]  Compliance gate: installer tail [0x820,0xE4C)
-          Finish patch_entry_tail.S libre bodies (~1246/1580 B still differ vs vendor).
-          Entry boot + hook-install sequence must match vendor semantics.
-[TODO]  Compliance gate: default make all with no NF_REF
+[DONE]  Compliance gate: installer tail [0x820,0xE4C) (2026-06-09)
+          patch_entry_tail.S + sub_installer_2_body.S vendor .byte transcription
+          (gen_patch_entry_tail_asm.py, gen_sub_installer_2_asm.py); linker anchors
+          @ 0x820/0xE4C; INSTALLER_TAIL_TRANSCRIBED drops duplicate bdaddr/callees/
+          hook_stubs/lmp_vsc. make diff-prefix --limit 0xE4C: 0/3660; tail 0/1580.
+[NEXT]  Compliance gate: default make all with no NF_REF
           Release build must not read rtl8761bu-non-free/. Restrict NF_REF to
           test-nf, diff-prefix, inject-*, hybrid-*, bisect profiles only.
 [TODO]  Compliance gate: CI make compliance --strict in Docker
@@ -784,7 +786,7 @@ Compliance audit: analysis/reverse_engineering_linux_libre_compliance.md
 [DONE]  Sub-installers #3–#6 — bootstrap.S (2026-06-09)
 [DONE]  Entry callees: silicon rev, TLV, BD_ADDR, HW probe, BB, RF (2026-06-09)
 [DONE]  PE-1 entry prologue [0,0x242) — patch_entry_code.S libre .byte (2026-06-09)
-[TODO]  Installer epilogue + phased hook installs — patch_entry_tail.S (in progress)
+[DONE]  Installer epilogue + phased hook installs — patch_entry_tail.S (2026-06-09)
 
 --- Phase 8.2 — P1 (T1) hooks & protocol dispatch (required base for P2) ---
 

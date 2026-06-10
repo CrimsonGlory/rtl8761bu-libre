@@ -40,6 +40,7 @@ sub_installer_1:
 	/* sub_installer_2 @ 0x764: patch_entry_si2.S or installer_vendor_early.S */
 	.section	.text.hooks
 
+#ifndef INSTALLER_TAIL_TRANSCRIBED
 	.globl	sub_installer_3
 	.type	sub_installer_3, @function
 sub_installer_3:
@@ -125,3 +126,4 @@ sub_installer_6:
 	jr	$ra
 	nop
 	.size	sub_installer_6, . - sub_installer_6
+#endif /* !INSTALLER_TAIL_TRANSCRIBED */

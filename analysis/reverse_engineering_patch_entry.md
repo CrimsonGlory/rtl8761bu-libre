@@ -126,8 +126,18 @@ Fix: `src/patch_entry_si2.S` (`.text.si2` @ `0x764`); `patch_entry_tail` follows
 | `7f051e64…` (`full-inject-t3-pe5-vendor-tail`) | OK | OK | **OK** `88:C9:E8:6B:F9:1E` |
 
 Libre prefix `[0,0x764)` verified without `VENDOR_EARLY_PREFIX`. Production interim:
-libre `patch_entry_*` + `VENDOR_TAIL_FILL` `[0xE4C,…)`. Next RE: `[0x820,0xE4C)` (replace
-`patch_entry_tail` macros); then libre tail.
+libre `patch_entry_*` + `VENDOR_TAIL_FILL` `[0xE4C,…)`.
+
+### PE-tail installer [0x820, 0xE4C) (2026-06-09)
+
+`src/patch_entry_tail.S` — libre **1580 B `.byte` block** (no macros). Regenerate:
+`scripts/gen_patch_entry_tail_asm.py`. `sub_installer_2_body.S` re-transcribed for full
+188 B @ `[0x764, 0x820)`. Linker anchors `0x820` / `0xE4C`; `__prefix_end` @ `0xE4C`.
+`CFLAGS -DINSTALLER_TAIL_TRANSCRIBED` omits duplicate `bdaddr.S`, `callees.S`,
+`hook_stubs.S`, `lmp_vsc.S`, bootstrap si3–6, shims `fn_c088` prefix.
+
+`make diff-prefix --limit 0xE4C`: **0/3660** installer prefix diffs (`sub_inst_2` 0/188,
+`patch_entry_tail` region 0/1580). Next: libre tail `[0xE4C, …)`.
 
 ---
 

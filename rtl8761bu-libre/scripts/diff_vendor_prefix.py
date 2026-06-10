@@ -20,6 +20,8 @@ REGIONS = [
     ("helper fns (a5d8..)", 0x05D8, 0x0724),
     ("sub_installer_1", 0x0724, 0x0754),
     ("fn_bss_init", 0x0754, 0x0764),
+    ("sub_installer_2", 0x0764, 0x0820),
+    ("installer tail", 0x0820, 0x0E4C),
 ]
 
 

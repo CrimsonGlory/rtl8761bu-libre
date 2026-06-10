@@ -33,7 +33,9 @@ SECTIONS {
         *(.text.bss_init)
         . = __prefix_start + 0x764;
         *(.text.si2)
-        *(.text.entry.tail)
+        . = __prefix_start + 0x820;
+        *(.text.installer_tail)
+        . = __prefix_start + 0xE4C;
         __prefix_end = .;
         *(.text.hooks)
         *(.text)

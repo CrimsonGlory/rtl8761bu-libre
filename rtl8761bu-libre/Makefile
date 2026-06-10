@@ -23,10 +23,13 @@ SRCS := src/init_minimal.S
 else ifdef PHASE
 SRCS := src/init_phase_$(PHASE).S $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S $(wildcard src/init_phase_*.S),$(wildcard src/*.S))
 else
+# Installer tail [0x820,0xE4C) is transcribed in patch_entry_tail.S; drop duplicate bodies.
+INSTALLER_TAIL_EXCLUDE := src/bdaddr.S src/callees.S src/hook_stubs.S src/lmp_vsc.S
 SRCS := $(wildcard src/*.c) $(filter-out src/stub_macros.S src/init.S src/init_minimal.S src/init_null.S \
 	src/init_phase_%.S src/installer_vendor_early.S src/sub_installer_2_body.S \
 	src/patch_entry_code.S src/patch_entry_pool.S \
-	src/patch_entry_helpers.S src/patch_entry_si2.S src/patch_entry_tail.S,$(wildcard src/*.S))
+	src/patch_entry_helpers.S src/patch_entry_si2.S src/patch_entry_tail.S \
+	$(INSTALLER_TAIL_EXCLUDE),$(wildcard src/*.S))
 PATCH_PREFIX_SRCS := src/patch_entry_code.S src/patch_entry_pool.S \
 	src/patch_entry_helpers.S src/patch_entry_si2.S src/patch_entry_tail.S
 endif
@@ -47,6 +50,11 @@ CFLAGS  := -mips32r2 -EL -msoft-float -G 0 -mno-abicalls \
            -fno-pic -fno-builtin \
            -Os -Wall -Wextra \
            -Isrc
+ifndef MINIMAL
+ifndef PHASE
+CFLAGS  += -DINSTALLER_TAIL_TRANSCRIBED
+endif
+endif
 
 LDFLAGS := -T $(LDSCRIPT) -nostdlib -nostartfiles
 

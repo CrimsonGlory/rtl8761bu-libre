@@ -8,6 +8,7 @@
 
 	.section	.text.hooks
 
+#ifndef INSTALLER_TAIL_TRANSCRIBED
 	.globl	fn_c088
 	.type	fn_c088, @function
 fn_c088:
@@ -21,6 +22,7 @@ fn_c088:
 	nop
 1:	.word	0x80120961
 	.size	fn_c088, . - fn_c088
+#endif /* !INSTALLER_TAIL_TRANSCRIBED */
 
 	.globl	fn_d154
 	.type	fn_d154, @function
