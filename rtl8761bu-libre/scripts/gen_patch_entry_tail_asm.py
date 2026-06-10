@@ -73,7 +73,7 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     0x0C4C: ("fn_10ca4", "hook body"),
     0x0C50: ("fn_e82c", "hook body"),
     0x0C54: ("fn_eac0_callee", "hook body"),
-    0x0C58: ("fn_dfb0", "hook body"),
+    # fn_dfb0 @ PRAM+0x3FB0 — protocol_dispatch.S (not tail offset 0xC58)
     0x0C5C: ("fn_daa4", "hook body"),
     0x0C60: ("fn_da70", "hook body"),
     0x0C64: ("fn_d9f4", "hook body"),
