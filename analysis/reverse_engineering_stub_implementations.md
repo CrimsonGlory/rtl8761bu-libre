@@ -158,7 +158,7 @@ void FUN_8010cc94(void *msg) {
 
 **26 bytes** — cannot be shortened; both calls are mandatory for P1.
 
-### 4.5 `FUN_8010ca20` — type-0x67 monitor (STUB-T1 / IMPL-T3)
+### 4.5 `FUN_8010ca20` — type-0x67 monitor (IMPL-T3, transcribed 2026-06-10)
 
 **P1/P2 stub** (EMPTY-RET with optional fast-path check):
 

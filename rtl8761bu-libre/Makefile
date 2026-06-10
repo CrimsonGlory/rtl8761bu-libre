@@ -9,7 +9,7 @@
 #   make verify             — sanity-check header + entry fingerprint
 #
 # Linux-libre release profiles (single-patch, no inject_vendor / NF_REF):
-#   PROFILE=p2-libre (default) — T1+T2 hooks transcribed; T3+ still stub
+#   PROFILE=p2-libre (default) — T1+T2+T3 hooks transcribed; sub2 targets still stub
 #   PROFILE=p1-libre           — alias for bisect history (same tree when T2 done)
 #
 # FC20 downloads the patch body to 0x8010A000; ROM calls 0x8010A001 (body+0).

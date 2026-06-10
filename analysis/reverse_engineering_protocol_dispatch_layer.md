@@ -550,3 +550,11 @@ void new_func_for_unknown_fptr_index0(int *msg) {
 - ROM calls at fixed addresses for logging, LMP recovery, cleanup
 - PATCH `FUN_8010a5d8` for register 0x2d read (already analyzed in sco_esco layer)
 - No tail-call to ROM — function returns after patch-only work
+
+### Libre implementation (2026-06-10)
+
+`src/protocol_dispatch.S`: vendor-fixed @ PRAM+`0x2A20` (runtime `0x8010CA20`);
+534 B byte-identical transcription + 130 B `fn_ca20_gap` @ PRAM+`0x2C36` (vendor
+pool bridge to `fn_ccb8`). Regenerate: `scripts/gen_fn_ca20_asm.py`. Linker scatter
+in `rtl8761bu.ld`. Prefix `[0x2A20,0x2CB8)` 0/664 diffs vs NF_REF. Replaces
+STUB-T1 empty-return stub; completes T3 protocol-dispatch surface for P3.

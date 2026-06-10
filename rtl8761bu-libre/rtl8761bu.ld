@@ -42,7 +42,8 @@
  *   [0x2780, …)     fn_c780 subsystem init (t1_hooks.S)
  *   [0x243C, …)     fn_c43c infrastructure ptr region (t1_hooks.S)
  *   [0x249C, …)     fn_c49c infrastructure ptr region (t1_hooks.S)
- *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
+ *   [0x2A20, 0x2C36) fn_ca20 type-0x67 coexistence monitor (protocol_dispatch.S)
+ *   [0x2C36, 0x2CB8) fn_ca20_gap vendor pool bridge (protocol_dispatch.S)
  *   [0x2CB8, …)     fn_ccb8 AFH HW reg configurator (t3_hooks.S; ce0c callee)
  *   [0x2DC0, …)     fn_ce0c_pre_gap vendor pool bridge (t3_hooks.S)
  *   [0x2E0C, …)     fn_ce0c AFH capability mapper (t3_hooks.S)
@@ -152,6 +153,8 @@ SECTIONS {
         KEEP(*(.text.fn_c780_pool))
         . = __prefix_start + 0x2A20;
         KEEP(*(.text.fn_ca20))
+        . = __prefix_start + 0x2C36;
+        KEEP(*(.text.fn_ca20_gap))
         . = __prefix_start + 0x2CB8;
         KEEP(*(.text.fn_ccb8))
         . = __prefix_start + 0x2DC0;

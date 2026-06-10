@@ -156,7 +156,7 @@ Installed by `FUN_8010e27c` (hook #14), not direct `bos_base` offsets.
 | `FUN_8010d154` | 16 B | T1 | **SHIM-T1** — passthrough → ROM `0x80066e68` |
 | `FUN_8010da70` | 44 B | T1 | **SHIM-T1** — LC TX pass-through → ROM `0x80042420` |
 | `FUN_8010d9f4` | 98 B | T1 | **SHIM-T1** — LC RX pass-through → ROM `0x80042188` |
-| `FUN_8010ca20` | 534 B | T1/T3 | **STUB-T1**, **IMPL-T3** — type `0x67` coexistence monitor |
+| `FUN_8010ca20` | 534 B | T3 | **IMPL-T3** — type `0x67` coexistence monitor (`protocol_dispatch.S`) |
 
 ---
 

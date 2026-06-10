@@ -43,8 +43,8 @@
  * Pool @ +0x118. Decompile: FUN_8010c63c (Ghidra 2026-06-08).
  *
  * fn_c780 @ PRAM+0x2780 (runtime 0x8010C780): subsystem init (34 B).
- * Calls FUN_80110869 + ROM 0x800083ed/0x80007af1; sets flag @ 0x8012133b.
- * Pool @ +0x24. Decompile: FUN_8010c780 (Ghidra 2026-06-10).
+ * Calls fn_10868 + ROM 0x800083ed/0x80007af1; sets flag @ 0x8012133b.
+ * Pool @ PRAM+0x27A4 (fn_c780_pool.S → fn_10868+1). Ghidra 2026-06-10.
  *
  * fn_c43c @ PRAM+0x243C (runtime 0x8010C43C): infrastructure ptr (96 B).
  * BB reg 0x120 mask/write + ROM tail-call via pool @ +0x54.
