@@ -3,9 +3,14 @@
 # Builds a source-only replacement for rtl8761bu_fw.bin.
 #
 # Usage:
-#   make docker             — clean + full build + verify (use inside Docker)
+#   make docker             — clean + p2-libre build + verify (use inside Docker)
+#   make p2-libre           — explicit P2 libre ship profile (no NF_REF / inject)
 #   make minimal            — P0 smoke test (entry @ patch body offset 0)
 #   make verify             — sanity-check header + entry fingerprint
+#
+# Linux-libre release profiles (single-patch, no inject_vendor / NF_REF):
+#   PROFILE=p2-libre (default) — T1+T2 hooks transcribed; T3+ still stub
+#   PROFILE=p1-libre           — alias for bisect history (same tree when T2 done)
 #
 # FC20 downloads the patch body to 0x8010A000; ROM calls 0x8010A001 (body+0).
 
@@ -42,7 +47,9 @@ BUILD_PROFILE := $(if $(filter $(MINIMAL),null),null-gap,$(if $(MINIMAL),minimal
 else
 LDSCRIPT      := rtl8761bu.ld
 ENTRY_OFFSET  := 0
-BUILD_PROFILE := $(if $(PHASE),phase-$(PHASE),$(if $(filter $(MINIMAL),null),null,$(if $(MINIMAL),minimal,full)))
+# Default release = P2 (T1+T2 libre bodies). Override: make PROFILE=p1-libre
+PROFILE       ?= p2-libre
+BUILD_PROFILE := $(if $(PHASE),phase-$(PHASE),$(if $(filter $(MINIMAL),null),null,$(if $(MINIMAL),minimal,$(PROFILE))))
 endif
 
 CFLAGS  := -mips32r2 -EL -msoft-float -G 0 -mno-abicalls \
@@ -76,21 +83,31 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker release minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci
+.PHONY: all docker release p1-libre p2-libre minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci profile-siblings
 
 # Docker builds need NF_REF for inject/bisect profiles and diff-prefix (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
 DOCKER_NF_ENV := -e NF_REF=/nf_ref/$(notdir $(NF_REF))
 
-all: rtl8761bu_fw.bin rtl8761bu_config.bin
+all: rtl8761bu_fw.bin rtl8761bu_config.bin profile-siblings
 
-# Default Docker entry: discard stale host build/ then build + verify.
+# Default Docker entry: discard stale host build/ then P2 libre build + verify.
 docker: clean all verify
 
 # Linux-libre release path — no NF_REF mount required in Docker.
 release: docker
 
-# CI gate: clean build + verify + strict compliance (no NF_REF, full profile).
+# Explicit P2 libre ship (same as default `make all`; saves rtl8761bu_fw.p2-libre.bin).
+p2-libre:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p2-libre all verify
+
+# P1 bisect label — same source tree once T2 bodies are transcribed.
+p1-libre:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p1-libre all verify
+
+# CI gate: clean build + verify + strict compliance (no NF_REF, p2-libre profile).
 compliance-ci: docker
 	$(PYTHON) scripts/compliance_check.py --no-nf-ref --release --strict
 
@@ -307,6 +324,13 @@ rtl8761bu_fw.bin: build/patch_padded.bin pack.py
 
 rtl8761bu_config.bin: gen_config.py
 	$(PYTHON) gen_config.py $@
+
+# Profile-named siblings for promote-test.sh / fw_to_test staging.
+profile-siblings: rtl8761bu_fw.bin rtl8761bu_config.bin
+	@test -n "$(PROFILE)" || exit 0
+	@cp rtl8761bu_fw.bin rtl8761bu_fw.$(PROFILE).bin
+	@cp rtl8761bu_config.bin rtl8761bu_config.$(PROFILE).bin
+	@echo "profile siblings: rtl8761bu_fw.$(PROFILE).bin"
 
 # Byte-diff libre patch.bin vs vendor patch1 prefix (patch_entry RE progress)
 diff-prefix: build/patch.bin scripts/diff_vendor_prefix.py $(NF_REF)

@@ -10,13 +10,30 @@ SCO/eSCO voice and linux-libre compliance are noted separately.
 
 ## 1. Active test profile
 
+### Pure-libre P2 (Phase 8.3 — current)
+
+| Field | Value |
+|-------|-------|
+| **Profile** | `p2-libre` |
+| **Make target** | `make p2-libre` (default `make docker` / `make all`) |
+| **SHA256** | `8a5893981c90e9f7f939d2807e575da30ab6f707121ac861d932a719e0c635c0` |
+| **Staged** | `fw_to_test/rtl8761bu_fw.bin` (NeoPC scp source) |
+| **Config SHA256** | `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45095f` |
+
+**Composition**: 100% libre single-patch (27,928 B); T1+T2 hook bodies transcribed;
+T3 AFH hooks + sub-installer #2 targets still `STUB_RET`. No `inject_vendor`, no
+`NF_REF`. `make compliance-ci` PASS. Code 23,168 B + 4,636 B NOP pad to 27,808 B.
+
+**Pass criteria**: FC20 OK, `fw version 0x09a98a6b`, `hciconfig` UP, ACL connect,
+BT 5.1 features, A2DP and/or SCO/eSCO (hardware pending).
+
+### Interim inject profile (Phase 7 reference)
+
 | Field | Value |
 |-------|-------|
 | **Profile** | `full-inject-t3-pe5-vendor-tail` |
 | **Make target** | `make full-inject-t3-pe5-vendor-tail` |
 | **SHA256** | `7f051e6480ca7f3abe8d1fd16d21557ee0b4e7108a67cb31cd112aaa1a633bab` |
-| **Staged** | `fw_to_test/rtl8761bu_fw.bin` (NeoPC scp source) |
-| **Config SHA256** | `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45095f` |
 
 **Composition**: libre `patch_entry` prefix `[0, 0x764)` (PE-1..PE-5) + libre
 `sub_installer_2` @ file `0x764` + vendor tail `[0xE4C, …)` + vendor T3 hook bodies.

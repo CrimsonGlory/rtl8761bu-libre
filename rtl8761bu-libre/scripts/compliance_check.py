@@ -84,7 +84,9 @@ ALLOWED_INCBIN: dict[str, frozenset[str]] = {
     "src/installer_vendor_early.S": frozenset({"build/vendor_prefix.bin"}),
 }
 
-LIBRE_RELEASE_PROFILE = "full"
+LIBRE_RELEASE_PROFILE = "p2-libre"
+# Legacy alias from before Phase 8.3 profile naming.
+LIBRE_RELEASE_PROFILE_ALIASES = frozenset({"full", "p2-libre"})
 
 
 def _read_profile(path: Path) -> str:
@@ -159,7 +161,7 @@ def _audit_incbin(root: Path) -> list[str]:
 
 
 def _audit_release_profile(profile: str) -> list[str]:
-    if profile != LIBRE_RELEASE_PROFILE:
+    if profile not in LIBRE_RELEASE_PROFILE_ALIASES:
         return [
             f"default release profile is {profile!r}, expected {LIBRE_RELEASE_PROFILE!r}"
         ]
@@ -378,7 +380,11 @@ def main() -> int:
         print()
         if total_diff == 0:
             failures.append("patch1 is byte-identical to vendor (non-free)")
-        elif vendor_match >= PREFIX_CONNECT and profile == "full" and pe1_has_incbin:
+        elif (
+            vendor_match >= PREFIX_CONNECT
+            and profile in LIBRE_RELEASE_PROFILE_ALIASES
+            and pe1_has_incbin
+        ):
             failures.append("default full build embeds vendor PE-1 incbin (578 B)")
     else:
         print(f"patch1 @0x3780: sha256 {hashlib.sha256(libre_p1).hexdigest()} (no vendor diff)")
