@@ -38,6 +38,7 @@
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
+ *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  */
 
 ENTRY(patch_entry)
@@ -119,6 +120,8 @@ SECTIONS {
         KEEP(*(.text.fn_dd1c))
         . = __prefix_start + 0x3FB0;
         KEEP(*(.text.fn_dfb0))
+        . = __prefix_start + 0x5884;
+        KEEP(*(.text.fn_f884))
 
         *(.text.hooks)
         *(.text)

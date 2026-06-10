@@ -2353,3 +2353,72 @@ linker splits `installer_tail` / `fn_abd0` / `installer_tail_cont` in
 `rtl8761bu.ld` (`[0xBD0,0xD0C)` gap). `gen_patch_entry_tail_asm.py` omits
 abd0 bytes + mislabels `fn_d168`…`fn_bb54` prefix. Removed `STUB_RET` from
 `hook_stubs.S`. Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group M — bos_base+0x50 Connection Handler (2026-06-10)
+
+### `FUN_8010f884` / `LAB_8010f884` (204 B) — bos+0x50 dispatch hook
+
+**Install slot:** RAM `0x801206fc` (`bos_base+0x50`, `FUN_8010a000` Phase 1 hook #30).
+**PRAM body:** runtime `0x8010F884` (file offset `0x5884` in patch1).
+
+**Layout:** 64-byte literal pool @ body `+0x00`, MIPS16e code @ `+0x40` (140 B).
+
+**Semantics (vendor patch1 disasm + pool resolve):** T2 bos_base hook installed
+mid-sequence with eSCO-adjacent slots (`a550`, `c160`, `abd0`). Takes conn index
+(`param_1`); indexes `large2` stride `0x2b8`. Branches on conn `+0x50` halfword
+(`0xffff` = idle/skip path), `+0x215`/`+0x219` codec-mode bytes, and global gate
+structs. Active paths emit ROM `possible_logging_function` with HCI internal evt
+`0xfa` and up to three indirect callees (same send/cleanup chain pattern as
+`FUN_8010abd0`). Returns `1` on all paths.
+
+**Literal pool (vendor patch1, body off `+0x00`):**
+
+| Body off | Runtime | Role |
+|----------|---------|------|
+| `+0x00` | `0x80120634` | RAM data / gate |
+| `+0x04` | `0x8010F679` | patch helper |
+| `+0x08` | `0x80120624` | RAM slot |
+| `+0x0C` | `0x8010F9BD` | patch helper |
+| `+0x10` | `0x80120608` | RAM slot |
+| `+0x14` | `0x8010F719` | patch helper |
+| `+0x18` | `0x80120648` | RAM slot |
+| `+0x1C` | `0x801205D0` | RAM data |
+| `+0x20` | `0x8010FDAD` | patch helper |
+| `+0x24` | `0x8010FC29` | patch helper |
+| `+0x28` | `0x8010F6F1` | patch helper |
+| `+0x2C` | `0x8010F531` | patch helper |
+| `+0x30` | `0x801205B8` | RAM ind fn-ptr |
+| `+0x34` | `0x8010FCED` | patch helper |
+| `+0x38` | `0x801205FC` | RAM data |
+| `+0x3C` | `0x8010FA11` | patch tail-call target |
+
+**Libre:** `src/t2_hooks.S` — 204 B byte-identical transcription @ PRAM+`0x5884`;
+linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from `hook_stubs.S`.
+Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group N — eSCO Active Flag (2026-06-10)
+
+### `FUN_8010a550` (54 B) — set eSCO-active global
+
+**Install slot:** RAM `0x80120cd4` (`FUN_8010a000` Phase 1 hook #32).
+**PRAM body:** runtime `0x8010A550` (file offset `0x0550` in PE-2 literal pool).
+
+**Semantics (Ghidra decompile):** Four-condition gate before setting byte
+`*0x80120ccd = 1`: flag not already set; MMIO/status byte `*0x80122fc4` bit 7
+clear; capability word `*0x8012194c` bit 3 set; `param_1` bit 17 set. Returns 0.
+
+**Literal pool @ body `+0x38`:**
+
+| Body off | Runtime | Role |
+|----------|---------|------|
+| `+0x38` | `0x80120ccd` | eSCO-active flag byte |
+| `+0x3C` | `0x80122fc4` | MMIO/status byte (bit 7) |
+| `+0x40` | `0x8012194c` | capability word (bit 3 at +2) |
+
+**Libre:** `src/t2_hooks.S` — pool alias `fn_a550` @ `patch_entry_pool+0x30e`
+(PRAM+`0x0550`, 54 B from PE-2 pool). Removed `STUB_RET` from `hook_stubs.S`.
+Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
