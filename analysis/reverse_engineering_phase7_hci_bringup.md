@@ -61,7 +61,7 @@ explicitly.
 
 - BT 5.1 extended-features LE advertisement → next WIP item
 - SCO/eSCO audio → separate WIP item
-- `linux-libre` blob policy audit → separate WIP item
+- `linux-libre` blob policy audit → `reverse_engineering_linux_libre_compliance.md` (FAIL; remediation roadmap)
 
 ---
 

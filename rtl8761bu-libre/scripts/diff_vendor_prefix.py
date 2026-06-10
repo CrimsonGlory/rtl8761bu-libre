@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Diff libre patch.bin against vendor patch1 prefix [0, LIMIT).
 
 Default LIMIT=0x764 (UB500 connect-critical prefix). Reports per-region stats

@@ -1,4 +1,5 @@
-/* Shared sub_installer_2 machine code (included from bootstrap.S or installer_vendor_early.S). */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * Shared sub_installer_2 machine code (included from bootstrap.S or installer_vendor_early.S). */
 	.globl	sub_installer_2
 	.type	sub_installer_2, @function
 sub_installer_2:

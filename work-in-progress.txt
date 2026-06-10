@@ -732,9 +732,12 @@ PHASE 7 — TEST
 [DONE]  Test audio (SCO/eSCO) if applicable (2026-06-09)
           Profile 7f051e64…: A2DP music playback PASS (headset paired under vendor blob).
           SCO/eSCO voice path not explicitly tested. → phase7 §8, results.md
-[NEXT]  Run compliance checks against linux-libre blob policy
-          Audit libre build for non-free bytes remaining (vendor tail [0xE4C,…), NF_REF
-          build-time deps, reproducibility, license headers).
+[DONE]  Run compliance checks against linux-libre blob policy (2026-06-09)
+          FAIL verdict (expected): patch0 14048 B from NF_REF in pack.py --dual;
+          PE-1 incbin 578 B in patch_entry_code.S; pe5 profile 95% vendor patch1
+          (tail [0xE4C,…) verbatim). SPDX added to all src/*.S + scripts/*.py;
+          make compliance + scripts/compliance_check.py; reproducible make all in Docker.
+          → analysis/reverse_engineering_linux_libre_compliance.md
 
 
 NOTES

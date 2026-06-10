@@ -1,4 +1,5 @@
-/* phase-si2: through sub_installer_1/2 */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * phase-si2: through sub_installer_1/2 */
 	.set	mips16
 	.include "stub_macros.S"
 	.section	.text

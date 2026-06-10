@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """
 hybrid.py — splice vendor + libre patch1 bodies for FC20 bisect
 

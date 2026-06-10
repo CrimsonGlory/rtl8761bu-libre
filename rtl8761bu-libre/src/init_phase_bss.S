@@ -1,4 +1,5 @@
-/* phase-bss: prologue + fn_bss_init, then patch-active + return */
+/* SPDX-License-Identifier: GPL-2.0-or-later
+ * phase-bss: prologue + fn_bss_init, then patch-active + return */
 	.set	mips16
 	.include "stub_macros.S"
 	.section	.text
