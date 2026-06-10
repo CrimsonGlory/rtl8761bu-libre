@@ -6,8 +6,13 @@ Known slot annotations from analysis/reverse_engineering_patch_installer.md Appe
 """
 from __future__ import annotations
 
+import struct
 import sys
 from pathlib import Path
+
+# fn_10ddc pool slot (hook #42): relocated body @ PRAM+0x0E4C, not native 0x09F8
+FN_10DDC_POOL_OFF = 0x192
+FN_10DDC_POOL_RT = 0x8010AE4D
 
 POOL_FILE_OFF = 0x242
 POOL_SIZE = 0x5D8 - 0x242
@@ -57,6 +62,7 @@ ANNOTATIONS: dict[int, str] = {
     0x0A2: "FUN_8010a594",
     0x0A6: "0x80120cf8",
     0x0AA: "FUN_8010c0f4",
+    0x226: "FUN_8010a410 — HW reg 0x11C codec mode (86 B); alias t2_hooks.S",
     0x0AE: "0x80121414",
     0x0B2: "FUN_8010a4ac",
     0x0B6: "0x801213dc",
@@ -114,7 +120,7 @@ ANNOTATIONS: dict[int, str] = {
     0x186: "DAT_8010a3c8 — FUN_8010c278 RF init",
     0x18A: "PTR_DAT_8010a3cc — patch-active @ 0x80120538",
     0x18E: "0x80121020",
-    0x192: "FUN_80110ddc",
+    0x192: "fn_10ddc+1 @ relocated 0x8010AE4D (hook #42)",
     0x196: "0x80121220",
     0x19A: "FUN_8010bda0",
     0x19E: "0x8012167c",
@@ -176,8 +182,9 @@ def main() -> None:
     out = Path(sys.argv[2])
     with nf.open("rb") as f:
         f.seek(0x3780 + POOL_FILE_OFF)
-        blob = f.read(POOL_SIZE)
-    out.write_text(emit_pool(blob), encoding="utf-8")
+        blob = bytearray(f.read(POOL_SIZE))
+    struct.pack_into("<I", blob, FN_10DDC_POOL_OFF, FN_10DDC_POOL_RT)
+    out.write_text(emit_pool(bytes(blob)), encoding="utf-8")
     print(f"gen_patch_entry_pool_asm: {POOL_SIZE} B → {out}")
 
 

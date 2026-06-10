@@ -57,15 +57,14 @@ VENDOR_OVERLAY: list[tuple[int, int]] = [
     (0x8010C49C, 0x8010C500 - 0x8010C49C),
     (0x8010C43C, 0x8010C49C - 0x8010C43C),  # 96 B; abuts c49c (4 B shared in vendor manifest)
     (0x8010E27C, 52),  # protocol dispatch installer body
-    (0x8010CA20, 0x8010CA80 - 0x8010CA20),
+    (0x8010CA20, 534),  # FUN_8010ca20 — type-0x67 coexistence monitor (protocol_dispatch.S)
     (0x8010DFB0, 0x8010E020 - 0x8010DFB0),
     (0x8010DAA4, 0x8010DB00 - 0x8010DAA4),
     (0x8010DA70, 20),
     (0x8010D9F4, 20),
     (0x8010D154, 0x8010D1C0 - 0x8010D154),
-    # FUN_80110ca4 (178 B) is at runtime 0x80110CA4 — 4 B past the 27,808-byte
-    # FC20 patch1 image (ends 0x80110CA0).  Not present in rtl8761bu_fw.bin patch1;
-    # sub_installer_3 uses INSTALL_HOOK → linked fn_10ca4 stub until reimplemented.
+    # FUN_80110ca4 (178 B): GZF @ 0x80110CA4 (4 B past FC20 window); libre body
+    # @ PRAM+0x6350 (0x80110350). sub2_fn_18 entry is fn_10ca4+0x14.
     (0x8010E82C, 0x8010E880 - 0x8010E82C),
 ]
 

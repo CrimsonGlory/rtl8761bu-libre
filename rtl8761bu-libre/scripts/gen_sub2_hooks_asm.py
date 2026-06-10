@@ -28,7 +28,7 @@ SUB2_TARGETS: list[tuple[int, int]] = [
     (0x80110044, 0x80110060 - 0x80110044),
     (0x8010FE84, 0x8010FEA0 - 0x8010FE84),
     (0x80110640, 0x8011065C - 0x80110640),
-    (0x80110364, 0x80110380 - 0x80110364),
+    # sub2_fn_18 @ 0x80110364 is fn_10ca4+0x14 — see gen_fn_10ca4_asm.py / t4_hooks.S
 ]
 
 PATCH1_OFF = 0x3780

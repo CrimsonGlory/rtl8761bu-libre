@@ -58,7 +58,7 @@
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x41C2, …)     fn_e350_pre_gap vendor pool bridge (t3_hooks.S)
  *   [0x4350, …)     fn_e350 AFH quality ranking engine (t3_hooks.S)
- *   [0x47E6, …)     fn_e350_post_gap vendor region (t3_hooks.S)
+ *   [0x47E6, …)     fn_e350_post_gap vendor region (t3_hooks.S; fn_e82c @ +0x46)
  *   [0x585C, …)     fn_f85c AFH readiness gate (t3_hooks.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  *   [0x5950, …)     fn_f950 AFH quality + VSC FC95 trigger (t3_hooks.S)

@@ -17,7 +17,8 @@ delta differs from wip-state.sh delta:
   - BLOCKED_DELTA > 0 with [NEXT] or [TODO] remaining → commit + continue
   - DONE_DELTA >= 1 → same as wip-loop
   - FAILED_DELTA > 0 → stop (hard failure)
-  - neither done nor blocked rose → STOP_REASON=needs_block (run recovery worker)
+  - DONE_DELTA=0 and BLOCKED_DELTA=0 → STOP_REASON=needs_block (worker left [NEXT]
+    open; run recovery to [BLOCKED] + promote first [TODO] → [NEXT])
 EOF
 }
 
@@ -45,6 +46,7 @@ case "$cmd" in
     grep -E '^(DONE_|NEXT_|TODO_|BLOCKED_|FAILED_)' "$base_out" || true
 
     stop_reason="$(get_field STOP_REASON "$base_out")"
+    done_delta="$(get_field DONE_DELTA "$base_out")"
     blocked_delta="$(get_field BLOCKED_DELTA "$base_out")"
     after_next="$(get_field NEXT_AFTER "$base_out")"
     after_todo="$(get_field TODO_AFTER "$base_out")"
@@ -83,6 +85,14 @@ case "$cmd" in
       echo "SHOULD_CONTINUE=no"
       echo "STOP_REASON=blocked_complete"
       exit 1
+    fi
+
+    if [[ "${done_delta:-0}" -eq 0 && "${blocked_delta:-0}" -eq 0 ]]; then
+      echo "SHOULD_COMMIT=no"
+      echo "SHOULD_CONTINUE=yes"
+      echo "STOP_REASON=needs_block"
+      echo "NEEDS_BLOCK_REASON=worker_left_NEXT_open"
+      exit 0
     fi
 
     if [[ "$stop_reason" == no_progress || "$stop_reason" == blocked ]]; then

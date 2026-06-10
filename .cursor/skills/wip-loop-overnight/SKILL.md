@@ -17,6 +17,32 @@ with the next `[TODO]`.
 
 Designed to run before sleep so RE/implementation work advances as far as possible.
 
+## Mandatory ticket closure (every worker step)
+
+**Every worker MUST close the active ticket before finishing.** Leaving `[NEXT]`
+unchanged is a violation — the supervisor runs a recovery worker.
+
+When you pick up the current `[NEXT]` item:
+
+1. **Finish it** → rename `[NEXT]` to `[DONE]` (add date + summary if the line
+   warrants it).
+2. **Cannot finish** (hardware, NeoPC paste, user decision, missing device/tool) →
+   rename `[NEXT]` to `[BLOCKED]` (add today's date + one-line reason).
+3. **Always promote** → rename the **first** remaining `[TODO]` to `[NEXT]` (when
+   any `[TODO]` exists).
+
+There is no third outcome. Do **not** leave an item as `[NEXT]` when your turn ends.
+Do **not** skip promotion when `[TODO]` items remain.
+
+| Outcome | Tag change | Promote first `[TODO]`? |
+|---------|------------|-------------------------|
+| Step completed | `[NEXT]` → `[DONE]` | Yes, if any `[TODO]` left |
+| Needs user / hardware / external | `[NEXT]` → `[BLOCKED]` | Yes, if any `[TODO]` left |
+| Build/RE hard failure | `[FAILED]` (rare) | No — supervisor stops loop |
+
+**Wrong:** hardware step still `[NEXT]` with “awaiting journalctl”.  
+**Right:** `[BLOCKED]` “needs NeoPC journalctl (2026-06-10)” + first `[TODO]` → `[NEXT]`.
+
 ## Roles
 
 | Role | Who | Job |
@@ -34,10 +60,10 @@ Designed to run before sleep so RE/implementation work advances as far as possib
 .cursor/skills/wip-loop-overnight/scripts/wip-state-overnight.sh bisect-mode
 ```
 
-## When to mark `[BLOCKED]`
+## When to mark `[BLOCKED]` (not leave `[NEXT]`)
 
-Worker marks `[NEXT]` → `[BLOCKED]` (with date + reason) and promotes first
-`[TODO]` → `[NEXT]` when the step **cannot** be finished in this environment:
+Use `[BLOCKED]` — never an open `[NEXT]` — when the step **cannot** be finished in
+this environment:
 
 - NeoPC / UB500 hardware test, `journalctl` paste, `try_new_firmware.sh`
 - Bisect SPLIT waiting on flash result
@@ -54,16 +80,21 @@ use `[FAILED]` or fix inline. Supervisor **stops** on `[FAILED]`.
 ```
 Overnight wip-loop worker step.
 
-Check work-in-progress.txt and continue with the [NEXT] item.
-
-If you complete the step: mark [NEXT] → [DONE], promote the first [TODO] → [NEXT]
-(if applicable), write analysis/docs, build when relevant.
-
-If you CANNOT complete the step (hardware, user paste, missing device, external
-dependency): mark [NEXT] → [BLOCKED] with today's date and a one-line reason,
-promote the first [TODO] → [NEXT]. Do not leave the item stuck as [NEXT].
-
 Repo: /root/rtl8761bu-libre — read CLAUDE.md; use wairz MCP for Ghidra RE.
+
+Open work-in-progress.txt. Execute exactly ONE item — the current [NEXT] line.
+
+MANDATORY before you finish (no exceptions):
+  • Done with the work → [NEXT] → [DONE]
+  • Blocked on user/hardware/external → [NEXT] → [BLOCKED] (date + one-line reason)
+  • Either way, if any [TODO] remains → rename the FIRST [TODO] to [NEXT]
+  • NEVER leave the ticket as [NEXT] when your turn ends
+
+If you completed implementation/RE: write analysis/docs, build when relevant, then
+apply the tag changes above.
+
+If blocked (NeoPC flash, journalctl paste, missing UB500, user decision, tool you
+cannot access): still apply [BLOCKED] + promote — do not hand off with an open [NEXT].
 ```
 
 **First TODO** (no `[NEXT]`, but `[TODO]` exists):
@@ -71,25 +102,35 @@ Repo: /root/rtl8761bu-libre — read CLAUDE.md; use wairz MCP for Ghidra RE.
 ```
 Overnight wip-loop worker step.
 
-Check work-in-progress.txt and work on the first [TODO] item (promote it to
-[NEXT] first if needed). Same completion and [BLOCKED] rules as the default
-overnight worker prompt.
+Repo: /root/rtl8761bu-libre — read CLAUDE.md; use wairz MCP for Ghidra RE.
+
+No [NEXT] is set. Rename the FIRST [TODO] to [NEXT], then execute it.
+
+MANDATORY before you finish:
+  • [NEXT] → [DONE] if completed, or [NEXT] → [BLOCKED] if needs user/hardware
+  • Promote the next first [TODO] → [NEXT] when any [TODO] remains
+  • NEVER leave your ticket as [NEXT]
 ```
 
 **Bisect** (`BISECT_MODE=yes`) — same as wip-loop bisect worker, except:
 
-- No hardware paste in prompt → **block** the bisect `[NEXT]` (reason: needs NeoPC
-  flash), promote first `[TODO]`, do **not** stage HANDOFF and stop the loop.
-- Hardware paste provided → normal bisect flow (log, apply-result, continue).
+- No hardware paste in prompt → `[NEXT]` → `[BLOCKED]` (reason: needs NeoPC flash),
+  promote first `[TODO]` → `[NEXT]`; do **not** stage HANDOFF or leave `[NEXT]` open.
+- Hardware paste provided → normal bisect flow (log, apply-result); on completion
+  `[NEXT]` → `[DONE]` and promote next `[TODO]`.
 
 **Recovery** (supervisor runs when `STOP_REASON=needs_block`):
 
 ```
 Overnight wip-loop recovery step.
 
-The previous worker made no progress on the active [NEXT] in work-in-progress.txt.
-Mark that item [BLOCKED] with today's date and a one-line reason. Promote the
-first [TODO] to [NEXT]. Only edit work-in-progress.txt — no feature work.
+The previous worker violated ticket closure: the active item is still [NEXT] in
+work-in-progress.txt.
+
+Fix ONLY work-in-progress.txt:
+  1. Rename that [NEXT] → [BLOCKED] (today's date + reason: worker left ticket open)
+  2. Rename the first [TODO] → [NEXT]
+Do not do feature work.
 ```
 
 ## Supervisor loop
@@ -108,6 +149,9 @@ Repeat until stop:
 Pick prompt: bisect (overnight rules) / default / first TODO / stop if no work.
 
 Use **Task** tool (`generalPurpose`). Wait for completion.
+
+**Verify ticket closure:** after each worker, the active line must not still be
+`[NEXT]` unless `[DONE]` or `[BLOCKED]` rose. Open `[NEXT]` → `needs_block` → recovery.
 
 ### 3. Evaluate
 
