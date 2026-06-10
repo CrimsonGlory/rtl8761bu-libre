@@ -20,6 +20,9 @@
  *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
  *   [0x31F4, …)     fn_d1f4 conn timing matcher (t1_hooks.S)
+ *   [0x3618, …)     fn_d618 HCI internal msg dispatcher (t1_hooks.S)
+ *   [0x3890, …)     fn_d890 HCI VSC msg handler (t1_hooks.S)
+ *   [0x3D1C, …)     fn_dd1c HCI msg type router (t1_hooks.S)
  *   [0x2224, …)     fn_c224 bos+0x24 HCI handler (t1_hooks.S)
  *   [0x263C, …)     fn_c63c ACL retransmission handler (t1_hooks.S)
  *   [0x2780, …)     fn_c780 subsystem init (t1_hooks.S)
@@ -79,12 +82,18 @@ SECTIONS {
         KEEP(*(.text.fn_ca20))
         . = __prefix_start + 0x31F4;
         KEEP(*(.text.fn_d1f4))
+        . = __prefix_start + 0x3618;
+        KEEP(*(.text.fn_d618))
+        . = __prefix_start + 0x3890;
+        KEEP(*(.text.fn_d890))
         . = __prefix_start + 0x39F4;
         KEEP(*(.text.fn_d9f4))
         . = __prefix_start + 0x3A70;
         KEEP(*(.text.fn_da70))
         . = __prefix_start + 0x3AA4;
         KEEP(*(.text.fn_daa4))
+        . = __prefix_start + 0x3D1C;
+        KEEP(*(.text.fn_dd1c))
         . = __prefix_start + 0x3FB0;
         KEEP(*(.text.fn_dfb0))
 

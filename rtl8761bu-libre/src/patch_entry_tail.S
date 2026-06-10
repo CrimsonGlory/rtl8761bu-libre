@@ -245,21 +245,9 @@ fn_b174:
 	.type		fn_b7f0, @function
 fn_b7f0:
 	/* 0x0bd8 / 0x8010abd8 — hook body */
-	.globl		fn_dd1c
-	.type		fn_dd1c, @function
-fn_dd1c:
-	/* 0x0bdc / 0x8010abdc — hook body */
-	.globl		fn_d890
-	.type		fn_d890, @function
-fn_d890:
-	/* 0x0be0 / 0x8010abe0 — hook body */
 	/* 0x0be0 / 0x8010abe0 */
 	.byte	0x6c, 0xea, 0x49, 0x22, 0x63, 0xa6, 0xff, 0x6c, 0x4e, 0x43, 0x8c, 0xea, 0x4a, 0x5a, 0x41, 0x60
 
-	.globl		fn_d618
-	.type		fn_d618, @function
-fn_d618:
-	/* 0x0be4 / 0x8010abe4 — hook body */
 	.globl		fn_a594
 	.type		fn_a594, @function
 fn_a594:

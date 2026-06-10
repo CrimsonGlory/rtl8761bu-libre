@@ -867,12 +867,19 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           Decompile: FUN_8010c63c — ACL seq counter vs struct+0x14bc, MMIO
           0xb6001176 flow-control bits, ROM ACL buffer get/submit chain; pool @ +0x118.
           Removed mislabeled tail symbol @ 0xBD4 + hook_stubs.S STUB_RET. Tier: T1.
-[NEXT]  fn_dd1c, fn_d890, fn_d618 (422 B) — HCI internal msg dispatcher
-[TODO]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
+[DONE]  fn_dd1c, fn_d890, fn_d618 — HCI internal msg dispatcher (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x3618/0x3890/0x3D1C (runtime
+          0x8010D618 / 0x8010D890 / 0x8010DD1C); 422 B + 144 B + 100 B
+          byte-identical to vendor patch1; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010d618 — types 0x408/0x1002/0x1405/0xc03 + HCI evt 0xe;
+          FUN_8010d890 — vendor VSC opcodes 0xFC19/0xFC6E/0xFCEF/0xFD9D/0xFCAD;
+          FUN_8010dd1c — types 0x401/0x403/0x405/0x419/0x41d/0xc3f/0x203c router.
+          Removed tail mislabels @ 0xBDC/0xBE0/0xBE4 + hook_stubs.S STUB_RET.
+          Tier: T1.
+[NEXT]  fn_a594 (14 B), fn_a49c (10 B) — trivial MMIO / flag clear
 [TODO]  fn_c49c, fn_c43c — infrastructure ptr region
 
-T1 decompile queue (may downgrade tier): c198, d1f4, dd1c, d890,
-          c49c, c43c — wairz DecompileAddr.java before transcribe.
+T1 decompile queue (may downgrade tier): c49c, c43c — wairz before transcribe.
 
 [TODO]  Hardware P1 smoke: ACL connect on pure-libre image (no inject tail)
           After 8.0 + enough 8.2 for FC20 + hciconfig + connect. Bisect unknowns.

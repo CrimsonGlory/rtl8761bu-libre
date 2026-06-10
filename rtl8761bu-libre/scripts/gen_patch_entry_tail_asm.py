@@ -41,9 +41,8 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     # fn_c780 @ PRAM+0x2780 — t1_hooks.S (not tail 0xBD0)
     # fn_c63c @ PRAM+0x263C — t1_hooks.S (not tail 0xBD4)
     0x0BD8: ("fn_b7f0", "hook body"),
-    0x0BDC: ("fn_dd1c", "hook body"),
-    0x0BE0: ("fn_d890", "hook body"),
-    0x0BE4: ("fn_d618", "hook body"),
+    # fn_dd1c @ PRAM+0x3D1C, fn_d890 @ PRAM+0x3890, fn_d618 @ PRAM+0x3618 — t1_hooks.S
+    # (not tail 0xBDC / 0xBE0 / 0xBE4 mislabels)
     0x0BE8: ("fn_a594", "hook body"),
     0x0BEC: ("fn_c0f4", "hook body"),
     0x0BF0: ("fn_a4ac", "hook body"),
