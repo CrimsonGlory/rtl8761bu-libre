@@ -312,7 +312,7 @@ build/patch.bin: build/patch.elf
 	$(OBJCOPY) -O binary --only-section=.text --only-section=.text.entry \
 		--gap-fill=0x00 $< $@
 
-build/patch_padded.bin: build/patch.bin pad.py
+build/patch_padded.bin: build/patch.elf pad.py
 	$(PYTHON) pad.py $< $(PATCH_SIZE) $@ $(ENTRY_OFFSET)
 
 rtl8761bu_fw.bin: build/patch_padded.bin pack.py

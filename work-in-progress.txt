@@ -1072,9 +1072,22 @@ Explicitly omit for P2 (T3 — defer to Phase 8.4):
           SHA256 `8a5893981c90e9f7f939d2807e575da30ab6f707121ac861d932a719e0c635c0`
           → staged `fw_to_test/` as profile p2-libre (T1+T2 transcribed; T3 stub).
 
-[NEXT]  pad.py NOP fill to 27,808 B from libre code only
-[TODO]  Hardware P2 acceptance: FC20 OK, HCI, ACL, BT 5.1, A2DP and/or SCO/eSCO
-[TODO]  make compliance → SHIP: YES on P2 profile artifact
+[DONE]  pad.py NOP fill to 27,808 B from libre code only (2026-06-10)
+          pad.py reads patch.elf: NOP background + overlay all .text* sections
+          at VMA−0x8010A000 (fixes missing .text.hooks past 0x5A80 — fn_a84c/
+          fn_b4d0/fn_c854/fn_10868 were NOP-only before). Makefile: patch_padded
+          depends on patch.elf not patch.bin. P2: 24,796 B code + 3,008 B NOP pad;
+          make compliance-ci PASS. SHA256 fw addd6593… (p2-libre staged fw_to_test).
+[BLOCKED]  Hardware P2 acceptance: FC20 OK, HCI, ACL, BT 5.1, A2DP and/or SCO/eSCO (2026-06-10)
+          Awaiting NeoPC try_new_firmware.sh + journalctl/connect paste (no UB500 on daas-dev).
+          **STAGED** — profile `p2-libre` (post pad.py ELF fix).
+          SHA256 `addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb`
+          → `fw_to_test/rtl8761bu_fw.bin`. Config unchanged (6c28a3f0…).
+          Pass: FC20 OK, fw 0x09a98a6b, hciconfig UP, connect, A2DP and/or SCO/eSCO.
+          Fail bisect: FC20 → entry; HCI hang → installer; audio → T2 callee gap.
+[DONE]  make compliance → SHIP: YES on P2 profile artifact (2026-06-10)
+          `make compliance-ci`: LINUX-LIBRE PASS (single-patch 27,928 B; patch1 body
+          608ada31…). Profile p2-libre; no NF_REF/incbin blockers.
 
 --- Phase 8.4 — P3 AFH / coexistence (required for P4, optional for P2) ---
 

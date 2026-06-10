@@ -280,11 +280,18 @@ Details: `reverse_engineering_config_blob.md`.
 
 ```
 src/*.[cS]  ──► mipsel-linux-gnu-gcc  ──► build/patch.elf
-build/patch.elf  ──► objcopy  ──► build/patch.bin
-build/patch.bin  ──► pad.py (NOP + footer)  ──► build/patch_padded.bin
+build/patch.elf  ──► pad.py (NOP holes + footer)  ──► build/patch_padded.bin
+build/patch.bin  ──► objcopy (diff-prefix / bisect only)
 build/patch_padded.bin  ──► pack.py  ──► rtl8761bu_fw.bin
 gen_config.py  ──► rtl8761bu_config.bin
 ```
+
+`pad.py` reads `patch.elf` directly: the 27,804-byte PRAM body starts as
+MIPS16e NOP fill, then every allocated `.text*` section is copied at
+`section.vma − 0x8010A000`.  Scatter gaps and the tail stay NOP — only
+libre-linked code is placed.  This is required for `.text.hooks` bodies
+past file offset `0x5A80` (e.g. `fn_a84c`, `fn_b4d0`, `fn_c854`,
+`fn_10868`) that `objcopy --only-section=.text` previously dropped.
 
 ### 4.2 Source tree (target layout)
 

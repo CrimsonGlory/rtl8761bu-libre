@@ -159,4 +159,5 @@ See also `rtl8761bu-libre/test-queue.txt`.
 
 | Profile | SHA256 (`rtl8761bu_fw.bin`) | Staged | Notes |
 |---------|------------------------------|--------|-------|
-| **p1-libre** | `67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a` | 2026-06-10 | **100% libre** single-patch 27,928 B; `make compliance-ci` PASS; 17,136 B code + 10,668 B NOP pad (no vendor tail/inject). T1 hooks transcribed; T2+ still `STUB_RET` (19 sub2 + 14 T2). Pass: FC20 OK, `fw version 0x09a98a6b`, `hciconfig` UP, connect `88:C9:E8:6B:F9:1E`. Fail bisect: FC20 → entry/prefix; HCI `0x2036` → NOP tail; page-timeout → T2 stubs. |
+| **p2-libre** | `addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb` | 2026-06-10 | **100% libre** P2 single-patch 27,928 B; `pad.py` ELF assembly (24,796 B code + 3,008 B NOP; fixes missing `.text.hooks` past 0x5A80). T1+T2 transcribed; T3 stub. `make compliance-ci` PASS. Pass: FC20 OK, `fw version 0x09a98a6b`, HCI UP, connect, A2DP/SCO. Fail bisect: FC20 → entry; HCI hang → installer; audio → T2 callee. |
+| ~~p1-libre~~ | `67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a` | 2026-06-10 | superseded by p2-libre (missing hook bodies in padded image) |
