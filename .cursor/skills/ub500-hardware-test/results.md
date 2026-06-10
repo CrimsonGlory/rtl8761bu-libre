@@ -89,7 +89,16 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `4099d4bd6e809cb860f12ebd741b19033a2f660af0bf106d5a08ed0b30beb25c` | full-inject-t3-vendor-tail (vendor early) | FC20 **PASS**; connect **OK** |
 | `74fec1169d1879c5868a6ffb1e4b98f91f67c5601732c94ad658ea5e867e5c6f` | full (macro fix) | FAIL |
 | `9cfd8d5e3992aeba8d3e3bca0e0e763923259f7ef2e9ba972010d59d00ce5171` | full (macro bug) | FAIL |
-| `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | p4-libre | **pending** (NeoPC) |
+| `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | p4-libre | **pending** (NeoPC); **SHIP: YES** (compliance-ci) |
+
+## linux-libre compliance (SHIP gate)
+
+| Profile | SHA256 (`rtl8761bu_fw.bin`) | `make compliance-ci` | SHIP | Date |
+|---------|------------------------------|----------------------|------|------|
+| p2-libre | `addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb` | PASS (single-patch 27,928 B) | YES | 2026-06-10 |
+| p4-libre | `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | PASS (single-patch 27,928 B; patch1 `61d465d62bc55370789835163b8aa8e9be42f43d7cb8bb24b2f27babce397f31`) | **YES** | 2026-06-10 |
+
+P4 artifact: PRAM 27,680 B code + 124 B NOP pad; 43 IMPL + 1 SHIM hooks; sub2 19/19 IMPL; 0 STUB_RET among hook installs. No NF_REF, no incbin blockers, no inject overlay.
 
 ## Conclusions (2026-06-09)
 
@@ -160,7 +169,7 @@ See also `rtl8761bu-libre/test-queue.txt`.
 
 | Profile | SHA256 (`rtl8761bu_fw.bin`) | Staged | Notes |
 |---------|------------------------------|--------|-------|
-| **p4-libre** | `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | 2026-06-10 | **100% libre** P4 single-patch 27,928 B; full parity (T1+T2+T3+T4 + sub2 19/19 IMPL). PRAM 27,680 B code + 124 B NOP pad; patch1 `61d465d6…`. `make compliance-ci` PASS. Pass: FC20 OK, `fw version 0x09a98a6b`, HCI UP, connect, A2DP/SCO, AFH under Wi-Fi, BLE coexistence, reconnect stress. Fail bisect: FC20 → entry; HCI hang → installer; audio → T2; AFH/BLE → T3; sub2/T4 → callee gap. |
+| **p4-libre** | `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | 2026-06-10 | **100% libre** P4 single-patch 27,928 B; full parity (T1+T2+T3+T4 + sub2 19/19 IMPL). PRAM 27,680 B code + 124 B NOP pad; patch1 `61d465d62bc55370789835163b8aa8e9be42f43d7cb8bb24b2f27babce397f31`. **`make compliance-ci` PASS → SHIP: YES** (linux-libre gate). Hardware **pending** NeoPC. Pass: FC20 OK, `fw version 0x09a98a6b`, HCI UP, connect, A2DP/SCO, AFH under Wi-Fi, BLE coexistence, reconnect stress. Fail bisect: FC20 → entry; HCI hang → installer; audio → T2; AFH/BLE → T3; sub2/T4 → callee gap. |
 | ~~p3-libre~~ | `e8c15f3ac6662d43792bebdc28d8f60a1fac935061a5760b8be62149aa8643e2` | 2026-06-10 | superseded by p4-libre (P3-only; missing sub2 + T4) |
 | ~~p2-libre~~ | `addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb` | 2026-06-10 | superseded by p4-libre (P2-only; T3 stub) |
 | ~~p1-libre~~ | `67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a` | 2026-06-10 | superseded by p4-libre (P1-only; T2+ stubs) |
