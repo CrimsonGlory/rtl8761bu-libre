@@ -16,7 +16,7 @@
  *   [0x10A4, …)     fn_b0a4 ACL packet-type flag corrector (t1_hooks.S)
  *   [0x1118, …)     fn_b118 slot interval allocator (t1_hooks.S)
  *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
- *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
+ *   [0x15D8, …)     fn_b5d8 eSCO connection activator (t2_hooks.S)
  *   [0x17D4, …)     fn_b7d4 ACL slot lookup wrapper (t2_hooks.S)
  *   [0x17F0, …)     fn_b7f0 LMP eSCO packet processor (t2_hooks.S)
  *   [0x1CE0, …)     fn_bce0 eSCO slot capability mask (t2_hooks.S)

@@ -1036,8 +1036,15 @@ T2 callee bodies (eSCO cluster — not all hook slots; called from dfb0/others):
           Decompile: FUN_8010b7d4 — 12-byte stack buf + ROM ACL slot lookup;
           callee from fn_b64c eSCO link path (not DRAM hook install). Tier: T2.
           → reverse_engineering_sco_esco_layer.md (Group F impl note)
-[NEXT]  fn_b5d8 (100 B) — eSCO connection activator
-[TODO]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
+[DONE]  fn_b5d8 (100 B) — eSCO connection activator (2026-06-10)
+          src/t2_hooks.S: vendor-fixed @ PRAM+0x15D8 (runtime 0x8010B5D8);
+          100 B byte-identical transcription; linker scatter in rtl8761bu.ld.
+          Decompile: FUN_8010b5d8 — conn_rec+0x90 active, ROM config assign,
+          +0x78|=0x20, clear +0x8f bit4, *0x8012082c(conn_idx,6), optional
+          FUN_8005ca00; pool @ +0x64. Callers: fn_b64c, fn_dfb0 opcode 0x270.
+          Removed return-0 stub from protocol_dispatch.S.
+          → reverse_engineering_sco_esco_layer.md (Group P2)
+[NEXT]  fn_b64c (344 B) — LMP eSCO link request (opcode 0x25)
 [TODO]  fn_10868 (322 B) — codec frame ring-buffer scheduler
 
 Explicitly omit for P2 (T3 — defer to Phase 8.4):

@@ -2493,6 +2493,29 @@ transcription (GZF `AnalyzeB4D0Tail.java`); section `.text.fn_b4d0` links in
 
 ---
 
+## Group P2 — eSCO Connection Activator (2026-06-10)
+
+### `FUN_8010b5d8` (100 B) — second half of b4d0 activation pair
+
+**PRAM body:** runtime `0x8010B5D8` (PRAM+`0x15D8`, within FC20 window).
+**GZF body:** immediately after `FUN_8010b4d0` literal pool (`0x8010B5D8`–`0x8010B64C`).
+
+**Semantics:** See §FUN_8010b5d8 above — sets `conn_rec+0x90` active bit, ROM
+`access_config` + `assign_pointer`, `+0x78|=0x20`, clears `+0x8f` bit 4 (deferred),
+indirect `*0x8012082c(conn_idx, 6)` → ROM `FUN_8004ce44`, optional
+`FUN_8005ca00(conn_rec, 0x0c, 1)` when `+0x90` bit 2 set. Returns 1.
+
+**Callers:** `FUN_8010b64c` (eSCO link request, pool `0x8010b7d0` → `fn_b5d8+1`);
+`FUN_8010dfb0` LMP opcode `0x270` (eSCO activation when pending + no timers).
+
+**Literal pool @ +0x64:** `0x8005e23d`, `0x8005d26d`, `0x8012082c`, `0x8005ca01`.
+
+**Libre:** `src/t2_hooks.S` — 100 B vendor byte-identical transcription;
+vendor-fixed linker scatter @ PRAM+`0x15D8`. Replaced 4 B return-0 stub in
+`protocol_dispatch.S` (dfb0 opcode `0x270` path). Tier **T2**.
+
+---
+
 ## Group Q — Timing Compensation Adder (2026-06-10)
 
 ### `FUN_8010a5ac` (36 B) — stride-0x1ac timing adjustment

@@ -15,8 +15,7 @@
  * fn_da70 @ PRAM+0x3A70 (runtime 0x8010DA70): LC TX intercept — SHIM-T1 P1.
  * Tail-calls ROM assoc_w_tLC_TX @ 0x80042420 (odd 0x80042421); $a0 = msg ptr.
  *
- * fn_b5d8 @ PRAM+0x15D8: minimal stub until eSCO activator is implemented;
- * dfb0 opcode 0x270 calls it; return 0 → fall through to ROM LMP handler.
+ * fn_b5d8 @ PRAM+0x15D8 — t2_hooks.S (eSCO connection activator; dfb0 0x270).
  *
  * fn_ca20 @ PRAM+0x2A20 (runtime 0x8010CA20): type-0x67 coexistence monitor —
  * STUB-T1 empty return (P1/P2); full 534 B impl deferred to T3.
@@ -25,15 +24,6 @@
  */
 
 	.set	mips16
-
-	.section	.text.fn_b5d8, "ax"
-	.globl	fn_b5d8
-	.type	fn_b5d8, @function
-fn_b5d8:
-	li	$v0, 0
-	jr	$ra
-	nop
-	.size	fn_b5d8, . - fn_b5d8
 
 	.section	.text.fn_ca20, "ax"
 	.globl	fn_ca20
