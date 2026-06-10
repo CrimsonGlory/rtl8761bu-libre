@@ -973,8 +973,14 @@ T2 hook installs (replace stubs):
           @ RAM 0x80120cf4. FUN_8010c178 — indirect call + large2[5].+0x4b=3;
           installed @ RAM 0x80120824. Removed hook_stubs STUB_RET.
           → reverse_engineering_sco_esco_layer.md (Group O)
-[NEXT]  fn_b4d0 (76 B) — eSCO slot allocation trigger (secondary+0x30)
-[TODO]  fn_a5ac (36 B) — timing compensation
+[DONE]  fn_b4d0 (264 B) — eSCO slot allocation trigger (secondary+0x30) (2026-06-10)
+          src/t2_hooks.S: GZF byte-identical [0x8010B4D0,0x8010B5D8) — 232 B body +
+          32 B literal pool; native PRAM+0xB4D0 past FC20 window → .text.hooks +
+          INSTALL_HOOK 0x80120990 (not ABS). Decompile: FUN_8010b4d0 — cap PDU into
+          large2 stride 0x1ac, pending bit, ROM cancel, *0x8012082c / *0x80120958.
+          Removed hook_stubs.S STUB_RET. Build: docker verify OK.
+          → reverse_engineering_sco_esco_layer.md (Group P)
+[NEXT]  fn_a5ac (36 B) — timing compensation
 [TODO]  fn_c854 (460 B) — timing (installed with a5ac)
 [TODO]  fn_c09c (76 B) — per-link BB reg 0xf gate
 [TODO]  fn_bda0 (114 B) — SCO/eSCO acceptance validator

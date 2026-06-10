@@ -2453,3 +2453,23 @@ from pool @ `0x8010c194`). Pool words live in the 8-byte vendor gap
 **Libre:** `src/t2_hooks.S` — 24 B body @ PRAM+`0x2178` + 8 B gap pool
 (`fn_c178_gap`). Linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from
 `hook_stubs.S`. Tier **T2**.
+
+---
+
+## Group P — eSCO Slot Allocation Trigger (2026-06-10)
+
+### `FUN_8010b4d0` (264 B code+pool) — secondary+0x30 hook
+
+**Install slot:** RAM `0x80120990` (`FUN_8010a000` hook #37, secondary struct+0x30).
+**GZF body:** runtime `0x8010B4D0`–`0x8010B5D8` (232 B insn + epilogue + 32 B
+literal pool @ +`0xe8`). Manifest `76 B` counts insn prefix only; working image
+needs the full 264-byte contiguous blob for PC-relative pool loads.
+
+**Semantics:** See §FUN_8010b4d0 above — cap PDU → large2 stride `0x1ac`, pending
+bit, ROM `FUN_8001d4a0` cancel, indirect `*0x8012082c` / `*0x80120958`.
+
+**Libre:** Native runtime `0x8010B4D0` is **past** the 27,808 B FC20 patch1
+window (`PRAM+0xB4D0` > `0x6CA0`). `src/t2_hooks.S` — 264 B byte-identical
+transcription (GZF `AnalyzeB4D0Tail.java`); section `.text.fn_b4d0` links in
+`.text.hooks`. `init.S` uses `INSTALL_HOOK` (linked addr+1), not
+`INSTALL_HOOK_ABS`. Removed `STUB_RET` from `hook_stubs.S`. Tier **T2**.

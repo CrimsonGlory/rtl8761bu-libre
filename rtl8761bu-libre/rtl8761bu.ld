@@ -43,6 +43,7 @@
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
+ *   (.text.hooks)   fn_b4d0 eSCO slot trigger — past FC20 window (t2_hooks.S)
  */
 
 ENTRY(patch_entry)
