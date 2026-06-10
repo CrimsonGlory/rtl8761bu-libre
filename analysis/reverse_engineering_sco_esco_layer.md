@@ -2824,3 +2824,26 @@ fn-ptrs, `PTR_base_of_0x1ac_struct_array_0xA_large2_8010fc50`.
 PRAM+`0x5B08` + 28 B `fn_fa34_gap`; linker scatter in `rtl8761bu.ld` after
 `fn_fa34`. Removed `STUB_RET` from `hook_stubs.S`. Prefix `[0x5AEC,0x5C2C)` 0/320
 match vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).
+
+---
+
+## Group AC — AFH Readiness Gate (2026-06-10)
+
+### `FUN_8010f85c` (40 B) — struct flag gate + indirect AFH callee
+
+**Install slot:** RAM `0x80120a0c` (`FUN_8010a000` Phase 1 hook #31; pool refs
+`a344` / `a348` in `patch_entry_pool.S`).
+**PRAM body:** runtime `0x8010F85C` (file offset `0x585C` in patch1); immediately
+before `FUN_8010F884` @ PRAM+`0x5884`.
+
+**Layout:** 30 B MIPS16e body + 10 B literal pool @ body `+0x20` (`0x8010F87C`…).
+
+**Semantics (Ghidra decompile, `DecompileFunction.java` FUN_8010f85c):** Returns 0
+by default. If byte at `(*PTR_PTR_8010f87c)[0x28]` has bit 0 clear, tail-calls
+`(*DAT_8010f880)()` and returns its result. Pool: `PTR_PTR_8010f87c` → struct ptr
+`0x8010FC69`; `DAT_8010f880` → indirect callee slot `0x80120628`.
+
+**Libre:** `src/t3_hooks.S` — 40 B byte-identical vendor transcription @
+PRAM+`0x585C`; linker scatter in `rtl8761bu.ld` before `fn_f884`. Removed
+`STUB_RET` from `hook_stubs.S`. Prefix `[0x585C,0x5884)` 0/40 match vs NF_REF.
+Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).

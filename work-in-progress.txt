@@ -1126,8 +1126,16 @@ Explicitly omit for P2 (T3 — defer to Phase 8.4):
           0x80121458 (hook #28). Removed hook_stubs STUB_RET.
           make docker verify OK; prefix [0x5AEC,0x5C2C) 0/320 diffs vs vendor.
           → reverse_engineering_sco_esco_layer.md (Group AB)
-[NEXT]  fn_f85c (40 B) — AFH region
-[TODO]  fn_ce0c (728 B) — AFH capability mapper + init chain
+[DONE]  fn_f85c (40 B) — AFH region (2026-06-10)
+          src/t3_hooks.S: vendor-fixed @ PRAM+0x585C (runtime 0x8010F85C);
+          40 B byte-identical transcription (30 B body + 10 B pool).
+          Decompile: FUN_8010f85c — if struct@0x8010fc69[+0x28] bit0 clear,
+          indirect call via 0x80120628 else return 0; pool @ +0x20.
+          Linker scatter before fn_f884 in rtl8761bu.ld. Installed @ RAM
+          0x80120a0c (hook #31). Removed hook_stubs STUB_RET.
+          make docker verify OK; prefix [0x585C,0x5884) 0/40 diffs vs vendor.
+          → reverse_engineering_sco_esco_layer.md (Group AC)
+[NEXT]  fn_ce0c (728 B) — AFH capability mapper + init chain
 [TODO]  fn_e350 (1174 B) — AFH quality ranking engine
 [TODO]  fn_ca20 full impl (534 B) — type 0x67 coexistence monitor (was STUB-T1)
 [TODO]  Hardware P3: Wi-Fi colocation / BLE dual-mode stress (bench optional)

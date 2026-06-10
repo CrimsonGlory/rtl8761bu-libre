@@ -95,6 +95,24 @@ fn_fb08:
 	.size	fn_fb08, . - fn_fb08
 
 /*
+ * fn_f85c @ PRAM+0x585C (runtime 0x8010F85C): AFH readiness gate (40 B).
+ * Decompile: FUN_8010f85c (Ghidra 2026-06-10) — 30 B body + 10 B literal pool;
+ * if (struct@PTR_PTR_8010f87c[+0x28] & 1)==0 call *DAT_8010f880 else return 0.
+ * Pool @ +0x20: struct ptr 0x8010fc69, indirect callee 0x80120628. Installed @ RAM
+ * slot 0x80120a0c (hook #31, patch_entry pool a344/a348). Immediately before
+ * fn_f884 @ PRAM+0x5884. Tier T3.
+ */
+
+	.section	.text.fn_f85c, "ax"
+	.globl	fn_f85c
+	.type	fn_f85c, @function
+fn_f85c:
+	.byte	0xa0, 0x05, 0x12, 0x80, 0x69, 0xfd, 0x10, 0x80, 0xac, 0x05, 0x12, 0x80, 0x95, 0xfc, 0x10, 0x80
+	.byte	0x3c, 0x06, 0x12, 0x80, 0xd5, 0xf5, 0x10, 0x80, 0x44, 0x06, 0x12, 0x80, 0x69, 0xfc, 0x10, 0x80
+	.byte	0x28, 0x06, 0x12, 0x80, 0x85, 0xf5, 0x10, 0x80
+	.size	fn_f85c, . - fn_f85c
+
+/*
  * fn_f950 @ PRAM+0x5950 (runtime 0x8010F950): AFH channel quality + VSC 0xFC95 trigger.
  * Decompile: FUN_8010f950 (Ghidra 2026-06-10) — logs 10-byte channel map, classifies
  * quality, triggers ROM VSC 0xFC95 "start AFH scan" when sentinel == -1; pool @ +0xAE
