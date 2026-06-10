@@ -18,6 +18,7 @@
  *   [0x13D8, …)     fn_b3d8 ACL slot scheduler (t1_hooks.S)
  *   [0x15D8, …)     fn_b5d8 (eSCO activator; stub until T2)
  *   [0x17F0, …)     fn_b7f0 LMP eSCO packet processor (t2_hooks.S)
+ *   [0x1CE0, …)     fn_bce0 eSCO slot capability mask (t2_hooks.S)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
  *   [0x20F4, …)     fn_c0f4 eSCO-adjacent capability gate (t2_hooks.S)
  *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
@@ -75,6 +76,8 @@ SECTIONS {
         KEEP(*(.text.fn_b5d8))
         . = __prefix_start + 0x17F0;
         KEEP(*(.text.fn_b7f0))
+        . = __prefix_start + 0x1CE0;
+        KEEP(*(.text.fn_bce0))
         . = __prefix_start + 0x1E20;
         KEEP(*(.text.fn_be20))
         . = __prefix_start + 0x20F4;

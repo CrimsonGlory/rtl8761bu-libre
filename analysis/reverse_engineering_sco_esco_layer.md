@@ -2221,3 +2221,80 @@ conditions must pass to return 1 (and zero `*param_3`):
 (68 B vendor bytes already in `patch_entry_pool.S` @ file `0x4AC`). Removed
 `STUB_RET` from `hook_stubs.S`; tail mislabel @ `0xBF0` restored to gap bytes.
 Tier **T2** (`IMPL-T2` in `mandatory_hooks.md`).
+
+---
+
+## Group K — eSCO Slot Capability Mask (2026-06-10)
+
+### `FUN_8010bce0` (96 B) — large2 cap-bit mask + optional HCI evt
+
+**Install slot:** RAM `0x80121348` (pool `0x8010a300` / `0x8010a304` in `FUN_8010a000`
+Phase 1 batch, hook #22). **PRAM body:** runtime `0x8010BCE0` (file offset `0x1CE0`
+in patch1 — gap between `fn_b7f0` @ `0x17F0` and `fn_be20` @ `0x1E20`; **not** the
+mislabeled tail symbol at file `0xBF8` / runtime `0x8010ABF8`).
+
+**Decompile (Ghidra GZF process mode, `DecompileFunction.java` @ `FUN_8010bce0`):**
+
+```c
+bool FUN_8010bce0(ushort *param_1, ushort *param_2)
+{
+  bool bVar1;
+  undefined *puVar2;
+  undefined *puVar3;
+  undefined1 auStack_20 [3];
+  undefined1 local_1d;
+  undefined1 *local_18;
+
+  puVar2 = PTR_base_of_0x1ac_struct_array_0xA_large2_8010bd84;
+  *param_1 = ~*(ushort *)(PTR_base_of_0x1ac_struct_array_0xA_large2_8010bd84 + 0xc)
+             & *param_1;
+  *param_2 = ~*(ushort *)(puVar2 + 0xe) & *param_2;
+  puVar3 = PTR_DAT_8010bd88;
+  if ((*param_1 & 0x80) != 0) {
+    if (*PTR_DAT_8010bd88 != '\0') {
+      puVar2[0x44] = puVar2[0x44] & 0xfe;
+      local_18 = auStack_20;
+      *puVar3 = 0;
+      (*DAT_8010bd8c)(&DAT_0000200c, local_18);
+      local_1d = 0;
+      (*DAT_8010bd90)(0xe, local_18, 4);
+    }
+    (*DAT_8010bd98)(6, 0xfa, &DAT_0000366b, 0xca1, 0,
+                   PTR_DAT_8010bd94, 0);
+  }
+  bVar1 = (*param_2 & 0x80) != 0;
+  if (bVar1) {
+    (*DAT_8010bd9c)();
+  }
+  return bVar1;
+}
+```
+
+**Semantics:** eSCO slot-region hook on two capability halfwords (`param_1`,
+`param_2`). Masks each against the bitwise complement of `large2_base[+0xc]`
+and `large2_base[+0xe]` (conn stride-`0x1ac` struct at `0x8012382c`). When
+`param_1` bit 7 (`0x80`) is set after masking: optionally clears
+`large2[+0x44]` bit 0, zeroes a global flag, builds a 4-byte HCI event buffer
+(opcode `0xe` via ROM `0x8001D4A1`), and calls ROM log/dispatch @ `0x800611E5`.
+When `param_2` bit 7 is set, tail-calls patch fn @ `0x8010BB09`. Returns whether
+`param_2` had bit 7 set.
+
+**Literal pool (vendor patch1 bytes, PC-relative `lw` targets in body):**
+
+| Body off | Runtime | Role |
+|----------|---------|------|
+| `+0x00` | `0x8012DC50` | data |
+| `+0x04` | `0x80110844` | patch |
+| `+0x08` | `0x801259EC` | bos_base / main struct |
+| `+0x0C` | `0x80120060` | config data |
+| `+0x10` | `0x800611E5` | ROM log/dispatch |
+| `+0x14` | `0x800605A9` | ROM |
+| `+0x18` | `0x8001E5D9` | ROM ACL slot lookup |
+| `+0x1C` | `0x8001D4A1` | ROM HCI evt send |
+| `+0x20` | `0x8010BB09` | patch tail-call target |
+| `+0x3C` | `0x8001ACD9` | ROM conn lookup |
+
+**Libre:** `src/t2_hooks.S` — 96 B byte-identical transcription @ PRAM+`0x1CE0`;
+linker scatter in `rtl8761bu.ld`. Removed `STUB_RET` from `hook_stubs.S`; tail
+mislabel @ `0xBF8` restored to gap bytes. Tier **T2** (`IMPL-T2` in
+`mandatory_hooks.md`).

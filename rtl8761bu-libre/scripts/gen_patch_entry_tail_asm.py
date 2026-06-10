@@ -45,7 +45,7 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     # fn_a594 @ PRAM+0x0594, fn_a49c @ PRAM+0x049C — t1_hooks.S (not tail 0xBE8/0xBF4)
     # fn_c0f4 @ PRAM+0x20F4 — t2_hooks.S (not tail 0xBEC mislabel)
     # fn_a4ac @ PRAM+0x04AC — t2_hooks.S pool alias (not tail 0xBF0 mislabel)
-    0x0BF8: ("fn_bce0", "hook body"),
+    # fn_bce0 @ PRAM+0x1CE0 — t2_hooks.S (not tail 0xBF8 mislabel)
     # fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S (not tail 0xBFC/0xC00)
     0x0C04: ("fn_d168", "hook body"),
     0x0C08: ("fn_fa34", "hook body"),
