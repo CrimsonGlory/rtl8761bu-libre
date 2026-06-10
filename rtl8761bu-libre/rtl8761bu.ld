@@ -43,6 +43,7 @@
  *   [0x243C, …)     fn_c43c infrastructure ptr region (t1_hooks.S)
  *   [0x249C, …)     fn_c49c infrastructure ptr region (t1_hooks.S)
  *   [0x2A20, …)     fn_ca20 type-0x67 monitor STUB-T1 (protocol_dispatch.S)
+ *   [0x3168, …)     fn_d168 AFH HW register init (t3_hooks.S)
  *   [0x39F4, …)     fn_d9f4 LC RX SHIM-T1 (protocol_dispatch.S)
  *   [0x3A70, …)     fn_da70 LC TX SHIM-T1 (protocol_dispatch.S)
  *   [0x3AA4, …)     fn_daa4 HCI event intercept (protocol_dispatch.S)
@@ -138,6 +139,8 @@ SECTIONS {
         KEEP(*(.text.fn_c780_pool))
         . = __prefix_start + 0x2A20;
         KEEP(*(.text.fn_ca20))
+        . = __prefix_start + 0x3168;
+        KEEP(*(.text.fn_d168))
         . = __prefix_start + 0x31F4;
         KEEP(*(.text.fn_d1f4))
         . = __prefix_start + 0x3618;

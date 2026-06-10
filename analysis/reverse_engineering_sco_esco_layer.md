@@ -2703,3 +2703,36 @@ descriptors until no pending data. See §FUN_80110868 decompile above.
 window @ runtime `0x8010FF9A`). `fn_c780_epilogue.S` (2 B vendor @ PRAM+`0x27A2`) +
 `fn_c780_pool.S` (4-word pool @ PRAM+`0x27A4`). `DumpFn10868.java` for regeneration.
 Tier **T2** callee (not a DRAM hook install).
+
+---
+
+## Group Y — AFH HW Register Init (2026-06-10)
+
+### `FUN_8010d168` (140 B) — AFH-adjacent BB register programmer
+
+**Install slot:** RAM `0x80120f4c` (`FUN_8010a000` Phase 1 hook #25; pool refs
+`a318` / `a31c` in `patch_entry_pool.S`).
+**PRAM body:** runtime `0x8010D168` (file offset `0x3168` in patch1); abuts
+`FUN_8010d1f4` @ PRAM+`0x31F4`.
+
+**Layout:** 114 B MIPS16e body + 26 B literal pool @ body `+0x72` (`0x8010D1E0`…).
+
+**Semantics (Ghidra decompile, `DecompileFunction.java` FUN_8010d168):** AFH cluster
+entry hook installed with slots #26–28 (`fa34`, `f950`, `fb08`). Programs baseband
+registers via ROM hw read/write fn-ptr in pool (`PTR_DAT_8010d1e0`):
+
+| Step | BB reg | Operation |
+|------|--------|-----------|
+| 1 | `0x120` | write `read \| 0x400` |
+| 2 | `0x27c` | write `read \| 0x100` |
+| 3 | `0x5e` | write `0x1000` |
+| — | indirect | tail-call `DAT_8010d1ec` |
+| 4 | `0x290` | write `read \| 0x200` |
+
+Pool words `DAT_8010d1dc`…`DAT_8010d1f0` also hold AFH channel bitmask constants
+(16-bit masks `0xefff`, `0xfbff`, … embedded in the 140 B blob).
+
+**Libre:** `src/t3_hooks.S` — 140 B byte-identical vendor transcription @
+PRAM+`0x3168`; linker scatter in `rtl8761bu.ld` between `fn_ca20` and `fn_d1f4`.
+Removed `STUB_RET` from `hook_stubs.S`. `make diff-prefix` @ `[0x3168,0x31F4)`:
+0/140 match vs NF_REF. Tier **T3** (`IMPL-T3` in `mandatory_hooks.md`).

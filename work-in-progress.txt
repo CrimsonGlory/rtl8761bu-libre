@@ -1091,8 +1091,16 @@ Explicitly omit for P2 (T3 — defer to Phase 8.4):
 
 --- Phase 8.4 — P3 AFH / coexistence (required for P4, optional for P2) ---
 
-[TODO]  fn_d168 (140 B) — near AFH slots
-[TODO]  fn_fa34 (184 B) — 79-channel map merger
+[DONE]  fn_d168 (140 B) — near AFH slots (2026-06-10)
+          src/t3_hooks.S: vendor-fixed @ PRAM+0x3168 (runtime 0x8010D168);
+          140 B byte-identical transcription (114 B body + 26 B pool).
+          Decompile: FUN_8010d168 — ROM hw r/w BB regs 0x120/0x27c/0x5e/0x290
+          + indirect tail-call; AFH bitmask constants in pool @ +0x72.
+          Linker scatter between fn_ca20 and fn_d1f4 in rtl8761bu.ld.
+          Installed @ RAM 0x80120f4c (hook #25). Removed hook_stubs STUB_RET.
+          make docker verify OK; prefix [0x3168,0x31F4) 0/140 diffs vs vendor.
+          → reverse_engineering_sco_esco_layer.md (Group Y)
+[NEXT]  fn_fa34 (184 B) — 79-channel map merger
 [TODO]  fn_f950 (174 B) — channel quality + HCI VSC 0xFC95 trigger
 [TODO]  fn_fb08 (292 B) — BLE 40-channel map aggregator
 [TODO]  fn_f85c (40 B) — AFH region

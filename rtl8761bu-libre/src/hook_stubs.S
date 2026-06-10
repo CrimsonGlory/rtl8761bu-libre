@@ -30,7 +30,7 @@
 	/* fn_a410 @ PRAM+0x0468, fn_a4ac @ PRAM+0x04AC, fn_a550 @ PRAM+0x0550, fn_a5ac @ PRAM+0x05AC, fn_bce0 @ PRAM+0x1CE0, fn_bda0 @ PRAM+0x1DA0, fn_abd0 @ PRAM+0xBD0, fn_f884 @ PRAM+0x5884, fn_b4d0, fn_a84c, fn_aa58 — t2_hooks.S */
 	/* fn_c160 @ PRAM+0x2160, fn_c178 @ PRAM+0x2178, fn_c854 — t2_hooks.S */
 	/* fn_c49c @ PRAM+0x249C, fn_c43c @ PRAM+0x243C — t1_hooks.S */
-	STUB_RET	fn_d168
+	/* fn_d168 @ PRAM+0x3168 — t3_hooks.S */
 	STUB_RET	fn_fa34
 	STUB_RET	fn_f950
 	STUB_RET	fn_fb08
