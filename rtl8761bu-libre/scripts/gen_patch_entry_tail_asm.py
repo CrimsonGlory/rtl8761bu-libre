@@ -31,9 +31,9 @@ SYMBOLS: dict[int, tuple[str, str]] = {
     0x0AEC: ("fn_hw_probe", "FUN_8010aa60 — silicon / HW probe"),
     0x0AF2: ("fn_bb_init", "FUN_8010aa66 — baseband register init"),
     0x0B5E: ("fn_rf_init", "FUN_8010aad2 — RF register table init"),
-    # fn_b118 @ PRAM+0x1118 — t1_hooks.S (outside [0x820, 0xE4C) tail)
+    # fn_b118 @ PRAM+0x1118, fn_be20 @ PRAM+0x1E20 — t1_hooks.S (outside tail)
     0x0BB0: ("fn_b174", "hook body"),
-    0x0BB4: ("fn_be20", "hook body"),
+    # 0x0BB4: mislabeled fn_be20 in tail — runtime 0x8010abb4 is fn_b174 cluster
     0x0BB8: ("fn_c1e8", "hook body"),
     0x0BBC: ("fn_c224", "hook body"),
     0x0BC4: ("fn_b3d8", "hook body"),

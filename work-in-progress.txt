@@ -825,8 +825,12 @@ T1 hook installs (replace hook_stubs.S STUB_RET with libre bodies):
           src/t1_hooks.S: vendor-fixed @ PRAM+0x1118 (runtime 0x8010B118);
           82 B byte-identical transcription; ROM alloc 0x80056609/0x80056661 via pool
           @ +0x52. Removed misplaced tail label @ 0x0BAC; linker scatter in rtl8761bu.ld.
-[NEXT]  fn_be20 — global dispatch @ 0x801286c0
-[TODO]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair
+[DONE]  fn_be20 — global dispatch @ 0x801286c0 (2026-06-10)
+          src/t1_hooks.S: vendor-fixed @ PRAM+0x1E20 (runtime 0x8010BE20);
+          140 B byte-identical transcription (code + literal pool); linker scatter
+          in rtl8761bu.ld. Decompile: FUN_8010be20 — large2 idle-path gate,
+          ROM BD_ADDR sync + HCI evt 0xe. Removed mislabeled tail label @ 0xabb4.
+[NEXT]  fn_c1e8, fn_c224 — bos+0x20, +0x24 HCI handler pair
 [TODO]  fn_b3d8 (206 B) — ACL slot scheduler
 [TODO]  fn_b0a4 (108 B) — ACL packet-type flag corrector
 [TODO]  fn_c198, fn_d1f4 — early install batch (decompile may adjust tier)

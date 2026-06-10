@@ -20,9 +20,9 @@
 
 	.section	.text.hooks
 
-	/* fn_b118 @ PRAM+0x1118 — t1_hooks.S */
+	/* fn_b118 @ PRAM+0x1118, fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	STUB_RET	fn_b174
-	STUB_RET	fn_be20
+	/* fn_be20 @ PRAM+0x1E20 — t1_hooks.S */
 	STUB_RET	fn_c1e8
 	STUB_RET	fn_c224
 	STUB_RET	fn_b3d8
