@@ -1,0 +1,41 @@
+---
+description: When the agent should git-commit during firmware/hardware work (user delegates timing)
+alwaysApply: true
+---
+
+# Git Commit Criteria
+
+The user delegates **when** to commit. The agent decides without asking each time, following this policy.
+
+## Commit when
+
+1. **Hardware gate passes** — e.g. FC20 OK, HCI OK (no `0x2036`), or a bisect bracket is confirmed on NeoPC.
+2. **Bisect milestone closed** — interval found, approach rejected; source state should be frozen (include fw SHA256 in commit body).
+3. **Before risky work** — vendor byte embeds, wide `git checkout` on hooks/linker, large splices, or experiments likely to break FC20/HCI.
+4. **Coherent fix complete** — builds clean, change set is one logical unit, and `results.md` already has the matching 64-char SHA.
+
+## Do not commit when
+
+- Only another hardware FAIL in an **open** bisect with no meaningful source change (`results.md` is enough).
+- Tree does not build, or a claimed baseline is not hardware-validated.
+- The diff mixes unrelated experiments — split or wait.
+
+## Always (commit or not)
+
+- Append every NeoPC run to `.cursor/skills/ub500-hardware-test/results.md` (full SHA256).
+- **On PASS:** `archive-hw-pass.sh` → `artifacts/hw-validated/` + `artifacts/manifest.tsv`.
+- Save `rtl8761bu_fw.<profile>.bin` when a profile passes a gate.
+- Update `fw_to_test/bisect-state.yaml` when bisect state changes.
+- After a gate passes: consider **new chat** ([conversation-handoff.mdc](conversation-handoff.mdc)).
+
+## Commit message
+
+- Subject: what milestone or fix (e.g. `p4-libre: HCI baseline — pool 0x3f4 + pre-gaps`).
+- Body: NeoPC result summary + **full** `rtl8761bu_fw.bin` SHA256 when hardware-validated.
+- Follow `commit-message-metadata.mdc` for `Co-authored-by` / model trailers when used.
+
+## Avoid losing baselines
+
+Uncommitted HCI gap anchors, pool fixes, and hook changes are easy to lose via `git reset` / `checkout`. **Checkpoint in git** once hardware confirms FC20+HCI, or immediately before destructive bisect steps.
+
+Do not push unless the user asks.

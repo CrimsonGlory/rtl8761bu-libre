@@ -26,8 +26,24 @@ After **each** user paste of `try_new_firmware.sh` / dmesg output:
 2. Record: profile name, SHA256, FC20 pass/fail, `RTL: fw version …` line if present, functional notes (connect/scan), date.
 3. Update `rtl8761bu-libre/test-queue.txt` (mark `done` / `ACTIVE`).
 4. Promote the next profile into `fw_to_test/` when continuing a queue.
+5. **On PASS** — run [archive-hw-pass.sh](scripts/archive-hw-pass.sh) (mandatory). See [artifacts/README.md](../../../artifacts/README.md).
 
 **Do not re-flash a SHA256 that already failed** unless the underlying code changed (new hash).
+
+## Archive validated builds (required on PASS)
+
+```bash
+.cursor/skills/ub500-hardware-test/scripts/archive-hw-pass.sh \
+  <profile> <gate> "NeoPC notes"
+# gates: fc20 | hci | connect | vendor-ref | bisect
+
+.cursor/skills/ub500-hardware-test/scripts/archive-hw-pass.sh --list
+.cursor/skills/ub500-hardware-test/scripts/promote-test.sh --restore <sha-prefix>
+```
+
+Stores `rtl8761bu_fw.<full-sha>.bin` + `patch_padded.<sha>.bin` under `artifacts/hw-validated/`; appends `artifacts/manifest.tsv`.
+
+**Start a new chat** after a gate passes or bisect closes — see [conversation-handoff.mdc](../../rules/conversation-handoff.mdc).
 
 ## Paths
 
@@ -37,6 +53,7 @@ After **each** user paste of `try_new_firmware.sh` / dmesg output:
 | | `/root/rtl8761bu-libre/fw_to_test/rtl8761bu_config.bin` |
 | **Build tree** | `/root/rtl8761bu-libre/rtl8761bu-libre/` (`make` output + profile siblings) |
 | **Queued siblings** | `rtl8761bu-libre/rtl8761bu_fw.<profile>.bin` |
+| **Validated archive** | `artifacts/hw-validated/` + `artifacts/manifest.tsv` |
 
 Only **one** profile occupies `fw_to_test/` — the build the user flashes next.
 Vendor `test-nf` is promoted here too; never mix non-free blobs into `rtl8761bu-libre/rtl8761bu_fw.bin` as the scp default.

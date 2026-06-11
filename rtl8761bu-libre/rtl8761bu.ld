@@ -27,6 +27,7 @@
  *   [0x1DA0, …)     fn_bda0 SCO/eSCO acceptance validator (t2_hooks.S)
  *   [0x1E20, …)     fn_be20 global dispatch (t1_hooks.S)
  *   [0x0BD0, …)     fn_abd0 eSCO audio-path dispatcher (t2_hooks.S, overlays tail)
+ *   [0x2080, 0x209C) fn_c09c_pre_gap HCI pool/tail (fn_c09c_pre_gap.S)
  *   [0x209C, …)     fn_c09c per-link BB reg 0xf gate (t2_hooks.S)
  *   [0x20F4, …)     fn_c0f4 eSCO-adjacent capability gate (t2_hooks.S)
  *   [0x2160, …)     fn_c160 eSCO slot indirect-call stub (t2_hooks.S)
@@ -34,7 +35,9 @@
  *   [0x2178, …)     fn_c178 eSCO slot state setter (t2_hooks.S)
  *   [0x2190, …)     fn_c178_gap literal pool (t2_hooks.S)
  *   [0x2198, …)     fn_c198 early-install gate (t1_hooks.S)
+ *   [0x21D6, 0x21E8) fn_c1e8_pre_gap literal pool before fn_c1e8 (fn_c1e8_pre_gap.S)
  *   [0x21E8, …)     fn_c1e8 bos+0x20 HCI handler (t1_hooks.S)
+ *   [0x2214, 0x2224) fn_c224_pre_gap literal pool before fn_c224 (fn_c224_pre_gap.S)
  *   [0x31F4, …)     fn_d1f4 conn timing matcher (t1_hooks.S)
  *   [0x3618, …)     fn_d618 HCI internal msg dispatcher (t1_hooks.S)
  *   [0x3890, …)     fn_d890 HCI VSC msg handler (t1_hooks.S)
@@ -58,7 +61,7 @@
  *   [0x3FB0, …)     fn_dfb0 LMP intercept (protocol_dispatch.S)
  *   [0x41C2, …)     fn_e350_pre_gap vendor pool bridge (t3_hooks.S)
  *   [0x4350, …)     fn_e350 AFH quality ranking engine (t3_hooks.S)
- *   [0x47E6, …)     fn_e350_post_gap vendor region (t3_hooks.S; fn_e82c @ +0x46)
+ *   [0x47E6, …)     fn_e350_post_gap vendor region (t3_hooks.S)
  *   [0x585C, …)     fn_f85c AFH readiness gate (t3_hooks.S)
  *   [0x5884, …)     fn_f884 bos+0x50 connection handler (t2_hooks.S)
  *   [0x5950, …)     fn_f950 AFH quality + VSC FC95 trigger (t3_hooks.S)
@@ -131,6 +134,8 @@ SECTIONS {
         KEEP(*(.text.fn_bda0))
         . = __prefix_start + 0x1E20;
         KEEP(*(.text.fn_be20))
+        . = __prefix_start + 0x2080;
+        KEEP(*(.text.fn_c09c_pre_gap))
         . = __prefix_start + 0x209C;
         KEEP(*(.text.fn_c09c))
         . = __prefix_start + 0x20F4;
@@ -145,8 +150,12 @@ SECTIONS {
         KEEP(*(.text.fn_c178_gap))
         . = __prefix_start + 0x2198;
         KEEP(*(.text.fn_c198))
+        . = __prefix_start + 0x21D6;
+        KEEP(*(.text.fn_c1e8_pre_gap))
         . = __prefix_start + 0x21E8;
         KEEP(*(.text.fn_c1e8))
+        . = __prefix_start + 0x2214;
+        KEEP(*(.text.fn_c224_pre_gap))
         . = __prefix_start + 0x2224;
         KEEP(*(.text.fn_c224))
         . = __prefix_start + 0x243C;

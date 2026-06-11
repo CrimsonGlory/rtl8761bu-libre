@@ -1,0 +1,2 @@
+# Binary blobs — indexed in manifest.tsv; never commit firmware bytes
+hw-validated/

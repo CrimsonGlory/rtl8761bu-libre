@@ -39,3 +39,5 @@ Ship **one** profile per message. State clearly:
 ## Pass criteria
 
 FC20: no `command 0xfc20 tx timeout`. Vendor baseline: `RTL: fw version 0x09a98a6b` + connect works.
+
+On NeoPC PASS: `archive-hw-pass.sh <profile> <gate> "notes"` → `artifacts/hw-validated/`. Restore: `promote-test.sh --restore <sha>`. Start a **new chat** after a gate passes ([conversation-handoff.mdc](conversation-handoff.mdc)).

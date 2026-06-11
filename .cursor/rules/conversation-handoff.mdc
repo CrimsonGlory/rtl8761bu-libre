@@ -1,0 +1,44 @@
+---
+description: Start a new Cursor chat at phase changes to keep context small
+alwaysApply: true
+---
+
+# Conversation handoff (context management)
+
+Long hardware bisect threads fill the context window with journalctl, SHA tables, and dead ends. **Start a new chat** at phase boundaries; carry state in files, not chat history.
+
+## Start a new chat after
+
+1. **Hardware gate passes** — archive (`archive-hw-pass.sh`), log `results.md`, commit if milestone; next task is new work.
+2. **Bisect interval closed** — bracket recorded in `results.md` + `fw_to_test/bisect-state.yaml`.
+3. **Before risky source work** — vendor embeds, `git checkout` on hooks/linker, `git reset`, multi-file reverts.
+4. **Three or more flash rounds** in one thread with no new source insight (paste loop).
+
+## Stay in the same chat for
+
+- One build → promote → flash → log cycle
+- Debugging one failing SHA without changing phase
+
+## First message in a new chat (paste this)
+
+```
+Repo: /root/rtl8761bu-libre
+Read: fw_to_test/bisect-state.yaml, artifacts/manifest.tsv (last PASS rows)
+Skill: .cursor/skills/ub500-hardware-test/SKILL.md
+
+Last archived PASS: <fw sha from manifest>
+Rejected / do not re-flash: <sha list or "see results.md">
+Next task: <one sentence>
+```
+
+Agent should read those files before acting — not rely on prior chat.
+
+## Files are the source of truth
+
+| File | Holds |
+|------|--------|
+| `artifacts/manifest.tsv` | Validated fw + patch SHA256 |
+| `artifacts/hw-validated/*.bin` | Restorable binaries |
+| `.cursor/skills/ub500-hardware-test/results.md` | Every run (pass and fail) |
+| `fw_to_test/bisect-state.yaml` | Active bisect + rejected approaches |
+| `rtl8761bu-libre/rtl8761bu_fw.<profile>.bin` | Profile siblings (overwrite risk) |

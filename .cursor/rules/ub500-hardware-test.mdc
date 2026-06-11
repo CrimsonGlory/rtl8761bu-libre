@@ -43,3 +43,7 @@ Paste `journalctl` output. FC20 pass = no `fc20 tx timeout`. Vendor baseline = `
 Full table + SHA256 index: `.cursor/skills/ub500-hardware-test/results.md`
 
 Agent **must** append every hardware run there (full 64-char SHA256) before handing off the next profile.
+
+On NeoPC **PASS**, run `archive-hw-pass.sh <profile> <gate> "notes"` (see `artifacts/README.md`). Restore lost baselines: `promote-test.sh --restore <sha-prefix>`.
+
+Start a **new chat** after a hardware gate passes or a bisect closes ([conversation-handoff.mdc](conversation-handoff.mdc)).

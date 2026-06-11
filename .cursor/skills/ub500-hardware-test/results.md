@@ -173,3 +173,36 @@ See also `rtl8761bu-libre/test-queue.txt`.
 | ~~p3-libre~~ | `e8c15f3ac6662d43792bebdc28d8f60a1fac935061a5760b8be62149aa8643e2` | 2026-06-10 | superseded by p4-libre (P3-only; missing sub2 + T4) |
 | ~~p2-libre~~ | `addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb` | 2026-06-10 | superseded by p4-libre (P2-only; T3 stub) |
 | ~~p1-libre~~ | `67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a` | 2026-06-10 | superseded by p4-libre (P1-only; T2+ stubs) |
+
+## 2026-06-11 session (connect tail / fn_b174)
+
+| SHA256 | Profile | FC20 | HCI | Connect | Notes |
+|--------|---------|------|-----|---------|-------|
+| `cf37bc779e832ced7cd771d346cf34884326d93530a0453bb3fa600927c177d2` | p4 (`fn_b174` vendor embed only) | **FAIL** `0xfc20 tx timeout` | — | — | vendor `[0x1174,0x13D8)` alone breaks FC20; cliff confirmed |
+| `e46865915acbc2409aa4018bc66dff508dfd040c9fbc374bf443ef58da66b270` | p4 (wrong baseline re-stage) | **PASS** `0x09a98a6b` | **FAIL** `Opcode 0x2036` | — | ≠ confirmed baseline `62198d8c…`; agent had dropped uncommitted HCI anchors/pool fix |
+| `62198d8c1c530133ba76e848676a730f988e38a0ca4b0d5e10d0291f0494ee55` | p4 (HCI gaps + pool `0x3f4`) | **PASS** | **PASS** | **FAIL** page-timeout | hardware-confirmed 2026-06-10/11; **not reproducible** from current tree HEAD (`e4686591` instead) |
+
+| `e46865915acbc2409aa4018bc66dff508dfd040c9fbc374bf443ef58da66b270` | p4 (HCI gaps + pool fix, retest) | **PASS** `0x09a98a6b` | **FAIL** `Opcode 0x2036` | — | **Retest 2026-06-11** after anchor/pool restore; image has vendor bytes @ pool+3 HCI gaps — **still not `62198d8c`**; tree drift or missing fix |
+
+**Open:** recover `62198d8c` artifact or git-bisect to HCI-passing tree; `e4686591` is **not** a safe baseline despite gap bytes in staged image.
+
+| `1ab2abc2082e591f49a1f8b413fdcb15462d322deebb3720a96b26a5ebc074ae` | p4 (HCI pre-gaps only, no pool `0x3f4`) | FC20 **PASS**; **HCI FAIL** `Opcode 0x2036` | — | pool fix **ruled out**; same failure as `e4686591` |
+| `148baa25c3db17148047e2ca970b62b0a7a75b960b4762ea20f045b7977cff76` | test-nf (vendor sanity retest) | FC20 **PASS**; HCI **PASS**; **connect OK** | — | NeoPC stack OK; libre p4 HCI regression is **source-side** |
+| `c184b3ea1e447b7d99bf4376ec5443a73833650992f90885088d9a49d72219d7` | libre-hybrid `SPLIT=0xE4C` (retest) | FC20 **PASS**; HCI **PASS**; connect **OK** 2nd try (1st page-timeout); **audio low** vs test-nf | 2026-06-11 |
+
+## Pending hardware (HCI regression)
+
+| Profile | SHA256 | Staged | Notes |
+|---------|--------|--------|-------|
+| ~~p4-hci-gaps-only~~ | `1ab2abc2082e591f49a1f8b413fdcb15462d322deebb3720a96b26a5ebc074ae` | 2026-06-11 | **HCI FAIL** `0x2036` — pre-gaps alone insufficient vs Jun-10 `328632bc`/`62198d8c` |
+| ~~test-nf~~ (vendor sanity) | `148baa25c3db17148047e2ca970b62b0a7a75b960b4762ea20f045b7977cff76` | 2026-06-11 | FC20 **PASS**; HCI **PASS**; **connect OK** `Connected: yes` — NeoPC+dongle **OK** |
+| ~~libre-hybrid~~ `SPLIT=0xE4C` | `c184b3ea1e447b7d99bf4376ec5443a73833650992f90885088d9a49d72219d7` | 2026-06-11 | FC20 OK; HCI OK; connect OK 2nd try; **audio low** (user) |
+| `62198d8c1c530133ba76e848676a730f988e38a0ca4b0d5e10d0291f0494ee55` | p4-libre (fn_c09c fix retest) | FC20 **PASS** `0x09a98a6b`; HCI **PASS**; connect **FAIL** `page-timeout` ×4 | 2026-06-11 |
+| `3f2ff4d6b1a1d66354d70b18f370e36befb7da6dea367742371f1625abd6a9b8` | p4 tail-split `SPLIT=0x3D74` | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×5 | 2026-06-11 |
+| `0807cd1c63bec926f28be7394aeb1da048b359984fa5bf419a4d4b99448e4b3f` | p4 tail-split `SPLIT=0x25E0` | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×3 | 2026-06-11 |
+| `3b08a03432acfe9d6055612c5b79be2f5291a3b3502bb0aa0db1ff2cff7f2610` | p4 tail-split `SPLIT=0x1A16` | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×4 | 2026-06-11 |
+| `872dadd0fde1df96efdabd112b9986de03785811916d7eb9557e7071be8e54ea` | p4 tail-split `SPLIT=0x1431` | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×4 | 2026-06-11 |
+| `c8e6a218fcebe48690553c9bfdc09fcba36768f79965998f13cd6484cb3ced2e` | p4 tail-split `SPLIT=0x113E` | **FC20 FAIL** `0xfc20 tx timeout`; byte-split mid-fn | 2026-06-11 |
+| `536b8ac13fe6209f6f9dfec37bf3c18fa48654e84f4e13385e50d3e3c98dbb2f` | p4 tail-split `SPLIT=0x1174` (`fn_b174`) | **FC20 FAIL** `0xfc20 tx timeout` | 2026-06-11 |
+| `4b33982178290bf3e59721adbccc34274e170bf73b84b86a46f329d7c79bf85f` | p4 tail-split `SPLIT=0x10A4` (`fn_b0a4`) | **FC20 FAIL** `0xfc20 tx timeout` | 2026-06-11 |
+| `e91bce4ced5270f86b9e14d783e22bdaab930688b6d0e9eb2c1ef2eb8673ceed` | p4 tail-split `SPLIT=0xE4C` (vendor tail control) | FC20 **PASS**; HCI **PASS**; connect **OK** `Connected: yes` | 2026-06-11 |

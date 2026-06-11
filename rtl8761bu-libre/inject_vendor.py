@@ -10,8 +10,11 @@ Usage:
 
 Environment (bisect):
   VENDOR_TAIL_FILL=1       — copy vendor patch1 [0xE4C, footer)
+  VENDOR_TAIL_SPLIT=0xNN   — copy vendor [SPLIT, footer); libre below SPLIT (connect bisect)
   VENDOR_INSTALLER_PREFIX=1 — copy vendor prefix [0, 0xE4C)
   VENDOR_PREFIX_SPLIT=0xNN — partial vendor prefix (byte-split bisect)
+  VENDOR_OVERLAY_SET=name  — selective hook overlay (vendor_hci_bisect.HCI_OVERLAY_SETS)
+  VENDOR_FILE_OVERLAY_SET=name — file-offset ranges (vendor_hci_bisect.FILE_OVERLAY_SETS)
 
 Reads vendor_t1_manifest.VENDOR_OVERLAY; copies bytes from vendor patch1
 at native offsets.  Requires NF_REF vendor image for reference bodies.
@@ -66,13 +69,53 @@ def main():
     elif os.environ.get("VENDOR_PREFIX_SPLIT"):
         prefix_split = int(os.environ["VENDOR_PREFIX_SPLIT"], 0)
 
-    overlays = VENDOR_OVERLAY + T2_VENDOR_OVERLAY + T3_VENDOR_OVERLAY
+    use_tail_split = bool(os.environ.get("VENDOR_TAIL_SPLIT"))
+    file_overlay_set = os.environ.get("VENDOR_FILE_OVERLAY_SET", "").strip()
+    overlay_set = os.environ.get("VENDOR_OVERLAY_SET", "").strip()
+    if file_overlay_set:
+        from vendor_hci_bisect import FILE_OVERLAY_SETS
+
+        if file_overlay_set not in FILE_OVERLAY_SETS:
+            raise SystemExit(
+                f"unknown VENDOR_FILE_OVERLAY_SET={file_overlay_set!r}; "
+                f"choices: {', '.join(sorted(FILE_OVERLAY_SETS))}"
+            )
+        overlays = []
+        relocs = []
+        merged = 0
+        for off, size in FILE_OVERLAY_SETS[file_overlay_set]:
+            if off < 0 or off + size > PATCH1_LEN:
+                raise SystemExit(f"bad file overlay [{off:#x}, {off + size:#x})")
+            libre[off:off + size] = v_body[off:off + size]
+            merged += size
+        open(out, 'wb').write(libre)
+        print(f"inject_vendor: file overlay {file_overlay_set} "
+              f"({len(FILE_OVERLAY_SETS[file_overlay_set])} ranges), "
+              f"{merged} B from vendor → {out}")
+        return
+    if overlay_set:
+        from vendor_hci_bisect import HCI_OVERLAY_SETS
+
+        if overlay_set not in HCI_OVERLAY_SETS:
+            raise SystemExit(
+                f"unknown VENDOR_OVERLAY_SET={overlay_set!r}; "
+                f"choices: {', '.join(sorted(HCI_OVERLAY_SETS))}"
+            )
+        overlays = HCI_OVERLAY_SETS[overlay_set]
+        relocs = []
+    elif use_tail or use_tail_split:
+        # Byte-split bisect: libre padded image + prefix/tail graft only.
+        overlays = []
+        relocs = []
+    else:
+        overlays = VENDOR_OVERLAY + T2_VENDOR_OVERLAY + T3_VENDOR_OVERLAY
+        # Full vendor installer owns FUN_80110ddc @ native offset; skip reloc to 0xAE4C.
+        relocs = [] if prefix_split >= VENDOR_INSTALLER_PREFIX_LEN else VENDOR_RELOC
+
     merged = 0
     for runtime, size in overlays:
         merged += _apply_overlay(libre, v_body, runtime, size, "overlay")
 
-    # Full vendor installer owns FUN_80110ddc @ native offset; skip reloc to 0xAE4C.
-    relocs = [] if prefix_split >= VENDOR_INSTALLER_PREFIX_LEN else VENDOR_RELOC
     for dest, src, size in relocs:
         src_off = src - PATCH1_BASE
         dest_off = dest - PATCH1_BASE
@@ -91,22 +134,34 @@ def main():
         libre[0:prefix_len] = v_body[0:prefix_len]
         merged += prefix_len
 
+    tail_end = PATCH1_LEN - PATCH1_FOOTER_LEN
     tail_len = 0
+    tail_split = 0
     if use_tail:
         tail_start = VENDOR_INSTALLER_PREFIX_LEN
-        tail_end = PATCH1_LEN - PATCH1_FOOTER_LEN
         if tail_end <= tail_start:
             raise SystemExit("bad tail range")
         tail_len = tail_end - tail_start
         libre[tail_start:tail_end] = v_body[tail_start:tail_end]
         merged += tail_len
+    elif os.environ.get("VENDOR_TAIL_SPLIT"):
+        tail_split = int(os.environ["VENDOR_TAIL_SPLIT"], 0)
+        if tail_split < 0 or tail_split > tail_end:
+            raise SystemExit(f"tail split {tail_split:#x} out of range [0, {tail_end:#x})")
+        tail_len = tail_end - tail_split
+        if tail_len:
+            libre[tail_split:tail_end] = v_body[tail_split:tail_end]
+            merged += tail_len
 
     open(out, 'wb').write(libre)
     extras = []
     if prefix_len:
         extras.append(f"prefix {prefix_len} B")
     if tail_len:
-        extras.append(f"tail {tail_len} B")
+        if tail_split:
+            extras.append(f"tail [{tail_split:#x}, {tail_end:#x}) {tail_len} B")
+        else:
+            extras.append(f"tail {tail_len} B")
     extra_s = (" + " + " + ".join(extras)) if extras else ""
     print(f"inject_vendor: {len(overlays)} overlays + {len(relocs)} relocs{extra_s}, "
           f"{merged} B from vendor → {out}")

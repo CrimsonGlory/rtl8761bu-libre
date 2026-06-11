@@ -1,7 +1,8 @@
 # UB500 test queue — ACTIVE = fw_to_test/rtl8761bu_fw.bin
 # NeoPC: try_new_firmware.sh scp's from daas-dev:.../fw_to_test/
 
-ACTIVE  p4-libre  ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56  pure-libre P4 (T1+T2+T3+T4+sub2; FC20+HCI+ACL+A2DP+AFH+BLE+reconnect)
+ACTIVE  p4-libre  62198d8c1c530133ba76e848676a730f988e38a0ca4b0d5e10d0291f0494ee55  fn_c09c fix recovered HCI baseline; pending NeoPC HCI retest
+queued  p4-inject-hci-c09c  62198d8c1c530133ba76e848676a730f988e38a0ca4b0d5e10d0291f0494ee55  bisect proof (inject ≡ native after source fix)
 queued  p3-libre  e8c15f3ac6662d43792bebdc28d8f60a1fac935061a5760b8be62149aa8643e2  pure-libre P3 (superseded by p4-libre)
 queued  p2-libre  addd6593d34144a3334910f32ba7b6f7d96acecb22787976f7aa6c79047920bb  pure-libre P2 (superseded by p4-libre)
 queued  p1-libre  67a1b3bafa6d989815baf62962630b5169d22e3f97d2967ab78305c5bf1f4e9a  pure-libre P1 smoke (superseded by p4-libre)

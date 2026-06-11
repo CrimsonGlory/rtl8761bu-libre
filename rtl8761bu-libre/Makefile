@@ -83,7 +83,7 @@ CFLAGS += -DVENDOR_EARLY_PREFIX=$(VENDOR_EARLY_PREFIX)
 BUILD_PROFILE := full-vendor-early-$(VENDOR_EARLY_PREFIX)
 endif
 
-.PHONY: all docker release p1-libre p2-libre p3-libre p4-libre minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 phase-% clean verify size diff-prefix compliance compliance-ci profile-siblings
+.PHONY: all docker release p1-libre p2-libre p3-libre p4-libre minimal minimal-null test-nf hybrid libre-hybrid full-inject-t1 inject-t1 full-inject-t2 inject-t2 full-inject-t3 inject-t3 full-inject-t3-pe5-vendor-tail inject-t3-pe5-vendor-tail full-inject-t3-vendor-inst inject-t3-vendor-inst full-inject-t3-vendor-tail inject-t3-vendor-tail full-inject-t3-vendor-tail-split inject-t3-vendor-tail-split full-vendor-patch1 inject-vendor-patch1 p4-inject-hci-c09c inject-hci-c09c p4-inject-hci-tail inject-hci-tail p4-inject-tail-split inject-tail-split p4-overlay-connect inject-overlay-connect phase-% clean verify size diff-prefix compliance compliance-ci profile-siblings
 
 # Docker builds need NF_REF for inject/bisect profiles and diff-prefix (not default pack).
 DOCKER_NF_VOL := -v "$(abspath $(dir $(NF_REF)))":/nf_ref:ro
@@ -266,6 +266,68 @@ inject-vendor-patch1: build/patch_padded.bin inject_vendor.py vendor_t1_manifest
 	$(PYTHON) pack.py --dual --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
 	@echo "profile=full-vendor-patch1" > build/.profile
 	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@sha256sum rtl8761bu_fw.bin
+
+# p4 HCI hook-body bisect: overlay vendor fn_c09c only (sole HCI body diff vs NF on p4-libre).
+p4-inject-hci-c09c:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p4-libre all
+	$(MAKE) inject-hci-c09c
+
+inject-hci-c09c: build/patch_padded.bin inject_vendor.py vendor_hci_bisect.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_OVERLAY_SET=c09c $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=p4-inject-hci-c09c" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@cp rtl8761bu_fw.bin rtl8761bu_fw.p4-inject-hci-c09c.bin
+	@sha256sum rtl8761bu_fw.bin
+
+# Control: p4 libre + vendor tail [0xE4C,…) — expect HCI PASS (same as libre-hybrid SPLIT=0xE4C).
+p4-inject-hci-tail:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p4-libre all
+	$(MAKE) inject-hci-tail
+
+inject-hci-tail: build/patch_padded.bin inject_vendor.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_TAIL_FILL=1 $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=p4-inject-hci-tail" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@cp rtl8761bu_fw.bin rtl8761bu_fw.p4-inject-hci-tail.bin
+	@sha256sum rtl8761bu_fw.bin
+
+# Connect bisect: p4 libre + vendor tail [SPLIT,footer). FAIL@62198d8c SPLIT=0x6C9C; PASS@SPLIT=0xE4C.
+TAIL_SPLIT ?= 0x3D74
+p4-inject-tail-split:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p4-libre all
+	$(MAKE) inject-tail-split
+
+inject-tail-split: build/patch_padded.bin inject_vendor.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_TAIL_SPLIT=$(TAIL_SPLIT) $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=p4-inject-tail-split-$(TAIL_SPLIT)" > build/.profile
+	@echo "entry_offset=$(ENTRY_OFFSET)" >> build/.profile
+	@echo "tail_split=$(TAIL_SPLIT)" >> build/.profile
+	@cp rtl8761bu_fw.bin rtl8761bu_fw.p4-inject-tail-split-$(TAIL_SPLIT).bin
+	@sha256sum rtl8761bu_fw.bin
+
+# Connect hook-range overlay on p4-libre base (no tail splice).
+CONNECT_OVERLAY ?= e4c-10a4
+p4-overlay-connect:
+	$(MAKE) clean
+	$(MAKE) PROFILE=p4-libre all
+	$(MAKE) inject-overlay-connect
+
+inject-overlay-connect: build/patch_padded.bin inject_vendor.py vendor_hci_bisect.py $(NF_REF)
+	@test -f $(NF_REF) || (echo "missing $(NF_REF)" && exit 1)
+	VENDOR_FILE_OVERLAY_SET=$(CONNECT_OVERLAY) $(PYTHON) inject_vendor.py build/patch_padded.bin $(NF_REF) build/patch_injected.bin
+	$(PYTHON) pack.py --chip-id $(CHIP_ID) build/patch_injected.bin $(FW_VERSION) rtl8761bu_fw.bin
+	@echo "profile=p4-overlay-$(CONNECT_OVERLAY)" > build/.profile
+	@cp rtl8761bu_fw.bin rtl8761bu_fw.p4-overlay-$(CONNECT_OVERLAY).bin
 	@sha256sum rtl8761bu_fw.bin
 
 # Vendor reference image (bisect baseline — must match non-free byte-for-byte)
