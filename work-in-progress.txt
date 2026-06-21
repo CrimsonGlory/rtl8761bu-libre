@@ -1503,12 +1503,37 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           earlier sessions, not re-verified this pass since no new script was
           attempted).
 
-[NEXT]  Document the encryption engine (E0 / SAFER+ / AES-CCM)
+[DONE]  Document the encryption engine (E0 / SAFER+ / AES-CCM) (2026-06-21)
           BT classic and BLE security procedures' cipher implementation.
           Currently zero coverage — only the SSP IO-cap *trigger* path
           (FUN_80025b68) is documented, not the cipher itself.
 
-[TODO]  Document USB/UART transport framing and the ROM-side HCI driver
+          Found and fully decompiled the SAFER+ block cipher: core round
+          function (0x8002cddc), key schedule (0x8002cb2c), bias constant
+          (0x8002ca88), and exp/log S-box table pointers (0x8002cf1c/20 —
+          symbol names literally say PTR_CRYPT_SAFER_*). Traced 3
+          Bluetooth-spec-shaped wrappers down to the cipher: FUN_8002d00c
+          matches E1 (2-pass SAFER+ -> 4B ACO + 12B SRES) and FUN_8002d14c
+          matches E21/E22 (16B key + 16B block -> 16B output). Confirmed the
+          LMP_* encryption procedure handlers (LMP_COMB_KEY_0x09,
+          LMP_AU_RAND_0x0B, LMP_SRES_0x0C, LMP_ENCRYPTION_MODE_REQ_0x0F,
+          LMP_PAUSE_ENCRYPTION_AES_REQ_0x66) are pure protocol state
+          machines with NO cipher math inline -- they all call down through
+          a small set of shared wrappers into the SAFER+ core above.
+
+          E0 stream cipher and AES-CCM were searched for (LMP encryption
+          handler cluster, BLE Meta-event cluster, AES-named LMP procedure)
+          but NOT located in ROM software -- no LFSR-shaped loop, AES S-box,
+          or MixColumns pattern found anywhere. Most likely both are
+          hardware-offloaded via the same hook architecture already
+          documented in rom/reverse_engineering_hardware_layer.md
+          (bos_base+0xe4 / FUN_8004f824) -- plausible but not confirmed;
+          flagged as open follow-up, not a tool blocker.
+
+          Doc: analysis/rom/reverse_engineering_encryption_engine.md (new).
+          Added to analysis/INDEX.md per its keep-current rule.
+
+[NEXT]  Document USB/UART transport framing and the ROM-side HCI driver
           How raw USB/UART bytes become HCI packets before reaching the VSC
           dispatcher already documented in reverse_engineering_vsc_dispatcher.md.
 
