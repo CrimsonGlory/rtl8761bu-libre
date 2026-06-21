@@ -163,29 +163,37 @@ Questions below.
 
 ## Confirmed: transition to MIPS16e
 
-Everything else examined in this pass — `disable_interrupts_(clear_LSBit_of_CP0_Status_Register)`
-(`0x80009104`), `enable_interrupts_(set_CP0_Status_to_arg)` (`0x80009120`),
-`lots_of_initialization` (`0x8000fb5c`), and `calls_to_0x8010a001_as_fptr_to_install_patches`
-(`0x800109ac`) — are **MIPS16e** functions (confirmed: their first instructions
-disassemble as MIPS16e compressed forms — e.g. `0x800109ac` decodes as
-`addiu sp,-0x58`, a MIPS16e-style stack adjustment, and `0x8000fb5c` likewise).
+**Correction (2026-06-21, via `reverse_engineering_interrupt_vectors.md`)**:
+this section originally claimed `disable_interrupts` and `enable_interrupts`
+were MIPS16e. That was wrong — direct disassembly shows both are **32-bit
+MIPS**, decoding as `mfc0`/`mtc0` (COP0 Status access), which MIPS16e cannot
+encode at all. They form a small cluster of 32-bit-MIPS CP0-Status helpers at
+`0x80009000`-`0x800090fe` (alongside unnamed siblings `FUN_80009014` and
+`FUN_800090b8`), immediately *before* the interrupt trampoline at `0x80009160`.
+See that doc for the full disassembly and the `jalx`/`jalr`-based ISA-mode-switch
+mechanism these helpers participate in.
 
-**The exact instruction that switches the CPU from 32-bit MIPS mode into
-MIPS16e mode was not located in this pass.** MIPS16e mode is normally entered
-via a `JALX`-class instruction (jump-and-link-exchange, which toggles the ISA
-mode bit as a side effect) or via a mode bit in a control register, depending
-on the core. Given the boot block's heavy use of plain `jr`/`lui`/`addiu`
-"goto absolute address" idioms rather than `jal`/`jalr`, it's plausible the
-ISA-mode switch happens via a `jalx` at some point between `0x800000c8` (last
-address examined) and `0x80009104` (first confirmed MIPS16e Kovah-named
-function) — **this gap (`~0x800000c8`–`0x80009104`, roughly 36 KB of ROM) was
-not walked in this pass** and is the main open territory for a future
-continuation. It's reasonably likely that the genuine "lots of initialization"
-work (BSS zeroing if any, watchdog config, clock/PLL bring-up if visible, and
-the actual jalx-mode-switch) lives somewhere in this unexplored gap, possibly
-including or near `lots_of_initialization` itself (`0x8000fb5c`) which is
-already MIPS16e and Kovah-named, suggesting the mode switch happens *before*
-reaching it.
+`lots_of_initialization` (`0x8000fb5c`) and `calls_to_0x8010a001_as_fptr_to_install_patches`
+(`0x800109ac`) genuinely **are MIPS16e** functions (confirmed: their first
+instructions disassemble as MIPS16e compressed forms — e.g. `0x800109ac`
+decodes as `addiu sp,-0x58`, a MIPS16e-style stack adjustment, and `0x8000fb5c`
+likewise).
+
+**Update (2026-06-21, via `reverse_engineering_interrupt_vectors.md`)**: a
+concrete `jalx`-class mode switch was found at `0x800109ac`
+(`calls_to_0x8010a001_as_fptr_to_install_patches`) — a `jalx 0x80009014` call
+into the 32-bit-MIPS CP0-Status helper cluster described above, returning to
+MIPS16e via the standard link-register-LSB convention. That confirms the
+mechanism (`jalx`/`jr` round-trips between ISA modes) but is a single call site
+found during interrupt-trampoline work, not a sweep of the boot path itself —
+the *original* power-on 32-bit-MIPS→MIPS16e transition (as opposed to this
+later runtime mode-switch-for-a-CP0-access pattern) still has not been located.
+**The gap `~0x800000c8`–`0x80009104` (roughly 36 KB of ROM) remains unwalked**
+and is the main open territory for a future continuation; it's reasonably
+likely the genuine "lots of initialization" work (BSS zeroing if any, watchdog
+config, clock/PLL bring-up if visible, and the actual power-on jalx) lives
+somewhere in this gap, possibly including or near `lots_of_initialization`
+itself (`0x8000fb5c`).
 
 ---
 

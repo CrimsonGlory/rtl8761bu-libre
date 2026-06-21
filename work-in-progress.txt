@@ -1336,12 +1336,44 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           run_ghidra_headless script_name executions (stale content keeps
           running) -- see "Tool note" section in the new doc for repro.
 
-[NEXT]  Map the interrupt vector table and ISR handlers
-          MIPS exception/interrupt vector base, registered ISRs, and how they
-          relate to the HW register MMIO window (0xb000a0bc) already documented
-          in reverse_engineering_rom_regs.md.
+[DONE]  Map the interrupt vector table and ISR handlers (2026-06-21)
+          Found and documented analysis/rom/reverse_engineering_interrupt_vectors.md.
+          No classical fixed vector table exists (all conventional BEV=0
+          offsets 0x80/0x100/0x180/0x200 and BEV=1 0xbfc0xxxx addresses
+          checked -- the latter unmapped, the former just ordinary
+          unremarkable code, not vector stubs). Instead found a single fixed
+          context-save trampoline at 0x80009160 (32-bit MIPS): saves all
+          GPRs+HI/LO/EPC to a k0-relative RAM frame, then jalr's to
+          0x80033ce9 (odd addr = MIPS16e call target) -- this resolved the
+          boot-reset doc's open "where's the jalx mode-switch" question (a
+          concrete jalx 0x80009014 instance found in
+          calls_to_0x8010a001_as_fptr_to_install_patches). The MIPS16e
+          dispatcher FUN_80033ce8 is a single-slot ISR dispatcher: calls a
+          registered fptr (PTR_DAT_80033d1c, default 0x80120f84, in the
+          bos_base RAM region) or falls back to acking via MMIO word
+          0xb000a0a0 -- confirmed sibling register to the documented HW port
+          0xb000a0bc (same 0xb000a0xx control-register block), answering the
+          ticket's HW-MMIO-relation question. Also corrected an error in the
+          boot-reset doc: disable_interrupts/enable_interrupts (0x80009104/
+          0x80009120) are 32-bit MIPS (mfc0/mtc0), not MIPS16e as that doc
+          claimed.
+          Open (documented, not blocking): exact silicon trap PC unconfirmed
+          (0x80009160 is the strongest candidate, not proven); restore path
+          at 0x80009220 not individually re-disassembled (inferred by
+          symmetry); single-slot-vs-table ambiguity for real interrupt
+          sources not resolved; 0xb000a0a0 bit semantics inferred from access
+          pattern only, not a datasheet.
+          Tool limitation hit and flagged per CLAUDE.md (not worked around):
+          BOTH wairz script-storage pools were full -- the research-files
+          pool (save_ghidra_script/script_file_id) at exactly 50/50 with no
+          delete/evict tool, AND the separate scripts-directory pool
+          (script_name, GHIDRA_SCRIPTS.md) also at 50, which
+          save_ghidra_script cannot write to anyway (confirmed via backend
+          source read). Could not create the planned new batch probe script;
+          worked around by using pre-existing DiagAddr.java/DecompileAddr.java
+          one-address-at-a-time instead. See new doc's "Tool note" section.
 
-[TODO]  Document the full HCI command parser / router
+[NEXT]  Document the full HCI command parser / router
           Phases 1-8 only mapped the VSC opcode subset relevant to the patch
           (reverse_engineering_lmp_vsc_opcode_map.md: 73 opcodes at 0x80030f1c).
           Standard (non-vendor) HCI command groups (OGF 0x01-0x08) are still
