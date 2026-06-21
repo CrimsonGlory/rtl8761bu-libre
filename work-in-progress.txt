@@ -1600,10 +1600,29 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           + unnamed summary). Added to analysis/INDEX.md per its
           keep-current rule.
 
-[NEXT]  Re-run RomCoverageStats.java as an ongoing progress metric
-          Track % of ROM bytes disassembled + named over time. This phase has
-          no fixed "done" line (512 KB is a lot of silicon) — treat it as
-          ongoing, best-effort documentation rather than a ship gate.
+[DONE]  Re-run RomCoverageStats.java as an ongoing progress metric (2026-06-21)
+          Re-ran RomCoverageStats.java + RomNamedFuncAddrs.java via
+          run_ghidra_headless (GZF process mode, use_saved_project=True)
+          against the same GZF. New numbers vs. this morning's baseline:
+          total functions 2738→2739 (+1), named functions 461→461 (unchanged),
+          named % 16.84%→16.83% (rounding noise from the +1 denominator,
+          same numerator), defined-bytes% 95.37% (unchanged), undefined-bytes%
+          4.63% (unchanged). Despite ~10 other Phase 9 tickets landing today
+          (boot/reset sequence, interrupt vectors, HCI command router, LC/LMP
+          state machine, BLE link layer, encryption engine, USB transport
+          driver, 33-function consolidation, function index), the raw
+          named-vs-anonymous function count didn't move, because that work
+          mostly documented/cross-referenced functions already named in the
+          morning baseline rather than naming new FUN_* functions. Appended a
+          second History row (not overwritten) to
+          analysis/rom/rom_coverage_baseline.md with the new numbers and this
+          interpretation. RomNamedFuncAddrs.java's 461-address dump hit
+          wairz's ~30KB stdout truncation as expected (documented limitation,
+          not relevant to this ticket's aggregate-stats requirement); did NOT
+          work around it via container/host filesystem access — the
+          RomCoverageStats.java aggregate output needed for this metric came
+          back complete and untruncated. Zero [TODO]/[NEXT] items remain in
+          Phase 9.
 
 
 NOTES

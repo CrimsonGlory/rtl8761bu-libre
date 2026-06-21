@@ -101,4 +101,26 @@ safe to re-run at any time as a progress check.
 
 | Date | Total fns | Named fns | Named % | Defined bytes % | Undefined bytes % |
 |------|-----------|-----------|---------|------------------|--------------------|
-| 2026-06-21 | 2738 | 461 | 16.84% | 95.37% | 4.63% |
+| 2026-06-21 (morning baseline) | 2738 | 461 | 16.84% | 95.37% | 4.63% |
+| 2026-06-21 (end of day) | 2739 | 461 | 16.83% | 95.37% | 4.63% |
+
+Same-day re-run, after this session's boot/reset sequence, interrupt vector,
+HCI command router, LC/LMP state machine, BLE link layer, encryption engine,
+USB transport driver, 33-function consolidation, and function-index work.
+Practically **unchanged** from the morning baseline: total function count
+moved by +1 (Ghidra's auto-analysis split one more function during this
+session's work — likely a side effect of decompiling/cross-referencing
+nearby code, not a manual rename), and the named-function count stayed
+exactly at 461, so named % moved by only -0.01 (2738→2739 denominator, same
+numerator). Byte-coverage figures (defined/undefined/named-bytes) are
+bit-for-bit identical to the morning run.
+
+Interpretation: today's Phase 9 work was concentrated on *writing up and
+cross-referencing* functions that were already named in the morning baseline
+(consolidation, function-index, prose documentation) rather than naming new
+previously-anonymous `FUN_*` functions, so the raw named-count metric does
+not move even though real documentation progress happened. The function-index
+doc (`analysis/rom/rom_function_index.md`) is the more precise record of that
+day's qualitative progress (high/medium/low confidence tiers per named
+function); this coverage table tracks only the coarse named-vs-anonymous
+split.
