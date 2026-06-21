@@ -226,9 +226,18 @@ a fixed ROM handler. This is consistent with `0x801206ac` sitting in the same
 `0x8012xxxx` RAM "hook slot" region already documented for `bos_base`
 (`CLAUDE.md`'s "Key Struct Offsets" table; `0x801212e4`,
 `0x80120f84`/`reverse_engineering_interrupt_vectors.md`, etc.) — this ROM
-appears to ship with essentially **no native LE command support**, only a
-single extension point for a patch (or a later silicon revision's ROM) to
-install one.
+ships with a thin **inbound LE command-parsing** path (one OCF, patch-extensible).
+
+**Correction (2026-06-21, via `reverse_engineering_ble_link_layer.md`)**: this
+"essentially no native LE support" framing is accurate only for inbound HCI
+command parsing covered in this section. The same follow-up pass found a large,
+fully-decompiled cluster of 17+ ROM-resident `send_evt_Meta_subevent_0x##`
+functions (`0x80044730`-`0x80046620+`) implementing nearly every LE Meta Event
+through BT 5.x (Connection Complete, Advertising Report, PHY Update Complete,
+LE Secure Connections P-256/DHKey, etc.) — i.e. the **outbound event-generation**
+side of LE is substantially ROM-resident, not thin at all. See that doc for
+the full picture; don't read this section as "BLE is mostly unimplemented in
+ROM."
 
 ### LE-enable gate
 
@@ -307,7 +316,9 @@ HCI host (USB/UART, not traced in this pass)
             ├─ 0x08 → HCI_CMD_OGF_08__LE_Commands           (0x80044674, 176B) [NEW, this pass]
             │           gated by config_base+0x7a bit 0x2 ("LE enable")
             │           → 1-entry OCF jump table @ 0x8004472c → RAM hook slot 0x801206ac
-            │             (i.e. ROM ships near-zero native LE support; patch-extensible)
+            │             (thin INBOUND command parsing only -- patch-extensible;
+            │              OUTBOUND LE event generation is substantially ROM-resident,
+            │              see reverse_engineering_ble_link_layer.md)
             ├─ 0x3F → HCI_CMD_OGF_3F__Vendor_Specific       (0x80030f1c, 4372B)[documented separately]
             └─ default → HCI_Command_Status(error=Unknown Command)
                           or OGC_3_OCF_TONS_deal_with_return_status... if config byte set

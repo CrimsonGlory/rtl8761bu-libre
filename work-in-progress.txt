@@ -1459,12 +1459,51 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           work against this GZF filename (looks in a different binary store) --
           correctly avoided in favor of run_ghidra_headless per CLAUDE.md.
 
-[NEXT]  Document the BLE link layer state machine, if present in this ROM
+[DONE]  Document the BLE link layer state machine, if present in this ROM (2026-06-21)
           Advertising, scanning, and connection state machine. First confirm
           whether BLE link-layer logic actually lives in this ROM revision or
           is handled elsewhere, then document accordingly.
 
-[TODO]  Document the encryption engine (E0 / SAFER+ / AES-CCM)
+          Wrote analysis/rom/reverse_engineering_ble_link_layer.md; added row
+          to INDEX.md. Conclusion: PARTIALLY IN ROM, with a correction to the
+          prior HCI-router doc. (1) OGF8 LE *command parsing* is confirmed
+          thin (1-entry OCF jump table -> ROM stub at 0x800454a8 that just
+          echoes back HCI_Command_Status; prior doc's "no native LE command
+          support" stands, though the RAM slot 0x801206ac is not literally
+          "empty" -- it has ROM-default content, just an inert stub). (2) But
+          a separate, large, fully-decompiled cluster of 17+ named
+          send_evt_Meta_subevent_0x## functions (0x80044730-0x80046620+,
+          rom block) generates nearly every LE Meta Event in the BT5.x spec
+          -- Connection Complete/Enhanced Connection Complete (1032B, fully
+          decompiled, reads conn handle/role/peer addr/interval/latency/
+          timeout from the shared 0x1ac conn-record struct array also used
+          by BT Classic SCO/eSCO), Advertising Report/Direct Advertising
+          Report (332B, fully decompiled -- loops reports, copies BD_ADDR/
+          RSSI/AD-payload), LTK Request, PHY Update Complete, Channel
+          Selection Algorithm, LE Secure Connections P-256/DHKey pair, etc.
+          This directly contradicts the prior doc's blanket "essentially no
+          native LE support" framing -- that was only true for command
+          parsing, not event generation. NOT found: a single monolithic
+          link-layer *driver*/state-machine function that decides when to
+          call these senders (the actual RF timing/anchor-point/channel-
+          selection engine) -- searched via string search (FindStringRefs.java
+          returns ZERO results for every pattern tried on this binary,
+          including ".+" -- confirmed non-functional/string-poor binary, not
+          a BLE-specific negative) and via the ISR-slot doc (single generic
+          ISR slot, no per-source vector, nothing BLE-identifiable) but could
+          not trace callers of the Meta-event senders because FindXrefsTo.java
+          is confirmed still stale (hardcoded to old 0x801212e4 probe, known
+          save_ghidra_script overwrite bug, not re-fixed). This is a real,
+          flagged tool blocker for Part 3/4 of the new doc, not a guess -- see
+          doc's Tool Note. Net: BLE link-layer EVENT REPORTING is confirmed
+          ROM-resident and substantial; whether the lower-level RF/timing
+          STATE MACHINE itself is ROM, patch, or hardware-sequenced remains
+          genuinely open (would need a working xrefs-to tool or a fresh batch
+          script to resolve -- both wairz script pools were reported full in
+          earlier sessions, not re-verified this pass since no new script was
+          attempted).
+
+[NEXT]  Document the encryption engine (E0 / SAFER+ / AES-CCM)
           BT classic and BLE security procedures' cipher implementation.
           Currently zero coverage — only the SSP IO-cap *trigger* path
           (FUN_80025b68) is documented, not the cipher itself.
