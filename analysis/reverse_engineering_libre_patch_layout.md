@@ -4,7 +4,7 @@
 **Status**: Phase 5 design (implements `[NEXT]` from `work-in-progress.txt`)  
 **Sources**: non-free `rtl8761bu_fw.bin` hex dump, GZF RE (`FUN_8010a000` hook map),
 `rtl8761bu-libre/` build system (`pack.py`, `pad.py`, `rtl8761bu.ld`),  
-`reverse_engineering_minimum_feature_set.md`, `reverse_engineering_patch_installer.md`.
+`reverse_engineering_minimum_feature_set.md`, `firmware/reverse_engineering_patch_installer.md`.
 
 This document defines the on-disk EPatch envelope and the in-RAM code layout the libre
 firmware must produce. It is the authoritative reference for Phase 6 implementation.
@@ -386,8 +386,8 @@ Before declaring layout correct on hardware:
 | File | Relevance |
 |------|-----------|
 | `reverse_engineering_minimum_feature_set.md` | Tier definitions, mandatory functions |
-| `reverse_engineering_patch_installer.md` | Appendix D hook map, entry callees |
-| `reverse_engineering_sub_installers.md` | Firmware header parse, sub-installer bodies |
+| `firmware/reverse_engineering_patch_installer.md` | Appendix D hook map, entry callees |
+| `firmware/reverse_engineering_sub_installers.md` | Firmware header parse, sub-installer bodies |
 | `rtl8761bu-libre/pack.py`, `pad.py`, `rtl8761bu.ld` | Current build implementation |
 | `rtl8761bu-non-free/rtl8761bu_static_analysis_by_sonnet_4.6_high_thinking_enabled.md` | §5 EPatch format (note 8 vs 9 byte magic correction) |
 

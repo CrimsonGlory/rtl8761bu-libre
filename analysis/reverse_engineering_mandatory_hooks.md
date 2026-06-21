@@ -51,7 +51,7 @@ These are **not** installed by the patch entry; ROM or connection setup owns the
 | `PTR_DAT_800508ec` | `FUN_80050810` prep hook | **No** | **ROM-NULL** | Double-indirect; reference leaves unset. |
 
 **Conclusion:** Zero libre implementation for global HW hooks. Confirmed in
-`reverse_engineering_hardware_layer.md` §12.
+`rom/reverse_engineering_hardware_layer.md` §12.
 
 ---
 
@@ -183,9 +183,9 @@ installer stub is still **IMPL-T1**.
 
 | Item | Verdict | Notes |
 |------|---------|-------|
-| Address-pair table @ file `0xA0` | **OMIT** | Confirmed 2026-06-10: zero xrefs, no consumer; see `reverse_engineering_address_pair_table_omit.md` |
+| Address-pair table @ file `0xA0` | **OMIT** | Confirmed 2026-06-10: zero xrefs, no consumer; see `firmware/reverse_engineering_address_pair_table_omit.md` |
 | `FUN_80103780` master installer | **OMIT** | Parallel variant; runtime entry is `FUN_8010a000` |
-| Late-patch block `FUN_80109980`…`80109824` | **OMIT** | Confirmed 2026-06-10: below PRAM `0x8010A000`; zero patch1 pool refs; see `reverse_engineering_late_patch_block_omit.md` |
+| Late-patch block `FUN_80109980`…`80109824` | **OMIT** | Confirmed 2026-06-10: below PRAM `0x8010A000`; zero patch1 pool refs; see `firmware/reverse_engineering_late_patch_block_omit.md` |
 | `bos+0xd8` NULL | **NULL-T1** | Test on hardware; ROM timeout fallback for LMP `0x268` |
 | `FUN_8010ca20` empty stub | **STUB-T1** | Degrades Wi-Fi/BLE coexistence only |
 | TLV loop active records | **SKIP** | Leave `remaining=0`; `FUN_8010a7b8` becomes no-op |
@@ -235,8 +235,8 @@ still needing decompile before sign-off.
 ### P4 — Full parity
 
 **Add:** Sub-installer #2's 19 targets + `FUN_80110ddc` (transcribed as `fn_10ddc`).
-Late-patch block **omitted** (see `reverse_engineering_late_patch_block_omit.md`).
-Address-pair table **omitted** (see `reverse_engineering_address_pair_table_omit.md`).
+Late-patch block **omitted** (see `firmware/reverse_engineering_late_patch_block_omit.md`).
+Address-pair table **omitted** (see `firmware/reverse_engineering_address_pair_table_omit.md`).
 
 ---
 
@@ -268,7 +268,7 @@ For `patch_entry` replicating `FUN_8010a000`:
    if any slot is on the ACL critical path.
 3. Hardware test: confirm **P1 works with `bos+0xd8` NULL** (ACL-only, no eSCO).
 4. ~~Resolve **`FUN_80110ddc`** (hook #42)~~ — **DONE** (2026-06-10): eSCO packet-type selector; `t4_hooks.S`.
-5. ~~**Address-pair table**~~ — **DONE** (2026-06-10): intentional OMIT; `reverse_engineering_address_pair_table_omit.md`.
+5. ~~**Address-pair table**~~ — **DONE** (2026-06-10): intentional OMIT; `firmware/reverse_engineering_address_pair_table_omit.md`.
 
 ---
 
@@ -295,7 +295,7 @@ For `patch_entry` replicating `FUN_8010a000`:
 |------|---------|
 | `reverse_engineering_minimum_feature_set.md` | Function-level T0–T4 tiers |
 | `reverse_engineering_libre_patch_layout.md` | PRAM layout, hook map excerpt |
-| `reverse_engineering_patch_installer.md` | Appendix D full install map |
-| `reverse_engineering_hardware_layer.md` | ROM-NULL global hooks §12 |
-| `reverse_engineering_protocol_dispatch_layer.md` | Dispatch handlers + `ca20` |
-| `reverse_engineering_sco_esco_layer.md` | T2 eSCO cluster decompiles |
+| `firmware/reverse_engineering_patch_installer.md` | Appendix D full install map |
+| `rom/reverse_engineering_hardware_layer.md` | ROM-NULL global hooks §12 |
+| `firmware/reverse_engineering_protocol_dispatch_layer.md` | Dispatch handlers + `ca20` |
+| `firmware/reverse_engineering_sco_esco_layer.md` | T2 eSCO cluster decompiles |

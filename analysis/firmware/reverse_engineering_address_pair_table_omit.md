@@ -121,5 +121,5 @@ required for UB500 bring-up documented in Phase 7/8.
 
 - `reverse_engineering_sub_installers.md` — original table dump (superseded verdict here)
 - `reverse_engineering_string_assoc_installer.md` — `FUN_8010e27c` vs table correction
-- `reverse_engineering_mandatory_hooks.md` — OMIT-T1 through P4
-- `reverse_engineering_libre_patch_layout.md` §6 — layout note
+- `../reverse_engineering_mandatory_hooks.md` — OMIT-T1 through P4
+- `../reverse_engineering_libre_patch_layout.md` §6 — layout note

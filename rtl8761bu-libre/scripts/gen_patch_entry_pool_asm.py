@@ -2,7 +2,7 @@
 """Emit src/patch_entry_pool.S from vendor FUN_8010a000 literal pool bytes.
 
 Pool file range [0x242, 0x5d8) — 918 B. Runtime base 0x8010A242.
-Known slot annotations from analysis/reverse_engineering_patch_installer.md Appendix D.
+Known slot annotations from analysis/firmware/reverse_engineering_patch_installer.md Appendix D.
 """
 from __future__ import annotations
 
@@ -141,7 +141,7 @@ def emit_pool(blob: bytes) -> str:
         " * PE-2: libre consolidated literal pool (918 B .byte block). Must use .byte",
         " * not .word — .word raises section alignment and inserts padding after the",
         " * 578 B entry code (breaks PC-relative lw offsets). See Appendix D in",
-        " * analysis/reverse_engineering_patch_installer.md for slot semantics.",
+        " * analysis/firmware/reverse_engineering_patch_installer.md for slot semantics.",
         " *",
         " * Regenerate: scripts/gen_patch_entry_pool_asm.py",
         " */",

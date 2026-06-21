@@ -2,7 +2,7 @@
 """Diff libre patch.bin against vendor patch1 prefix [0, LIMIT).
 
 Default LIMIT=0x764 (UB500 connect-critical prefix). Reports per-region stats
-documented in analysis/reverse_engineering_patch_entry.md.
+documented in analysis/firmware/reverse_engineering_patch_entry.md.
 """
 from __future__ import annotations
 

@@ -42,7 +42,7 @@ From `reverse_engineering_patch_installer.md`:
 
 Libre single-patch EPatch v2 copies **only** the 27,808-byte body to
 `0x8010A000`. Code section 1 is **not** loaded at `0x80100000` in this layout
-(entry-centric design in `rtl8761bu.ld` / `reverse_engineering_libre_patch_layout.md` §3).
+(entry-centric design in `rtl8761bu.ld` / `../reverse_engineering_libre_patch_layout.md` §3).
 
 ---
 
@@ -131,8 +131,8 @@ The incorrect note in `reverse_engineering_phase7_hci_bringup.md` stating libre
 
 ## Cross-references
 
-- `reverse_engineering_mandatory_hooks.md` §7 — OMIT-T3 verdict
-- `reverse_engineering_minimum_feature_set.md` §T4 — late-patch listed as non-ship
-- `reverse_engineering_libre_patch_layout.md` §4.2 — `.text.late` optional, deferred
+- `../reverse_engineering_mandatory_hooks.md` §7 — OMIT-T3 verdict
+- `../reverse_engineering_minimum_feature_set.md` §T4 — late-patch listed as non-ship
+- `../reverse_engineering_libre_patch_layout.md` §4.2 — `.text.late` optional, deferred
 - `reverse_engineering_sco_esco_layer.md` Group AF — `fn_10ddc` negotiator
 - `work-in-progress.txt` Phase 2 — per-function decompile summaries

@@ -9,6 +9,15 @@ USB chip (UB500 dongle). The Linux `btrtl` driver loads it at boot via HCI VSC `
 This work continues Xeno Kovah's (Dark Mentor LLC) public reverse-engineering research
 presented at Hardwear.io NL 2025.
 
+### Secondary goal (nice-to-have): documenting the ROM
+
+The RTL8761BU mask ROM (`0x80000000 – 0x8007ffff`) is fixed in chip silicon —
+it cannot be reflashed, replaced, or otherwise modified on real hardware. RE'ing
+it produces no shipping deliverable; it is purely theoretical/educational, done
+to build a complete documented understanding of the chip's Bluetooth stack
+alongside the firmware replacement work. Lower priority than the primary goal.
+ROM-only findings live in `analysis/rom/`.
+
 ---
 
 ## Reverse-Engineering Tool Stack
@@ -94,9 +103,12 @@ file — see the rule at the bottom of `GHIDRA_SCRIPTS.md`.
 
 ## Findings — Already Documented
 
-All findings go in `/root/rtl8761bu-libre/analysis/`. Full index with one-line
-summaries: [`analysis/INDEX.md`](analysis/INDEX.md). Keep that index current,
-not this file — see the rule at the bottom of `INDEX.md`.
+All findings go in `/root/rtl8761bu-libre/analysis/`, split into `firmware/`
+(patch/RAM-loaded firmware — primary goal) and `rom/` (silicon ROM —
+secondary/nice-to-have goal), with cross-cutting design and process docs at
+the `analysis/` root. Full index with one-line summaries:
+[`analysis/INDEX.md`](analysis/INDEX.md). Keep that index current, not this
+file — see the rule at the bottom of `INDEX.md`.
 
 ---
 
