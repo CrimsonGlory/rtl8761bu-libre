@@ -1373,13 +1373,46 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           worked around by using pre-existing DiagAddr.java/DecompileAddr.java
           one-address-at-a-time instead. See new doc's "Tool note" section.
 
-[NEXT]  Document the full HCI command parser / router
-          Phases 1-8 only mapped the VSC opcode subset relevant to the patch
-          (reverse_engineering_lmp_vsc_opcode_map.md: 73 opcodes at 0x80030f1c).
-          Standard (non-vendor) HCI command groups (OGF 0x01-0x08) are still
-          unmapped in ROM.
+[DONE]  Document the full HCI command parser / router (2026-06-21)
+          Found and fully decompiled the top-level standard-HCI dispatcher
+          assoc_w_tHCI_CMD (0x80020ee0, 672B): housekeeping, raw-opcode
+          special cases (0x300/0x456/0x1), loopback-mode short-circuit,
+          HCI_Reset-while-busy disconnect guard, OGF = opcode>>10 extraction
+          (confirmed the OGF/OCF bit layout generalizes beyond the
+          already-documented OGF 0x3F case), an optional top-level
+          pre-dispatch patch hook (PTR_PTR_800211a4), a debug var-args
+          logger, then a linear (not jump-table) compare chain over OGF.
+          All 8 standard OGF groups (0x01-0x08) now have confirmed handler
+          addresses: OGF 1/2/3/5/6 were already named in
+          kovah_function_list.md (confirmed reachable via direct jal sites);
+          OGF 4 (Informational Parameters, 0x8002013c, 74B) and OGF 8 (LE
+          Commands, 0x80044674, 176B) are NEW finds this pass, not in
+          kovah_function_list.md before now -- both fully decompiled.
+          OGF 4 is a near-stub that validates OCF range then delegates to
+          the shared OGC_3_OCF_TONS_deal_with_return_status... sink. OGF 8
+          has the same "extract OCF, log, bounds-check, jump-table" shape as
+          OGF 3/6's big-switch dispatchers, but its jump table
+          (PTR_PTR_8004472c) has exactly ONE live entry (OCF=0) pointing at
+          an empty RAM hook slot (0x801206ac), not ROM code -- i.e. this ROM
+          ships essentially no native LE command support, gated behind
+          config_base+0x7a bit 0x2 (an already-documented config-blob
+          feature flag, reused here as an LE-enable bit). Confirms OGF 0x07
+          has NO case at all (only OGF 0x08 is LE, per spec -- the ticket's
+          hedge about "0x08 per some specs" was unnecessary, spec is
+          unambiguous and ROM matches it).
+          Per-OGF OCF-level dispatch (the "real" jump tables) confirmed only
+          for OGF 1 (872B, matches its 12 already-named OCF handlers),
+          3, 6, 8; OGF 2/5 internals not walked (named addresses confirmed
+          reachable, contents not decompiled -- left as documented open work).
+          Wrote analysis/rom/reverse_engineering_hci_command_router.md;
+          added row to INDEX.md; added OGF4/OGF8/assoc_w_tHCI_CMD entries to
+          kovah_function_list.md. No wairz blocker this pass -- DiagAddr.java/
+          DecompileAddr.java with 0x-prefixed script_args sufficed throughout
+          (noted in the new doc: these two scripts need the 0x prefix,
+          opposite of GHIDRA_SCRIPTS.md's general script_args hex-literal
+          warning, which applies to a different invocation mode).
 
-[TODO]  Document the link controller (LC) / LMP procedure state machine
+[NEXT]  Document the link controller (LC) / LMP procedure state machine
           Baseband procedures beyond the eSCO/SCO/AFH paths already covered:
           inquiry, paging, role switch, authentication/pairing beyond the SSP
           IO-capability exchange (FUN_80025b68's *callers* are documented; the

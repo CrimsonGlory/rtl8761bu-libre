@@ -89,9 +89,11 @@ Kovah's Ghidra project loads:
 | `0x80020814` | `HCI_CMD_OGF_01__Link_Control` |
 | `0x8002060c` | `HCI_CMD_OGF_02__Link_Policy` |
 | `0x800202c0` | `HCI_CMD_OGF_03__Controller_and_Baseband` |
+| `0x8002013c` | `HCI_CMD_OGF_04___wraps__possible_OGF0__referencing_default_name_10` (Informational Parameters; 74B near-stub — see `rom/reverse_engineering_hci_command_router.md`) |
 | `0x80020188` | `HCI_CMD_OGF_05__Status_Parameters` |
 | `0x800200a8` | `HCI_CMD_OGF_06__TestMode` |
-| `0x80020ee0` | `assoc_w_tHCI_CMD` |
+| `0x80044674` | `HCI_CMD_OGF_08__LE_Commands__big_switch` (176B; 1-entry OCF jump table → RAM hook slot `0x801206ac`; gated by `config_base+0x7a` bit `0x2` — see `rom/reverse_engineering_hci_command_router.md`) |
+| `0x80020ee0` | `assoc_w_tHCI_CMD` (top-level standard-HCI command router — full decompile in `rom/reverse_engineering_hci_command_router.md`) |
 | `0x80020bec` | `assoc_w_tHCI_EVT` |
 
 ### HCI Command Handlers – OGF 1 (Link Control)
