@@ -1255,6 +1255,104 @@ Implementation order (summary):
   P1 hardware → 8.3 T2 eSCO → P2 SHIP → 8.4 T3 AFH → 8.5 P4 parity.
 
 
+PHASE 9 — COMPLETE REVERSING AND DOCUMENTATION OF THE ROM (SECONDARY, NICE-TO-HAVE)
+-------------------------------------------------------------------------------------
+Goal: build a complete, documented understanding of the RTL8761BU mask ROM
+(0x80000000-0x8007ffff, 512 KB) for research/educational value. Unlike Phases
+1-8, this has NO shipping deliverable — the ROM is fixed in chip silicon and
+can never be reflashed on real hardware. Lower priority than the primary
+firmware goal; ongoing/best-effort rather than a ship gate. Findings live in
+analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
+
+[DONE]  Incidental ROM RE carried over from Phases 1-8 (not re-done here)
+          Four ROM subsystems already fully documented as a side effect of
+          building the libre firmware's hook map:
+            analysis/rom/reverse_engineering_hardware_layer.md — FUN_8004f824
+              slot-budget validator + 7-entry interval table
+            analysis/rom/reverse_engineering_vsc_dispatcher.md — FUN_80047c50
+              VSC parameter validator + connection record writer
+            analysis/rom/reverse_engineering_conn_record_subsystem.md — eSCO/SCO
+              connection record pool (alloc/register/lookup/commit/free)
+            analysis/rom/reverse_engineering_rom_regs.md — HW register r/w
+              protocol (0x8001136c/9c, MMIO 0xb000a0bc)
+          Also: kovah_function_list.md's ROM section is the starting name index.
+
+[TODO]  Baseline current ROM coverage
+          Run RomCoverageStats.java (byte coverage: disassembled/defined vs
+          undefined, named vs anonymous functions) and RomNamedFuncAddrs.java
+          (addresses of all user-named functions in the rom block) against the
+          GZF. Establishes what % of the 512 KB ROM is already understood
+          before starting systematic work. Re-run periodically as a progress
+          metric (see last step).
+
+[TODO]  Consolidate partially-resolved ROM functions from Phases 1-8
+          ~25+ ROM functions were identified and minimally characterized
+          (one-line purpose) while tracing firmware hook targets, but never
+          given a full decompile or their own RE notes. Promote each to a
+          proper write-up (decompile, literal pool, callers/callees, purpose)
+          in analysis/rom/. Candidates collected from "new ROM fns" callouts
+          across Phases 1-8: FUN_80011510, FUN_80011608, FUN_80011a74,
+          FUN_800122b8, FUN_80012e38, FUN_800117a4, FUN_8000c3f4, FUN_8001d4a0,
+          FUN_8005e23c, FUN_8005d26c, FUN_8005ca00, FUN_8001acd8, FUN_8002143c,
+          FUN_8001ac74, FUN_80056988, FUN_8004f25c, FUN_800511b8, FUN_80050b2c,
+          FUN_80050ff8, FUN_8004f374, FUN_80052c1c, FUN_8004e808, FUN_80051124,
+          FUN_8004e2d0, FUN_8003aea0 (register-script interpreter, 15+ call
+          sites), FUN_800115c8, FUN_80044730, FUN_80050810 + handlers
+          (FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c),
+          FUN_8000fd38 (copies_config_bdaddr), FUN_8000b820, FUN_80011584,
+          FUN_80011608, FUN_80025b68 (codec template un-scrambler),
+          FUN_800225a8 / FUN_800614fc (codec staging init).
+
+[TODO]  Map the boot / reset sequence
+          Reset vector, watchdog/clock init, BSS/data setup — whatever brings
+          the chip from power-on to the point where ROM calls the patch entry
+          (0x8010A001). Phases 1-8 start from the patch's perspective; the
+          ROM's own startup path is currently undocumented.
+
+[TODO]  Map the interrupt vector table and ISR handlers
+          MIPS exception/interrupt vector base, registered ISRs, and how they
+          relate to the HW register MMIO window (0xb000a0bc) already documented
+          in reverse_engineering_rom_regs.md.
+
+[TODO]  Document the full HCI command parser / router
+          Phases 1-8 only mapped the VSC opcode subset relevant to the patch
+          (reverse_engineering_lmp_vsc_opcode_map.md: 73 opcodes at 0x80030f1c).
+          Standard (non-vendor) HCI command groups (OGF 0x01-0x08) are still
+          unmapped in ROM.
+
+[TODO]  Document the link controller (LC) / LMP procedure state machine
+          Baseband procedures beyond the eSCO/SCO/AFH paths already covered:
+          inquiry, paging, role switch, authentication/pairing beyond the SSP
+          IO-capability exchange (FUN_80025b68's *callers* are documented; the
+          state machine that drives them is not), sniff/hold/park power modes.
+
+[TODO]  Document the BLE link layer state machine, if present in this ROM
+          Advertising, scanning, and connection state machine. First confirm
+          whether BLE link-layer logic actually lives in this ROM revision or
+          is handled elsewhere, then document accordingly.
+
+[TODO]  Document the encryption engine (E0 / SAFER+ / AES-CCM)
+          BT classic and BLE security procedures' cipher implementation.
+          Currently zero coverage — only the SSP IO-cap *trigger* path
+          (FUN_80025b68) is documented, not the cipher itself.
+
+[TODO]  Document USB/UART transport framing and the ROM-side HCI driver
+          How raw USB/UART bytes become HCI packets before reaching the VSC
+          dispatcher already documented in reverse_engineering_vsc_dispatcher.md.
+
+[TODO]  Produce a comprehensive ROM function index
+          analysis/rom/ equivalent of kovah_function_list.md, scoped to the ROM
+          block only: every function's address, size, name (Kovah's or newly
+          assigned), one-line purpose, and a confidence/coverage flag.
+          Supersedes the ad-hoc "new ROM fns" callouts scattered across
+          Phases 1-8.
+
+[TODO]  Re-run RomCoverageStats.java as an ongoing progress metric
+          Track % of ROM bytes disassembled + named over time. This phase has
+          no fixed "done" line (512 KB is a lot of silicon) — treat it as
+          ongoing, best-effort documentation rather than a ship gate.
+
+
 NOTES
 -----
 - All addresses are runtime (patch at 0x80100000, ROM at 0x80000000)
