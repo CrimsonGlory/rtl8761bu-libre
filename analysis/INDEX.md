@@ -60,6 +60,7 @@ shipping deliverable, it exists purely to document the chip for research value.
 | `rom/reverse_engineering_conn_feature_dispatch.md` | 10 fns in the `FUN_80052c64` eSCO/SCO parameter negotiation cluster: hash-bucket pool, refcounting, commit, re-validation |
 | `rom/reverse_engineering_register_script_interpreter.md` | `FUN_8003aea0` — 16-opcode byte-code VM for hardware register-config scripts, called from both ROM init and patch entry |
 | `rom/reverse_engineering_conn_type_dispatch_and_esco.md` | `FUN_80050810` (`bos_base+0xe0` hook) + 4 type handlers, plus `FUN_80044730` eSCO packet-type/air-mode table |
+| `rom/reverse_engineering_boot_reset_sequence.md` | ROM power-on boot path: 32-bit MIPS preamble @ `0x80000000`–`~0x800000c8` (MMIO/CP0 setup), unresolved MIPS16e-switch gap to `0x80009104`, and the (separate, patch-download-time) call chain to patch entry `0x8010a001` via `0x800109ac` |
 
 **Keep this index current**: any time a new file is added to `analysis/`, add a row
 to the right section in the same turn — filename (with `firmware/` or `rom/` prefix

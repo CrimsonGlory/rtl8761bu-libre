@@ -1317,13 +1317,26 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
               un-scrambling algorithm, and libre-firmware implications)
           analysis/INDEX.md updated with all 5 new docs per its keep-current rule.
 
-[NEXT]  Map the boot / reset sequence
-          Reset vector, watchdog/clock init, BSS/data setup — whatever brings
-          the chip from power-on to the point where ROM calls the patch entry
-          (0x8010A001). Phases 1-8 start from the patch's perspective; the
-          ROM's own startup path is currently undocumented.
+[DONE]  Map the boot / reset sequence (2026-06-21)
+          Found and documented analysis/rom/reverse_engineering_boot_reset_sequence.md:
+          a 32-bit MIPS (not MIPS16e!) boot preamble at ROM base 0x80000000-
+          ~0x800000c8, previously totally undocumented (not in
+          kovah_function_list.md, no Kovah annotations). Confirmed: MMIO pokes
+          at 0xb000af08/0xb000a000, CP0 Status read-mask-write (clear boot-
+          exception-vector bit, set IM mask) -- the closest thing to a
+          documented reset-vector handler this chip has. Confirmed the
+          ROM->patch-entry call chain (0x800109ac calls 0x8010a001) is a
+          *separate*, patch-download-time event, not part of power-on boot.
+          Open: ~36KB gap (0x800000c8-0x80009104) not walked -- presumably
+          contains the MIPS16e mode switch (jalx) and any watchdog/clock init;
+          lots_of_initialization (0x8000fb5c) located but not decompiled.
+          Documented as future work, not blockers.
+          Also found and documented a wairz bug: save_ghidra_script overwrites
+          of an existing script filename do not take effect on subsequent
+          run_ghidra_headless script_name executions (stale content keeps
+          running) -- see "Tool note" section in the new doc for repro.
 
-[TODO]  Map the interrupt vector table and ISR handlers
+[NEXT]  Map the interrupt vector table and ISR handlers
           MIPS exception/interrupt vector base, registered ISRs, and how they
           relate to the HW register MMIO window (0xb000a0bc) already documented
           in reverse_engineering_rom_regs.md.

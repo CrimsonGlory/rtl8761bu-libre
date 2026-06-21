@@ -25,7 +25,7 @@ To save a new script: use `mcp__wairz__save_ghidra_script`, then reference it by
 | `DecompileFunction.java` | Decompiles by name |
 | `ListAllFunctions.java` | Lists all known functions |
 | `ListMemBlocks.java` | Lists memory blocks (sanity check) |
-| `FindXrefsTo.java` | Cross-references to a target address |
+| `FindXrefsTo.java` | **[REPURPOSED 2026-06-21, was: xrefs to 0x801212e4]** Boot/reset sequence probe: disasm+xrefs+raw-bytes dump at ROM base 0x80000000/0x80000078 + bootstrap/init candidate addresses. NOTE: editing this script via `save_ghidra_script` did NOT take effect when re-run via `run_ghidra_headless` (kept executing the old xrefs-to-0x801212e4 version) — see "Tool note" in `analysis/rom/reverse_engineering_boot_reset_sequence.md` for the repro; treat overwrites of existing script filenames as unreliable until wairz fixes this |
 | `FindStringRefs.java` | Finds references to a string |
 | `DiagAddr.java` | Dumps bytes + disasm around an address |
 | `GlobalLayout.java` | Shows global data layout |
