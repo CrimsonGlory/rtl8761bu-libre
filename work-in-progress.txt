@@ -1277,13 +1277,31 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
               protocol (0x8001136c/9c, MMIO 0xb000a0bc)
           Also: kovah_function_list.md's ROM section is the starting name index.
 
-[TODO]  Baseline current ROM coverage
-          Run RomCoverageStats.java (byte coverage: disassembled/defined vs
-          undefined, named vs anonymous functions) and RomNamedFuncAddrs.java
-          (addresses of all user-named functions in the rom block) against the
-          GZF. Establishes what % of the 512 KB ROM is already understood
-          before starting systematic work. Re-run periodically as a progress
-          metric (see last step).
+[DONE]  Baseline current ROM coverage (2026-06-21)
+          Ran RomCoverageStats.java + RomNamedFuncAddrs.java (both scripts
+          pre-existed in GHIDRA_SCRIPTS.md) against the GZF rom block. Result:
+          2738 total functions, 461 user-named (16.84%); 95.37% of ROM bytes
+          defined (instructions+data) vs 4.63% undefined; only 16.99% of ROM
+          bytes fall inside a *named* function. Written up in
+          analysis/rom/rom_coverage_baseline.md (indexed in analysis/INDEX.md).
+
+[NEXT]  Consolidate partially-resolved ROM functions from Phases 1-8
+          ~25+ ROM functions were identified and minimally characterized
+          (one-line purpose) while tracing firmware hook targets, but never
+          given a full decompile or their own RE notes. Promote each to a
+          proper write-up (decompile, literal pool, callers/callees, purpose)
+          in analysis/rom/. Candidates collected from "new ROM fns" callouts
+          across Phases 1-8: FUN_80011510, FUN_80011608, FUN_80011a74,
+          FUN_800122b8, FUN_80012e38, FUN_800117a4, FUN_8000c3f4, FUN_8001d4a0,
+          FUN_8005e23c, FUN_8005d26c, FUN_8005ca00, FUN_8001acd8, FUN_8002143c,
+          FUN_8001ac74, FUN_80056988, FUN_8004f25c, FUN_800511b8, FUN_80050b2c,
+          FUN_80050ff8, FUN_8004f374, FUN_80052c1c, FUN_8004e808, FUN_80051124,
+          FUN_8004e2d0, FUN_8003aea0 (register-script interpreter, 15+ call
+          sites), FUN_800115c8, FUN_80044730, FUN_80050810 + handlers
+          (FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c),
+          FUN_8000fd38 (copies_config_bdaddr), FUN_8000b820, FUN_80011584,
+          FUN_80011608, FUN_80025b68 (codec template un-scrambler),
+          FUN_800225a8 / FUN_800614fc (codec staging init).
 
 [TODO]  Consolidate partially-resolved ROM functions from Phases 1-8
           ~25+ ROM functions were identified and minimally characterized

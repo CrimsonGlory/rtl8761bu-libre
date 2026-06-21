@@ -54,6 +54,7 @@ shipping deliverable, it exists purely to document the chip for research value.
 | `rom/reverse_engineering_vsc_dispatcher.md` | `FUN_80047c50` — ROM VSC parameter validator and connection record writer |
 | `rom/reverse_engineering_conn_record_subsystem.md` | ROM eSCO/SCO connection record pool: allocation, registration, lookup, hardware commit, free |
 | `rom/reverse_engineering_rom_regs.md` | ROM HW register r/w protocol (`0x8001136c`/`9c`, MMIO `0xb000a0bc`) |
+| `rom/rom_coverage_baseline.md` | Phase 9 baseline: 2738 fns total, 461 named (16.84%), 95.37% bytes defined / 4.63% undefined, as of 2026-06-21 |
 
 **Keep this index current**: any time a new file is added to `analysis/`, add a row
 to the right section in the same turn — filename (with `firmware/` or `rom/` prefix
