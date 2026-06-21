@@ -1285,43 +1285,39 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           bytes fall inside a *named* function. Written up in
           analysis/rom/rom_coverage_baseline.md (indexed in analysis/INDEX.md).
 
-[NEXT]  Consolidate partially-resolved ROM functions from Phases 1-8
-          ~25+ ROM functions were identified and minimally characterized
-          (one-line purpose) while tracing firmware hook targets, but never
-          given a full decompile or their own RE notes. Promote each to a
-          proper write-up (decompile, literal pool, callers/callees, purpose)
-          in analysis/rom/. Candidates collected from "new ROM fns" callouts
-          across Phases 1-8: FUN_80011510, FUN_80011608, FUN_80011a74,
-          FUN_800122b8, FUN_80012e38, FUN_800117a4, FUN_8000c3f4, FUN_8001d4a0,
-          FUN_8005e23c, FUN_8005d26c, FUN_8005ca00, FUN_8001acd8, FUN_8002143c,
-          FUN_8001ac74, FUN_80056988, FUN_8004f25c, FUN_800511b8, FUN_80050b2c,
-          FUN_80050ff8, FUN_8004f374, FUN_80052c1c, FUN_8004e808, FUN_80051124,
-          FUN_8004e2d0, FUN_8003aea0 (register-script interpreter, 15+ call
-          sites), FUN_800115c8, FUN_80044730, FUN_80050810 + handlers
-          (FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c),
-          FUN_8000fd38 (copies_config_bdaddr), FUN_8000b820, FUN_80011584,
-          FUN_80011608, FUN_80025b68 (codec template un-scrambler),
-          FUN_800225a8 / FUN_800614fc (codec staging init).
+[DONE]  Consolidate partially-resolved ROM functions from Phases 1-8 (2026-06-21)
+          All 33 unique functions from the candidate list (after dedup of the
+          FUN_80011608 repeat) now have full decompile + literal-pool +
+          callers/callees + purpose write-ups, across 5 new docs grouped by
+          subsystem:
+            analysis/rom/reverse_engineering_baseband_reg_helpers.md — 9 fns:
+              FUN_80011510, FUN_80011608, FUN_800115c8, FUN_80011584,
+              FUN_80011a74, FUN_800117a4, FUN_800122b8, FUN_80012e38, FUN_8000b820
+            analysis/rom/reverse_engineering_lmp_version_conn_setup.md — 8 fns:
+              FUN_8001d4a0, FUN_8005e23c, FUN_8005d26c, FUN_8005ca00,
+              FUN_8001acd8, FUN_8002143c, FUN_8001ac74, FUN_8000c3f4
+            analysis/rom/reverse_engineering_conn_feature_dispatch.md — 10 fns:
+              FUN_80056988, FUN_8004f25c, FUN_800511b8, FUN_80050b2c,
+              FUN_80050ff8, FUN_8004f374, FUN_80052c1c, FUN_8004e808,
+              FUN_80051124, FUN_8004e2d0
+            analysis/rom/reverse_engineering_register_script_interpreter.md —
+              FUN_8003aea0 (confirmed register-script byte-code VM, 16 call
+              sites, 16 opcodes 0x0-0xF)
+            analysis/rom/reverse_engineering_conn_type_dispatch_and_esco.md —
+              FUN_80050810 + handlers (FUN_800506ac, FUN_8004e670, FUN_8004e6f4,
+              FUN_8004e76c), plus FUN_80044730 (eSCO packet-type table)
+          Two candidates were confirmed already fully documented elsewhere and
+          intentionally NOT duplicated:
+            FUN_8000fd38 (copies_config_bdaddr) — see
+              analysis/reverse_engineering_config_blob.md Section 7.2
+            FUN_80025b68 / FUN_800225a8 / FUN_800614fc (codec template
+              un-scrambler cluster) — see
+              analysis/rom/reverse_engineering_hardware_layer.md Section 9
+              (already has full call chains, ROM source tables, the
+              un-scrambling algorithm, and libre-firmware implications)
+          analysis/INDEX.md updated with all 5 new docs per its keep-current rule.
 
-[TODO]  Consolidate partially-resolved ROM functions from Phases 1-8
-          ~25+ ROM functions were identified and minimally characterized
-          (one-line purpose) while tracing firmware hook targets, but never
-          given a full decompile or their own RE notes. Promote each to a
-          proper write-up (decompile, literal pool, callers/callees, purpose)
-          in analysis/rom/. Candidates collected from "new ROM fns" callouts
-          across Phases 1-8: FUN_80011510, FUN_80011608, FUN_80011a74,
-          FUN_800122b8, FUN_80012e38, FUN_800117a4, FUN_8000c3f4, FUN_8001d4a0,
-          FUN_8005e23c, FUN_8005d26c, FUN_8005ca00, FUN_8001acd8, FUN_8002143c,
-          FUN_8001ac74, FUN_80056988, FUN_8004f25c, FUN_800511b8, FUN_80050b2c,
-          FUN_80050ff8, FUN_8004f374, FUN_80052c1c, FUN_8004e808, FUN_80051124,
-          FUN_8004e2d0, FUN_8003aea0 (register-script interpreter, 15+ call
-          sites), FUN_800115c8, FUN_80044730, FUN_80050810 + handlers
-          (FUN_800506ac, FUN_8004e670, FUN_8004e6f4, FUN_8004e76c),
-          FUN_8000fd38 (copies_config_bdaddr), FUN_8000b820, FUN_80011584,
-          FUN_80011608, FUN_80025b68 (codec template un-scrambler),
-          FUN_800225a8 / FUN_800614fc (codec staging init).
-
-[TODO]  Map the boot / reset sequence
+[NEXT]  Map the boot / reset sequence
           Reset vector, watchdog/clock init, BSS/data setup — whatever brings
           the chip from power-on to the point where ROM calls the patch entry
           (0x8010A001). Phases 1-8 start from the patch's perspective; the

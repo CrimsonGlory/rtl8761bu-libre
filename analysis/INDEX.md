@@ -55,6 +55,11 @@ shipping deliverable, it exists purely to document the chip for research value.
 | `rom/reverse_engineering_conn_record_subsystem.md` | ROM eSCO/SCO connection record pool: allocation, registration, lookup, hardware commit, free |
 | `rom/reverse_engineering_rom_regs.md` | ROM HW register r/w protocol (`0x8001136c`/`9c`, MMIO `0xb000a0bc`) |
 | `rom/rom_coverage_baseline.md` | Phase 9 baseline: 2738 fns total, 461 named (16.84%), 95.37% bytes defined / 4.63% undefined, as of 2026-06-21 |
+| `rom/reverse_engineering_baseband_reg_helpers.md` | 9 generic baseband register read/write/toggle helper fns (`FUN_80011510` family + `FUN_8000b820`) consolidated from Phases 1-8 |
+| `rom/reverse_engineering_lmp_version_conn_setup.md` | 8 fns: LMP version exchange (`send_evt_HCI_Read_Remote_Version_Information_Complete` etc.) + role-switch/link-policy validation chain |
+| `rom/reverse_engineering_conn_feature_dispatch.md` | 10 fns in the `FUN_80052c64` eSCO/SCO parameter negotiation cluster: hash-bucket pool, refcounting, commit, re-validation |
+| `rom/reverse_engineering_register_script_interpreter.md` | `FUN_8003aea0` — 16-opcode byte-code VM for hardware register-config scripts, called from both ROM init and patch entry |
+| `rom/reverse_engineering_conn_type_dispatch_and_esco.md` | `FUN_80050810` (`bos_base+0xe0` hook) + 4 type handlers, plus `FUN_80044730` eSCO packet-type/air-mode table |
 
 **Keep this index current**: any time a new file is added to `analysis/`, add a row
 to the right section in the same turn — filename (with `firmware/` or `rom/` prefix
