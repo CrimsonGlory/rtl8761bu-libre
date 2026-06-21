@@ -1412,13 +1412,54 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           opposite of GHIDRA_SCRIPTS.md's general script_args hex-literal
           warning, which applies to a different invocation mode).
 
-[NEXT]  Document the link controller (LC) / LMP procedure state machine
+[DONE]  Document the link controller (LC) / LMP procedure state machine (2026-06-21)
           Baseband procedures beyond the eSCO/SCO/AFH paths already covered:
           inquiry, paging, role switch, authentication/pairing beyond the SSP
           IO-capability exchange (FUN_80025b68's *callers* are documented; the
           state machine that drives them is not), sniff/hold/park power modes.
 
-[TODO]  Document the BLE link layer state machine, if present in this ROM
+          Traced from OGF1 (0x80020814)/OGF2 (0x8002060c) HCI handlers past the
+          dispatch layer into actual baseband driver functions. Fully traced
+          with addresses + decompiles: (1) Paging/HCI_Create_Connection --
+          fHCI_Create_Connection_0x05 (0x8001bd38) allocates a conn-record slot
+          then hands off via the shared dispatcher called_by_fHCI_Remote_
+          Name_Request_5 (0x80036df8) to FUN_80041900 (0x80041900), which
+          programs ~6 baseband HW registers (BD_ADDR-derived sync words, clock
+          offset, page-timeout class) and sets the "paging in progress" flag.
+          (2) Role switch/HCI_Switch_Role -- FUN_8001acd8 (0x8001acd8) ->
+          FUN_8002143c feasibility check (already documented) -> FUN_8001ac74
+          (0x8001ac74) kickoff/defer decision -> FUN_8001ab44 (0x8001ab44, newly
+          decompiled this pass) computes a slot-offset/backoff and sends
+          LMP_SLOT_OFFSET (opcode 0x13) via send_LMP_pkt (0x800611e4, confirmed
+          as the ONE shared LMP-PDU-TX primitive used by every named LMP_*
+          handler in kovah_function_list.md). Partially traced: (3) Inquiry --
+          fHCI_Inquiry_0x01 (0x8001bfa0) trigger chain confirmed but the actual
+          inquiry-train/FHS-broadcast logic not located. (4) Sniff -- only
+          LMP_UNSNIFF_REQ exit-path (0x8001af9c) traced; HCI_Sniff_Mode entry
+          not reached.
+          Headline finding: there is no single monolithic LC/LMP "state
+          machine" function -- architecture is one shared connection-record
+          array + one shared send_LMP_pkt TX primitive + small per-procedure
+          driver functions, with state tracked via a status byte (+0xb2) and
+          several flag fields (+0x171/+0x16f/+0x179/+0xd0/+0x216) on the
+          connection record.
+          Explicitly unexplored (listed as future work in the new doc):
+          inquiry-train/page-train low-level transmit loops (likely timer/
+          interrupt-driven, outside the synchronous HCI-command call chain),
+          HCI_Sniff_Mode entry, Hold mode, Park mode, the LMP PDU *receive-side*
+          dispatcher that routes incoming LMP opcodes to handlers like
+          LMP_encryption_opcode_handlers (the highest-value remaining target --
+          would be the true receive-side counterpart to send_LMP_pkt), and the
+          LMP_SWITCH_REQ PDU send itself (only its LMP_SLOT_OFFSET precursor
+          was found).
+          Wrote analysis/rom/reverse_engineering_lc_lmp_state_machine.md; added
+          row to INDEX.md. No wairz blocker -- DiagAddr.java/DecompileAddr.java
+          with 0x-prefixed script_args sufficed. New tool note (not a blocker,
+          just documented for future sessions): mcp__wairz__xrefs_to does NOT
+          work against this GZF filename (looks in a different binary store) --
+          correctly avoided in favor of run_ghidra_headless per CLAUDE.md.
+
+[NEXT]  Document the BLE link layer state machine, if present in this ROM
           Advertising, scanning, and connection state machine. First confirm
           whether BLE link-layer logic actually lives in this ROM revision or
           is handled elsewhere, then document accordingly.
