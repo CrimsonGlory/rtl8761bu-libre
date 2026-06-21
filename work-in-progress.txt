@@ -1533,11 +1533,48 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           Doc: analysis/rom/reverse_engineering_encryption_engine.md (new).
           Added to analysis/INDEX.md per its keep-current rule.
 
-[NEXT]  Document USB/UART transport framing and the ROM-side HCI driver
+[DONE]  Document USB/UART transport framing and the ROM-side HCI driver (2026-06-21)
           How raw USB/UART bytes become HCI packets before reaching the VSC
           dispatcher already documented in reverse_engineering_vsc_dispatcher.md.
 
-[TODO]  Produce a comprehensive ROM function index
+          Traced backward from assoc_w_tHCI_CMD (0x80020ee0). The direct
+          caller was NOT found -- confirmed (not assumed) both xref tools are
+          unusable for this: FindXrefsTo.java still runs stale content
+          (prints the old 0x801212e4 target), and DiagAddr.java's
+          "Symbols@target" xref section returns empty even for a function
+          with a KNOWN, disassembly-confirmed direct caller
+          (HCI_CMD_OGF_01__Link_Control, called via jal from inside
+          assoc_w_tHCI_CMD itself) -- proving the tool exposes no xref data
+          at all, not "zero callers." No new script could be written to do a
+          jal-byte-pattern sweep (both script pools still full per prior
+          tickets).
+
+          Despite that, found real, previously-undocumented material:
+          working backward from called_at_end_of_every_HCI_CMD_via_fptr
+          (0x80009f68) turned up a cluster of 4 ring-buffer drain functions
+          at ROM 0x80009da8-0x8000a474 (Kovah's own GZF labels
+          early_fptr1/5/6/7, never indexed in kovah_function_list.md), each
+          draining a circular queue (8/16/16/32 slots) of completed
+          transfers. One of them (FUN_8000a1c0) explicitly builds an HCI
+          Event packet and calls a sink with literal arg 4 -- the HCI H4
+          transport type-byte for Event (1=Cmd/2=ACL/3=SCO/4=Event) --
+          direct evidence of a transport-to-HCI bridge. A sibling function
+          (FUN_8000a310) is a 3-channel enable/disable/reset state machine
+          (interrupt-disable-protected register writes via the already-
+          documented disable_interrupts/enable_interrupts jalx pair),
+          matching a USB endpoint model (e.g. control + 2 bulk/int pipes)
+          far better than a single UART line -- consistent with UB500 being
+          USB-only. Found a RAM control-block region (~0x80120200-
+          0x80122564) distinct from bos_base/config_base, i.e. USB transport
+          has its own hook/control-block family separate from the
+          BT-protocol-level one. Inbound ACL/SCO paths and the literal
+          4-way packet-type-byte branch were searched for but not found --
+          left as open work.
+
+          Doc: analysis/rom/reverse_engineering_usb_transport_hci_driver.md
+          (new). Added to analysis/INDEX.md per its keep-current rule.
+
+[NEXT]  Produce a comprehensive ROM function index
           analysis/rom/ equivalent of kovah_function_list.md, scoped to the ROM
           block only: every function's address, size, name (Kovah's or newly
           assigned), one-line purpose, and a confidence/coverage flag.
