@@ -55,6 +55,7 @@ shipping deliverable, it exists purely to document the chip for research value.
 | `rom/reverse_engineering_conn_record_subsystem.md` | ROM eSCO/SCO connection record pool: allocation, registration, lookup, hardware commit, free |
 | `rom/reverse_engineering_rom_regs.md` | ROM HW register r/w protocol (`0x8001136c`/`9c`, MMIO `0xb000a0bc`) |
 | `rom/rom_coverage_baseline.md` | Phase 9 baseline: 2738 fns total, 461 named (16.84%), 95.37% bytes defined / 4.63% undefined, as of 2026-06-21 |
+| `rom/rom_function_index.md` | Full ROM function index, supersedes ad-hoc "new ROM fns" callouts from Phases 1-8: 461-row named-function table (address, size, name, one-line purpose, confidence — 57 high/105 medium/299 low) + 2278-function unnamed-function summary (address-range histogram, size stats, confidence: unanalyzed); flags 147 additional ROM addresses decompiled/documented in Phase 1-8 prose but never given a real Ghidra name |
 | `rom/reverse_engineering_baseband_reg_helpers.md` | 9 generic baseband register read/write/toggle helper fns (`FUN_80011510` family + `FUN_8000b820`) consolidated from Phases 1-8 |
 | `rom/reverse_engineering_lmp_version_conn_setup.md` | 8 fns: LMP version exchange (`send_evt_HCI_Read_Remote_Version_Information_Complete` etc.) + role-switch/link-policy validation chain |
 | `rom/reverse_engineering_conn_feature_dispatch.md` | 10 fns in the `FUN_80052c64` eSCO/SCO parameter negotiation cluster: hash-bucket pool, refcounting, commit, re-validation |

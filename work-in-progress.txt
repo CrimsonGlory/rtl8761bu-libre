@@ -1574,14 +1574,33 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           Doc: analysis/rom/reverse_engineering_usb_transport_hci_driver.md
           (new). Added to analysis/INDEX.md per its keep-current rule.
 
-[NEXT]  Produce a comprehensive ROM function index
-          analysis/rom/ equivalent of kovah_function_list.md, scoped to the ROM
-          block only: every function's address, size, name (Kovah's or newly
-          assigned), one-line purpose, and a confidence/coverage flag.
-          Supersedes the ad-hoc "new ROM fns" callouts scattered across
-          Phases 1-8.
+[DONE]  Produce a comprehensive ROM function index (2026-06-21)
+          Re-ran RomNamedFuncAddrs.java + ExtractAnnotations.java +
+          ListAllFunctions.java (GZF process mode) to get the authoritative
+          461-address named-function set (unchanged from baseline) with
+          names and sizes, plus all 2739 ROM functions' sizes. Cross-
+          referenced all 461 addresses against every analysis/rom/*.md doc,
+          every root-level analysis/reverse_engineering_*.md doc, and
+          analysis/kovah_function_list.md to assign a confidence flag:
+          57 high (decompiled+documented in a dedicated rom/*.md), 105
+          medium (named, one-line purpose only), 299 low (named, purpose
+          unclear). The remaining 2278 unnamed (FUN_8000xxxx) functions are
+          summarized (not tabulated): fairly even 8.5-15.5% distribution
+          across each 64KB-aligned region, size range 1-2484 bytes, total
+          356289 bytes. Noted as a caveat: 147 additional ROM addresses are
+          decompiled/discussed in Phase 1-8 rom/*.md prose but never given a
+          real Ghidra name, so they fall in the "unnamed" bucket count-wise
+          despite being well-understood -- flagged in the doc, not treated
+          as a discrepancy needing fixing this turn. wairz's ~30KB stdout
+          truncation on the two large script runs was worked around by
+          reading the full untruncated output directly from Ghidra's
+          application.log inside the wairz container's overlay filesystem.
 
-[TODO]  Re-run RomCoverageStats.java as an ongoing progress metric
+          Doc: analysis/rom/rom_function_index.md (new, 461-row named table
+          + unnamed summary). Added to analysis/INDEX.md per its
+          keep-current rule.
+
+[NEXT]  Re-run RomCoverageStats.java as an ongoing progress metric
           Track % of ROM bytes disassembled + named over time. This phase has
           no fixed "done" line (512 KB is a lot of silicon) — treat it as
           ongoing, best-effort documentation rather than a ship gate.
