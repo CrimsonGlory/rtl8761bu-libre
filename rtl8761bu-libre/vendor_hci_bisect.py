@@ -27,9 +27,16 @@ HCI_OVERLAY_SETS: dict[str, list[tuple[int, int]]] = {
 HCI_OVERLAY_SETS["all-hci"] = HCI_OVERLAY_SETS["c09c"] + HCI_OVERLAY_SETS["t1-hci"]
 
 # Connect bisect — file offsets in patch_padded.bin (not runtime).
+# Full installer tail is [0xE4C, 0x6C9C) (tail_end = PATCH1_LEN - 4); 0x13D8 is
+# fn_b3d8 entry only — overlays stopping there leave libre [0x13D8,0x6C9C) → FC20 cliff.
+_TAIL_END = 0x6C9C
+_FILE_E4C = 0xE4C
+
 FILE_OVERLAY_SETS: dict[str, list[tuple[int, int]]] = {
-    "e4c-10a4": [(0xE4C, 0x10A4 - 0xE4C)],   # fn_10ddc + fn_10ddc_gap
+    "e4c-10a4": [(_FILE_E4C, 0x10A4 - _FILE_E4C)],   # fn_10ddc + fn_10ddc_gap
     "10a4-1174": [(0x10A4, 0x1174 - 0x10A4)],  # fn_b0a4 + fn_b118
-    "1174-13d8": [(0x1174, 0x13D8 - 0x1174)],  # fn_b174 … fn_b3d8 entry
-    "e4c-13d8": [(0xE4C, 0x13D8 - 0xE4C)],
+    "1174-13d8": [(0x1174, 0x13D8 - 0x1174)],  # fn_b174 … fn_b3d8 entry (FC20 cliff alone)
+    "e4c-1174": [(_FILE_E4C, 0x1174 - _FILE_E4C)],  # slices 1+2
+    "e4c-13d8": [(_FILE_E4C, 0x13D8 - _FILE_E4C)],  # stops at fn_b3d8 — FC20 cliff
+    "e4c-tail": [(_FILE_E4C, _TAIL_END - _FILE_E4C)],  # ≡ tail-split SPLIT=0xE4C
 }

@@ -1,9 +1,18 @@
-# Connect hook-range overlay bisect [0xE4C, 0x13D8)
+# Connect hook-range overlay bisect [0xE4C, 0x6C9C)  (full installer tail)
 version: "1"
 status: "connect_hook_overlay"
 connect_hook_overlay:
   pass_control: "e91bce4c"
   fail_base: "62198d8c"
-  active: "e4c-10a4"
-  bracket: "[0xE4C, 0x13D8)"
-updated_at: "2026-06-11T19:18:00Z"
+  active: "e4c-1174"
+  rejected:
+    - "e4c-10a4"    # alone — connect page-timeout
+    - "10a4-1174"   # alone — connect page-timeout
+    - "1174-13d8"   # alone — FC20 cliff @ fn_b3d8 boundary
+    - "e4c-13d8"    # bracket ended 0x13D8 not tail_end — FC20 cliff
+  bracket: "[0xE4C, 0x6C9C)"
+  tail_end: "0x6C9C"
+  notes: >
+    0x13D8 is fn_b3d8 entry only; real tail runs to tail_end 0x6C9C.
+    tail-split E4C replaces [0xE4C,0x6C9C). Queued: e4c-tail overlay sanity.
+updated_at: "2026-06-11T20:10:00Z"

@@ -90,6 +90,13 @@ Config (all runs): `6c28a3f07c6a30ed208c4b64862a23f02b7d93543ea980edd24df16bab45
 | `74fec1169d1879c5868a6ffb1e4b98f91f67c5601732c94ad658ea5e867e5c6f` | full (macro fix) | FAIL |
 | `9cfd8d5e3992aeba8d3e3bca0e0e763923259f7ef2e9ba972010d59d00ce5171` | full (macro bug) | FAIL |
 | `ea7a57423983716cf61cceb7c278e8587f1542c5329428acdd63a6ca86898a56` | p4-libre | **pending** (NeoPC); **SHIP: YES** (compliance-ci) |
+| `62198d8c1c530133ba76e848676a730f988e38a0ca4b0d5e10d0291f0494ee55` | p4-libre (fn_c09c fix) | FC20 **PASS**; HCI **PASS**; connect **FAIL** |
+| `e91bce4ced5270f86b9e14d783e22bdaab930688b6d0e9eb2c1ef2eb8673ceed` | p4 tail-split `0xE4C` | FC20 **PASS**; HCI **PASS**; connect **OK** |
+| `09c8f0f3adae59369711043dfdda9651db1fb15ff3cde4fd62b2c54bd7126b9c` | p4-overlay `e4c-10a4` | FC20 **PASS**; HCI **PASS**; connect **FAIL** — bug not in `[0xE4C,0x10A4)` |
+| `3688aefafcbc2f7bf8f2dc381d5a6fa1e060564e8d103b62bbad51c31ab0d1d7` | p4-overlay `10a4-1174` | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×4 — bug **not** in `[0x10A4,0x1174)` |
+| `b57ddeac69f4760cbfdd8f6a81ce4250de5a2abc50205dd7acf6dbdecd9c3995` | p4-overlay `1174-13d8` | **FC20 FAIL** `0xfc20 tx timeout` — isolated `[0x1174,0x13D8)` overlay breaks boot (fn_b174 cliff) |
+| `ec0c21dfa33094414aeef3c894519c40fe0f25bda1740e185f206912ff4862e3` | p4-overlay `e4c-13d8` | **FC20 FAIL** — overlay stopped @ `0x13D8`; libre `[0x13D8,0x6C9C)` breaks boot |
+| `34f1bd0807b3262732d1e3885da13495106c5b0cb265c88be496dd42d2161f3e` | p4-overlay `e4c-1174` | **STAGED** — pending NeoPC |
 
 ## linux-libre compliance (SHIP gate)
 
@@ -206,3 +213,8 @@ See also `rtl8761bu-libre/test-queue.txt`.
 | `536b8ac13fe6209f6f9dfec37bf3c18fa48654e84f4e13385e50d3e3c98dbb2f` | p4 tail-split `SPLIT=0x1174` (`fn_b174`) | **FC20 FAIL** `0xfc20 tx timeout` | 2026-06-11 |
 | `4b33982178290bf3e59721adbccc34274e170bf73b84b86a46f329d7c79bf85f` | p4 tail-split `SPLIT=0x10A4` (`fn_b0a4`) | **FC20 FAIL** `0xfc20 tx timeout` | 2026-06-11 |
 | `e91bce4ced5270f86b9e14d783e22bdaab930688b6d0e9eb2c1ef2eb8673ceed` | p4 tail-split `SPLIT=0xE4C` (vendor tail control) | FC20 **PASS**; HCI **PASS**; connect **OK** `Connected: yes` | 2026-06-11 |
+| ~~p4-overlay~~ `e4c-10a4` | `09c8f0f3adae59369711043dfdda9651db1fb15ff3cde4fd62b2c54bd7126b9c` | 2026-06-11 | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×4 — bug **not** in `[0xE4C,0x10A4)` |
+| ~~p4-overlay~~ `10a4-1174` | `3688aefafcbc2f7bf8f2dc381d5a6fa1e060564e8d103b62bbad51c31ab0d1d7` | 2026-06-11 | FC20 **PASS**; HCI **PASS**; connect **FAIL** `page-timeout` ×4 — bug **not** in `[0x10A4,0x1174)` |
+| ~~p4-overlay~~ `1174-13d8` | `b57ddeac69f4760cbfdd8f6a81ce4250de5a2abc50205dd7acf6dbdecd9c3995` | 2026-06-11 | **FC20 FAIL** `0xfc20 tx timeout` — vendor-only last slice incompatible with libre prefix (same cliff as tail-split `0x1174`) |
+| ~~p4-overlay~~ `e4c-13d8` | `ec0c21dfa33094414aeef3c894519c40fe0f25bda1740e185f206912ff4862e3` | 2026-06-11 | **FC20 FAIL** — bracket ended @ `0x13D8` not `0x6C9C`; libre tail suffix breaks boot |
+| `34f1bd0807b3262732d1e3885da13495106c5b0cb265c88be496dd42d2161f3e` | p4-overlay `e4c-1174` (vendor `[0xE4C,0x1174)` on p4-libre) | **STAGED** — pending NeoPC | 2026-06-11 |
