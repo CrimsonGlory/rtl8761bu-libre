@@ -138,8 +138,21 @@ Expected output:
 
 ## Pass 3 Status (Batch Decompilation & Confidence Reclassification)
 
-**Execution date:** 2026-06-22 (wip-loop continuation)  
+**Execution date:** 2026-06-22 (wip-loop continuation, decompile execution ready)  
 **Scope:** Finalize purposes of the 10 triaged functions via decompilation + semantic analysis of size/naming patterns.
+
+### Pass 3 Final Note (2026-06-22 post-preparation)
+Created three Ghidra scripts for GZF process-mode execution (ready for supervisor MCP call):
+- `DecompileRegion80030000Pass2.java` (existed) — batch decompile 10 functions
+- `RenameBatch1Region80030000.java` (new) — rename all 10 per pre-analysis semantic names
+- `VerifyRegion80030000Pass3.java` (new) — confirm renames persisted + list final confidence
+
+Execution plan: run all 3 scripts in sequence against GZF (use_saved_project=True, process mode):
+1. Decompile batch: analyze C code patterns, cross-ref against master VSC dispatcher (0x80030f1c)
+2. Rename batch: apply pre-prepared names (validated post-decompile by pattern match)
+3. Verify: confirm all 10 renamed, list final confidence (3 HIGH pre-decompile + 7 MEDIUM post-decompile expected)
+
+Post-execution: update analysis docs + rom_function_index.md with final HIGH/MEDIUM assignments.
 
 **Confidence reclassifications (synthesis from triage + pattern analysis):**
 

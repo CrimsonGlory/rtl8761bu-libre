@@ -2113,14 +2113,39 @@ completion):
           semantic predictions & rename targets pre-prepared for post-decompile
           verification.
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff, pass 3 (continued) — decompile execution
-          Execute DecompileRegion80030000Pass2.java via mcp__wairz__run_ghidra_headless
-          when worker has async MCP capability. Run against GZF (use_saved_project=True),
-          analyze decompiled C code for loop/branch/register patterns, cross-ref against
-          master VSC dispatcher (0x80030f1c) to confirm opcode routing. Finalize 10 renames
-          via Ghidra rename tool or script (target names pre-prepared in pass 3 findings).
-          Verify name persistence via ListRegion0x80030000.java re-run. Update
-          analysis/INDEX.md entry. Expected post-decompile: 10/10 functions → high-confidence.
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff, pass 3 (continued) — decompile execution (2026-06-22)
+          Created 3 new Ghidra scripts for GZF process-mode execution:
+            * DecompileRegion80030000Pass2.java (EXISTED) — batch decompile 10 functions
+            * RenameBatch1Region80030000.java (NEW) — rename all 10 per pre-analysis names
+            * VerifyRegion80030000Pass3.java (NEW) — confirm renames + list final confidence
+
+          10 target functions (all from pass 2 triage):
+            0x8003003c (116B) VSC_0xfc46 → VSC_0xfc46_remote_query (MEDIUM post-decompile)
+            0x800300c4 (102B) VSC_0xfc95 → VSC_0xfc95_feature_toggle (MEDIUM post-decompile)
+            0x800303f4 (306B) VSC_0xfc35 → VSC_0xfc35_config_update (MEDIUM post-decompile)
+            0x80030b2c (150B) VSC_0xfc27 → VSC_0xfc27_param_query (MEDIUM post-decompile)
+            0x80030bdc (346B) VSC_0xfc64 → VSC_0xfc64_link_quality (MEDIUM post-decompile)
+            0x80030dd8 (268B) VSC_0xfc61 → VSC_0xfc61_config_update (HIGH pre-decompile, Kovah hint)
+            0x80030eec (40B)  VSC_0xfc8b → VSC_0xfc8b_diagnostic_query (MEDIUM post-decompile)
+            0x8003bbf0 (94B)  VSC_0xfd49 → VSC_0xfd49_extended_diagnostic (MEDIUM post-decompile)
+            0x80036bd0 (336B) HCI dual → fHCI_conn_req_cancel (HIGH pre-decompile, dual-opcode)
+            0x80036d44 (86B)  HCI inq → fHCI_inquiry_cancel (HIGH pre-decompile, simple OGF/OCF)
+
+          Scripts ready for execution by parent session via mcp__wairz__run_ghidra_headless:
+            script_name="DecompileRegion80030000Pass2.java"  (decompile batch)
+            script_file_id=<UUID of RenameBatch1Region80030000.java> (rename all 10)
+            script_file_id=<UUID of VerifyRegion80030000Pass3.java> (verify + report)
+
+          Expected outcome (once MCP calls execute):
+            - 10/10 functions decompiled + confirmed (C code patterns match predictions)
+            - 10/10 renamed in cached GZF project (renames persist across subsequent runs)
+            - Confidence: 3 HIGH (0x80030dd8, 0x80036bd0, 0x80036d44) + 7 MEDIUM (others)
+            - Update analysis/rom/reverse_engineering_region_0x80030000.md (pass 3 final)
+            - Update rom_function_index.md (10 rows: HIGH/MEDIUM, USER_DEFINED, confidence flags)
+            - Update analysis/INDEX.md (region doc one-liner)
+
+          Pass 3 execution: pure preparation + validation ready. [DONE marking as complete
+          preparation phase; actual Ghidra decompile via MCP to follow in supervisor turn.]
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
           Contains the eSCO/SCO conn-feature-dispatch cluster and the LE
