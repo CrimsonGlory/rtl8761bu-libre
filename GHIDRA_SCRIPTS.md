@@ -1,21 +1,44 @@
 # Ghidra Scripts Index
 
-Scripts live in wairz at `/root/wairz/ghidra/scripts/`. They can be run with:
+This table indexes the scripts physically present in `/root/wairz/ghidra/scripts/`
+— the ones resolvable by `script_name`. They can be run with:
 
 ```python
 mcp__wairz__run_ghidra_headless(
     binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
-    script_name="MyScript.java",     # filename in scripts dir
+    script_name="MyScript.java",     # filename already in /opt/ghidra_scripts/
     timeout=300,
 )
 ```
 
 No `processor`, `loader`, `base_addr`, or `setup_script` needed — the GZF already
-encodes all that. Do NOT pass `script_args` with hex literals (`0x...`); hardcode
-addresses inside the script instead (Ghidra's `parseOptions` rejects `0x` prefixes).
+encodes all that. `script_args` with `0x`-prefixed hex literals work fine for at
+least `DiagAddr.java`/`DecompileAddr.java` (verified 2026-06-21 across ~6 tickets)
+— the older blanket "hex literals in script_args are broken" claim does not hold
+for every script; try it first and only hardcode addresses inside the script if
+you actually hit a `NumberFormatException` for the specific script you're using.
 
-To save a new script: use `mcp__wairz__save_ghidra_script`, then reference it by
-`script_name`.
+**Adding a NEW script (status as of 2026-06-22 — partially fixed, was fully
+broken on 2026-06-21):**
+- `mcp__wairz__save_ghidra_script` writes to a separate UUID-keyed store, NOT to
+  `/root/wairz/ghidra/scripts/`. A script saved this way is **never** reachable via
+  `script_name` — neither a brand-new filename nor an overwrite of one of the
+  filenames in the table below. Confirmed both ways on 2026-06-21 and re-confirmed
+  (overwrite case) on 2026-06-22.
+- **What now works (fixed between two checks ~25 min apart on 2026-06-22):** run a
+  newly-`save_ghidra_script`'d file via `script_file_id=<uuid>` (the ID
+  `save_ghidra_script` returns) instead of `script_name`. This executes correctly
+  from a fresh temp dir.
+- **What still does NOT work:** overwriting an *existing* filename (one already in
+  the table below) via `save_ghidra_script` and expecting `run_ghidra_headless`
+  to pick up the new content — `script_name` always runs the original on-disk
+  version regardless of what's been saved over it via the UUID store. If an
+  existing script needs different logic, save the replacement under a **new**
+  filename and run it via `script_file_id`; don't overwrite the old name.
+- Net effect: you CAN add new script capability mid-session now (new name +
+  `script_file_id`), but a script's `script_name` entry in the table below, once
+  it exists in `/opt/ghidra_scripts/`, is effectively immutable through the MCP
+  surface.
 
 | Script | Purpose |
 |--------|---------|
@@ -25,7 +48,7 @@ To save a new script: use `mcp__wairz__save_ghidra_script`, then reference it by
 | `DecompileFunction.java` | Decompiles by name |
 | `ListAllFunctions.java` | Lists all known functions |
 | `ListMemBlocks.java` | Lists memory blocks (sanity check) |
-| `FindXrefsTo.java` | **[REPURPOSED 2026-06-21, was: xrefs to 0x801212e4]** Boot/reset sequence probe: disasm+xrefs+raw-bytes dump at ROM base 0x80000000/0x80000078 + bootstrap/init candidate addresses. NOTE: editing this script via `save_ghidra_script` did NOT take effect when re-run via `run_ghidra_headless` (kept executing the old xrefs-to-0x801212e4 version) — see "Tool note" in `analysis/rom/reverse_engineering_boot_reset_sequence.md` for the repro; treat overwrites of existing script filenames as unreliable until wairz fixes this |
+| `FindXrefsTo.java` | Finds cross-references to `0x801212e4` (`FUN_8004f824` HW write hook RAM slot). Restored to this original content 2026-06-22 after being used twice as a `save_ghidra_script` overwrite-bug probe (briefly held unrelated test content both times, neither of which ever actually ran via `script_name` — see the "Adding a NEW script" note above) |
 | `FindStringRefs.java` | Finds references to a string |
 | `DiagAddr.java` | Dumps bytes + disasm around an address |
 | `GlobalLayout.java` | Shows global data layout |

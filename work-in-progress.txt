@@ -1624,6 +1624,117 @@ analysis/rom/ (see analysis/INDEX.md for the index + the rule on adding to it).
           back complete and untruncated. Zero [TODO]/[NEXT] items remain in
           Phase 9.
 
+PHASE 9 CONTINUED — EXHAUSTIVE RE OF EVERY ROM FUNCTION (full coverage, not just themes)
+-----------------------------------------------------------------------------------------
+Phase 9's initial backlog (above) was a thematic walkthrough — boot/reset,
+interrupts, HCI router, LC/LMP, BLE, encryption, USB transport, a 33-fn
+consolidation batch, and a function index — and it's done. But per
+analysis/rom/rom_function_index.md, that walkthrough only brought 57 of 2739
+ROM functions (2.1%) to "high confidence" (decompiled + written up). The
+other 2682 are either completely unnamed (2278 FUN_8000xxxx, never triaged)
+or named-but-thin (404: 105 medium-confidence one-liners + 299 low-confidence
+Kovah names with unclear purpose, neither decompiled).
+
+Goal now: drive every one of those 2682 to "high confidence" — full decompile
++ purpose + (where confidently established) a real Ghidra name — or, for the
+genuine non-functions Ghidra's auto-analyzer mis-split out (1-byte alignment
+stubs, switch-table case labels, thunks), an explicit one-line note saying so
+instead of silently leaving them unlisted. Sweep by address region using the
+8 buckets already computed in rom_function_index.md (each region's count
+below = its own unnamed total + its own thin-named total, both computed
+2026-06-22 from that doc):
+
+  0x80000000-0x8000ffff: 307 unnamed + 27 thin-named (16 med/11 low) = 334
+  0x80010000-0x8001ffff: 268 unnamed + 130 thin-named (64 med/66 low) = 398
+  0x80020000-0x8002ffff: 321 unnamed + 63 thin-named (19 med/44 low) = 384
+  0x80030000-0x8003ffff: 290 unnamed + 17 thin-named (0 med/17 low) = 307
+  0x80040000-0x8004ffff: 307 unnamed + 12 thin-named (2 med/10 low) = 319
+  0x80050000-0x8005ffff: 354 unnamed + 10 thin-named (2 med/8 low) = 364
+  0x80060000-0x8006ffff: 238 unnamed + 94 thin-named (1 med/93 low) = 332
+  0x80070000-0x8007ffff: 193 unnamed + 51 thin-named (1 med/50 low) = 244
+  TOTAL: 2278 unnamed + 404 thin-named = 2682 functions to resolve
+
+This is a LARGE undertaking — no single worker turn will finish a whole
+64 KiB region (precedent: the Phase 1-8 consolidation ticket fully resolved
+33 pre-characterized functions in one turn; these are colder, less
+pre-characterized, so expect a similar or smaller per-turn throughput).
+**Mandatory splitting rule for these region tickets** (overrides the generic
+wip-loop "mark DONE or BLOCKED, never leave [NEXT] open" rule's *finality*
+implication — it still applies, just via self-chaining instead of true
+completion):
+  - Triage as many functions as you can with real decompile + evidenced
+    purpose (not guesses) this turn. Use mcp__wairz__run_ghidra_headless GZF
+    process mode with existing generic scripts (DiagAddr.java/
+    DecompileAddr.java with 0x-prefixed script_args — confirmed working
+    across Phase 9). Rename functions in the GZF project where purpose is
+    confidently established (the cached GZF project persists across runs in
+    process mode, so renames should stick — verify this assumption on your
+    first such attempt and note the result).
+  - Write up findings in analysis/rom/: extend an existing thematic doc if a
+    function belongs to a subsystem Phase 9 already covered (e.g. functions
+    in 0x80040000-0x8004ffff bordering the LE Meta Event cluster documented
+    in reverse_engineering_ble_link_layer.md), otherwise start/extend a
+    per-region catch-all doc (e.g. analysis/rom/reverse_engineering_region_
+    0x80060000.md) for functions that don't fit any existing theme.
+  - Update analysis/rom/rom_function_index.md's confidence flags (and add
+    newly-named functions to its named-function table) for every function
+    you resolve, so the index stays the source of truth for what's left.
+  - When you finish your turn without finishing the whole region: rewrite
+    the ticket's address range to cover only the REMAINING unresolved
+    sub-range (shrink it — don't just repeat the full range), file it as
+    [TODO] immediately after itself, and promote THAT continuation (not some
+    unrelated ticket) to [NEXT]. Only mark a region [DONE] once every
+    function in its (possibly now-shrunk) range is high-confidence or has an
+    explicit "not a real function" note.
+  - Periodically (not necessarily every turn) re-run RomCoverageStats.java /
+    RomNamedFuncAddrs.java and append a new row to
+    analysis/rom/rom_coverage_baseline.md's History table to track
+    macro-progress (named-%% and high-confidence-%% should both climb over
+    the life of this sweep).
+
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff (307 unnamed + 27 thin-named fns)
+          Smallest, most already-touched region (boot/reset preamble +
+          interrupt trampoline + USB transport driver all live here at high
+          confidence already). Triage the rest per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
+          Largest thin-named count of any region (130) — heavy LMP/VSC
+          handler territory (many `VSC_0xfc##`/`LMP__0x###` one-liners
+          already named by Kovah but never decompiled). Triage per the
+          splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
+          Contains the HCI command router and SAFER+ cipher (both already
+          high-confidence) plus 321 untouched unnamed functions and 63 thin
+          ones. Triage per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
+          Contains the VSC dispatcher and register-script interpreter
+          (already high-confidence) plus 290 untouched unnamed functions.
+          Triage per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
+          Contains the eSCO/SCO conn-feature-dispatch cluster and the LE
+          Meta Event sender cluster (both already high-confidence) plus 307
+          untouched unnamed functions. Triage per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff (354 unnamed + 10 thin-named fns)
+          Largest unnamed count of any region (354). Contains the
+          connection-type dispatch/eSCO handler cluster (already
+          high-confidence). Triage per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80060000-0x8006ffff (238 unnamed + 94 thin-named fns)
+          Almost entirely untouched by Phase 9's thematic walkthrough (only
+          1 high-confidence function currently) — expect this region to need
+          a new catch-all doc rather than extending existing ones. Triage
+          per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (193 unnamed + 51 thin-named fns)
+          Top of the populated ROM (last named fn at 0x8007943c per
+          rom_function_index.md); almost entirely untouched (only 1
+          high-confidence function currently). Triage per the splitting rule
+          above.
+
 
 NOTES
 -----
