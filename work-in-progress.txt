@@ -1743,10 +1743,9 @@ completion):
           analysis/INDEX.md's two affected rows (rom_function_index.md
           summary + region_0x80000000.md one-liner). Full per-function
           evidence in the region doc's pass-9 section.
-          Promoting the first [TODO] (region 0x80010000-0x8001ffff) to
-          [NEXT] per the wip-loop instructions, since this region-sweep
-          ticket reached true completion (not a self-chained shrink) this
-          pass.
+          Promoting the first TODO item (region 0x80010000-0x8001ffff) per
+          the wip-loop instructions, since this region-sweep ticket reached
+          true completion (not a self-chained shrink) this pass.
 
           --- PRIOR PASS HISTORY (preserved) ---
           SUPERVISOR NOTE (2026-06-22, pass 8): re-ran
