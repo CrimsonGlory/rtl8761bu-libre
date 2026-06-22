@@ -1692,102 +1692,116 @@ completion):
     macro-progress (named-%% and high-confidence-%% should both climb over
     the life of this sweep).
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~61 of 220 gap fns remain, reconciled)
-          SUPERVISOR NOTE (2026-06-22, pass 6): re-ran
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~49 of 220 gap fns remain, reconciled)
+          SUPERVISOR NOTE (2026-06-22, pass 7): re-ran
           ListRegion0x80000_Gaps.java first (required first step) — confirmed
-          count still exactly 220, all 146 pass-1-through-5 names persisted,
-          no regressions. Then resolved 13 MORE functions by triaging the
-          `0x80004fd8`-`0x80006cb8` head of the `0x80004fd8`-`0x800085a4`
-          stretch flagged since pass 5 as the highest-value untouched target:
-            - top_level_link_event_status_dispatcher_loop (0x80004fd8,
-              434B) — THE SINGLE BIGGEST FIND: the master status-word
-              dispatcher loop that the ENTIRE packet-type/role-switch/eSCO/
-              conn-teardown supercluster (passes 2-5) funnels into. Confirms
-              the whole supercluster is one cohesive link-event state
-              machine rooted at this one function — dispatches by status
-              bit to status_word_multiflag_link_event_dispatcher(2),
-              role_switch_completion_or_abort_handler,
-              truncated_page_complete_status_dispatcher,
-              link_status_bit_dispatch_for_role_state_notify,
-              batch_conn_teardown_and_packet_type_sweep,
-              bitmask_sweep_dispatch_to_8003e760/8003e98c_3entry, and
-              role_index_dispatch_or_log_0x2cd — i.e. literally every
-              cluster head named across passes 2-5.
-            - 12 more forming a related but DISTINCT "apply packet-type/
-              codec change and log it" layer (NOT more role-switch-theme
-              siblings as pass 5 had hypothesized for this stretch):
-              conn_state2_packet_type_reprogram_or_credit_dispatch
-              (0x800051d4), bitfield_class_status_callback_dispatcher_5way
-              (0x80005368), conn_3slot_oneshot_config_apply_and_log
-              (0x800054e8), sco_esco_param_pingpong_queue_rotator
-              (0x800055ec), conn_field_swap_and_notify_dispatcher_3_4
-              (0x8000576c), sco_esco_timing_field_diagnostic_logger
-              (0x80005998), sco_esco_slot_timing_offset_calc_variant1/2
-              (0x80005b30/0x80005d80) + their dispatch gate
-              sco_esco_slot_timing_offset_dispatch_gate (0x80005f34) —
-              confirmed via decompile that the gate literally branches
-              between the two variants, proving they're alternative
-              strategies not unrelated functions —
-              conn_packet_type_apply_and_codec_table_sync (0x80005fb8,
-              906B, most complex single function this pass),
-              conn_status_word_state_machine_dispatcher (0x80006384),
-              batch_conn_status_word_sweep_3entry (0x80006cb8).
+          count still exactly 220, all 159 pass-1-through-6 names persisted,
+          no regressions. Per the ticket's explicit instruction, RE-DERIVED
+          pass 6's flagged tally discrepancy from scratch instead of
+          deferring a third time: built the complete list of every address
+          pass 1-6's own resolved-function tables claim as resolved (161),
+          subtracted the 17 known out-of-scope leaf helpers (144 in-scope,
+          table-traceable), then diffed the 178 USER_DEFINED addresses
+          against those 144. The 34-entry remainder split cleanly into: 1
+          non-function (0x8000046c), 15 already-"high"-confidence functions
+          (the 0x80008a7c-0x80008cd8 feature-bit cluster — resolved in an
+          earlier pass but never tabulated into the region doc's own pass-N
+          tables, which is exactly why the table-scrape undercounted), and
+          18 genuine thin-named entries of which 2 (optimized_memcpy,
+          lots_of_initialization) are already "high confidence" elsewhere —
+          leaving exactly 16 genuinely open. CONCLUSION: the "16 genuinely
+          open thin-named" figure pass 4 first established was correct all
+          along; the bug was purely in how the running "resolved" total was
+          computed (144 table-traceable vs. true 159 = 144+15 untabulated),
+          not a real miscount of RE work. Full derivation in
+          analysis/rom/reverse_engineering_region_0x80000000.md's "Tally
+          reconciliation (pass 7)" section.
+          Then resolved 12 MORE functions, completing the entire
+          0x80004fd8-0x800085a4 stretch pass 5/6 had flagged (the former
+          "large cold stretch"), leading with the 4 functions pass 6 noted
+          as having known caller context:
+            - top_level_link_event_status_dispatcher_loop2 (0x800085a4,
+              1138B) — THE SINGLE BIGGEST FIND: a SECOND top-level
+              master status-word dispatcher, structurally parallel to pass
+              6's top_level_link_event_status_dispatcher_loop but keyed off
+              a different status-word pair (DAT_80008a18/DAT_80008a1c vs.
+              pass 6's DAT_8000518c/PTR_DAT_80005190) and feeding a
+              largely-disjoint handler set. The two loops share exactly 2
+              callees (the ring-buffer drain loops below) but otherwise
+              dispatch to separate cluster heads — relationship between the
+              two loops (independent status sources? primary/secondary?)
+              is now an open question, see the region doc's open-question
+              #9.
+            - ring_buffer_event_drain_dispatch_loop (0x80007af0, 1978B,
+              largest function in the whole stretch) — central consumer for
+              a 16-byte-entry status ring buffer; confirmed callee of BOTH
+              top-level dispatch loops.
+            - ring_buffer_event_drain_loop_variant2 (0x800083ec, 406B) —
+              drains a different ring (per-connection-class quota/delta
+              ring); also a confirmed callee of both top-level loops.
+            - conn_class_mode_apply_and_log (0x800066fc, 1408B) — confirmed
+              (slot, mode) signature exactly as pass 6 predicted from its
+              caller batch_conn_status_word_sweep_3entry; 5-case mode
+              switch (0-4) applying connection class/mode changes.
+            - 7 more: conn_class_mode_apply_and_log_variant2 (0x80006d0c,
+              1482B, sibling of the above for a packed-status-word calling
+              convention, called from loop2's bit-0x100 branch),
+              conn_index_status_bit_apply_and_log (0x80007330, 624B,
+              single-connection-index validate-and-activate handler),
+              conn_credit_or_counter_update_with_log (0x80007654, 848B),
+              bump_retry_or_timeout_counter_and_log (0x800075dc, 110B, leaf
+              called by the above), conn_rssi_quality_history_update
+              (0x800079f0, 238B), conn_field_increment_and_cleanup_dispatch
+              (0x80008328, 176B, non-ring single-shot counterpart of
+              ring_buffer_event_drain_loop_variant2), bounded_retry_loop_
+              dispatch_0x3 (0x800066ac, 76B), guarded_trampoline_to_
+              FUN_800131e4 (0x80005b08, 36B, trivial — confirmed real
+              function via decompile, not padding).
           Confirmed rename-persistence via a post-batch
           ListRegion0x80000_Gaps.java re-run: count still exactly 220, all
-          159 cumulative names (146 prior + 13 this pass) correctly
-          reflected, no regressions. Reconciled total: 159 of 220 in-scope
-          gap functions resolved, 61 remain (42 unnamed FUN_* + 16
-          thin-named tracked, 2 of which already "high confidence" via
-          other docs). FLAGGED OPEN ITEM (not introduced this pass): direct
-          recount this pass shows 220 = 42 DEFAULT-sourcetype + 178
-          USER_DEFINED-sourcetype exactly, but 159(resolved)+1(non-function)
-          +16(thin-named) = 176, not 178 — a 2-function gap inherited from
-          pass 4/5's unverified "18 thin-named, 2 high-conf, 14 open"
-          sub-split that was never independently re-derived. Next pass
-          should re-derive the thin-named bucket's exact membership from
-          scratch (diff the fresh USER_DEFINED list against the
-          159-resolved-with-evidence list) rather than carry the old figure
-          forward. Full detail and per-function evidence in
-          analysis/rom/reverse_engineering_region_0x80000000.md's pass-6
-          section. Synced rom_function_index.md (+13 rows all "high"
-          confidence; named 624->637; high-confidence 221->234; unnamed
-          2114->2101; unnamed-distribution this-region row 143->130,
-          6.8%->6.2%, with all other regions' percentages recomputed against
-          the new 2101 total) and analysis/INDEX.md's two affected rows
+          171 cumulative names (159 prior + 12 this pass) correctly
+          reflected, no regressions. RECONCILED TOTAL: 171 of 220 in-scope
+          gap functions resolved, 49 remain (30 unnamed FUN_* + 16
+          genuinely-open thin-named + 2 thin-named already "high
+          confidence" + 1 non-function). Arithmetic fully closed this pass:
+          171+30+16+2+1=220 — NO open arithmetic items remain (unlike
+          passes 5/6, which each carried forward an unresolved discrepancy).
+          Full detail and per-function evidence in
+          analysis/rom/reverse_engineering_region_0x80000000.md's pass-7
+          section. Synced rom_function_index.md (+12 rows all "high"
+          confidence; named 637->649; high-confidence 234->246; unnamed
+          2101->2089; unnamed-distribution this-region row 130->118,
+          6.2%->5.6%, with all other regions' percentages recomputed against
+          the new 2089 total) and analysis/INDEX.md's two affected rows
           (rom_function_index.md summary + region_0x80000000.md one-liner).
-          REMAINING SCOPE — 61 of 220 gap fns (42 still-unnamed FUN_*, 16
-          pre-existing thin-named-but-undecompiled tracked, of which 2
-          already rate "high confidence" via other docs; recount the other
-          14 next pass per the flagged arithmetic item above).
+          Also created GHIDRA_SCRIPTS.md research-script RenameBatch2.java
+          (functionally identical to the existing RenameBatch1.java —
+          should have reused RenameBatch1.java's UUID instead; flagged in
+          the index for future passes to prefer reuse over a RenameBatch3).
+          REMAINING SCOPE — 49 of 220 gap fns (30 still-unnamed FUN_*, 16
+          genuinely-open thin-named, 2 already "high confidence" elsewhere,
+          1 non-function). The 0x80004fd8-0x800085a4 stretch is now FULLY
+          RESOLVED (passes 6+7 together) — do not re-target it.
           Untouched/largely-untouched sub-ranges for the next pass (see the
           region doc's "Remaining scope" section for full detail):
             - 0x800007d0-0x80000820 (2 small fns, easy to overlook —
               sandwiched between 2 already-named functions)
-            - 0x80005b08-0x800085a4 (the unresolved remainder of this pass's
-              target stretch — 12 fns, 36B-1978B. HIGH VALUE: 0x80007af0,
-              0x800083ec, and 0x800085a4 are all CONFIRMED direct callees of
-              this pass's top_level_link_event_status_dispatcher_loop, and
-              0x800066fc is a confirmed callee of this pass's
-              batch_conn_status_word_sweep_3entry — triage these 4 first,
-              they have known caller context instead of needing cold
-              triage. 0x80005b08 (36B) is a trivial guarded trampoline, low
-              value.)
             - 0x80008eac-0x80008f04 (2 small fns right after the
               feature-bit cluster pass 5 resolved, likely related)
             - 0x8000aa64 (1398B, single untriaged function, carried forward
-              since pass 3)
+              since pass 3 — highest-value single remaining target by size)
             - 0x8000dd00 (404B, single fn between 2 already-resolved
               clusters)
-            - 0x8000e4bc-0x8000eda0 (~14 fns, 38B-700B — largest remaining
-              untouched stretch)
+            - 0x8000e4bc-0x8000eda0 (~14 fns, 38B-700B — LARGEST remaining
+              untouched stretch, 12 functions — RECOMMENDED NEXT TARGET)
             - 0x8000f4a0-0x8000fb20 (~9 small fns near the unknown_fptr_
               index9/VSC_0xfc39_wrapper thin-named cluster)
             - 0x8000fdc0-0x8000fe4c (3 fns, last untouched stretch before
               the region's upper boundary)
-            - the thin-named pre-existing functions (VSC/multi-VSC wrappers
-              + unknown_referencing_default_name_3/4/5/8, listed by address
-              in the region doc) — recount exact open count next pass per
-              the flagged arithmetic item above
+            - the 16 genuinely-open pre-existing thin-named functions
+              (VSC/multi-VSC wrappers + unknown_referencing_default_name_*,
+              listed by address in the region doc's "Remaining scope"
+              section) — membership now fully verified, no recount needed
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 

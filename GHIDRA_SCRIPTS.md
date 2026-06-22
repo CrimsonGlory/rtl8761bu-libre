@@ -130,11 +130,13 @@ current UUID (UUIDs are not stable across saves of the same filename):
 |----------|---------|
 | `BatchDecompileList.java` | Decompiles a comma-separated list of hex addresses (`script_args[0]`), printing each function's signature, direct callees, and decompiled C. Avoids one-address-per-tool-call overhead — used for all Phase 9 region-sweep batch triage going forward. |
 | `RenameBatch1.java` | Renames functions given a `;`-separated list of `0xADDR=newName` pairs (`script_args[0]`). Prints old/new name for each for verification. |
+| `RenameBatch2.java` | **Functionally identical** to `RenameBatch1.java` (same `;`-separated `0xADDR=newName` rename logic) — created 2026-06-22 pass 7 because looking up `RenameBatch1.java`'s current UUID via `list_ghidra_research_files` wasn't done before saving a fresh one. Redundant; future passes should prefer reusing `RenameBatch1.java` (look up its UUID first) rather than creating a `RenameBatch3.java` — the research-script pool has a soft cap (see below) and duplicate rename scripts don't add capability. |
 | `ListRegion0x80000_Gaps.java` | Lists every function (named+unnamed) in two hardcoded address ranges with size/name/source-type. Template for "list all functions in range X" — copy and edit the two range constants for a different region. |
 | `Region0x80000StringXrefs.java` | Lists every defined string in the `rom` block plus the functions that reference it. Useful for string-driven correlation in *other* regions (this region itself turned out to have almost no in-range strings — see `reverse_engineering_region_0x80000000.md`). |
 
-These 4 scripts pushed the shared research-script pool close to its
-informally-observed ~50-entry cap (see the cap-probe note above) — if a
-future ticket hits a save failure, these 4 (now superseded by direct reuse)
-are reasonable candidates to treat as "already served their one-off purpose"
+These scripts (now 5, including the redundant `RenameBatch2.java`) pushed
+the shared research-script pool close to its informally-observed ~50-entry
+cap (see the cap-probe note above) — if a future ticket hits a save
+failure, these are reasonable candidates to treat as "already served their
+one-off purpose"
 since their logic is generic enough to recreate cheaply if ever evicted.
