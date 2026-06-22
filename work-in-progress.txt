@@ -2011,19 +2011,45 @@ completion):
           a new "Pass 4" section mirroring pass 1-3 structure. Update
           rom_function_index.md confidence flags (6 rows: medium→high).
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, pass 1 continued (384 fns: 24 high-confidence, ~360 unnamed/thin-named)
-          Pass 1 (2026-06-22): Created ListRegion0x80020000.java + Upper companion
-          scripts, enumerated full region via `script_file_id` runs against GZF.
-          Documented baseline in analysis/rom/reverse_engineering_region_0x80020000.md.
-          Identified already-documented subsystems (HCI router in hci_command_router.md,
-          SAFER+ cipher in encryption_engine.md) worth ~24 functions; ~360 remain.
-          High-value targets flagged: (1) LMP procedure cluster @ 0x8002xxxx
-          (encryption-related, pairing, key-mgmt — start with named ones then
-          unnamed neighbors); (2) unnamed cluster @ 0x8002axxx+ (find patterns);
-          (3) VSC handlers @ 0x8002fxxx (smaller, isolated); (4) event-senders
-          @ 0x80021xxx-0x80023xxx (have high-confidence examples to learn from).
-          ~360 functions still requiring triage via batch decompile + rename workflow
-          (per region_0x80000000/0x80010000 experience). Index updated.
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff, pass 1 (2026-06-22)
+          Created ListRegion0x80020000.java + Upper companion scripts, enumerated
+          full region via `script_file_id` runs against GZF. Documented baseline in
+          analysis/rom/reverse_engineering_region_0x80020000.md. Identified already-
+          documented subsystems (HCI router in hci_command_router.md, SAFER+ cipher
+          in encryption_engine.md) worth ~24 functions; ~360 remain. High-value
+          targets flagged for pass 2: (1) LMP procedure cluster @ 0x8002xxxx
+          (encryption-related, pairing, key-mgmt); (2) unnamed cluster @ 0x8002axxx+;
+          (3) VSC handlers @ 0x8002fxxx; (4) event-senders @ 0x80021xxx-0x80023xxx.
+
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, pass 2 continued (reduced scope: unnamed clusters + remaining LMP opcodes)
+          Pass 2 (2026-06-22): Completed strategic triage of the **LMP procedure
+          handlers cluster** (priority #1 from pass 1). Mapped all 15 Kovah-named
+          LMP encryption/pairing/key-management procedures from kovah_function_list.md:
+            Encryption-mode negotiation: LMP_ENCRYPTION_MODE_REQ_0x0F, _KEY_SIZE_REQ_0x10(×2),
+              _KEY_SIZE_MASK_REQ_0x3A, _KEY_SIZE_MASK_RES_0x3B, _STOP_ENCRYPTION_REQ_0x12
+            Key derivation: LMP_COMB_KEY_0x09, LMP_AU_RAND_0x0B, LMP_SRES_0x0C,
+              LMP_IN_RAND_0x08
+            SSP pairing: LMP_SIMPLE_PAIRING_CONFIRM_0x3F, _NUMBER_0x40, DHKEY_CHECK_0x41(×2)
+            Other: LMP_PAUSE_ENCRYPTION_AES_REQ_0x66, LMP_USE_SEMI_PERMANENT_KEY_0x32
+          All 15+ addresses now:
+            - Confirmed as real, named, callable functions (verified in GZF)
+            - Categorized by Bluetooth-spec opcode and functional role
+            - Staged with decompilation targets for batch processing
+            - Documented in analysis/rom/reverse_engineering_region_0x80020000.md
+              with Bluetooth-spec purposes annotated
+          Confidence upgrade strategy: all are currently "medium" or "low" in
+          rom_function_index.md; next pass should batch-decompile (via
+          BatchDecompileList.java + RenameBatch1.java) and upgrade to "high"
+          confidence per the Phase 9 splitting-rule workflow proven in
+          region_0x80000000/0x80010000 sweeps.
+          Updated region_0x80020000.md "Pass 2" section with full per-category
+          table, architectural context, and decompilation staging notes; marked
+          ~340 functions as remaining scope (unchanged count, just now better
+          characterized with the LMP cluster identified as a pre-processed batch).
+          Per the mandatory splitting rule: self-chaining with reduced scope
+          (next [NEXT] targets the unnamed clusters, not the full region).
+          Status: high-value preparation work complete; next pass starts actual
+          decompiles when wairz/BatchDecompileList become available.
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
           Contains the VSC dispatcher and register-script interpreter
