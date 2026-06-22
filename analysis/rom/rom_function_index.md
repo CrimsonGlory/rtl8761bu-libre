@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 492 (461 baseline + 12 pass-1 + 19 pass-2, 2026-06-22 region-0x80000000 sweep) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2246 (2278 baseline − 12 pass-1 − 19 pass-2 − 1 reclassified non-function) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 89 (70 after pass 1 + 19 pass-2 new) |
+| Named functions (this doc's table) | 566 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3, 2026-06-22 region-0x80000000 sweep) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2172 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 1 reclassified non-function) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 163 (89 after pass 2 + 74 pass-3 new) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
 
@@ -52,6 +52,20 @@ Ghidra's auto-analyzer mis-split into a stub; see
 `rom/reverse_engineering_region_0x80000000.md`'s pass-2 section for the
 raw-byte evidence. The 19 new rows are appended after the pass-1 rows
 below.
+
+**2026-06-22 update (pass 3, same-day continuation)**: resolved 74 more
+functions in the same region (`0x80000000`-`0x8000ffff`), this time
+cold-triaging the previously-untouched "gap B" stretch
+(`~0x8000b068`-`0x8000ffff`) per the ticket's explicit instruction, plus
+closing out 2 small clusters pass 2 had flagged but not finished (the
+encryption-teardown/role-confirmation triplet and the `0x8000a4ac` pool-init
+cluster). All 74 are **high confidence** (decompiled + written up) — see
+`rom/reverse_engineering_region_0x80000000.md`'s pass-3 section for the
+per-cluster evidence and full per-function table. The 74 new rows are
+appended after the pass-2 rows below. 105 of the region's original 220
+gap functions are now resolved (104 real + 1 reclassified non-function);
+129 remain — see that doc's "Remaining scope" section for the specific
+untouched sub-ranges flagged for the next pass.
 
 Note: the 2026-06-21 `rom_coverage_baseline.md` run recorded `total=2738`;
 this run recorded `total=2739` (461 named unchanged). The 1-function drift
@@ -167,6 +181,80 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000b864` | 26 | `poll_status_sign_bit_with_timeout_0x65` | bounded (101-iteration) hardware-ready poll on a status byte's sign bit — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000b858` | 12 | `poll_status_sign_bit_with_timeout_0x65_variant` | near-duplicate of `poll_status_sign_bit_with_timeout_0x65`, not merged — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000f624` | 4 | `trivial_jr_ra_stub` | degenerate 1-instruction (`jr ra`) real function, confirmed not padding — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002974` | 246 | `encryption_key_teardown_notifier` | clears a connection's crypto key-valid flag on teardown, logs around it — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002a8c` | 198 | `conditional_debug_logger_0x2be` | feature-bit-gated conditional debug-event logger, no other side effects — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002b60` | 318 | `role_switch_confirmation_matcher` | role-switch confirmation/ack byte matcher against a small per-connection table — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000a4ac` | 62 | `conn_pool_quick_reset_and_log` | lightweight conn-record pool-state reset/log helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000a4f8` | 98 | `pool_row_register_and_optional_callback_copy` | carves N fixed-size rows out of a pool, optional per-row callback fill — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000a570` | 454 | `conn_record_7pool_init_and_clear_dirty` | 7-pool registration + zero-init/dirty-flag for the last 3 (17/17/9-entry) pools — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b068` | 180 | `usb_or_conn_status_dispatch_loop_variant1` | bit-drain status dispatcher sibling of `usb_event_status_handler` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b138` | 192 | `usb_or_conn_status_dispatch_loop_variant2` | same bit-drain dispatch pattern + record-pointer binding step — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b218` | 266 | `feature_bit_status_reconfig_handler` | feature/role-driven HW status-register reconfiguration — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b348` | 1026 | `baseband_feature_pool_init_and_reset` | top-level baseband feature/pool (re)initialization entry point — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b890` | 570 | `config_table_byte_stream_loader` | loads a config-table byte stream into the BD_ADDR-adjacent config table — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bae0` | 98 | `rf_calibration_kickoff_and_poll` | RF calibration start-and-poll sequencer — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bb58` | 50 | `rf_calibration_status_check_or_kickoff` | calibration status check / kickoff decision pair with the function above — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bb94` | 66 | `baseband_reg_0x34_init_and_latch` | one-time baseband register-0x34 init/latch routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bbe0` | 82 | `baseband_reg_0x34_role_index_setter` | register-0x34 role-index write half, pairs with the function above — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bc38` | 188 | `indexed_register_rw_poll_primitive` | general indexed-register write/poll-ack/read-back primitive — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bd34` | 32 | `indexed_register_write_1byte_wrapper` | thin 1-byte wrapper around `indexed_register_rw_poll_primitive` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bd54` | 14 | `check_status_bit_0x11_of_global` | `(*global>>0x11)&1` single-bit accessor — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bd68` | 12 | `check_status_bit_0x2_of_global` | `(*global>>2)&1` single-bit accessor — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bd78` | 48 | `link_active_or_config_flag_check` | link-active-or-config-override status check — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bdc4` | 10 | `or_bits_into_global_flag_word` | `*global \|= param_1` trivial OR helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bdd4` | 72 | `scrambled_bdaddr_field_writer_pair1` | XOR-merge bit-scrambled field writer, half of a pair — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000be28` | 16 | `check_bit_in_shifted_global_field` | indexed single-bit check into a shifted field — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000be3c` | 62 | `scrambled_bdaddr_field_writer_pair2` | complementary half of the scrambled-field writer pair — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000beac` | 72 | `poll_status_and_invoke_optional_fptr` | consume-pending-status with optional hook veto pattern — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bf04` | 60 | `set_bit_in_8entry_bitmask_pair_v1` | IRQ-safe 8-entry bitmask set/copy pair — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bf48` | 84 | `set_bit_in_8entry_bitmask_pair_v2` | IRQ-safe 8-entry bitmask set into two independent globals — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bfa4` | 84 | `toggle_bit_in_8entry_bitmask_pair` | clear-side sibling of `set_bit_in_8entry_bitmask_pair_v2` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c000` | 142 | `irq_safe_4state_flag_setter` | IRQ-safe range-checked 4-entry set/clear/toggle flag setter — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c7cc` | 116 | `sco_esco_timing_ratio_calculator` | SCO/eSCO timing-interval/ratio calculation primitive — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c848` | 30 | `set_sign_bit_from_bool_param` | sets/clears bit 31 from a boolean param — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c870` | 34 | `set_bit15_from_bool_param` | sets/clears bit 15 from a boolean param — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c898` | 22 | `set_bits24_29_from_param` | writes a 6-bit field at bit-offset 24 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c8b8` | 92 | `program_3field_indexed_register` | multi-field (8/4/11-bit) indexed register program routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c92c` | 14 | `check_inverted_bit4_of_global` | inverted single-bit check on bit 4 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c940` | 30 | `toggle_bit5_of_global_v1` | boolean-driven set/clear of bit 5 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c964` | 30 | `toggle_bit1_of_global_inverted` | boolean-driven set/clear of bit 1, inverted-logic sibling — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c988` | 30 | `toggle_bit2_of_global` | boolean-driven set/clear of bit 2 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c9ac` | 32 | `toggle_bit7_of_global` | boolean-driven set/clear of bit 7 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c9d0` | 22 | `set_bit7_from_lsb_param` | direct (non-branching) bit-7 set from parameter LSB — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c9ec` | 36 | `conditional_field_extract_into_global` | conditional 10-bit field-merge from a status word — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ca1c` | 164 | `scrambled_status_field_unpacker` | status-register bit-descrambling routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cad4` | 238 | `adaptive_threshold_register_programmer` | RF gain/threshold auto-adjustment register programmer — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cbd8` | 74 | `role_dependent_bit_toggle_pair` | role-dependent multi-bit register toggle pair — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cc34` | 28 | `set_bit1_from_lsb_param` | direct bit-1 set from parameter LSB — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cc54` | 18 | `masked_or_into_global` | generic masked-OR merge into a global — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cc74` | 10 | `masked_global_read` | generic masked read of a global — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cc88` | 238 | `conn_state2_role_dependent_hw_reconfig` | connection-role-dependent HW-status reconfiguration — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cd90` | 188 | `conn_state2_codec_or_role_field_programmer` | codec/role-field programmer, sibling of the function above — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ce78` | 26 | `load_u32_little_endian_from_bytes` | trivial little-endian 4-byte load helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cec4` | 84 | `link_state6_clear_bit15_if_feature_set` | link-state-6-gated register bit-15 clear — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cf28` | 90 | `link_state6_set_bit15_and_mark_done` | link-state-6-gated register bit-15 set + done-flag — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cf94` | 44 | `link_state6_set_bit3_if_active` | link-state-6-gated register bit-3 set if active — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d01c` | 14 | `get_2bit_link_state_field` | `(*global>>0x16)&3` 2-bit link-state field accessor — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d030` | 244 | `rf_divider_ratio_search_and_program` | RF frequency-synthesizer N-divider search-and-program routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d138` | 222 | `rf_divider_ratio_table_lookup_or_search` | divider table-lookup-first, search-as-fallback entry point — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d228` | 142 | `link_state6_afh_or_channel_feature_toggle1` | state-6-gated AFH/channel-feature toggle, 3-byte-match variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d2d0` | 108 | `link_state6_afh_or_channel_feature_toggle2` | state-6-gated AFH/channel-feature toggle, register-bit variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d3c0` | 138 | `link_state6_afh_or_channel_feature_toggle3` | state-6-gated AFH/channel-feature toggle, 2-bit-field variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d460` | 98 | `afh_feature_toggle_dispatcher` | unifying dispatcher over the 3 AFH/channel-feature toggle siblings — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d4d4` | 74 | `afh_feature_toggle_autotrigger` | automatic/conditional trigger wrapping the toggle dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d5fc` | 292 | `program_packet_type_and_timing_ratio` | central packet-type-and-timing programming routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d750` | 56 | `read_current_packet_type_word` | packet-type accessor/refresh counterpart of the programmer above — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d790` | 140 | `packet_type_change_and_threshold_update` | ties packet-type change to RF-threshold recompute — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d83c` | 98 | `vsc_0xfc17_packet_type_change_handler` | confirmed VSC handler for opcode 0xfc17 (change packet type) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d8b0` | 62 | `program_default_packet_type_and_status` | default/reset-state packet-type programming helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000dcd4` | 40 | `trigger_callback_on_high_retry_count` | escalating-backoff-style callback trigger on retry count — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ded8` | 158 | `link_state6_quality_recovery_poll_loop` | eSCO quality-recovery polling loop — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000df94` | 90 | `check_link_state3_and_set_recovery_flags` | gate-and-flag-set primitive for eSCO interval recompute — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e004` | 122 | `recompute_and_apply_esco_interval` | eSCO retransmission-interval recompute-and-apply routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e088` | 68 | `link_state6_quality_bit7_recovery_trigger` | trigger/entry-point wrapping the interval-recompute function — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e0dc` | 178 | `program_rf_freq_word_from_status_or_table` | RF frequency-word programming, table-or-live-status source — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e380` | 222 | `vsc_0xfc56_set_3word_params_and_packet_type` | confirmed VSC handler for opcode 0xfc56 (set 3 param words) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e470` | 68 | `build_and_send_default_status_report` | generic default-status-report builder/sender — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800109ac` | 916 | `calls_to_0x8010a001_as_fptr_to_install_patches` | calls to 0x8010a001 as fptr to install patches — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80011a18` | 30 | `called_if_config[0xf2]&4` | called if config[0xf2]&4 | low (named by Kovah, purpose unclear) |
 | `0x80011d9c` | 100 | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | LMP CH  0x3ee  case2 else 2 FUN 80011d9c | medium (named, one-line purpose only, not decompiled) |
@@ -597,48 +685,57 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 
 ---
 
-## Unnamed functions (2278)
+## Unnamed functions (2172, originally 2278)
 
-The remaining 2278 functions in the `rom` block (2739 total − 461 named)
-carry Ghidra's auto-generated `FUN_8000xxxx` label and have not been
-individually triaged. Per Phase 9 scoping, giving each of these a real name
-and purpose is explicitly out of scope for this doc — it's the rest of
-Phase 9's ongoing, best-effort work. This section satisfies "every function"
-at the index/coverage level via aggregate stats instead of 2278 rows of
-"unknown."
+The remaining 2172 functions in the `rom` block (2739 total − 566 named − 1
+reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
+label and have not been individually triaged. Per Phase 9 scoping, giving
+each of these a real name and purpose is explicitly out of scope for this
+doc — it's the rest of Phase 9's ongoing, best-effort work. This section
+satisfies "every function" at the index/coverage level via aggregate stats
+instead of 2278 rows of "unknown."
 
-**Confidence: unanalyzed** (for all 2278, as a single flag — no further
+**Confidence: unanalyzed** (for all 2172, as a single flag — no further
 granularity is meaningful until individual triage happens).
 
 ### Address-range distribution (by 0x10000-aligned region)
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 275 (307 − 12 pass-1 − 19 pass-2 − 1 reclassified non-function, 2026-06-22) | 12.2% |
-| `0x80010000`–`0x8001ffff` | 268 | 11.8% |
-| `0x80020000`–`0x8002ffff` | 321 | 14.1% |
-| `0x80030000`–`0x8003ffff` | 290 | 12.7% |
-| `0x80040000`–`0x8004ffff` | 307 | 13.5% |
-| `0x80050000`–`0x8005ffff` | 354 | 15.5% |
-| `0x80060000`–`0x8006ffff` | 238 | 10.4% |
-| `0x80070000`–`0x8007ffff` | 193 | 8.5% |
-| **Total** | **2266** | **100%** |
+| `0x80000000`–`0x8000ffff` | 201 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 1 reclassified non-function, 2026-06-22) | 9.3% |
+| `0x80010000`–`0x8001ffff` | 268 | 12.3% |
+| `0x80020000`–`0x8002ffff` | 321 | 14.8% |
+| `0x80030000`–`0x8003ffff` | 290 | 13.4% |
+| `0x80040000`–`0x8004ffff` | 307 | 14.1% |
+| `0x80050000`–`0x8005ffff` | 354 | 16.3% |
+| `0x80060000`–`0x8006ffff` | 238 | 11.0% |
+| `0x80070000`–`0x8007ffff` | 193 | 8.9% |
+| **Total** | **2172** | **100%** |
 
-Distribution is fairly even across the whole ROM (10–16% per 64 KiB region) —
-there's no single large "unexplored" region; unnamed functions are
-interleaved with named ones throughout, consistent with how Phases 1–8
-worked (tracing call chains and protocol handlers rather than sweeping
-linearly through address space).
+Distribution is fairly even across the whole ROM outside the
+`0x80000000`-`0x8000ffff` region (8.9–16.3% per 64 KiB region), which has
+now dropped to 9.3% of the unnamed total thanks to 3 passes of Phase 9's
+region sweep concentrating there; the other 7 regions are unchanged from
+the 2026-06-21 baseline and still interleave named/unnamed functions
+throughout, consistent with how Phases 1–8 worked (tracing call chains and
+protocol handlers rather than sweeping linearly through address space).
 
 ### Size statistics
 
+**Stale baseline (2026-06-21), not re-run this pass** — these aggregate
+byte-level stats (count/total-bytes/average) require a fresh
+`RomCoverageStats.java`-style pass over the now-shrunk unnamed set to be
+accurate; the per-region distribution table above (manually recomputed each
+pass from the named-table deltas) is the authoritative up-to-date count
+(2172, not 2278) until that re-run happens.
+
 | Metric | Value |
 |--------|-------|
-| Count | 2278 |
+| Count | 2278 (stale; see note above — true current count is 2172) |
 | Smallest function | 1 byte |
 | Largest function | 2484 bytes |
-| Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) |
-| Average size | 156.4 bytes |
+| Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) (stale) |
+| Average size | 156.4 bytes (stale) |
 | Address span | `0x80000000`–`0x80079934` |
 
 Many of the very small (1–12 byte) entries are switch-table case stubs,
