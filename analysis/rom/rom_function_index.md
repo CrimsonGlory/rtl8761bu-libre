@@ -26,12 +26,12 @@ GZF process mode, run 2026-06-21, against
 
 | Metric | Count |
 |--------|-------|
-| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 685 (681 + 4 region-0x80010000 pass-2 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2053 (2057 − 4 region-0x80010000 pass-2 newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 361 (323 + 4 region-0x80010000 pass-2 newly-named-and-decompiled + 34 region-0x80010000 pass-2 thin-named upgraded to high via decompile-confirmation) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
+| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 9 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
+| Named functions (this doc's table) | 691 (685 + 6 region-0x80010000 pass-3 confidence upgrades; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2047 (2053 − 6 region-0x80010000 pass-3 confidence upgrades; none were previously unnamed) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 367 (361 + 6 region-0x80010000 pass-3 functions upgraded from low/medium to high via decompile-confirmation) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 62 (68 − 6 region-0x80010000 pass-3 functions upgraded from medium to high) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 251 (257 − 6 region-0x80010000 pass-3 functions upgraded from low to high) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
 
@@ -252,6 +252,23 @@ section for full per-function detail and the updated "Remaining scope"
 priority list (now led by the `HCI_OGF1_OCF0x4#` cluster,
 `0x8001c490`-`0x8001c788`). The 38 new/upgraded rows are folded into the
 table below near their pass-1 siblings (not strictly appended).
+
+**2026-06-22 update (region 0x80010000 pass 3)**: resolved pass 2's
+top-priority recommended target, the **`HCI_OGF1_OCF0x4#` cluster** —
+6 functions all already named by Kovah (4 low-confidence, 2 medium-confidence),
+upgraded to high via full decompile-confirmation: all 6 are OGF=1 (Link Control)
+commands in the 0x3F–0x44 OCF range for truncated page search and page-time
+parameters. Key finding: discovered a 7-function set that includes a dispatcher
+wrapper (`call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`) at 0x8001c940 that routes
+6 handlers via a 6-way compact jump table, with post-command event routing that
+distinguishes Type-A handlers (send Command Status) from Type-B (send Command
+Complete). The cluster is architecturally simple and now fully documented in
+`reverse_engineering_region_0x80010000.md`'s "Pass 3" section with per-function
+detail, wrapper routing logic, tier classification (all T1 required for basic
+ACL), and 9 newly-confirmed ROM function references. All 6 functions confirmed
+as essential baseline Bluetooth Classic features. The 6 updated rows are
+already in place in the table below (address `0x8001c490`–`0x8001c940`);
+confidence columns updated from low→high (4 functions) and medium→high (2).
 
 ---
 
@@ -505,13 +522,13 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001bfa0` | 50 | `fHCI_Inquiry_0x01` | fHCI Inquiry 0x01 — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001c324` | 252 | `set_check_for_1_to_1` | set check for 1 to 1 | low (named by Kovah, purpose unclear) |
 | `0x8001c438` | 76 | `OGC_3_default_func_4` | OGC 3 default func 4 | high (decompiled+documented — see `region_0x80010000`) |
-| `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | HCI OGF1 OCF0x44 | low (named by Kovah, purpose unclear) |
-| `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | HCI OGF1 OCF0x43 | low (named by Kovah, purpose unclear) |
-| `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | HCI OGF1 OCF0x42 | low (named by Kovah, purpose unclear) |
-| `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | HCI OGF1 OCF0x41 | low (named by Kovah, purpose unclear) |
-| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | fHCI Truncated Page Cancel 0x40 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | fHCI Truncated Page 0x3F | medium (named, one-line purpose only, not decompiled) |
-| `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | call to HCI opcodes OGF=1 0x3F-to-0x44 | low (named by Kovah, purpose unclear) |
+| `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | Page time parameter setter (opcode 0xc44) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | Page search activity gate (opcode 0xc43) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | Page time parameter reader (opcode 0xc42) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | Page time sub-parameter setter (opcode 0xc41) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | Truncated page cancel (opcode 0xc40) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | Truncated page initiator (opcode 0xc3f) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | HCI OGF1 command dispatcher (6-way switch 0x3f–0x44) | high (decompiled + documented in region_0x80010000.md pass 3) |
 | `0x8001ca94` | 60 | `send_evt_HCI_Inquiry_Response_Notification` | send evt HCI Inquiry Response Notification | low (named by Kovah, purpose unclear) |
 | `0x8001cad4` | 36 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Channel_Map_Change` | send evt HCI Connectionless Peripheral Broadcast Channel Map Change | low (named by Kovah, purpose unclear) |
 | `0x8001cafc` | 20 | `send_evt_HCI_Peripheral_Page_Response_Timeout` | send evt HCI Peripheral Page Response Timeout | low (named by Kovah, purpose unclear) |

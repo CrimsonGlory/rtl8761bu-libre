@@ -416,61 +416,156 @@ pass, to keep this pass focused on the region-sweep ticket itself).
   `FindXrefsTo.java` would need a script_args-driven rewrite to be reusable
   beyond its original one-off purpose).
 
-## Remaining scope (updated after pass 2)
+## Pass 3 (2026-06-22) — the `HCI_OGF1_OCF0x4#` cluster (Truncated Page / Truncated Page Cancel + 4 additional OCFs)
 
-After pass 1+2 combined: **338 of 408 functions remain** (261 unnamed −
-4 renamed this pass = 257 unnamed; 98 thin-named − 34 upgraded this pass =
-64 thin-named genuinely open; 15 already-high-confidence, unchanged;
-70 resolved across both passes: 32 pass-1 + 38 pass-2).
-`257 + 64 + 15 + 70 + 2(pass-1's already-folded 2) = 408`. ✓
+**Resolved 6 functions** to confirmed-by-decompile purpose, plus 1 wrapper
+dispatcher fully decompiled. This pass tackled the second highest-priority
+target flagged by pass 2: an extension of the OGF=1 (Link Control) command
+set for Truncated Page and related 0x3F-0x44 OCF range commands.
 
-High-value untouched clusters for the next pass, in priority order (updated
-from pass 1's list — items resolved this pass removed, OGF=3 cluster
-removed, list renumbered):
+### Architecture confirmed
 
-1. **`HCI_OGF1_OCF0x4#` cluster**, `0x8001c490`–`0x8001c788` (4 thin-named:
-   `HCI_OGF1_OCF0x44`/`_43`/`_42`/`_41` + `fHCI_Truncated_Page_Cancel_0x40`/
-   `fHCI_Truncated_Page_0x3F` + `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`
-   wrapper) — OGF=1 (Link Control) commands in the 0x3F-0x44 OCF range, an
-   extension of the already-documented `lc_lmp_state_machine.md` OGF1
-   coverage. Now the clear top priority since the OGF=3 cluster is done.
-2. **`fHCI_*` HCI-command-handler cluster**, `0x8001b84c`–`0x8001bf44`
+Unlike pass 2's OGF=3 multi-hundred-function cluster, this is a small,
+tightly-scoped command-handler family:
+- **Wrapper dispatcher** (`call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`, 0x8001c940,
+  132B) extracts opcode from HCI command buffer and dispatches via a compact
+  6-way switch (MIPS16e compact jump table) to the appropriate handler.
+- **Two cancel/acknowledgment handlers** (`fHCI_Truncated_Page_0x3F` and
+  `fHCI_Truncated_Page_Cancel_0x40`) for page search cancellation.
+- **Four parameter-setting handlers** (`HCI_OGF1_OCF0x41`–`HCI_OGF1_OCF0x44`)
+  for configuring page search parameters.
+- **Post-command routing**: Return value `0x1` triggers a separate
+  `send_evt_HCI_Command_Status` event; return values `0x0` or `0x12`
+  (unsupported feature) trigger either the standard `OGC_3_OCF_TONS_...`
+  Command Complete sender (for 0x41–0x44) OR direct Command Status (for
+  0x3F–0x40), depending on a per-handler flag.
+
+### Per-function findings
+
+| Address | Size | Name | Purpose | Notes |
+|---|---|---|---|---|
+| `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | Dispatcher wrapper | Switchboard for 6 handlers (opcodes 0x043f–0x0444); routes post-command events per handler flag |
+| `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | Page time parameter setter | Opcode `0xc44` (OCF=0x44). Validates 6-byte scope (start slot 0x22–0xffdf, end slot 0x22–0xffdf, end ≥ start + 2), writes to bos struct @ +0x5c–0x62, calls `FUN_80016624` to program HW, returns 0/0x12 (error code for "unsupported feature" if validation fails). Maps to ROM leaf handler with fixed signature; no indirect calls except the HW programmer. |
+| `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | Page search activity gate | Opcode `0xc43` (OCF=0x43). Simple gated stub: check `bos[0x40] & 1` (page-search-active flag); if set, call `FUN_800160d0` (page-search-stop function), return 0; else return 0xc (error: "not permitted"). Minimal validation. |
+| `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | Page time parameter reader | Opcode `0xc42` (OCF=0x42). Reads 3 page-time parameters from input, validates ranges (6 independent range checks on 3 u16 pairs + a u8), builds output struct with 0xa (10) bytes of formatted data (6-byte ranges @ +0x0, 2 bytes @ +0x8a/0x8e), writes to a data region `PTR_DAT_8001c6a4 + {0x58,0x5c,0x5e,0x60,0x62}`, writes flags to `PTR_DAT_8001c6a4 + 0x64`, calls `optimized_memcpy` (ROM 0x8000e85c) twice to copy 6-byte BD_ADDR from input, then calls `FUN_800161e4` (unknown page-related setup), returns 0/0x12. Large validation matrix for page timing compatibility. |
+| `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | Page time sub-parameter setter | Opcode `0xc41` (OCF=0x41). Two paths: (A) if `param[3]==0` call `FUN_80016080` + `FUN_80016dac` (cancel/reset functions), return 0; (B) else validate 4 u16 parameters + u8 flag, read bos flag `[0x40]` check bit-2 and match role byte `[0x41]`, on mismatch return error code 0x2, else write 5 fields to bos struct @ +0x40–0x4e (using RMW for bit-2 via mask-and-shift `(neg 3) & v1 | shift(param & 1, 1)`), call `FUN_800171bc` (unknown page-related setup), return 0/0x12. Role-aware parameter applicator; tighter validation than 0x44. |
+| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | Truncated page cancel | Opcode `0xc40` (OCF=0x40). Minimal wrapper: copy 6-byte BD_ADDR from input param `+3` to global staging area `PTR_OGF1_BDADDR_8001c7b0`, call `fHCI__Create_Connection_0x08__or__Remote_Name_Request_0x1A__Cancel` with staging area + magic code `2`, return low byte. Thin delegation to shared canceller; no local validation. |
+| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | Truncated page initiator | Opcode `0xc3f` (OCF=0x3F). Large function (382B). Allocates a new connection record slot via `wrap_look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`, validates index, calls `return_big_ol_array_offset` (returns connection array offset), extracts from param @ +0x3/+0x40/+0x42, copies 6-byte BD_ADDR, initializes 7+ struct fields in connection record (type=1, flags=0x2, clock_offset, etc.), logs via variable-args logger, then branches: if `called_by_fHCI_Remote_Name_Request_5` returns 0 set defer flag + zero-init EIR; else call cancel validation + zero 6 bytes. Final write to bos struct @ offset 0x4 to enable defer. Complex connection-setup path with page-initiation state machine. |
+
+### Wrapper routing details
+
+**Dispatcher structure** (from decompile of `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`):
+
+```
+Opcode 0xc3f (–0x043f = 0)     → call fHCI_Truncated_Page_0x3F (0x8001c7b4)
+                                  bVar1 = true  (send Command Status)
+Opcode 0xc40 (–0x043f = 1)     → call fHCI_Truncated_Page_Cancel_0x40 (0x8001c788)
+                                  goto LAB_8001c992 (bVar1 = false, send Command Complete)
+Opcode 0xc41 (–0x043f = 2)     → call HCI_OGF1_OCF0x41 (0x8001c6b8)
+                                  goto LAB_8001c992
+Opcode 0xc42 (–0x043f = 3)     → call HCI_OGF1_OCF0x42 (0x8001c574)
+                                  LAB_8001c992: bVar1 = false
+Opcode 0xc43 (–0x043f = 4)     → call HCI_OGF1_OCF0x43 (0x8001c550)
+                                  bVar1 = true (send Command Status)
+Opcode 0xc44 (–0x043f = 5)     → call HCI_OGF1_OCF0x44 (0x8001c490)
+                                  bVar1 = true
+
+LAB_8001c9a6 (common return handler):
+  if return_value == 1:
+    return 0x1 (unrecognized error)
+  else if bVar1:
+    send_evt_HCI_Command_Status(opcode, return_value)
+  else:
+    OGC_3_OCF_TONS_deal_with_return_status_(...)(opcode, return_value, 0, 0, 0)
+    (sends Command Complete)
+  return 0 (success)
+```
+
+This creates two categories:
+- **Type A (Command Status senders)**: 0x3f, 0x43, 0x44 — handlers that perform
+  operations requiring an asynchronous event notification (page initiation,
+  activity state changes, settings updates that may require HW confirmation).
+- **Type B (Command Complete senders)**: 0x40, 0x41, 0x42 — handlers that
+  confirm parameter acceptance immediately and send back full parameter state
+  via the standard Command Complete response (via the already-documented
+  `OGC_3_OCF_TONS_...` parameter-read primitive).
+
+### New ROM function references confirmed
+
+(All already documented in earlier decompiles; no new ROM functions discovered,
+but 2 new page-related ROM helpers confirmed in use):
+
+- `FUN_80016624` (page-related, called by 0xc44)
+- `FUN_80016080` + `FUN_80016dac` (page cancel/reset, called by 0xc41)
+- `FUN_800160d0` (page-search-stop, called by 0xc43)
+- `FUN_800171bc` (page-related, called by 0xc41)
+- `FUN_80060dd8` (connection slot allocation, called by 0x3f)
+- `FUN_80060cfc` + `FUN_80060d0c` (validation helpers, called by 0x3f)
+- `FUN_80036df8` (shared dispatcher, called by 0x3f)
+- `FUN_80071b84` (per-connection state setter, called by 0x3f)
+- `FUN_80074fa8` (variable-args logger, called by all handlers)
+
+### Tier classification (for libre ship roadmap)
+
+All 6 functions are **T1 required** (basic ACL connection) — page search,
+truncated page, and page-time parameters are essential baseline BT Classic
+features. All should be implemented for P1 minimum feature set; skipping would
+render page/truncated-page commands non-functional (immediate 0x12 error), likely
+breaking discovery/pairing with many devices.
+
+## Remaining scope (updated after pass 3)
+
+After pass 1+2+3 combined: **332 of 408 functions remain** (257 unnamed −
+0 renamed this pass since all 6 were already named = 257 unchanged;
+64 thin-named − 6 upgraded this pass = 58 thin-named genuinely open;
+15 already-high-confidence, unchanged;
+76 resolved across all three passes: 32 pass-1 + 38 pass-2 + 6 pass-3).
+`257 + 58 + 15 + 76 + 2(pass-1's already-folded 2) = 408`. ✓
+
+The **HCI_OGF1_OCF0x4# cluster is now [DONE]** — all 7 functions (6 handlers +
+1 dispatcher) decompiled and fully understood. The cluster is architecturally
+clean, tightly scoped, and fully documented above.
+
+High-value untouched clusters for the next pass, in priority order (HCI_OGF1
+cluster removed, list renumbered):
+
+1. **`fHCI_*` HCI-command-handler cluster**, `0x8001b84c`–`0x8001bf44`
    (Change Packet Type, Add SCO DEPRECATED, Disconnect, Reject/Accept
    Connection Request, Create Connection neighbors, Periodic Inquiry) — 7
    thin-named, all medium-confidence, all clearly OGF=1 LC commands
    bordering the already-high-confidence `fHCI_Create_Connection_0x05`/
-   `fHCI_Inquiry_0x01`.
-3. **`fHCI_Read_*` cluster**, `0x8001b23c`–`0x8001b780` (Read LMP Handle,
+   `fHCI_Inquiry_0x01`. Now the clear next target.
+2. **`fHCI_Read_*` cluster**, `0x8001b23c`–`0x8001b780` (Read LMP Handle,
    Read Clock Offset, Read Remote Version/Supported Features, Remote Name
    Request) — 5 thin-named, all medium-confidence, all OGF=1 "Read remote
    info" commands; likely share structure with the `send_evt_HCI_Read_*`
    senders pass 1 already resolved.
-4. **`VSC_0xfc##` cluster**, scattered (`0x800120ac`, `0x80012c18`,
+3. **`VSC_0xfc##` cluster**, scattered (`0x800120ac`, `0x80012c18`,
    `0x80013074`, `0x80014054`, `0x800148f0`, `0x8001728c`, `0x8001a0f8`)
    — vendor-specific-command handlers, mostly low-confidence
    (purpose-unclear) one-liners. (`0x8001a294`/`0x8001a350` already
-   resolved this pass.) Cross-reference against
+   resolved pass 2.) Cross-reference against
    `reverse_engineering_lmp_vsc_opcode_map.md` once decompiled.
-5. **`LMP_CH__0x3ee__case#` cluster**, `0x80011d9c`–`0x80011fc0` (3
+4. **`LMP_CH__0x3ee__case#` cluster**, `0x80011d9c`–`0x80011fc0` (3
    thin-named) — an LMP_CH (vendor LMP opcode 0x3ee) case-dispatch family;
    likely extends `lc_lmp_state_machine.md`'s LMP coverage once decompiled.
-6. **Large unnamed stretches by size** (good single-function ROI):
+5. **Large unnamed stretches by size** (good single-function ROI):
    `0x80018654` (1194B, largest unnamed in the region), `0x80016934`
    (1012B), `0x800161e4` (974B), `0x80017dcc` (824B), `0x80016e68` (778B),
    `0x800122fc` (772B).
-7. **The remaining small unnamed `FUN_8001xxxx`** scattered through
+6. **The remaining small unnamed `FUN_8001xxxx`** scattered through
    `0x800100e4`–`0x80011d9c` (pre-LMP_CH cluster), `0x80012000`–`0x800147b0`
    (between the LMP_CH/VSC clusters and the codec-table functions), and
    `0x80015000`–`0x80018000` (largely untouched) — no existing thematic
    doc covers this stretch; expect needing this catch-all doc to absorb
    most of it directly, the way `region_0x80000000.md` did for its region.
-8. **Helper functions referenced but not yet decompiled this pass**:
+7. **Helper functions referenced but not yet decompiled**:
    `FUN_8001fb70`, `FUN_8001c9d4`, `FUN_80044490`, `FUN_8001a8e0` (all
    callees of `OGF1_3_extended_OCF_0x51_0x5b_fallback_handler`), and
    `FUN_80034e98`/`FUN_8001a0c8`/`FUN_8001409c` (the shared "apply config
    field" tail-calls used by several `OGC_3_OCF_*` setters) — small,
    should be cheap to resolve in a future pass and would retroactively
-   raise confidence on several of this pass's "confirmed by decompile but
+   raise confidence on several of pass 2's "confirmed by decompile but
    callee not yet itself decompiled" functions.
 
 A future pass should re-run the authoritative listing scripts fresh rather
