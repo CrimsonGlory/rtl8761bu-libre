@@ -1982,15 +1982,16 @@ completion):
           974B), and ~250 small unnamed `FUN_8001xxxx` scattered through
           the rest of the region with no existing thematic doc coverage.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, pass 4 (fHCI_* HCI-command-handler cluster)
+[BLOCKED]  Full RE: ROM region 0x80010000-0x8001ffff, pass 4 (prepared, awaiting wairz tool execution) (2026-06-22)
           Per the mandatory region-ticket splitting rule: pass 3 resolved 6
           more functions (76 total across passes 1-3), leaving 332 of 408
-          functions. Region ticket kept as [NEXT] with shrunk scope per the
-          self-chaining exception (not marked [DONE] — full region completion
-          requires all 408 functions resolved or explicitly noted as
-          non-functions).
+          functions. Pass 4 decompilation targets are fully prepared and
+          documented (see below), but cannot execute in agent context without
+          direct MCP tool access. Awaiting supervisor/user to execute via
+          wairz directly or retry with fresh agent. No work is lost;
+          handoff is clean.
 
-          PASS 4 TARGET (prepared, decompilation pending):
+          PASS 4 TARGET (fully prepared, awaiting execution):
           **fHCI_* HCI-command-handler cluster** at 0x8001b84c–0x8001bf44
           (priority #1 per pass 3's documented recommendations):
           - 0x8001b84c (170B):  fHCI_Change_Connection_Packet_Type_0x0F
@@ -2010,7 +2011,7 @@ completion):
           a new "Pass 4" section mirroring pass 1-3 structure. Update
           rom_function_index.md confidence flags (6 rows: medium→high).
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff, continued (384 fns, HCI router + SAFER+ already high-confidence)
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, continued (384 fns, HCI router + SAFER+ already high-confidence)
           Contains the HCI command router and SAFER+ cipher (both already
           high-confidence) plus 321 untouched unnamed functions and 63 thin
           ones. Triage per the splitting rule above. Next priority target
