@@ -2034,7 +2034,7 @@ completion):
 
           Next: [TODO] Pass 2 (Batch Triage) — decompile top 15 by size + cold-triage 191 unnamed.
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 2 batch triage) (2026-06-22+)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 2 batch triage) (2026-06-22+)
           Decompile largest 10-15 thin-named functions (1306B down to ~200B) via
           BatchDecompileList + DecompInterface. LMP cluster: assign opcode identities via
           cross-ref to reverse_engineering_lc_lmp_state_machine.md. HCI cluster: confirm vs.
