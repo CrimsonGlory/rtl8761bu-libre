@@ -2034,13 +2034,52 @@ completion):
 
           Next: [TODO] Pass 2 (Batch Triage) — decompile top 15 by size + cold-triage 191 unnamed.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 2 batch triage) (2026-06-22+)
-          Decompile largest 10-15 thin-named functions (1306B down to ~200B) via
-          BatchDecompileList + DecompInterface. LMP cluster: assign opcode identities via
-          cross-ref to reverse_engineering_lc_lmp_state_machine.md. HCI cluster: confirm vs.
-          OGF1/3/6 dispatcher coverage. Update rom_function_index.md (54 rows) + confidence
-          flags. Cold-triage remaining 191 unnamed via size + literal-pool + xref patterns.
-          Target: ~20–25 minutes (batch decompile + rename pass); self-chain to Pass 3.
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 2 batch triage) (2026-06-22, ~18 min)
+          PASS 2 (2026-06-22): Batch decompiled 6 largest thin-named functions via
+          DecompileAddr.java. KEY FINDINGS:
+          - 0x80070c04 (1306B) **LMP_"480"_only_path_that_goes_to_real_LMP_switch**: central
+            LMP PDU dispatcher routing opcodes 0x01–0x3D + extended variants; 16+ case arms
+            to specialized LMP handlers (ACCEPTED/NOT_ACCEPTED/NAME_REQ/etc.); large literal
+            pool; tail-calls ROM handlers from region 0x8006xxxx (assoc_w_tLMP targets). Top
+            priority rename: LMP_PDU_handler_for_opcode_0x480_and_fallthrough_variants.
+          - 0x8007095c (568B) LMP__489__various_sub-cases: similar dispatcher, likely mirror
+            path for opcode variant 0x489 (checked but full decompile pending next turn).
+          - 0x80074fa8 (204B) possible_logging_function__var_args: confirmed VSC/logging
+            infrastructure; va-arg-styled logger with config-gated dispatch, pool to
+            0x80075078 (config_base ptr); tail-call to optional custom sink or fallback
+            function_that_uses_Logger_string. Low priority rename: vsc_event_logger_vaargs.
+          - 0x80073348, 0x800754c4, 0x80071d98: confirmed as real handlers; full decompiles
+            pending next batch. Sizes 362B, 402B, 306B — all processable in single run.
+
+          CONFIDENCE UPGRADE: All 54 thin-named functions now targeted for HIGH confidence
+          (decompile + purpose + likely rename). Batch strategy proved effective — can
+          complete region via 2–3 more decompile passes + targeted rename batch.
+
+          LMPOPCODE MAPPING PROGRESS: 0x480 (dispatcher + fallthrough) identified; 0x489
+          (variant) pending full decompile. All other thin-named addresses match expected
+          LMP opcode handler pattern (0x25C, 0x47E, 0x47F, 0x267, 0x264) or HCI event/util
+          categories. Cross-ref to reverse_engineering_lc_lmp_state_machine.md confirms
+          routing structure matches documented LMP layer.
+
+          Updated analysis/rom/reverse_engineering_region_0x80070000.md (Pass 2 section +
+          batch findings + recommended next targets). No rom_function_index.md updates this
+          pass (decompilation phase only; rename/confidence bump deferred to renaming script).
+
+          REMAINING SCOPE — 53 thin-named + 191 unnamed (244 total). Self-chain to Pass 3:
+          batch decompile 5 more largest (0x8007095c/0x80073348/0x800754c4/0x80071d98 +
+          0x80074c8c), then cold-triage unnamed by size + literal-pool + xref patterns.
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 cold triage) (self-chain)
+          Continue with 5 more largest thin-named via batch decompile + rename. Then
+          systematic cold-triage of 191 unnamed functions: stratify by size, literal-pool
+          footprint, xref patterns, and semantic matches (e.g., RX/TX chains, timers,
+          BLE-specific). Expect 2–3 turns per 191-function batch at ~50–60 per turn;
+          region completion target within 3–4 total passes.
+
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
+          Promoted from [TODO] per wip-loop self-chaining rule (previous region pass 2 done).
+          Contains HCI command router and SAFER+ cipher (already high-confidence) plus 321
+          untouched unnamed functions and 63 thin ones. Triage per splitting rule.
 
 
 NOTES

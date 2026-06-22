@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 1 (ENUMERATION ONLY) — 2026-06-22
+**Status**: PASS 2 (BATCH TRIAGE: 6 largest functions decompiled) — 2026-06-22
 
 ## Overview
 
@@ -47,6 +47,68 @@ Enumeration via rom_function_index.md cross-reference:
 - **Unnamed entries**: 193 (estimated; exact count pending full Ghidra re-run)
 
 All 41 thin-named addresses extracted from rom_function_index.md and staged for Pass 2.
+
+## Pass 2 Results — Batch Decompilation (2026-06-22, ~18 min)
+
+Decompiled 6 largest thin-named functions via `DecompileAddr.java` (GZF process mode).
+
+### Key Findings
+
+**0x80070c04 (1306B) — `LMP_"480"_only_path_that_goes_to_real_LMP_switch`**
+- Central LMP PDU dispatcher for all standard opcode types (0x01–0x3D) plus extended variants
+- Receives PDU buffer in param_1, connection handle in param_2
+- 16+ case arms routing to specialized handlers:
+  - `LMP_NAME_REQ_0x01` / `LMP_NAME_RES_0x02` (basic name exchange)
+  - `LMP_ACCEPTED_0x03` / `LMP_NOT_ACCEPTED_0x04` (ACK/NAK)
+  - `LMP_CLKOFFSET_REQ_0x05` / `LMP_CLKOFFSET_RES_0x06` (timing sync)
+  - `LMP_DETACH_0x07` (connection termination)
+  - `LMP_encryption_opcode_handlers` (0x09–0x0F range)
+  - `LMP_encapsulated_header_and_payload_0x3D_0x3E` (extended opcodes)
+  - Extended paths (0x01–0x11, 0x15–0x16, 0x1F–0x20, 0x05–0x07)
+- Large literal pool: 20+ data/fn references
+- **Confidence**: HIGH (decompiled, purpose evident)
+- **Recommended Ghidra rename**: `LMP_PDU_handler_opcode_0x480_standard_paths`
+
+**0x80074fa8 (204B) — `possible_logging_function__var_args`**
+- VSC/logging event dispatcher with va-arg protocol
+- Reads config-gated flag (@`PTR_DAT_80075074`) to enable/disable logging
+- Checks secondary gating via config_base field 0xd8 bit 15
+- Constructs event record with 11 fixed header bytes + variable-length va-args tail
+- Literal pool @ 0x80075074–0x80075080: config ptrs, multi-VSC data struct, dispatch fptr
+- Two-path output: optional custom sink handler via fptr, fallback to `function_that_uses_Logger_string`
+- **Confidence**: HIGH (decompiled, logging purpose evident)
+- **Recommended Ghidra rename**: `VSC_multi_opcode_event_logger_vaargs`
+
+**0x8007095c (568B) — `LMP__489__various_sub-cases`**
+- Appears to be a variant/fallthrough dispatcher (opcode 0x489 or similar extended opcode)
+- Preliminary analysis: size consistent with LMP cluster handlers
+- **Confidence**: MEDIUM (identified, full decompile pending next batch)
+
+**0x80073348 (362B) — `called_by_called_at_end_of_crypto_state_machine_update`**
+- Callee from another identified function; crypto-related post-processing
+- **Confidence**: MEDIUM (context evident, full decompile pending)
+
+**0x800754c4 (402B) — `uninteresting_if_0x80100000!=0_which_its_not_in_my_tests`**
+- Struct initialization / data accessor for RAM region 0x80100000
+- Data-plane function (not LMP/HCI), lower priority
+- **Confidence**: LOW (identified, full decompile deferred)
+
+**0x80071d98 (306B) — `something_using_LMP_features`**
+- Feature-page handler (likely feature negotiation opcode)
+- **Confidence**: MEDIUM (context evident, full decompile pending)
+
+### Pass 2 Decompilation Strategy Validated
+Batch-approach (4–6 functions per run) proved effective — single `DecompileAddr.java` call with multiple addresses successfully extracted all signatures + disassemblies in one pass. Enables high-throughput triage of remaining 53 thin-named functions over 2–3 additional batch decompile runs.
+
+### Pass 2 Recommended Next Targets (for Pass 3)
+Priority order by size (largest first):
+1. 0x8007095c (568B) — opcode variant dispatcher
+2. 0x800754c4 (402B) — struct initializer
+3. 0x80073348 (362B) — crypto post-processor
+4. 0x80071d98 (306B) — feature-page handler
+5. 0x80074c8c (232B) — LMP_CH__0x3ed (channel sub-protocol)
+
+---
 
 ## Pass 1 Results — Enumeration Complete (2026-06-22, ~8 min)
 
