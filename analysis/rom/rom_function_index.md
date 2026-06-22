@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 649 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5 + 13 pass-6 + 12 pass-7, 2026-06-22 region-0x80000000 sweep) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2089 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 1 reclassified non-function) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 246 (234 after pass 6 + 12 pass-7 new) |
+| Named functions (this doc's table) | 661 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5 + 13 pass-6 + 12 pass-7 + 12 pass-8, 2026-06-22 region-0x80000000 sweep) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2077 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 1 reclassified non-function) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 258 (246 after pass 7 + 12 pass-8 new) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
 
@@ -852,12 +852,24 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80008328` | 176 | `conn_field_increment_and_cleanup_dispatch` | non-ring single-shot counterpart of `ring_buffer_event_drain_loop_variant2` — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800083ec` | 406 | `ring_buffer_event_drain_loop_variant2` | drains a per-connection-class quota ring and applies deltas — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800085a4` | 1138 | `top_level_link_event_status_dispatcher_loop2` | second master status-word dispatch loop, sibling of `top_level_link_event_status_dispatcher_loop` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e4bc` | 592 | `link_status_bitmask_event_dispatcher` | per-bit link/connection status-change dispatcher feeding AFH toggle + status report — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e764` | 202 | `config_flag_gated_status_log_and_propagate` | flag-gated status log-and-propagate, feeds `feature_bit_status_word_propagator` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e8c0` | 202 | `optimized_memmove` | overlap-aware optimized memmove, sibling of `optimized_memcpy`/`memset` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ea1c` | 144 | `status_pair_ring_push_with_overflow_trap` | 2-word ring push with conditional fatal-trap halt — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ead4` | 172 | `status_word_consume_and_dispatch_to_ring_or_download` | status-word consumer dispatching to download/callback/ring-push paths — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000eba0` | 80 | `indexed_register_rw_with_dead_sentinel` | generic indexed byte/halfword register accessor, `0xdead` rejection sentinel — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ebfc` | 48 | `dual_fptr_dispatch_by_flag_wrapper` | flag-selected dual-callback dispatch wrapper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ec34` | 38 | `set_byte_and_masked_lsb_pair` | trivial 2-field byte/masked-lsb setter — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ec64` | 60 | `conn_list_field_match_count_and_fallback_call` | list-scan-with-no-match-fallback helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ed04` | 42 | `build_fixed_event_0x201e_and_send` | fixed-format 3-byte-payload event builder/sender for event 0x201e — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000ed30` | 98 | `register_rw_dispatch_with_log` | logged register read/write dispatch wrapper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000eda0` | 700 | `generic_status_field_get_set_dispatcher` | large opcode-routed multi-field get/set dispatcher — see `region_0x80000000` | high (decompiled+documented) |
 
 ---
 
-## Unnamed functions (2089, originally 2278)
+## Unnamed functions (2077, originally 2278)
 
-The remaining 2089 functions in the `rom` block (2739 total − 649 named − 1
+The remaining 2077 functions in the `rom` block (2739 total − 661 named − 1
 reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
 label and have not been individually triaged. Per Phase 9 scoping, giving
 each of these a real name and purpose is explicitly out of scope for this
@@ -865,26 +877,26 @@ doc — it's the rest of Phase 9's ongoing, best-effort work. This section
 satisfies "every function" at the index/coverage level via aggregate stats
 instead of 2278 rows of "unknown."
 
-**Confidence: unanalyzed** (for all 2089, as a single flag — no further
+**Confidence: unanalyzed** (for all 2077, as a single flag — no further
 granularity is meaningful until individual triage happens).
 
 ### Address-range distribution (by 0x10000-aligned region)
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 118 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 1 reclassified non-function, 2026-06-22) | 5.6% |
-| `0x80010000`–`0x8001ffff` | 268 | 12.8% |
-| `0x80020000`–`0x8002ffff` | 321 | 15.4% |
-| `0x80030000`–`0x8003ffff` | 290 | 13.9% |
-| `0x80040000`–`0x8004ffff` | 307 | 14.7% |
-| `0x80050000`–`0x8005ffff` | 354 | 16.9% |
-| `0x80060000`–`0x8006ffff` | 238 | 11.4% |
-| `0x80070000`–`0x8007ffff` | 193 | 9.2% |
-| **Total** | **2089** | **100%** |
+| `0x80000000`–`0x8000ffff` | 106 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 1 reclassified non-function, 2026-06-22) | 5.1% |
+| `0x80010000`–`0x8001ffff` | 268 | 12.9% |
+| `0x80020000`–`0x8002ffff` | 321 | 15.5% |
+| `0x80030000`–`0x8003ffff` | 290 | 14.0% |
+| `0x80040000`–`0x8004ffff` | 307 | 14.8% |
+| `0x80050000`–`0x8005ffff` | 354 | 17.0% |
+| `0x80060000`–`0x8006ffff` | 238 | 11.5% |
+| `0x80070000`–`0x8007ffff` | 193 | 9.3% |
+| **Total** | **2077** | **100%** |
 
 Distribution is fairly even across the whole ROM outside the
-`0x80000000`-`0x8000ffff` region (9.2–16.9% per 64 KiB region), which has
-now dropped to 5.6% of the unnamed total thanks to 7 passes of Phase 9's
+`0x80000000`-`0x8000ffff` region (9.3–17.0% per 64 KiB region), which has
+now dropped to 5.1% of the unnamed total thanks to 8 passes of Phase 9's
 region sweep concentrating there; the other 7 regions are unchanged from
 the 2026-06-21 baseline and still interleave named/unnamed functions
 throughout, consistent with how Phases 1–8 worked (tracing call chains and
@@ -897,11 +909,11 @@ byte-level stats (count/total-bytes/average) require a fresh
 `RomCoverageStats.java`-style pass over the now-shrunk unnamed set to be
 accurate; the per-region distribution table above (manually recomputed each
 pass from the named-table deltas) is the authoritative up-to-date count
-(2089, not 2278) until that re-run happens.
+(2077, not 2278) until that re-run happens.
 
 | Metric | Value |
 |--------|-------|
-| Count | 2278 (stale; see note above — true current count is 2089) |
+| Count | 2278 (stale; see note above — true current count is 2077) |
 | Smallest function | 1 byte |
 | Largest function | 2484 bytes |
 | Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) (stale) |

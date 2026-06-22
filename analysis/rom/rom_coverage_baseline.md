@@ -103,6 +103,17 @@ safe to re-run at any time as a progress check.
 |------|-----------|-----------|---------|------------------|--------------------|
 | 2026-06-21 (morning baseline) | 2738 | 461 | 16.84% | 95.37% | 4.63% |
 | 2026-06-21 (end of day) | 2739 | 461 | 16.83% | 95.37% | 4.63% |
+| 2026-06-22 (Phase 9 region-0x80000000 sweep, after pass 8) | 2739 | 661 | 24.13% | 95.37% (unchanged) | 4.63% (unchanged) |
+
+Re-run after 8 passes of the region-0x80000000 exhaustive sweep (passes
+1-8, +200 named functions: 183 in-scope gap functions resolved + 17
+out-of-scope leaf helpers/cross-references named along the way). Named-fn
+count jumped from 461→661 (+200, named % 16.83%→24.13%) and named-bytes
+coverage from 16.99%→25.42% of the whole ROM — the largest jump in this
+table's history. Defined/undefined byte totals are bit-for-bit unchanged
+(this work decompiles/names functions Ghidra had already auto-disassembled,
+it doesn't define new code-units), consistent with the "naming vs.
+defining" distinction noted in the Interpretation section above.
 
 Same-day re-run, after this session's boot/reset sequence, interrupt vector,
 HCI command router, LC/LMP state machine, BLE link layer, encryption engine,

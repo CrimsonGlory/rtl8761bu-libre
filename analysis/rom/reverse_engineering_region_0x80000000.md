@@ -28,18 +28,21 @@ real functions + 1 4-byte degenerate stub) **plus reclassified one entry as
 a non-function** (`0x8000046c`, see below), **pass 3 (2026-06-22, same day)
 resolved 74 more**, **pass 4 (2026-06-22, same day) resolved 27 more**,
 **pass 5 (2026-06-22, this continuation) resolved 31 more**, **pass 6
-(2026-06-22, this continuation) resolved 13 more**, and **pass 7 (2026-06-22,
+(2026-06-22, this continuation) resolved 13 more**, **pass 7 (2026-06-22,
 this continuation) resolved 12 more** (plus re-derived the resolved-count
 tally from scratch, see "Tally reconciliation (pass 7)" below — the true
 figure was already 159 going into this pass, not the 158 some earlier
-summaries implied; pass 7's 12 fresh renames bring it to **171**).
-**171 of 220 in-scope gap functions are now resolved to a real name +
-decompiled purpose.** Remaining: **30 still completely unnamed
-`FUN_8000xxxx`** (down from pass 6's 42) + **16 genuinely-open pre-existing
+summaries implied; pass 7's 12 fresh renames bring it to 171), and **pass 8
+(2026-06-22, this continuation) resolved 12 more** (the
+`0x8000e4bc`-`0x8000eda0` stretch, pass 7's recommended next target),
+bringing the total to **183**.
+**183 of 220 in-scope gap functions are now resolved to a real name +
+decompiled purpose.** Remaining: **18 still completely unnamed
+`FUN_8000xxxx`** (down from pass 7's 30) + **16 genuinely-open pre-existing
 thin-named** Kovah names (unchanged since pass 4) + **2 thin-named already
 "high confidence"** via other docs (`optimized_memcpy`/`0x8000e85c`,
 `lots_of_initialization`/`0x8000fb5c`) + **1 non-function**
-(`0x8000046c`, zero-fill padding). Arithmetic: `171 + 30 + 16 + 2 + 1 = 220`. ✓
+(`0x8000046c`, zero-fill padding). Arithmetic: `183 + 18 + 16 + 2 + 1 = 220`. ✓
 
 ## Tally reconciliation (pass 4, 2026-06-22)
 
@@ -644,6 +647,47 @@ and one is a secondary/legacy path, or whether they service genuinely
 independent status-word sources) was not established this pass — flagged
 as an open question below.
 
+## Resolved functions — pass 8, this continuation (12)
+
+Re-ran `ListRegion0x80000_Gaps.java` first per the ticket's mandatory
+first-step rule: confirmed count still exactly 220, all 171 pass-1-through-7
+names persisted, no regressions. Confirmed pass 7's "recommended next
+target" note was still accurate (the `0x8000e4bc`-`0x8000eda0` stretch was
+still fully `FUN_8000xxxx`/`DEFAULT` in the fresh listing), so triaged all 12
+functions in that stretch via one `BatchDecompileList.java` call.
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x8000e4bc` | `link_status_bitmask_event_dispatcher` | 592B. Checks an optional installed override callback first; if absent/declined, reads a status bitmask (`DAT_8000e710`) and dispatches per-bit: clears/sets several link-state flag bits (mirroring the `link_active_or_config_flag_check`-style bit clears seen elsewhere in this region), calls `pack_freq_and_status_fields_from_globals` + `build_and_send_default_status_report` on a "send report" bit, calls `afh_feature_toggle_dispatcher` on 2 AFH-related bits, and on one bit (`uVar12 & 8`) enters the region's recurring "do-nothing infinite loop" idiom (a fatal-trap/halt pattern also seen in `status_pair_ring_push_with_overflow_trap` below) after a final register write — consistent with an unrecoverable-error halt path. A **per-bit link/connection status-change dispatcher**, structurally smaller than but thematically similar to `top_level_link_event_status_dispatcher_loop`/`loop2` from passes 6-7. |
+| `0x8000e764` | `config_flag_gated_status_log_and_propagate` | 202B. Gated by a flag byte (`PTR_DAT_8000e830 & 1`); if set, optionally logs a 10-argument event via `possible_logging_function__var_args` (gated on a second flag), optionally does an interrupt-disabled masked register update (`disable_interrupts_*`/`enable_interrupts_*` bracketing a conditional `PTR_FUN_8000e854`-sourced OR), then calls `feature_bit_status_word_propagator` if a config-blob byte's bit `0x80` is set. A **status-log-and-propagate** gate function feeding the same `feature_bit_status_word_propagator` pass 4 already named. |
+| `0x8000e8c0` | `optimized_memmove` | 202B. Classic overlap-aware `memmove`: branches on `param_2 <= param_1` (copy-forward vs. copy-backward direction), then within each direction further branches on alignment (4-byte-aligned word-copy fast path, 2-byte-aligned halfword fast path, byte-at-a-time fallback) — the textbook glibc-style optimized memmove shape. Sits immediately after `optimized_memcpy` (`0x8000e85c`, already named) and before `memset` (`0x8000e98c`, already named), completing a libc-style copy/move/zero trio in this part of ROM. |
+| `0x8000ea1c` | `status_pair_ring_push_with_overflow_trap` | 144B. Pushes a 2-word entry into a ring buffer (`PTR_DAT_8000eabc` table, head index `PTR_DAT_8000eab8`), with an 8-entry decay/reset on the head-index global (`PTR_DAT_8000eaac`); on a sentinel condition (head index back to 0 after the push) performs a small status-flag update and, on one branch (status byte `& 0x1e == 6`), copies a pointer field, then unconditionally enters the same "do-nothing infinite loop" halt idiom as `link_status_bitmask_event_dispatcher` above. The **ring-push-then-conditional-halt** primitive — called by `status_word_consume_and_dispatch_to_ring_or_download` below. |
+| `0x8000ead4` | `status_word_consume_and_dispatch_to_ring_or_download` | 172B. Reads a status word (`DAT_8000eb80`), checks for an optional override callback, tests a 2-bit field `==3` and a separate bit pattern (`bit1 set, bit0 clear`) to decide whether to clear/normalize the status word, and if either condition fired, commits the cleared word back to the global and dispatches to one of: `references_patch_download_mem2` (when a secondary field's low 6 bits `==10`), a generic installed-callback call, or `status_pair_ring_push_with_overflow_trap` (`FUN_8000ea1c`) — selected by a separate flag byte. The **status-word consumer** that decides whether a status update goes to the patch-download path, a generic callback, or the ring-push-trap primitive above. |
+| `0x8000eba0` | `indexed_register_rw_with_dead_sentinel` | 80B. Given `(width_flag, write_flag, offset)`: dispatches to either a byte-indexed or halfword-indexed register access at `base+offset` (base from `PTR_DAT_8000ebf0`), returning the literal sentinel `0xdead` when the access is rejected by a busy/alignment-flag check — the exact same `0xdead`-on-bad-alignment sentinel convention documented for `FUN_80011584` (halfword baseband-register read wrapper) in `reverse_engineering_baseband_reg_helpers.md`. A **generic indexed byte/halfword register accessor**, parallel in role to `indexed_register_rw_poll_primitive` (`0x8000bc38`) but for a different register bank/addressing scheme (no poll-for-ack loop, just a direct read/write with a rejection sentinel). |
+| `0x8000ebfc` | `dual_fptr_dispatch_by_flag_wrapper` | 48B. Thin wrapper: if a direction flag is `0`, tail-calls one installed function pointer (`PTR_DAT_8000ec30`) with 3 args and returns its result; otherwise calls a second installed function pointer (`PTR_DAT_8000ec2c`) with 4 args and returns 0. A **flag-selected dual-callback dispatch** wrapper, calling into `FUN_8003b5b8`/`FUN_8003c5b8` (both outside this region, not yet triaged). |
+| `0x8000ec34` | `set_byte_and_masked_lsb_pair` | 38B. Trivial 2-field setter: writes a full byte to one global (`PTR_DAT_8000ec5c`) and merges the low 8 bits of a halfword parameter into another global's low byte (`DAT_8000ec60`, preserving its high byte). A leaf setter in the same style as the region's many `set_bitN_of_global`/`toggle_bitN_of_global` helpers (passes 3-4). |
+| `0x8000ec64` | `conn_list_field_match_count_and_fallback_call` | 60B. Walks a linked list (`PTR_DAT_8000eca0`, next-pointer at struct offset `0x204*2=0x408`... actually indexed as `puVar5+0x204` in 16-bit units), counting nodes whose low-12-bits field matches a reference value (`PTR_DAT_8000eca4+0x2a`); if the count is zero (no match found in the list), calls an installed function pointer (`PTR_DAT_8000eca8`) with 2 fixed-ish args. A **list-scan-with-no-match-fallback** helper — likely a "is this value already registered; if not, register/notify" check over a connection or procedure list. |
+| `0x8000ed04` | `build_fixed_event_0x201e_and_send` | 42B. Builds a fixed 6-byte local buffer (`0x201e` opcode/event-code halfword, length byte `3`, then the 3 input parameters as payload bytes) and calls `FUN_80048964` (outside this region, not yet triaged — likely the generic HCI-event-send routine given the `0x201e`-prefixed-buffer shape matches other "build event and send" callers in this region, e.g. `build_and_send_default_status_report`). A **fixed-format 3-byte-payload event builder/sender** for event code `0x201e`. |
+| `0x8000ed30` | `register_rw_dispatch_with_log` | 98B. Same flag-selected-dispatch shape as `dual_fptr_dispatch_by_flag_wrapper` above: if the direction flag is set, calls a write-callback (`PTR_DAT_8000ed94`) with `(value, addr&0xffff)`; otherwise calls a read-callback (`PTR_DAT_8000ed98`) with `(value)` and captures its return. Either way, unconditionally logs the full `(direction, value, addr)` triple via `possible_logging_function__var_args` (event `0x1e3`) before returning. A **logged register read/write dispatch** wrapper — the logging-instrumented sibling of the bare `dual_fptr_dispatch_by_flag_wrapper`. |
+| `0x8000eda0` | `generic_status_field_get_set_dispatcher` | 700B, the largest function in this batch. A wide switch keyed on a field-ID byte (`bVar1`, values seen: `0`, `0xc`, `0xd`, `0x11`-`0x1f`, `0x20`-`0x25`, `0x26`, default) extracted from an input PDU/struct pointer, with a nested sub-switch (`uVar12`, cases 0-5) for the `0x11`-`0x1d` field-ID range selecting between baseband-register read/write (`FUN_80011584`/`FUN_80011608`), a literal-pool table lookup/store (`DAT_8000f074`/`8078`/`807c`-indexed halfword arrays), and 2 VSC-style calls (`VSC_0xfd49_FUN_8003bbf0`/`FUN_8003bd94`) depending on a "has-direct-value" flag (`bVar9`); the `0x26` case is a distinct sub-path that snapshots 2 fields, calls `FUN_8003ce50`/`build_fixed_event_0x201e_and_send`/3 LMP-related functions (`LMP__25B__most_common_for_VSCs1`, `VSC_0xfc95_called2`, `LMP__268__most_common_for_VSCs2_checks_fptr_patch`) in sequence, and the `0x1e`/`0x1f`/default-ish field IDs read 4-byte little-endian values out of 3 selectable byte-array bases (`PTR_DAT_8000f080`/`f084`/`f088`, the last indexed by a secondary selector `*10`). All paths converge on a common tail that packs a result code + value into the input struct and calls back out via `PTR_DAT_8000f0a0`. A **generic multi-field get/set dispatcher** serving many distinct status/config fields through one opcode-routed entry point — the largest and most central function in this stretch, sitting structurally alongside the region's other "VSC_0xfc..." and "multi-field" dispatchers. |
+
+Confirmed rename-persistence via a post-batch `ListRegion0x80000_Gaps.java`
+re-run: count still exactly 220, all 183 cumulative names (171 prior + 12
+this pass) correctly reflected, no regressions. **New reconciled tally: 183
+of 220 in-scope gap functions resolved, 37 remain**: 18 still-unnamed
+`FUN_*` (down from pass 7's 30) + 16 genuinely-open thin-named (unchanged)
++ 2 already-high-confidence thin-named (unchanged) + 1 non-function.
+Arithmetic check: `183 + 18 + 16 + 2 + 1 = 220`. ✓
+
+This pass also confirms the region contains a complete libc-style
+`memcpy`/`memmove`/`memset` trio back-to-back at `0x8000e85c`-`0x8000e9cc`
+(`optimized_memcpy`, `optimized_memmove` this pass, `memset`), and that the
+region's recurring "do-nothing infinite loop" halt idiom (seen previously in
+isolated spots) appears twice more in this stretch
+(`link_status_bitmask_event_dispatcher`, `status_pair_ring_push_with_overflow_trap`),
+reinforcing that it's a deliberate fatal-trap pattern rather than an
+analysis artifact.
+
 ## Decompiled but not yet confidently named (context for next worker)
 
 Carried over from pass 1 where still accurate, with pass-2 updates noted.
@@ -821,15 +865,14 @@ functions from pass 2, are listed here:
 
 After pass 1 (12 resolved), pass 2 (19 more + 1 non-function
 reclassification), pass 3 (74 more), pass 4 (27 more + tally
-reconciliation), pass 5 (31 more), pass 6 (13 more), and **pass 7 (12 more
-resolved this continuation, plus a from-scratch tally re-derivation)**,
-**171 of the original 220 gap functions are resolved** (170 real functions
-+ 1 reclassified non-function), leaving **49 genuinely unresolved**: 30
+reconciliation), pass 5 (31 more), pass 6 (13 more), pass 7 (12 more + a
+from-scratch tally re-derivation), and **pass 8 (12 more resolved this
+continuation, the `0x8000e4bc`-`0x8000eda0` stretch)**,
+**183 of the original 220 gap functions are resolved** (182 real functions
++ 1 reclassified non-function), leaving **37 genuinely unresolved**: 18
 still completely unnamed (`FUN_8000xxxx`, never triaged — down from pass
-6's 42) and 16 pre-existing thin-named-but-undecompiled Kovah names that
-fall in this region's gaps (unchanged since pass 4 — pass 7's
-from-scratch re-derivation confirmed this figure was correct all along;
-see "Tally reconciliation (pass 7)" above for the full derivation). Of
+7's 30) and 16 pre-existing thin-named-but-undecompiled Kovah names that
+fall in this region's gaps (unchanged since pass 4). Of
 those 16, 2 — `optimized_memcpy`/`0x8000e85c` and
 `lots_of_initialization`/`0x8000fb5c` — are already rated "high
 confidence" in `rom_function_index.md` via other docs and don't need
@@ -845,15 +888,13 @@ further work here; the other 14 are genuinely open:
 `wraps_multi_VSC_called_if_no_patch3`/`0x8000f53c`,
 `VSC_0xfc39_wrapper_FUN_8000fae8`/`0x8000fae8`, `copies_config_bdaddr`/`0x8000fd38`.
 Recount verified directly: `ListRegion0x80000_Gaps.java` re-run at the end
-of this pass shows all 220 original entries with pass 1-7's 171 renamed
+of this pass shows all 220 original entries with pass 1-8's 183 renamed
 names correctly reflected (confirms no rename-persistence regression and
-no count drift since pass 6). **Arithmetic, fully reconciled this pass:**
-`171 (resolved) + 30 (still-unnamed) + 16 (thin-named, genuinely open) + 2
+no count drift since pass 7). **Arithmetic, fully reconciled this pass:**
+`183 (resolved) + 18 (still-unnamed) + 16 (thin-named, genuinely open) + 2
 (thin-named, already high-confidence) + 1 (non-function) = 220`. ✓ No
-open arithmetic items remain — the pass-6 discrepancy was a bookkeeping gap
-(15 already-resolved functions never tabulated into this doc's pass-N
-tables, not a real miscount), fully explained in "Tally reconciliation
-(pass 7)" above.
+open arithmetic items — pass 8 was a clean +12 with no bookkeeping
+surprises.
 
 **Note on the `0x80001648`/`0x80001c4c` cluster heads**: these were the
 single highest-value named targets through pass 3, and were **fully
@@ -861,15 +902,25 @@ resolved in pass 4** (along with the packet-type-policy quartet
 `0x800013a4`/`0x80001470`/`0x8000151c`/`0x80001564`) — no longer open.
 
 **Note on the `0x80004fd8`-`0x800085a4` stretch**: fully resolved as of
-this pass (passes 6+7). Found to contain two distinct top-level
+pass 7 (passes 6+7 together). Found to contain two distinct top-level
 status-word dispatch loops (`top_level_link_event_status_dispatcher_loop`,
 `top_level_link_event_status_dispatcher_loop2`) plus their ~20 shared and
 distinct per-connection apply/log/drain handlers — no longer open. The two
 top-level loops' relationship to each other (primary/secondary? independent
-status-word sources?) remains an open question, see below.
+status-word sources?) remains an open question, see above.
+
+**Note on the `0x8000e4bc`-`0x8000eda0` stretch**: fully resolved as of
+this pass (pass 8). Found to contain a mix of: 2 more "do-nothing infinite
+loop" fatal-trap handlers (`link_status_bitmask_event_dispatcher`,
+`status_pair_ring_push_with_overflow_trap`), the `optimized_memmove`
+completing the region's `memcpy`/`memmove`/`memset` libc-style trio, a
+status-word-to-ring/download consumer pair, 2 small register-accessor
+wrappers (one with a `0xdead` sentinel matching `FUN_80011584`'s
+convention), and the large `generic_status_field_get_set_dispatcher`
+(700B) — a many-field opcode-routed get/set router. No longer open.
 
 **Untouched/largely-untouched sub-ranges for the next pass** (all are cold,
-never-triaged `FUN_8000xxxx` unless noted; 30 unnamed functions total,
+never-triaged `FUN_8000xxxx` unless noted; 18 unnamed functions total,
 confirmed by direct re-list this pass):
 
 - `0x800007d0`–`0x80000820`: 2 small untouched functions (68B, 364B) between
@@ -886,20 +937,13 @@ confirmed by direct re-list this pass):
 - `0x8000dd00`: a single 404B untouched function sandwiched between pass
   3/4's packet-type cluster and the `link_state6_quality_recovery_poll_loop`
   cluster — likely related given proximity.
-- `0x8000e4bc`–`0x8000eda0`: ~14 functions (38B–700B:
-  `0x8000e4bc`/592B, `0x8000e764`/202B, `0x8000e8c0`/202B, `0x8000ea1c`/144B,
-  `0x8000ead4`/172B, `0x8000eba0`/80B, `0x8000ebfc`/48B, `0x8000ec34`/38B,
-  `0x8000ec64`/60B, `0x8000ed04`/42B, `0x8000ed30`/98B, `0x8000eda0`/700B)
-  between `build_and_send_default_status_report` and `optimized_memcpy` —
-  the largest single remaining untouched stretch in the region (12
-  functions). **Recommended next target** — largest concentration of
-  unresolved work left.
 - `0x8000f4a0`–`0x8000fb20`: ~9 small functions (32B–562B: `0x8000f4a0`/58B,
   `0x8000f4f4`/56B, `0x8000f584`/96B, `0x8000f628`/32B, `0x8000f658`/562B,
   `0x8000f8bc`/336B, `0x8000fa48`/86B, `0x8000fab0`/50B, `0x8000fb20`/50B)
   around the `unknown_fptr_index9`/`VSC_0xfc39_wrapper_FUN_8000fae8`
   thin-named cluster — likely related to multi-VSC dispatch given the
-  neighboring thin-named functions' VSC-prefixed names.
+  neighboring thin-named functions' VSC-prefixed names. **Now the largest
+  remaining untouched stretch (9 functions) — recommended next target.**
 - `0x8000fdc0`–`0x8000fe4c`: 3 small/medium untouched functions (42B, 76B,
   610B) immediately after `copies_config_bdaddr`, the last untouched
   stretch before the region's upper boundary `0x8000ffff`.
