@@ -27,11 +27,20 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 |
-| Named functions (this doc's table) | 461 |
-| Unnamed (`FUN_*`) functions (summarized below) | 2278 |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 57 |
+| Named functions (this doc's table) | 473 (461 baseline + 12 newly named 2026-06-22 region-0x80000000 sweep) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2266 (2278 baseline − 12) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 70 (actual baseline count was 58, not the 57 this doc previously stated — pre-existing off-by-one in the summary text, not introduced this pass — + 12 new) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
+
+**2026-06-22 update**: Phase 9's region-by-region exhaustive sweep
+(`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
+functions this pass, all in ROM region `0x80000000`-`0x8000ffff`. See
+`rom/reverse_engineering_region_0x80000000.md` for full detail; the 12 new
+rows are appended at the end of the named-function table below (kept
+separate from the original 2026-06-21 alphabetical-by-address run for easy
+diffing — a future re-run of `RomNamedFuncAddrs.java` will naturally merge
+them back into address order).
 
 Note: the 2026-06-21 `rom_coverage_baseline.md` run recorded `total=2738`;
 this run recorded `total=2739` (461 named unchanged). The 1-function drift
@@ -115,6 +124,18 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000fae8` | 50 | `VSC_0xfc39_wrapper_FUN_8000fae8` | VSC 0xfc39 wrapper FUN 8000fae8 | medium (named, one-line purpose only, not decompiled) |
 | `0x8000fb5c` | 436 | `lots_of_initialization` | lots of initialization — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x8000fd38` | 120 | `copies_config_bdaddr` | copies config bdaddr | medium (named, one-line purpose only, not decompiled) |
+| `0x8000046c` | 20 | `usb_event_status_handler_dup` | decompiles identically to `0x80000480`; alias/thunk vs. boundary bug not disambiguated — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000480` | 764 | `usb_event_status_handler` | USB-class event-status bit dispatcher, ends in USB-transport-drain calls — see `region_0x80000000`, `usb_transport_hci_driver` | high (decompiled+documented) |
+| `0x80000a5c` | 410 | `connection_event_status_handler` | per-connection HW status-change handler (link loss/role/feature gating) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000c24` | 64 | `timer_callback_table_dispatcher_4entry` | fixed 4-entry callback-table dispatcher over a status byte — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000c74` | 190 | `uart_rx_tx_byte_fifo_handler` | UART-style RX/TX circular-byte-FIFO ISR handler — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000d78` | 492 | `isr_bottom_half_status_dispatcher` | ISR bottom-half/deferred-event dispatcher, reads CP0 Cause/EPC then branches to ~8 status-bit handlers — see `region_0x80000000`, `interrupt_vectors` | high (decompiled+documented) |
+| `0x800011fc` | 188 | `conn_record_pending_data_drain` | linked-list byte-stream dequeue primitive over conn-record buffer pool — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
+| `0x800012b8` | 216 | `baseband_event_status_dispatcher_0xd` | 13-source baseband event dispatcher, parallel in shape to `FUN_80050810` — see `region_0x80000000`, `conn_type_dispatch_and_esco` | high (decompiled+documented) |
+| `0x80009130` | 12 | `get_CP0_Cause_register` | `return Cause;` — CP0 interrupt-cause accessor — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000913c` | 12 | `get_CP0_EPC_register` | `return EPC;` — CP0 exception-PC accessor — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000a780` | 318 | `find_pool_index_by_addr_and_mark_dirty` | resolves an address to a record-pool index across 4 fixed-size pools, disables IRQs, sets a dirty bit, re-enables IRQs — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
+| `0x8000a8e8` | 308 | `conn_record_periodic_sweep_and_clear_dirty` | periodic 17-entry sweep clearing dirty/in-use flags, pairs with `find_pool_index_by_addr_and_mark_dirty` — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
 | `0x800109ac` | 916 | `calls_to_0x8010a001_as_fptr_to_install_patches` | calls to 0x8010a001 as fptr to install patches — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80011a18` | 30 | `called_if_config[0xf2]&4` | called if config[0xf2]&4 | low (named by Kovah, purpose unclear) |
 | `0x80011d9c` | 100 | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | LMP CH  0x3ee  case2 else 2 FUN 80011d9c | medium (named, one-line purpose only, not decompiled) |
@@ -562,7 +583,7 @@ granularity is meaningful until individual triage happens).
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 307 | 13.5% |
+| `0x80000000`–`0x8000ffff` | 295 (307 − 12 resolved 2026-06-22) | 13.0% |
 | `0x80010000`–`0x8001ffff` | 268 | 11.8% |
 | `0x80020000`–`0x8002ffff` | 321 | 14.1% |
 | `0x80030000`–`0x8003ffff` | 290 | 12.7% |
@@ -570,7 +591,7 @@ granularity is meaningful until individual triage happens).
 | `0x80050000`–`0x8005ffff` | 354 | 15.5% |
 | `0x80060000`–`0x8006ffff` | 238 | 10.4% |
 | `0x80070000`–`0x8007ffff` | 193 | 8.5% |
-| **Total** | **2278** | **100%** |
+| **Total** | **2266** | **100%** |
 
 Distribution is fairly even across the whole ROM (10–16% per 64 KiB region) —
 there's no single large "unexplored" region; unnamed functions are

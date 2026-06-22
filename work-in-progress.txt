@@ -1692,10 +1692,52 @@ completion):
     macro-progress (named-%% and high-confidence-%% should both climb over
     the life of this sweep).
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff (307 unnamed + 27 thin-named fns)
-          Smallest, most already-touched region (boot/reset preamble +
-          interrupt trampoline + USB transport driver all live here at high
-          confidence already). Triage the rest per the splitting rule above.
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~208 of 220 gap fns remain)
+          First pass (2026-06-22) resolved 12 functions to real names with
+          full decompile + evidenced purpose: CP0 Cause/EPC register
+          accessors (0x80009130/0x8000913c), an ISR bottom-half status
+          dispatcher (0x80000d78), USB/connection/timer/UART event-status
+          handlers (0x80000480, 0x8000046c, 0x80000a5c, 0x80000c24,
+          0x80000c74), a 13-source baseband event dispatcher (0x800012b8),
+          a conn-record linked-list drain primitive (0x800011fc), and a
+          mark-dirty/clear-dirty pair extending conn_record_subsystem.md
+          (0x8000a780, 0x8000a8e8). Wrote up in NEW doc
+          analysis/rom/reverse_engineering_region_0x80000000.md (added to
+          analysis/INDEX.md). Updated rom_function_index.md's named-function
+          table (+12 rows, all "high" confidence) and unnamed-distribution
+          table (307->295 for this region, 2278->2266 total).
+          VERIFIED (per CLAUDE.md/ticket ask): function renames made via a
+          script_file_id script DO persist across a later, separate
+          run_ghidra_headless call (different script) against the same GZF
+          with use_saved_project=True — confirmed by renaming
+          0x80009130/0x8000913c then re-querying them with a different
+          script and seeing the new names. This should hold for all
+          remaining region tickets in this sweep.
+          Two new generic, reusable scripts saved for this sweep (see
+          GHIDRA_SCRIPTS.md's new "Reusable research scripts" section):
+          BatchDecompileList.java (batch decompile by address list) and
+          RenameBatch1.java (batch rename by addr=name list) — both take
+          their args via script_args[0], no per-ticket editing needed.
+          REMAINING SCOPE — the two gaps not covered by existing
+          boot_reset_sequence/interrupt_vectors/usb_transport_hci_driver
+          docs, minus the 12 just resolved:
+            gap A: 0x80000200-0x80009000 (continue from ~0x80002700 onward;
+                   0x80000200-~0x800026ff fully decompiled this pass even
+                   where not yet confidently named — see "decompiled but not
+                   yet confidently named" list in the new doc for an
+                   immediate head start, esp. the 0x80001648 packet-type
+                   cluster and 0x80001c4c role-switch/truncated-page
+                   cluster, both dense with existing partial evidence)
+            gap B: 0x8000a474-0x8000ffff (untouched this pass except
+                   0x8000a4ac-0x8000a8e8, which IS now resolved/contextualized
+                   — continue from ~0x8000aa64 onward)
+          Triage the rest per the splitting rule above.
+
+[TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
+          Largest thin-named count of any region (130) — heavy LMP/VSC
+          handler territory (many `VSC_0xfc##`/`LMP__0x###` one-liners
+          already named by Kovah but never decompiled). Triage per the
+          splitting rule above.
 
 [TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
           Largest thin-named count of any region (130) — heavy LMP/VSC

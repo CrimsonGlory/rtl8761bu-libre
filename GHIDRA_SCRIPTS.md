@@ -39,6 +39,22 @@ broken on 2026-06-21):**
   `script_file_id`), but a script's `script_name` entry in the table below, once
   it exists in `/opt/ghidra_scripts/`, is effectively immutable through the MCP
   surface.
+- **Confirmed working end-to-end 2026-06-22** (Phase 9 region-0x80000000 sweep):
+  saved 4 new scripts via `save_ghidra_script` (`ListRegion0x80000_Gaps.java`,
+  `Region0x80000StringXrefs.java`, `BatchDecompileList.java`,
+  `RenameBatch1.java`), ran each via `script_file_id` against the GZF with
+  `use_saved_project=True` — all executed correctly. Also confirmed
+  **function renames made via a `script_file_id` script persist** to a
+  *separate, later* `run_ghidra_headless` call (different script) against
+  the same cached GZF project — i.e. the GZF-process-mode project cache is a
+  real persistent Ghidra project, not re-imported fresh each call.
+- **Research-script store is a shared, capped pool** (`list_ghidra_research_files`
+  showed ~50 entries as of 2026-06-22, including an explicit
+  `ProbeCapTest20260622.java` cap probe from earlier in the day) — it holds
+  *all* `.py`/`.java` research scripts across the whole project's history, not
+  just Ghidra ones tied to this binary. Before saving a new script, consider
+  `mcp__wairz__list_ghidra_research_files` to see how close to the cap the
+  pool is; there is still no delete/evict tool, so the pool only grows.
 
 | Script | Purpose |
 |--------|---------|
@@ -99,3 +115,26 @@ directly), add a row to the table above in the same turn — script name + one-l
 purpose. Do this immediately, not as a follow-up. Undocumented scripts are
 invisible to future sessions and the table silently drifts out of date (as
 happened with 27 scripts before this rule was added).
+
+## Reusable research scripts (UUID-keyed, run via `script_file_id`)
+
+Most `save_ghidra_script`'d files in `list_ghidra_research_files` are
+one-off/single-ticket scripts (hardcoded addresses, named for the specific
+investigation that created them) and aren't worth indexing here. The
+following, saved during the 2026-06-22 Phase 9 region sweep, are **generic**
+(take addresses via `script_args`) and reusable by any future region-sweep
+ticket — look them up by name via `list_ghidra_research_files` to get the
+current UUID (UUIDs are not stable across saves of the same filename):
+
+| Filename | Purpose |
+|----------|---------|
+| `BatchDecompileList.java` | Decompiles a comma-separated list of hex addresses (`script_args[0]`), printing each function's signature, direct callees, and decompiled C. Avoids one-address-per-tool-call overhead — used for all Phase 9 region-sweep batch triage going forward. |
+| `RenameBatch1.java` | Renames functions given a `;`-separated list of `0xADDR=newName` pairs (`script_args[0]`). Prints old/new name for each for verification. |
+| `ListRegion0x80000_Gaps.java` | Lists every function (named+unnamed) in two hardcoded address ranges with size/name/source-type. Template for "list all functions in range X" — copy and edit the two range constants for a different region. |
+| `Region0x80000StringXrefs.java` | Lists every defined string in the `rom` block plus the functions that reference it. Useful for string-driven correlation in *other* regions (this region itself turned out to have almost no in-range strings — see `reverse_engineering_region_0x80000000.md`). |
+
+These 4 scripts pushed the shared research-script pool close to its
+informally-observed ~50-entry cap (see the cap-probe note above) — if a
+future ticket hits a save failure, these 4 (now superseded by direct reuse)
+are reasonable candidates to treat as "already served their one-off purpose"
+since their logic is generic enough to recreate cheaply if ever evicted.
