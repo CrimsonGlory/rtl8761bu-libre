@@ -1692,17 +1692,26 @@ completion):
     macro-progress (named-%% and high-confidence-%% should both climb over
     the life of this sweep).
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~129 of 220 gap fns remain)
-          SUPERVISOR NOTE (2026-06-22): the running tally has drifted —
-          105 resolved + 129 remaining = 234, not the original pass-1 count
-          of 220. Individual function claims spot-checked and solid (literal
-          opcode-immediate evidence for the new VSC handlers); the drift is
-          almost certainly a boundary/recount-methodology difference across
-          passes' scripts, not fabricated work. NEXT PASS: before triaging
-          more functions, re-run ListRegion0x80000_Gaps.java fresh against
-          the current (post-pass-3) GZF state and reconcile the total against
-          this 234 figure before continuing — don't propagate the drift
-          further without understanding it.
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~102 of 220 gap fns remain, reconciled)
+          SUPERVISOR NOTE (2026-06-22, updated after pass 4 was cut off mid-turn
+          by a session limit): pass 4 reconciled the prior tally-drift note
+          below (root cause found: 17 of pass 3's "105 resolved" were leaf
+          helpers OUTSIDE this region's 220-function scope, and the
+          thin-named bucket was undercounted by 2) AND resolved 27 more
+          functions (the 0x80001648/0x80001c4c packet-type/role-switch
+          supercluster, 14 fns; the 0x8000c09c-0x8000c77c stretch +
+          neighbors, 13 fns). Reconciled total: 115 resolved in-scope, 102
+          remain (86 unnamed + 16 genuinely-open thin-named). Full detail
+          and per-function evidence in
+          analysis/rom/reverse_engineering_region_0x80000000.md's pass-4
+          section ("Tally reconciliation" + "Resolved functions — pass 4").
+          INCOMPLETE: pass 4 was cut off by a session limit before updating
+          analysis/rom/rom_function_index.md (confidence flags/named-function
+          table/unnamed-distribution counts) or analysis/INDEX.md for the 27
+          new pass-4 functions — rom_function_index.md still only reflects
+          through pass 3. NEXT PASS MUST sync rom_function_index.md (and
+          INDEX.md if needed) for all 27 pass-4 functions before triaging
+          anything new — don't let this drift further.
           PASS 1 (2026-06-22) resolved 12 functions to real names with full
           decompile + evidenced purpose: CP0 Cause/EPC register accessors
           (0x80009130/0x8000913c), an ISR bottom-half status dispatcher

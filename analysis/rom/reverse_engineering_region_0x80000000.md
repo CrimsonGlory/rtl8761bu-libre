@@ -14,22 +14,103 @@ elsewhere are **not** repeated here:
   `early_fptr1/5/6/7`) — see `reverse_engineering_usb_transport_hci_driver.md`
 
 This doc covers the two remaining gaps: roughly `0x80000200`–`0x80009000`
-and `0x8000a474`–`0x8000ffff`. Per the region's scoping in
-`rom_function_index.md`, that's 307 unnamed (`FUN_8000xxxx`) + 27
-thin-named functions, 334 total. **Pass 1 (2026-06-22 morning) resolved 12**
-of those to a real Ghidra name + decompiled purpose, **pass 2
-(2026-06-22, same day) resolved 19 more** (18 real functions + 1
-4-byte degenerate stub) **plus reclassified one entry as a non-function**
-(`0x8000046c`, see below), and **pass 3 (2026-06-22, this continuation)
-resolved 74 more** — **105 resolved total** (104 real functions + the 1
-non-function reclassification), with several clusters now fully decompiled
-end-to-end. The region is NOT fully resolved — **129 of the original 220
-gap functions remain** (113 still completely unnamed `FUN_8000xxxx`, 16
-pre-existing thin-named-but-undecompiled, minus the 2 of those 16 —
-`optimized_memcpy`/`0x8000e85c` and `lots_of_initialization`/`0x8000fb5c` —
-that the index already rates "high confidence" via other docs, leaving 15
-genuinely-thin) — see the shrunk continuation range filed in
-`work-in-progress.txt`.
+and `0x8000a474`–`0x8000ffff`. A fresh, authoritative `ListRegion0x80000_Gaps.java`
+run (2026-06-22, pass 4) confirms these two gaps contain exactly **220**
+functions (named + unnamed) — this 220 is the correct, stable scope figure
+for *this document's* two-gap range and has not drifted; see "Tally
+reconciliation (pass 4)" below for why the running resolved/remaining counts
+*appeared* to drift in earlier passes' summaries even though the underlying
+220-function scope never changed.
+
+**Pass 1 (2026-06-22 morning) resolved 12** functions to a real Ghidra name +
+decompiled purpose, **pass 2 (2026-06-22, same day) resolved 19 more** (18
+real functions + 1 4-byte degenerate stub) **plus reclassified one entry as
+a non-function** (`0x8000046c`, see below), **pass 3 (2026-06-22, same day)
+resolved 74 more**, and **pass 4 (2026-06-22, this continuation) resolved 27
+more**. Cumulative real-function renames across all four passes: **115**,
+all within the 220-function scope (see reconciliation below for why pass
+3's own summary said "105" using a methodology that double-counted 17
+out-of-scope leaf helpers). The region is NOT fully resolved —
+**102 of the 220 gap functions remain**: 86 still completely unnamed
+`FUN_8000xxxx`, plus 18 pre-existing thin-named-but-undecompiled Kovah
+names, **minus** 2 of those 18 (`optimized_memcpy`/`0x8000e85c` and
+`lots_of_initialization`/`0x8000fb5c`) that the index already rates "high
+confidence" via other docs — leaving **16 genuinely-thin** (corrects pass
+3's stale "14 genuinely open"; pass 3's own enumeration of pre-existing
+thin-named functions omitted `0x800009c0`/`unknown_referencing_default_name_1`,
+undercounting that bucket by 1, see reconciliation below). Total still
+needing work: 86 unnamed + 16 genuinely-open-thin = **102**.
+
+## Tally reconciliation (pass 4, 2026-06-22)
+
+**Why this pass exists:** the supervisor flagged that the running tally in
+`work-in-progress.txt` had drifted — "105 resolved + 129 remaining = 234"
+no longer summed to the original 220-function scope. This section
+re-derives the count from scratch and pins down the exact cause.
+
+**Method:** re-ran `ListRegion0x80000_Gaps.java` fresh (via `script_file_id`,
+`use_saved_project=True`) against the post-pass-3 GZF state, before doing
+any new triage. It returned exactly **220** functions again (`REGION_GAPS_END
+count=220`) — the scope itself never changed across any pass. Classified
+all 220 by Ghidra `SourceType`: **113 `DEFAULT`** (still unnamed
+`FUN_8000xxxx`) and **107 `USER_DEFINED`** (named, of any provenance —
+Kovah-original or Phase-9-renamed).
+
+Cross-referenced the 107 `USER_DEFINED` names against the doc's own
+pass-1/2/3 resolved-function tables (106 distinct addresses claimed
+resolved, of which 1 — `0x8000046c` — is the non-function reclassification,
+leaving 105 claimed-resolved real functions):
+
+| Category | Count | Detail |
+|---|---|---|
+| Claimed resolved (passes 1-3, real functions) | 105 | per pass-3's own "Remaining scope" tally |
+| ...of which actually inside this doc's 220-function scope | **88** | verified by direct address membership check against the fresh 220-entry list |
+| ...of which are OUTSIDE this doc's 220-function scope | **17** | see breakdown below — this is the drift's entire cause |
+| Non-function reclassification | 1 | `0x8000046c` (zero-fill padding) |
+| Pre-existing thin-named, untouched by passes 1-3 | 18 | not 16 as pass 3's "Remaining scope" stated — see below |
+| ...of which already "high confidence" via other docs | 2 | `optimized_memcpy`/`0x8000e85c`, `lots_of_initialization`/`0x8000fb5c` |
+| ...of which genuinely open | 16 | not 14 as pass 3 stated |
+| Still completely unnamed (`FUN_*`, `DEFAULT`) | 113 | matches `ListRegion0x80000_Gaps.java`'s `DEFAULT`-count exactly |
+
+**Root cause of the drift, confirmed by direct address-membership testing
+(not guessed):** of the 105 functions passes 1-3 collectively renamed to
+real names, **17 are leaf-helper functions that live in entirely different
+ROM regions** — `0x80010000`-`0x8001ffff` (`0x8001483c`, `0x80014d50`,
+`0x800147b0`, `0x80013dc4`, `0x80014c58`), `0x80020000`-`0x8002ffff`
+(`0x8002addc`, `0x8002bc88`), `0x80030000`-`0x8003ffff` (`0x80035068`,
+`0x8003d018`), `0x80040000`-`0x8004ffff` (`0x80042db8`, `0x80042de8`,
+`0x80042a68`), `0x80060000`-`0x8006ffff` (`0x80060708`) — plus 4 more
+(`0x80009130`, `0x8000913c`, `0x800093d0`, `0x800093e4`) that *are* inside
+`0x80000000`-`0x8000ffff` numerically but fall inside the
+`0x80009000`-`0x8000a474` interrupt-vector/MIPS16e-switch sub-range this doc
+explicitly **excludes** from its 220-count (covered by
+`reverse_engineering_interrupt_vectors.md` instead). Passes 1-3 correctly
+*decompiled and renamed* these 17 as supporting evidence for in-scope
+cluster heads (e.g. `set_bos_e4_role_switch_hook_bit` was needed to
+understand `0x80001648`'s behavior), but pass 3's running-total arithmetic
+incorrectly **counted all 17 against the 220-function gap scope** as if
+they were "resolved gap functions," inflating the resolved count from the
+true 88 to a claimed 105. Separately, pass 3's own "Remaining scope" section
+enumerated only 16 of the 18 actual pre-existing thin-named functions in
+the gaps — it omitted `0x800009c0`/`unknown_referencing_default_name_1` —
+undercounting the thin-named bucket by 1 (later listed as "14 genuinely
+open" instead of the correct 16). These two errors run in *opposite*
+directions and nearly cancel (over-counting resolved by 17, under-counting
+thin-named-open by 2), which is why the final "129 remaining" headline
+number coincidentally looked plausible/stable across passes 2 and 3 even
+though the underlying resolved/thin breakdown was wrong both times. **This
+is a real boundary/recount-methodology bug in how prior passes tallied
+their own running totals, not fabricated work** — every individual rename
+re-verified in this pass is present, correctly named, and persisted
+correctly in the GZF.
+
+**Reconciled arithmetic (verified to sum to exactly 220):**
+`86 (still-unnamed) + 16 (genuinely-open thin-named) + 2 (thin-named,
+already high-confidence elsewhere) + 115 (resolved in-scope, cumulative
+through pass 4) + 1 (non-function) = 220`. The pass-4 column already
+reflects this turn's 27 new resolutions (88 carried over from passes 1-3,
+mechanically verified in-scope, + 27 new = 115); see "Resolved functions —
+pass 4" below.
 
 ## Method
 
@@ -280,6 +361,61 @@ above for the shared evidence pattern per cluster.
 | `0x8000e0dc` | `program_rf_freq_word_from_status_or_table` | 178B. IRQ-disabled; branches on a "use table" flag — either programs a 13-bit frequency-word field directly from a status register, or looks it up from a 2-byte table entry — and updates a derived single-bit flag + (if a "locked" feature bit is set) a mirrored status byte either way. RF frequency-word programming with table-or-live-status source selection. |
 | `0x8000e380` | `vsc_0xfc56_set_3word_params_and_packet_type` | 222B. Checks HCI command opcode `0xfc56`; on match, unpacks 3 little-endian 32-bit words from the command parameters into 3 globals, conditionally reads the current packet type (`FUN_8000c688`), conditionally re-inits the baseband feature pool (`baseband_feature_pool_init_and_reset(2)`), calls `FUN_8000e1b0` with the unpacked words, and conditionally restores the packet type via `program_packet_type_and_timing_ratio`. **Confirmed VSC handler for opcode `0xfc56`** — a vendor-specific "set 3 parameter words" command, likely RF/AFH-table-related given the pool-reinit call. |
 | `0x8000e470` | `build_and_send_default_status_report` | 68B. Invokes an optional callback to obtain a buffer; on success, fills a fixed 6-byte status-report template (`0xf, 4, 0, role+1, 0, 0`) and sends it via `FUN_8002f220`. Generic default-status-report builder/sender. |
+
+## Resolved functions — pass 4, this continuation (27)
+
+Per the ticket's instruction, this pass first reconciled the tally (see
+"Tally reconciliation" above) and then mined this doc's own "Decompiled but
+not yet confidently named" section and "Remaining scope" list for concrete
+targets — the `0x80001648` packet-type cluster and `0x80001c4c`
+role-switch/truncated-page cluster (both flagged since pass 2 as "highest
+value, leaf callees already resolved") plus the
+`0x800013a4`/`0x80001470`/`0x8000151c`/`0x80001564` policy quartet, and the
+`0x8000c09c`-`0x8000c77c` stretch (already decompiled in this doc's prose as
+pass-3 callees, just not yet tabulated/named) plus a few of its immediate
+untouched neighbors (`0x8000cfcc`-`0x8000cffc`, `0x8000d8f8`/`0x8000dbdc`,
+`0x8000e1b0`).
+
+**The packet-type/role-switch supercluster (14):**
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x800013a4` | `select_and_program_sco_esco_packet_type_for_conn` | 174B. Chooses one of `0xc00`/`0xc000`/`0x1c00` packet-type words based on `bdaddr_random_` and a secure-connection config-blob bit, then programs it via the standard indexed-write callback. Sibling/entry-point of the policy quartet. |
+| `0x80001470` | `esco_quality_window_recovery_check` | 146B. If the connection's current packet type is `0x1c00` (eSCO) and a watchdog-budget check (`ptVar2->uint_0x08 - now < 0xe`) passes, reprograms to `0xc000` (max-rate SCO) and decrements a retry counter — an eSCO degrade-on-quality-window-miss recovery step. |
+| `0x8000151c` | `scheduler_find_next_min_deadline` | 64B. Scans up to 10 connection-record entries for the minimum `unknown4_0x3C` ("next deadline") value among valid+active ones, stores it into the shared scheduler-state struct's `uint_0x08` field. Confirmed as the scheduler-tick/next-timeout finder feeding the watchdog check above. |
+| `0x80001564` | `feature_bit_packet_type_policy_chooser` | 220B. Returns one of 5 fixed policy codes (`0x7f`/`0x80`/`0x82`/`0x83`/`0x84`) based on link-mode/feature bits and a `lookup_codec_or_role_type_table_7x4` lookup, then applies it via `FUN_80063fc4`. |
+| `0x80001648` | `apply_codec_type_and_role_switch_hook_dispatch` | 728B. Dispatches on a mode byte (1/2/4/8) read from a shared parameter block: mode 1 programs SCO packet type `0x1c00`; mode 2 toggles a baseband feature bit then programs role-switch-hook state; mode 4 sets up an AFH/role register write; mode 8 programs codec-table-indexed SCO type `0xc000`/`0xc00`. Calls `set_bos_e4_role_switch_hook_bit`/`clear_bos_e4_role_switch_hook_bit` based on a `field_0x219` byte (`==1` set, else clear) both at entry and again after the dispatch, and ends by clearing two codec-table indexed-register bits, calling `FUN_800431a0`, and dispatching housekeeping (`FUN_800607dc`, `FUN_800720c4(...,0x35)`, `FUN_80034e6c`). This is the **central codec-type/role-switch-hook apply routine** the rest of the cluster funnels into — confirms the cluster's working theory: it is "apply whichever connection-type/role change was just decided" rather than "decide" (decision happens in the sibling quartet above). |
+| `0x80001944` | `vsc_clear_bit13_and_log_0x2cd` | 58B. Clears bit 13 of register `0x32`, then logs event `0x2cd` via `possible_logger_called_if_no_patch3`. Small VSC-adjacent housekeeping/logging step. |
+| `0x80001990` | `role_switch_or_afh_table_entry_toggle_and_log` | 292B. Gated on a packet-type-class bitmask test (`0xcc18 >> (type>>0xc) & 1`); programs register `0x70` to `0xc00`, then — if a config "power-req/clk-adj" feature bit is set and a per-slot table bit (`+0xd`) plus type `==3` match — sets that bit and logs via `possible_logging_function__var_args`; otherwise toggles a per-connection table entry's in-use bit (XOR `1`) and logs via both `possible_logger_called_if_no_patch3` (event `0x321`) and `possible_logging_function__var_args` (with several connection-record fields as varargs). |
+| `0x80001ad8` | `lmp_role_switch_param_fixup_and_log_confirm_mismatch` | 86B. If a 16-bit parameter's upper nibble is `0x2`, rewrites its low byte to `0x12` (a role-switch-PDU parameter fixup); calls an optional verification callback, and if it signals mismatch, logs event `0x2be` via `possible_logger_called_if_no_patch3` with the shared `int_0x10` state field — the **confirmation-mismatch logger** companion to `role_switch_confirmation_matcher` (`0x80002b60`). |
+| `0x80001b3c` | `role_switch_hook_clear_and_packet_type_reset_seq4` | 238B. Gated on a shared state byte `==4`; if so, clears the role-switch-hook bit (`clear_bos_e4_role_switch_hook_bit`), reprograms 2 connections' packet types (one to `0xc000`, the other to `0x1c00`), updates a role-index register write, and advances the state byte to `8` — a sequenced **state-4-to-state-8 role-switch teardown step**. Else logs a mismatch (event `0x25e`). |
+| `0x80001c4c` | `role_switch_completion_or_abort_handler` | 700B. Branches on the shared `the_0x300.int_0x10` state field: state `2` ("as initiator") commits the role-switch as **successful** — programs packet type `0x1c00` (eSCO) for the remapped slot and resets state to 0; any other state ("as responder/other") treats it as an **abort/failure** path — programs `0xc00` (SCO) instead, checks a global "page in progress" flag (`check_if_80122df0_is_non_zero_else_ret_0xff`) to decide whether to also remap and mark a second slot, and logs a recovery-path warning (event `0x5ea`) when no usable slot is found. Both branches converge to clear a register bit field, look up the connection's codec/role table row, and — if codec lookup succeeds — apply the codec config (`FUN_80014dac`), bump the connection's procedure-completion counter (`field_0x173 +1`), log completion (event `700`), bump a per-slot LAP counter, call `sometimes_called_with_0_3_0`, and tear down the codec table (`clear_codec_table_entries_for_role`) — i.e. apply-then-clear, consistent with "role switch just finished (success or failure), reconcile codec state either way." This is the **role-switch completion/abort handler** flagged since pass 2 as the single highest-value unresolved cluster head — now resolved. |
+| `0x80001f34` | `esco_renegotiation_request_gate` | 248B. Gated on 2 global flags both clear; if a per-connection "in renegotiation" flag (`+0x32==1`) is set, optionally defers to a callback, then — if the remapped eSCO slot is free — delegates to `FUN_80037e28`; otherwise, if a config bit + slot-availability + non-default-packet-type conditions all hold, marks the connection "renegotiation pending" (state `2`) and logs (event `0x328`). The **gate/entry-point** deciding whether an eSCO renegotiation request can proceed now or must wait. |
+| `0x80002048` | `page_response_timing_and_afh_update_counters` | 334B. Gated on a page-response-state match (`iVar11+0x2e==2` and LT_ADDR match); on match, bumps 2 per-connection counters (response-count, and conditionally a non-broadcast-count), and conditionally bumps role-dependent AFH counters (`field_0xb0`/`field_0xaa`) based on packet-type-class bits. A second, independently-gated block (random-BD_ADDR or non-zero param + a feature bit + a valid page-table slot) clears the page-response state, bumps a per-channel counter, and tears down 2 connection/channel-table entries (`FUN_8002bae0`, `FUN_80013cec`) plus an 8-bit channel-active bitmask, calling `FUN_800142f8`/`FUN_80014290(0)` when the bitmask empties. Page-response/AFH-bookkeeping update routine. |
+| `0x800021c0` | `link_quality_mode3_packet_type_reprogram` | 254B. Branches on a 2-state mode flag (`DAT_800022c0`); mode 1 (gated further on connection sub-state `==3`) checks a packet-type-class field for `0xc` and, if a specific role-index match (`==3`) and 2 other flags are clear, reprograms packet type to `0xc00` and calls `wraps_uninteresting_if_0x80100000!=0...`; mode-0 path checks a 2-bit field `!=3` before the same `0xc00` reprogram. Both modes finish with `FUN_8002bb50(2, role_subfield, 0)` — a **link-quality-driven packet-type downgrade-to-SCO** routine, gated by connection sub-state and role index. |
+| `0x800022e4` | `truncated_page_complete_status_dispatcher` | 384B. Bit-tested dispatch over a status word: bit 1 logs a computed "remaining slots" value and sets a feature flag if a table bit (`+0xd & 2`) was set; bit 2 looks up the codec/role table, and on lookup failure resets a slot's role state, logs (event `0x259`), **calls `set_bos[bosi].0xb2_index=arg2` and `send_evt_HCI_Truncated_Page_Complete` directly** — confirming this branch is the actual **HCI Truncated Page Complete event generator**; bits `0x80`/`0x100`/`0x200` select a status code (0/1/2) passed to `FUN_800051d4`, conditionally followed by `FUN_8003ce98`; bit 8 calls `FUN_800379dc`. The **top-level truncated-page-complete status-word dispatcher**, matching the cluster's name. |
+
+**`0x8000c09c`-`0x8000c77c` stretch + immediate neighbors (13):**
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x8000c350` | `lmp_25b_afh_toggle_via_vsc_0xfc95` | 56B. Conditionally calls `LMP__25B__most_common_for_VSCs1` (if a state var `!=-1`), then unconditionally calls `VSC_0xfc95_called2` and `LMP__268__most_common_for_VSCs2_checks_fptr_patch` — same 3-function call triad already seen gating the `link_state6_afh_or_channel_feature_toggle1/2/3` siblings, confirming this is another AFH/channel-feature-toggle call site (a 4th, simpler one with no link-state gate of its own — the gating happens in its caller). |
+| `0x8000c3f4` | `feature_bit_status_word_propagator` | 414B. Reads 2 config-blob feature-byte fields (`field56_0x3e`/`field57_0x3f`), computes 2 derived status flags (`0x800000`/`0x200000`-style bits) from several status-word/global tests, conditionally calls `unknown_referencing_default_name_6` when either flag fires, then — gated on a second feature byte's bit `2` — calls `link_active_or_config_flag_check` and `unknown_referencing_default_name_3` (the latter with a computed boolean), and finally tail-calls an optional installed callback with the raw status word. The **central feature-bit-driven status propagation routine** tying together 3 previously-thin/unnamed functions (`unknown_referencing_default_name_3/6`, `link_active_or_config_flag_check`) as its direct callees — clarifies their context even though their own internals remain to be separately resolved. |
+| `0x8000c5c8` | `swap_status_bits_between_globals_if_consistent` | 136B. Given a byte param + output pointer + mode flag, optionally calls `FUN_80009694` (gated on mode`==0`), then conditionally swaps bits between two global words if a consistency check (`(g1&v)!=0 == (v&g2)!=0`) passes — writes back `param & g2` to the output and XORs `g2` with the input byte. A **bit-swap-if-consistent primitive**, parametrized generic enough that its specific peripheral wasn't pinned down. |
+| `0x8000c664` | `set_bit7_of_global_from_param` | 32B. `*global = param ? (*global \| 0xffffff80) : (*global & 0x7f), masked to a byte` — single-bit (bit 7) set/clear helper, same family as the other `set_bitN_of_global` accessors named in pass 3. |
+| `0x8000c688` | `pack_freq_and_status_fields_from_globals` | 152B. Packs 5 separate global values (a byte, a word, an int, a dword, another byte+dword) into a 4-byte output structure via masked shifts — a **multi-field status/frequency-word packer**, feeding the RF-divider/packet-type orchestrators below (`afh_or_rf_divider_reconfig_orchestrator` calls it twice). |
+| `0x8000c738` | `set_bit0_and_mirror_if_feature_set` | 54B. Sets/clears bit 0 of a global from a boolean param, then — if a feature-config bit (`+2 & 0x20`) is set — mirrors that same bit into a second global. Set-and-conditionally-propagate pattern. |
+| `0x8000c77c` | `apply_freq_field_or_call_optional_fptr` | 58B. If an optional function pointer is null, packs a frequency/status field (29-bit mask shifted, plus a 1-bit flag shifted to bit 13) into a global masked by a 4th global; otherwise just calls the function pointer. The **RF-register-accessor leaf** called by `link_state6_quality_recovery_poll_loop` (pass 3) — confirms that caller's "quality recovery" interpretation since this function directly programs an RF status/frequency field. |
+| `0x8000cfcc` | `or_bit4_into_global` | 12B. `*global \|= 0x10` — trivial unconditional bit-4 OR-in helper, no parameter. |
+| `0x8000cfdc` | `toggle_bit5_of_global_v2` | 28B. Boolean-param-driven set/clear of bit 5 (`0x20`) — a second, distinct bit-5 toggle helper (the pass-3 `toggle_bit5_of_global_v1` operates on a different global at `0x8000c940`). |
+| `0x8000cffc` | `toggle_bit6_of_global` | 28B. Boolean-param-driven set/clear of bit 6 (`0x40`), same family as the above. |
+| `0x8000d8f8` | `afh_or_rf_divider_reconfig_orchestrator` | 694B. Large branching routine gated on multiple feature/status bits; one path resets a packet-type-mask field and calls `program_packet_type_and_timing_ratio`/`program_default_packet_type_and_status`; the other (when none of the early-exit conditions hold) computes an RF divider target from status-word fields and a per-feature shift/sign adjustment, calls `pack_freq_and_status_fields_from_globals`, and dispatches to `rf_divider_ratio_table_lookup_or_search` or `rf_divider_ratio_search_and_program` based on a 2-bit mode field, finally reprogramming the packet type if the divider result changed. The **top-level orchestrator** tying together the RF-divider cluster (pass 3) and the packet-type cluster (pass 4) — confirms they are two halves of one AFH/RF-quality reconfiguration flow rather than unrelated clusters. |
+| `0x8000dbdc` | `program_packet_type_with_default_fallback` | 226B. Computes a candidate packet-type word from 2 globals' masked combination, tries `program_packet_type_and_timing_ratio` with it; on failure (`0xff` sentinel), falls back to a feature-gated alternate computation (either masked-from-global or a fixed constant), retries, and — if that also fails — applies a final fixed fallback constant. The **packet-type-program-with-cascading-fallback** wrapper, called by `vsc_0xfc56_payload_apply_and_rf_reconfig` below when no per-connection override callback is installed. |
+| `0x8000e1b0` | `vsc_0xfc56_payload_apply_and_rf_reconfig` | 430B. The function called by `vsc_0xfc56_set_3word_params_and_packet_type` (pass 3) to actually apply the 3 unpacked words: calls `conn_state2_role_dependent_hw_reconfig`, then either `program_packet_type_with_default_fallback` or `read_current_packet_type_word` depending on a per-connection flag, then — gated on more feature bits — calls `program_rf_freq_word_from_status_or_table`, `scrambled_status_field_unpacker`, and conditionally `sco_esco_timing_ratio_calculator`/`adaptive_threshold_register_programmer`; finishes by reprogramming 2 status registers, conditionally calling `LMP__25B__most_common_for_VSCs1`, setting 2 more status/timing fields, and calling `conn_state2_codec_or_role_field_programmer`. This is the **actual payload-apply body for VSC `0xfc56`** — confirms and completes the handler chain pass 3 only partially resolved (`vsc_0xfc56_set_3word_params_and_packet_type` → this function). |
+
+Confirmed rename-persistence again this pass via a post-batch
+`ListRegion0x80000_Gaps.java` re-run showing all 27 new names correctly
+reflected with no regressions to any prior pass's names.
 
 ## Decompiled but not yet confidently named (context for next worker)
 
