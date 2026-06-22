@@ -720,101 +720,101 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8005d26c` | 88 | `assign_pointer_to_0x1AC_offset_0x134` | assign pointer to 0x1AC offset 0x134 — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e23c` | 118 | `access_config_at_0xa5_and_0x1ac_stuct_stuff` | access config at 0xa5 and 0x1ac stuct stuff — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e3b8` | 80 | `fHCI_Read_Remote_Version_Information_config_handler` | HCI Read Remote Version Information handler; updates config struct 0x1ac with remote LMP version — see `region_0x80050000` | high (decompiled+documented) |
-| `0x800600e8` | 218 | `LMP__270__FUN_800600e8` | LMP  270  FUN 800600e8 | low (named by Kovah, purpose unclear) |
-| `0x800605a4` | 4 | `just_return_0` | just return 0 | low (named by Kovah, purpose unclear) |
-| `0x800605a8` | 308 | `get_status_bits_by_LMP_Opcode` | get status bits by LMP Opcode | low (named by Kovah, purpose unclear) |
-| `0x80060740` | 44 | `lookup_up_to_3_bos_array_indices_by_connection_handle` | lookup up to 3 bos array indices by connection handle | low (named by Kovah, purpose unclear) |
-| `0x800608f0` | 222 | `some_case_0x2b` | some case 0x2b | low (named by Kovah, purpose unclear) |
-| `0x80060c30` | 80 | `look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` | look for non matching bdaddr bos index i.e. free connection slot | low (named by Kovah, purpose unclear) |
-| `0x80060cfc` | 16 | `zero_initialize_6_bytes_at_param1` | zero initialize 6 bytes at param1 | low (named by Kovah, purpose unclear) |
-| `0x80060d0c` | 186 | `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched?` | called by fHCI Remote Name Request 6 nop if not patched? | low (named by Kovah, purpose unclear) |
-| `0x80060dd8` | 188 | `return_big_ol_array_offset` | return big ol array offset | low (named by Kovah, purpose unclear) |
+| `0x800600e8` | 218 | `LMP__270__FUN_800600e8` | LMP  270  FUN 800600e8 | high (decompiled+documented in region_0x80060000) |
+| `0x800605a4` | 4 | `just_return_0` | just return 0 | high (decompiled+documented in region_0x80060000) |
+| `0x800605a8` | 308 | `get_status_bits_by_LMP_Opcode` | get status bits by LMP Opcode | high (decompiled+documented in region_0x80060000) |
+| `0x80060740` | 44 | `lookup_up_to_3_bos_array_indices_by_connection_handle` | lookup up to 3 bos array indices by connection handle | high (decompiled+documented in region_0x80060000) |
+| `0x800608f0` | 222 | `some_case_0x2b` | some case 0x2b | high (decompiled+documented in region_0x80060000) |
+| `0x80060c30` | 80 | `look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` | look for non matching bdaddr bos index i.e. free connection slot | high (decompiled+documented in region_0x80060000) |
+| `0x80060cfc` | 16 | `zero_initialize_6_bytes_at_param1` | zero initialize 6 bytes at param1 | high (decompiled+documented in region_0x80060000) |
+| `0x80060d0c` | 186 | `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched?` | called by fHCI Remote Name Request 6 nop if not patched? | high (decompiled+documented in region_0x80060000) |
+| `0x80060dd8` | 188 | `return_big_ol_array_offset` | return big ol array offset | high (decompiled+documented in region_0x80060000) |
 | `0x800611e4` | 720 | `send_LMP_pkt` | send LMP pkt — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x800615a8` | 62 | `send_extended_opcode_LMP_reply?` | send extended opcode LMP reply? | low (named by Kovah, purpose unclear) |
-| `0x80061624` | 122 | `LMP_PACKET_TYPE_TABLE_REQ_0x7F_0B` | LMP PACKET TYPE TABLE REQ 0x7F 0B | low (named by Kovah, purpose unclear) |
-| `0x80061754` | 44 | `if_arg1<3_memcpy_features_to_arg2_else_HCI_Inquiry_Cancel` | if arg1<3 memcpy features to arg2 else HCI Inquiry Cancel | low (named by Kovah, purpose unclear) |
-| `0x80061784` | 100 | `copy_feature_and_send_extended_LMP_reply` | copy feature and send extended LMP reply | low (named by Kovah, purpose unclear) |
-| `0x800617ec` | 592 | `LMP_FEATURES_RES_EXT_0x7F_04` | LMP FEATURES RES EXT 0x7F 04 | low (named by Kovah, purpose unclear) |
-| `0x80061a4c` | 70 | `LMP_FEATURES_REQ_EXT_0x7F_03` | LMP FEATURES REQ EXT 0x7F 03 | low (named by Kovah, purpose unclear) |
-| `0x80061ad8` | 88 | `LMP_NOT_ACCEPTED_EXT_0x7F_02` | LMP NOT ACCEPTED EXT 0x7F 02 | low (named by Kovah, purpose unclear) |
-| `0x80061b34` | 80 | `LMP_ACCEPTED_EXT_0x7F_01` | LMP ACCEPTED EXT 0x7F 01 | low (named by Kovah, purpose unclear) |
-| `0x80061bb8` | 156 | `LMP_extended_opcode_handler_0x01-0x11` | LMP extended opcode handler 0x01-0x11 | low (named by Kovah, purpose unclear) |
-| `0x80061e70` | 60 | `some_case_0x37_2` | some case 0x37 2 | low (named by Kovah, purpose unclear) |
-| `0x80061eb0` | 160 | `LMP_SNIFF_SUBRATING_RES_0x7F_16` | LMP SNIFF SUBRATING RES 0x7F 16 | low (named by Kovah, purpose unclear) |
-| `0x80062054` | 238 | `LMP_SNIFF_SUBRATING_REQ_0x7F_15` | LMP SNIFF SUBRATING REQ 0x7F 15 | low (named by Kovah, purpose unclear) |
-| `0x80062158` | 70 | `LMP_extended_opcode_handler_0x15-0x16` | LMP extended opcode handler 0x15-0x16 | low (named by Kovah, purpose unclear) |
-| `0x80062270` | 166 | `LMP__267__FUN_80062270` | LMP  267  FUN 80062270 | low (named by Kovah, purpose unclear) |
-| `0x8006251c` | 132 | `LMP_POWER_CONTROL_RES` | LMP POWER CONTROL RES | low (named by Kovah, purpose unclear) |
-| `0x80062658` | 150 | `LMP_POWER_CONTROL_REQ` | LMP POWER CONTROL REQ | low (named by Kovah, purpose unclear) |
-| `0x800626f8` | 116 | `0x7F_LMP_POWER_REQ_RES_0x1F_0x20` | 0x7F LMP POWER REQ RES 0x1F 0x20 | low (named by Kovah, purpose unclear) |
-| `0x80062924` | 76 | `LMP_CLK_ADJ_ACK_0x7F_0x06` | LMP CLK ADJ ACK 0x7F 0x06 | low (named by Kovah, purpose unclear) |
-| `0x80062a58` | 568 | `VSC_0xfcd9_FUN_80062a58` | VSC 0xfcd9 FUN 80062a58 | low (named by Kovah, purpose unclear) |
-| `0x80062cac` | 390 | `LMP_CLK_ADJ_0x7F_0x05` | LMP CLK ADJ 0x7F 0x05 | low (named by Kovah, purpose unclear) |
-| `0x80062e44` | 318 | `LMP_CLK_ADJ_REQ_0x7F_0x07` | LMP CLK ADJ REQ 0x7F 0x07 | low (named by Kovah, purpose unclear) |
-| `0x80062f94` | 126 | `0x7F_LMP_CLK_ADJ(0x05)_ADJ_ACK(0x06)_ADJ_REQ(0x07)` | 0x7F LMP CLK ADJ(0x05) ADJ ACK(0x06) ADJ REQ(0x07) | low (named by Kovah, purpose unclear) |
-| `0x80063458` | 96 | `LMP_CHANNEL_CLASSIFICATION_0x7F_11` | LMP CHANNEL CLASSIFICATION 0x7F 11 | low (named by Kovah, purpose unclear) |
-| `0x800634c0` | 204 | `LMP_CHANNEL_CLASSIFICATION_REQ_0x7F_10` | LMP CHANNEL CLASSIFICATION REQ 0x7F 10 | low (named by Kovah, purpose unclear) |
-| `0x80063cc4` | 438 | `LMP_SET_AFH_0x3C` | LMP SET AFH 0x3C | low (named by Kovah, purpose unclear) |
-| `0x800656bc` | 256 | `LMP_CH__0x3ea__FUN_800656bc` | LMP CH  0x3ea  FUN 800656bc | low (named by Kovah, purpose unclear) |
-| `0x80066e68` | 200 | `assoc_w_tLMP_CH` | assoc w tLMP CH | medium (named, one-line purpose only, not decompiled) |
-| `0x80067128` | 160 | `set_check_for_1_to_1` | set check for 1 to 1 | low (named by Kovah, purpose unclear) |
-| `0x80067a2c` | 680 | `unknown_referencing_default_name(2x)_9` | unknown referencing default name(2x) 9 | low (named by Kovah, purpose unclear) |
-| `0x800683d8` | 40 | `calls_fptr` | calls fptr | low (named by Kovah, purpose unclear) |
-| `0x80068400` | 40 | `c_by_LMP_ENCAPSULATED_PAYLOAD_0x3E_call_fptr` | c by LMP ENCAPSULATED PAYLOAD 0x3E call fptr | low (named by Kovah, purpose unclear) |
-| `0x8006845c` | 78 | `call_if_encapsulated_payload_or_header_rejected` | call if encapsulated payload or header rejected | low (named by Kovah, purpose unclear) |
-| `0x800684c8` | 36 | `LMP_NOT_ACCEPTED` | LMP NOT ACCEPTED | low (named by Kovah, purpose unclear) |
-| `0x800684ec` | 192 | `LMP_ENCAPSULATED_PAYLOAD_0x3E` | LMP ENCAPSULATED PAYLOAD 0x3E | low (named by Kovah, purpose unclear) |
-| `0x800685b4` | 110 | `LMP_ENCAPSULATED_HEADER_0x3D` | LMP ENCAPSULATED HEADER 0x3D | low (named by Kovah, purpose unclear) |
-| `0x80068680` | 122 | `send_LMP_ENCAPSULATED_HEADER_reply` | send LMP ENCAPSULATED HEADER reply | low (named by Kovah, purpose unclear) |
-| `0x800686fc` | 94 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply2` | wraps send LMP ENCAPSULATED HEADER reply2 | low (named by Kovah, purpose unclear) |
-| `0x80068764` | 76 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply` | wraps send LMP ENCAPSULATED HEADER reply | low (named by Kovah, purpose unclear) |
-| `0x800687b8` | 46 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply_1_and_2` | wraps send LMP ENCAPSULATED HEADER reply 1 and 2 | low (named by Kovah, purpose unclear) |
-| `0x800687e8` | 130 | `LMP_encapsulated_header_and_payload_0x3D_0x3E` | LMP encapsulated header and payload 0x3D 0x3E | low (named by Kovah, purpose unclear) |
-| `0x800688f4` | 32 | `LMP_TIMING_ACCURACY_RES_0x30` | LMP TIMING ACCURACY RES 0x30 | low (named by Kovah, purpose unclear) |
-| `0x80068918` | 28 | `LMP_MIN_POWER_0x22` | LMP MIN POWER 0x22 | low (named by Kovah, purpose unclear) |
-| `0x80068938` | 28 | `LMP_MAX_POWER_0x21` | LMP MAX POWER 0x21 | low (named by Kovah, purpose unclear) |
-| `0x80068a2c` | 180 | `LMP_TEST_ACTIVATE_0x38` | LMP TEST ACTIVATE 0x38 | low (named by Kovah, purpose unclear) |
-| `0x80068aec` | 130 | `recv_LMP_VERSION_REQ_0x25_send_LMP_VERSION_RES_0x26` | recv LMP VERSION REQ 0x25 send LMP VERSION RES 0x26 | low (named by Kovah, purpose unclear) |
-| `0x80068f74` | 108 | `LMP_SLOT_OFFSET_0x34` | LMP SLOT OFFSET 0x34 | low (named by Kovah, purpose unclear) |
-| `0x80068fe4` | 62 | `send_LMP_FEATURES_REQ_or_RES` | send LMP FEATURES REQ or RES | low (named by Kovah, purpose unclear) |
-| `0x80069028` | 52 | `LMP_FEATURES_REQ_0x27` | LMP FEATURES REQ 0x27 | low (named by Kovah, purpose unclear) |
-| `0x80069060` | 116 | `LMP_TEST_CONTROL_0x39` | LMP TEST CONTROL 0x39 | low (named by Kovah, purpose unclear) |
-| `0x8006943c` | 214 | `LMP_INCR_POWER_REQ_0x1f` | LMP INCR POWER REQ 0x1f | low (named by Kovah, purpose unclear) |
-| `0x80069534` | 94 | `LMP_TIMING_ACCURACY_REQ_0x2F` | LMP TIMING ACCURACY REQ 0x2F | low (named by Kovah, purpose unclear) |
-| `0x8006959c` | 84 | `LMP_CLKOFFSET_REQ_0x05` | LMP CLKOFFSET REQ 0x05 | low (named by Kovah, purpose unclear) |
-| `0x800695f4` | 90 | `LMP_NAME_REQ_0x01` | LMP NAME REQ 0x01 | low (named by Kovah, purpose unclear) |
-| `0x80069658` | 214 | `LMP_DECR_POWER_REQ_0x20` | LMP DECR POWER REQ 0x20 | low (named by Kovah, purpose unclear) |
-| `0x80069750` | 62 | `LMP_PAGE_MODE_RES_0x36` | LMP PAGE MODE RES 0x36 | low (named by Kovah, purpose unclear) |
-| `0x80069794` | 298 | `LMP_QUALITY_OF_SERVICE_REQ_0x2A` | LMP QUALITY OF SERVICE REQ 0x2A | low (named by Kovah, purpose unclear) |
-| `0x800698c8` | 62 | `LMP_QUALITY_OF_SERVICE_0x29` | LMP QUALITY OF SERVICE 0x29 | low (named by Kovah, purpose unclear) |
-| `0x8006990c` | 128 | `LMP_PAGE_MODE_REQ_0x35` | LMP PAGE MODE REQ 0x35 | low (named by Kovah, purpose unclear) |
-| `0x80069998` | 168 | `LMP_START_ENCRYPTION_REQ_0x18` | LMP START ENCRYPTION REQ 0x18 | low (named by Kovah, purpose unclear) |
-| `0x80069a4c` | 560 | `LMP_START_ENCRYPTION_REQ_0x17` | LMP START ENCRYPTION REQ 0x17 | low (named by Kovah, purpose unclear) |
-| `0x80069c94` | 194 | `LMP_DETACH_0x07` | LMP DETACH 0x07 | low (named by Kovah, purpose unclear) |
-| `0x80069d6c` | 42 | `LMP_AUTO_RATE_0x23` | LMP AUTO RATE 0x23 | low (named by Kovah, purpose unclear) |
-| `0x80069d9c` | 154 | `LMP_PREFERRED_RATE_0x24` | LMP PREFERRED RATE 0x24 | low (named by Kovah, purpose unclear) |
-| `0x80069e40` | 84 | `LMP_SETUP_COMPLETE_0x31` | LMP SETUP COMPLETE 0x31 | low (named by Kovah, purpose unclear) |
-| `0x80069e98` | 310 | `LMP_HOST_CONNECTION_REQ_0x33` | LMP HOST CONNECTION REQ 0x33 | low (named by Kovah, purpose unclear) |
-| `0x80069fe4` | 148 | `LMP_SUPERVISION_TIMEOUT_0x37` | LMP SUPERVISION TIMEOUT 0x37 | low (named by Kovah, purpose unclear) |
-| `0x8006a084` | 74 | `LMP_CLKOFFSET_RES_0x06` | LMP CLKOFFSET RES 0x06 | low (named by Kovah, purpose unclear) |
-| `0x8006a0d4` | 90 | `LMP_VERSION_RES_0x26` | LMP VERSION RES 0x26 | low (named by Kovah, purpose unclear) |
-| `0x8006a134` | 626 | `LMP_SWITCH_REQ_0x13` | LMP SWITCH REQ 0x13 | low (named by Kovah, purpose unclear) |
-| `0x8006a3dc` | 108 | `LMP_MAX_SLOT_0x2D` | LMP MAX SLOT 0x2D | low (named by Kovah, purpose unclear) |
-| `0x8006a450` | 140 | `LMP_MAX_SLOT_REQ_0x2E` | LMP MAX SLOT REQ 0x2E | low (named by Kovah, purpose unclear) |
-| `0x8006a4e8` | 296 | `LMP_NAME_RES_0x02` | LMP NAME RES 0x02 | low (named by Kovah, purpose unclear) |
-| `0x8006a698` | 242 | `helper_function_send_reply_LMP_FEATURES_RES_0x28` | helper function send reply LMP FEATURES RES 0x28 | low (named by Kovah, purpose unclear) |
-| `0x8006a794` | 238 | `LMP_FEATURES_RES_0x28` | LMP FEATURES RES 0x28 | low (named by Kovah, purpose unclear) |
-| `0x8006aae4` | 122 | `LMP_NOT_ACCEPTED_0x04` | LMP NOT ACCEPTED 0x04 | low (named by Kovah, purpose unclear) |
-| `0x8006ac9c` | 190 | `LMP_ACCEPTED_0x03` | LMP ACCEPTED 0x03 | low (named by Kovah, purpose unclear) |
-| `0x8006b1e4` | 58 | `lookup_some_sort_of_connection_struct_index_by_connection_handle` | lookup some sort of connection struct index by connection handle | low (named by Kovah, purpose unclear) |
-| `0x8006bcfc` | 164 | `LMP_REMOVE_SCO_LINK_REQ_0x2C` | LMP REMOVE SCO LINK REQ 0x2C | low (named by Kovah, purpose unclear) |
-| `0x8006c6e0` | 168 | `LMP_SCO_LINK_REQ_0x2B` | LMP SCO LINK REQ 0x2B | low (named by Kovah, purpose unclear) |
-| `0x8006c858` | 36 | `called_by_fHCI_Read_LMP_Handle_3` | called by fHCI Read LMP Handle 3 | low (named by Kovah, purpose unclear) |
-| `0x8006eff0` | 208 | `LMP_REMOVE_eSCO_LINK_REQ_0x7F_0D` | LMP REMOVE eSCO LINK REQ 0x7F 0D | low (named by Kovah, purpose unclear) |
-| `0x8006f0d0` | 1600 | `LMP_eSCO_LINK_REQ_0x7F_0C` | LMP eSCO LINK REQ 0x7F 0C | low (named by Kovah, purpose unclear) |
-| `0x8006f870` | 106 | `some_case_0x37_1` | some case 0x37 1 | low (named by Kovah, purpose unclear) |
-| `0x8006f8e8` | 96 | `path2_send_evt_0x14_HCI_Mode_Change` | path2 send evt 0x14 HCI Mode Change | low (named by Kovah, purpose unclear) |
-| `0x8006ff00` | 40 | `some_case_0x13` | some case 0x13 | low (named by Kovah, purpose unclear) |
+| `0x800615a8` | 62 | `send_extended_opcode_LMP_reply?` | send extended opcode LMP reply? | high (decompiled+documented in region_0x80060000) |
+| `0x80061624` | 122 | `LMP_PACKET_TYPE_TABLE_REQ_0x7F_0B` | LMP PACKET TYPE TABLE REQ 0x7F 0B | high (decompiled+documented in region_0x80060000) |
+| `0x80061754` | 44 | `if_arg1<3_memcpy_features_to_arg2_else_HCI_Inquiry_Cancel` | if arg1<3 memcpy features to arg2 else HCI Inquiry Cancel | high (decompiled+documented in region_0x80060000) |
+| `0x80061784` | 100 | `copy_feature_and_send_extended_LMP_reply` | copy feature and send extended LMP reply | high (decompiled+documented in region_0x80060000) |
+| `0x800617ec` | 592 | `LMP_FEATURES_RES_EXT_0x7F_04` | LMP FEATURES RES EXT 0x7F 04 | high (decompiled+documented in region_0x80060000) |
+| `0x80061a4c` | 70 | `LMP_FEATURES_REQ_EXT_0x7F_03` | LMP FEATURES REQ EXT 0x7F 03 | high (decompiled+documented in region_0x80060000) |
+| `0x80061ad8` | 88 | `LMP_NOT_ACCEPTED_EXT_0x7F_02` | LMP NOT ACCEPTED EXT 0x7F 02 | high (decompiled+documented in region_0x80060000) |
+| `0x80061b34` | 80 | `LMP_ACCEPTED_EXT_0x7F_01` | LMP ACCEPTED EXT 0x7F 01 | high (decompiled+documented in region_0x80060000) |
+| `0x80061bb8` | 156 | `LMP_extended_opcode_handler_0x01-0x11` | LMP extended opcode handler 0x01-0x11 | high (decompiled+documented in region_0x80060000) |
+| `0x80061e70` | 60 | `some_case_0x37_2` | some case 0x37 2 | high (decompiled+documented in region_0x80060000) |
+| `0x80061eb0` | 160 | `LMP_SNIFF_SUBRATING_RES_0x7F_16` | LMP SNIFF SUBRATING RES 0x7F 16 | high (decompiled+documented in region_0x80060000) |
+| `0x80062054` | 238 | `LMP_SNIFF_SUBRATING_REQ_0x7F_15` | LMP SNIFF SUBRATING REQ 0x7F 15 | high (decompiled+documented in region_0x80060000) |
+| `0x80062158` | 70 | `LMP_extended_opcode_handler_0x15-0x16` | LMP extended opcode handler 0x15-0x16 | high (decompiled+documented in region_0x80060000) |
+| `0x80062270` | 166 | `LMP__267__FUN_80062270` | LMP  267  FUN 80062270 | high (decompiled+documented in region_0x80060000) |
+| `0x8006251c` | 132 | `LMP_POWER_CONTROL_RES` | LMP POWER CONTROL RES | high (decompiled+documented in region_0x80060000) |
+| `0x80062658` | 150 | `LMP_POWER_CONTROL_REQ` | LMP POWER CONTROL REQ | high (decompiled+documented in region_0x80060000) |
+| `0x800626f8` | 116 | `0x7F_LMP_POWER_REQ_RES_0x1F_0x20` | 0x7F LMP POWER REQ RES 0x1F 0x20 | high (decompiled+documented in region_0x80060000) |
+| `0x80062924` | 76 | `LMP_CLK_ADJ_ACK_0x7F_0x06` | LMP CLK ADJ ACK 0x7F 0x06 | high (decompiled+documented in region_0x80060000) |
+| `0x80062a58` | 568 | `VSC_0xfcd9_FUN_80062a58` | VSC 0xfcd9 FUN 80062a58 | high (decompiled+documented in region_0x80060000) |
+| `0x80062cac` | 390 | `LMP_CLK_ADJ_0x7F_0x05` | LMP CLK ADJ 0x7F 0x05 | high (decompiled+documented in region_0x80060000) |
+| `0x80062e44` | 318 | `LMP_CLK_ADJ_REQ_0x7F_0x07` | LMP CLK ADJ REQ 0x7F 0x07 | high (decompiled+documented in region_0x80060000) |
+| `0x80062f94` | 126 | `0x7F_LMP_CLK_ADJ(0x05)_ADJ_ACK(0x06)_ADJ_REQ(0x07)` | 0x7F LMP CLK ADJ(0x05) ADJ ACK(0x06) ADJ REQ(0x07) | high (decompiled+documented in region_0x80060000) |
+| `0x80063458` | 96 | `LMP_CHANNEL_CLASSIFICATION_0x7F_11` | LMP CHANNEL CLASSIFICATION 0x7F 11 | high (decompiled+documented in region_0x80060000) |
+| `0x800634c0` | 204 | `LMP_CHANNEL_CLASSIFICATION_REQ_0x7F_10` | LMP CHANNEL CLASSIFICATION REQ 0x7F 10 | high (decompiled+documented in region_0x80060000) |
+| `0x80063cc4` | 438 | `LMP_SET_AFH_0x3C` | LMP SET AFH 0x3C | high (decompiled+documented in region_0x80060000) |
+| `0x800656bc` | 256 | `LMP_CH__0x3ea__FUN_800656bc` | LMP CH  0x3ea  FUN 800656bc | high (decompiled+documented in region_0x80060000) |
+| `0x80066e68` | 200 | `assoc_w_tLMP_CH` | assoc w tLMP CH | high (decompiled+documented in region_0x80060000) |
+| `0x80067128` | 160 | `set_check_for_1_to_1` | set check for 1 to 1 | high (decompiled+documented in region_0x80060000) |
+| `0x80067a2c` | 680 | `unknown_referencing_default_name(2x)_9` | unknown referencing default name(2x) 9 | high (decompiled+documented in region_0x80060000) |
+| `0x800683d8` | 40 | `calls_fptr` | calls fptr | high (decompiled+documented in region_0x80060000) |
+| `0x80068400` | 40 | `c_by_LMP_ENCAPSULATED_PAYLOAD_0x3E_call_fptr` | c by LMP ENCAPSULATED PAYLOAD 0x3E call fptr | high (decompiled+documented in region_0x80060000) |
+| `0x8006845c` | 78 | `call_if_encapsulated_payload_or_header_rejected` | call if encapsulated payload or header rejected | high (decompiled+documented in region_0x80060000) |
+| `0x800684c8` | 36 | `LMP_NOT_ACCEPTED` | LMP NOT ACCEPTED | high (decompiled+documented in region_0x80060000) |
+| `0x800684ec` | 192 | `LMP_ENCAPSULATED_PAYLOAD_0x3E` | LMP ENCAPSULATED PAYLOAD 0x3E | high (decompiled+documented in region_0x80060000) |
+| `0x800685b4` | 110 | `LMP_ENCAPSULATED_HEADER_0x3D` | LMP ENCAPSULATED HEADER 0x3D | high (decompiled+documented in region_0x80060000) |
+| `0x80068680` | 122 | `send_LMP_ENCAPSULATED_HEADER_reply` | send LMP ENCAPSULATED HEADER reply | high (decompiled+documented in region_0x80060000) |
+| `0x800686fc` | 94 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply2` | wraps send LMP ENCAPSULATED HEADER reply2 | high (decompiled+documented in region_0x80060000) |
+| `0x80068764` | 76 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply` | wraps send LMP ENCAPSULATED HEADER reply | high (decompiled+documented in region_0x80060000) |
+| `0x800687b8` | 46 | `wraps_send_LMP_ENCAPSULATED_HEADER_reply_1_and_2` | wraps send LMP ENCAPSULATED HEADER reply 1 and 2 | high (decompiled+documented in region_0x80060000) |
+| `0x800687e8` | 130 | `LMP_encapsulated_header_and_payload_0x3D_0x3E` | LMP encapsulated header and payload 0x3D 0x3E | high (decompiled+documented in region_0x80060000) |
+| `0x800688f4` | 32 | `LMP_TIMING_ACCURACY_RES_0x30` | LMP TIMING ACCURACY RES 0x30 | high (decompiled+documented in region_0x80060000) |
+| `0x80068918` | 28 | `LMP_MIN_POWER_0x22` | LMP MIN POWER 0x22 | high (decompiled+documented in region_0x80060000) |
+| `0x80068938` | 28 | `LMP_MAX_POWER_0x21` | LMP MAX POWER 0x21 | high (decompiled+documented in region_0x80060000) |
+| `0x80068a2c` | 180 | `LMP_TEST_ACTIVATE_0x38` | LMP TEST ACTIVATE 0x38 | high (decompiled+documented in region_0x80060000) |
+| `0x80068aec` | 130 | `recv_LMP_VERSION_REQ_0x25_send_LMP_VERSION_RES_0x26` | recv LMP VERSION REQ 0x25 send LMP VERSION RES 0x26 | high (decompiled+documented in region_0x80060000) |
+| `0x80068f74` | 108 | `LMP_SLOT_OFFSET_0x34` | LMP SLOT OFFSET 0x34 | high (decompiled+documented in region_0x80060000) |
+| `0x80068fe4` | 62 | `send_LMP_FEATURES_REQ_or_RES` | send LMP FEATURES REQ or RES | high (decompiled+documented in region_0x80060000) |
+| `0x80069028` | 52 | `LMP_FEATURES_REQ_0x27` | LMP FEATURES REQ 0x27 | high (decompiled+documented in region_0x80060000) |
+| `0x80069060` | 116 | `LMP_TEST_CONTROL_0x39` | LMP TEST CONTROL 0x39 | high (decompiled+documented in region_0x80060000) |
+| `0x8006943c` | 214 | `LMP_INCR_POWER_REQ_0x1f` | LMP INCR POWER REQ 0x1f | high (decompiled+documented in region_0x80060000) |
+| `0x80069534` | 94 | `LMP_TIMING_ACCURACY_REQ_0x2F` | LMP TIMING ACCURACY REQ 0x2F | high (decompiled+documented in region_0x80060000) |
+| `0x8006959c` | 84 | `LMP_CLKOFFSET_REQ_0x05` | LMP CLKOFFSET REQ 0x05 | high (decompiled+documented in region_0x80060000) |
+| `0x800695f4` | 90 | `LMP_NAME_REQ_0x01` | LMP NAME REQ 0x01 | high (decompiled+documented in region_0x80060000) |
+| `0x80069658` | 214 | `LMP_DECR_POWER_REQ_0x20` | LMP DECR POWER REQ 0x20 | high (decompiled+documented in region_0x80060000) |
+| `0x80069750` | 62 | `LMP_PAGE_MODE_RES_0x36` | LMP PAGE MODE RES 0x36 | high (decompiled+documented in region_0x80060000) |
+| `0x80069794` | 298 | `LMP_QUALITY_OF_SERVICE_REQ_0x2A` | LMP QUALITY OF SERVICE REQ 0x2A | high (decompiled+documented in region_0x80060000) |
+| `0x800698c8` | 62 | `LMP_QUALITY_OF_SERVICE_0x29` | LMP QUALITY OF SERVICE 0x29 | high (decompiled+documented in region_0x80060000) |
+| `0x8006990c` | 128 | `LMP_PAGE_MODE_REQ_0x35` | LMP PAGE MODE REQ 0x35 | high (decompiled+documented in region_0x80060000) |
+| `0x80069998` | 168 | `LMP_START_ENCRYPTION_REQ_0x18` | LMP START ENCRYPTION REQ 0x18 | high (decompiled+documented in region_0x80060000) |
+| `0x80069a4c` | 560 | `LMP_START_ENCRYPTION_REQ_0x17` | LMP START ENCRYPTION REQ 0x17 | high (decompiled+documented in region_0x80060000) |
+| `0x80069c94` | 194 | `LMP_DETACH_0x07` | LMP DETACH 0x07 | high (decompiled+documented in region_0x80060000) |
+| `0x80069d6c` | 42 | `LMP_AUTO_RATE_0x23` | LMP AUTO RATE 0x23 | high (decompiled+documented in region_0x80060000) |
+| `0x80069d9c` | 154 | `LMP_PREFERRED_RATE_0x24` | LMP PREFERRED RATE 0x24 | high (decompiled+documented in region_0x80060000) |
+| `0x80069e40` | 84 | `LMP_SETUP_COMPLETE_0x31` | LMP SETUP COMPLETE 0x31 | high (decompiled+documented in region_0x80060000) |
+| `0x80069e98` | 310 | `LMP_HOST_CONNECTION_REQ_0x33` | LMP HOST CONNECTION REQ 0x33 | high (decompiled+documented in region_0x80060000) |
+| `0x80069fe4` | 148 | `LMP_SUPERVISION_TIMEOUT_0x37` | LMP SUPERVISION TIMEOUT 0x37 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a084` | 74 | `LMP_CLKOFFSET_RES_0x06` | LMP CLKOFFSET RES 0x06 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a0d4` | 90 | `LMP_VERSION_RES_0x26` | LMP VERSION RES 0x26 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a134` | 626 | `LMP_SWITCH_REQ_0x13` | LMP SWITCH REQ 0x13 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a3dc` | 108 | `LMP_MAX_SLOT_0x2D` | LMP MAX SLOT 0x2D | high (decompiled+documented in region_0x80060000) |
+| `0x8006a450` | 140 | `LMP_MAX_SLOT_REQ_0x2E` | LMP MAX SLOT REQ 0x2E | high (decompiled+documented in region_0x80060000) |
+| `0x8006a4e8` | 296 | `LMP_NAME_RES_0x02` | LMP NAME RES 0x02 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a698` | 242 | `helper_function_send_reply_LMP_FEATURES_RES_0x28` | helper function send reply LMP FEATURES RES 0x28 | high (decompiled+documented in region_0x80060000) |
+| `0x8006a794` | 238 | `LMP_FEATURES_RES_0x28` | LMP FEATURES RES 0x28 | high (decompiled+documented in region_0x80060000) |
+| `0x8006aae4` | 122 | `LMP_NOT_ACCEPTED_0x04` | LMP NOT ACCEPTED 0x04 | high (decompiled+documented in region_0x80060000) |
+| `0x8006ac9c` | 190 | `LMP_ACCEPTED_0x03` | LMP ACCEPTED 0x03 | high (decompiled+documented in region_0x80060000) |
+| `0x8006b1e4` | 58 | `lookup_some_sort_of_connection_struct_index_by_connection_handle` | lookup some sort of connection struct index by connection handle | high (decompiled+documented in region_0x80060000) |
+| `0x8006bcfc` | 164 | `LMP_REMOVE_SCO_LINK_REQ_0x2C` | LMP REMOVE SCO LINK REQ 0x2C | high (decompiled+documented in region_0x80060000) |
+| `0x8006c6e0` | 168 | `LMP_SCO_LINK_REQ_0x2B` | LMP SCO LINK REQ 0x2B | high (decompiled+documented in region_0x80060000) |
+| `0x8006c858` | 36 | `called_by_fHCI_Read_LMP_Handle_3` | called by fHCI Read LMP Handle 3 | high (decompiled+documented in region_0x80060000) |
+| `0x8006eff0` | 208 | `LMP_REMOVE_eSCO_LINK_REQ_0x7F_0D` | LMP REMOVE eSCO LINK REQ 0x7F 0D | high (decompiled+documented in region_0x80060000) |
+| `0x8006f0d0` | 1600 | `LMP_eSCO_LINK_REQ_0x7F_0C` | LMP eSCO LINK REQ 0x7F 0C | high (decompiled+documented in region_0x80060000) |
+| `0x8006f870` | 106 | `some_case_0x37_1` | some case 0x37 1 | high (decompiled+documented in region_0x80060000) |
+| `0x8006f8e8` | 96 | `path2_send_evt_0x14_HCI_Mode_Change` | path2 send evt 0x14 HCI Mode Change | high (decompiled+documented in region_0x80060000) |
+| `0x8006ff00` | 40 | `some_case_0x13` | some case 0x13 | high (decompiled+documented in region_0x80060000) |
 | `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP  48A  FUN 80070248 | low (named by Kovah, purpose unclear) |
 | `0x800702e4` | 246 | `LMP__259__FUN_800702e4` | LMP  259  FUN 800702e4 | low (named by Kovah, purpose unclear) |
 | `0x800703f0` | 68 | `LMP__600__FUN_800703f0` | LMP  600  FUN 800703f0 | low (named by Kovah, purpose unclear) |

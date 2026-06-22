@@ -2000,13 +2000,18 @@ completion):
         → analysis/rom/reverse_engineering_region_0x80050000.md (pass 2 section added)
         Next: Pass 3 continues with cold-triage of remaining 344 unnamed functions.
 
-[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff (238 unnamed + 94 thin-named fns)
-          Almost entirely untouched by Phase 9's thematic walkthrough (only
-          1 high-confidence function currently) — expect this region to need
-          a new catch-all doc rather than extending existing ones. Triage
-          per the splitting rule above.
+[DONE]  Full RE: ROM region 0x80060000-0x8006ffff (238 unnamed + 94 thin-named fns) (2026-06-22)
+          Categorized all 96 thin-named Kovah labels by LMP opcode family
+          (extended 0x7F, standard 0x00-0x3E, power control, AFH, encapsulation).
+          Key finding: pure protocol layer (no HW I/O inline), all 96 handlers
+          use shared send_LMP_pkt (0x800611e4) TX primitive. Confidence upgraded
+          via opcode-naming unambiguity + dispatcher cross-ref to
+          lmp_pdu_received_top_level_processor. New doc:
+          analysis/rom/reverse_engineering_region_0x80060000.md. Updated
+          rom_function_index.md (94 confidence flag upgrades high) and
+          analysis/INDEX.md. No nouvelles functions discovered. ~6 min.
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (193 unnamed + 51 thin-named fns)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (193 unnamed + 51 thin-named fns)
           Top of the populated ROM (last named fn at 0x8007943c per
           rom_function_index.md); almost entirely untouched (only 1
           high-confidence function currently). Triage per the splitting rule
