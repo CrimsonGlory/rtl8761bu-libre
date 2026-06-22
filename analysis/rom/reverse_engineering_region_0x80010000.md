@@ -223,3 +223,257 @@ exclude the 2 moved) + 2 (folded into the 32) = 408`. ✓ A future pass
 should re-run the authoritative listing scripts fresh rather than trust
 this arithmetic note's hand-derivation, per the lesson from
 `region_0x80000000.md`'s pass-4/7 tally-reconciliation episodes.
+
+## Pass 2 (2026-06-22) — the OGF=3 (Controller & Baseband) OCF-handler cluster
+
+Re-ran `ListRegion0x80010000.java` + `ListRegion0x80010000_Upper.java` first
+(required first step). The lower script's stdout truncated again at the
+exact same boundary (`0x8001b84c`, the first line the upper script also
+prints) — confirmed gapless coverage between the two scripts (no address
+range falls between their outputs). All 32 pass-1 names persisted; no
+regressions.
+
+**Resolved priority target #1 from pass 1's recommendation list: the
+`OGC_3_OCF_*` / "OGF=3" cluster** spanning `0x80019ad0`–`0x8001c438` and
+`0x8001dc10`–`0x8001f94c` — **38 functions** (34 thin-named upgraded to high
+confidence via decompile-confirmation: 20 medium + 14 low; 4 newly named
+from unnamed `FUN_*`).
+
+### Key finding: this is the standard OGF=3 dispatcher, not an unexplored vendor opcode group
+
+Pass 1's doc flagged this cluster as a possible **previously-unexplored
+whole HCI opcode group**, hypothesizing it might be vendor-specific/test
+commands not covered by `reverse_engineering_hci_command_router.md` (which
+documents OGF 0x01–0x08 standard groups + OGF 0x3F vendor-specific). This
+pass **confirms and resolves** that open question by decompiling the
+top-level OGF=3 dispatcher itself,
+`HCI_CMD_OGF_03__Controller_and_Baseband__big_switch_FUN_800202c0`
+(`0x800202c0`, in region `0x80020000`, already "high confidence" per
+`rom_function_index.md` — out of this region's scope but decisive context):
+its `CALLEES` list is **exactly** the `OGC_3_OCF_*` functions in this
+region. The `OGC_3` prefix means **"OGF Code 3"** — this is the real,
+spec-defined **OGF 0x03 (Controller & Baseband)** command group that
+`hci_command_router.md`'s OGF table already lists as
+`HCI_CMD_OGF_03__Controller_and_Baseband__big_switch_FUN_800202c0`. That doc
+correctly identified the *dispatcher's* address (`0x800202c0`, in region
+`0x80020000`) but had not yet traced into its ~50 individual OCF handlers,
+which Realtek physically placed in this region (`0x80010000`) rather than
+alongside the dispatcher. **Not a new/unexplored OGF — it is the
+already-documented OGF 0x03, just with its handler bodies scattered to a
+different memory region than its switch statement.** Recommend a
+cross-reference note be added to `hci_command_router.md` in a future pass
+pointing at this region doc for the OCF-handler-level detail (not done this
+pass, to keep this pass focused on the region-sweep ticket itself).
+
+### Architecture: a 4-tier dispatch + fallback chain
+
+`FUN_800202c0`'s decompile (`switch(*param_1 + -0xc01)`, i.e. keyed on
+`opcode - OGF3/OCF0`) reveals a layered structure:
+
+1. **Direct OCF switch cases** (`0xc01`–`0xc3e`, i.e. OCF `0x00`–`0x3d`):
+   each case calls one `OGC_3_OCF_##` function directly by OCF number —
+   `OGC_3_OCF_01` (LAP/IAC config), `OGC_3_OCF_05` (event-filter table,
+   338B), `OGC_3_OCF_08` (flush-flag-set, calls back into the parameter
+   dispatcher below on success), `OGC_3_OCF_1a` (scan-enable), `OGC_3_OCF_1c`
+   (page-timeout), `OGC_3_OCF_1e` (connection-accept-timeout),
+   `OGC_3_OCF_24` (class-of-device, drives 2 multi-VSC calls),
+   `OGC_3_OCF_26`/`_27`/`_28` (voice-setting / role-switch-related,
+   bos-array-index-gated), `OGC_3_OCF_2a`/`_2f`/`_31`/`_33` (small
+   single-byte/struct-field config setters — automatic-flush-timeout,
+   num-broadcast-retransmissions, hold-mode-activity, SCO-flow-control),
+   `OGC_3_OCF_2d` (link-supervision-timeout, RSSI-threshold-aware),
+   `OGC_3_OCF_35` (host #-of-completed-packets, an iterative multi-handle
+   parser — 314B), `OGC_3_OCF_36`/`_37` (role-discovery / link-policy,
+   feeds back into the parameter dispatcher), `OGC_3_OCF_3a` (current-IAC-LAP
+   write, validates packed 3-byte LAP entries).
+2. **Range-tested feature-gated calls**: 6 calls each guarded by a
+   `config_base` feature-enable bit
+   (`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bits 1/2, `field208_0xd8`
+   bits `0x1000`/`0x2000`) — `OGC_3_default_func_2`/`_3`/`_4`/`_5` plus the
+   terminal `HCI_Write_Simple_Pairing_Debug_Mode` call.
+3. **Default fallthrough for OCF ≥ 0x3F**:
+   `OGC_3_default_func_0_OCF_0x3F_and_above` (`0x80019bf4`) — its own
+   sub-switch (keyed `opcode - 0xc3f`) covers OCF `0x3f` (`OGC_3_OCF_3f`,
+   "feature page" bit-validated 10-byte Hamming-weight-checked write — the
+   same Hamming-weight-checksum idiom already documented for
+   `0x80109de0`/`send_evt_HCI_Inquiry_Response_Notification`-adjacent code),
+   `0x45`/`0x47`/`0x49` (`OGC_3_OCF_45`/`_47`/`_49`, near-identical
+   single-byte config-field setters that each tail-call a shared apply
+   function — `FUN_80034e98` for `_45`/`_49`, `FUN_8001a0c8` for `_47`), and
+   OCF `0x42`/`0x44`/`0x46`/`0x48` as pure **field getters** (handled by
+   `deal_with_OGF_3_OCF_0x3f-0x49`, `0x80019c88` — confirmed via decompile
+   to be a clean read-only switch over the same struct fields `_45`/`_47`/
+   `_49` write, the textbook "separate Read_X/Write_X getter+setter OCF
+   pair" pattern already seen elsewhere in this ROM).
+4. **OCF ≥ 0x51 vendor-extension tier**:
+   `OGC_3_OCF_0x51_and_above_path_to_VSC_0xfcc0` (`0x8001a350`) — confirmed
+   via decompile to be Realtek's own continuation of the OGF=3 numbering
+   *past* the Bluetooth-spec-defined OCF range, into RTK-private opcodes.
+   OCF `0x52` (`OGC_3_OCF_0x52_HCI_Write_Extended_Inquiry_Response...`,
+   `0x8001a294`) is confirmed as the real `HCI_Write_Extended_Inquiry_
+   Response` implementation: validates the EIR data's length/FEC-required
+   flag, picks one of several `send_LMP_pkt`-style packet-type
+   constants by EIR length bucket, and forwards to the vendor command
+   `calls_to_VSC_0xfcc0`. OCF `0x5e` (`0xe`, handled inline) triggers
+   `FUN_8001a128` (renamed `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_
+   FUN_80017930` — looks up the bos-array index for a connection handle and
+   sets a per-connection flag via a helper, gated on the command having a
+   3-byte fixed-format param block and a zero 4th byte) — **note**: this
+   pass initially mis-derived this as OCF `0x44` from miscounted switch-case
+   arithmetic and renamed it `..._OCF_44_HCI_Change_Connection_Link_Key`
+   (a real spec OCF 0x44 name); double-checked the decompile, found no
+   internal opcode comparison to confirm 0x44, and **corrected the name**
+   to a conservative `OCF_62`-based non-spec name (see `OGF1_3_extended_
+   OCF_0x51_0x5b_fallback_handler`'s `0xc01`-relative case `0xc68-0xc01=0x67`
+   confirming the *sibling* function `0x8001a838` is OCF `0x67`, not a
+   spec-defined OCF; `0x8001a128`'s own caller is
+   `OGC_3_default_func_2`/`0x8001a898`'s `0xc68` case-equal check, which
+   maps to OCF `0x67` for *that* sibling and OCF `0x63`'s 8-byte-memcpy
+   branch for the other — `0x8001a128` itself is reached via a separate,
+   not-yet-traced caller; named conservatively as OCF `0x62` based on its
+   position immediately before the confirmed-`0x67` sibling in the binary
+   layout, flagged here as **not fully opcode-confirmed**, unlike the other
+   33 functions resolved this pass which all have a direct `param_1 ==
+   0xc##` or `*param_1 + -0xc##` decompile-visible opcode check).
+5. **`fHCI_Reset_0x03` discovery**: `0x8001f408` (586B, was
+   `unknown_referencing_default_name_7`) is **not** part of the OCF-handler
+   switch at all — it's the real `HCI_Reset` (OGF=3, OCF=3) implementation,
+   confirmed by cross-referencing `assoc_w_tHCI_CMD`'s already-documented
+   "disconnect-on-stale-`0xc03`-Reset guard" logic
+   (`reverse_engineering_hci_command_router.md` step 4) and `FUN_800202c0`'s
+   own `case 2:` (OCF 2... actually opcode `0xc03`, i.e. `*param_1+-0xc01==2`)
+   special-cased *outside* the normal OCF-dispatch path (it directly calls
+   `unknown_referencing_default_name_7` — now `fHCI_Reset_0x03_full_
+   subsystem_teardown` — then `OGC_3_OCF_TONS_deal_with_return_status_
+   referencing_default_name_10` to send the Command Complete). Renamed
+   accordingly. Full decompile shows a long, flat sequence of: interrupt
+   disable, ~8 subsystem-reset function calls (LMP procedure-completion
+   wait, baseband feature pool reset, codec/audio dispatch reset), then
+   ~25 direct zeroing/reinitializing writes to global state pointers, then
+   interrupt re-enable — textbook "full controller reset" shape.
+6. **`OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10`**
+   (`0x8001dc10`, 2454B — the single largest function in this region,
+   larger even than pass 1's previous record-holder
+   `lmp_pdu_received_top_level_processor` from region `0x80000000`'s
+   220B... no, that one was 2044B; this one at 2454B is larger still)
+   fully decompiled: it is the **shared "read HCI parameter and send
+   Command Complete" primitive** for the entire OGF 1/2/3 standard command
+   surface — a giant chain of `if (puVar14 == (undefined*)0xc##)` /
+   range-bucketed equality tests over the opcode, each branch reading one
+   struct field (BD_ADDR, page-timeout, connection-accept-timeout,
+   voice-setting, hold-mode-activity, link-policy settings, SCO flow
+   control, LMP local name, RSSI threshold delta via the pass-1-resolved
+   `rssi_threshold_delta_for_bos_index`, etc.) into a local buffer, then
+   calling `hci_event_sender(0xe, ...)` (`hci_event_sender` already
+   high-confidence) to emit the Command Complete event with that payload.
+   Confirmed by an explicit decompiler comment surviving in the pseudo-C:
+   `/* 0xC00 = OGF = 3 = Control & Baseband */` and `/* 0x800 = OGF 2 =
+   Link Policy */` / `/* 0x400 = OCF 1 = Link Control */` — independent
+   confirmation of the OGF/OCF bit-layout documented in
+   `hci_command_router.md`, this time from the *read-parameter* side rather
+   than the *dispatch* side. This is the parameter-read counterpart to the
+   already-documented `initialize_0x28_sized_struct` (struct init) and the
+   pass-1-resolved `send_evt_HCI_*` cluster (event senders) — together
+   these three pieces cover write-config / init / read-config for the
+   OGF 1–3 standard parameter surface.
+7. **`HCI_Write_Loopback_Mode`/`HCI_Enable_Device_Under_Test_Mode`/
+   `HCI_Read_Loopback_Mode`** (`0x8001e780`/`0x8001e784`/`0x8001ea34`,
+   adjacent to the OGC_3 cluster but logically OGF=6 Testing commands, not
+   OGF=3): fully decompiled. `HCI_Write_Loopback_Mode` is the actual
+   implementation backing the loopback short-circuit already documented in
+   `hci_command_router.md` step 3 — confirms the local/remote loopback
+   modes (`0`/`1`/`2`/`0xff`) drive synthetic `send_evt_HCI_Connection_
+   Complete`/`send_evt_HCI_Disconnection_Complete` event sequences to
+   simulate up to 4 fake connections for test purposes.
+
+### Helper functions also resolved this pass
+
+- `OGF1_3_extended_OCF_0x51_0x5b_fallback_handler` (`0x8001a658`, was
+  `FUN_8001a658`, 346B) — the generic per-opcode fallback reached from
+  *both* the standard router's default OCF≥0x3F path (via
+  `deal_with_OGF_3_OCF_0x3f-0x49`'s default case) and
+  `OGC_3_OCF_0x51_and_above_path_to_VSC_0xfcc0`'s own default case; handles
+  opcode `0x811` (OGF=2 Link Policy) and `0xc51`/`0xc5a`/`0xc5b` directly,
+  else chains through up to 4 more feature-gated handler functions
+  (`FUN_8001fb70`, `FUN_8001c9d4`, `FUN_80044490`, `FUN_8001a8e0` — not yet
+  decompiled, flagged for a future pass).
+- `OGC_3_OCF_67_vendor_ext_write_byte_param` (`0x8001a838`, was
+  `FUN_8001a838`, 90B) — confirmed via its own decompile-visible
+  `OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10
+  (0xc68, ...)` call that its opcode is exactly `0xc68` (OCF `0x67`,
+  non-spec/vendor-extension range); writes one byte to a global after a
+  bos-array-index validation.
+- `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_FUN_80017930` (`0x8001a128`,
+  was `FUN_8001a128`, 86B) — opcode not independently confirmed this pass
+  (see note in item 4 above); named conservatively, flagged for
+  opcode-confirmation in a future pass via a caller/xref trace (the
+  generic `FindXrefsTo.java` script is hardcoded to `0x801212e4` and could
+  not be repurposed via `script_args` this pass — would need a small
+  dedicated script, or `mcp__wairz__xrefs_to`/`find_callers`, neither of
+  which work against the GZF process-mode project — only against binaries
+  imported the normal wairz way. **Tooling gap for future passes**: no
+  generic "find xrefs to address X" script exists yet for GZF process mode;
+  `FindXrefsTo.java` would need a script_args-driven rewrite to be reusable
+  beyond its original one-off purpose).
+
+## Remaining scope (updated after pass 2)
+
+After pass 1+2 combined: **338 of 408 functions remain** (261 unnamed −
+4 renamed this pass = 257 unnamed; 98 thin-named − 34 upgraded this pass =
+64 thin-named genuinely open; 15 already-high-confidence, unchanged;
+70 resolved across both passes: 32 pass-1 + 38 pass-2).
+`257 + 64 + 15 + 70 + 2(pass-1's already-folded 2) = 408`. ✓
+
+High-value untouched clusters for the next pass, in priority order (updated
+from pass 1's list — items resolved this pass removed, OGF=3 cluster
+removed, list renumbered):
+
+1. **`HCI_OGF1_OCF0x4#` cluster**, `0x8001c490`–`0x8001c788` (4 thin-named:
+   `HCI_OGF1_OCF0x44`/`_43`/`_42`/`_41` + `fHCI_Truncated_Page_Cancel_0x40`/
+   `fHCI_Truncated_Page_0x3F` + `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`
+   wrapper) — OGF=1 (Link Control) commands in the 0x3F-0x44 OCF range, an
+   extension of the already-documented `lc_lmp_state_machine.md` OGF1
+   coverage. Now the clear top priority since the OGF=3 cluster is done.
+2. **`fHCI_*` HCI-command-handler cluster**, `0x8001b84c`–`0x8001bf44`
+   (Change Packet Type, Add SCO DEPRECATED, Disconnect, Reject/Accept
+   Connection Request, Create Connection neighbors, Periodic Inquiry) — 7
+   thin-named, all medium-confidence, all clearly OGF=1 LC commands
+   bordering the already-high-confidence `fHCI_Create_Connection_0x05`/
+   `fHCI_Inquiry_0x01`.
+3. **`fHCI_Read_*` cluster**, `0x8001b23c`–`0x8001b780` (Read LMP Handle,
+   Read Clock Offset, Read Remote Version/Supported Features, Remote Name
+   Request) — 5 thin-named, all medium-confidence, all OGF=1 "Read remote
+   info" commands; likely share structure with the `send_evt_HCI_Read_*`
+   senders pass 1 already resolved.
+4. **`VSC_0xfc##` cluster**, scattered (`0x800120ac`, `0x80012c18`,
+   `0x80013074`, `0x80014054`, `0x800148f0`, `0x8001728c`, `0x8001a0f8`)
+   — vendor-specific-command handlers, mostly low-confidence
+   (purpose-unclear) one-liners. (`0x8001a294`/`0x8001a350` already
+   resolved this pass.) Cross-reference against
+   `reverse_engineering_lmp_vsc_opcode_map.md` once decompiled.
+5. **`LMP_CH__0x3ee__case#` cluster**, `0x80011d9c`–`0x80011fc0` (3
+   thin-named) — an LMP_CH (vendor LMP opcode 0x3ee) case-dispatch family;
+   likely extends `lc_lmp_state_machine.md`'s LMP coverage once decompiled.
+6. **Large unnamed stretches by size** (good single-function ROI):
+   `0x80018654` (1194B, largest unnamed in the region), `0x80016934`
+   (1012B), `0x800161e4` (974B), `0x80017dcc` (824B), `0x80016e68` (778B),
+   `0x800122fc` (772B).
+7. **The remaining small unnamed `FUN_8001xxxx`** scattered through
+   `0x800100e4`–`0x80011d9c` (pre-LMP_CH cluster), `0x80012000`–`0x800147b0`
+   (between the LMP_CH/VSC clusters and the codec-table functions), and
+   `0x80015000`–`0x80018000` (largely untouched) — no existing thematic
+   doc covers this stretch; expect needing this catch-all doc to absorb
+   most of it directly, the way `region_0x80000000.md` did for its region.
+8. **Helper functions referenced but not yet decompiled this pass**:
+   `FUN_8001fb70`, `FUN_8001c9d4`, `FUN_80044490`, `FUN_8001a8e0` (all
+   callees of `OGF1_3_extended_OCF_0x51_0x5b_fallback_handler`), and
+   `FUN_80034e98`/`FUN_8001a0c8`/`FUN_8001409c` (the shared "apply config
+   field" tail-calls used by several `OGC_3_OCF_*` setters) — small,
+   should be cheap to resolve in a future pass and would retroactively
+   raise confidence on several of this pass's "confirmed by decompile but
+   callee not yet itself decompiled" functions.
+
+A future pass should re-run the authoritative listing scripts fresh rather
+than trust this doc's hand-derived tallies, per the now twice-repeated
+lesson from `region_0x80000000.md`'s pass-4/7 tally-reconciliation
+episodes.

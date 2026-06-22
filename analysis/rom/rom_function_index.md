@@ -27,11 +27,13 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 681 (679 after region-0x80000000 pass 9 + 2 region-0x80010000 pass-1 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep started 2026-06-22) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2057 (2059 − 2 region-0x80010000 pass-1 newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 323 (291 after region-0x80000000 pass 9 + 2 region-0x80010000 pass-1 newly-named-and-decompiled + 30 region-0x80010000 pass-1 thin-named upgraded to high via decompile-confirmation) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 88 (96 − 8 region-0x80010000 pass-1 medium-confidence fns upgraded to high) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 271 (293 − 22 region-0x80010000 pass-1 low-confidence fns upgraded to high) |
+| Named functions (this doc's table) | 685 (681 + 4 region-0x80010000 pass-2 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2053 (2057 − 4 region-0x80010000 pass-2 newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 361 (323 + 4 region-0x80010000 pass-2 newly-named-and-decompiled + 34 region-0x80010000 pass-2 thin-named upgraded to high via decompile-confirmation) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
+
+**Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
 
 **2026-06-22 update (pass 1)**: Phase 9's region-by-region exhaustive sweep
 (`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
@@ -225,9 +227,35 @@ top recommendation), and the region's own scoping/tally notes. The 32
 new/upgraded rows are appended after the region-0x80000000 pass-9 rows
 below.
 
+**2026-06-22 update (region 0x80010000 pass 2)**: resolved pass 1's
+top-priority recommended target, the **`OGC_3_OCF_*` cluster** —
+38 functions (34 thin-named upgraded to high via decompile-confirmation:
+20 medium + 14 low; 4 newly named from unnamed `FUN_*`). Decisive finding:
+decompiling the standard-router's OGF=3 dispatcher
+(`HCI_CMD_OGF_03__Controller_and_Baseband__big_switch_FUN_800202c0`,
+`0x800202c0`, region `0x80020000`, already high-confidence) showed its
+`CALLEES` list is exactly this region's `OGC_3_OCF_*` functions — so this
+is the **already-documented standard OGF 0x03 (Controller & Baseband)**
+command group (per `hci_command_router.md`'s OGF table), not a
+previously-unexplored vendor opcode group as pass 1 had hypothesized;
+Realtek simply placed the OCF-handler bodies in this region while the
+dispatcher switch lives in `0x80020000`. Also discovered
+`unknown_referencing_default_name_7` (`0x8001f408`, 586B) is the real
+`HCI_Reset` (OGF=3/OCF=3) implementation — renamed
+`fHCI_Reset_0x03_full_subsystem_teardown`. Renamed 3 more from `FUN_*`:
+`OGF1_3_extended_OCF_0x51_0x5b_fallback_handler` (`0x8001a658`),
+`OGC_3_OCF_67_vendor_ext_write_byte_param` (`0x8001a838`, opcode `0xc68`
+confirmed via decompile), `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_
+FUN_80017930` (`0x8001a128`, opcode not fully confirmed — flagged for a
+future pass). See `reverse_engineering_region_0x80010000.md`'s "Pass 2"
+section for full per-function detail and the updated "Remaining scope"
+priority list (now led by the `HCI_OGF1_OCF0x4#` cluster,
+`0x8001c490`-`0x8001c788`). The 38 new/upgraded rows are folded into the
+table below near their pass-1 siblings (not strictly appended).
+
 ---
 
-## Named functions (679, was 461 at the 2026-06-21 baseline)
+## Named functions (685, was 461 at the 2026-06-21 baseline)
 
 Confidence legend:
 - **high (decompiled+documented)** — appears in a dedicated `analysis/rom/*.md`
@@ -437,25 +465,28 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80018e58` | 220 | `send_HCI_Command_Status_for_HCI_0x0A` | send HCI Command Status for HCI 0x0A | medium (named, one-line purpose only, not decompiled) |
 | `0x80019594` | 370 | `send_HCI_Command_Status_for_HCI_0x09` | send HCI Command Status for HCI 0x09 | medium (named, one-line purpose only, not decompiled) |
 | `0x80019830` | 638 | `send_HCI_Command_Status_for_HCI_0x07` | send HCI Command Status for HCI 0x07 | medium (named, one-line purpose only, not decompiled) |
-| `0x80019ad0` | 172 | `OGC_3_OCF_3f` | OGC 3 OCF 3f | medium (named, one-line purpose only, not decompiled) |
-| `0x80019b88` | 32 | `OGC_3_OCF_49` | OGC 3 OCF 49 | medium (named, one-line purpose only, not decompiled) |
-| `0x80019bac` | 32 | `OGC_3_OCF_45` | OGC 3 OCF 45 | medium (named, one-line purpose only, not decompiled) |
-| `0x80019bd0` | 32 | `OGC_3_OCF_47` | OGC 3 OCF 47 | medium (named, one-line purpose only, not decompiled) |
-| `0x80019bf4` | 116 | `OGC_3_default_func_0_OCF_0x3F_and_above` | OGC 3 default func 0 OCF 0x3F and above | medium (named, one-line purpose only, not decompiled) |
-| `0x80019c88` | 104 | `deal_with_OGF_3_OCF_0x3f-0x49` | deal with OGF 3 OCF 0x3f-0x49 | medium (named, one-line purpose only, not decompiled) |
+| `0x80019ad0` | 172 | `OGC_3_OCF_3f` | OGC 3 OCF 3f | high (decompiled+documented — see `region_0x80010000`) |
+| `0x80019b88` | 32 | `OGC_3_OCF_49` | OGC 3 OCF 49 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x80019bac` | 32 | `OGC_3_OCF_45` | OGC 3 OCF 45 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x80019bd0` | 32 | `OGC_3_OCF_47` | OGC 3 OCF 47 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x80019bf4` | 116 | `OGC_3_default_func_0_OCF_0x3F_and_above` | OGC 3 default func 0 OCF 0x3F and above | high (decompiled+documented — see `region_0x80010000`) |
+| `0x80019c88` | 104 | `deal_with_OGF_3_OCF_0x3f-0x49` | deal with OGF 3 OCF 0x3f-0x49 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x80019d80` | 202 | `fHCI_Setup_Synchronous_Connection?` | fHCI Setup Synchronous Connection? | low (named by Kovah, purpose unclear) |
 | `0x80019e4c` | 60 | `send_evt_HCI_Read_Remote_Extended_Features_Complete` | send evt HCI Read Remote Extended Features Complete | medium (named, one-line purpose only, not decompiled) |
 | `0x80019e88` | 124 | `send_evt_HCI_Synchronous_Connection_Changed` | send evt HCI Synchronous Connection Changed | medium (named, one-line purpose only, not decompiled) |
 | `0x80019f0c` | 232 | `send_evt_HCI_Synchronous_Connection_Complete` | send evt HCI Synchronous Connection Complete | medium (named, one-line purpose only, not decompiled) |
 | `0x8001a0f8` | 44 | `calls_to_VSC_0xfcc0` | calls to VSC 0xfcc0 | low (named by Kovah, purpose unclear) |
-| `0x8001a294` | 174 | `OGC_3_OCF_0x52_HCI_Write_Extended_Inquiry_Response_fills_0x300_then_calls_to_VSC_0xfcc0` | OGC 3 OCF 0x52 HCI Write Extended Inquiry Response fills 0x300 then calls to VSC 0xfcc0 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001a350` | 164 | `OGC_3_OCF_0x51_and_above_path_to_VSC_0xfcc0` | OGC 3 OCF 0x51 and above path to VSC 0xfcc0 | low (named by Kovah, purpose unclear) |
+| `0x8001a128` | 86 | `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_FUN_80017930` | renamed from `FUN_8001a128`; OCF number not fully opcode-confirmed this pass (flagged) — see `region_0x80010000` | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001a294` | 174 | `OGC_3_OCF_0x52_HCI_Write_Extended_Inquiry_Response_fills_0x300_then_calls_to_VSC_0xfcc0` | OGC 3 OCF 0x52 HCI Write Extended Inquiry Response fills 0x300 then calls to VSC 0xfcc0 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001a350` | 164 | `OGC_3_OCF_0x51_and_above_path_to_VSC_0xfcc0` | OGC 3 OCF 0x51 and above path to VSC 0xfcc0 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001a420` | 56 | `send_evt_HCI_Remote_Host_Supported_Features_Notification` | send evt HCI Remote Host Supported Features Notification | low (named by Kovah, purpose unclear) |
 | `0x8001a458` | 34 | `send_evt_HCI_Enhanced_Flush_Complete` | send evt HCI Enhanced Flush Complete | low (named by Kovah, purpose unclear) |
 | `0x8001a47c` | 42 | `send_evt_HCI_Link_Supervision_Timeout_Changed` | send evt HCI Link Supervision Timeout Changed | low (named by Kovah, purpose unclear) |
 | `0x8001a4a8` | 268 | `send_evt_HCI_Sniff_Subrating` | send evt HCI Sniff Subrating | low (named by Kovah, purpose unclear) |
 | `0x8001a5b8` | 158 | `send_evt_HCI_Extended_Inquiry_Result` | send evt HCI Extended Inquiry Result | low (named by Kovah, purpose unclear) |
-| `0x8001a898` | 66 | `OGC_3_default_func_2` | OGC 3 default func 2 | low (named by Kovah, purpose unclear) |
+| `0x8001a658` | 346 | `OGF1_3_extended_OCF_0x51_0x5b_fallback_handler` | renamed from `FUN_8001a658`; generic per-opcode fallback for OCF 0x51-0x5b range — see `region_0x80010000` | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001a838` | 90 | `OGC_3_OCF_67_vendor_ext_write_byte_param` | renamed from `FUN_8001a838`; opcode `0xc68` confirmed via decompile — see `region_0x80010000` | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001a898` | 66 | `OGC_3_default_func_2` | OGC 3 default func 2 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001a9b8` | 52 | `bit_test_[bit_index_at_offset_0x16f]_within_[short_at_offset_0x24]` | bit test [bit index at offset 0x16f] within [short at offset 0x24] | low (named by Kovah, purpose unclear) |
 | `0x8001aa3c` | 254 | `LMP_QUALITY_OF_SERVICE_REQ_0x2A` | LMP QUALITY OF SERVICE REQ 0x2A — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001af9c` | 114 | `LMP_0x18_LMP_UNSNIFF_REQ` | LMP 0x18 LMP UNSNIFF REQ — see `lc_lmp_state_machine` | high (decompiled+documented) |
@@ -473,7 +504,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001bf44` | 88 | `fHCI_Periodic_Inquiry_Mode_0x03` | fHCI Periodic Inquiry Mode 0x03 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001bfa0` | 50 | `fHCI_Inquiry_0x01` | fHCI Inquiry 0x01 — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001c324` | 252 | `set_check_for_1_to_1` | set check for 1 to 1 | low (named by Kovah, purpose unclear) |
-| `0x8001c438` | 76 | `OGC_3_default_func_4` | OGC 3 default func 4 | low (named by Kovah, purpose unclear) |
+| `0x8001c438` | 76 | `OGC_3_default_func_4` | OGC 3 default func 4 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | HCI OGF1 OCF0x44 | low (named by Kovah, purpose unclear) |
 | `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | HCI OGF1 OCF0x43 | low (named by Kovah, purpose unclear) |
 | `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | HCI OGF1 OCF0x42 | low (named by Kovah, purpose unclear) |
@@ -513,37 +544,37 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001d904` | 256 | `send_evt_HCI_Inquiry_Result_or_HCI_Inquiry_Result_with_RSSI` | send evt HCI Inquiry Result or HCI Inquiry Result with RSSI | low (named by Kovah, purpose unclear) |
 | `0x8001da0c` | 40 | `send_evt_HCI_Inquiry_Complete` | send evt HCI Inquiry Complete | medium (named, one-line purpose only, not decompiled) |
 | `0x8001da3c` | 438 | `send_evt_HCI_Number_Of_Completed_Packets` | send evt HCI Number Of Completed Packets | low (named by Kovah, purpose unclear) |
-| `0x8001dc10` | 2454 | `OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` | OGC 3 OCF TONS deal with return status referencing default name 10 | low (named by Kovah, purpose unclear) |
-| `0x8001e5d8` | 52 | `send_evt_HCI_Command_Status` | send evt HCI Command Status | medium (named, one-line purpose only, not decompiled) |
-| `0x8001e610` | 52 | `OGC_3_OCF_01` | OGC 3 OCF 01 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001e648` | 48 | `OGC_3_OCF_33` | OGC 3 OCF 33 | low (named by Kovah, purpose unclear) |
-| `0x8001e67c` | 12 | `OGC_3_OCF_2a` | OGC 3 OCF 2a | low (named by Kovah, purpose unclear) |
-| `0x8001e68c` | 20 | `OGC_3_OCF_2f` | OGC 3 OCF 2f | low (named by Kovah, purpose unclear) |
-| `0x8001e6a4` | 20 | `OGC_3_OCF_31` | OGC 3 OCF 31 | low (named by Kovah, purpose unclear) |
-| `0x8001e6bc` | 56 | `OGC_3_OCF_13_referencing_default_name` | OGC 3 OCF 13 referencing default name | medium (named, one-line purpose only, not decompiled) |
+| `0x8001dc10` | 2454 | `OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` | OGC 3 OCF TONS deal with return status referencing default name 10 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e5d8` | 52 | `send_evt_HCI_Command_Status` | send evt HCI Command Status | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e610` | 52 | `OGC_3_OCF_01` | OGC 3 OCF 01 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e648` | 48 | `OGC_3_OCF_33` | OGC 3 OCF 33 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e67c` | 12 | `OGC_3_OCF_2a` | OGC 3 OCF 2a | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e68c` | 20 | `OGC_3_OCF_2f` | OGC 3 OCF 2f | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e6a4` | 20 | `OGC_3_OCF_31` | OGC 3 OCF 31 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001e6bc` | 56 | `OGC_3_OCF_13_referencing_default_name` | OGC 3 OCF 13 referencing default name | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001e6fc` | 44 | `OGC_3_OCF_16` | OGC 3 OCF 16 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001e72c` | 22 | `OGC_3_OCF_18` | OGC 3 OCF 18 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001e748` | 20 | `OGC_3_OCF_3c` | OGC 3 OCF 3c | low (named by Kovah, purpose unclear) |
 | `0x8001e760` | 28 | `OGC_3_OCF_3e` | OGC 3 OCF 3e | low (named by Kovah, purpose unclear) |
 | `0x8001e780` | 4 | `HCI_Read_Loopback_Mode` | HCI Read Loopback Mode — see `hci_command_router` | high (decompiled+documented) |
-| `0x8001e784` | 28 | `HCI_Enable_Device_Under_Test_Mode` | HCI Enable Device Under Test Mode | medium (named, one-line purpose only, not decompiled) |
+| `0x8001e784` | 28 | `HCI_Enable_Device_Under_Test_Mode` | HCI Enable Device Under Test Mode | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001ea34` | 264 | `HCI_Write_Loopback_Mode` | HCI Write Loopback Mode — see `hci_command_router` | high (decompiled+documented) |
-| `0x8001eb50` | 88 | `OGC_3_OCF_28` | OGC 3 OCF 28 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ebac` | 34 | `OGC_3_OCF_27` | OGC 3 OCF 27 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ebd0` | 78 | `OGC_3_OCF_36` | OGC 3 OCF 36 | low (named by Kovah, purpose unclear) |
-| `0x8001ec20` | 180 | `OGC_3_OCF_37` | OGC 3 OCF 37 | low (named by Kovah, purpose unclear) |
-| `0x8001ecd8` | 180 | `OGC_3_OCF_26` | OGC 3 OCF 26 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ed98` | 68 | `OGC_3_OCF_24` | OGC 3 OCF 24 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ede4` | 74 | `OGC_3_OCF_1e` | OGC 3 OCF 1e | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ee34` | 106 | `OGC_3_OCF_1c` | OGC 3 OCF 1c | medium (named, one-line purpose only, not decompiled) |
-| `0x8001eea4` | 90 | `OGC_3_OCF_1a` | OGC 3 OCF 1a | medium (named, one-line purpose only, not decompiled) |
-| `0x8001ef54` | 314 | `OGC_3_OCF_35` | OGC 3 OCF 35 | low (named by Kovah, purpose unclear) |
-| `0x8001f098` | 210 | `OGC_3_OCF_2d` | OGC 3 OCF 2d | low (named by Kovah, purpose unclear) |
-| `0x8001f184` | 164 | `OGC_3_OCF_3a` | OGC 3 OCF 3a | low (named by Kovah, purpose unclear) |
-| `0x8001f230` | 120 | `OGC_3_OCF_08` | OGC 3 OCF 08 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001f2ac` | 338 | `OGC_3_OCF_05` | OGC 3 OCF 05 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001f408` | 586 | `unknown_referencing_default_name_7` | unknown referencing default name 7 | low (named by Kovah, purpose unclear) |
-| `0x8001f94c` | 116 | `OGC_3_default_func_5` | OGC 3 default func 5 | low (named by Kovah, purpose unclear) |
+| `0x8001eb50` | 88 | `OGC_3_OCF_28` | OGC 3 OCF 28 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ebac` | 34 | `OGC_3_OCF_27` | OGC 3 OCF 27 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ebd0` | 78 | `OGC_3_OCF_36` | OGC 3 OCF 36 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ec20` | 180 | `OGC_3_OCF_37` | OGC 3 OCF 37 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ecd8` | 180 | `OGC_3_OCF_26` | OGC 3 OCF 26 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ed98` | 68 | `OGC_3_OCF_24` | OGC 3 OCF 24 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ede4` | 74 | `OGC_3_OCF_1e` | OGC 3 OCF 1e | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ee34` | 106 | `OGC_3_OCF_1c` | OGC 3 OCF 1c | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001eea4` | 90 | `OGC_3_OCF_1a` | OGC 3 OCF 1a | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001ef54` | 314 | `OGC_3_OCF_35` | OGC 3 OCF 35 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f098` | 210 | `OGC_3_OCF_2d` | OGC 3 OCF 2d | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f184` | 164 | `OGC_3_OCF_3a` | OGC 3 OCF 3a | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f230` | 120 | `OGC_3_OCF_08` | OGC 3 OCF 08 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f2ac` | 338 | `OGC_3_OCF_05` | OGC 3 OCF 05 | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f408` | 586 | `fHCI_Reset_0x03_full_subsystem_teardown` | renamed from `unknown_referencing_default_name_7`; real `HCI_Reset` (OGF=3/OCF=3) implementation — see `region_0x80010000` | high (decompiled+documented — see `region_0x80010000`) |
+| `0x8001f94c` | 116 | `OGC_3_default_func_5` | OGC 3 default func 5 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001f9cc` | 320 | `fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` | fHCI Remote OOB Extended Data Request Reply 0x45 | low (named by Kovah, purpose unclear) |
 | `0x8001fb10` | 60 | `wrap_fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` | wrap fHCI Remote OOB Extended Data Request Reply 0x45 | low (named by Kovah, purpose unclear) |
 | `0x8001fb4c` | 34 | `send_evt_HCI_Authenticated_Payload_Timeout_Expired` | send evt HCI Authenticated Payload Timeout Expired | low (named by Kovah, purpose unclear) |
@@ -984,25 +1015,25 @@ granularity is meaningful until individual triage happens).
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
 | `0x80000000`–`0x8000ffff` | 88 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function, 2026-06-22 — **region's gap-sweep now COMPLETE; the remaining 88 are outside this doc's two-gap scope, e.g. the excluded interrupt-vector sub-range**) | 4.3% |
-| `0x80010000`–`0x8001ffff` | 261 (263 authoritative-recount baseline, 2026-06-22 region-0x80010000 pass 1 — supersedes the original 268 estimate, see that region doc's scope note — minus 2 pass-1 renames) | 12.7% |
+| `0x80010000`–`0x8001ffff` | 257 (263 authoritative-recount baseline, 2026-06-22 region-0x80010000 pass 1 — supersedes the original 268 estimate, see that region doc's scope note — minus 2 pass-1 renames minus 4 pass-2 renames) | 12.5% |
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
 | `0x80040000`–`0x8004ffff` | 307 | 15.0% |
 | `0x80050000`–`0x8005ffff` | 354 | 17.3% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 193 | 9.4% |
-| **Total** | **2052** | **100%** |
+| **Total** | **2048** | **100%** |
 
 (Note: the doc-wide "Unnamed (`FUN_*`) functions" summary metric above still
-reads 2057 — derived as `2059 − 2` from the prior baseline's running total,
-not yet reconciled against this table's fresh 2052 recount. The 5-function
+reads 2053 — derived as `2057 − 4` from the prior baseline's running total,
+not yet reconciled against this table's fresh 2048 recount. The 5-function
 gap is the same authoritative-recount drift described in
 `reverse_engineering_region_0x80010000.md`'s scope section: this region's
 *old* estimate (268) was never verified against a direct
-`FunctionManager` enumeration until this pass; the other 6 untouched
+`FunctionManager` enumeration until pass 1; the other 6 untouched
 regions' counts are still old, unverified estimates and may carry similar
 small drift once their own pass-1 authoritative recount happens. Treat
-2052 (this table) as more trustworthy than 2057 (the summary metric) until
+2048 (this table) as more trustworthy than 2053 (the summary metric) until
 a future pass reconciles them properly via a fresh `RomCoverageStats.java`
 run, per the periodic-recompute instruction in `work-in-progress.txt`.)
 

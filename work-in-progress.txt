@@ -1833,7 +1833,83 @@ completion):
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 1 done, 376 fns remain)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 2 done, 338 fns remain)
+          PASS 2 (2026-06-22): re-ran ListRegion0x80010000.java +
+          ListRegion0x80010000_Upper.java first (required first step) —
+          confirmed the lower script's truncation cuts off at exactly
+          0x8001b84c (the first line the upper script also prints), so the
+          two scripts' outputs are gapless together; all 32 pass-1 names
+          persisted, no regressions.
+
+          Resolved pass 1's own top-priority recommended target: the
+          **`OGC_3_OCF_*` cluster** (`0x80019ad0`-`0x8001c438` and
+          `0x8001dc10`-`0x8001f94c`) — 38 functions (34 thin-named upgraded
+          to high confidence via decompile-confirmation: 20 medium + 14
+          low; 4 newly named from unnamed `FUN_*`).
+
+          KEY FINDING: decompiled the standard HCI router's OGF=3
+          dispatcher itself,
+          `HCI_CMD_OGF_03__Controller_and_Baseband__big_switch_FUN_800202c0`
+          (`0x800202c0`, region `0x80020000`, already high-confidence) — its
+          CALLEES list is exactly this region's `OGC_3_OCF_*` functions.
+          This means the cluster pass 1 flagged as a possible
+          "previously-unexplored vendor opcode group" is actually the
+          **already-documented standard OGF 0x03 (Controller & Baseband)**
+          command group from `reverse_engineering_hci_command_router.md`'s
+          OGF table — Realtek just physically placed the ~50 individual
+          OCF-handler function bodies in this region while the dispatcher
+          switch statement itself lives in region `0x80020000`. Not a new
+          opcode group; question resolved.
+
+          Also found `unknown_referencing_default_name_7` (`0x8001f408`,
+          586B) is the real `HCI_Reset` (OGF=3/OCF=3) implementation — a
+          flat sequence of interrupt-disable, ~8 subsystem-reset calls,
+          ~25 global-state zeroing writes, interrupt-enable. Renamed
+          `fHCI_Reset_0x03_full_subsystem_teardown`. Renamed 3 more
+          previously-unnamed helpers: `OGF1_3_extended_OCF_0x51_0x5b_
+          fallback_handler` (`0x8001a658`), `OGC_3_OCF_67_vendor_ext_
+          write_byte_param` (`0x8001a838`, opcode `0xc68` confirmed via
+          decompile), `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_
+          FUN_80017930` (`0x8001a128`, opcode NOT fully confirmed this
+          pass — flagged for a future pass; an initial mis-derived name
+          using a real spec OCF was caught and corrected before this
+          write-up).
+
+          Fully decompiled `OGC_3_OCF_TONS_deal_with_return_status_
+          referencing_default_name_10` (`0x8001dc10`, 2454B — now the
+          single largest function in this region): the shared "read HCI
+          parameter, send Command Complete" primitive for OGF 1/2/3,
+          confirmed via decompiler-surviving comments
+          (`/* 0xC00 = OGF = 3 = Control & Baseband */` etc.) that
+          independently verify the OGF/OCF bit-layout from the
+          read-parameter side.
+
+          Updated analysis/rom/reverse_engineering_region_0x80010000.md
+          (new "Pass 2" section), analysis/rom/rom_function_index.md (38
+          rows upgraded/added; summary counts: named 681->685, high
+          323->361, medium 88->68, low 271->257, unnamed 2057->2053;
+          unnamed-distribution table's region row 261->257/12.5%, total
+          2052->2048 with all other regions' rows untouched this pass), and
+          analysis/INDEX.md (both affected rows).
+
+          REMAINING SCOPE — 338 of 408 functions (257 unnamed + 64
+          genuinely-open thin-named + 15 already-high-confidence + 70
+          resolved across passes 1+2 + 2 pass-1-folded). Top priority for
+          next pass per the region doc's updated "Remaining scope" section:
+          the **`HCI_OGF1_OCF0x4#` cluster** (`0x8001c490`-`0x8001c788`, 4
+          thin-named + neighbors) — OGF=1 Link Control commands in the
+          0x3F-0x44 OCF range. Also flagged: the `fHCI_*` 7-function
+          cluster (`0x8001b84c`-`0x8001bf44`), the `fHCI_Read_*` 5-function
+          cluster (`0x8001b23c`-`0x8001b780`), scattered `VSC_0xfc##`
+          handlers, the `LMP_CH__0x3ee__case#` 3-function cluster, several
+          large unnamed functions by size (`0x80018654` 1194B largest,
+          `0x80016934` 1012B, `0x800161e4` 974B), and the remaining small
+          unnamed `FUN_8001xxxx` scattered through the rest of the region.
+          Also flagged 4 callee helpers from this pass
+          (`FUN_8001fb70`/`FUN_8001c9d4`/`FUN_80044490`/`FUN_8001a8e0`) as
+          cheap future targets.
+
+          --- PRIOR PASS HISTORY (preserved) ---
           PASS 1 (2026-06-22): no prior pass history — this was a brand-new
           region ticket. Got an authoritative function list via two new
           scripts (`ListRegion0x80010000.java` +
