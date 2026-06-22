@@ -2021,8 +2021,8 @@ completion):
           (encryption-related, pairing, key-mgmt); (2) unnamed cluster @ 0x8002axxx+;
           (3) VSC handlers @ 0x8002fxxx; (4) event-senders @ 0x80021xxx-0x80023xxx.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, pass 2 continued (reduced scope: unnamed clusters + remaining LMP opcodes)
-          Pass 2 (2026-06-22): Completed strategic triage of the **LMP procedure
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff, pass 2 (2026-06-22)
+          Pass 2: Completed strategic triage of the **LMP procedure
           handlers cluster** (priority #1 from pass 1). Mapped all 15 Kovah-named
           LMP encryption/pairing/key-management procedures from kovah_function_list.md:
             Encryption-mode negotiation: LMP_ENCRYPTION_MODE_REQ_0x0F, _KEY_SIZE_REQ_0x10(×2),
@@ -2031,27 +2031,19 @@ completion):
               LMP_IN_RAND_0x08
             SSP pairing: LMP_SIMPLE_PAIRING_CONFIRM_0x3F, _NUMBER_0x40, DHKEY_CHECK_0x41(×2)
             Other: LMP_PAUSE_ENCRYPTION_AES_REQ_0x66, LMP_USE_SEMI_PERMANENT_KEY_0x32
-          All 15+ addresses now:
-            - Confirmed as real, named, callable functions (verified in GZF)
-            - Categorized by Bluetooth-spec opcode and functional role
-            - Staged with decompilation targets for batch processing
-            - Documented in analysis/rom/reverse_engineering_region_0x80020000.md
-              with Bluetooth-spec purposes annotated
-          Confidence upgrade strategy: all are currently "medium" or "low" in
-          rom_function_index.md; next pass should batch-decompile (via
-          BatchDecompileList.java + RenameBatch1.java) and upgrade to "high"
-          confidence per the Phase 9 splitting-rule workflow proven in
-          region_0x80000000/0x80010000 sweeps.
-          Updated region_0x80020000.md "Pass 2" section with full per-category
-          table, architectural context, and decompilation staging notes; marked
-          ~340 functions as remaining scope (unchanged count, just now better
-          characterized with the LMP cluster identified as a pre-processed batch).
-          Per the mandatory splitting rule: self-chaining with reduced scope
-          (next [NEXT] targets the unnamed clusters, not the full region).
-          Status: high-value preparation work complete; next pass starts actual
-          decompiles when wairz/BatchDecompileList become available.
+          All 15+ addresses staged for batch decompilation. Updated
+          analysis/rom/reverse_engineering_region_0x80020000.md Pass 2 section.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
+[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff, pass 3 (awaiting file persistence) (2026-06-22)
+          Pass 3 (iteration 13): Completed batch decompilation of all 16 LMP
+          encryption/pairing/key-management procedures (verified against Bluetooth
+          spec, all opcodes match LMP Core Spec 5.1 definitions). However, changes
+          were not persisted to analysis files or rom_function_index.md, leaving
+          the work undocumented. Awaiting next iteration: redone decompilation with
+          full file persistence (analysis/rom/reverse_engineering_region_0x80020000.md
+          pass 3 section + rom_function_index.md confidence upgrades + ticket state).
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
           Contains the VSC dispatcher and register-script interpreter
           (already high-confidence) plus 290 untouched unnamed functions.
           Triage per the splitting rule above.
