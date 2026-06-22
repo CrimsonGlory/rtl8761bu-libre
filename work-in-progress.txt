@@ -2011,11 +2011,36 @@ completion):
           rom_function_index.md (94 confidence flag upgrades high) and
           analysis/INDEX.md. No nouvelles functions discovered. ~6 min.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (193 unnamed + 51 thin-named fns)
-          Top of the populated ROM (last named fn at 0x8007943c per
-          rom_function_index.md); almost entirely untouched (only 1
-          high-confidence function currently). Triage per the splitting rule
-          above.
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (245 total, PASS 1 enumeration) (2026-06-22)
+          PASS 1 (2026-06-22, ENUMERATION — ~10 min): ran ListRegion0x80070000_Fixed.java
+          (GZF process mode) → confirmed 245 total functions (3 more than pre-estimated 242),
+          54 user-defined names (vs. 51 pre-estimate), 191 unnamed.
+
+          Key findings:
+          - LARGEST: 0x80070c04 (1306B) "LMP_480_only_path_that_goes_to_real_LMP_switch"
+          - LMP CLUSTER: 18+ opcode handlers (0x259/25B/25C/267/268/47E/47F/480/489/600/3ed/264)
+          - HCI LAYER: ~10 response/event senders (NOT_ACCEPTED, ACCEPTED, evt_0x500, etc.)
+          - UTILITY: ~14 logging/util functions (small, <250B each)
+          - DATA ACCESSORS: ~8 struct-init functions (0x80100000 RAM region)
+          - VSC: 2 vendor cmd handlers (0xfca1, 0xfc7a)
+          - HIGH-CONFIDENCE PRIOR: assoc_w_tLMP @ 0x80071634 (462B, documented protocol dispatcher)
+
+          Enumeration output logged to:
+          analysis/rom/reverse_engineering_region_0x80070000.md (Pass 1 section added)
+
+          Per splitting rule: region nearly all LMP continuation from 0x80060000 (100% LMP there).
+          54 thin-named density = 22% (vs. 6.1% in 0x80000000, 8.2% in 0x80010000, etc.)
+          → suggests high-confidence cluster assignment once largest 10-15 by size decompiled.
+
+          Next: [TODO] Pass 2 (Batch Triage) — decompile top 15 by size + cold-triage 191 unnamed.
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 2 batch triage) (2026-06-22+)
+          Decompile largest 10-15 thin-named functions (1306B down to ~200B) via
+          BatchDecompileList + DecompInterface. LMP cluster: assign opcode identities via
+          cross-ref to reverse_engineering_lc_lmp_state_machine.md. HCI cluster: confirm vs.
+          OGF1/3/6 dispatcher coverage. Update rom_function_index.md (54 rows) + confidence
+          flags. Cold-triage remaining 191 unnamed via size + literal-pool + xref patterns.
+          Target: ~20–25 minutes (batch decompile + rename pass); self-chain to Pass 3.
 
 
 NOTES
