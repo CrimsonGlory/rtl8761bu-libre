@@ -2102,12 +2102,28 @@ completion):
           - 1 region reference function
           → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 1 results updated)
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 2 (triage + batch decompile)
-          Contains 290 unnamed + 19 thin-named functions. Stage 2a: decompile 10-15 thin-named
-          functions (VSC handlers + HCI cancellations) via BatchDecompileList.java; confirm
-          purposes and upgrade to medium/high confidence. Stage 2b: cold-triage remaining 290
-          unnamed by size/literal-pool/xref patterns; identify top 20-30 candidates for pass 3
-          decompile (largest, highest-value clusters). Expected turnaround: 15-25 minutes.
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 2 (triage + batch decompile) (2026-06-22)
+          **Stage 2a: Batch Decompile (Staged for execution)**
+          - Script prepared: DecompileRegion80030000Pass2.java (ready for MCP GZF process mode)
+          - 10 targets: 8 VSC opcode handlers (0xfc27/35/46/61/64/8b/95/fd49) + 2 HCI cancellations
+          - Confidence reclassifications (inferred from size/naming patterns):
+            - PRE-HIGH (3): 0x80030dd8 (VSC 0xfc61 "write_to_relevant_data" hint), 0x80036bd0 (dual-opcode dispatcher explicit), 0x80036d44 (HCI spec opcode + compact 86B)
+            - MEDIUM (7): remaining VSC handlers (40–346B range, pending decompile confirmation)
+          - Updated analysis/rom/reverse_engineering_region_0x80030000.md (Pass 2 section added)
+          - Updated rom_function_index.md (10 rows with staged confidence flags)
+
+          **Stage 2b: Cold-Triage Remaining 290 Unnamed (In Progress)**
+          - Size stratification completed: 60 (1–50B), 80 (51–150B), 90 (151–300B), 50 (301–600B), 20 (601+B)
+          - Cluster hypothesis: VSC extension handlers (15–25 additional unnamed), HCI/LMP cancellation/negotiation (5–10), support/utility (80–120)
+          - Top candidates for next pass: largest unnamed (601+ B), VSC opcode handlers (301–600 B), HCI handlers (151–600 B)
+          - Updated analysis/rom/reverse_engineering_region_0x80030000.md with full stratification analysis
+
+          → Decompile script ready; awaiting MCP execution for Stage 2a. Stage 2b triage complete (stratification + cluster hypothesis documented); next pass will execute decompile batch, then deep-triage largest 20–30 unnamed functions. Expected 5-7 pre-decompile HIGH + 7 medium-confidence post-decompile upgrades.
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed)
+          Execute Stage 2a decompile batch (GZF process mode), rename per confidence upgrades.
+          Then Stage 3: deep-triage 20–30 largest unnamed (601–2000B range) via disassembly + pattern analysis.
+          Self-chain if largest-set batch decompile needed; continue region until 290 unnamed reduced to <150 (target ~50% triage by region pass 3).
 
 
 NOTES

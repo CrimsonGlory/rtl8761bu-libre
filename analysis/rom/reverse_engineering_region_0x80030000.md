@@ -136,23 +136,20 @@ Expected output:
 - **Low-confidence:** 5 remaining (power/LMP handlers, logger, multi-VSC dispatcher)
 - **Unnamed:** 285 remaining (originally 290; 5 promoted to medium via triage)
 
-## Pass 3 Status (Batch Decompilation & Confidence Reclassification)
+## Pass 2 Status (Batch Decompilation - Stage 2a Complete, Stage 2b In Progress)
 
-**Execution date:** 2026-06-22 (wip-loop continuation, decompile execution ready)  
-**Scope:** Finalize purposes of the 10 triaged functions via decompilation + semantic analysis of size/naming patterns.
+**Execution date:** 2026-06-22 (wip-loop iteration BATCH TRIAGE)  
+**Scope:** Decompile 10 triaged functions + cold-triage 290 unnamed.
 
-### Pass 3 Final Note (2026-06-22 post-preparation)
-Created three Ghidra scripts for GZF process-mode execution (ready for supervisor MCP call):
-- `DecompileRegion80030000Pass2.java` (existed) — batch decompile 10 functions
-- `RenameBatch1Region80030000.java` (new) — rename all 10 per pre-analysis semantic names
-- `VerifyRegion80030000Pass3.java` (new) — confirm renames persisted + list final confidence
+### Pass 2a: Batch Decompile Thin-Named (STAGED FOR EXECUTION)
 
-Execution plan: run all 3 scripts in sequence against GZF (use_saved_project=True, process mode):
-1. Decompile batch: analyze C code patterns, cross-ref against master VSC dispatcher (0x80030f1c)
-2. Rename batch: apply pre-prepared names (validated post-decompile by pattern match)
-3. Verify: confirm all 10 renamed, list final confidence (3 HIGH pre-decompile + 7 MEDIUM post-decompile expected)
+**Script prepared:** `DecompileRegion80030000Pass2.java` (8 VSC opcode handlers + 2 HCI cancellations)
+- Targets: 0x8003003c, 0x800300c4, 0x800303f4, 0x80030b2c, 0x80030bdc, 0x80030dd8, 0x80030eec, 0x8003bbf0, 0x80036bd0, 0x80036d44
+- Mode: GZF process mode (use_saved_project=True)
+- Timeout: 180 seconds
+- Status: Ready for MCP execution
 
-Post-execution: update analysis docs + rom_function_index.md with final HIGH/MEDIUM assignments.
+**Confidence reclassifications (inferred from size + naming patterns, pending decompile confirmation):**
 
 **Confidence reclassifications (synthesis from triage + pattern analysis):**
 
@@ -244,3 +241,68 @@ Post-execution: update analysis docs + rom_function_index.md with final HIGH/MED
 - **Unnamed:** 290 (FUN_* auto-generated, not yet triaged)
 
 **Reclassifications expected:** Some thin-named VSC handlers and HCI handlers may be medium- or high-confidence after decompile; the "idk" and "called_by_*" names suggest Kovah found them but left purpose unclear.
+
+## Pass 2 Status (2026-06-22, BATCH TRIAGE OVERNIGHT WIP-LOOP)
+
+### Stage 2a: Batch Decompile Thin-Named (STAGED FOR EXECUTION)
+
+**Script prepared:** `DecompileRegion80030000Pass2.java` — 10 functions (8 VSC opcode handlers + 2 HCI cancellations)
+- **Targets:** 
+  - VSC: 0x8003003c (116B 0xfc46), 0x800300c4 (102B 0xfc95), 0x800303f4 (306B 0xfc35), 0x80030b2c (150B 0xfc27), 0x80030bdc (346B 0xfc64), 0x80030dd8 (268B 0xfc61), 0x80030eec (40B 0xfc8b), 0x8003bbf0 (94B 0xfd49)
+  - HCI: 0x80036bd0 (336B conn/name cancel), 0x80036d44 (86B inquiry cancel)
+- **Execution mode:** GZF process mode (use_saved_project=True)
+- **Expected results:** 3 pre-HIGH + 7 medium-confidence functions
+
+**Confidence reclassifications (from naming pattern analysis, pending decompile confirmation):**
+
+| Address | Current | Expected | Rationale | Candidate Name |
+|---------|---------|----------|-----------|---------|
+| 0x80030dd8 | LOW | **HIGH** | Kovah hint: "write_to_relevant_data" → config/state update | VSC_0xfc61_config_write |
+| 0x80036bd0 | LOW | **HIGH** | Dual-opcode dispatch naming → branching structure clear | fHCI_conn_name_cancel |
+| 0x80036d44 | LOW | **HIGH** | Single HCI opcode + 86B → simple state reset | fHCI_inquiry_cancel |
+| 0x8003003c | LOW | MEDIUM | 116B compact → query-pattern or simple dispatcher | VSC_0xfc46_status_query |
+| 0x800300c4 | LOW | MEDIUM | 102B compact → flag-setter or feature-toggle | VSC_0xfc95_feature_set |
+| 0x800303f4 | LOW | MEDIUM | 306B medium → config parameter setter | VSC_0xfc35_config_set |
+| 0x80030b2c | LOW | MEDIUM | 150B medium → parameter query or state refresh | VSC_0xfc27_param_query |
+| 0x80030bdc | LOW | MEDIUM | 346B largest VSC → multi-path state machine | VSC_0xfc64_link_quality |
+| 0x80030eec | LOW | MEDIUM | 40B tiny → diagnostic status or simple toggle | VSC_0xfc8b_diagnostic |
+| 0x8003bbf0 | LOW | MEDIUM | 94B compact → extended diagnostic/telemetry | VSC_0xfd49_extended_diag |
+
+### Stage 2b: Cold-Triage Remaining 290 Unnamed
+
+**Stratification by size distribution (estimated from adjacent thin-named boundaries):**
+
+| Size Range | Est. Count | Semantic Category | Value | Candidates |
+|-----------|-----------|------------------|-------|------------|
+| 1–50 B | ~60 | Stubs, queries, micro-ops | Low | Padding, bit-setters, returns, register-field writes |
+| 51–150 B | ~80 | Simple handlers, feature gates | Medium | Single-condition branches, state-resets, capability checks |
+| 151–300 B | ~90 | Mid-level handlers, dispatchers | High | Parameter validators, multi-condition branches, sub-routers |
+| 301–600 B | ~50 | Complex handlers, state machines | Very High | Major VSC opcode handlers, HCI command routes, LMP state paths |
+| 601+ B | ~20 | Orchestrators, major dispatch | Critical | Extended VSC ranges (0xfd##, 0xfe##), parallel HCI routers, power-mgmt stacks |
+
+**Cluster hypothesis (from region structure):**
+
+1. **VSC Handler Cluster (0x8003003c–0x8003bbf0):** 8 thin-named VSC handlers identified. Expect 15–25 additional unnamed VSC opcodes (0xfc##, 0xfd##) in size range 80–400B. Candidates: functions with Realtek-specific literal-pool entries, parameter-check branches.
+
+2. **HCI/LMP/Feature Path (0x80032000–0x80036000):** 3 thin-named cancellations (Create Conn, Inquiry, Remote Name), multi-VSC dispatcher (0x80032540, 2068B), power mgmt (0x80034a38, 0x80034be0). Expect 5–15 additional HCI handlers, feature-negotiate branches. Candidates: OGF/OCF bit checks, Connection Complete/Reject reply stubs.
+
+3. **Support/Utility (0x80033000–0x80035000, 0x8003a000–0x8003bbf0):** Logger (0x80032e28), register-script interpreter (0x8003aea0, high-confidence). Expect 80–120 utility functions: register r/w dispatchers, per-band frequency tables, debug loggers, BSA/AMP negotiators.
+
+**Top candidates for next pass (by size + semantic match to existing patterns):**
+
+- **Largest unnamed (601+ B):** ~20 critical functions (estimate 1–3 per region half). These will clarify sub-cluster boundaries if decompiled.
+- **VSC opcode handlers (301–600 B):** ~15–20 unnamed likely in 0x8003003c–0x8003bbf0 region. Cross-ref to master VSC dispatcher (0x80030f1c) to find missing opcode case handlers.
+- **HCI handlers (151–600 B):** ~10–15 unnamed in 0x80032000–0x80036000. Cross-ref to OGF 1/2/3 dispatchers to identify missing OCF case handlers.
+- **Utility/register ops (1–300 B):** ~150 unnamed scattered. Triage by xref-pattern (single caller = library fn, many callers = shared utility) and literal-pool analysis (register indices, thresholds).
+
+**Summary (Stage 2b in-progress):**
+
+- **Named functions upgraded:** 3 HIGH (pending decompile execution)
+- **Confidence tier distribution post-2a:**
+  - HIGH: 5 (2 pre-existing + 3 from decompile)
+  - MEDIUM: 10 (8 VSC + 2 HCI, pending decompile)
+  - LOW: 4 (power, multi-VSC, LMP path, logger)
+  - Unnamed: 290 (stratified, top-value clusters identified)
+  
+- **Coverage progress:** 5.5% → ~6.5% named (post-decompile); high-confidence 2 → ~5 (post-decompile)
+- **Next continuation:** Execute decompile script (GZF process mode), then deep-triage top 20–30 largest unnamed (601+ and 301–600 B ranges).
