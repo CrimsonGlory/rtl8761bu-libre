@@ -201,12 +201,46 @@ Post-execution: update analysis docs + rom_function_index.md with final HIGH/MED
 
 **Reclassifications expected (post-decompile):** 8–10 functions → high-confidence based on decompile clarity. "idk" and "called_by_*" names suggest Kovah left purposes intentionally vague for manual RE verification.
 
-## Coverage Progress
+## Enumeration Results (PASS 1 COMPLETE)
 
-- **Named functions:** 17 of 307 (5.5%)
+**Execution date:** 2026-06-22 (wip-loop execution)  
+**Method:** ListRegion0x80030000.java via Ghidra headless (GZF process mode, use_saved_project=True)
+
+**Final counts verified:**
+- **Total functions:** 309 (matches 290 unnamed + 19 thin/high-named baseline estimate)
+- **Unnamed (AUTO source):** 290
+- **Named (USER_DEFINED source):** 19
+
+**Named function breakdown:**
+- **2 high-confidence** (decompiled+documented): VSC dispatcher (0x80030f1c, 4372B), register-script interpreter (0x8003aea0, 688B)
+- **8 VSC opcode handlers** (thin-named, medium-confidence expected post-decompile):
+  - 0x8003003c (116B) VSC 0xfc46 handler
+  - 0x800300c4 (102B) VSC 0xfc95 handler
+  - 0x800303f4 (306B) VSC 0xfc35 handler
+  - 0x80030b2c (150B) VSC 0xfc27 handler
+  - 0x80030bdc (346B) VSC 0xfc64 handler
+  - 0x80030dd8 (268B) VSC 0xfc61 handler (write_to_relevant_data hint)
+  - 0x80030eec (40B) VSC 0xfc8b handler
+  - 0x8003bbf0 (94B) VSC 0xfd49 handler
+- **3 HCI cancellation handlers** (low-confidence named):
+  - 0x80036bd0 (336B) Create Connection/Remote Name Request Cancel
+  - 0x80036d44 (86B) Inquiry Cancel (OGF 1 OCF 2)
+  - 0x80036df8 (316B) Remote Name Request follow-up caller
+- **5 utility/dispatch functions** (low-confidence):
+  - 0x80032540 (2068B) multi-VSC handler
+  - 0x80032e28 (20B) logger/init caller
+  - 0x80033188 (182B) LMP 0x47E path handler
+  - 0x80034a38 (378B) TX power query (idk_*)
+  - 0x80034be0 (120B) TX power setter
+- **1 region reference:**
+  - 0x800302ac (272B) references_patch_download_mem4
+
+**Coverage Progress (after Pass 1)**
+
+- **Named functions:** 19 of 309 (6.1%)
 - **High-confidence:** 2 (decompiled + documented)
-- **Medium-confidence:** 0
-- **Low-confidence (thin-named):** 15 (named by Kovah, awaiting decompile)
+- **Medium-confidence (post-triage expected):** ~10 (VSC handlers + HCI cancellation)
+- **Low-confidence (thin-named):** 7 (power mgmt, multi-VSC, LMP 0x47E, etc.)
 - **Unnamed:** 290 (FUN_* auto-generated, not yet triaged)
 
 **Reclassifications expected:** Some thin-named VSC handlers and HCI handlers may be medium- or high-confidence after decompile; the "idk" and "called_by_*" names suggest Kovah found them but left purpose unclear.

@@ -2093,10 +2093,21 @@ completion):
           via RenameBatch1.java. Then systematic cold-triage of remaining ~340 unnamed + thin-named:
           stratify by size, literal-pool, xref patterns. Expect 2–3 turns at ~50-100 fns per turn.
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
-          Promoted from [TODO] per wip-loop self-chaining rule (0x80020000 pass 2 complete).
-          Contains VSC dispatcher + register-script interpreter (already high-confidence) plus
-          290 untouched unnamed functions. Triage per splitting rule.
+[DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
+          Confirmed count: 309 total functions (290 unnamed + 19 named).
+          - 2 high-confidence (VSC dispatcher 0x80030f1c, reg-script 0x8003aea0)
+          - 8 VSC opcode handlers (medium-confidence, thin-named, need decompile)
+          - 3 HCI cancellation handlers (low-confidence, thin-named)
+          - 5 utility/dispatch functions (low-confidence, thin-named)
+          - 1 region reference function
+          → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 1 results updated)
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 2 (triage + batch decompile)
+          Contains 290 unnamed + 19 thin-named functions. Stage 2a: decompile 10-15 thin-named
+          functions (VSC handlers + HCI cancellations) via BatchDecompileList.java; confirm
+          purposes and upgrade to medium/high confidence. Stage 2b: cold-triage remaining 290
+          unnamed by size/literal-pool/xref patterns; identify top 20-30 candidates for pass 3
+          decompile (largest, highest-value clusters). Expected turnaround: 15-25 minutes.
 
 
 NOTES
