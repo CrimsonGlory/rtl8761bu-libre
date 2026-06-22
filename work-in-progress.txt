@@ -1833,19 +1833,25 @@ completion):
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 2 done, 338 fns remain)
-          PASS 2 (2026-06-22): re-ran ListRegion0x80010000.java +
-          ListRegion0x80010000_Upper.java first (required first step) —
-          confirmed the lower script's truncation cuts off at exactly
-          0x8001b84c (the first line the upper script also prints), so the
-          two scripts' outputs are gapless together; all 32 pass-1 names
-          persisted, no regressions.
+[DONE]  Full RE: ROM region 0x80010000-0x8001ffff, pass 3 (2026-06-22)
+          PASS 3 (2026-06-22): re-ran ListRegion0x80010000.java +
+          ListRegion0x80010000_Upper.java first (required first step) to
+          verify count stability — confirmed 408 functions remain unchanged
+          from pass 2; all 32 pass-1 names plus 38 pass-2 renames persisted,
+          no regressions.
 
-          Resolved pass 1's own top-priority recommended target: the
-          **`OGC_3_OCF_*` cluster** (`0x80019ad0`-`0x8001c438` and
-          `0x8001dc10`-`0x8001f94c`) — 38 functions (34 thin-named upgraded
-          to high confidence via decompile-confirmation: 20 medium + 14
-          low; 4 newly named from unnamed `FUN_*`).
+          Resolved pass 2's own top-priority recommended target: the
+          **`HCI_OGF1_OCF0x4#` cluster** (`0x8001c490`-`0x8001c940`) — 6
+          functions (all already named by Kovah: 4 low-confidence, 2
+          medium-confidence; upgraded to high via full decompile-confirmation).
+          Key finding: complete 7-function architectural map including a
+          dispatcher wrapper routing 6 handlers via 6-way compact jump table,
+          with post-command event-type routing (Command Status vs Command
+          Complete). All 6 are essential OGF=1 truncated-page and page-time
+          commands (T1 required for basic ACL). See
+          reverse_engineering_region_0x80010000.md pass 3 section for
+          full per-function decompile detail, wrapper routing logic, and 9
+          newly-confirmed ROM function references.
 
           KEY FINDING: decompiled the standard HCI router's OGF=3
           dispatcher itself,
@@ -1976,10 +1982,22 @@ completion):
           974B), and ~250 small unnamed `FUN_8001xxxx` scattered through
           the rest of the region with no existing thematic doc coverage.
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 3 done, ~332 of 408 fns remain)
+          Per the mandatory region-ticket splitting rule: pass 3 resolved 6
+          more functions (70 total across passes 1-3), leaving 332 of 408
+          functions. Region ticket kept as [NEXT] with shrunk scope per the
+          self-chaining exception (not marked [DONE] — full region completion
+          requires all 408 functions resolved or explicitly noted as
+          non-functions). Next highest-value target per the region doc:
+          the large cold stretch beginning around 0x8001f464+, or the
+          remaining thin-named functions not yet upgraded to high confidence.
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff, continued (384 fns, HCI router + SAFER+ already high-confidence)
           Contains the HCI command router and SAFER+ cipher (both already
           high-confidence) plus 321 untouched unnamed functions and 63 thin
-          ones. Triage per the splitting rule above.
+          ones. Triage per the splitting rule above. Next priority target
+          per the standard workflow: re-run ListRegion authoritative scripts,
+          identify next high-value cluster, and begin decompilation batch.
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
           Contains the VSC dispatcher and register-script interpreter
