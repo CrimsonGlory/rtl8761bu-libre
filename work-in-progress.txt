@@ -1692,137 +1692,88 @@ completion):
     macro-progress (named-%% and high-confidence-%% should both climb over
     the life of this sweep).
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~102 of 220 gap fns remain, reconciled)
-          SUPERVISOR NOTE (2026-06-22, updated after pass 4 was cut off mid-turn
-          by a session limit): pass 4 reconciled the prior tally-drift note
-          below (root cause found: 17 of pass 3's "105 resolved" were leaf
-          helpers OUTSIDE this region's 220-function scope, and the
-          thin-named bucket was undercounted by 2) AND resolved 27 more
-          functions (the 0x80001648/0x80001c4c packet-type/role-switch
-          supercluster, 14 fns; the 0x8000c09c-0x8000c77c stretch +
-          neighbors, 13 fns). Reconciled total: 115 resolved in-scope, 102
-          remain (86 unnamed + 16 genuinely-open thin-named). Full detail
-          and per-function evidence in
-          analysis/rom/reverse_engineering_region_0x80000000.md's pass-4
-          section ("Tally reconciliation" + "Resolved functions — pass 4").
-          INCOMPLETE: pass 4 was cut off by a session limit before updating
-          analysis/rom/rom_function_index.md (confidence flags/named-function
-          table/unnamed-distribution counts) or analysis/INDEX.md for the 27
-          new pass-4 functions — rom_function_index.md still only reflects
-          through pass 3. NEXT PASS MUST sync rom_function_index.md (and
-          INDEX.md if needed) for all 27 pass-4 functions before triaging
-          anything new — don't let this drift further.
-          PASS 1 (2026-06-22) resolved 12 functions to real names with full
-          decompile + evidenced purpose: CP0 Cause/EPC register accessors
-          (0x80009130/0x8000913c), an ISR bottom-half status dispatcher
-          (0x80000d78), USB/connection/timer/UART event-status handlers
-          (0x80000480, 0x8000046c, 0x80000a5c, 0x80000c24, 0x80000c74), a
-          13-source baseband event dispatcher (0x800012b8), a conn-record
-          linked-list drain primitive (0x800011fc), and a mark-dirty/
-          clear-dirty pair extending conn_record_subsystem.md (0x8000a780,
-          0x8000a8e8).
-          PASS 2 (2026-06-22) resolved 19 MORE functions by starting from
-          pass 1's own "decompiled but not yet confidently named" list and
-          "open questions" section: the bos_base+0xe4 hw-hook-bit set/clear
-          pair (0x8001483c, 0x80014d50), the SCO/eSCO packet-credit
-          scheduler (0x80000fb8) and its 3 leaf helpers (0x8002addc,
-          0x8002bc88, 0x8003d018), a codec-table write/clear primitive pair
-          (0x80013dc4, 0x800147b0, 0x80014c58) plus their role-index helpers
-          (0x80060708, 0x80042db8, 0x80042de8, 0x80042a68), an LMP
-          procedure-completion busy-wait barrier (0x80035068) and its
-          status-bit helpers (0x800093d0, 0x800093e4), an RF
-          freq-program-and-poll primitive pair (0x8000b820, 0x8000b864,
-          0x8000b858), and a trivial 4-byte jr-ra stub confirmed real
-          (0x8000f624). ALSO reclassified 0x8000046c as NOT a real
-          function (20 zero-filled padding bytes Ghidra mis-split into a
-          stub before usb_event_status_handler) — retracted pass 1's
-          tentative "usb_event_status_handler_dup" name.
-          PASS 3 (2026-06-22, this continuation) resolved 74 MORE functions
-          — by far the largest single-pass yield so far — by cold-triaging
-          the explicitly-flagged "untouched gap B" stretch
-          (~0x8000b068-0x8000ffff) plus closing out 2 clusters pass 2 had
-          flagged but not finished:
-            - the encryption-teardown/role-confirmation triplet
-              (0x80002974 encryption_key_teardown_notifier, 0x80002a8c
-              conditional_debug_logger_0x2be, 0x80002b60
-              role_switch_confirmation_matcher)
-            - the 0x8000a4ac pool-init cluster, corrected from pass 2's "3
-              pools" to **7 pool-register calls** (counts 6/12/4/8/17/17/9)
-              against 4 distinct pool bases (0x8000a4ac
-              conn_pool_quick_reset_and_log, 0x8000a4f8
-              pool_row_register_and_optional_callback_copy, 0x8000a570
-              conn_record_7pool_init_and_clear_dirty)
-            - the VSC_0xfc39/0xfc6c + RF-calibration cluster
-              (~0x8000b068-0x8000c350, 23 fns) — status-dispatch-loop
-              variants, baseband feature/pool init, RF calibration
-              sequencer pair, indexed-register R/W primitive, scrambled
-              BD_ADDR field writers, 8-entry bitmask helpers
-            - the RF/baseband register bitfield-accessor cluster
-              (~0x8000c7cc-0x8000cc88, 23 fns) — sco_esco_timing_ratio_
-              calculator plus ~20 single-bit/field set/clear/toggle/read
-              accessors, an adaptive-threshold register programmer, a
-              status-field descrambler
-            - the link-state/AFH/packet-type cluster
-              (~0x8000d01c-0x8000d8b0, 17 fns) — RF divider-ratio
-              search+lookup pair, 3 link-state-6-gated AFH/channel-feature
-              toggle siblings + their dispatcher/autotrigger, the central
-              program_packet_type_and_timing_ratio routine + its read/
-              update/default helpers, and a confirmed VSC_0xfc17 (change
-              packet type) handler (0x8000d83c)
-            - the eSCO quality/retransmission-recovery cluster
-              (~0x8000dcd4-0x8000e470, 8 fns) — recompute_and_apply_esco_
-              interval and its gate/trigger chain, an RF freq-word
-              programmer, and a confirmed VSC_0xfc56 (set 3 param words)
-              handler (0x8000e380)
-          Confirmed rename-persistence again this pass, twice: once via
-          ListRegion0x80000_Gaps.java showing all 74 new names, and again
-          mid-pass when later BatchDecompileList.java calls' CALLEES lines
-          showed earlier-renamed functions (sco_esco_timing_ratio_
-          calculator, baseband_feature_pool_init_and_reset,
-          role_dependent_bit_toggle_pair) resolved by name — no regression.
-          Extended analysis/rom/reverse_engineering_region_0x80000000.md
-          (pass-3 method note + 6 per-cluster resolved-functions tables
-          covering all 74 new names, 2 new open questions on naming-
-          convention caveats, fully rewritten "Remaining scope" section
-          with an accurate recount and a per-sub-range breakdown of what's
-          still untouched). Updated rom_function_index.md's named-function
-          table (+74 rows, all "high" confidence), summary counts (named
-          492->566, high-confidence 89->163, unnamed 2246->2172), and
-          unnamed-distribution table (this region 275->201, 12.2%->9.3% of
-          unnamed total; corrected the table's stale "Total: 2266" to the
-          arithmetically-correct 2172 and flagged the separate "Size
-          statistics" sub-table's count/byte-total/average as stale
-          baseline data pending a fresh RomCoverageStats.java run).
-          REMAINING SCOPE — 129 of 220 gap fns (113 still-unnamed FUN_*, 16
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~71 of 220 gap fns remain, reconciled)
+          SUPERVISOR NOTE (2026-06-22, pass 5): pass 5 synced
+          rom_function_index.md and analysis/INDEX.md for pass 4's 27
+          functions (which pass 4 had left INCOMPLETE due to a session-limit
+          cutoff — fixed this pass, no longer drifting) AND resolved 31 MORE
+          functions by cold-triaging the `0x80002488`-`0x80008f04` stretch
+          (the highest-value untouched target flagged since pass 3):
+            - 8 more siblings of the packet-type/role-switch supercluster,
+              including status_word_multiflag_link_event_dispatcher
+              (0x80002488, 1136B) — the master multi-flag status-word
+              dispatcher the 0x80001648/0x80001c4c cluster funnels alongside
+              — plus its twin status_word_multiflag_link_event_dispatcher2
+              (0x800030a0), role_switch_packet_type_reset_and_log
+              (0x80002e64), select_packet_type_and_renegotiate_or_log
+              (0x8000333c), role_switch_esco_mode_dispatch_gate (0x8000355c),
+              rf_channel_freq_word_programmer_for_esco_mode (0x80003674,
+              1534B, largest in this batch), auth_retry_counter_escalation_
+              handler (0x80002cc0), status_bit_gated_role_state_logger_
+              dispatch (0x80003cc0)
+            - a 4-function connection-teardown/link-loss-cleanup cluster:
+              conditional_feature_gated_init_wrapper (0x800045b4),
+              link_status_bit_dispatch_for_role_state_notify (0x800045e0),
+              conn_event_packet_type_update_and_reschedule (0x800046b8),
+              conn_teardown_and_link_loss_cleanup_handler (0x80004820,
+              1230B, top-level per-connection disconnect/cleanup handler)
+            - a batch-sweep-dispatcher quartet: batch_conn_teardown_and_
+              packet_type_sweep (0x80004d74, ties the 2 functions above
+              together as a connection-handle-bitmask sweep),
+              bitmask_sweep_dispatch_to_8003e760_3entry (0x80004df8),
+              bitmask_sweep_dispatch_to_8003e98c_3entry (0x80004e9c),
+              role_index_dispatch_or_log_0x2cd (0x80004f28)
+            - the 0x80008a7c-0x80008cd8 feature-bit-registration cluster (8
+              fns) flagged since pass 3 as "looks cheap" — confirmed: each
+              fn asserts one bit of a 16-bit feature-enable word via a
+              poll-and-write hardware primitive (FUN_800773d8), with a
+              per-feature log tag on failure
+          Confirmed rename-persistence via a post-batch
+          ListRegion0x80000_Gaps.java re-run: count still exactly 220, all
+          146 cumulative names (115 prior + 31 this pass) correctly
+          reflected, no regressions. Reconciled total: 146 of 220 in-scope
+          gap functions resolved, 71 remain (55 unnamed FUN_* + 16
+          genuinely-open thin-named; 2 more thin-named already "high
+          confidence" via other docs). Arithmetic check:
+          55+16+2+146+1(non-function)=220. Full detail and per-function
+          evidence in analysis/rom/reverse_engineering_region_0x80000000.md's
+          pass-5 section. Synced rom_function_index.md (+31 rows all "high"
+          confidence; named 593->624; high-confidence 190->221; unnamed
+          2145->2114; unnamed-distribution this-region row 174->143,
+          8.1%->6.8%, with all other regions' percentages recomputed against
+          the new 2114 total) and analysis/INDEX.md's two affected rows
+          (rom_function_index.md summary + region_0x80000000.md one-liner).
+          Also deleted a duplicate "Full RE: ROM region 0x80010000-0x8001ffff"
+          [TODO] line that had been sitting directly below this ticket.
+          REMAINING SCOPE — 71 of 220 gap fns (55 still-unnamed FUN_*, 16
           pre-existing thin-named-but-undecompiled of which 2 already rate
           "high confidence" via other docs so only 14 are genuinely open).
-          Highest-value untouched targets for the next pass (see the region
-          doc's "Remaining scope" section for the full per-sub-range list):
-            - the 0x80001648 packet-type cluster and 0x80001c4c role-switch/
-              truncated-page cluster (5 fns each, leaf callees resolved
-              since pass 2, cluster heads still unnamed — UNTOUCHED by pass
-              3, still the single highest-value target) plus the
-              0x800013a4/0x80001470/0x8000151c/0x80001564 quartet
-            - the large cold stretch 0x80002488-0x80008f04 (~35 fns,
-              includes a tiny-function run at 0x80008a7c-0x80008cd8 that
-              looks like another bitfield-accessor cluster, likely cheap)
-            - 0x8000aa64 (1398B, single untriaged function)
-            - the 0x8000c09c-0x8000c77c stretch between pass 3's two
-              clusters (some already decompiled in this doc's prose as
-              callees, e.g. 0x8000c688, but not yet tabulated/renamed —
-              cheap win)
-            - 0x8000cfcc-0x8000d01c (3 tiny fns), 0x8000d8f8-0x8000dcd4,
-              0x8000e1b0 (called by a pass-3 function but not itself named)
-            - 0x8000e4bc-0x8000ffff (~40 fns, largest remaining stretch,
-              includes the unknown_fptr_index9 thin-named cluster)
+          Untouched/largely-untouched sub-ranges for the next pass (see the
+          region doc's "Remaining scope" section for full detail):
+            - 0x800007d0-0x80000820 (2 small fns, easy to overlook —
+              sandwiched between 2 already-named functions)
+            - 0x80004fd8-0x800085a4 (~25 fns, 36B-1978B — the remainder of
+              the former "large cold stretch" pass 5 didn't reach; given
+              pass 5's finding that the preceding stretch was one
+              continuous role-switch/eSCO/conn-teardown theme, check here
+              first for more siblings before assuming unrelated)
+            - 0x80008eac-0x80008f04 (2 small fns right after the
+              feature-bit cluster pass 5 resolved, likely related)
+            - 0x8000aa64 (1398B, single untriaged function, carried forward
+              since pass 3)
+            - 0x8000dd00 (404B, single fn between 2 already-resolved
+              clusters)
+            - 0x8000e4bc-0x8000eda0 (~14 fns, 38B-700B — largest remaining
+              untouched stretch)
+            - 0x8000f4a0-0x8000fb20 (~9 small fns near the unknown_fptr_
+              index9/VSC_0xfc39_wrapper thin-named cluster)
+            - 0x8000fdc0-0x8000fe4c (3 fns, last untouched stretch before
+              the region's upper boundary)
+            - the 14 genuinely-open pre-existing thin-named functions (VSC/
+              multi-VSC wrappers + unknown_referencing_default_name_3/4/5/8,
+              listed by address in the region doc)
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
-
-[TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
-          Largest thin-named count of any region (130) — heavy LMP/VSC
-          handler territory (many `VSC_0xfc##`/`LMP__0x###` one-liners
-          already named by Kovah but never decompiled). Triage per the
-          splitting rule above.
 
 [TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
           Largest thin-named count of any region (130) — heavy LMP/VSC

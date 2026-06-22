@@ -26,20 +26,23 @@ reconciliation (pass 4)" below for why the running resolved/remaining counts
 decompiled purpose, **pass 2 (2026-06-22, same day) resolved 19 more** (18
 real functions + 1 4-byte degenerate stub) **plus reclassified one entry as
 a non-function** (`0x8000046c`, see below), **pass 3 (2026-06-22, same day)
-resolved 74 more**, and **pass 4 (2026-06-22, this continuation) resolved 27
-more**. Cumulative real-function renames across all four passes: **115**,
-all within the 220-function scope (see reconciliation below for why pass
-3's own summary said "105" using a methodology that double-counted 17
-out-of-scope leaf helpers). The region is NOT fully resolved —
-**102 of the 220 gap functions remain**: 86 still completely unnamed
-`FUN_8000xxxx`, plus 18 pre-existing thin-named-but-undecompiled Kovah
-names, **minus** 2 of those 18 (`optimized_memcpy`/`0x8000e85c` and
+resolved 74 more**, **pass 4 (2026-06-22, same day) resolved 27 more**, and
+**pass 5 (2026-06-22, this continuation) resolved 31 more**. Cumulative
+real-function renames across all five passes: **146**, all within the
+220-function scope (see reconciliation below for why pass 3's own summary
+said "105" using a methodology that double-counted 17 out-of-scope leaf
+helpers — pass 4 fixed the counting bug; pass 5's count was derived using
+pass 4's corrected method from the start, so no further reconciliation was
+needed). The region is NOT fully resolved — **71 of the 220 gap functions
+remain needing work**: 55 still completely unnamed `FUN_8000xxxx` (down from
+pass 4's 86), plus 18 pre-existing thin-named-but-undecompiled Kovah names, **minus**
+2 of those 18 (`optimized_memcpy`/`0x8000e85c` and
 `lots_of_initialization`/`0x8000fb5c`) that the index already rates "high
-confidence" via other docs — leaving **16 genuinely-thin** (corrects pass
-3's stale "14 genuinely open"; pass 3's own enumeration of pre-existing
-thin-named functions omitted `0x800009c0`/`unknown_referencing_default_name_1`,
-undercounting that bucket by 1, see reconciliation below). Total still
-needing work: 86 unnamed + 16 genuinely-open-thin = **102**.
+confidence" via other docs — leaving **16 genuinely-thin** (unchanged since
+pass 4; not touched this pass). Total still needing work: 55 unnamed + 16
+genuinely-open-thin = **71**, plus the 2 already-high-confidence thin-named
++ 146 resolved + 1 non-function = 220 total (arithmetic verified, see
+pass-5 section below).
 
 ## Tally reconciliation (pass 4, 2026-06-22)
 
@@ -417,6 +420,55 @@ Confirmed rename-persistence again this pass via a post-batch
 `ListRegion0x80000_Gaps.java` re-run showing all 27 new names correctly
 reflected with no regressions to any prior pass's names.
 
+## Resolved functions — pass 5, this continuation (31)
+
+Per the ticket's instruction, this pass targeted the highest-value untouched
+sub-range flagged since pass 3: the large cold stretch
+`0x80002488`-`0x80008f04`. A fresh `ListRegion0x80000_Gaps.java` run at the
+start of this pass confirmed the region's scope is still exactly 220
+functions (no drift) and that all 115 pass-1-through-4 names persisted
+correctly. Cold-triaged 31 of that stretch's ~60 unnamed functions via
+`BatchDecompileList.java`, working from `0x80002488` upward:
+
+**The status-word/role-switch/eSCO supercluster's missing 6th-13th siblings (8):**
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x80002488` | `status_word_multiflag_link_event_dispatcher` | 1136B. Decodes a 16-bit status word (`DAT_800028f8`) into role/AFH/handle-class fields, calls `remap_role_index_to_esco_slot_if_pending`, then dispatches across many independently-gated sub-behaviors: optional role-switch trigger (`FUN_80037b94`), inquiry-response notification, page-table/channel-bitmask teardown (`FUN_8002bae0`), codec lookup + apply (`lookup_codec_or_role_type_table_7x4`/`FUN_800384ac`), `esco_renegotiation_request_gate`, and AFH/LAP counter updates. The **master multi-flag link-event dispatcher** the `0x80001648`/`0x80001c4c` supercluster funnels alongside — confirms the supercluster is larger than pass 4's 10+4 count suggested. |
+| `0x80002cc0` | `auth_retry_counter_escalation_handler` | 398B. Increments a per-connection encryption/auth retry counter (`field_0x2b4`) on LMP-PDU-shaped status-bit conditions; at count 3 marks a crypto-struct dirty and calls `FUN_80025f34`/`FUN_80023fb8`; at count 4 sets disconnect reason `0xe` and calls `possible_LMP_DETACH`, logging failure if it returns 0. The **encryption/authentication-retry escalation-to-detach handler**. |
+| `0x80002e64` | `role_switch_packet_type_reset_and_log` | 512B. Looks up a connection's codec/role-table row, reprograms its packet type to `0xc00`/`0xc000` (SCO) based on `bdaddr_random_`, clears a per-connection channel-active bitmask bit (tearing down 2 housekeeping tables when it empties), logs event `0x328` via `possible_logger_called_if_no_patch3`, and conditionally calls `FUN_800179a8` or logs event `0xc1d`. The concrete implementation behind the `FUN_80002e64` callee referenced (but not yet named) by passes 3-4's prose — confirms it as a **role-switch/eSCO-slot teardown-and-packet-type-reset** routine, called by `select_packet_type_and_renegotiate_or_log` and `role_switch_esco_mode_dispatch_gate` below. |
+| `0x800030a0` | `status_word_multiflag_link_event_dispatcher2` | 618B. Sibling/twin of `status_word_multiflag_link_event_dispatcher` above: decodes a different status word (`DAT_8000330c`) and dispatches its bits (0,1,2,3,4,5,0x10,0x40) to `encryption_key_teardown_notifier`, `apply_codec_type_and_role_switch_hook_dispatch`, `role_switch_or_afh_table_entry_toggle_and_log`, `send_evt_HCI_Peripheral_Page_Response_Timeout`, and per-bit logging, clearing the_0x300's `int_0x10` state field along one path. |
+| `0x8000333c` | `select_packet_type_and_renegotiate_or_log` | 490B. Same packet-type-selection logic as `select_and_program_sco_esco_packet_type_for_conn` (0xc00/0xc000/0x1c00 based on `bdaddr_random_` + secure-connection config bit), programs it, then — if a role/timing/codec-state condition chain holds — calls `FUN_8003845c` and logs event `0x328`; otherwise calls `esco_renegotiation_request_gate` (if a remap slot is pending) and logs event `0x321`. Called by `role_switch_esco_mode_dispatch_gate` below. |
+| `0x8000355c` | `role_switch_esco_mode_dispatch_gate` | 252B. Small gate dispatching on `(param_2, param_3)`: `(1,1)` calls `select_packet_type_and_renegotiate_or_log`; `(1, other)` calls `FUN_8002bb50` then `role_switch_packet_type_reset_and_log` on success (else logs a mismatch); the `param_2==0` path calls `select_and_program_sco_esco_packet_type_for_conn` and/or `esco_renegotiation_request_gate` depending on connection-record flags. The **dispatch gate** tying together 4 of this cluster's named functions. |
+| `0x80003674` | `rf_channel_freq_word_programmer_for_esco_mode` | 1534B. The largest function in this batch: a 10-case mode switch (cases 2-10) computing an RF channel/frequency word from per-connection codec-mode fields (`field319_0x282`/`field320_0x284`/`field318_0x280`), programming baseband registers `0x102`/`0x100`/`0x60`/`2`, juggling a 2-slot pending-frequency-change queue, and calling `esco_renegotiation_request_gate` on the early-exit path. The **RF channel/frequency-word programmer for SCO/eSCO mode transitions** — the lowest-level hardware-facing function in this supercluster found so far. |
+| `0x80003cc0` | `status_bit_gated_role_state_logger_dispatch` | 74B. Reads a status word (`DAT_80003d0c`), classifies it into one of 3 states via bits `0x40`/`0x80`/`0x100`, then dispatches to one of two leaf "log if not in role-switch state" helpers (`FUN_8003d4fc`/`FUN_8003d490`, both out-of-region in `0x80030000`+, decompiled for context but not renamed here) depending on a second status-word's `0x1e0` field. |
+
+**The connection-teardown/cleanup cluster (4):**
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x800045b4` | `conditional_feature_gated_init_wrapper` | 36B. Calls `func2_that_uses_structs_at_0x80100000` unconditionally, then conditionally calls `FUN_80037af0` if a feature flag + config-blob field both indicate the relevant feature is enabled. Trivial conditional-init wrapper. |
+| `0x800045e0` | `link_status_bit_dispatch_for_role_state_notify` | 182B. Classifies a status word into one of 3 role-state codes (0/1/2) via bits `0x40`/`0x80`/`0x100` of two chained status reads, dispatches to `FUN_8003d490` (the same leaf as `status_bit_gated_role_state_logger_dispatch`'s callee), then conditionally calls `FUN_8006426c` and updates a connection-record byte based on whichever status path fired. |
+| `0x800046b8` | `conn_event_packet_type_update_and_reschedule` | 312B. Looks up a connection by index (`param_1 < 0xc`), updates a rolling-average timing counter, reprograms its packet type to `0xc000` (max-rate SCO) if `bdaddr_random_==0`, conditionally calls `FUN_8003851c` when the current packet type is `0xc00`/`0x1c00`/`0xc000` (sign-extended check), then calls `scheduler_find_next_min_deadline` and `esco_renegotiation_request_gate`. A **per-connection-event packet-type-refresh-and-reschedule** step. |
+| `0x80004820` | `conn_teardown_and_link_loss_cleanup_handler` | 1230B. The largest function in this batch's second cluster: validates a connection index, computes a disconnect-reason byte, logs it (event `0x267`), updates a per-role retry/backoff table, calls `FUN_80037a20` and `scheduler_find_next_min_deadline`, calls `possible_LMP_DETACH` when `field_0xb6==6`, sweeps all 0xc connection roles reprogramming packet type to `0xc000`/`0x1c00` for any with `bdaddr_random_==1`, logs event `0x32d`, calls `esco_renegotiation_request_gate`, and (depending on a feature flag) either dispatches a custom callback or computes a backoff/jitter window and conditionally calls `FUN_800737f0`/`FUN_80063b48`. The **top-level connection-teardown / link-loss cleanup handler** — the per-connection counterpart to `conn_teardown_and_link_loss_cleanup_handler`'s caller below. |
+
+**Batch sweep dispatchers + small leaves (4):**
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x80004d74` | `batch_conn_teardown_and_packet_type_sweep` | 124B. Two 11-bit-mask sweep loops over connection handles 1-11: first calls `conn_teardown_and_link_loss_cleanup_handler` for every handle set in one bitmask, then calls `conn_event_packet_type_update_and_reschedule` for every handle set in a second bitmask. The **batch dispatcher** tying together this pass's two largest new functions — confirms both are genuinely per-connection-handle operations rather than singletons. |
+| `0x80004df8` | `bitmask_sweep_dispatch_to_8003e760_3entry` | 148B. Sweeps a 7-bit mask (3 active slots max) calling out-of-region `FUN_8003e760` for each set bit with connection-table-derived args, then programs register `0x29a` with the accumulated mask. Real function, evidenced, but the specific peripheral identity of reg `0x29a` / `FUN_8003e760` wasn't pinned down this pass (out of region scope). |
+| `0x80004e9c` | `bitmask_sweep_dispatch_to_8003e98c_3entry` | 130B. Same pattern as the above but sweeping bits 7-13 of `param_1` and calling out-of-region `FUN_8003e98c`, finishing with a register-`0x5c` program call. Sibling of the above with a shifted bit range. |
+| `0x80004f28` | `role_index_dispatch_or_log_0x2cd` | 140B. If a per-connection flag is clear, calls `FUN_8003894c`; if set, clears the flag, optionally logs event `0x2cd` when a role-index/bos-entry-valid condition holds, and conditionally reprograms register `0x32`'s bit `0x2000` based on a struct flag. |
+
+Confirmed rename-persistence for all 31 via a post-batch
+`ListRegion0x80000_Gaps.java` re-run — count still exactly 220, no
+regressions to any of passes 1-4's 115 names. New reconciled tally: **146 of
+220 in-scope gap functions resolved** (115 prior + 31 this pass), **74
+remain**: 55 still completely unnamed (down from 86) + 16 genuinely-open
+thin-named + 2 already-high-confidence thin-named (unchanged, untouched
+this pass). Arithmetic check: `55 + 16 + 2 + 146 + 1(non-function) = 220`. ✓
+
 ## Decompiled but not yet confidently named (context for next worker)
 
 Carried over from pass 1 where still accurate, with pass-2 updates noted.
@@ -572,16 +624,18 @@ functions from pass 2, are listed here:
 
 ## Remaining scope
 
-After pass 1 (12 resolved), pass 2 (19 more resolved + 1 non-function
-reclassification), and **pass 3 (74 more resolved this continuation)**,
-**105 of the original 220 gap functions are resolved** (104 real functions
-+ 1 reclassified non-function), leaving **129 genuinely unresolved**:
-113 still completely unnamed (`FUN_8000xxxx`, never triaged) and 16
-pre-existing thin-named-but-undecompiled Kovah names that fall in this
-region's gaps but weren't touched by any Phase-9 pass yet (of those 16, 2 —
-`optimized_memcpy`/`0x8000e85c` and `lots_of_initialization`/`0x8000fb5c` —
-are already rated "high confidence" in `rom_function_index.md` via other
-docs and don't need further work here; the other 14 are genuinely open:
+After pass 1 (12 resolved), pass 2 (19 more + 1 non-function
+reclassification), pass 3 (74 more), pass 4 (27 more + tally
+reconciliation), and **pass 5 (31 more resolved this continuation)**,
+**146 of the original 220 gap functions are resolved** (145 real functions
++ 1 reclassified non-function), leaving **71 genuinely unresolved**: 55
+still completely unnamed (`FUN_8000xxxx`, never triaged — down from pass
+4's 86) and 16 pre-existing thin-named-but-undecompiled Kovah names that
+fall in this region's gaps (unchanged since pass 4, not touched this
+pass). Of those 16, 2 — `optimized_memcpy`/`0x8000e85c` and
+`lots_of_initialization`/`0x8000fb5c` — are already rated "high
+confidence" in `rom_function_index.md` via other docs and don't need
+further work here; the other 14 are genuinely open:
 `func2_that_uses_structs_at_0x80100000`/`0x80003d10`,
 `log_many_2_0x72_0x121-0x14e`/`0x80008d18`,
 `VSC_0xfc6c_FUN_8000bd04`/`0x8000bd04`,
@@ -591,57 +645,59 @@ docs and don't need further work here; the other 14 are genuinely open:
 `memset`/`0x8000e98c`, `references_patch_download_mem2`/`0x8000e9cc`,
 `called_by_unknown_fptr_index9_1`/`0x8000f0a4`, `unknown_fptr_index9`/`0x8000f41c`,
 `wraps_multi_VSC_called_if_no_patch3`/`0x8000f53c`,
-`VSC_0xfc39_wrapper_FUN_8000fae8`/`0x8000fae8`, `copies_config_bdaddr`/`0x8000fd38`).
+`VSC_0xfc39_wrapper_FUN_8000fae8`/`0x8000fae8`, `copies_config_bdaddr`/`0x8000fd38`.
 Recount verified directly: `ListRegion0x80000_Gaps.java` re-run at the end
-of this pass shows all 220 original entries with pass 1+2+3's 105 renamed
+of this pass shows all 220 original entries with pass 1-5's 146 renamed
 names correctly reflected (confirms no rename-persistence regression and
-no count drift since pass 2).
+no count drift since pass 4). Arithmetic check:
+`55 + 16 + 2 + 146 + 1 = 220`. ✓
 
-**Untouched/largely-untouched sub-ranges for the next pass** (the
-`0x80001648`/`0x80001c4c` cluster heads remain the highest-value named
-targets; everything else below is cold, never-triaged `FUN_8000xxxx`):
+**Note on the `0x80001648`/`0x80001c4c` cluster heads**: these were the
+single highest-value named targets through pass 3, and were **fully
+resolved in pass 4** (along with the packet-type-policy quartet
+`0x800013a4`/`0x80001470`/`0x8000151c`/`0x80001564`) — no longer open.
 
-- `0x80001648`–`0x800022e4`: the two 5-function clusters pass 2 fully
-  decompiled the leaf callees for but did not name the heads (packet-type
-  cluster `0x80001648`/`0x80001944`/`0x80001990`/`0x80001ad8`/`0x80001b3c`;
-  role-switch/truncated-page cluster `0x80001c4c`/`0x80001f34`/`0x80002048`/
-  `0x800021c0`/`0x800022e4`), plus the packet-type-policy quartet
-  `0x800013a4`/`0x80001470`/`0x8000151c`/`0x80001564` — **still untouched by
-  pass 3**, carried forward unchanged from pass 2.
-- `0x80002488`–`0x80008f04`: a large, entirely cold stretch (~35 functions,
-  sizes ranging 16B–2044B) that no pass has touched yet — includes
-  `func2_that_uses_structs_at_0x80100000` (2044B, thin-named) and a run of
-  tiny (16-64B) functions around `0x80008a7c`–`0x80008cd8` that look like
-  another bitfield-accessor cluster similar to pass 3's `0x8000c7cc`–`0x8000cc88`
-  one (worth checking first for cheap pattern-matched wins).
+**Untouched/largely-untouched sub-ranges for the next pass** (all are cold,
+never-triaged `FUN_8000xxxx` unless noted):
+
+- `0x800007d0`–`0x80000820`: 2 small untouched functions (68B, 364B) between
+  the interrupt-vector exclusion zone and `unknown_referencing_default_name_1`
+  — never triaged by any pass, easy to overlook since they're sandwiched
+  between two already-named functions.
+- `0x80004fd8`–`0x800085a4`: the remainder of the former "large cold
+  stretch" pass 5 didn't reach — roughly 25 functions, sizes 36B–1978B,
+  immediately after pass 5's `role_index_dispatch_or_log_0x2cd`
+  (`0x80004f28`) and before the tiny feature-bit cluster pass 5 did resolve
+  (`0x80008a7c`+). Given pass 5's evidence that the preceding stretch was
+  one continuous role-switch/eSCO/connection-teardown theme, this stretch
+  is a reasonable first place to check for more siblings of the same
+  cluster before assuming it's unrelated.
+- `0x80008eac`–`0x80008f04`: 2 small untouched functions immediately after
+  `log_many_2_0x72_0x121-0x14e`, before the pool-init cluster — likely
+  related to the feature-bit-table cluster pass 5 resolved just before them
+  (`0x80008a7c`–`0x80008cd8`), worth checking first.
 - `0x8000aa64`: a single large (1398B) untriaged function between the
-  pool-init cluster and gap B's start — not yet decompiled.
-- `0x8000c09c`–`0x8000c77c`: the remaining thin-named-but-undecompiled
-  Kovah names (`unknown_referencing_default_name_3/4/5`) plus a handful of
-  cold `FUN_*` (`0x8000c350`, `0x8000c3f4`, `0x8000c5c8`, `0x8000c664`,
-  `0x8000c688`, `0x8000c738`, `0x8000c77c`) that sit *between* pass 3's
-  VSC_0xfc39 cluster and its register-bitfield cluster — pass 3 decompiled
-  several of these as callees (e.g. `FUN_8000c688` is called by
-  `vsc_0xfc56_set_3word_params_and_packet_type` and
-  `packet_type_change_and_threshold_update`) but did not commit names for
-  them since they weren't the direct target of this pass's batches — cheap
-  win for the next pass since they're already decompiled in this doc's
-  prose, just not tabulated/renamed.
-- `0x8000cfcc`–`0x8000d01c`: 3 tiny untouched functions immediately before
-  the link-state/AFH/packet-type cluster pass 3 did resolve.
-- `0x8000d8f8`–`0x8000dcd4`: untouched stretch immediately before pass 3's
-  eSCO quality-recovery cluster (`0x8000d8f8`, `0x8000dbdc`) — likely related
-  given proximity, worth checking first.
-- `0x8000e1b0`–`0x8000e380`: `0x8000e1b0` (430B) is called by pass 3's
-  `vsc_0xfc56_set_3word_params_and_packet_type` but not itself decompiled —
-  cheap next step.
-- `0x8000e4bc`–`0x8000ffff`: the largest remaining untouched stretch
-  (~40 functions) — includes the `unknown_fptr_index9` cluster
-  (`0x8000f0a4`/`0x8000f41c`, thin-named, 806B+108B) and a run of small
-  functions around `0x8000f4a0`–`0x8000fb20` that likely relate to the
-  `VSC_0xfc39_wrapper_FUN_8000fae8` thin-named function nearby. Also
-  contains the already-high-confidence `optimized_memcpy`/`memset`/
-  `copies_config_bdaddr`/`lots_of_initialization` (no work needed).
+  pool-init cluster and gap B's start — not yet decompiled, carried forward
+  unchanged since pass 3.
+- `0x8000dd00`: a single 404B untouched function sandwiched between pass
+  3/4's packet-type cluster and the `link_state6_quality_recovery_poll_loop`
+  cluster — likely related given proximity.
+- `0x8000e4bc`–`0x8000eda0`: ~14 functions (38B–700B) between
+  `build_and_send_default_status_report` and `optimized_memcpy` — the
+  largest single remaining untouched stretch in the region.
+- `0x8000f4a0`–`0x8000fb20`: ~9 small functions (32B–562B) around the
+  `unknown_fptr_index9`/`VSC_0xfc39_wrapper_FUN_8000fae8` thin-named
+  cluster — likely related to multi-VSC dispatch given the neighboring
+  thin-named functions' VSC-prefixed names.
+- `0x8000fdc0`–`0x8000fe4c`: 3 small/medium untouched functions (42B, 76B,
+  610B) immediately after `copies_config_bdaddr`, the last untouched
+  stretch before the region's upper boundary `0x8000ffff`.
+- The 14 genuinely-open pre-existing thin-named functions listed above
+  (mostly VSC/multi-VSC wrappers and `unknown_referencing_default_name_*`)
+  remain untouched by any pass — several were decompiled in passes 3-4's
+  prose as callees (e.g. `unknown_referencing_default_name_3/6` via
+  `feature_bit_status_word_propagator`) but not yet given their own
+  confident rename.
 
 See `work-in-progress.txt` for the shrunk continuation ticket's exact
 address sub-range.

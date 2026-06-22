@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 566 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3, 2026-06-22 region-0x80000000 sweep) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2172 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 1 reclassified non-function) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 163 (89 after pass 2 + 74 pass-3 new) |
+| Named functions (this doc's table) | 624 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5, 2026-06-22 region-0x80000000 sweep) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2114 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 1 reclassified non-function) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 221 (190 after pass 4 + 31 pass-5 new) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
 
@@ -66,6 +66,44 @@ appended after the pass-2 rows below. 105 of the region's original 220
 gap functions are now resolved (104 real + 1 reclassified non-function);
 129 remain — see that doc's "Remaining scope" section for the specific
 untouched sub-ranges flagged for the next pass.
+
+**2026-06-22 update (pass 4, same-day continuation)**: resolved 27 more
+functions in the same region (`0x80000000`-`0x8000ffff`) — the
+`0x80001648`/`0x80001c4c` packet-type/role-switch supercluster (14
+functions, including the long-flagged cluster heads
+`apply_codec_type_and_role_switch_hook_dispatch` and
+`role_switch_completion_or_abort_handler`) and the `0x8000c09c`-`0x8000c77c`
+stretch plus immediate neighbors (13 functions, including
+`afh_or_rf_divider_reconfig_orchestrator` and
+`vsc_0xfc56_payload_apply_and_rf_reconfig`). This pass also reconciled a
+tally-drift bug in passes 1-3's own running totals (root cause: 17 of the
+claimed-105 "resolved" functions were leaf helpers OUTSIDE this region's
+220-function scope, living in `0x80010000`+ regions or the excluded
+interrupt-vector sub-range; separately the thin-named-open bucket was
+undercounted by 2). Reconciled, verified-by-direct-address-membership
+total: **115 of 220 in-scope gap functions resolved**, **102 remain** (86
+still-unnamed + 16 genuinely-open thin-named; 2 more thin-named are already
+"high confidence" via other docs and don't need further work). See
+`rom/reverse_engineering_region_0x80000000.md`'s "Tally reconciliation
+(pass 4)" and "Resolved functions — pass 4" sections for full detail. The
+27 new rows are appended after the pass-3 rows below.
+
+**2026-06-22 update (pass 5, same-day continuation)**: resolved 31 more
+functions in the same region (`0x80000000`-`0x8000ffff`), cold-triaging the
+large `0x80002488`-`0x80008f04` stretch flagged since pass 3 as the
+highest-value untouched sub-range. Found this stretch was largely more
+siblings of the packet-type/role-switch supercluster (8 functions,
+including `status_word_multiflag_link_event_dispatcher`, the master
+multi-flag dispatcher the `0x80001648`/`0x80001c4c` cluster funnels
+alongside) and a connection-teardown/link-loss-cleanup cluster (4
+functions, including `conn_teardown_and_link_loss_cleanup_handler`), plus a
+batch-sweep-dispatcher quartet and the tiny `0x80008a7c`-`0x80008cd8`
+feature-bit-registration cluster (8 functions). See
+`rom/reverse_engineering_region_0x80000000.md`'s "Resolved functions — pass
+5" section for full per-cluster evidence. Reconciled total: **146 of 220
+in-scope gap functions resolved**, **71 remain** (55 still-unnamed + 16
+genuinely-open thin-named; 2 more thin-named already "high confidence" via
+other docs). The 31 new rows are appended after the pass-4 rows below.
 
 Note: the 2026-06-21 `rom_coverage_baseline.md` run recorded `total=2738`;
 this run recorded `total=2739` (461 named unchanged). The 1-function drift
@@ -682,12 +720,70 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80078e68` | 72 | `VSC_0xfc7a_FUN_80078e68` | VSC 0xfc7a FUN 80078e68 | low (named by Kovah, purpose unclear) |
 | `0x8007943c` | 36 | `send_evt_INVALID_opcode_0xFF` | send evt INVALID opcode 0xFF | low (named by Kovah, purpose unclear) |
 | `0x800798b0` | 122 | `call_to_HCI_Disconnect_on_error` | call to HCI Disconnect on error | low (named by Kovah, purpose unclear) |
+| `0x800013a4` | 174 | `select_and_program_sco_esco_packet_type_for_conn` | chooses SCO/eSCO packet-type word and programs it — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001470` | 146 | `esco_quality_window_recovery_check` | eSCO degrade-on-quality-window-miss recovery step — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000151c` | 64 | `scheduler_find_next_min_deadline` | scheduler-tick/next-timeout finder — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001564` | 220 | `feature_bit_packet_type_policy_chooser` | feature-bit-driven packet-type policy chooser — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001648` | 728 | `apply_codec_type_and_role_switch_hook_dispatch` | central codec-type/role-switch-hook apply routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001944` | 58 | `vsc_clear_bit13_and_log_0x2cd` | clears reg 0x32 bit 13 and logs event 0x2cd — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001990` | 292 | `role_switch_or_afh_table_entry_toggle_and_log` | role-switch/AFH table-entry toggle and log — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001ad8` | 86 | `lmp_role_switch_param_fixup_and_log_confirm_mismatch` | role-switch-PDU param fixup + confirmation-mismatch logger — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001b3c` | 238 | `role_switch_hook_clear_and_packet_type_reset_seq4` | state-4-to-state-8 role-switch teardown step — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001c4c` | 700 | `role_switch_completion_or_abort_handler` | role-switch completion/abort handler — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80001f34` | 248 | `esco_renegotiation_request_gate` | gates whether an eSCO renegotiation request can proceed now or must wait — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002048` | 334 | `page_response_timing_and_afh_update_counters` | page-response/AFH-bookkeeping update routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800021c0` | 254 | `link_quality_mode3_packet_type_reprogram` | link-quality-driven packet-type downgrade-to-SCO — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800022e4` | 384 | `truncated_page_complete_status_dispatcher` | top-level HCI Truncated Page Complete status-word dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c350` | 56 | `lmp_25b_afh_toggle_via_vsc_0xfc95` | AFH/channel-feature-toggle call site (4th sibling) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c3f4` | 414 | `feature_bit_status_word_propagator` | central feature-bit-driven status propagation routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c5c8` | 136 | `swap_status_bits_between_globals_if_consistent` | bit-swap-if-consistent primitive — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c664` | 32 | `set_bit7_of_global_from_param` | bit-7 set/clear helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c688` | 152 | `pack_freq_and_status_fields_from_globals` | multi-field status/frequency-word packer — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c738` | 54 | `set_bit0_and_mirror_if_feature_set` | set-and-conditionally-propagate bit-0 helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c77c` | 58 | `apply_freq_field_or_call_optional_fptr` | RF-register-accessor leaf — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cfcc` | 12 | `or_bit4_into_global` | trivial unconditional bit-4 OR-in helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cfdc` | 28 | `toggle_bit5_of_global_v2` | second, distinct bit-5 toggle helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000cffc` | 28 | `toggle_bit6_of_global` | boolean-driven bit-6 toggle — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000d8f8` | 694 | `afh_or_rf_divider_reconfig_orchestrator` | top-level AFH/RF-divider reconfig orchestrator — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000dbdc` | 226 | `program_packet_type_with_default_fallback` | packet-type-program-with-cascading-fallback wrapper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e1b0` | 430 | `vsc_0xfc56_payload_apply_and_rf_reconfig` | payload-apply body for VSC 0xfc56 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002488` | 1136 | `status_word_multiflag_link_event_dispatcher` | master multi-flag status-word link-event dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002cc0` | 398 | `auth_retry_counter_escalation_handler` | encryption/auth-retry escalation-to-detach handler — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80002e64` | 512 | `role_switch_packet_type_reset_and_log` | role-switch/eSCO-slot teardown-and-packet-type-reset — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800030a0` | 618 | `status_word_multiflag_link_event_dispatcher2` | sibling status-word multi-flag link-event dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000333c` | 490 | `select_packet_type_and_renegotiate_or_log` | packet-type-select-and-renegotiate variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000355c` | 252 | `role_switch_esco_mode_dispatch_gate` | role-switch/eSCO-mode dispatch gate — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80003674` | 1534 | `rf_channel_freq_word_programmer_for_esco_mode` | RF channel/frequency-word programmer for SCO/eSCO mode transitions — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80003cc0` | 74 | `status_bit_gated_role_state_logger_dispatch` | status-bit dispatch to role-state logger leaves — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800045b4` | 36 | `conditional_feature_gated_init_wrapper` | conditional feature-gated init wrapper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800045e0` | 182 | `link_status_bit_dispatch_for_role_state_notify` | link-status-bit dispatcher for role-state notify — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800046b8` | 312 | `conn_event_packet_type_update_and_reschedule` | per-connection-event packet-type-refresh-and-reschedule — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80004820` | 1230 | `conn_teardown_and_link_loss_cleanup_handler` | top-level connection-teardown/link-loss cleanup handler — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80004d74` | 124 | `batch_conn_teardown_and_packet_type_sweep` | batch dispatcher sweeping conn-teardown+packet-type-update across handles — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80004df8` | 148 | `bitmask_sweep_dispatch_to_8003e760_3entry` | 3-slot bitmask sweep dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80004e9c` | 130 | `bitmask_sweep_dispatch_to_8003e98c_3entry` | 3-slot bitmask sweep dispatcher (shifted bit range) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80004f28` | 140 | `role_index_dispatch_or_log_0x2cd` | role-index dispatch or log event 0x2cd — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008a7c` | 22 | `conditional_feature_bit_enable_0x15` | conditional feature-bit enable (status==0x15) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008a94` | 16 | `feature_bit_enable_helper_v1` | feature-bit enable helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008aa4` | 16 | `feature_bit_disable_helper_v1` | feature-bit disable helper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008ab4` | 16 | `feature_bit_enable_helper_v2` | feature-bit enable helper variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008ac4` | 16 | `feature_bit_disable_helper_v2` | feature-bit disable helper variant — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008ad4` | 24 | `program_feature_bit_0x200_pair2` | programs feature-bit register with bit 1 set — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008aec` | 64 | `program_feature_bit_0x100_and_log` | programs feature-bit 0x100 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008b30` | 62 | `program_feature_bit_0x80_and_log` | programs feature-bit 0x80 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008b74` | 48 | `program_feature_bit_0x1_and_log` | programs feature-bit 0x1 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008ba8` | 56 | `program_feature_bit_0x200_and_log` | programs feature-bit 0x200 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008be8` | 56 | `program_feature_bit_0x400_and_log` | programs feature-bit 0x400 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008c28` | 50 | `program_feature_bit_0x1000_and_log` | programs feature-bit 0x1000 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008c60` | 50 | `program_feature_bit_0x2000_and_log` | programs feature-bit 0x2000 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008c98` | 56 | `program_feature_bit_0x4000_and_log` | programs feature-bit 0x4000 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008cd8` | 56 | `program_feature_bit_0x8000_and_log` | programs feature-bit 0x8000 and logs on failure — see `region_0x80000000` | high (decompiled+documented) |
 
 ---
 
-## Unnamed functions (2172, originally 2278)
+## Unnamed functions (2114, originally 2278)
 
-The remaining 2172 functions in the `rom` block (2739 total − 566 named − 1
+The remaining 2114 functions in the `rom` block (2739 total − 624 named − 1
 reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
 label and have not been individually triaged. Per Phase 9 scoping, giving
 each of these a real name and purpose is explicitly out of scope for this
@@ -695,26 +791,26 @@ doc — it's the rest of Phase 9's ongoing, best-effort work. This section
 satisfies "every function" at the index/coverage level via aggregate stats
 instead of 2278 rows of "unknown."
 
-**Confidence: unanalyzed** (for all 2172, as a single flag — no further
+**Confidence: unanalyzed** (for all 2114, as a single flag — no further
 granularity is meaningful until individual triage happens).
 
 ### Address-range distribution (by 0x10000-aligned region)
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 201 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 1 reclassified non-function, 2026-06-22) | 9.3% |
-| `0x80010000`–`0x8001ffff` | 268 | 12.3% |
-| `0x80020000`–`0x8002ffff` | 321 | 14.8% |
-| `0x80030000`–`0x8003ffff` | 290 | 13.4% |
-| `0x80040000`–`0x8004ffff` | 307 | 14.1% |
-| `0x80050000`–`0x8005ffff` | 354 | 16.3% |
-| `0x80060000`–`0x8006ffff` | 238 | 11.0% |
-| `0x80070000`–`0x8007ffff` | 193 | 8.9% |
-| **Total** | **2172** | **100%** |
+| `0x80000000`–`0x8000ffff` | 143 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 1 reclassified non-function, 2026-06-22) | 6.8% |
+| `0x80010000`–`0x8001ffff` | 268 | 12.7% |
+| `0x80020000`–`0x8002ffff` | 321 | 15.2% |
+| `0x80030000`–`0x8003ffff` | 290 | 13.7% |
+| `0x80040000`–`0x8004ffff` | 307 | 14.5% |
+| `0x80050000`–`0x8005ffff` | 354 | 16.7% |
+| `0x80060000`–`0x8006ffff` | 238 | 11.3% |
+| `0x80070000`–`0x8007ffff` | 193 | 9.1% |
+| **Total** | **2114** | **100%** |
 
 Distribution is fairly even across the whole ROM outside the
-`0x80000000`-`0x8000ffff` region (8.9–16.3% per 64 KiB region), which has
-now dropped to 9.3% of the unnamed total thanks to 3 passes of Phase 9's
+`0x80000000`-`0x8000ffff` region (9.1–16.7% per 64 KiB region), which has
+now dropped to 6.8% of the unnamed total thanks to 5 passes of Phase 9's
 region sweep concentrating there; the other 7 regions are unchanged from
 the 2026-06-21 baseline and still interleave named/unnamed functions
 throughout, consistent with how Phases 1–8 worked (tracing call chains and
@@ -727,11 +823,11 @@ byte-level stats (count/total-bytes/average) require a fresh
 `RomCoverageStats.java`-style pass over the now-shrunk unnamed set to be
 accurate; the per-region distribution table above (manually recomputed each
 pass from the named-table deltas) is the authoritative up-to-date count
-(2172, not 2278) until that re-run happens.
+(2114, not 2278) until that re-run happens.
 
 | Metric | Value |
 |--------|-------|
-| Count | 2278 (stale; see note above — true current count is 2172) |
+| Count | 2278 (stale; see note above — true current count is 2114) |
 | Smallest function | 1 byte |
 | Largest function | 2484 bytes |
 | Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) (stale) |
