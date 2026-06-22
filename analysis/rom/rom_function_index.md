@@ -26,14 +26,14 @@ GZF process mode, run 2026-06-21, against
 
 | Metric | Count |
 |--------|-------|
-| Total functions in `rom` block | 2739 |
-| Named functions (this doc's table) | 473 (461 baseline + 12 newly named 2026-06-22 region-0x80000000 sweep) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2266 (2278 baseline − 12) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 70 (actual baseline count was 58, not the 57 this doc previously stated — pre-existing off-by-one in the summary text, not introduced this pass — + 12 new) |
+| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
+| Named functions (this doc's table) | 492 (461 baseline + 12 pass-1 + 19 pass-2, 2026-06-22 region-0x80000000 sweep) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2246 (2278 baseline − 12 pass-1 − 19 pass-2 − 1 reclassified non-function) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 89 (70 after pass 1 + 19 pass-2 new) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
 
-**2026-06-22 update**: Phase 9's region-by-region exhaustive sweep
+**2026-06-22 update (pass 1)**: Phase 9's region-by-region exhaustive sweep
 (`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
 functions this pass, all in ROM region `0x80000000`-`0x8000ffff`. See
 `rom/reverse_engineering_region_0x80000000.md` for full detail; the 12 new
@@ -41,6 +41,17 @@ rows are appended at the end of the named-function table below (kept
 separate from the original 2026-06-21 alphabetical-by-address run for easy
 diffing — a future re-run of `RomNamedFuncAddrs.java` will naturally merge
 them back into address order).
+
+**2026-06-22 update (pass 2, same-day continuation)**: resolved 19 more
+functions in the same region (`0x80000000`-`0x8000ffff`), starting from
+pass 1's own "decompiled but not yet confidently named" list per the
+ticket's splitting-rule instructions, plus reclassified `0x8000046c` (was
+tentatively named `usb_event_status_handler_dup` in pass 1) as **not a
+real function** — it is 20 bytes of zero-filled alignment padding that
+Ghidra's auto-analyzer mis-split into a stub; see
+`rom/reverse_engineering_region_0x80000000.md`'s pass-2 section for the
+raw-byte evidence. The 19 new rows are appended after the pass-1 rows
+below.
 
 Note: the 2026-06-21 `rom_coverage_baseline.md` run recorded `total=2738`;
 this run recorded `total=2739` (461 named unchanged). The 1-function drift
@@ -124,7 +135,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000fae8` | 50 | `VSC_0xfc39_wrapper_FUN_8000fae8` | VSC 0xfc39 wrapper FUN 8000fae8 | medium (named, one-line purpose only, not decompiled) |
 | `0x8000fb5c` | 436 | `lots_of_initialization` | lots of initialization — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x8000fd38` | 120 | `copies_config_bdaddr` | copies config bdaddr | medium (named, one-line purpose only, not decompiled) |
-| `0x8000046c` | 20 | `usb_event_status_handler_dup` | decompiles identically to `0x80000480`; alias/thunk vs. boundary bug not disambiguated — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000046c` | 20 | **NOT A REAL FUNCTION** (was tentatively `usb_event_status_handler_dup` in pass 1) | zero-filled alignment padding before `0x80000480`, mis-split by Ghidra's analyzer; reclassified 2026-06-22 pass 2 — see `region_0x80000000` | n/a (non-function, excluded from named/unnamed counts) |
 | `0x80000480` | 764 | `usb_event_status_handler` | USB-class event-status bit dispatcher, ends in USB-transport-drain calls — see `region_0x80000000`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80000a5c` | 410 | `connection_event_status_handler` | per-connection HW status-change handler (link loss/role/feature gating) — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80000c24` | 64 | `timer_callback_table_dispatcher_4entry` | fixed 4-entry callback-table dispatcher over a status byte — see `region_0x80000000` | high (decompiled+documented) |
@@ -136,6 +147,26 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000913c` | 12 | `get_CP0_EPC_register` | `return EPC;` — CP0 exception-PC accessor — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000a780` | 318 | `find_pool_index_by_addr_and_mark_dirty` | resolves an address to a record-pool index across 4 fixed-size pools, disables IRQs, sets a dirty bit, re-enables IRQs — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
 | `0x8000a8e8` | 308 | `conn_record_periodic_sweep_and_clear_dirty` | periodic 17-entry sweep clearing dirty/in-use flags, pairs with `find_pool_index_by_addr_and_mark_dirty` — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
+| `0x8001483c` | 104 | `set_bos_e4_role_switch_hook_bit` | sets per-connection-index bit in the `bos_base+0xe4` hw-hook bitmask — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80014d50` | 84 | `clear_bos_e4_role_switch_hook_bit` | clears per-connection-index bit at `bos_base+0xe4`, pairs with `set_bos_e4_role_switch_hook_bit` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80060708` | 50 | `lookup_codec_or_role_type_table_7x4` | 7×4 byte-pair table lookup by role index + sub-index — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80042db8` | 42 | `remap_role_index_to_esco_slot_if_pending` | remaps SCO index to `idx+8` eSCO range if pending-flag set — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80042de8` | 36 | `remap_role_index_to_esco_slot_unconditional` | unconditional `idx+8` SCO→eSCO index remap — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800147b0` | 140 | `write_baseband_codec_param_triplet` | writes a 3-row codec config block for a connection via indexed register writes — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80035068` | 138 | `lmp_25c_procedure_completion_waiter` | 2-state synchronous busy-wait barrier for an in-flight LMP procedure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80042a68` | 62 | `conn_record_role_to_esco_slot_index` | connection-record accessor returning current credit/codec slot index — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000fb8` | 550 | `sco_esco_packet_credit_scheduler` | per-connection SCO/eSCO outbound packet-credit scheduler, builds HW packet-length descriptor table — see `region_0x80000000`, `conn_feature_dispatch` | high (decompiled+documented) |
+| `0x8002addc` | 52 | `lookup_conn_record_by_lt_addr` | fixed 3-slot connection lookup by LT_ADDR-like parameter — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8002bc88` | 116 | `alloc_credit_scheduler_slot_0xd` | 13-slot (`0xd`) bitmask allocator for the credit-scheduler table — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8003d018` | 26 | `wrapping_subtract_masked_by_shift` | generic modular/wrapping subtract-and-mask primitive — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800093d0` | 14 | `set_global_status_bit_0x400` | `*global \|= 0x400` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x800093e4` | 16 | `clear_global_status_bit_0x400` | `*global &= ~0x400` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80013dc4` | 96 | `write_codec_table_entry_and_wait_ack` | indexed codec/parameter table row write + hardware-ack poll — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80014c58` | 152 | `clear_codec_table_entries_for_role` | zeroes a connection's codec-table rows (teardown counterpart of `write_baseband_codec_param_triplet`) — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b820` | 56 | `program_rf_freq_reg_and_start_poll` | programs a 10-bit RF freq/channel word + kicks off lock-wait poll — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b864` | 26 | `poll_status_sign_bit_with_timeout_0x65` | bounded (101-iteration) hardware-ready poll on a status byte's sign bit — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000b858` | 12 | `poll_status_sign_bit_with_timeout_0x65_variant` | near-duplicate of `poll_status_sign_bit_with_timeout_0x65`, not merged — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f624` | 4 | `trivial_jr_ra_stub` | degenerate 1-instruction (`jr ra`) real function, confirmed not padding — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800109ac` | 916 | `calls_to_0x8010a001_as_fptr_to_install_patches` | calls to 0x8010a001 as fptr to install patches — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80011a18` | 30 | `called_if_config[0xf2]&4` | called if config[0xf2]&4 | low (named by Kovah, purpose unclear) |
 | `0x80011d9c` | 100 | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | LMP CH  0x3ee  case2 else 2 FUN 80011d9c | medium (named, one-line purpose only, not decompiled) |
@@ -583,7 +614,7 @@ granularity is meaningful until individual triage happens).
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 295 (307 − 12 resolved 2026-06-22) | 13.0% |
+| `0x80000000`–`0x8000ffff` | 275 (307 − 12 pass-1 − 19 pass-2 − 1 reclassified non-function, 2026-06-22) | 12.2% |
 | `0x80010000`–`0x8001ffff` | 268 | 11.8% |
 | `0x80020000`–`0x8002ffff` | 321 | 14.1% |
 | `0x80030000`–`0x8003ffff` | 290 | 12.7% |
