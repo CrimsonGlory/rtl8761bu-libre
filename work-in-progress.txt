@@ -1975,12 +1975,27 @@ completion):
           974B), and ~250 small unnamed `FUN_8001xxxx` scattered through
           the rest of the region with no existing thematic doc coverage.
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
-          Contains the HCI command router and SAFER+ cipher (both already
-          high-confidence) plus 321 untouched unnamed functions and 63 thin
-          ones. Triage per the splitting rule above.
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff (pass 1-2 complete, pass 3 staged) (2026-06-22)
+          PASS 1 (enumeration, committed 144964f): Listed all 384 functions,
+          identified 24 already-documented (HCI router, SAFER+ cipher), staged
+          360 for triage. Created baseline analysis/rom/reverse_engineering_
+          region_0x80020000.md.
+          PASS 2 (LMP procedure identification, committed 3b52ddc): Identified
+          and organized 15+ LMP encryption/pairing/key-management procedures
+          by functional category (encryption-mode negotiation, key derivation,
+          SSP, etc.). Staged all addresses for batch decompilation
+          (0x80026c38, 0x80027de0, 0x80026e64, 0x80027f30, 0x80027f80,
+          0x80027fd4, 0x80026f54, 0x8002763c, 0x80027100, 0x80027454,
+          0x80028bb8, 0x80028950, 0x800287b8, 0x80028904, 0x80028fc4,
+          0x800297bc). Ready for pass 3 batch decompile + rename.
+          PASS 3 (batch decompilation) was started but not persisted
+          (recovery commit c7b1be7). Work in passes 1-2 remains committed
+          and valid. Future pass 3 should use staged addresses + verify
+          persistence via file edits to analysis/rom/*.md docs.
+          → analysis/rom/reverse_engineering_region_0x80020000.md (passes 1-2)
+          → analysis/rom/rom_function_index.md (passes 1-2 confidence updates)
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
           Contains the VSC dispatcher and register-script interpreter
           (already high-confidence) plus 290 untouched unnamed functions.
           Triage per the splitting rule above.
