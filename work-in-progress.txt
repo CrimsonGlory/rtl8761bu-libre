@@ -2076,10 +2076,27 @@ completion):
           BLE-specific). Expect 2–3 turns per 191-function batch at ~50–60 per turn;
           region completion target within 3–4 total passes.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
-          Promoted from [TODO] per wip-loop self-chaining rule (previous region pass 2 done).
-          Contains HCI command router and SAFER+ cipher (already high-confidence) plus 321
-          untouched unnamed functions and 63 thin ones. Triage per splitting rule.
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
+          Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
+          Pass 1 established baseline via ListRegion0x80020000.java + ListRegion0x80020000_Upper.java.
+          Pass 2 completed strategic triage: identified & staged 15 LMP encryption/pairing/key-mgmt
+          procedures (opcodes 0x09, 0x0B, 0x0C, 0x0F, 0x10, 0x12, 0x3A, 0x3B, 0x3F-0x41, 0x66, 0x32)
+          for batch-decompilation via BatchDecompileList.java. Batch addresses staged in region doc.
+          ~340 functions remain (unnamed clusters, remaining LMP opcodes, VSC handlers, event-senders).
+          → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 2 section complete)
+          Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
+          Status per splitting rule: strategic progress on high-value target, region not finished.
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
+          Execute batch-decompilation of staged 15 LMP encryption/pairing procedures via
+          BatchDecompileList.java (addresses from region doc Pass 2 table), upgrade to high confidence
+          via RenameBatch1.java. Then systematic cold-triage of remaining ~340 unnamed + thin-named:
+          stratify by size, literal-pool, xref patterns. Expect 2–3 turns at ~50-100 fns per turn.
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
+          Promoted from [TODO] per wip-loop self-chaining rule (0x80020000 pass 2 complete).
+          Contains VSC dispatcher + register-script interpreter (already high-confidence) plus
+          290 untouched unnamed functions. Triage per splitting rule.
 
 
 NOTES

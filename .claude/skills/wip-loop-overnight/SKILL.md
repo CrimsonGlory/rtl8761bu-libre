@@ -6,7 +6,7 @@ description: >-
   the next [TODO], commit, and keep looping. Use when the user runs wip-loop before
   sleep, wants maximum reverse-engineering progress, or says overnight/unattended
   wip-loop with skip-blocked.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # WIP loop — overnight / unattended
