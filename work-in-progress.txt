@@ -1693,6 +1693,16 @@ completion):
     the life of this sweep).
 
 [NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~129 of 220 gap fns remain)
+          SUPERVISOR NOTE (2026-06-22): the running tally has drifted —
+          105 resolved + 129 remaining = 234, not the original pass-1 count
+          of 220. Individual function claims spot-checked and solid (literal
+          opcode-immediate evidence for the new VSC handlers); the drift is
+          almost certainly a boundary/recount-methodology difference across
+          passes' scripts, not fabricated work. NEXT PASS: before triaging
+          more functions, re-run ListRegion0x80000_Gaps.java fresh against
+          the current (post-pass-3) GZF state and reconcile the total against
+          this 234 figure before continuing — don't propagate the drift
+          further without understanding it.
           PASS 1 (2026-06-22) resolved 12 functions to real names with full
           decompile + evidenced purpose: CP0 Cause/EPC register accessors
           (0x80009130/0x8000913c), an ISR bottom-half status dispatcher
