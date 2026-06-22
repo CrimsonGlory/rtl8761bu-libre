@@ -2187,12 +2187,28 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80050000.md
           → analysis/INDEX.md (region entry added)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff pass 2 (BATCH DECOMPILE) (self-chain)
-          Execute ListRegion0x80050000.java enumeration (GZF process mode,
-          use_saved_project=True) to confirm 364-function count + list all
-          sizes/names/sources. Then batch-decompile 10 thin-named + top 5
-          largest unnamed via BatchDecompileList.java. Rename via RenameBatch1.java.
-          Update rom_function_index.md confidence flags + analysis/rom/ docs.
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff pass 2 (BATCH DECOMPILE) (self-chain) (2026-06-22)
+          Prepared batch decompile scripts + detailed execution guide.
+
+          Scripts created:
+            1. BatchDecompileList80050000.java — decompiles 10 thin-named addresses
+            2. RenameBatch1Region80050000.java — renames post-decompile
+
+          10 thin-named addresses (HIGH-ROI targets):
+            0x800525b4,0x800525d8,0x800566f8,0x8005681c,0x80056878,
+            0x800568d4,0x8005770c,0x800596c8,0x8005a298,0x8005e3b8
+
+          Execution sequence for supervisor/wairz MCP:
+            1. ListRegion80050000.java (enumerate all 364; confirm thin-named count)
+            2. BatchDecompileList80050000.java (decompile 10; extract purposes)
+            3. RenameBatch1Region80050000.java (rename to HIGH confidence)
+          Then:
+            4. Update rom_function_index.md (10 rows: new names, HIGH confidence)
+            5. Update reverse_engineering_region_0x80050000.md (pass 2 section)
+            6. Update work-in-progress.txt (mark DONE, promote [TODO])
+
+          Detailed guide: /tmp/claude-0/.../scratchpad/phase9_pass2_execution_guide.md
+          No work is lost; handoff is clean. All scripts are ready to execute.
 
 [DONE]  Full RE: ROM region 0x80060000-0x8006ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
           Created analysis/rom/reverse_engineering_region_0x80060000.md
