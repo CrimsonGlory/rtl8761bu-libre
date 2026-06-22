@@ -1982,15 +1982,33 @@ completion):
           974B), and ~250 small unnamed `FUN_8001xxxx` scattered through
           the rest of the region with no existing thematic doc coverage.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 3 done, ~332 of 408 fns remain)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, pass 4 (fHCI_* HCI-command-handler cluster)
           Per the mandatory region-ticket splitting rule: pass 3 resolved 6
-          more functions (70 total across passes 1-3), leaving 332 of 408
+          more functions (76 total across passes 1-3), leaving 332 of 408
           functions. Region ticket kept as [NEXT] with shrunk scope per the
           self-chaining exception (not marked [DONE] — full region completion
           requires all 408 functions resolved or explicitly noted as
-          non-functions). Next highest-value target per the region doc:
-          the large cold stretch beginning around 0x8001f464+, or the
-          remaining thin-named functions not yet upgraded to high confidence.
+          non-functions).
+
+          PASS 4 TARGET (prepared, decompilation pending):
+          **fHCI_* HCI-command-handler cluster** at 0x8001b84c–0x8001bf44
+          (priority #1 per pass 3's documented recommendations):
+          - 0x8001b84c (170B):  fHCI_Change_Connection_Packet_Type_0x0F
+          - 0x8001b8fc (204B):  fHCI_Add_SCO_Connection_DEPRECATED_0x07
+          - 0x8001b9d4 (258B):  fHCI_Disconnect_0x06
+          - 0x8001baf8 (190B):  fHCI_Reject_Connection_Request_0x0A
+          - 0x8001bbbc (360B):  fHCI_Accept_Connection_Request_0x09
+          - 0x8001bf44 (88B):   fHCI_Periodic_Inquiry_Mode_0x03
+          (0x8001bfa0 50B fHCI_Inquiry_0x01 already high-confidence, skip)
+
+          Total 1270B to decompile (6 functions, all medium-confidence,
+          all OGF=1 Link Control commands). Use BatchDecompileList.java
+          script with args: 0x8001b84c,0x8001b8fc,0x8001b9d4,0x8001baf8,
+          0x8001bbbc,0x8001bf44. Then rename with RenameBatch1.java once
+          decompiles confirm purposes. Extend
+          analysis/rom/reverse_engineering_region_0x80010000.md with
+          a new "Pass 4" section mirroring pass 1-3 structure. Update
+          rom_function_index.md confidence flags (6 rows: medium→high).
 
 [TODO]  Full RE: ROM region 0x80020000-0x8002ffff, continued (384 fns, HCI router + SAFER+ already high-confidence)
           Contains the HCI command router and SAFER+ cipher (both already
