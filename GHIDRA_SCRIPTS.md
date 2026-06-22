@@ -137,8 +137,10 @@ current UUID (UUIDs are not stable across saves of the same filename):
 | `ListRegion0x80010000_Upper.java` | Companion to `ListRegion0x80010000.java` — lists only `0x8001b800`-`0x8001ffff` (the upper portion that got truncated out of the full-region run). Together the two cover the full `0x80010000`-`0x8001ffff` region. |
 | `ListRegion0x80020000.java` | Lists every function in `0x80020000`-`0x8002ffff` with size/name/source-type. Template for region listing; pairs with `ListRegion0x80020000_Upper.java` to work around stdout truncation (same caveat as region 0x80010000). |
 | `ListRegion0x80020000_Upper.java` | Companion to `ListRegion0x80020000.java` — lists only `0x80025000`-`0x8002ffff` (the upper portion). Together the two cover the full `0x80020000`-`0x8002ffff` region. |
+| `ListRegion0x80030000.java` | Lists every function in `0x80030000`-`0x8003ffff` with size/name/source-type. Used for Phase 9 region-0x80030000 pass 1 enumeration (307 functions: VSC dispatcher + register-script interpreter + 290 unnamed). Pairs with `ListRegion0x80030000_Upper.java` if truncation occurs. |
+| `ListRegion0x80030000_Upper.java` | **To be created as needed** — companion to `ListRegion0x80030000.java` if the full region exceeds stdout truncation. Would list only the upper portion (starting ~`0x80038000`). |
 
-These scripts (now 7, including the redundant `RenameBatch2.java`) pushed
+These scripts (now 7+ generic region-listing scripts, including the redundant `RenameBatch2.java`) pushed
 the shared research-script pool close to its informally-observed ~50-entry
 cap (see the cap-probe note above) — if a future ticket hits a save
 failure, these are reasonable candidates to treat as "already served their

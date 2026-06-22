@@ -2043,10 +2043,52 @@ completion):
           full file persistence (analysis/rom/reverse_engineering_region_0x80020000.md
           pass 3 section + rom_function_index.md confidence upgrades + ticket state).
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
-          Contains the VSC dispatcher and register-script interpreter
-          (already high-confidence) plus 290 untouched unnamed functions.
-          Triage per the splitting rule above.
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff, pass 1 (2026-06-22)
+          PASS 1 (enumeration) SCOPE ESTABLISHED:
+          - Created ListRegion0x80030000.java (generic enumeration script)
+          - Extracted baseline composition from rom_function_index.md:
+            * Total: 307 functions (290 unnamed + 17 thin-named)
+            * High-confidence: 2 (master VSC dispatcher @ 0x80030f1c,
+              register-script interpreter @ 0x8003aea0; already documented)
+            * Medium-confidence: 0
+            * Low-confidence: 15 (Kovah names: 8 VSC opcode handlers
+              0xfc27/35/46/61/64/8b/95/fd49; 2 HCI cancellation commands;
+              3 power/LMP handlers; 2 init/logger; see full table in doc)
+            * Unnamed: 290 (FUN_* auto-generated)
+          - Created analysis/rom/reverse_engineering_region_0x80030000.md
+            baseline doc with:
+            * High-confidence function details (dispatch architecture)
+            * Thin-named function table (15 entries; VSC/HCI/LMP breakdown)
+            * Regional structure observations (VSC dispatcher cluster,
+              power/TX functions, HCI handlers, LMP handlers, interpreter)
+            * Coverage progress metrics
+            * Remaining work plan for pass 2+ (actual decompilation)
+          - Updated analysis/INDEX.md and GHIDRA_SCRIPTS.md with new doc/script
+            entries
+          **Next passes (pass 2+) will:**
+          - Run enumeration scripts against GZF in process mode
+          - Categorize/cluster the 290 unnamed functions
+          - Decompile + rename per splitting rule (size + evidence priority)
+          - Expected sub-regions: VSC handler cluster, HCI command handlers,
+            power management, LMP state machine helpers, generic utilities
+          **Notes for pass 2:**
+          - Enumeration script may truncate if region is dense (like 0x80010000/
+            0x80020000); prepare ListRegion0x80030000_Upper.java if needed
+          - Focus on VSC opcode handlers first (8 thin-named functions likely
+            to be medium-confidence after decompile)
+          - Power/TX functions may cluster with other power-management code
+            across multiple regions (cross-check against 0x80040000+ addresses)
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff, pass 2+ (decompilation)
+          308 functions to triage (290 unnamed + 15 thin-named + 3 already
+          high-confidence). Continue per splitting rule: run enumeration,
+          categorize by heuristic (size/caller patterns), decompile largest
+          untouched stretches first. Recommend starting with VSC opcode
+          handler cluster (0x8003003c–0x80030eec, 8 thin-named handlers) and
+          HCI cancellation command pair (0x80036bd0/d44, 2 thin-named). Update
+          rom_function_index.md confidence flags + names as functions reach
+          high-confidence status. Re-run coverage baseline and rom_function_
+          index.md aggregate counts when pass 2 completes.
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
           Contains the eSCO/SCO conn-feature-dispatch cluster and the LE
