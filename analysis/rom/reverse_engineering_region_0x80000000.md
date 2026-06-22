@@ -469,6 +469,74 @@ remain**: 55 still completely unnamed (down from 86) + 16 genuinely-open
 thin-named + 2 already-high-confidence thin-named (unchanged, untouched
 this pass). Arithmetic check: `55 + 16 + 2 + 146 + 1(non-function) = 220`. ✓
 
+## Resolved functions — pass 6, this continuation (13)
+
+Per the ticket's instructions, this pass re-ran `ListRegion0x80000_Gaps.java`
+first (confirmed: still exactly 220 functions, all 146 pass-1-through-5
+names persisted correctly, no regressions) then targeted the highest-value
+untouched sub-range flagged in the pass-5 "Remaining scope" list:
+`0x80004fd8`-`0x800085a4` (~25-27 unnamed `FUN_8000xxxx`, the unreached
+remainder of the former "large cold stretch"). Batch-decompiled the first 17
+of that stretch via `BatchDecompileList.java` (in two 8-address batches plus
+one follow-up single-address call for `0x80006cb8` whose decompile was cut
+off by output truncation in the second batch) and confidently named 13:
+
+| Address | New name | Evidence / purpose |
+|---------|----------|---------------------|
+| `0x80004fd8` | `top_level_link_event_status_dispatcher_loop` | 434B. Reads a 16-bit status word (`DAT_8000518c`), masks it against an enable-mask (`PTR_DAT_80005190`), and loops while any masked-set bit remains: an optional guard callback can suppress the iteration; otherwise dispatches by bit to **all** of this region's previously-named cluster heads — bit 0x8→`status_word_multiflag_link_event_dispatcher2`, bit 0x2→`status_word_multiflag_link_event_dispatcher`, bit 0x1→a default 3-function chain or an override callback, bit 0x20→`role_switch_completion_or_abort_handler` (computing its arg from a packed status word) plus a register-0x29a write, bit 0x4→`truncated_page_complete_status_dispatcher`, bit 0x1000→`link_status_bit_dispatch_for_role_state_notify`, bits 0x600→captures a 2nd status word, bit 0x200→`batch_conn_teardown_and_packet_type_sweep`, bit 0x400→`bitmask_sweep_dispatch_to_8003e98c_3entry`, bit 0x800→`bitmask_sweep_dispatch_to_8003e760_3entry`, bit 0x100→`role_index_dispatch_or_log_0x2cd`. This is the **single master orchestrator** the entire packet-type/role-switch/conn-teardown supercluster (passes 2-5) funnels into — confirms the whole supercluster is one status-word-driven link-event state machine rooted here. Single highest-value find of this pass. |
+| `0x800051d4` | `conn_state2_packet_type_reprogram_or_credit_dispatch` | 356B. Takes a connection index; if the connection's struct offset `+0x24=='\x02'` (a specific state), reprograms its packet type via register `0x5e` based on `bdaddr_random_`/role-index match against `+0x19`. Otherwise (any other state) optionally triggers a role-switch-adjacent callback pair (`FUN_8002af24`/`FUN_8002bb50`), calls `sco_esco_packet_credit_scheduler`, and reprograms packet type based on the scheduler's result and a `the_0x300.field_0x179` check, logging if the role-switch path fired. |
+| `0x80005368` | `bitfield_class_status_callback_dispatcher_5way` | 360B. 5-way switch on `param_1` (0-4), each branch masking a different status-word bitfield (`0x7000`/`7`/`0x1c0`/`0xe00`/`0x7000`) out of one of two globals, then for each set bit (max 3 iterations) writes a per-bit class tag and invokes an indexed callback with the branch's class index (0-4). A **bitfield-class-to-callback dispatcher** spanning 5 independent status categories. |
+| `0x800054e8` | `conn_3slot_oneshot_config_apply_and_log` | 226B. Sweeps a 3-bit status mask; for each set bit (slot index `8..10`), if a per-slot "already applied" flag (bit 4 of `+6`) is clear, conditionally calls an indexed-write callback (gated on 2 feature flags), then unconditionally logs 12 fields via `possible_logging_function__var_args` and sets the "applied" flag. A **per-connection one-shot config-apply-and-log** sweep over 3 fixed slots. |
+| `0x800055ec` | `sco_esco_param_pingpong_queue_rotator` | 312B. First clears 2 status bits with paired logging+register-write (a sign bit and bit 4 of a 2nd status word), then runs an unconditional ping-pong loop: copies one of 2 alternating sets of timing/param fields (selected by a rotating index bit) into the head slot of an 8-entry ring buffer, advancing a write-index (mod 8) and a count each iteration. Returns when the source-ready flag for the next iteration is clear. The **SCO/eSCO parameter ping-pong queue rotator** behind the credit scheduler's input ring. |
+| `0x8000576c` | `conn_field_swap_and_notify_dispatcher_3_4` | 524B. Dispatches on `param_1`: case 4 (gated on connection validity + a state byte) sets a "pending" bit in a per-slot table; case 3 (the main path) conditionally swaps a pair of per-connection byte fields depending on a global mode flag, calls `FUN_8005cdd4` to apply a 0x400-class config write, compares the swapped pair against its previous value to decide a "changed" flag, conditionally calls an indexed notify callback with a derived class code (0/1/2 from a 3-bit test), logs 9 fields, and — if changed — calls `FUN_8004ad0c(idx, 0)`. A **per-connection field-swap-detect-and-notify dispatcher** for 2 of its 5 possible mode values (1/2 unhandled here, present in neighboring cluster functions). |
+| `0x80005998` | `sco_esco_timing_field_diagnostic_logger` | 336B. Status-bit-gated multi-field logger, active only when a "verbose logging" flag (`puVar5[8] & 8`) is set: bit 0 clear logs 1 timing field; bit 0 set logs 5 fields (one set); bit 2 set logs a different 5-field set. All paths read a shared counter callback first. Pure **diagnostic/telemetry logger** for SCO/eSCO timing-window internals — no control-flow side effects beyond logging. |
+| `0x80005b30` | `sco_esco_slot_timing_offset_calc_variant1` | 564B. Heavy modulo/offset arithmetic over a connection's "slot window" fields (`field469_0x1e2` etc.) and credit-scheduler outputs (`FUN_8004f240`/`FUN_8004e9c4`/`FUN_800598ec`), computing a wrapped slot offset and writing it back into 2 of the struct's timing fields before calling `FUN_80056204` with the computed slot. One of 2 alternative offset-calculation strategies (see `_dispatch_gate` below) — the more complex of the pair, used when a per-connection "complex timing" flag (checked by the dispatch gate) is set. |
+| `0x80005d80` | `sco_esco_slot_timing_offset_calc_variant2` | 412B. Same family as `variant1` (reads the same struct fields, calls `FUN_8004f240`/`FUN_8004e9c4`/`FUN_800598ec`/`FUN_80072bac`), but uses a simpler modulo-distance computation (single `FUN_80072bac` table/range search instead of variant1's multi-step pool-index math) before calling the same `FUN_80056204` finalizer. The **simple-path sibling** of `variant1`. |
+| `0x80005f34` | `sco_esco_slot_timing_offset_dispatch_gate` | 102B. Guarded by an optional callback; if not suppressed, programs register 7, sets a status flag, then dispatches to `variant2` (`field455_0x1d4==0`, the "simple" timing case) or `variant1` (otherwise, the "complex" case) — logging 2 timing fields after the complex path. The **dispatch gate** proving `variant1`/`variant2` are alternative strategies for the same underlying slot-offset computation, not unrelated functions — confirms the hypothesis from this pass's initial read. |
+| `0x80005fb8` | `conn_packet_type_apply_and_codec_table_sync` | 906B. Large dual-mode function on `param_1`: modes 0-1 (sub-dispatch on a connection-table state byte at `+0x1da`/`+0x1de`) apply a packet-type/codec-table sync sequence — mode 1 fires an `LMP_25B`-class PDU send and sets a register-0xc status bit; the main mode-0-class path validates a state match, conditionally triggers a feature-gated register sequence (`FUN_800142f8`/`FUN_80014290`), reprograms 3 packet-type-window fields from a per-slot table, logs 12 fields, conditionally back-propagates 1-2 fields depending on the global mode flag, applies via `FUN_8005cdd4`, and finally calls `FUN_8005ae58`/`FUN_8004ca7c` plus a conditional `possible_logger_called_if_no_patch3` (event `0x26f`) on a derived 2-bit reason code. Modes 2+ (param_1>=2) instead copy a codec-config 5-byte block from either the connection-table row or a row found via `FUN_8005c948`, apply it via `FUN_8005cdd4`, and conditionally set a per-slot register bit. The **packet-type-apply-plus-codec-table-sync** routine — the most complex single function resolved this pass. |
+| `0x80006384` | `conn_status_word_state_machine_dispatcher` | 758B. Reads a status word, conditionally triggers one of 3 mutually-exclusive setup paths (idle-bandwidth check via `FUN_80056ca8`, a "primary" path via `FUN_800504b4`, or a "secondary" path via `FUN_80053034`) based on 2 flag bits, then dispatches a 4-state machine (`bVar9 = bits 1-2 of the status word`) covering disconnect-notify (state 1), normal-or-default packet-type apply (states 0/2), and a complex re-key/role-dependent path (state 3) that conditionally calls `FUN_8004f998`/`FUN_8004fd6c` and logs a packed status word via `possible_logger_called_if_no_patch3` (event `0x26f`, same event code as `conn_packet_type_apply_and_codec_table_sync` above — likely the shared "connection state changed" telemetry event). A **per-connection status-word-driven state machine** sibling to the top-level dispatcher. |
+| `0x80006cb8` | `batch_conn_status_word_sweep_3entry` | 78B. Reads a status word, clears its upper "class" nibble pattern (`& 0x8fff`), then sweeps 3 fixed slot indices (8,9,10), calling `FUN_800066fc(slot, class)` for each slot whose corresponding class-nibble is non-zero (class extracted via successive 4-bit shifts). The **3-slot batch dispatcher** for `FUN_800066fc` (itself not yet resolved — large at 1408B, left for the next pass), confirming `FUN_800066fc`'s `(slot, mode)` signature matches a per-connection-class state-change handler. |
+
+Confirmed rename-persistence via a post-batch `ListRegion0x80000_Gaps.java`
+re-run: count still exactly 220, all 159 cumulative names (146 prior + 13
+this pass) correctly reflected, no regressions. **New reconciled tally: 159
+of 220 in-scope gap functions resolved, 61 remain** (42 still-unnamed
+`FUN_*`, down from pass 5's 55, + 16 pre-existing thin-named-but-undecompiled
+unchanged since pass 4, of which 2 are already "high confidence" via other
+docs so 14 are genuinely open + 2 already-high-confidence thin-named).
+Arithmetic check: `42 (unnamed) + 16 (thin-named, 2 high-conf + 14 open) +
+159 (resolved) + 1 (non-function) = 218` — **this is short of 220 by 2**;
+direct recount of this pass's fresh `ListRegion0x80000_Gaps.java` output
+shows exactly 42 `DEFAULT`-sourcetype entries and 178 `USER_DEFINED` entries
+(42+178=220 confirmed), so the discrepancy is entirely inside the
+178-USER_DEFINED bucket's sub-split (159 resolved + 1 non-function + 16
+thin-named = 176, not 178) — **a pre-existing 2-function miscount inherited
+from the pass-4/5 baseline, not introduced this pass** (this pass only
+added 13 new resolutions on top of pass 5's already-reconciled 146; it did
+not re-derive the thin-named-bucket count from scratch). Flagged for the
+next pass to re-derive the exact thin-named-bucket membership from a fresh
+`ListRegion0x80000_Gaps.java` diff against the resolved-name list, rather
+than carrying forward pass 4's "18 thin-named, 2 high-conf" figure
+unverified.
+
+Not yet decompiled from this pass's target stretch (left for the next
+pass): `0x80005b08` (36B, trivial guarded trampoline to `FUN_800131e4`, low
+value), `0x800066ac` (76B), `0x800066fc` (1408B, the largest remaining
+function in the stretch — callee of this pass's `batch_conn_status_word_sweep_3entry`,
+high value for the next pass since its caller's signature is now known),
+`0x80006d0c` (1482B), `0x80007330` (624B), `0x800075dc` (110B), `0x80007654`
+(848B), `0x800079f0` (238B), `0x80007af0` (1978B, the largest function in
+the whole stretch, also a direct callee of this pass's
+`top_level_link_event_status_dispatcher_loop` — high value), `0x80008328`
+(176B), `0x800083ec` (406B, also a direct callee of the top-level
+dispatcher), `0x800085a4` (1138B, also a direct callee of the top-level
+dispatcher). That leaves roughly 12 of the original ~25-27-function stretch
+still untouched, all now with at least one known caller context from this
+pass's finds (`top_level_link_event_status_dispatcher_loop` calls
+`0x80007af0`/`0x800083ec`/`0x800085a4` directly; `batch_conn_status_word_sweep_3entry`
+calls `0x800066fc`), which should make the next pass's triage faster than
+cold-starting.
+
 ## Decompiled but not yet confidently named (context for next worker)
 
 Carried over from pass 1 where still accurate, with pass-2 updates noted.
@@ -626,14 +694,14 @@ functions from pass 2, are listed here:
 
 After pass 1 (12 resolved), pass 2 (19 more + 1 non-function
 reclassification), pass 3 (74 more), pass 4 (27 more + tally
-reconciliation), and **pass 5 (31 more resolved this continuation)**,
-**146 of the original 220 gap functions are resolved** (145 real functions
-+ 1 reclassified non-function), leaving **71 genuinely unresolved**: 55
-still completely unnamed (`FUN_8000xxxx`, never triaged — down from pass
-4's 86) and 16 pre-existing thin-named-but-undecompiled Kovah names that
-fall in this region's gaps (unchanged since pass 4, not touched this
-pass). Of those 16, 2 — `optimized_memcpy`/`0x8000e85c` and
-`lots_of_initialization`/`0x8000fb5c` — are already rated "high
+reconciliation), pass 5 (31 more), and **pass 6 (13 more resolved this
+continuation)**, **159 of the original 220 gap functions are resolved**
+(158 real functions + 1 reclassified non-function), leaving **61 genuinely
+unresolved**: 42 still completely unnamed (`FUN_8000xxxx`, never triaged —
+down from pass 5's 55) and 16 pre-existing thin-named-but-undecompiled
+Kovah names that fall in this region's gaps (unchanged since pass 4, not
+touched this or last pass). Of those 16, 2 — `optimized_memcpy`/`0x8000e85c`
+and `lots_of_initialization`/`0x8000fb5c` — are already rated "high
 confidence" in `rom_function_index.md` via other docs and don't need
 further work here; the other 14 are genuinely open:
 `func2_that_uses_structs_at_0x80100000`/`0x80003d10`,
@@ -647,10 +715,23 @@ further work here; the other 14 are genuinely open:
 `wraps_multi_VSC_called_if_no_patch3`/`0x8000f53c`,
 `VSC_0xfc39_wrapper_FUN_8000fae8`/`0x8000fae8`, `copies_config_bdaddr`/`0x8000fd38`.
 Recount verified directly: `ListRegion0x80000_Gaps.java` re-run at the end
-of this pass shows all 220 original entries with pass 1-5's 146 renamed
+of this pass shows all 220 original entries with pass 1-6's 159 renamed
 names correctly reflected (confirms no rename-persistence regression and
-no count drift since pass 4). Arithmetic check:
-`55 + 16 + 2 + 146 + 1 = 220`. ✓
+no count drift since pass 5). **Arithmetic note (open item, see pass-6
+section above):** `42 + 16 + 159 + 1 = 218`, two short of 220 — this gap
+is inherited from pass 4/5's unverified "18 thin-named, 2 high-conf, 14
+open" sub-split of the thin-named bucket and was NOT introduced by pass 6
+(pass 6 only added 13 fresh resolutions; it did not re-derive the
+thin-named bucket). The directly-recounted split that *is* verified this
+pass: 220 total = 42 `DEFAULT`-sourcetype + 178 `USER_DEFINED`-sourcetype
+(both counted straight from this pass's fresh script output). The next
+pass should re-derive the thin-named bucket's exact membership (178 minus
+the 159 confidently-resolved-with-evidence minus 1 non-function = 18, not
+16) rather than carrying the old figure forward — i.e. there are likely 2
+more pre-existing thin-named functions hiding in the "resolved" bucket's
+edges than previously tracked. This does not affect this pass's 13 new
+renames, which are independently verified by direct decompile evidence
+above.
 
 **Note on the `0x80001648`/`0x80001c4c` cluster heads**: these were the
 single highest-value named targets through pass 3, and were **fully
@@ -664,14 +745,26 @@ never-triaged `FUN_8000xxxx` unless noted):
   the interrupt-vector exclusion zone and `unknown_referencing_default_name_1`
   — never triaged by any pass, easy to overlook since they're sandwiched
   between two already-named functions.
-- `0x80004fd8`–`0x800085a4`: the remainder of the former "large cold
-  stretch" pass 5 didn't reach — roughly 25 functions, sizes 36B–1978B,
-  immediately after pass 5's `role_index_dispatch_or_log_0x2cd`
-  (`0x80004f28`) and before the tiny feature-bit cluster pass 5 did resolve
-  (`0x80008a7c`+). Given pass 5's evidence that the preceding stretch was
-  one continuous role-switch/eSCO/connection-teardown theme, this stretch
-  is a reasonable first place to check for more siblings of the same
-  cluster before assuming it's unrelated.
+- `0x80005b08`–`0x800085a4`: the unresolved remainder of pass 6's target
+  stretch — `0x80005b08` (36B, trivial guarded trampoline, low value),
+  `0x800066ac` (76B), `0x800066fc` (1408B, **high value**: confirmed callee
+  of pass 6's `batch_conn_status_word_sweep_3entry` with signature
+  `(slot, class)`), `0x80006d0c` (1482B), `0x80007330` (624B), `0x800075dc`
+  (110B), `0x80007654` (848B), `0x800079f0` (238B), `0x80007af0` (1978B,
+  **high value**: confirmed direct callee of pass 6's
+  `top_level_link_event_status_dispatcher_loop`), `0x80008328` (176B),
+  `0x800083ec` (406B, also a confirmed direct callee of the top-level
+  dispatcher), `0x800085a4` (1138B, also a confirmed direct callee of the
+  top-level dispatcher). Pass 6 resolved the first 13 of this stretch
+  (`0x80004fd8`-`0x80006cb8`) and found it to be a status-word-driven
+  dispatcher/state-machine theme (NOT the role-switch/eSCO/teardown theme
+  hypothesized after pass 5 — that theme ends at `0x80004f28`; this stretch
+  is a distinct but related "apply the decided packet-type/codec change and
+  log it" layer). Strongly recommended next target: the 3 confirmed
+  callees of `top_level_link_event_status_dispatcher_loop` first
+  (`0x80007af0`/`0x800083ec`/`0x800085a4`), then `0x800066fc` (callee of
+  `batch_conn_status_word_sweep_3entry`), since all 4 now have known caller
+  context from pass 6's work rather than needing cold triage.
 - `0x80008eac`–`0x80008f04`: 2 small untouched functions immediately after
   `log_many_2_0x72_0x121-0x14e`, before the pool-init cluster — likely
   related to the feature-bit-table cluster pass 5 resolved just before them
