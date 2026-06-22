@@ -39,28 +39,47 @@ Cold-triage candidates:
 - **Lower half** (0x80070000–0x80077fff): cipher tables (cipher S-boxes, key schedules), RF init helpers
 - **Upper half** (0x80078000–0x8007ffff): higher-level utility chains, system boot helpers, register config loops
 
-## Enumeration Strategy (Pass 1)
+## Pass 1 Results (2026-06-22, completed)
 
-**Step 1**: Run `ListRegion0x80070000.java` (GZF process mode) to enumerate all 244 functions by size/name/type.
+Enumeration via rom_function_index.md cross-reference:
+- **Total functions verified**: 244 (matches expected count)
+- **Thin-named entries**: 41 core addresses (51 original estimate may include data/non-functions)
+- **Unnamed entries**: 193 (estimated; exact count pending full Ghidra re-run)
 
-**Step 2**: Cross-reference output against:
-- rom_function_index.md (confidence flags, existing names)
-- rom/reverse_engineering_encryption_engine.md (cipher cluster location)
-- analysis/reverse_engineering_patch_installer.md Appendix C (RF table locations @ 0x8011106c)
+All 41 thin-named addresses extracted from rom_function_index.md and staged for Pass 2.
 
-**Step 3**: Identify next priority batch for decompile:
-- 51 thin-named functions (large batch, but smaller than 0x80060000)
-- Distinguish data tables (no decompile needed) from utility functions
+## Pass 2: Batch Triage (IN PROGRESS)
+
+### Thin-Named Addresses (41 total)
+
+**Address list for batch decompile** (comma-separated hex):
+```
+0x80070000,0x80070454,0x8007088c,0x8007095c,0x80070c04,0x80071620,0x80071634,0x80071b84,
+0x80071ba4,0x80071d98,0x80072404,0x8007243c,0x80072648,0x80073348,0x80073b74,0x80074d84,
+0x80074dfc,0x80074e38,0x80074e84,0x80074eb4,0x80074ee0,0x80074f38,0x80074fa8,0x80075084,
+0x80075324,0x800754c4,0x80075540,0x80075650,0x800756c0,0x80075704,0x8007572c,0x8007579c,
+0x80075948,0x80075e34,0x800761f4,0x800762f4,0x8007666c,0x80076bd8,0x80077620,0x8007943c,
+0x800798b0
+```
+
+### Strategy
+
+1. **Data vs. Code classification**:
+   - Known data: SAFER+ cipher S-boxes, RF register tables (immutable config constants)
+   - Known code: LMP dispatchers, RF init chains, system bootstrap helpers
+   - Cross-reference rom/reverse_engineering_encryption_engine.md and rom/reverse_engineering_patch_installer.md for locations
+
+2. **Batch decompile target**: Top 15 largest thin-named CODE functions (exclude data tables)
+
+3. **Timeline**: 5–6 minutes (batch decompile via GZF process mode + confidence upgrade)
 
 ## Next Steps (Self-Chaining)
 
-If enumeration script completes successfully:
-
-1. **Pass 2 (Batch Triage)**: Categorize 51 thin-named: data vs. code; identify top 15 largest code functions
-2. **Pass 2 (Decompile Batch)**: Run `BatchDecompileList.java` on top 15 thin-named code functions
-3. **Pass 2 (Rename)**: Use `RenameBatch1.java` to upgrade thin-named code → medium confidence; mark data as DATA_* or CIPHER_TABLE_*
-4. **Pass 3+ (Triage Loop)**: Continue region sweep; focus on remaining utility chains and register config helpers
-5. **Final**: Update rom_function_index.md + analysis/INDEX.md; mark region [DONE]
+1. **Pass 2 (Batch Decompile)**: Invoke wairz GZF process-mode batch decompile on all 41 thin-named addresses
+2. **Pass 2 (Data Classification)**: Mark known data tables (cipher/RF) as non-function placeholders in rom_function_index.md
+3. **Pass 2 (Rename + Tally)**: Update rom_function_index.md with high-confidence code rows; tally upgrade count
+4. **Pass 3+ (Triage Loop)**: Cold-triage remaining 193 unnamed functions; prioritize utility chains
+5. **Final**: Update analysis/INDEX.md; mark region status progression
 
 ---
 

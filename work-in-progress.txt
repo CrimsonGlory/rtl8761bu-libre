@@ -2205,12 +2205,28 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80060000.md
           → analysis/INDEX.md (region entry added)
 
-[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff pass 2 (BATCH TRIAGE) (self-chain)
-          Execute ListRegion0x80060000.java enumeration. Categorize 94
-          thin-named by LMP opcode family (encryption first). Batch-decompile
-          top 20 via BatchDecompileList.java. Rename via RenameBatch1.java.
-          Update rom_function_index.md confidence flags. Expected high ROI due
-          to massive thin-named batch.
+[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff pass 2 (BATCH DECOMPILE) (self-chain)
+          93 thin-named addresses identified (rom_function_index.md cross-ref):
+          0x80060000,0x800605a4,0x800605a8,0x80060708,0x80060740,0x800608f0,
+          0x80060c30,0x80060cfc,0x80060d0c,0x80060dd8,0x800611e4,0x800615a8,
+          0x80061624,0x80061754,0x80061784,0x800617ec,0x80061a4c,0x80061ad8,
+          0x80061b34,0x80061bb8,0x80061e70,0x80061eb0,0x80062054,0x80062158,
+          0x8006251c,0x80062658,0x800626f8,0x80062924,0x80062cac,0x80062e44,
+          0x80062f94,0x80063458,0x800634c0,0x80063cc4,0x80066e68,0x80067128,
+          0x80067a2c,0x800683d8,0x80068400,0x8006845c,0x800684c8,0x800684ec,
+          0x800685b4,0x80068680,0x800686fc,0x80068764,0x800687b8,0x800687e8,
+          0x800688f4,0x80068918,0x80068938,0x80068a2c,0x80068aec,0x80068f74,
+          0x80068fe4,0x80069028,0x80069060,0x8006943c,0x80069534,0x8006959c,
+          0x800695f4,0x80069658,0x80069750,0x80069794,0x800698c8,0x8006990c,
+          0x80069998,0x80069a4c,0x80069c94,0x80069d6c,0x80069d9c,0x80069e40,
+          0x80069e98,0x80069fe4,0x8006a084,0x8006a0d4,0x8006a134,0x8006a3dc,
+          0x8006a450,0x8006a4e8,0x8006a698,0x8006a794,0x8006aae4,0x8006ac9c,
+          0x8006b1e4,0x8006bcfc,0x8006c6e0,0x8006c858,0x8006eff0,0x8006f0d0,
+          0x8006f870,0x8006f8e8,0x8006ff00
+          Batch-decompile all 93 via GZF process mode. Categorize by LMP opcode
+          family (encryption COMB_KEY/AU_RAND/SRES first). Rename via Kovah
+          LMP opcode map. Update rom_function_index.md confidence flags high.
+          Expected duration: 6–7 min.
 
 [DONE]  Full RE: ROM region 0x80070000-0x8007ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
           Created analysis/rom/reverse_engineering_region_0x80070000.md
@@ -2222,11 +2238,20 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80070000.md
           → analysis/INDEX.md (region entry added)
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff pass 2 (BATCH TRIAGE) (self-chain)
-          Execute ListRegion0x80070000.java enumeration. Categorize 51
-          thin-named: distinguish data tables (no decompile) from code functions.
-          Batch-decompile top 15 code via BatchDecompileList.java. Rename via
-          RenameBatch1.java. Update rom_function_index.md confidence flags.
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff pass 2 (BATCH DECOMPILE) (self-chain)
+          41 thin-named addresses identified (rom_function_index.md cross-ref):
+          0x80070000,0x80070454,0x8007088c,0x8007095c,0x80070c04,0x80071620,
+          0x80071634,0x80071b84,0x80071ba4,0x80071d98,0x80072404,0x8007243c,
+          0x80072648,0x80073348,0x80073b74,0x80074d84,0x80074dfc,0x80074e38,
+          0x80074e84,0x80074eb4,0x80074ee0,0x80074f38,0x80074fa8,0x80075084,
+          0x80075324,0x800754c4,0x80075540,0x80075650,0x800756c0,0x80075704,
+          0x8007572c,0x8007579c,0x80075948,0x80075e34,0x800761f4,0x800762f4,
+          0x8007666c,0x80076bd8,0x80077620,0x8007943c,0x800798b0
+          Batch-decompile all 41 via GZF process mode. Triage code vs. data
+          (mark SAFER+ cipher/RF tables as non-function). Decompile all code
+          functions. Rename per context (LMP dispatchers, RF init, system boot).
+          Update rom_function_index.md confidence flags high. Expected duration:
+          5–6 min.
 
 
 NOTES
