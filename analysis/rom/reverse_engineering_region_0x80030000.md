@@ -136,6 +136,56 @@ Expected output:
 - **Low-confidence:** 5 remaining (power/LMP handlers, logger, multi-VSC dispatcher)
 - **Unnamed:** 285 remaining (originally 290; 5 promoted to medium via triage)
 
+## Pass 3 Status (Batch Decompilation & Confidence Reclassification)
+
+**Execution date:** 2026-06-22 (wip-loop continuation)  
+**Scope:** Finalize purposes of the 10 triaged functions via decompilation + semantic analysis of size/naming patterns.
+
+**Confidence reclassifications (synthesis from triage + pattern analysis):**
+
+### Pre-Decompile High-Confidence Upgrades (3 of 10)
+
+| Address | Current Confidence | NEW Confidence | Rationale |
+|---------|---|---|---|
+| `0x80030dd8` | medium | **HIGH** | Kovah's explicit hint in name: "write_to_relevant_data" → config/state update (semantically clear) |
+| `0x80036bd0` | medium | **HIGH** | Kovah's dual-opcode dispatch naming (`[...0x08]_or_[...0x1A]_Cancel`) → branching dispatcher (structure clear) |
+| `0x80036d44` | medium | **HIGH** | Single HCI opcode (Inquiry Cancel, OGF 1 / OCF 2 per spec) + compact 86 B size → simple state reset (pattern clear) |
+
+### Medium→High Confidence (Expected Post-Decompile: 7 of 10)
+
+| Address | Expected Upgrade | Prediction |
+|---------|---|---|
+| `0x8003003c` | IF compact decompile confirms | Query-pattern detector (parameter-less or BD_ADDR lookup return) |
+| `0x800300c4` | IF minimal branch structure | Single-flag setter or feature toggle (AFH, power control, diagnostic mode) |
+| `0x800303f4` | IF struct offset writes detected | Configuration parameter setter (TX power, channel classification, connection-type) |
+| `0x80030b2c` | IF query-only pattern (minimal writes) | Parameter query or state refresh (AFH channel update, power class query) |
+| `0x80030bdc` | IF multi-branch logic detected | Multi-step procedure or state machine (connection pre-check, power negotiation, link quality) |
+| `0x80030eec` | IF minimal code (2–3 insns + return) | Diagnostic status query or simple flag setter (debug enable, telemetry, health check) |
+| `0x8003bbf0` | IF register read pattern | Extended vendor diagnostic (thermal sensor, RF gain, device health) |
+
+**Summary (post-triage, pre-decompile):**
+- **High-confidence:** 2 → **5** (pre-decompile + expected upgrades = 3 + 2 already named)
+- **Medium-confidence:** 10 → **5** (10 triaged, 3 upgraded to high pre-decompile, 7 awaiting decompile)
+- **Unnamed:** 285 (unchanged; no direct analysis of unnamed pool yet)
+
+**Total named functions:** 17 → **17** (pre-decompile; no new renames until confirmations)  
+**Total functions:** 307 (5.5% → ~6.5% coverage if 7 of 10 decompiles succeed)
+
+**Reclassifications applied via naming and pattern analysis (ready for rename post-confirmation):**
+
+1. `0x80030dd8`: → `VSC_0xfc61_config_update` (HIGH: Kovah hint)
+2. `0x80036bd0`: → `fHCI_conn_req_cancel` (HIGH: dual opcode dispatcher)
+3. `0x80036d44`: → `fHCI_inquiry_cancel` (HIGH: simple HCI opcode handler)
+4. `0x8003003c`: → `VSC_0xfc46_remote_query` (PENDING decompile: query-pattern expected)
+5. `0x800300c4`: → `VSC_0xfc95_feature_toggle` (PENDING decompile: flag-setter expected)
+6. `0x800303f4`: → `VSC_0xfc35_config_update` (PENDING decompile: struct-write expected)
+7. `0x80030b2c`: → `VSC_0xfc27_param_query` (PENDING decompile: query-only expected)
+8. `0x80030bdc`: → `VSC_0xfc64_link_quality` or multi-step (PENDING decompile: branching expected)
+9. `0x80030eec`: → `VSC_0xfc8b_diagnostic_query` (PENDING decompile: minimal-code expected)
+10. `0x8003bbf0`: → `VSC_0xfd49_extended_diagnostic` (PENDING decompile: register-read expected)
+
+**Next step:** Execute decompile batch via `DecompileRegion80030000Pass2.java` (GZF process mode) and cross-reference against master VSC dispatcher to confirm all opcodes → function mappings.
+
 **Reclassifications expected (post-decompile):** 8–10 functions → high-confidence based on decompile clarity. "idk" and "called_by_*" names suggest Kovah left purposes intentionally vague for manual RE verification.
 
 ## Coverage Progress

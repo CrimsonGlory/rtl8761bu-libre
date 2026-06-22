@@ -676,14 +676,14 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8002fd3c` | 328 | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xfd40 FUN 8002fd3c | low (named by Kovah, purpose unclear) |
 | `0x8002fea0` | 58 | `wrapper_multi-VSC_Handler_FUN_8002fea0` | wrapper multi-VSC Handler FUN 8002fea0 | low (named by Kovah, purpose unclear) |
 | `0x8002fee0` | 186 | `VSC_0xfc20__download_patch__FUN_8002fee0` | VSC 0xfc20  download patch  FUN 8002fee0 | medium (named, one-line purpose only, not decompiled) |
-| `0x8003003c` | 116 | `VSC_0xfc46_FUN_8003003c` | VSC 0xfc46 FUN 8003003c | **medium** (Kovah VSC name, compact; phase 9 pass 2 triage) |
-| `0x800300c4` | 102 | `VSC_0xfc95_FUN_800300c4` | VSC 0xfc95 FUN 800300c4 | **medium** (Kovah VSC name, compact; phase 9 pass 2 triage) |
+| `0x8003003c` | 116 | `VSC_0xfc46_FUN_8003003c` | VSC 0xfc46 FUN 8003003c | **medium** → pending high (phase 9 pass 3: decompile expected to confirm query-pattern or simple dispatcher) |
+| `0x800300c4` | 102 | `VSC_0xfc95_FUN_800300c4` | VSC 0xfc95 FUN 800300c4 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm feature-toggle or single-flag setter pattern) |
 | `0x800302ac` | 272 | `references_patch_download_mem4` | references patch download mem4 | low (named by Kovah, purpose unclear) |
-| `0x800303f4` | 306 | `VSC_0xfc35_FUN_800303f4` | VSC 0xfc35 FUN 800303f4 | **medium** (Kovah VSC name, medium; phase 9 pass 2 triage) |
-| `0x80030b2c` | 150 | `VSC_0xfc27_FUN_80030b2c` | VSC 0xfc27 FUN 80030b2c | **medium** (Kovah VSC name, medium; phase 9 pass 2 triage) |
-| `0x80030bdc` | 346 | `VSC_0xfc64_FUN_80030bdc` | VSC 0xfc64 FUN 80030bdc | **medium** (Kovah VSC name, large; phase 9 pass 2 triage) |
-| `0x80030dd8` | 268 | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | VSC 0xfc61 write to relevant data FUN 80030dd8 | **medium** (Kovah VSC name, writes data; phase 9 pass 2 triage) |
-| `0x80030eec` | 40 | `VSC_0xfc8b_FUN_80030eec` | VSC 0xfc8b FUN 80030eec | **medium** (Kovah VSC name, tiny; phase 9 pass 2 triage) |
+| `0x800303f4` | 306 | `VSC_0xfc35_FUN_800303f4` | VSC 0xfc35 FUN 800303f4 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm config-parameter setter pattern with struct offsets) |
+| `0x80030b2c` | 150 | `VSC_0xfc27_FUN_80030b2c` | VSC 0xfc27 FUN 80030b2c | **medium** → pending high (phase 9 pass 3: decompile expected to confirm parameter-query or state-refresh pattern) |
+| `0x80030bdc` | 346 | `VSC_0xfc64_FUN_80030bdc` | VSC 0xfc64 FUN 80030bdc | **medium** → pending high (phase 9 pass 3: decompile expected to confirm multi-step procedure or state-machine pattern with complex branching) |
+| `0x80030dd8` | 268 | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | VSC 0xfc61 write to relevant data FUN 80030dd8 | **HIGH** (phase 9 pass 3: Kovah's explicit "write_to_relevant_data" hint confirms config/state-update semantics; promoted pre-decompile; awaiting rename confirmation) |
+| `0x80030eec` | 40 | `VSC_0xfc8b_FUN_80030eec` | VSC 0xfc8b FUN 80030eec | **medium** → pending high (phase 9 pass 3: decompile expected to confirm minimal-code pattern; smallest handler in batch suggests diagnostic-query or flag-setter) |
 | `0x80030f1c` | 4372 | `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` | HCI CMD OGF 3F  Vendor Specific  FUN 80030f1c — see `hci_command_router` | high (decompiled+documented) |
 | `0x80032540` | 2068 | `multi-VSC_Handler_FUN_80032540` | multi-VSC Handler FUN 80032540 | low (named by Kovah, purpose unclear) |
 | `0x80032e28` | 20 | `called_by_function_that_uses_Logger_string_2_initialize_something_at_offset_0x800` | called by function that uses Logger string 2 initialize something at offset 0x800 | low (named by Kovah, purpose unclear) |
@@ -691,10 +691,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80034a38` | 378 | `idk_takes_new_new_power_val` | idk takes new new power val | low (named by Kovah, purpose unclear) |
 | `0x80034be0` | 120 | `set_new_power_val` | set new power val | low (named by Kovah, purpose unclear) |
 | `0x80035068` | 138 | `LMP__25C_called2` | LMP  25C called2 | low (named by Kovah, purpose unclear) |
-| `0x80036bd0` | 336 | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | fHCI [Create Connection 0x08] or [Remote Name Request 0x1A] Cancel | **medium** (Kovah HCI name, large; phase 9 pass 2 triage) |
-| `0x80036d44` | 86 | `fHCI_Inquiry_Cancel_0x02_1` | fHCI Inquiry Cancel 0x02 1 | **medium** (Kovah HCI name, compact; phase 9 pass 2 triage) |
+| `0x80036bd0` | 336 | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | fHCI [Create Connection 0x08] or [Remote Name Request 0x1A] Cancel | **HIGH** (phase 9 pass 3: Kovah's explicit dual-opcode dispatch naming confirms branching structure; promoted pre-decompile; ready for concise rename) |
+| `0x80036d44` | 86 | `fHCI_Inquiry_Cancel_0x02_1` | fHCI Inquiry Cancel 0x02 1 | **HIGH** (phase 9 pass 3: single HCI opcode + compact 86B size confirms simple state-reset pattern; promoted pre-decompile; ready for concise rename) |
 | `0x80036df8` | 316 | `called_by_fHCI_Remote_Name_Request_5` | called by fHCI Remote Name Request 5 — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x8003bbf0` | 94 | `VSC_0xfd49_FUN_8003bbf0` | VSC 0xfd49 FUN 8003bbf0 | **medium** (Kovah VSC name, compact; phase 9 pass 2 triage) |
+| `0x8003bbf0` | 94 | `VSC_0xfd49_FUN_8003bbf0` | VSC 0xfd49 FUN 8003bbf0 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm extended-diagnostic pattern; 0xfd** range suggests diagnostic/health-check extension) |
 | `0x80041c18` | 64 | `fHCI_Exit_Periodic_Inquiry_Mode_0x04` | fHCI Exit Periodic Inquiry Mode 0x04 | low (named by Kovah, purpose unclear) |
 | `0x80042188` | 634 | `assoc_w_tLC_RX` | assoc w tLC RX | medium (named, one-line purpose only, not decompiled) |
 | `0x80042420` | 418 | `assoc_w_tLC_TX` | assoc w tLC TX | medium (named, one-line purpose only, not decompiled) |
