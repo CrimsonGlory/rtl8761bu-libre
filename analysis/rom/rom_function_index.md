@@ -26,12 +26,12 @@ GZF process mode, run 2026-06-21, against
 
 | Metric | Count |
 |--------|-------|
-| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 9 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 691 (685 + 6 region-0x80010000 pass-3 confidence upgrades; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2047 (2053 − 6 region-0x80010000 pass-3 confidence upgrades; none were previously unnamed) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 367 (361 + 6 region-0x80010000 pass-3 functions upgraded from low/medium to high via decompile-confirmation) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 62 (68 − 6 region-0x80010000 pass-3 functions upgraded from medium to high) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 251 (257 − 6 region-0x80010000 pass-3 functions upgraded from low to high) |
+| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
+| Named functions (this doc's table) | 685 (681 + 4 region-0x80010000 pass-2 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2053 (2057 − 4 region-0x80010000 pass-2 newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 361 (323 + 4 region-0x80010000 pass-2 newly-named-and-decompiled + 34 region-0x80010000 pass-2 thin-named upgraded to high via decompile-confirmation) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
 
@@ -252,23 +252,6 @@ section for full per-function detail and the updated "Remaining scope"
 priority list (now led by the `HCI_OGF1_OCF0x4#` cluster,
 `0x8001c490`-`0x8001c788`). The 38 new/upgraded rows are folded into the
 table below near their pass-1 siblings (not strictly appended).
-
-**2026-06-22 update (region 0x80010000 pass 3)**: resolved pass 2's
-top-priority recommended target, the **`HCI_OGF1_OCF0x4#` cluster** —
-6 functions all already named by Kovah (4 low-confidence, 2 medium-confidence),
-upgraded to high via full decompile-confirmation: all 6 are OGF=1 (Link Control)
-commands in the 0x3F–0x44 OCF range for truncated page search and page-time
-parameters. Key finding: discovered a 7-function set that includes a dispatcher
-wrapper (`call_to_HCI_opcodes_OGF=1_0x3F-to-0x44`) at 0x8001c940 that routes
-6 handlers via a 6-way compact jump table, with post-command event routing that
-distinguishes Type-A handlers (send Command Status) from Type-B (send Command
-Complete). The cluster is architecturally simple and now fully documented in
-`reverse_engineering_region_0x80010000.md`'s "Pass 3" section with per-function
-detail, wrapper routing logic, tier classification (all T1 required for basic
-ACL), and 9 newly-confirmed ROM function references. All 6 functions confirmed
-as essential baseline Bluetooth Classic features. The 6 updated rows are
-already in place in the table below (address `0x8001c490`–`0x8001c940`);
-confidence columns updated from low→high (4 functions) and medium→high (2).
 
 ---
 
@@ -522,13 +505,13 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001bfa0` | 50 | `fHCI_Inquiry_0x01` | fHCI Inquiry 0x01 — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001c324` | 252 | `set_check_for_1_to_1` | set check for 1 to 1 | low (named by Kovah, purpose unclear) |
 | `0x8001c438` | 76 | `OGC_3_default_func_4` | OGC 3 default func 4 | high (decompiled+documented — see `region_0x80010000`) |
-| `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | Page time parameter setter (opcode 0xc44) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | Page search activity gate (opcode 0xc43) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | Page time parameter reader (opcode 0xc42) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | Page time sub-parameter setter (opcode 0xc41) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | Truncated page cancel (opcode 0xc40) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | Truncated page initiator (opcode 0xc3f) | high (decompiled + documented in region_0x80010000.md pass 3) |
-| `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | HCI OGF1 command dispatcher (6-way switch 0x3f–0x44) | high (decompiled + documented in region_0x80010000.md pass 3) |
+| `0x8001c490` | 186 | `HCI_OGF1_OCF0x44` | HCI OGF1 OCF0x44 | low (named by Kovah, purpose unclear) |
+| `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | HCI OGF1 OCF0x43 | low (named by Kovah, purpose unclear) |
+| `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | HCI OGF1 OCF0x42 | low (named by Kovah, purpose unclear) |
+| `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | HCI OGF1 OCF0x41 | low (named by Kovah, purpose unclear) |
+| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | fHCI Truncated Page Cancel 0x40 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | fHCI Truncated Page 0x3F | medium (named, one-line purpose only, not decompiled) |
+| `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | call to HCI opcodes OGF=1 0x3F-to-0x44 | low (named by Kovah, purpose unclear) |
 | `0x8001ca94` | 60 | `send_evt_HCI_Inquiry_Response_Notification` | send evt HCI Inquiry Response Notification | low (named by Kovah, purpose unclear) |
 | `0x8001cad4` | 36 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Channel_Map_Change` | send evt HCI Connectionless Peripheral Broadcast Channel Map Change | low (named by Kovah, purpose unclear) |
 | `0x8001cafc` | 20 | `send_evt_HCI_Peripheral_Page_Response_Timeout` | send evt HCI Peripheral Page Response Timeout | low (named by Kovah, purpose unclear) |
@@ -676,14 +659,14 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8002fd3c` | 328 | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xfd40 FUN 8002fd3c | low (named by Kovah, purpose unclear) |
 | `0x8002fea0` | 58 | `wrapper_multi-VSC_Handler_FUN_8002fea0` | wrapper multi-VSC Handler FUN 8002fea0 | low (named by Kovah, purpose unclear) |
 | `0x8002fee0` | 186 | `VSC_0xfc20__download_patch__FUN_8002fee0` | VSC 0xfc20  download patch  FUN 8002fee0 | medium (named, one-line purpose only, not decompiled) |
-| `0x8003003c` | 116 | `VSC_0xfc46_FUN_8003003c` | VSC 0xfc46 FUN 8003003c | **medium** → pending high (phase 9 pass 3: decompile expected to confirm query-pattern or simple dispatcher) |
-| `0x800300c4` | 102 | `VSC_0xfc95_FUN_800300c4` | VSC 0xfc95 FUN 800300c4 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm feature-toggle or single-flag setter pattern) |
+| `0x8003003c` | 116 | `VSC_0xfc46_FUN_8003003c` | VSC 0xfc46 FUN 8003003c | low (named by Kovah, purpose unclear) |
+| `0x800300c4` | 102 | `VSC_0xfc95_FUN_800300c4` | VSC 0xfc95 FUN 800300c4 | low (named by Kovah, purpose unclear) |
 | `0x800302ac` | 272 | `references_patch_download_mem4` | references patch download mem4 | low (named by Kovah, purpose unclear) |
-| `0x800303f4` | 306 | `VSC_0xfc35_FUN_800303f4` | VSC 0xfc35 FUN 800303f4 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm config-parameter setter pattern with struct offsets) |
-| `0x80030b2c` | 150 | `VSC_0xfc27_FUN_80030b2c` | VSC 0xfc27 FUN 80030b2c | **medium** → pending high (phase 9 pass 3: decompile expected to confirm parameter-query or state-refresh pattern) |
-| `0x80030bdc` | 346 | `VSC_0xfc64_FUN_80030bdc` | VSC 0xfc64 FUN 80030bdc | **medium** → pending high (phase 9 pass 3: decompile expected to confirm multi-step procedure or state-machine pattern with complex branching) |
-| `0x80030dd8` | 268 | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | VSC 0xfc61 write to relevant data FUN 80030dd8 | **HIGH** (phase 9 pass 3: Kovah's explicit "write_to_relevant_data" hint confirms config/state-update semantics; promoted pre-decompile; awaiting rename confirmation) |
-| `0x80030eec` | 40 | `VSC_0xfc8b_FUN_80030eec` | VSC 0xfc8b FUN 80030eec | **medium** → pending high (phase 9 pass 3: decompile expected to confirm minimal-code pattern; smallest handler in batch suggests diagnostic-query or flag-setter) |
+| `0x800303f4` | 306 | `VSC_0xfc35_FUN_800303f4` | VSC 0xfc35 FUN 800303f4 | low (named by Kovah, purpose unclear) |
+| `0x80030b2c` | 150 | `VSC_0xfc27_FUN_80030b2c` | VSC 0xfc27 FUN 80030b2c | low (named by Kovah, purpose unclear) |
+| `0x80030bdc` | 346 | `VSC_0xfc64_FUN_80030bdc` | VSC 0xfc64 FUN 80030bdc | low (named by Kovah, purpose unclear) |
+| `0x80030dd8` | 268 | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | VSC 0xfc61 write to relevant data FUN 80030dd8 | low (named by Kovah, purpose unclear) |
+| `0x80030eec` | 40 | `VSC_0xfc8b_FUN_80030eec` | VSC 0xfc8b FUN 80030eec | low (named by Kovah, purpose unclear) |
 | `0x80030f1c` | 4372 | `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` | HCI CMD OGF 3F  Vendor Specific  FUN 80030f1c — see `hci_command_router` | high (decompiled+documented) |
 | `0x80032540` | 2068 | `multi-VSC_Handler_FUN_80032540` | multi-VSC Handler FUN 80032540 | low (named by Kovah, purpose unclear) |
 | `0x80032e28` | 20 | `called_by_function_that_uses_Logger_string_2_initialize_something_at_offset_0x800` | called by function that uses Logger string 2 initialize something at offset 0x800 | low (named by Kovah, purpose unclear) |
@@ -691,10 +674,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80034a38` | 378 | `idk_takes_new_new_power_val` | idk takes new new power val | low (named by Kovah, purpose unclear) |
 | `0x80034be0` | 120 | `set_new_power_val` | set new power val | low (named by Kovah, purpose unclear) |
 | `0x80035068` | 138 | `LMP__25C_called2` | LMP  25C called2 | low (named by Kovah, purpose unclear) |
-| `0x80036bd0` | 336 | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | fHCI [Create Connection 0x08] or [Remote Name Request 0x1A] Cancel | **HIGH** (phase 9 pass 3: Kovah's explicit dual-opcode dispatch naming confirms branching structure; promoted pre-decompile; ready for concise rename) |
-| `0x80036d44` | 86 | `fHCI_Inquiry_Cancel_0x02_1` | fHCI Inquiry Cancel 0x02 1 | **HIGH** (phase 9 pass 3: single HCI opcode + compact 86B size confirms simple state-reset pattern; promoted pre-decompile; ready for concise rename) |
+| `0x80036bd0` | 336 | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | fHCI [Create Connection 0x08] or [Remote Name Request 0x1A] Cancel | low (named by Kovah, purpose unclear) |
+| `0x80036d44` | 86 | `fHCI_Inquiry_Cancel_0x02_1` | fHCI Inquiry Cancel 0x02 1 | low (named by Kovah, purpose unclear) |
 | `0x80036df8` | 316 | `called_by_fHCI_Remote_Name_Request_5` | called by fHCI Remote Name Request 5 — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x8003bbf0` | 94 | `VSC_0xfd49_FUN_8003bbf0` | VSC 0xfd49 FUN 8003bbf0 | **medium** → pending high (phase 9 pass 3: decompile expected to confirm extended-diagnostic pattern; 0xfd** range suggests diagnostic/health-check extension) |
+| `0x8003bbf0` | 94 | `VSC_0xfd49_FUN_8003bbf0` | VSC 0xfd49 FUN 8003bbf0 | low (named by Kovah, purpose unclear) |
 | `0x80041c18` | 64 | `fHCI_Exit_Periodic_Inquiry_Mode_0x04` | fHCI Exit Periodic Inquiry Mode 0x04 | low (named by Kovah, purpose unclear) |
 | `0x80042188` | 634 | `assoc_w_tLC_RX` | assoc w tLC RX | medium (named, one-line purpose only, not decompiled) |
 | `0x80042420` | 418 | `assoc_w_tLC_TX` | assoc w tLC TX | medium (named, one-line purpose only, not decompiled) |
@@ -725,18 +708,18 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80046620` | 34 | `put_0x1f4_struct_pointer_from_index_arg1_into_arg2` | put 0x1f4 struct pointer from index arg1 into arg2 — see `ble_link_layer`, `hci_command_router` | high (decompiled+documented) |
 | `0x8004a71c` | 16 | `VSC_0xfc95_called1` | VSC 0xfc95 called1 | low (named by Kovah, purpose unclear) |
 | `0x8004c0f4` | 472 | `LMP__26F__sends_LE_HCI_Events` | LMP  26F  sends LE HCI Events | low (named by Kovah, purpose unclear) |
-| `0x800525b4` | 36 | `send_evt_Meta_buf_at_arg1+0x100` | send evt Meta buf at arg1+0x100 | low (named by Kovah, purpose unclear) |
-| `0x800525d8` | 62 | `send_evt_Meta_buf_at_arg1` | send evt Meta buf at arg1 | low (named by Kovah, purpose unclear) |
-| `0x800566f8` | 58 | `VSC_0xfc97_1_FUN_800566f8` | VSC 0xfc97 1 FUN 800566f8 | medium (named, one-line purpose only, not decompiled) |
-| `0x8005681c` | 84 | `VSC_0xfc73_3_FUN_8005681c` | VSC 0xfc73 3 FUN 8005681c | low (named by Kovah, purpose unclear) |
-| `0x80056878` | 84 | `VSC_0xfc73_2_FUN_80056878` | VSC 0xfc73 2 FUN 80056878 | low (named by Kovah, purpose unclear) |
-| `0x800568d4` | 94 | `VSC_0xfc73_1_FUN_800568d4` | VSC 0xfc73 1 FUN 800568d4 | low (named by Kovah, purpose unclear) |
-| `0x8005770c` | 166 | `VSC_0xfc97_2_FUN_8005770c` | VSC 0xfc97 2 FUN 8005770c | medium (named, one-line purpose only, not decompiled) |
-| `0x800596c8` | 50 | `get_0x1ac_struct_ptr_by_index` | get 0x1ac struct ptr by index | low (named by Kovah, purpose unclear) |
-| `0x8005a298` | 62 | `get_TX_or_RX_PHY` | get TX or RX PHY | low (named by Kovah, purpose unclear) |
+| `0x800525b4` | 36 | `send_evt_LE_Meta_Subevent_variant` | sends LE Meta subevent with pre-incremented length field — see `region_0x80050000` | high (decompiled+documented) |
+| `0x800525d8` | 62 | `send_evt_LE_Meta_Subevent` | generic LE Meta subevent sender with HCI event 0x3E header — see `region_0x80050000` | high (decompiled+documented) |
+| `0x800566f8` | 58 | `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1` | validates and applies extended advertising parameters for LE — see `region_0x80050000` | high (decompiled+documented) |
+| `0x8005681c` | 84 | `VSC_0xfc73_AFH_Channel_Assessment_variant_3` | AFH channel assessment updates with connection context (variant 3) — see `region_0x80050000` | high (decompiled+documented) |
+| `0x80056878` | 84 | `VSC_0xfc73_AFH_Channel_Assessment_variant_2` | processes AFH channel assessment reports with global state update (variant 2) — see `region_0x80050000` | high (decompiled+documented) |
+| `0x800568d4` | 94 | `VSC_0xfc73_AFH_Channel_Assessment_variant_1` | main AFH channel map update dispatcher with map flags and commitment (variant 1) — see `region_0x80050000` | high (decompiled+documented) |
+| `0x8005770c` | 166 | `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` | comprehensive extended advertising parameter handler with interval validation — see `region_0x80050000` | high (decompiled+documented) |
+| `0x800596c8` | 50 | `query_config_struct_0x1ac_by_index` | config struct array accessor; retrieves 0x1ac-sized records by index (BD_ADDR/HW config blocks) — see `region_0x80050000` | high (decompiled+documented) |
+| `0x8005a298` | 62 | `query_current_PHY_by_connection_index` | PHY query helper; returns active TX or RX PHY for a connection — see `region_0x80050000` | high (decompiled+documented) |
 | `0x8005d26c` | 88 | `assign_pointer_to_0x1AC_offset_0x134` | assign pointer to 0x1AC offset 0x134 — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e23c` | 118 | `access_config_at_0xa5_and_0x1ac_stuct_stuff` | access config at 0xa5 and 0x1ac stuct stuff — see `lmp_version_conn_setup` | high (decompiled+documented) |
-| `0x8005e3b8` | 80 | `c_by_fHCI_Read_Remote_Version_Information_various_0x1ac_manip` | c by fHCI Read Remote Version Information various 0x1ac manip | low (named by Kovah, purpose unclear) |
+| `0x8005e3b8` | 80 | `fHCI_Read_Remote_Version_Information_config_handler` | HCI Read Remote Version Information handler; updates config struct 0x1ac with remote LMP version — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800600e8` | 218 | `LMP__270__FUN_800600e8` | LMP  270  FUN 800600e8 | low (named by Kovah, purpose unclear) |
 | `0x800605a4` | 4 | `just_return_0` | just return 0 | low (named by Kovah, purpose unclear) |
 | `0x800605a8` | 308 | `get_status_bits_by_LMP_Opcode` | get status bits by LMP Opcode | low (named by Kovah, purpose unclear) |
