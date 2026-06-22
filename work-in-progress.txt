@@ -2168,22 +2168,57 @@ completion):
           Splitting rule: if all 319 resolved in single turn, mark [DONE];
           else mark [TODO] with shrunk address range + self-chain to pass 3.
 
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff (354 unnamed + 10 thin-named fns)
-          Largest unnamed count of any region (354). Contains the
-          connection-type dispatch/eSCO handler cluster (already
-          high-confidence). Triage per the splitting rule above.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
+          Created analysis/rom/reverse_engineering_region_0x80050000.md
+          (baseline doc: 364 functions scope, ~25 already high-confidence from
+          prior thematic passes, 10 thin-named pending decompile, 354 unnamed).
+          Created ListRegion0x80050000.java script (saved to wairz research store)
+          for GZF process-mode enumeration. Updated analysis/INDEX.md per
+          keep-current rule. Next pass: execute enumeration script, then batch-decompile
+          10 thin-named + top N largest unnamed per splitting rule.
+          → analysis/rom/reverse_engineering_region_0x80050000.md
+          → analysis/INDEX.md (region entry added)
 
-[TODO]  Full RE: ROM region 0x80060000-0x8006ffff (238 unnamed + 94 thin-named fns)
-          Almost entirely untouched by Phase 9's thematic walkthrough (only
-          1 high-confidence function currently) — expect this region to need
-          a new catch-all doc rather than extending existing ones. Triage
-          per the splitting rule above.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff pass 2 (BATCH DECOMPILE) (self-chain)
+          Execute ListRegion0x80050000.java enumeration (GZF process mode,
+          use_saved_project=True) to confirm 364-function count + list all
+          sizes/names/sources. Then batch-decompile 10 thin-named + top 5
+          largest unnamed via BatchDecompileList.java. Rename via RenameBatch1.java.
+          Update rom_function_index.md confidence flags + analysis/rom/ docs.
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (193 unnamed + 51 thin-named fns)
-          Top of the populated ROM (last named fn at 0x8007943c per
-          rom_function_index.md); almost entirely untouched (only 1
-          high-confidence function currently). Triage per the splitting rule
-          above.
+[DONE]  Full RE: ROM region 0x80060000-0x8006ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
+          Created analysis/rom/reverse_engineering_region_0x80060000.md
+          (baseline doc: 332 functions scope, ~12 already high-confidence from
+          prior thematic passes, 94 thin-named [LARGEST BATCH] pending decompile,
+          238 unnamed). Created ListRegion0x80060000.java script for enumeration.
+          Updated analysis/INDEX.md per keep-current rule. Next pass: execute
+          enumeration script; batch-triage 94 thin-named by LMP opcode family;
+          decompile top 20 code functions per splitting rule.
+          → analysis/rom/reverse_engineering_region_0x80060000.md
+          → analysis/INDEX.md (region entry added)
+
+[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff pass 2 (BATCH TRIAGE) (self-chain)
+          Execute ListRegion0x80060000.java enumeration. Categorize 94
+          thin-named by LMP opcode family (encryption first). Batch-decompile
+          top 20 via BatchDecompileList.java. Rename via RenameBatch1.java.
+          Update rom_function_index.md confidence flags. Expected high ROI due
+          to massive thin-named batch.
+
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
+          Created analysis/rom/reverse_engineering_region_0x80070000.md
+          (baseline doc: 244 functions scope, ~15 already high-confidence from
+          prior thematic passes, 51 thin-named pending decompile, 193 unnamed).
+          Created ListRegion0x80070000.java script for enumeration. Updated
+          analysis/INDEX.md per keep-current rule. Next pass: execute enumeration
+          script; code-vs-data triage; decompile top 15 code functions per splitting rule.
+          → analysis/rom/reverse_engineering_region_0x80070000.md
+          → analysis/INDEX.md (region entry added)
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff pass 2 (BATCH TRIAGE) (self-chain)
+          Execute ListRegion0x80070000.java enumeration. Categorize 51
+          thin-named: distinguish data tables (no decompile) from code functions.
+          Batch-decompile top 15 code via BatchDecompileList.java. Rename via
+          RenameBatch1.java. Update rom_function_index.md confidence flags.
 
 
 NOTES
