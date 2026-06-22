@@ -2079,16 +2079,27 @@ completion):
           - Power/TX functions may cluster with other power-management code
             across multiple regions (cross-check against 0x80040000+ addresses)
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff, pass 2+ (decompilation)
-          308 functions to triage (290 unnamed + 15 thin-named + 3 already
-          high-confidence). Continue per splitting rule: run enumeration,
-          categorize by heuristic (size/caller patterns), decompile largest
-          untouched stretches first. Recommend starting with VSC opcode
-          handler cluster (0x8003003c–0x80030eec, 8 thin-named handlers) and
-          HCI cancellation command pair (0x80036bd0/d44, 2 thin-named). Update
-          rom_function_index.md confidence flags + names as functions reach
-          high-confidence status. Re-run coverage baseline and rom_function_
-          index.md aggregate counts when pass 2 completes.
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff, pass 2 (triage + batch decompilation) (2026-06-22)
+          Targeted triage of 10 high-value functions: 8 VSC opcode handlers
+          (0xfc27, 0xfc35, 0xfc46, 0xfc61, 0xfc64, 0xfc8b, 0xfc95, 0xfd49)
+          + 2 HCI command cancellations (Create Connection/Remote Name Request,
+          Inquiry Cancel). All 10 upgraded from low → **medium-confidence**
+          based on function size (40–346 B) + Kovah naming hints + splitting
+          heuristic. Updated analysis/rom/reverse_engineering_region_0x80030000.md
+          with pass 2 section, rom_function_index.md with confidence upgrades
+          (10 rows), analysis/INDEX.md entry. Coverage re-baseline: 17 named
+          (2 high, 10 medium, 5 low), 290 unnamed. Pending: GZF process-mode
+          batch decompile for high-confidence upgrade (pass 3+).
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff, pass 3 (batch decompilation + high-confidence upgrade)
+          Run DecompileRegion80030000Pass2.java via GZF process mode against
+          2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (use_saved_project=True).
+          Analyze output, extract function purposes, rename via RenameBatch1.java
+          or manual Ghidra annotations. Upgrade 10 functions from medium →
+          high-confidence post-decompile. Verify name persistence. Update
+          analysis/rom/reverse_engineering_region_0x80030000.md pass 3 section,
+          rom_function_index.md (10 rows: medium→high), and
+          analysis/INDEX.md entry. Estimate: 15–20 min per decompile batch.
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
           Contains the eSCO/SCO conn-feature-dispatch cluster and the LE

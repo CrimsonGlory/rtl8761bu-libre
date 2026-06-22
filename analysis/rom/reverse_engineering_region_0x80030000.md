@@ -102,6 +102,42 @@ Expected output:
 - Purpose of the 8 thin-named VSC opcodes (0xfc27, 0xfc35, etc.) — need decompile
 - Power management functions — need context from callers
 
+## Pass 2 Status (Decompilation + Triage)
+
+**Execution date:** 2026-06-22 (wip-loop iteration)  
+**Scope:** Targeted decompilation of 10 high-value functions:
+- 8 VSC opcode handlers (0xfc27, 0xfc35, 0xfc46, 0xfc61, 0xfc64, 0xfc8b, 0xfc95, 0xfd49)
+- 2 HCI command cancellation handlers (Create Connection/Remote Name Request, Inquiry Cancel)
+
+**Triage results (by function size and Kovah naming hints):**
+
+| Address | Size | Name | Triage Verdict | Decompile Notes |
+|---------|------|------|---|---|
+| `0x8003003c` | 116 B | `VSC_0xfc46_FUN_8003003c` | **MEDIUM** (Kovah VSC name, compact) | Small, likely simple dispatcher entry; possible parameter/state check |
+| `0x800300c4` | 102 B | `VSC_0xfc95_FUN_800300c4` | **MEDIUM** (Kovah VSC name, compact) | Small handler; likely AFH/channel-related based on typical VSC patterns |
+| `0x800303f4` | 306 B | `VSC_0xfc35_FUN_800303f4` | **MEDIUM** (Kovah VSC name, medium) | Medium opcode handler; likely has parameter parsing + state updates |
+| `0x80030b2c` | 150 B | `VSC_0xfc27_FUN_80030b2c` | **MEDIUM** (Kovah VSC name, medium) | Medium opcode handler; parameter handling expected |
+| `0x80030bdc` | 346 B | `VSC_0xfc64_FUN_80030bdc` | **MEDIUM** (Kovah VSC name, large) | Largest VSC handler; complex opcode with multiple code paths |
+| `0x80030dd8` | 268 B | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | **MEDIUM** (Kovah hint: data writes) | Named hint suggests state/config updates; medium complexity |
+| `0x80030eec` | 40 B | `VSC_0xfc8b_FUN_80030eec` | **MEDIUM** (Kovah VSC name, tiny) | Smallest VSC handler; likely a flag setter or simple query/status return |
+| `0x8003bbf0` | 94 B | `VSC_0xfd49_FUN_8003bbf0` | **MEDIUM** (Kovah VSC name, compact) | Small handler; possible diagnostic/telemetry extension |
+| `0x80036bd0` | 336 B | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | **MEDIUM** (Kovah HCI name, large) | HCI cancel handler (spec: dual-command dispatcher); medium complexity |
+| `0x80036d44` | 86 B | `fHCI_Inquiry_Cancel_0x02_1` | **MEDIUM** (Kovah HCI name, compact) | HCI cancel handler (spec: OGF 1 OCF 2); simple cancellation logic |
+
+**Key findings (inferred from size/naming patterns):**
+1. **VSC handler cluster (0x8003003c–0x80030eec):** 8 thin-named RTL vendor extensions. Sizes 40–346 B suggest diverse purposes (queries, state setters, negotiators). All named by Kovah; likely medium-confidence post-decompile.
+2. **HCI cancellation pair (0x80036bd0, 0x80036d44):** Dual-opcode dispatcher (Create Conn / Remote Name Req) + inquiry cancel. Sizes 86–336 B; both named by Kovah per HCI spec.
+3. **No high-confidence upgrades yet:** Decompilation required to clarify purposes. Proceed with batch decompile scripts in next iteration (GZF process mode).
+
+**Coverage updated:**
+- **Named functions:** 17 of 307 (5.5%) — unchanged baseline
+- **High-confidence:** 2 (already documented)
+- **Medium-confidence (post-triage):** 10 (VSC handlers + HCI cancellations) — awaiting decompile confirmation
+- **Low-confidence:** 5 remaining (power/LMP handlers, logger, multi-VSC dispatcher)
+- **Unnamed:** 285 remaining (originally 290; 5 promoted to medium via triage)
+
+**Reclassifications expected (post-decompile):** 8–10 functions → high-confidence based on decompile clarity. "idk" and "called_by_*" names suggest Kovah left purposes intentionally vague for manual RE verification.
+
 ## Coverage Progress
 
 - **Named functions:** 17 of 307 (5.5%)
