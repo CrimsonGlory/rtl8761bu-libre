@@ -1692,7 +1692,63 @@ completion):
     macro-progress (named-%% and high-confidence-%% should both climb over
     the life of this sweep).
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~37 of 220 gap fns remain, reconciled)
+[DONE]  Full RE: ROM region 0x80000000-0x8000ffff gaps, continued (2026-06-22, ~37 of 220 gap fns remain, reconciled)
+          PASS 9 (2026-06-22, FINAL — REGION COMPLETE): re-ran
+          ListRegion0x80000_Gaps.java first (required first step) — confirmed
+          count still exactly 220, all 183 pass-1-through-8 names persisted,
+          no regressions, and confirmed pass 8's recommended next target
+          (0x8000f4a0-0x8000fb20, 9 functions) was still accurate. Resolved
+          that 9-function stretch via BatchDecompileList.java +
+          RenameBatch1.java (clear_state_and_dispatch_reset_table_entry,
+          counter_threshold_gated_reset_trigger,
+          conditional_table_entry_registration_init,
+          shift_amount_from_2bit_field_calc,
+          multi_condition_readiness_status_checker,
+          secondary_readiness_check_and_param_capture,
+          config_derived_shift_and_threshold_setter,
+          clear_reg0x100_bit15_if_bit6_set,
+          log_event_0x3ee_if_status_not_idle). Then resolved all 8 remaining
+          small isolated FUN_* functions (0x800007d0/0x80000820 status-bit
+          escalation ladders, 0x80008eac/0x80008f04 VSC-param-apply +
+          feature-bit-mask dispatch, 0x8000dd00 AFH/RF-reconfig retry state
+          machine, 0x8000fdc0/0x8000fdf8 register-field-write dispatchers,
+          0x8000fe4c a 610B 5-way minimum-timing/credit selector) plus the
+          1398B 0x8000aa64 (pdu_type_dispatch_enqueue_to_per_type_ring_and_
+          notify, carried since pass 3 as the largest untriaged single
+          function). Then circled back and triaged all 16 pre-existing
+          genuinely-open thin-named functions (8 renamed for clarity incl.
+          the unknown_referencing_default_name_3/4/5 -> codec_mode_*/
+          codec_config_* cluster and unknown_fptr_index9 ->
+          mailbox_message_dispatcher_index9; the other 8 kept their
+          existing accurate Kovah names, now fully decompiled/evidenced).
+          Most notably identified lmp_pdu_received_top_level_processor
+          (0x80003d10, 2044B) as the SINGLE LARGEST FUNCTION IN THE ENTIRE
+          REGION -- a central orchestrator calling into nearly every
+          cluster passes 1-8 had named.
+          Post-pass ListRegion0x80000_Gaps.java re-run confirms: count
+          still exactly 220, and -- for the first time across all 9
+          passes -- ZERO DEFAULT/FUN_* entries remain; every single entry
+          is USER_DEFINED. FINAL TALLY: 219 of 220 are real, named,
+          evidenced functions; the 220th (0x8000046c) is the confirmed
+          non-function (zero-fill padding, reclassified pass 4). 0 remain
+          unresolved. REGION 0x80000000-0x8000ffff GAP-SWEEP IS COMPLETE.
+          Updated analysis/rom/reverse_engineering_region_0x80000000.md
+          (new "Resolved functions -- pass 9" section + rewrote "Remaining
+          scope" to reflect completion), analysis/rom/rom_function_index.md
+          (26 rows updated/added, confidence flags upgraded, aggregate
+          counts recomputed: named 661->679, high-confidence 258->291,
+          medium 105->96, low 299->293, unnamed 2077->2059, region's
+          unnamed-distribution row 106->88/4.3%, all other regions'
+          percentages recomputed against the new 2059 total), and
+          analysis/INDEX.md's two affected rows (rom_function_index.md
+          summary + region_0x80000000.md one-liner). Full per-function
+          evidence in the region doc's pass-9 section.
+          Promoting the first [TODO] (region 0x80010000-0x8001ffff) to
+          [NEXT] per the wip-loop instructions, since this region-sweep
+          ticket reached true completion (not a self-chained shrink) this
+          pass.
+
+          --- PRIOR PASS HISTORY (preserved) ---
           SUPERVISOR NOTE (2026-06-22, pass 8): re-ran
           ListRegion0x80000_Gaps.java first (required first step) — confirmed
           count still exactly 220, all 171 pass-1-through-7 names persisted,
@@ -1777,7 +1833,7 @@ completion):
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 
-[TODO]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
           Largest thin-named count of any region (130) — heavy LMP/VSC
           handler territory (many `VSC_0xfc##`/`LMP__0x###` one-liners
           already named by Kovah but never decompiled). Triage per the

@@ -27,11 +27,11 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 661 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5 + 13 pass-6 + 12 pass-7 + 12 pass-8, 2026-06-22 region-0x80000000 sweep) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2077 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 1 reclassified non-function) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 258 (246 after pass 7 + 12 pass-8 new) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 105 |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 299 |
+| Named functions (this doc's table) | 679 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5 + 13 pass-6 + 12 pass-7 + 12 pass-8 + 18 pass-9, 2026-06-22 region-0x80000000 sweep — pass 9 COMPLETES the region) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2059 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 291 (258 after pass 8 + 18 pass-9 newly-named + 9 medium-upgraded + 6 low-upgraded thin-named; `memset`/`0x8000e98c` was already high, no change) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 96 (105 − 9 pass-9 upgraded to high) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 293 (299 − 6 pass-9 upgraded to high) |
 
 **2026-06-22 update (pass 1)**: Phase 9's region-by-region exhaustive sweep
 (`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
@@ -176,9 +176,32 @@ summarized in the second half of this doc. A future cleanup pass could
 promote these 147 to real names in Ghidra; tracked informally, not a
 separate TODO line item.
 
+**2026-06-22 update (pass 9, same-day continuation — region 0x80000000
+gap-sweep COMPLETE)**: resolved the final 26 functions in this region's
+two-gap scope: the `0x8000f4a0`-`0x8000fb20` 9-function stretch, all 8
+remaining small isolated `FUN_*` functions, the 1398B `0x8000aa64`
+(carried since pass 3), and all 16 pre-existing genuinely-open thin-named
+functions (8 renamed for clarity, e.g. `unknown_referencing_default_name_3/4/5`
+→ the `codec_mode_*`/`codec_config_*` cluster, `unknown_fptr_index9` →
+`mailbox_message_dispatcher_index9`; the other 8 kept their existing
+Kovah names, now fully decompiled/evidenced rather than renamed, since
+those names were already accurate). Most notably identified
+`lmp_pdu_received_top_level_processor` (`0x80003d10`, 2044B) as **the
+single largest function in the entire region** — a central orchestrator
+calling into nearly every cluster passes 1-8 had named. Post-pass
+`ListRegion0x80000_Gaps.java` re-run confirms **zero `DEFAULT`/`FUN_*`
+entries remain in the 220-function gap scope — every single entry is now
+`USER_DEFINED`**. Final tally: **219 of 220 real functions resolved + 1
+confirmed non-function (`0x8000046c`) = 220, with 0 unresolved.** This
+region's gap-sweep ticket is complete; see
+`reverse_engineering_region_0x80000000.md`'s pass-9 section and updated
+"Remaining scope" for full detail. The 26 new/upgraded rows are folded
+into the table below (most appear near their pass-1-8 siblings rather than
+strictly appended, to keep related functions co-located).
+
 ---
 
-## Named functions (461)
+## Named functions (679, was 461 at the 2026-06-21 baseline)
 
 Confidence legend:
 - **high (decompiled+documented)** — appears in a dedicated `analysis/rom/*.md`
@@ -202,9 +225,9 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 
 | Address | Size | Name | Purpose | Confidence |
 |---------|------|------|---------|------------|
-| `0x800009c0` | 150 | `unknown_referencing_default_name_1` | unknown referencing default name 1 | low (named by Kovah, purpose unclear) |
-| `0x80003d10` | 2044 | `func2_that_uses_structs_at_0x80100000` | func2 that uses structs at 0x80100000 | medium (named, one-line purpose only, not decompiled) |
-| `0x80008d18` | 380 | `log_many_2_0x72_0x121-0x14e` | log many 2 0x72 0x121-0x14e | medium (named, one-line purpose only, not decompiled) |
+| `0x800009c0` | 150 | `link_status_bit_escalation_dispatcher_v3` | status-bit-escalation-ladder dispatcher (3rd variant), config-feature-bit gated — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80003d10` | 2044 | `lmp_pdu_received_top_level_processor` | the largest function in the region — top-level connection-event/LMP-PDU-received orchestrator tying together most of the region's named clusters — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008d18` | 380 | `log_many_2_0x72_0x121-0x14e` | VSC-0xfca1-mask-driven 12-event conditional logger — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80009104` | 28 | `disable_interrupts_(clear_LSBit_of_CP0_Status_Register)` | disable interrupts (clear LSBit of CP0 Status Register) — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80009120` | 16 | `enable_interrupts_(set_CP0_Status_to_arg)` | enable interrupts (set CP0 Status to arg) — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80009148` | 4 | `VSC_0xfc11_3_in_while_loop_FUN_80009148` | VSC 0xfc11 3 in while loop FUN 80009148 — see `interrupt_vectors` | high (decompiled+documented) |
@@ -221,21 +244,21 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80009be4` | 88 | `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2?` | call fptr if set with 2 args possibly allocates buf at arg2? | low (named by Kovah, purpose unclear) |
 | `0x80009cc0` | 106 | `reg_multiple_dptrs?_FUN_80009cc0` | reg multiple dptrs? FUN 80009cc0 | low (named by Kovah, purpose unclear) |
 | `0x80009f68` | 92 | `called_at_end_of_every_HCI_CMD_via_fptr` | called at end of every HCI CMD via fptr — see `usb_transport_hci_driver` | high (decompiled+documented) |
-| `0x8000bd04` | 46 | `VSC_0xfc6c_FUN_8000bd04` | VSC 0xfc6c FUN 8000bd04 | medium (named, one-line purpose only, not decompiled) |
-| `0x8000bdb4` | 12 | `VSC_common_used_in_0xfc39_FUN_8000bdb4` | VSC common used in 0xfc39 FUN 8000bdb4 | medium (named, one-line purpose only, not decompiled) |
-| `0x8000be84` | 26 | `VSC_0xfc39_1_FUN_8000be84` | VSC 0xfc39 1 FUN 8000be84 | medium (named, one-line purpose only, not decompiled) |
-| `0x8000c09c` | 178 | `unknown_referencing_default_name_3` | unknown referencing default name 3 | low (named by Kovah, purpose unclear) |
-| `0x8000c198` | 370 | `unknown_referencing_default_name_4` | unknown referencing default name 4 | low (named by Kovah, purpose unclear) |
-| `0x8000c390` | 86 | `unknown_referencing_default_name_5` | unknown referencing default name 5 | low (named by Kovah, purpose unclear) |
+| `0x8000bd04` | 46 | `vsc_0xfc6c_indexed_reg_read_with_0xff_sentinel` | VSC 0xfc6c indexed register read with 0xff default/sentinel — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000bdb4` | 12 | `clear_bits_in_global_0xfc39_helper` | `*global &= ~param` bit-clear helper shared by VSC 0xfc39 handling — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000be84` | 26 | `set_or_clear_bits_in_global_0xfc39_helper` | set-or-clear-bits-in-global companion to the above, VSC 0xfc39 — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c09c` | 178 | `codec_mode_select_and_audio_buffer_dispatch` | codec-mode-select dispatcher feeding the audio circular-buffer writer — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c198` | 370 | `codec_config_param_table_initializer` | config-blob-driven audio/codec parameter-table setup routine — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000c390` | 86 | `codec_mode_apply_and_afh_toggle` | combined codec-mode-apply-and-AFH-toggle step, completes the codec-mode 3-function cluster — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000e85c` | 100 | `optimized_memcpy` | optimized memcpy — see `vsc_dispatcher` | high (decompiled+documented) |
-| `0x8000e98c` | 64 | `memset` | memset | medium (named, one-line purpose only, not decompiled) |
-| `0x8000e9cc` | 56 | `references_patch_download_mem2` | references patch download mem2 | medium (named, one-line purpose only, not decompiled) |
-| `0x8000f0a4` | 806 | `called_by_unknown_fptr_index9_1` | called by unknown fptr index9 1 | low (named by Kovah, purpose unclear) |
-| `0x8000f41c` | 108 | `unknown_fptr_index9` | unknown fptr index9 | low (named by Kovah, purpose unclear) |
-| `0x8000f53c` | 64 | `wraps_multi_VSC_called_if_no_patch3` | wraps multi VSC called if no patch3 | medium (named, one-line purpose only, not decompiled) |
-| `0x8000fae8` | 50 | `VSC_0xfc39_wrapper_FUN_8000fae8` | VSC 0xfc39 wrapper FUN 8000fae8 | medium (named, one-line purpose only, not decompiled) |
+| `0x8000e98c` | 64 | `memset` | memset — completes the region's memcpy/memmove/memset libc-style trio — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000e9cc` | 56 | `references_patch_download_mem2` | redirects a stale patch-image pointer to the real patch entry point `0x8010a000` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f0a4` | 806 | `multi_field_opcode_dispatcher_type1_msg` | central 6-bit-field-ID-routed message handler invoked by `mailbox_message_dispatcher_index9` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f41c` | 108 | `mailbox_message_dispatcher_index9` | single-slot mailbox/queue dispatcher keyed on message type, the actual "index9" fptr-table entry — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f53c` | 64 | `wraps_multi_VSC_called_if_no_patch3` | installed-VSC-callback wrapper with conditional logging on failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fae8` | 50 | `vsc_0xfc39_wrapper` | VSC 0xfc39 wrapper, dispatches to bit-clear/set helpers or a 3rd VSC handler by config field — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000fb5c` | 436 | `lots_of_initialization` | lots of initialization — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
-| `0x8000fd38` | 120 | `copies_config_bdaddr` | copies config bdaddr | medium (named, one-line purpose only, not decompiled) |
+| `0x8000fd38` | 120 | `copies_config_bdaddr` | clears reserved config-blob bits, memcmp+memcpy's BD_ADDR into the config blob if changed — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000046c` | 20 | **NOT A REAL FUNCTION** (was tentatively `usb_event_status_handler_dup` in pass 1) | zero-filled alignment padding before `0x80000480`, mis-split by Ghidra's analyzer; reclassified 2026-06-22 pass 2 — see `region_0x80000000` | n/a (non-function, excluded from named/unnamed counts) |
 | `0x80000480` | 764 | `usb_event_status_handler` | USB-class event-status bit dispatcher, ends in USB-transport-drain calls — see `region_0x80000000`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80000a5c` | 410 | `connection_event_status_handler` | per-connection HW status-change handler (link loss/role/feature gating) — see `region_0x80000000` | high (decompiled+documented) |
@@ -244,6 +267,24 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80000d78` | 492 | `isr_bottom_half_status_dispatcher` | ISR bottom-half/deferred-event dispatcher, reads CP0 Cause/EPC then branches to ~8 status-bit handlers — see `region_0x80000000`, `interrupt_vectors` | high (decompiled+documented) |
 | `0x800011fc` | 188 | `conn_record_pending_data_drain` | linked-list byte-stream dequeue primitive over conn-record buffer pool — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
 | `0x800012b8` | 216 | `baseband_event_status_dispatcher_0xd` | 13-source baseband event dispatcher, parallel in shape to `FUN_80050810` — see `region_0x80000000`, `conn_type_dispatch_and_esco` | high (decompiled+documented) |
+| `0x800007d0` | 68 | `escalating_feature_bit_enable_and_report` | enable-feature-and-report escalation ladder, called from `connection_event_status_handler` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80000820` | 364 | `link_state_feature_bit_escalation_and_log_dispatcher` | larger link-state-gated escalation/log dispatcher, called from `isr_bottom_half_status_dispatcher` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008eac` | 80 | `vsc_param_apply_with_log_0x6b_0xce` | thin VSC-parameter-apply wrapper with logging on entry/failure — see `region_0x80000000` | high (decompiled+documented) |
+| `0x80008f04` | 264 | `feature_bit_mask_dispatch_via_vsc_0xfca1` | VSC-0xfca1-mask-gated sibling dispatcher to the `program_feature_bit_0x*` cluster — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000dd00` | 404 | `afh_rf_reconfig_retry_state_machine` | 3-state retry/backoff state machine around AFH/RF-divider reconfiguration — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fdc0` | 42 | `config_bit_gated_reg_field_write_idx0xb` | config-bit-gated baseband-register-field write at field index 0xb — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fdf8` | 76 | `flag_gated_reg_field_write_idx0xb` | flag-gated companion register-field write at field index 0xb — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fe4c` | 610 | `min_timing_credit_selector_5way` | 5-way minimum-timing/credit selector, richer sibling of `scheduler_find_next_min_deadline` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000aa64` | 1398 | `pdu_type_dispatch_enqueue_to_per_type_ring_and_notify` | central incoming-PDU type-dispatch-and-enqueue function, enqueue-side sibling to `conn_record_pending_data_drain` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f4a0` | 58 | `clear_state_and_dispatch_reset_table_entry` | state-reset-and-dispatch primitive, IRQ-bracketed — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f4f4` | 56 | `counter_threshold_gated_reset_trigger` | counter-driven reset trigger feeding the above — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f584` | 96 | `conditional_table_entry_registration_init` | conditional fptr-table-entry registration via `interesting_string_user_fptr_registration_function` — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f628` | 32 | `shift_amount_from_2bit_field_calc` | trivial 2-bit-field-to-shift-amount leaf calc — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f658` | 562 | `multi_condition_readiness_status_checker` | ~10-condition bitmask-accumulating eligibility checker — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000f8bc` | 336 | `secondary_readiness_check_and_param_capture` | second-stage readiness check + timing/RF parameter capture — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fa48` | 86 | `config_derived_shift_and_threshold_setter` | config-blob-derived shift-exponent + threshold-byte setter — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fab0` | 50 | `clear_reg0x100_bit15_if_bit6_set` | conditional baseband-register-0x100 bit-clear wrapper — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8000fb20` | 50 | `log_event_0x3ee_if_status_not_idle` | conditional-log helper, event 0x3ee unless status is idle-sentinel — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80009130` | 12 | `get_CP0_Cause_register` | `return Cause;` — CP0 interrupt-cause accessor — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000913c` | 12 | `get_CP0_EPC_register` | `return EPC;` — CP0 exception-PC accessor — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000a780` | 318 | `find_pool_index_by_addr_and_mark_dirty` | resolves an address to a record-pool index across 4 fixed-size pools, disables IRQs, sets a dirty bit, re-enables IRQs — see `region_0x80000000`, `conn_record_subsystem` | high (decompiled+documented) |
@@ -867,9 +908,9 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 
 ---
 
-## Unnamed functions (2077, originally 2278)
+## Unnamed functions (2059, originally 2278)
 
-The remaining 2077 functions in the `rom` block (2739 total − 661 named − 1
+The remaining 2059 functions in the `rom` block (2739 total − 679 named − 1
 reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
 label and have not been individually triaged. Per Phase 9 scoping, giving
 each of these a real name and purpose is explicitly out of scope for this
@@ -877,28 +918,29 @@ doc — it's the rest of Phase 9's ongoing, best-effort work. This section
 satisfies "every function" at the index/coverage level via aggregate stats
 instead of 2278 rows of "unknown."
 
-**Confidence: unanalyzed** (for all 2077, as a single flag — no further
+**Confidence: unanalyzed** (for all 2059, as a single flag — no further
 granularity is meaningful until individual triage happens).
 
 ### Address-range distribution (by 0x10000-aligned region)
 
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
-| `0x80000000`–`0x8000ffff` | 106 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 1 reclassified non-function, 2026-06-22) | 5.1% |
-| `0x80010000`–`0x8001ffff` | 268 | 12.9% |
-| `0x80020000`–`0x8002ffff` | 321 | 15.5% |
-| `0x80030000`–`0x8003ffff` | 290 | 14.0% |
-| `0x80040000`–`0x8004ffff` | 307 | 14.8% |
-| `0x80050000`–`0x8005ffff` | 354 | 17.0% |
-| `0x80060000`–`0x8006ffff` | 238 | 11.5% |
-| `0x80070000`–`0x8007ffff` | 193 | 9.3% |
-| **Total** | **2077** | **100%** |
+| `0x80000000`–`0x8000ffff` | 88 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function, 2026-06-22 — **region's gap-sweep now COMPLETE; the remaining 88 are outside this doc's two-gap scope, e.g. the excluded interrupt-vector sub-range**) | 4.3% |
+| `0x80010000`–`0x8001ffff` | 268 | 13.0% |
+| `0x80020000`–`0x8002ffff` | 321 | 15.6% |
+| `0x80030000`–`0x8003ffff` | 290 | 14.1% |
+| `0x80040000`–`0x8004ffff` | 307 | 14.9% |
+| `0x80050000`–`0x8005ffff` | 354 | 17.2% |
+| `0x80060000`–`0x8006ffff` | 238 | 11.6% |
+| `0x80070000`–`0x8007ffff` | 193 | 9.4% |
+| **Total** | **2059** | **100%** |
 
 Distribution is fairly even across the whole ROM outside the
-`0x80000000`-`0x8000ffff` region (9.3–17.0% per 64 KiB region), which has
-now dropped to 5.1% of the unnamed total thanks to 8 passes of Phase 9's
-region sweep concentrating there; the other 7 regions are unchanged from
-the 2026-06-21 baseline and still interleave named/unnamed functions
+`0x80000000`-`0x8000ffff` region (9.4–17.2% per 64 KiB region), which has
+now dropped to 4.3% of the unnamed total after Phase 9's region sweep
+**fully completed** there (9 passes, 0 gap functions left unresolved); the
+other 7 regions are unchanged from the 2026-06-21 baseline and still
+interleave named/unnamed functions
 throughout, consistent with how Phases 1–8 worked (tracing call chains and
 protocol handlers rather than sweeping linearly through address space).
 
@@ -909,11 +951,11 @@ byte-level stats (count/total-bytes/average) require a fresh
 `RomCoverageStats.java`-style pass over the now-shrunk unnamed set to be
 accurate; the per-region distribution table above (manually recomputed each
 pass from the named-table deltas) is the authoritative up-to-date count
-(2077, not 2278) until that re-run happens.
+(2059, not 2278) until that re-run happens.
 
 | Metric | Value |
 |--------|-------|
-| Count | 2278 (stale; see note above — true current count is 2077) |
+| Count | 2278 (stale; see note above — true current count is 2059) |
 | Smallest function | 1 byte |
 | Largest function | 2484 bytes |
 | Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) (stale) |
