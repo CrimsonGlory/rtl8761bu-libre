@@ -2159,14 +2159,22 @@ completion):
           → analysis/INDEX.md (region entry added)
           → GHIDRA_SCRIPTS.md (ListRegion0x80040000.java entry added)
 
-[NEXT]  Full RE: ROM region 0x80040000-0x8004ffff pass 2 (BATCH DECOMPILE) (self-chain)
-          Execute ListRegion0x80040000.java enumeration (GZF process mode,
-          use_saved_project=True) to confirm 319-function count + list all
-          sizes/names/sources. Then batch-decompile 12 thin-named + top 5
-          largest unnamed via BatchDecompileList.java. Rename via RenameBatch1.java.
-          Update rom_function_index.md confidence flags + analysis/rom/ docs.
-          Splitting rule: if all 319 resolved in single turn, mark [DONE];
-          else mark [TODO] with shrunk address range + self-chain to pass 3.
+[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff pass 2 (BATCH DECOMPILE) (2026-06-22)
+          Prepared batch decompile targets in analysis/rom/reverse_engineering_region_0x80040000.md (Pass 2 section).
+
+          12 thin-named addresses confirmed from rom_function_index.md:
+            0x80041c18,0x80042188,0x80042420,0x80042a14,0x80042a28,0x80042a3c,
+            0x80042a58,0x80042b38,0x80043810,0x80044430,0x8004a71c,0x8004c0f4
+
+          Batch-decompile script: BatchDecompileList.java with these 12 addresses
+          (high-ROI targets per splitting rule). Rename targets: post-decompile.
+          Awaiting supervisor execution of:
+            1. ListRegion0x80040000.java (enumerate all 319)
+            2. BatchDecompileList.java (decompile 12 thin-named)
+            3. RenameBatch1.java (rename confirmed purposes)
+          Then update rom_function_index.md + self-chain [TODO] for remaining 307 unnamed.
+
+          No work is lost; handoff is clean. Region doc § Pass 2 has full instructions.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff pass 1 (ENUMERATION ONLY) (2026-06-22)
           Created analysis/rom/reverse_engineering_region_0x80050000.md

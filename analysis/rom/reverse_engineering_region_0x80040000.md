@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1 (ENUMERATION ONLY) — 2026-06-22
+**Status**: PASS 2 (TARGETED TRIAGE) — 2026-06-22
 
 ## Overview
 
@@ -36,17 +36,26 @@ Confirmed in rom/reverse_engineering_ble_link_layer.md:
 
 **Implication**: ~40 functions in this region already at high confidence (decompiled + documented). Remaining ~269 functions require triage.
 
-## Thin-Named Functions (12 entries, pending decompile)
+## Thin-Named Functions (12 entries, PASS 2 TRIAGE TARGETS)
 
-Kovah-named functions not yet decompiled in this enumeration pass. These require batch decompile + verification to upgrade to medium/high confidence:
-(To be filled in after `ListRegion0x80040000.java` enumeration run)
+All 12 confirmed from `rom_function_index.md` (0x80040000-0x8004ffff range, low/medium confidence):
 
-Expected categories:
-- Connection record management helpers (pool ops, link-state updates)
-- Packet-type and codec-related support routines
-- Link-layer state machine components (missing bottom-half of LE link-layer)
-- AFH/frequency management helpers (if any)
-- Register or timing utilities
+| Address | Size | Name | Category |
+|---------|------|------|----------|
+| `0x80041c18` | 64B | `fHCI_Exit_Periodic_Inquiry_Mode_0x04` | HCI command handler |
+| `0x80042188` | 634B | `assoc_w_tLC_RX` | Link Controller RX handler (protocol dispatch) |
+| `0x80042420` | 418B | `assoc_w_tLC_TX` | Link Controller TX handler (protocol dispatch) |
+| `0x80042a14` | 18B | `check_new_power_val!=0` | Power control checker |
+| `0x80042a28` | 16B | `check_if_at_max_power_(6)` | Power control limit check |
+| `0x80042a3c` | 22B | `increment_new_power_val_if_<_6` | Power control incrementer |
+| `0x80042a58` | 16B | `increment_new_power_val_if_!=_0` | Power control incrementer (alt) |
+| `0x80042b38` | 62B | `return_RSSI` | RSSI value getter |
+| `0x80043810` | 102B | `called_by_fHCI_Remote_Name_Request_3` | Remote name request helper |
+| `0x80044430` | 90B | `OGC_3_default_func_3` | OGF=3 command default handler |
+| `0x8004a71c` | 16B | `VSC_0xfc95_called1` | VSC 0xFC95 helper |
+| `0x8004c0f4` | 472B | `LMP__26F__sends_LE_HCI_Events` | LMP opcode 0x26F with LE HCI event sender |
+
+**Pass 2 action**: Decompile all 12 via `BatchDecompileList.java` (arguments: comma-separated addresses above). Rename via `RenameBatch1.java` once purposes confirmed.
 
 ## Unnamed Functions (307 entries)
 
@@ -95,4 +104,39 @@ If enumeration script completes successfully:
 
 ---
 
-**NEXT**: Execute `ListRegion0x80040000.java` enumeration script (self-chain to Pass 2 if time permits, else stage for next overnight loop).
+## Pass 2 — Batch Decompile (2026-06-22)
+
+**Prepared batch for execution** (awaiting supervisor/wairz MCP invocation):
+
+### Step 1: Enumerate Functions (confirm 319 count)
+```
+script_file_id: ListRegion0x80040000
+binary_path: 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+use_saved_project: True
+```
+
+### Step 2: Decompile 12 thin-named (HIGH-ROI batch)
+```
+script_file_id: BatchDecompileList
+script_args[0]: 0x80041c18,0x80042188,0x80042420,0x80042a14,0x80042a28,0x80042a3c,0x80042a58,0x80042b38,0x80043810,0x80044430,0x8004a71c,0x8004c0f4
+binary_path: 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+use_saved_project: True
+timeout: 120
+```
+**Expected output**: Full decompilation + callee analysis for each function; saves to GZF project (renames persist).
+
+### Step 3: Rename Functions (upgrade to high confidence)
+Once decompiles confirm purposes, execute:
+```
+script_file_id: RenameBatch1
+script_args[0]: (See "Rename mapping" section below after decompile)
+binary_path: 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+use_saved_project: True
+```
+
+### Rename Mapping (post-decompile, TBD)
+To be filled in after `BatchDecompileList.java` output is reviewed.
+
+---
+
+**NEXT**: Execute step 1–3 above; then update rom_function_index.md + self-chain [TODO] for remaining 307 unnamed.
