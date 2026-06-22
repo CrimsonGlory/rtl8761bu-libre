@@ -1833,7 +1833,7 @@ completion):
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 2 done, 338 fns remain)
+[DONE]  Full RE: ROM region 0x80010000-0x8001ffff, pass 2 (2026-06-22, 38 fns upgraded)
           PASS 2 (2026-06-22): re-ran ListRegion0x80010000.java +
           ListRegion0x80010000_Upper.java first (required first step) —
           confirmed the lower script's truncation cuts off at exactly
