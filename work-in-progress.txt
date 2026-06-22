@@ -2011,12 +2011,19 @@ completion):
           a new "Pass 4" section mirroring pass 1-3 structure. Update
           rom_function_index.md confidence flags (6 rows: medium→high).
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, continued (384 fns, HCI router + SAFER+ already high-confidence)
-          Contains the HCI command router and SAFER+ cipher (both already
-          high-confidence) plus 321 untouched unnamed functions and 63 thin
-          ones. Triage per the splitting rule above. Next priority target
-          per the standard workflow: re-run ListRegion authoritative scripts,
-          identify next high-value cluster, and begin decompilation batch.
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff, pass 1 continued (384 fns: 24 high-confidence, ~360 unnamed/thin-named)
+          Pass 1 (2026-06-22): Created ListRegion0x80020000.java + Upper companion
+          scripts, enumerated full region via `script_file_id` runs against GZF.
+          Documented baseline in analysis/rom/reverse_engineering_region_0x80020000.md.
+          Identified already-documented subsystems (HCI router in hci_command_router.md,
+          SAFER+ cipher in encryption_engine.md) worth ~24 functions; ~360 remain.
+          High-value targets flagged: (1) LMP procedure cluster @ 0x8002xxxx
+          (encryption-related, pairing, key-mgmt — start with named ones then
+          unnamed neighbors); (2) unnamed cluster @ 0x8002axxx+ (find patterns);
+          (3) VSC handlers @ 0x8002fxxx (smaller, isolated); (4) event-senders
+          @ 0x80021xxx-0x80023xxx (have high-confidence examples to learn from).
+          ~360 functions still requiring triage via batch decompile + rename workflow
+          (per region_0x80000000/0x80010000 experience). Index updated.
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns)
           Contains the VSC dispatcher and register-script interpreter
