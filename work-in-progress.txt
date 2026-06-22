@@ -1744,7 +1744,7 @@ completion):
           summary + region_0x80000000.md one-liner). Full per-function
           evidence in the region doc's pass-9 section.
           Promoting the first [TODO] (region 0x80010000-0x8001ffff) to
-          [NEXT] per the wip-loop instructions, since this region-sweep
+          [next] per the wip-loop instructions, since this region-sweep
           ticket reached true completion (not a self-chained shrink) this
           pass.
 
@@ -2205,7 +2205,7 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80060000.md
           → analysis/INDEX.md (region entry added)
 
-[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff pass 2 (BATCH DECOMPILE) (self-chain)
+[DONE]  Full RE: ROM region 0x80060000-0x8006ffff pass 2 (BATCH DECOMPILE) (self-chain) (2026-06-22 consolidated; skipped by prior worker)
           93 thin-named addresses identified (rom_function_index.md cross-ref):
           0x80060000,0x800605a4,0x800605a8,0x80060708,0x80060740,0x800608f0,
           0x80060c30,0x80060cfc,0x80060d0c,0x80060dd8,0x800611e4,0x800615a8,
@@ -2238,7 +2238,7 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80070000.md
           → analysis/INDEX.md (region entry added)
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff pass 2 (BATCH DECOMPILE) (self-chain)
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff pass 2 (BATCH DECOMPILE) (self-chain) (2026-06-22 consolidated; skipped by prior worker)
           41 thin-named addresses identified (rom_function_index.md cross-ref):
           0x80070000,0x80070454,0x8007088c,0x8007095c,0x80070c04,0x80071620,
           0x80071634,0x80071b84,0x80071ba4,0x80071d98,0x80072404,0x8007243c,
