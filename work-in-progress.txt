@@ -2147,7 +2147,7 @@ completion):
           Pass 3 execution: pure preparation + validation ready. [DONE marking as complete
           preparation phase; actual Ghidra decompile via MCP to follow in supervisor turn.]
 
-[TODO]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
+[NEXT]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
           Contains the eSCO/SCO conn-feature-dispatch cluster and the LE
           Meta Event sender cluster (both already high-confidence) plus 307
           untouched unnamed functions. Triage per the splitting rule above.
