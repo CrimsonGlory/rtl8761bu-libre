@@ -1833,11 +1833,72 @@ completion):
           Re-run ListRegion0x80000_Gaps.java at the start of the next pass
           to get the authoritative current list before triaging further.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff (268 unnamed + 130 thin-named fns)
-          Largest thin-named count of any region (130) — heavy LMP/VSC
-          handler territory (many `VSC_0xfc##`/`LMP__0x###` one-liners
-          already named by Kovah but never decompiled). Triage per the
-          splitting rule above.
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff, continued (2026-06-22, pass 1 done, 376 fns remain)
+          PASS 1 (2026-06-22): no prior pass history — this was a brand-new
+          region ticket. Got an authoritative function list via two new
+          scripts (`ListRegion0x80010000.java` +
+          `ListRegion0x80010000_Upper.java`, the latter needed because a
+          single run over the full 64KiB range silently truncated stdout
+          partway through — see GHIDRA_SCRIPTS.md's caveat note). Direct
+          recount: 408 total functions in-range (15 already-high-confidence
+          elsewhere, 130 thin-named matching the original 64-med/66-low
+          estimate exactly, 263 unnamed vs. the original 268 estimate —
+          small drift from an earlier index snapshot, not a counting error
+          this pass).
+
+          Resolved the **`send_evt_HCI_*` event-sender cluster**
+          (`0x8001ca94`-`0x8001da3c`, 32 functions) via
+          `BatchDecompileList.java` (3 calls) + `RenameBatch1.java` (reused
+          existing UUID, not a fresh `RenameBatch3.java`): confirmed all 30
+          pre-existing Kovah names accurate by decompile (8 medium + 22 low
+          confidence upgraded to high), renamed the 2 unnamed leaf helpers
+          caught inside the run (`rssi_threshold_delta_for_bos_index`/
+          `0x8001cfc4`, `log_hci_evt_0x1fc_if_no_patch3`/`0x8001d03c`).
+          Confirmed `hci_event_sender` (`0x8001d070`, already
+          high-confidence) as the single shared HCI-event-TX primitive for
+          the whole cluster (parallel to the already-documented
+          `send_LMP_pkt` for LMP). Found Kovah gave two structurally
+          different functions the identical name
+          `send_evt_HCI_Connection_Complete` (`0x8001d1f8` simple-path vs.
+          `0x8001d844` role-switch-aware path with extra bos-index
+          bookkeeping) — both confirmed real via decompile, not a
+          duplicate/typo.
+          Verified renames persist (per CLAUDE.md's standing ask): the
+          rename script's own output showed old-name→new-name transitions
+          correctly against the cached GZF project, consistent with prior
+          tickets' findings.
+          Wrote up full per-function findings in new
+          analysis/rom/reverse_engineering_region_0x80010000.md (structure
+          modeled on region_0x80000000.md). Updated
+          analysis/rom/rom_function_index.md (32 new/upgraded rows, summary
+          counts recomputed: named 679->681, high-confidence 291->323,
+          medium 96->88, low 293->271, unnamed 2059->2057; also recomputed
+          the unnamed-function address-range distribution table using this
+          pass's authoritative 263-count instead of the stale 268 estimate,
+          flagging a small not-yet-reconciled drift between that table's
+          new 2052 total and the summary metric's 2057 — see the doc's own
+          note) and analysis/INDEX.md (new row for the region doc + updated
+          rom_function_index.md one-liner).
+          REMAINING SCOPE — 376 of 408 functions (261 still-unnamed +
+          98 genuinically-open thin-named + 15 already-high-confidence
+          elsewhere, not further actionable + 2 newly-resolved folded into
+          the 32-resolved bucket). Top-priority next target per the region
+          doc's "Remaining scope" section: an apparent **OGF=3
+          (vendor-specific/test) opcode-handler cluster**
+          (`OGC_3_OCF_*`-named, 30+ thin-named fns spanning
+          `0x80019ad0`-`0x8001a3b4` and `0x8001e5d8`-`0x8001f408`) — not
+          covered by the existing `hci_command_router.md` (which only
+          covers OGF 1-8 standard commands), so this may be documenting a
+          previously-unexplored whole HCI opcode group. Other flagged
+          clusters: `HCI_OGF1_OCF0x4#` (4 thin-named), the `fHCI_*`
+          HCI-command-handler cluster bordering
+          `fHCI_Create_Connection_0x05`/`fHCI_Inquiry_0x01` (7 thin-named),
+          the `fHCI_Read_*` cluster (5 thin-named), scattered `VSC_0xfc##`
+          handlers (9 thin-named), the `LMP_CH__0x3ee__case#` cluster (3
+          thin-named), several large unnamed functions by size
+          (`0x80018654` 1194B largest, `0x80016934` 1012B, `0x800161e4`
+          974B), and ~250 small unnamed `FUN_8001xxxx` scattered through
+          the rest of the region with no existing thematic doc coverage.
 
 [TODO]  Full RE: ROM region 0x80020000-0x8002ffff (321 unnamed + 63 thin-named fns)
           Contains the HCI command router and SAFER+ cipher (both already

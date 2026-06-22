@@ -27,11 +27,11 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 679 (461 baseline + 12 pass-1 + 19 pass-2 + 74 pass-3 + 27 pass-4 + 31 pass-5 + 13 pass-6 + 12 pass-7 + 12 pass-8 + 18 pass-9, 2026-06-22 region-0x80000000 sweep — pass 9 COMPLETES the region) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2059 (2278 baseline − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 291 (258 after pass 8 + 18 pass-9 newly-named + 9 medium-upgraded + 6 low-upgraded thin-named; `memset`/`0x8000e98c` was already high, no change) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 96 (105 − 9 pass-9 upgraded to high) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 293 (299 − 6 pass-9 upgraded to high) |
+| Named functions (this doc's table) | 681 (679 after region-0x80000000 pass 9 + 2 region-0x80010000 pass-1 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep started 2026-06-22) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2057 (2059 − 2 region-0x80010000 pass-1 newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 323 (291 after region-0x80000000 pass 9 + 2 region-0x80010000 pass-1 newly-named-and-decompiled + 30 region-0x80010000 pass-1 thin-named upgraded to high via decompile-confirmation) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 88 (96 − 8 region-0x80010000 pass-1 medium-confidence fns upgraded to high) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 271 (293 − 22 region-0x80010000 pass-1 low-confidence fns upgraded to high) |
 
 **2026-06-22 update (pass 1)**: Phase 9's region-by-region exhaustive sweep
 (`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
@@ -198,6 +198,32 @@ region's gap-sweep ticket is complete; see
 "Remaining scope" for full detail. The 26 new/upgraded rows are folded
 into the table below (most appear near their pass-1-8 siblings rather than
 strictly appended, to keep related functions co-located).
+
+**2026-06-22 update (region 0x80010000 pass 1, new region started)**: with
+`0x80000000`-`0x8000ffff` complete, started the next region in the Phase 9
+sweep order: `0x80010000`-`0x8001ffff` (the largest thin-named bucket of
+any region, 130 thin-named per the original estimate). A fresh
+authoritative listing (new scripts `ListRegion0x80010000.java` +
+`ListRegion0x80010000_Upper.java`, both saved this pass) found 408 total
+functions in-range: 15 already-high-confidence, 64 medium + 66 low
+thin-named (130 total, matching the original estimate), and 263 unnamed
+(vs. the original 268 estimate — small drift from an earlier index
+snapshot). Pass 1 resolved the **`send_evt_HCI_*` event-sender cluster**,
+`0x8001ca94`-`0x8001da3c`: 30 thin-named functions confirmed-by-decompile
+(8 medium→high, 22 low→high) plus 2 unnamed leaf helpers renamed
+(`rssi_threshold_delta_for_bos_index`/`0x8001cfc4`,
+`log_hci_evt_0x1fc_if_no_patch3`/`0x8001d03c`) — 32 resolved total. Found
+and confirmed the shared TX primitive `hci_event_sender` (`0x8001d070`,
+already high-confidence) is called by every function in the cluster;
+discovered Kovah used the identical name `send_evt_HCI_Connection_Complete`
+for two structurally-different functions (`0x8001d1f8` simple path,
+`0x8001d844` role-switch-aware path) — both confirmed real, not a
+duplicate/typo. See `reverse_engineering_region_0x80010000.md` for full
+per-function detail, the "Remaining scope" section's prioritized next
+targets (an apparent OGF=3 vendor-command opcode-handler cluster is the
+top recommendation), and the region's own scoping/tally notes. The 32
+new/upgraded rows are appended after the region-0x80000000 pass-9 rows
+below.
 
 ---
 
@@ -905,10 +931,42 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000ed04` | 42 | `build_fixed_event_0x201e_and_send` | fixed-format 3-byte-payload event builder/sender for event 0x201e — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000ed30` | 98 | `register_rw_dispatch_with_log` | logged register read/write dispatch wrapper — see `region_0x80000000` | high (decompiled+documented) |
 | `0x8000eda0` | 700 | `generic_status_field_get_set_dispatcher` | large opcode-routed multi-field get/set dispatcher — see `region_0x80000000` | high (decompiled+documented) |
+| `0x8001ca94` | 60 | `send_evt_HCI_Inquiry_Response_Notification` | builds 3-byte LAP + RSSI-delta payload, sends HCI event 0x56 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cad4` | 36 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Channel_Map_Change` | 10-byte payload from fixed data ptr, HCI event 0x55 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cafc` | 20 | `send_evt_HCI_Peripheral_Page_Response_Timeout` | no-payload HCI event 0x54 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cb10` | 74 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Timeout` | dual-source 7-byte payload selected by bool param, HCI event 0x52 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cb68` | 24 | `send_evt_HCI_Synchronization_Train_Complete` | 1-byte status payload, HCI event 0x4f — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cb80` | 70 | `send_evt_HCI_Triggered_Clock_Capture` | feature-bit-gated 9-byte clock/flag payload, HCI event 0x4e — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cbcc` | 52 | `send_evt_HCI_Truncated_Page_Complete` | 6-byte BD_ADDR payload by bos index, HCI event 0x53 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cc04` | 110 | `send_evt_HCI_Synchronization_Train_Received` | 0x1d-byte BD_ADDR/clock/interval/map payload, HCI event 0x50 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cc80` | 226 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Receive` | guard-fn-gated variable-length payload or logger fallback, HCI event 0x51 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cd74` | 586 | `initialize_0x28_sized_struct` | per-connection LMP/QoS feature-capability struct initializer, gated by 5 config_base feature bits — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001cfc4` | 110 | `rssi_threshold_delta_for_bos_index` | RSSI-vs-threshold-pair signed delta lookup by bos index (renamed from `FUN_8001cfc4`) — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d03c` | 48 | `log_hci_evt_0x1fc_if_no_patch3` | debug-logger wrapper tagging HCI event 0x1fc (renamed from `FUN_8001d03c`) — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d1bc` | 24 | `send_evt_HCI_Hardware_Error` | 1-byte payload, HCI event 0x10 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d1d4` | 34 | `send_evt_HCI_Flush_Occurred` | 2-byte handle payload, HCI event 0x11 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d1f8` | 74 | `send_evt_HCI_Connection_Complete` | simple-path 11-byte payload, HCI event 0x03 (sibling of the role-switch-aware variant at 0x8001d844) — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d244` | 58 | `send_evt_HCI_Loopback_Command` | variable-length (≤253B) payload, HCI event 0x19 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d280` | 130 | `send_evt_0x21_HCI_Flow_Specification_Complete` | 4-field QoS record byte-swapped via `copy_bytes_in_LSB_order`, HCI event 0x21 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d308` | 122 | `send_evt_0x0D_HCI_QoS_Setup_Complete` | 4-field QoS record (rate/peak-BW/latency/delay-variation), HCI event 0x0d — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d388` | 70 | `send_evt_HCI_Role_Change` | bos-index-gated 8-byte payload, HCI event 0x12 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d3d4` | 36 | `send_evt_HCI_Max_Slots_Change` | 3-byte payload, HCI event 0x1b — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d3f8` | 44 | `send_event_HCI_Connection_Packet_Type_Changed` | 5-byte payload, HCI event 0x1d — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d424` | 76 | `called_by_fHCI_Read_LMP_Handle_send_evt_HCI_Command_Complete` | 0xb-byte Command Complete payload, num_cmd_pkts defaults to 1, HCI event 0x0e — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d474` | 44 | `send_evt_HCI_Read_Clock_Offset_Complete` | 5-byte payload, HCI event 0x1c — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d534` | 48 | `send_evt_HCI_Read_Remote_Supported_Features_Complete` | 11-byte payload (status+handle+8-byte features), HCI event 0x0b — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d564` | 74 | `send_evt_HCI_Remote_Name_Request_Complete` | 0xff-byte payload (BD_ADDR + name buffer, possibly EIR/FHS dual-use), HCI event 0x07 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d5b4` | 68 | `send_evt_0x14_HCI_Mode_Change` | 6-byte payload, HCI event 0x14 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d5fc` | 460 | `send_evt_HCI_Disconnection_Complete` | full teardown orchestrator (codec/role/index bookkeeping) + conditional HCI event 0x05 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d804` | 64 | `send_evt_HCI_Connection_Request` | 10-byte payload (BD_ADDR+class+link_type), HCI event 0x04 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d844` | 178 | `send_evt_HCI_Connection_Complete` | role-switch-aware variant with bos-index bookkeeping, HCI event 0x03 (sibling of the simple variant at 0x8001d1f8) — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001d904` | 256 | `send_evt_HCI_Inquiry_Result_or_HCI_Inquiry_Result_with_RSSI` | multi-entry inquiry-result payload builder, HCI event 0x02 or 0x22 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001da0c` | 40 | `send_evt_HCI_Inquiry_Complete` | 1-byte status payload + inquiry-session cleanup, HCI event 0x01 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x8001da3c` | 438 | `send_evt_HCI_Number_Of_Completed_Packets` | 4-source variable-length (handle,count) pair list, HCI event 0x13 — see `region_0x80010000` | high (decompiled+documented) |
 
 ---
 
-## Unnamed functions (2059, originally 2278)
+## Unnamed functions (2057, originally 2278)
 
 The remaining 2059 functions in the `rom` block (2739 total − 679 named − 1
 reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
@@ -926,14 +984,27 @@ granularity is meaningful until individual triage happens).
 | Address range | Unnamed function count | % of unnamed total |
 |---|---|---|
 | `0x80000000`–`0x8000ffff` | 88 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function, 2026-06-22 — **region's gap-sweep now COMPLETE; the remaining 88 are outside this doc's two-gap scope, e.g. the excluded interrupt-vector sub-range**) | 4.3% |
-| `0x80010000`–`0x8001ffff` | 268 | 13.0% |
+| `0x80010000`–`0x8001ffff` | 261 (263 authoritative-recount baseline, 2026-06-22 region-0x80010000 pass 1 — supersedes the original 268 estimate, see that region doc's scope note — minus 2 pass-1 renames) | 12.7% |
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
-| `0x80040000`–`0x8004ffff` | 307 | 14.9% |
-| `0x80050000`–`0x8005ffff` | 354 | 17.2% |
+| `0x80040000`–`0x8004ffff` | 307 | 15.0% |
+| `0x80050000`–`0x8005ffff` | 354 | 17.3% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 193 | 9.4% |
-| **Total** | **2059** | **100%** |
+| **Total** | **2052** | **100%** |
+
+(Note: the doc-wide "Unnamed (`FUN_*`) functions" summary metric above still
+reads 2057 — derived as `2059 − 2` from the prior baseline's running total,
+not yet reconciled against this table's fresh 2052 recount. The 5-function
+gap is the same authoritative-recount drift described in
+`reverse_engineering_region_0x80010000.md`'s scope section: this region's
+*old* estimate (268) was never verified against a direct
+`FunctionManager` enumeration until this pass; the other 6 untouched
+regions' counts are still old, unverified estimates and may carry similar
+small drift once their own pass-1 authoritative recount happens. Treat
+2052 (this table) as more trustworthy than 2057 (the summary metric) until
+a future pass reconciles them properly via a fresh `RomCoverageStats.java`
+run, per the periodic-recompute instruction in `work-in-progress.txt`.)
 
 Distribution is fairly even across the whole ROM outside the
 `0x80000000`-`0x8000ffff` region (9.4–17.2% per 64 KiB region), which has

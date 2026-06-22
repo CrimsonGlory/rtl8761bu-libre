@@ -133,8 +133,10 @@ current UUID (UUIDs are not stable across saves of the same filename):
 | `RenameBatch2.java` | **Functionally identical** to `RenameBatch1.java` (same `;`-separated `0xADDR=newName` rename logic) — created 2026-06-22 pass 7 because looking up `RenameBatch1.java`'s current UUID via `list_ghidra_research_files` wasn't done before saving a fresh one. Redundant; future passes should prefer reusing `RenameBatch1.java` (look up its UUID first) rather than creating a `RenameBatch3.java` — the research-script pool has a soft cap (see below) and duplicate rename scripts don't add capability. |
 | `ListRegion0x80000_Gaps.java` | Lists every function (named+unnamed) in two hardcoded address ranges with size/name/source-type. Template for "list all functions in range X" — copy and edit the two range constants for a different region. |
 | `Region0x80000StringXrefs.java` | Lists every defined string in the `rom` block plus the functions that reference it. Useful for string-driven correlation in *other* regions (this region itself turned out to have almost no in-range strings — see `reverse_engineering_region_0x80000000.md`). |
+| `ListRegion0x80010000.java` | Lists every function in `0x80010000`-`0x8001ffff` with size/name/source-type. **Caveat found 2026-06-22**: a single run over this full 64KiB range produces stdout that exceeds the tool's truncation limit (~30KB of 41KB observed) — the printed list silently cuts off partway through, with no error. Had to pair this with `ListRegion0x80010000_Upper.java` (below) to get the missing tail. Future region-listing scripts for similarly dense regions should consider splitting into two halves proactively rather than discovering the truncation after the fact. |
+| `ListRegion0x80010000_Upper.java` | Companion to `ListRegion0x80010000.java` — lists only `0x8001b800`-`0x8001ffff` (the upper portion that got truncated out of the full-region run). Together the two cover the full `0x80010000`-`0x8001ffff` region. |
 
-These scripts (now 5, including the redundant `RenameBatch2.java`) pushed
+These scripts (now 7, including the redundant `RenameBatch2.java`) pushed
 the shared research-script pool close to its informally-observed ~50-entry
 cap (see the cap-probe note above) — if a future ticket hits a save
 failure, these are reasonable candidates to treat as "already served their
