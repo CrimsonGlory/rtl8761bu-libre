@@ -2062,13 +2062,13 @@ completion):
 
           Next iteration: [TODO] Pass 3b execute MCP batch decompile on top 20 candidates + rename persistence.
 
-[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3b (batch decompile top 20 candidates) (continuation)
+[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3b (batch decompile top 20 candidates) (continuation for next iteration)
           Scripts ready: BatchDecompileList80050000Pass3Top20.java + RenameBatch1Region80050000Pass3.java
           Staged: Top 20 candidates ranked by size (>100B, 1–15 candidates typically 300B-1000B range)
           Next: MCP execution of batch decompile, rename + HIGH confidence upgrade to rom_function_index.md
           Expected: 20 functions upgraded to HIGH-confidence; region HIGH-confidence % from 2.7% → ~8-10%
 
-[NEXT]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
+[TODO]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
           LMP opcode cluster already categorized by family (extended 0x7F, standard 0x00-0x3E, power, AFH, etc).
           All 94 thin-named handlers use shared send_LMP_pkt TX primitive — pure protocol layer (no HW I/O).
           Next: Batch decompile largest 15-20 thin-named to confirm naming accuracy + HIGH confidence.
