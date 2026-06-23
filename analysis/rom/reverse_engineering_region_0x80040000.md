@@ -383,3 +383,64 @@ remain essentially unexplored — likely diminishing returns for HIGH-confidence
 renames given their size (less code = less distinguishing behavior to
 cross-confirm), but a future pass could still spot-check the highest-xref
 ones in that tier if the mid-tier list gets exhausted first.
+
+---
+
+## Pass 5 — Continue 151-600B tier cold-triage EXECUTED (2026-06-23)
+
+Re-ran `ColdTriageRegion80040000Pass4.java` for a fresh ranked list (now 274
+unnamed outside top-15 lists; counts shifted slightly from Pass 4's run due
+to the 3 renames already applied: 89/117/48/20/0 across tiers 1-5). Decompiled
+the next 7 ranked 151-600B candidates via two small batches
+(`BatchDecompile80040000Pass5A.java`, 3 functions; `...Pass5B.java`, 4
+functions). Two candidates from the originally-planned priority list
+(`0x8004e5ac`, `0x800431a0`) were skipped because they already have
+substantial prior analysis elsewhere — `0x8004e5ac` is fully documented in
+`reverse_engineering_conn_record_subsystem.md` §11 ("hardware sub-object
+hierarchy teardown" / handle-table deregister), and `0x800431a0` is named as
+a callee of `apply_codec_type_and_role_switch_hook_dispatch` in
+`reverse_engineering_region_0x80000000.md` — both still show as `FUN_*` in
+this GZF (not yet formally renamed in Ghidra) but are not "untriaged."
+
+| Address | Size | xrefs | Behavior | Confidence |
+|---|---|---|---|---|
+| `0x8004bde8` | 354B | 6 | `uint FUN_8004bde8(byte*,uint,uint,char,u4,u4,u1,char)`: validates a buffer-size/header budget (`*pbVar7 * 2 + 6 + header_len`) with a logging fallback on underflow, checks a minimum-length gate against `param_3`, then calls `FUN_80056988` (payload extraction), an optional callback via `PTR_PTR_8004bf54`/`FUN_8005001c`, a function-pointer-table dispatch indexed by `*param_1 & 0xf` (opcode-style nibble), an optional `FUN_800530a0` forwarding call, and finally branches between `FUN_8004bc74`+`FUN_8004ba34` or `FUN_80050f7c`+`FUN_80052f38` depending on a "got an answer" flag and a state byte. Generic packet/PDU-dispatch-and-forward shape (header parse → opcode-table callback → conditional response/forward), but no single HCI/LMP-specific terminator confirms a precise name. | MEDIUM |
+| `0x8004ef08` | 526B | 4 | `void FUN_8004ef08(void)`: complex doubly-linked-list management over two lists rooted at `PTR_DAT_8004f118` (`+4`/`+8`/`+0x10` head pointers), with insert/unlink helpers (`FUN_8004ee94`, `FUN_8004ee50`) and a deadline/budget calculation (`uVar4 >> 1`, masked delta `DAT_8004f12c`). Structurally the **complement of `0x8004f580`** (Pass 4's "generic timer/event-queue insertion primitive," sorted by the same wraparound-masked delta key) — this looks like that queue's **dequeue/dispatch/requeue** routine: it processes one "in-flight" entry, then drains a pending list into an active list while budget remains, finally moving the next entry to in-flight. No HCI/LMP signature; pure internal scheduler infra. | MEDIUM-HIGH (cluster match with `0x8004f580`, but internal infra so no command-name target) |
+| `0x80040060` | 184B | 4 | `bool FUN_80040060(int,int)`: calls the named `LMP__25C_called2()` (documented elsewhere as `lmp_25c_procedure_completion_waiter`, a busy-wait barrier for an in-flight LMP procedure) inside an interrupt-disabled critical section that computes a credit/window comparison (`(ushort << 1) < (uVar11 - iVar10)`) against a per-connection deadline (`*piVar9`), setting a state byte at `param_2+0x247` to 1 on success. Reads/clears a "coexistence" sentinel (`*piVar9 = -1`) and a 2-bit mode field at `param_1+1`. This is a **scheduling-readiness check gating the LMP-25C procedure**, consistent with the busy-wait barrier's caller-side credit/deadline test, but isn't distinguishable to a specific named HCI/LMP procedure without more context. | MEDIUM-HIGH |
+| `0x8004326c` | 166B | 4 | `void FUN_8004326c(uint param_1)`: sweeps the `big_ol_struct` connection-record array (10 entries, skipping `param_1`), and for entries with the valid-entry flag set, reads a role-switch-hook-style byte (`byte_0xCC`) and a connection-index field, checks bit 0 of `PTR_DAT_80043318[idx+4]` (role-switch-hook bit pattern matching the documented `set/clear_bos_e4_role_switch_hook_bit` family), remaps the index `+8` into the eSCO range if a second gate table entry is `1`, then calls `FUN_80014450()` followed by `FUN_80034c5c(0x1c00, 0xc000, codec_table[idx])` — programming the connection's packet type to eSCO (`0x1c00`)/max-rate-SCO (`0xc000`), the exact same packet-type-constant pair used throughout the already-documented codec-type/role-switch cluster in `reverse_engineering_region_0x80000000.md` (`apply_codec_type_and_role_switch_hook_dispatch`, `role_switch_packet_type_reset_and_log`, etc.), then clears two per-index gate-table bytes to `0xff` (disabled sentinel) under interrupt-disable. This is a **connection-table-wide SCO/eSCO packet-type-and-role-switch-hook reset/teardown sweep**, structurally part of that same cluster, but the single confirming signal (an xref from a specific named caller) is unavailable due to the open `xrefs_to` tooling gap, so it's held at MEDIUM-HIGH rather than HIGH. | MEDIUM-HIGH |
+| `0x8004b3c0` | 162B | 4 | `void FUN_8004b3c0(int*,uint,char,char)`: gated on a nonzero byte-count field (`param_1[2]`), under interrupt-disable, selects one of two `0x1ac`-strided connection-record field pairs (`field289_0x128`/`field403_0x1a0`, chosen by `param_4`) and performs a linked-list-style splice: depending on `param_3`, either appends `param_1`'s 3-word record onto the selected list's tail (unaligned 4-byte store sequence into `+0x100..0x103`) or prepends it, then accumulates the byte-count field. Generic intrusive-list append/prepend helper over per-connection field-pair lists — no HCI/LMP-specific signature, looks like shared list-splice infra (akin to the `0x8004f580`/`0x8004ef08` queue pair but operating on per-connection lists instead of a global one). | MEDIUM |
+| `0x8004fd6c` | 226B | 3 | `void FUN_8004fd6c(byte,char,int)`: gated by `FUN_8004fcb8(param_3)` (an existence/validity check), then for `param_1<4` switches on `param_2-1` over a small per-index struct array (`PTR_DAT_8004fe60`, 7-byte stride): case 0 sets a 2-bit mode field and a bit in the struct, cases 1/3 clear a bit, case 4 sets a different bit and increments a shared counter byte, case 5 clears that bit and decrements the counter. Classic **enable/ref-count/disable state-machine setter** over a small fixed-size resource table (≤4 entries — plausibly SCO/eSCO channel slots given the `<4` bound seen elsewhere in this region), but no command-name-level confirmation available. | MEDIUM |
+| `0x8004b898` | 194B | 3 | `undefined4 FUN_8004b898(uint,undefined1,char)`: bounds-checks `param_1-0x10 < 0xb` (an 11-value enum/index range), then under interrupt-disable checks a per-connection valid-entry bit and a 16-bit feature-capability mask (`field453_0x1d2`/`field454_0x1d3`, bit-indexed by `param_1-0x10`) before writing `param_2` into `field138_0x91`, setting a flag bit in `field136_0x8f`, and setting/clearing bit 0 of `field139_0x92` based on `param_3`; on success calls a function-pointer hook (`PTR_DAT_8004b960`) with `(index, param_2)`, then always logs via `possible_logging_function__var_args`. Shape matches a **feature-bit-gated per-connection parameter setter with HW-callback notification** (e.g. toggling a per-connection mode/parameter that requires both software state and a hardware-hook side effect), but the specific feature/parameter isn't identifiable without naming the bit positions in the capability mask. | MEDIUM-HIGH |
+
+**Net effect this pass**: 0 of 7 decompiled candidates renamed to HIGH
+confidence — all sit at MEDIUM/MEDIUM-HIGH. `0x8004326c` has the strongest
+structural case (direct match to the already-documented packet-type/role-
+switch-hook cluster's constant pair `0x1c00`/`0xc000`) but, consistent with
+project policy, is held below HIGH without a definitive single-purpose
+confirmation (a caller-side xref or a uniquely distinguishing constant). This
+continues the pattern observed since Pass 3: the 151-600B tier yields mostly
+structural/cluster-membership evidence rather than clean single-purpose
+confirmations, which is expected given the open `xrefs_to`/`find_callers`
+tooling gap against this GZF (still not re-investigated this pass; flagged
+repeatedly in Pass 3/4, no change in status).
+
+Full decompiled C for all 7 functions is preserved in the Ghidra run logs for
+`BatchDecompile80040000Pass5A.java` and `...Pass5B.java` (2026-06-23).
+
+### Region 0x80040000 Pass 5 status: 267 unnamed functions remain untriaged
+
+After this pass, 267 of the 274 "outside top-15" unnamed functions identified
+at the start of Pass 5 remain completely untouched. The 151-600B tier now has
+59 ranked-but-undecompiled candidates remaining (next up by xref count:
+`0x8004fd6c` and `0x8004b898` already covered this pass: the rest of the
+xrefs:2 tier — `0x8004eb18` (404B), `0x8004f374` (368B), `0x8004f730` (230B),
+`0x800442bc` (222B), `0x8004ea2c` (220B), `0x80043884` (210B), `0x8004c940`
+(194B), `0x8004f25c` (186B), `0x80043984` (178B) — then the xrefs:1 tier
+topped by `0x8004ba34` (534B), `0x8004a730` (456B), `0x8004ae74` (452B). The
+1-150B tiers (206 functions) remain unexplored. Given 5 consecutive passes
+(Pass 3/3-cont/4/5) have now consistently produced MEDIUM/MEDIUM-HIGH outcomes
+in the absence of working `xrefs_to`/`find_callers`, a future pass should
+either (a) continue the xrefs:2/1 tier for a few more easy-win attempts, or
+(b) pivot to a different, less-explored region (e.g. 0x80060000 or
+0x80070000) where fresh top-15-by-size sweeps may yield a better HIGH-rename
+hit rate than this region's now-thoroughly-picked-over remainder.

@@ -2139,25 +2139,38 @@ completion):
           (new HIGH row for 0x8004ca7c, region count 303->301 reconciling the missed Pass-3-continuation
           rename), analysis/INDEX.md.
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 5 (continue 151-600B tier cold-triage) (2026-06-23)
-          Pass 4 ranked the 69 remaining 151-600B-tier unnamed functions (outside the top-15 lists) by
-          xref count and decompiled only the top 3 (1 HIGH rename: conn_link_quality_history_reset_and_vsc_0xfc95_trigger
-          at 0x8004ca7c). 66 ranked candidates remain undecompiled in that tier; the 1-150B tiers
-          (206 functions) are entirely unexplored. Next concrete steps:
-            1. Batch-decompile the next ~6-9 candidates from ColdTriageRegion80040000Pass4.java's
-               ranked output in 2-3-function batches via mcp__wairz__run_ghidra_headless (GZF process
-               mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf, use_saved_project=true)
-               — keep batches small per the recurring log-truncation lesson. Priority order from Pass 4:
-               0x8004bde8 (354B,6 xrefs), 0x800431a0 (184B,5), 0x8004ef08 (526B,4), 0x8004e5ac (188B,4),
-               0x80040060 (184B,4), 0x8004326c (166B,4), 0x8004b3c0 (162B,4), then the xrefs:3/2 tier.
-            2. Cross-confirm against already-named structs/constants/call patterns as in Pass 4 (the
-               mcp__wairz__xrefs_to / find_callers "Binary not found" gap against this GZF in process
-               mode remains open and does not need re-flagging unless directly blocking a specific
-               candidate worth calling out).
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 5 (continue 151-600B tier cold-triage) (2026-06-23)
+          Re-ran ColdTriageRegion80040000Pass4.java for a fresh ranked list, then batch-decompiled
+          7 more 151-600B-tier candidates (0x8004bde8, 0x8004ef08, 0x80040060, 0x8004326c, 0x8004b3c0,
+          0x8004fd6c, 0x8004b898) via two small batches (BatchDecompile80040000Pass5A/B.java). Skipped
+          0x8004e5ac and 0x800431a0 from the original priority list — both already have substantial
+          prior analysis in reverse_engineering_conn_record_subsystem.md / region_0x80000000.md
+          respectively, even though still FUN_-prefixed in this GZF. Result: 0 of 7 reached HIGH
+          confidence this pass (all MEDIUM/MEDIUM-HIGH) — 5 consecutive passes (3/3-cont/4/5) have now
+          produced this outcome in the absence of working xrefs_to/find_callers against this GZF.
+          0x8004326c has the strongest structural case (matches the 0x1c00/0xc000 packet-type-constant
+          pair from the already-documented codec-type/role-switch cluster in region_0x80000000.md) but
+          held below HIGH per project policy absent a confirming xref. Updated
+          reverse_engineering_region_0x80040000.md (Pass 5 section) and analysis/INDEX.md.
+          rom_function_index.md summary counts unchanged (no renames to record this pass).
+
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 6 (finish xrefs:2 tier, then pivot if exhausted) (2026-06-23)
+          Pass 5 left the 151-600B tier at 59 ranked-but-undecompiled candidates. The xrefs:2 tier
+          (9 functions) is the next cheap target: 0x8004eb18 (404B), 0x8004f374 (368B), 0x8004f730 (230B),
+          0x800442bc (222B), 0x8004ea2c (220B), 0x80043884 (210B), 0x8004c940 (194B), 0x8004f25c (186B),
+          0x80043984 (178B). Next concrete steps:
+            1. Batch-decompile these 9 in 2-3 small batches (3+3+3) via mcp__wairz__run_ghidra_headless
+               (GZF process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
+               use_saved_project=true) — keep batches small per the recurring log-truncation lesson.
+            2. Cross-confirm against already-named structs/constants/call patterns (the xrefs_to/
+               find_callers "Binary not found" gap against this GZF remains open; no need to re-flag).
             3. Only rename functions reaching HIGH confidence; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
-            5. If the 151-600B tier gets fully exhausted before easy wins run out, consider spot-checking
-               the highest-xref candidates in the 51-150B tier next, or pivot to a different region.
+            4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md (if any renames),
+               analysis/INDEX.md.
+            5. Given 5 straight passes with no/low HIGH-rename yield in this region's remainder, if this
+               pass also yields 0-1 HIGH renames, STRONGLY consider pivoting to a less-explored region
+               (e.g. 0x80060000 or 0x80070000 — check analysis/INDEX.md for current pass status of each)
+               for the next ticket rather than continuing to grind this region's xrefs:1 tier.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
