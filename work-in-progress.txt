@@ -2005,10 +2005,33 @@ completion):
           Pass 2 stage 2a decompile + Pass 3 continuation: ready for next supervised session.
           → analysis/rom/reverse_engineering_region_0x80030000.md (passes 1-2 complete)
 
-[NEXT]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns)
-          Contains the eSCO/SCO conn-feature-dispatch cluster and the LE
-          Meta Event sender cluster (both already high-confidence) plus 307
-          untouched unnamed functions. Triage per the splitting rule above.
+[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns) (2026-06-23, PASS 2 staged)
+          PASS 1 (2026-06-22, ENUMERATION — DONE): confirmed 319 total functions (307 unnamed + 12 thin-named).
+          PASS 2 (2026-06-23, BATCH DECOMPILE — STAGED, awaiting MCP execution):
+
+          Scripts prepared in /root/wairz/ghidra/scripts/:
+            - ListRegion0x80040000.java: enumeration (confirm 319 baseline)
+            - BatchDecompileList80040000.java: decompile 12 thin-named targets
+            - RenameBatch1Region80040000.java: rename to high-confidence names post-decompile
+
+          12 thin-named targets ready for decompilation:
+            0x80041c18 (fHCI_Exit_Periodic_Inquiry_Mode_0x04, 64B)
+            0x80042188 (assoc_w_tLC_RX, 634B) — Link Controller RX handler
+            0x80042420 (assoc_w_tLC_TX, 418B) — Link Controller TX handler
+            0x80042a14 (check_new_power_val!=0, 18B)
+            0x80042a28 (check_if_at_max_power_(6), 16B)
+            0x80042a3c (increment_new_power_val_if_<_6, 22B)
+            0x80042a58 (increment_new_power_val_if_!=_0, 16B)
+            0x80042b38 (return_RSSI, 62B)
+            0x80043810 (called_by_fHCI_Remote_Name_Request_3, 102B)
+            0x80044430 (OGC_3_default_func_3, 90B)
+            0x8004a71c (VSC_0xfc95_called1, 16B)
+            0x8004c0f4 (LMP__26F__sends_LE_HCI_Events, 472B)
+
+          BLOCKER: Requires mcp__wairz__run_ghidra_headless invocation (GZF process mode).
+          Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
+          → Promote 0x80050000 (next region) to [NEXT] per wip-loop rule.
+          → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff (pass 2 BATCH DECOMPILE) (self-chain) (2026-06-22)
         Enumeration confirmed 364 total functions (10 thin-named, 354 unnamed).
@@ -2089,7 +2112,7 @@ completion):
           batch decompile 5 more largest (0x8007095c/0x80073348/0x800754c4/0x80071d98 +
           0x80074c8c), then cold-triage unnamed by size + literal-pool + xref patterns.
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 cold triage) (self-chain)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 cold triage) (self-chain)
           Continue with 5 more largest thin-named via batch decompile + rename. Then
           systematic cold-triage of 191 unnamed functions: stratify by size, literal-pool
           footprint, xref patterns, and semantic matches (e.g., RX/TX chains, timers,
