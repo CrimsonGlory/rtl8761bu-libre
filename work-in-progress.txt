@@ -2507,27 +2507,47 @@ completion):
           (4 new rows), analysis/INDEX.md. Next: Pass 8 - remaining 12 Top-20 entries +
           quantizer-pair cross-confirm attempt.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 8 (remaining Top-20 + quantizer-pair cross-confirm) (2026-06-23)
-          Self-chained continuation (no other [TODO] available to promote). Pass 7 decompiled 4 of the
-          remaining Top-20 entries (2 renamed HIGH, 2 held at MEDIUM) and reconciled conflicting
-          evidence about the AFH/LAP-table pair (kept at MEDIUM-HIGH). 12 Top-20 entries remain
-          un-decompiled and the quantizer pair cross-confirmation is still outstanding.
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 8 (remaining Top-20 + quantizer-pair cross-confirm) (2026-06-23)
+          Decompiled all 12 remaining Top-20 candidates (0x80074940, 0x800791d0, 0x800747b0,
+          0x800731bc, 0x80076a20, 0x80078fdc, 0x800796b8, 0x800745d8, 0x80071138, 0x800767ec,
+          0x80077020, 0x80077508) via single-address DecompileAddr.java calls, fully exhausting
+          the original Top-20. 3 reached HIGH and were renamed via RenamePass8Region80070000.java:
+          0x800731bc -> LMP_SCO_LINK_REQ_0x17_modify_handler (triple opcode-literal confirmation,
+          modify/renegotiate-path sibling of Pass 7's 0x80072ff8); 0x80076a20 ->
+          crypto_bignum_multiply_square_v1 and 0x800767ec -> crypto_bignum_multiply_variable_len
+          (both confirmed HIGH on unambiguous bignum-multiply/carry-chain structural grounds).
+          Remaining 9 decompiled functions held at MEDIUM/MEDIUM-HIGH (TLV/feature-page
+          parse-serialize cluster, connection-slot allocator, HW register write/init pair).
+          Attempted quantizer-pair (0x8007814c/0x80077bcc) cross-confirm by decompiling helper-trio
+          member 0x800779d0 - found to be a generic 4-tap smoothing filter with no opcode literal,
+          ruling it out as an anchor; pair remains MEDIUM-HIGH, unrenamed.
+          Region status: 24/245 functions now HIGH; 184 unnamed remain; Top-20 fully exhausted.
+          Updated reverse_engineering_region_0x80070000.md (new Pass 8 section), rom_function_index.md
+          (13 new rows), analysis/INDEX.md. Next: Pass 9 - cold-triage remaining ~184 unnamed
+          functions outside Top-20 (COMPLEX/HANDLER tiers), and/or revisit quantizer pair via
+          remaining helper trio members (FUN_80077ac4/FUN_80077988/FUN_80077928).
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 9 (cold-triage beyond Top-20) (2026-06-23)
+          Self-chained continuation (no other [TODO] available to promote). Pass 8 exhausted the
+          original Top-20 ranked list (24/245 functions now HIGH, 184 unnamed remain). This region
+          has now had 8 consecutive passes; per the project's own guidance, continuing to mine the
+          same Top-20 list is no longer the highest-value next step.
           Steps:
-            1. Decompile the remaining Top-20 candidates via single-address DecompileAddr.java calls
-               against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
-               use_saved_project=true): 0x80074940, 0x800791d0, 0x800747b0, 0x800731bc, 0x80076a20,
-               0x80078fdc, 0x800796b8, 0x800745d8, 0x80071138, 0x800767ec, 0x80077020, 0x80077508.
-            2. Attempt to cross-confirm the quantizer/threshold-search sibling pair
-               (0x8007814c/0x80077bcc) to HIGH via their shared helper trio (FUN_800779d0/
-               FUN_80077ac4/FUN_80077988/FUN_80077928) — look for a named caller or opcode/constant
-               literal that pins down the exact protocol role.
-            3. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update analysis/rom/reverse_engineering_region_0x80070000.md (new Pass 8 section),
+            1. Run a fresh cold-triage enumeration (ColdTriageRegion80070000PassN.java pattern, in-script
+               ReferenceManager size+xref ranking, sidestepping the broken xrefs_to/find_callers MCP
+               tools against this GZF) over the ~184 unnamed functions OUTSIDE the original Top-20,
+               focusing on COMPLEX/HANDLER size tiers.
+            2. Decompile the top-ranked 6-10 candidates from that new ranking via single-address
+               DecompileAddr.java calls against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF
+               process mode, use_saved_project=true).
+            3. Optionally revisit the quantizer pair (0x8007814c/0x80077bcc) via the remaining helper
+               trio members (FUN_80077ac4/FUN_80077988/FUN_80077928) if time permits.
+            4. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
+            5. Update analysis/rom/reverse_engineering_region_0x80070000.md (new Pass 9 section),
                rom_function_index.md (if renames), analysis/INDEX.md.
-            5. If Top-20 fully exhausted with no further HIGH promotions possible, consider continuing
-               cold-triage of the remaining ~177 unnamed functions outside the Top-20 (COMPLEX/HANDLER
-               tiers) as the subsequent pass.
-            6. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
+            6. If this region's yield continues to be low across consecutive passes, consider pivoting
+               to a different, less-explored ROM region for the pass after this one instead.
+            7. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).

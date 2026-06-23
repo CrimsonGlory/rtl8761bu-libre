@@ -743,4 +743,120 @@ This pass found two pieces of new evidence pulling in different directions:
 
 ---
 
-**NEXT**: Execute `ListRegion0x80070000.java` enumeration script (self-chain to Pass 2 if time permits).
+## Pass 8 (2026-06-23): Remaining Top-20 + quantizer-pair cross-confirm attempt
+
+Decompiled all 12 remaining Top-20 candidates via `DecompileAddr.java`
+(`use_saved_project=true` GZF process mode). 3 HIGH-confidence renames executed via
+`RenamePass8Region80070000.java`; the rest assessed MEDIUM/MEDIUM-HIGH per project
+policy (no opcode-literal or named-caller confirmation strong enough to clear the HIGH bar).
+
+### Renamed this pass (HIGH confidence)
+
+**0x800731bc (368B) → renamed `LMP_SCO_LINK_REQ_0x17_modify_handler`** — **HIGH, RENAMED**
+- Checks SCO slot-timing window validity (busy-flags at `+0x20e`/`+0x20d`, timing fields
+  `+0x92`/`+0x90`/`+0xd0`)
+- Accept path: calls `send_LMP_ACCEPTED(..., 0x17, ..., 0x16)`, updates SCO param fields
+  `+0x94/0x98/0x9c/0x96`
+- Negotiate path: builds an 11-byte PDU with first byte `0x17`, sends via
+  `send_LMP_pkt(..., 0xb, ...)`, then calls `get_status_bits_by_LMP_Opcode(0x17, 0)`
+- Triple opcode-literal confirmation identical in shape to Pass 7's `0x80072ff8`
+  (`LMP_SCO_LINK_REQ_0x17_handler`) — this is its modify/renegotiate-path sibling/companion
+
+**0x80076a20 (348B) → renamed `crypto_bignum_multiply_square_v1`** — **HIGH, RENAMED**
+- Generic multi-word (bignum) multiply primitive: Knuth/schoolbook multiply with 64-bit
+  (`ulonglong`) intermediate accumulation and carry propagation across a word array,
+  followed by a doubling (`<<1` with carry chain) pass and a squaring (`uVar3*uVar3`) pass
+- No LMP/HCI logic, no logging calls — pure arithmetic
+- Confirmed HIGH on structural grounds as cryptographic bignum-multiply infrastructure
+  (likely ECDH P-192/P-256 support for Secure Simple Pairing), paralleling existing
+  `crypto_state_machine_*` naming in this region
+
+**0x800767ec (278B) → renamed `crypto_bignum_multiply_variable_len`** — **HIGH, RENAMED**
+- Variable-length schoolbook multiply: trims leading/trailing zero digits from both input
+  digit-arrays, zeroes the output buffer, then performs the same 64-bit-accumulator
+  carry-chain multiply as `0x80076a20`
+- Same algorithmic family/pure-arithmetic shape as `crypto_bignum_multiply_square_v1` —
+  confirmed HIGH on the same structural grounds (no LMP/HCI logic, unambiguous bignum
+  multiply identity)
+
+### Decompiled this pass, not renamed (MEDIUM / MEDIUM-HIGH)
+
+- **0x80074940 (672B)** — 5-case dispatch via fn-ptr tables, calls `0x800747b0`
+  (see below) for case 2; touches the `0x1ac_struct_array`. **MEDIUM** — no opcode
+  literal, role depends on `0x800747b0`'s still-unconfirmed exact role.
+- **0x800747b0 (390B)** — TLV-style byte-stream parser (tag 1→2-byte field, tag 5→4-byte
+  field, tag 0x11→16-byte `optimized_memcpy`), falls through to
+  `possible_logging_function__var_args(2, 0x3c, 0x31d, 0x9db, 0x12, ...)` (18-byte dump)
+  on overflow. Strongly resembles LMP extended-feature-page TLV parsing but has no opcode
+  literal or named caller pinning the exact PDU. **MEDIUM-HIGH**.
+- **0x800791d0 (608B)** — populates a 0x2c-byte output struct from a bit-packed page
+  format (5-bit count field + reserved bits, multiple shift/mask bitfields matching
+  standard LMP feature-page octet layout); logs every field via
+  `possible_logging_function__var_args(3, 0x8e, ...)`. Structurally close to the existing
+  HIGH-confidence `LMP_features_validator` (0x80071d98) but lacks the opcode-literal/
+  named-caller evidence this pass's bar requires. **MEDIUM-HIGH**.
+- **0x80078fdc (344B)** — low-level bit-packing setter on `0x1ac_struct_array` fields
+  `+0x44`..`+0x49`, no opcode/caller evidence. **MEDIUM**.
+- **0x800796b8 (336B)** — bit-stream serializer/feeder (calls `FUN_8007967c` repeatedly +
+  `possible_logging_function__var_args(3, 0x8e, ...)`); likely the serialize counterpart
+  to `0x800791d0`'s parse (same `0x8e` log-module ID). **MEDIUM**.
+- **0x800745d8 (308B)** — near-identical skeleton to `0x800747b0` (same `0x101`-iteration
+  bounds-check loop, same `possible_logging_function__var_args(2, 0x3c, ...)` signature),
+  but tag-matches against a name/string table (XOR-compare + `memcmp`) rather than
+  extracting feature fields directly — a tag-matching variant/sibling of `0x800747b0`.
+  **MEDIUM-HIGH**.
+- **0x80071138 (306B)** — connection-slot allocation orchestration using several
+  already-named helpers (`look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`,
+  `set_check_for_1_to_1`, `set_bos_bosi__0xb2_index_arg2`, `HCI_EVT_0x500_FUN_800707dc`,
+  `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched_`). Clear remote-name-request /
+  connection-slot-allocator role via its callees, but the function itself has no single
+  opcode literal of its own. **MEDIUM-HIGH**.
+- **0x80077020 (240B)** — hardware register write sequence: reads defaults, checks
+  `the_0x300` struct field `0x173`, writes register offsets `0x26e`/`0x274` via an
+  indirect callback, then a second indirect callback dispatch with all params. Consistent
+  with SCO/eSCO link parameter programming but no opcode-literal confirmation. **MEDIUM**.
+- **0x80077508 (230B)** — HW register init sequence: writes register offsets
+  `0x14, 0x38, 0x20, 0x50, 0x58, 0x5c, 0x60, 0x64, 0x68, 0x6c, 0x70` via
+  `FUN_800773d8(offset, value, 0xf)`; calls the already-named
+  `VSC_0xfca1_FUN_80077474` — confirms this is HCI VSC 0xFCA1-related hardware init.
+  **MEDIUM-HIGH** (clear functional role via named callee, but no opcode-literal triple
+  confirmation).
+
+### Quantizer-pair cross-confirmation attempt (0x8007814c / 0x80077bcc)
+
+Decompiled the first of the shared helper trio, `0x800779d0` (126B), to look for an
+opcode literal or named caller that would pin down the pair's exact protocol role.
+Result: `0x800779d0` is a pure **4-tap moving-average / FIR smoothing filter**
+(`(p[i]+p[i+1]+p[i+2]+p[i+3]) >> 2`, with edge-of-array boundary handling) — generic
+signal-smoothing utility (e.g. RSSI or AFH-channel-quality series smoothing), not itself
+protocol-specific and carrying no opcode literal. This rules it out as an anchor for
+cross-confirming the quantizer pair's exact LMP/HCI role. **No promotion** — the
+quantizer pair (0x8007814c/0x80077bcc) remains MEDIUM-HIGH, unrenamed, per the ticket's
+"attempt" framing (not guaranteed to succeed).
+
+### Region Status After Pass 8
+
+- 24/245 total functions now HIGH confidence (17 thin-named + 7 renamed-from-unnamed:
+  2 from Pass 6, 2 from Pass 7, 3 from Pass 8)
+- All 20 of the original Top-20 candidates have now been decompiled and assessed
+  (full Top-20 exhausted)
+- 184 unnamed functions remain untriaged, including the carried-over MEDIUM/MEDIUM-HIGH
+  candidates (quantizer pair, AFH/LAP pair) and the newly-decompiled-but-unrenamed
+  MEDIUM/MEDIUM-HIGH functions from this pass
+
+### Next Steps (Self-Chaining → Pass 9)
+
+Per the ticket's own guidance: the Top-20 is now fully exhausted with no further HIGH
+promotions readily available from it. This pass pivots to cold-triage of the remaining
+~184 unnamed functions outside the original Top-20 (COMPLEX/HANDLER tiers), since this
+region (0x80070000) has now had 8 consecutive passes — continuing to mine diminishing
+returns from the same Top-20 list is no longer the highest-value next step. A future
+pass may also revisit cross-confirming the quantizer pair via the remaining helper trio
+members (`FUN_80077ac4`/`FUN_80077988`/`FUN_80077928`), which were not reached this pass.
+
+---
+
+**NEXT**: Cold-triage pass over the ~184 unnamed functions in region 0x80070000-0x8007ffff
+outside the original Top-20 (rank by size/xref count via in-script `ReferenceManager`
+queries, per the established `ColdTriageRegion80070000PassN.java` pattern), looking for
+new HIGH-confidence candidates among the COMPLEX/HANDLER tiers.
