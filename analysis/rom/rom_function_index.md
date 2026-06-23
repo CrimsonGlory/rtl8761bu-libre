@@ -824,18 +824,18 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8006f870` | 106 | `some_case_0x37_1` | some case 0x37 1 | high (decompiled+documented in region_0x80060000) |
 | `0x8006f8e8` | 96 | `path2_send_evt_0x14_HCI_Mode_Change` | path2 send evt 0x14 HCI Mode Change | high (decompiled+documented in region_0x80060000) |
 | `0x8006ff00` | 40 | `some_case_0x13` | some case 0x13 | high (decompiled+documented in region_0x80060000) |
-| `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP  48A  FUN 80070248 | low (named by Kovah, purpose unclear) |
+| `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP opcode 0x48A handler; reads conn-record fields, conditional struct-write path, no distinguishing call signature found | medium (decompiled, batch pass 5 2026-06-23) |
 | `0x800702e4` | 246 | `LMP_259_opcode_handler` | LMP opcode 0x259 handler; eSCO link negotiation or feature-specific opcode path | **high** (decompiled, batch pass 3b 2026-06-23) |
-| `0x800703f0` | 68 | `LMP__600__FUN_800703f0` | LMP  600  FUN 800703f0 | low (named by Kovah, purpose unclear) |
+| `0x800703f0` | 68 | `HCI_Inquiry_Complete_finalizer` (was `LMP__600__FUN_800703f0`) | HCI Inquiry Complete/Cancel finalizer — checks EIR-state (val 2 or 3), calls `send_evt_HCI_Inquiry_Complete(0)` then `fHCI_Inquiry_Cancel_0x02_1()`; original "LMP__600" label was a mislabel (this is HCI inquiry layer, not an LMP opcode) | **high** (decompiled+renamed, batch pass 5 2026-06-23) |
 | `0x80070454` | 272 | `possible_LMP_DETACH_handler` | LMP DETACH (0x07) handler variant or detach-path dispatcher; connection teardown | **high** (decompiled, batch pass 3b 2026-06-23) |
-| `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI EVT 0x500 FUN 800707dc | low (named by Kovah, purpose unclear) |
-| `0x8007088c` | 48 | `LMP__25C_called3` | LMP  25C called3 | low (named by Kovah, purpose unclear) |
+| `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI event 0x500-family sender/handler; conn-record gated, dispatches via shared event-send primitive (exact sub-case not cross-confirmed) | medium (decompiled, batch pass 5 2026-06-23) |
+| `0x8007088c` | 48 | `LMP__25C_called3` | Thin wrapper: calls `LMP__25C_called2()` then `FUN_8006d80c(p1,p2)` and `FUN_8006ba88(p1,p2)`; confirms 3-call chain sibling of `LMP__25C_called2`, no new opcode info | medium (decompiled, batch pass 5 2026-06-23) |
 | `0x8007095c` | 568 | `LMP__489__various_sub_cases` | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80070ba4` | 92 | `LMP__25C__FUN_80070ba4` | LMP  25C  FUN 80070ba4 | low (named by Kovah, purpose unclear) |
 | `0x80070c04` | 1306 | `LMP_480_standard_PDU_dispatcher` | Central LMP PDU dispatcher; routes opcodes 0x01–0x3D + extended paths (16+ case arms) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80071370` | 82 | `LMP__47F__FUN_80071370` | LMP  47F  FUN 80071370 | low (named by Kovah, purpose unclear) |
-| `0x800713d4` | 182 | `LMP__47E__FUN_800713d4` | LMP  47E  FUN 800713d4 | low (named by Kovah, purpose unclear) |
-| `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | LMP  267  FUN 800714a0 | low (named by Kovah, purpose unclear) |
+| `0x800713d4` | 182 | `send_LMP_FEATURES_REQ_page1_trigger` (was `LMP__47E__FUN_800713d4`) | Explicitly sends `send_LMP_FEATURES_REQ_or_RES(conn_idx, 0x27, 3)` (decompiler comment: "0x27 = LMP_FEATURES_REQ"); sets outstanding-PDU status bits for opcode 0x28 (LMP_FEATURES_RES) reply; gated on per-connection status byte == 0x02/0x05. Clear LMP page-1 features-negotiation trigger; original "47E" label unrelated | **high** (decompiled+renamed, batch pass 5 2026-06-23) |
+| `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | Connection-setup feature/timer finalizer: conditionally fires VSC 0xfc95 + `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when feature-page bit 2 set; conditional role-switch-style call `FUN_80061538`; services a watchdog-style timer triple (`FUN_80009b1c`/`...9a6c`/`...9a04`); finishes with `FUN_80017d2c(conn_idx, byte_0xCC, 0xffff)` | medium-high (decompiled, batch pass 5 2026-06-23; behavior clear, exact LMP opcode tie not cross-confirmed) |
 | `0x80071620` | 20 | `called_at_end_of_crypto_state_machine_update` | called at end of crypto state machine update | low (named by Kovah, purpose unclear) |
 | `0x80071634` | 462 | `assoc_w_tLMP_ROM_original` | ROM original LMP handler; routes extended opcodes 0x259–0x26d (intercepted by patch) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80071b50` | 44 | `LMP__264__FUN_80071b50` | LMP  264  FUN 80071b50 | low (named by Kovah, purpose unclear) |
@@ -871,7 +871,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x800762f4` | 852 | `crypto_state_machine_loop_handler` | Large do-while crypto state transitions; post-exchange validation + error recovery | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x8007666c` | 22 | `unknown_fptr_index1` | unknown fptr index1 | low (named by Kovah, purpose unclear) |
 | `0x80076bd8` | 48 | `swap_byte_order` | swap byte order | low (named by Kovah, purpose unclear) |
-| `0x80077474` | 130 | `VSC_0xfca1_FUN_80077474` | VSC 0xfca1 FUN 80077474 | low (named by Kovah, purpose unclear) |
+| `0x80077474` | 130 | `VSC_0xfca1_FUN_80077474` | Vendor-specific command 0xfca1 handler; small struct-init + conditional dispatch (consistent with VSC param-parsing pattern, exact param semantics not cross-confirmed) | medium (decompiled, batch pass 5 2026-06-23) |
 | `0x80077620` | 22 | `call2funcs` | call2funcs | low (named by Kovah, purpose unclear) |
 | `0x80078e68` | 72 | `VSC_0xfc7a_FUN_80078e68` | VSC 0xfc7a FUN 80078e68 | low (named by Kovah, purpose unclear) |
 | `0x8007943c` | 36 | `send_evt_INVALID_opcode_0xFF` | send evt INVALID opcode 0xFF | low (named by Kovah, purpose unclear) |

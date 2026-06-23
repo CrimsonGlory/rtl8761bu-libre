@@ -300,6 +300,59 @@ Remaining 39 named functions classified as **MEDIUM** (thematic context evident;
 
 ---
 
+## Pass 5 Results — Batch Decompile Top 8 Candidates (2026-06-23, complete)
+
+**Status**: All 8 staged Top-20 candidates (Pass 4's recommended batch) decompiled via
+single-address `DecompileAddr.java` calls (the pre-staged batch script
+`BatchDecompileList80070000Pass5.java` was unusable — see Tooling Note below). 2 of 8
+reached HIGH confidence and were renamed; 1 reached MEDIUM-HIGH; 5 remain MEDIUM
+(clear behavioral summary, but exact LMP-opcode/HCI-event identity not cross-confirmed
+absent working `xrefs_to`/`find_callers` against this GZF).
+
+### Per-Function Results
+
+| Address | Size | Old Name | New Name / Status | Confidence | Summary |
+|---------|------|----------|--------------------|------------|---------|
+| `0x800713d4` | 182B | `LMP__47E__FUN_800713d4` | **`send_LMP_FEATURES_REQ_page1_trigger`** | **HIGH (renamed)** | Explicitly calls `send_LMP_FEATURES_REQ_or_RES(conn_idx, 0x27, 3)` — decompiler comment confirms `0x27 = LMP_FEATURES_REQ`. Sets outstanding-PDU status bits for the expected `0x28` (LMP_FEATURES_RES) reply. Gated on per-connection status byte `0x02`/`0x05`. The prior "47E" label was unrelated to this function's actual behavior. |
+| `0x800703f0` | 68B | `LMP__600__FUN_800703f0` | **`HCI_Inquiry_Complete_finalizer`** | **HIGH (renamed)** | Checks EIR-data state (value 2 or 3), calls `send_evt_HCI_Inquiry_Complete(0)` then `fHCI_Inquiry_Cancel_0x02_1()`. This is an **HCI inquiry-layer** finalizer, not an LMP opcode handler — the original "LMP__600" Kovah label was a mislabel. |
+| `0x800714a0` | 220B | `LMP__267__FUN_800714a0` | unchanged (kept thin-named) | MEDIUM-HIGH | Connection-setup feature/timer finalizer: conditionally fires VSC `0xfc95` + `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when feature-page bit 2 is set on both local and remote pages; conditional role-switch-style call to `FUN_80061538`; services a watchdog-style timer triple (`FUN_80009b1c`/`...9a6c`/`...9a04`); finishes with `FUN_80017d2c(conn_idx, byte_0xCC, 0xffff)`. Behavior is clear but exact LMP opcode/trigger point not cross-confirmed — held below HIGH per project policy. |
+| `0x80074fa8` | 204B | `possible_logging_function?_var_args` | unchanged (already HIGH from earlier pass) | HIGH (confirmed, no change) | Re-confirmed VSC/logging infrastructure; va-arg-styled logger with config-gated dispatch. Already correctly documented in `rom_function_index.md`. |
+| `0x800707dc` | 164B | `HCI_EVT_0x500_FUN_800707dc` | unchanged | MEDIUM | HCI event 0x500-family sender/handler; conn-record gated dispatch via a shared event-send primitive. Sub-case/exact event semantics not cross-confirmed. |
+| `0x80070248` | 144B | `LMP__48A__FUN_80070248` | unchanged | MEDIUM | Reads conn-record fields with a conditional struct-write path. No distinguishing call signature (no `send_LMP_*`/`send_evt_*` call) found to confirm the 0x48A opcode association. |
+| `0x80077474` | 130B | `VSC_0xfca1_FUN_80077474` | unchanged | MEDIUM | Vendor-specific-command 0xfca1 handler; small struct-init + conditional dispatch, consistent with the region's other VSC param-parsing handlers. Exact parameter semantics not cross-confirmed. |
+| `0x8007088c` | 48B | `LMP__25C_called3` | unchanged | MEDIUM | Thin wrapper: calls `LMP__25C_called2()` then tail-chains `FUN_8006d80c(p1,p2)` and `FUN_8006ba88(p1,p2)`. Confirms this is a 3-call-chain sibling of the already-named `LMP__25C_called2`; no new opcode information gained — name is already as descriptive as the evidence supports. |
+
+### Tooling Note: Batch Script Failure
+
+`BatchDecompileList80070000Pass5.java` (staged in the prior BLOCKED ticket) failed to
+execute: `ghidra_scripts` headless run does a directory-wide `javac` compile, and
+~15+ unrelated legacy scripts in that directory have pre-existing compile errors
+(missing `import ghidra.app.script.GhidraScript;`, removed/changed Ghidra 12.1.2 API
+such as `DecompilerCallback`, bare `currentProgram`/`println`/`monitor` references).
+This poisons the whole batch compile, so even though `BatchDecompileList80070000Pass5.java`
+itself was syntactically similar to other working scripts, it failed to load
+(`ClassNotFoundException`). Worked around by reusing the already-correct
+`DecompileAddr.java` (single-address mode) once per target — 8 individual MCP calls
+instead of 1 batch call. No wairz internals were modified, per project policy. This
+directory-wide compile-noise issue (and the missing-import bug specifically in
+`BatchDecompileList80070000Pass5.java`/`Pass3b.java`/`BatchDecompileLMPEncryptionPairing.java`)
+should be flagged to the user as accumulating technical debt in
+`/root/wairz/ghidra/scripts/`.
+
+### Region Status After Pass 5
+
+- 17 of 54 thin-named functions now at HIGH confidence (across Pass 3a/3b/5 combined;
+  37 remain MEDIUM/LOW), plus 191 unnamed functions still pending cold-triage→decompile.
+- 2 renames performed this pass (both HIGH-confidence, cross-confirmed via explicit
+  named-callee evidence in the decompiled C: `send_LMP_FEATURES_REQ_or_RES` with an
+  opcode-number comment, and `send_evt_HCI_Inquiry_Complete`/`fHCI_Inquiry_Cancel_0x02_1`).
+- **Next recommended pass**: Pass 6 — cold-triage the 191 unnamed functions by size/xref
+  (per the Pass 4 plan above), since the named-function backlog from Pass 2-5 is now
+  thin (12-15 MEDIUM/LOW thin-named functions left as opportunistic follow-ups, no
+  fresh large-function targets remaining in the thin-named set).
+
+---
+
 ## Pass 1 Results — Enumeration Complete (2026-06-22, ~8 min)
 
 Via ListRegion0x80070000_Fixed.java (GZF process mode):

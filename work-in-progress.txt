@@ -2173,30 +2173,14 @@ completion):
           the most remaining unexplored work of any ROM region (245 total functions, 191 unnamed, only
           Pass 1 enumeration + Pass 2's 6-function spot-decompile done) — selected as the pivot target.
 
-[NEXT]   Full RE: ROM region 0x80070000-0x8007ffff PASS 3 (batch-decompile staged Pass 2 targets) (2026-06-23)
-          Region status (from analysis/INDEX.md): 245 total functions (191 unnamed + 54 thin-named).
-          Pass 1 (2026-06-22) enumerated and categorized the region (LMP/HCI/utility/accessor/VSC
-          clusters), confirming the largest function LMP_480_only_path_that_goes_to_real_LMP_switch
-          (0x80070c04, 1306B) and the HIGH-confidence assoc_w_tLMP dispatcher (0x80071634, 462B).
-          Pass 2 (2026-06-22) batch-decompiled 6 largest functions, all reaching HIGH confidence
-          (incl. 0x80070c04 confirmed as central LMP PDU dispatcher with 16+ case arms; 0x80074fa8
-          confirmed as VSC/logging event logger). Pass 2 staged concrete next targets — pick these up:
-            1. Batch-decompile the 5 staged Pass 2 targets in 2 small batches (3+2) via
-               mcp__wairz__run_ghidra_headless (GZF process mode,
-               binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf, use_saved_project=true):
-               0x8007095c (568B opcode variant dispatcher), 0x800754c4 (402B struct init),
-               0x80073348 (362B crypto post), 0x80071d98 (306B feature negotiation),
-               0x80074c8c (232B LMP_CH). Keep batches small per the recurring log-truncation lesson.
-            2. Cross-confirm against already-named structs/constants/call patterns from this region's
-               LMP/HCI/VSC clusters and from other regions' already-documented send_LMP_pkt/
-               hci_event_sender primitives.
-            3. Only rename functions reaching HIGH confidence; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update reverse_engineering_region_0x80070000.md, rom_function_index.md (if any renames),
-               analysis/INDEX.md.
-            5. If a fresh top-N-by-size or cold-triage ranking script for this region would help target
-               the remaining 185 unnamed functions (191 minus the 6 from Pass 2), consider creating one
-               (following the ColdTriageRegion800X0000PassN.java pattern used in other regions) before
-               the next pass, since this region currently lacks a triage script of its own.
+[DONE]   Full RE: ROM region 0x80070000-0x8007ffff PASS 3 (batch-decompile staged Pass 2 targets) (2026-06-23)
+          STALE-TICKET NOTE: verified before starting that the 5 literal targets named in this ticket
+          (0x8007095c, 0x800754c4, 0x80073348, 0x80071d98, 0x80074c8c) were ALREADY decompiled and
+          renamed to HIGH confidence in the real "Pass 3a" commit (d160a30, 2026-06-23) — confirmed via
+          cross-reference of reverse_engineering_region_0x80070000.md's own Pass 3a section,
+          rom_function_index.md's confidence/date annotations, and git log. No re-run performed (would
+          be redundant). Closing this ticket as the duplicate it is; real incremental work for the
+          region continued under the separate Pass 5 ticket below (now also closed this turn).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
@@ -2424,30 +2408,67 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 4 section complete)
           **Next**: Pass 5 batch decompile top 6–8 candidates; est. 12–15 min MCP runtime
 
-[BLOCKED]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 5: batch decompile top 6–8 candidates) (2026-06-23)
-          **SCRIPT CREATED AND STAGED**: BatchDecompileList80070000Pass5.java @ /root/wairz/ghidra/scripts/
-          **BLOCKER**: MCP tool invocation unavailable in agent bash context (mcp__wairz__run_ghidra_headless
-          requires direct MCP server call, not accessible via subprocess/bash).
-          **WORKAROUND**: Execute via Claude Code CLI or direct MCP call in user session.
-          **MCP CONFIG** (for user/CLI invocation):
-            Tool: mcp__wairz__run_ghidra_headless
-            binary_path: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
-            script_name: BatchDecompileList80070000Pass5
-            use_saved_project: true
-            timeout: 600
-          **TARGET FUNCTIONS** (8 total, 1,040B combined):
-            0x800714a0 (220B) — LMP__267          0x80074fa8 (204B) — logging_vaargs
-            0x800713d4 (182B) — LMP__47E          0x800707dc (164B) — HCI_EVT_0x500
-            0x80070248 (144B) — LMP__48A          0x80077474 (130B) — VSC_0xfca1
-            0x800703f0 (68B)  — LMP__600          0x8007088c (48B)  — LMP__25C_called3
-          **POST-EXECUTION** (once MCP completes):
-            1. Extract decompile results → scratchpad
-            2. Update analysis/rom/reverse_engineering_region_0x80070000.md (add Pass 5 section)
-            3. Update rom_function_index.md (upgrade 8 rows to HIGH confidence + semantic names)
-            4. Mark [BLOCKED] → [DONE] with summary
-            5. Promote [TODO] Pass 6 → [NEXT]
-            6. Commit: "Phase 9: region 0x80070000 sweep pass 5 (batch decompilation completed)"
-          Est. 12–15 min MCP runtime. See /tmp/claude-0/.../PASS5_EXECUTION_STATUS.md for tracking.
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 5: batch decompile top 6-8 candidates) (2026-06-23)
+          Unblocked: executed in a live interactive session with direct MCP access (the original
+          blocker — no MCP from agent/bash subprocess context — does not apply here). The staged
+          BatchDecompileList80070000Pass5.java batch script itself failed (directory-wide javac
+          compile poisoned by ~15+ unrelated broken legacy scripts in /root/wairz/ghidra/scripts/,
+          e.g. missing `import ghidra.app.script.GhidraScript;`, removed Ghidra 12.1.2 API like
+          DecompilerCallback, bare currentProgram/println/monitor references). Worked around by
+          reusing the already-correct DecompileAddr.java in single-address mode, 8 separate MCP calls
+          instead of 1 batch call — no wairz internals modified, per project policy. This script
+          breakage (and the wider directory-wide compile-noise issue) should be flagged to the user
+          as wairz technical debt; not fixed here.
+          All 8 staged targets decompiled: 0x800714a0, 0x80074fa8, 0x800713d4, 0x800707dc,
+          0x80070248, 0x80077474, 0x800703f0, 0x8007088c.
+          2 reached HIGH confidence and were renamed via a new RenamePass5Region80070000.java
+          (GZF process mode, SourceType.USER_DEFINED, verified "RENAME COMPLETE: 2 success, 0 failed"):
+            0x800713d4  LMP__47E__FUN_800713d4    -> send_LMP_FEATURES_REQ_page1_trigger
+              (explicit send_LMP_FEATURES_REQ_or_RES(conn_idx,0x27,3) call, decompiler comment
+              confirms "0x27 = LMP_FEATURES_REQ"; sets outstanding-status bits for the 0x28 reply)
+            0x800703f0  LMP__600__FUN_800703f0    -> HCI_Inquiry_Complete_finalizer
+              (calls send_evt_HCI_Inquiry_Complete(0) + fHCI_Inquiry_Cancel_0x02_1(); original
+              "LMP__600" label was a mislabel — this is HCI inquiry layer, not an LMP opcode)
+          Remaining 6 stay unrenamed: 0x80074fa8 already HIGH from an earlier pass (re-confirmed,
+          no change); 0x800714a0 reaches MEDIUM-HIGH (clear connection-setup feature/timer finalizer
+          behavior, exact LMP-opcode tie not cross-confirmed); 0x800707dc/0x80070248/0x80077474/
+          0x8007088c sit at MEDIUM (clear behavioral summary, insufficient cross-confirmation for the
+          project's HIGH bar absent working xrefs_to/find_callers against this GZF).
+          -> analysis/rom/reverse_engineering_region_0x80070000.md (new "Pass 5 Results" section,
+            full per-function table + tooling note)
+          -> analysis/rom/rom_function_index.md (8 rows updated: 2 renamed+HIGH, 1 reconfirmed HIGH,
+            1 MEDIUM-HIGH, 4 MEDIUM)
+          -> analysis/INDEX.md (region 0x80070000 entry rewritten to cover Pass 3a/3b/4/5, which had
+            never been reflected there despite being committed — was stale relative to git history)
+          -> /root/wairz/ghidra/scripts/RenamePass5Region80070000.java (new script)
+          Region status: 17/54 thin-named now HIGH (up from 15); 191 unnamed still untriaged.
+          Next: Pass 6 cold-triage of the 191 unnamed functions (thin-named backlog is now shallow —
+          37 MEDIUM/LOW remain as opportunistic follow-ups, no large fresh targets left there).
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 6 (cold-triage 191 unnamed functions) (2026-06-23)
+          Self-chained continuation (no other [TODO] available to promote). Pass 5 closed out the
+          thin-named backlog's large/clear-cut candidates (17/54 now HIGH; remaining 37 are
+          MEDIUM/LOW opportunistic follow-ups with no large fresh targets). The region's biggest
+          remaining body of work is the 191 unnamed (FUN_*) functions, never yet triaged for this
+          region specifically (Pass 4 only cold-triaged/projected by category, did not enumerate the
+          actual unnamed function list with real addresses/sizes/xrefs).
+          Steps:
+            1. Write/run a ColdTriageRegion80070000Pass6.java (or similarly named) script — GZF
+               process mode, mcp__wairz__run_ghidra_headless, use_saved_project=true — that
+               enumerates all unnamed (FUN_*) functions in 0x80070000-0x8007ffff with size + xref
+               count (use the in-script ReferenceManager pattern from other regions' Pass 4 scripts
+               to sidestep the still-broken xrefs_to/find_callers MCP tools against this GZF).
+               IMPORTANT: write the script directly to /root/wairz/ghidra/scripts/ (the
+               save_ghidra_script MCP tool did not make a script visible to the headless runner in
+               this session — write via the Write tool instead, matching the working convention).
+            2. Rank top 15-20 by size x xref count; stage them as concrete next-pass targets.
+            3. If time/context allows in the same pass, batch-decompile the top 5-8 of those via
+               DecompileAddr.java (single-address mode — the batch-script approach is unreliable in
+               this environment due to directory-wide compile poisoning, see Pass 5's tooling note).
+            4. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
+            5. Update analysis/rom/reverse_engineering_region_0x80070000.md (new Pass 6 section),
+               rom_function_index.md (if renames), analysis/INDEX.md.
+            6. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
