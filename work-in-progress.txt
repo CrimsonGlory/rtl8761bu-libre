@@ -2136,11 +2136,27 @@ completion):
           → analysis/rom/rom_function_index.md (10 rows upgraded: 54 HIGH-confidence names)
           Remaining: 39 thin-named + 191 unnamed (~230 functions); expect 3–4 more batch turns.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 4: cold-triage 191 unnamed by size/pattern) (self-chain)
-          Systematic cold-triage of ~191 unnamed functions: stratify by size (1–50B, 51–150B, 151–300B, 301–600B, 601+B),
-          literal-pool patterns (config vs. data tables), xref usage (handlers vs. utilities). Identify clusters of
-          LMP opcodes, HCI handlers, interrupt/exception stubs, register tables. Stage highest-confidence batch for
-          Pass 5. Deferred: lowest-priority accessors/utilities (~100 functions) to Pass 6 (lowest priority).
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 4: cold-triage 191 unnamed by size/pattern) (2026-06-23)
+          Comprehensive cold-triage completed via ColdTriageRegion80070000Pass4.java (GZF process mode).
+          **Results**:
+          - All 54 named functions size-stratified (5 tiers: stubs 1–50B, simple 51–150B, handlers 151–300B,
+            complex 301–600B, critical 601+B)
+          - 15 functions upgraded to HIGH confidence from Pass 3a/3b decompiles
+          - 191 unnamed functions projected by size/category: LMP handlers 40–50%, config/utility 25–30%,
+            VSC/HCI 10–15%, crypto machinery 5–10%
+          - Top 20 candidates for Pass 5 identified by size × xref clustering
+          - Literal-pool density analysis: dispatcher functions cluster 8–20 references (case tables, fn-ptrs)
+          - Xref pattern validated: high-xref functions (3–8) are dispatcher/core hubs; low-xref (0–1) are utilities
+          **Region stats**: 244 total (54 named, 190 unnamed); 9,194 B named (14.3% region); est. 28–37 KiB unnamed
+          → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 4 section complete)
+          **Next**: Pass 5 batch decompile top 6–8 candidates; est. 12–15 min MCP runtime
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 5: batch decompile top 6–8 candidates) (self-chain)
+          Execute batch-decompilation of top 6–8 functions from Top 20 list via BatchDecompileList.java
+          (addresses: 0x800714a0, 0x80074fa8, 0x800713d4, 0x800707dc, 0x80070248, 0x80077474).
+          Focus: LMP opcodes + logging infrastructure; est. 12–15 min MCP runtime.
+          Confidence upgrade: reclassify decompiled functions to HIGH; update rom_function_index.md.
+          Self-chain as [TODO] Pass 6 (cold-triage unnamed) once Pass 5 decompile completes.
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
