@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 7 (remaining Top-20 decompiled + 2 more renamed HIGH; AFH/LAP-table theory corroborated) — 2026-06-23
+**Status**: PASS 9 (fresh cold-triage re-enumeration, 184 unnamed remain, 0 new HIGH this pass — pivoting next ticket to region 0x80050000) — 2026-06-23
 
 ## Overview
 
@@ -854,9 +854,107 @@ returns from the same Top-20 list is no longer the highest-value next step. A fu
 pass may also revisit cross-confirming the quantizer pair via the remaining helper trio
 members (`FUN_80077ac4`/`FUN_80077988`/`FUN_80077928`), which were not reached this pass.
 
+## Pass 9 (2026-06-23): Fresh cold-triage re-enumeration + 6 decompiles — 0 new HIGH
+
+Ran a fresh cold-triage script (`ColdTriageRegion80070000Pass9.java`, in-script
+`ReferenceManager`-based xref counting, same pattern as Pass 6) over all currently-unnamed
+(`FUN_*`) functions in the region. Found **184 unnamed** (down from Pass 6's 191 baseline,
+consistent with the 7 cumulative renames across Passes 6-8). Size distribution: 0 STUB
+(≤50B)/SIMPLE tier entries reported in this run's focus; the >150B (HANDLER/COMPLEX/
+CRITICAL) focus-ranking produced a fresh Top-20, headed by the same two 1388B
+CRITICAL-tier quantizer-pair functions (`0x8007814c`, `0x80077bcc`) already flagged
+MEDIUM-HIGH in Pass 8, followed by `0x80072bac` (814B), `0x80074940` (672B), `0x80072924`
+(628B), `0x800791d0` (608B), `0x8007718c` (524B), `0x8007276c` (424B), `0x800747b0` (390B),
+`0x80078fdc` (344B), `0x800796b8` (336B), `0x80071138` (306B), `0x800745d8` (308B).
+
+**Important caveat discovered this pass**: because the cold-triage filter only excludes
+functions that have been *renamed* (no longer match `FUN_*`), several of Pass 8's
+decompiled-but-unrenamed MEDIUM/MEDIUM-HIGH functions (`0x80074940`, `0x800791d0`,
+`0x80078fdc`, `0x80071138`) resurface in this fresh ranking even though they were already
+analyzed. Decompiling them again this pass produced re-confirmations, not new findings.
+
+### Decompiled this pass (6 functions via single-address `DecompileAddr.java`)
+
+- **`0x80072bac` (814B)** — Directly calls `FUN_8007276c` inline (closing the Pass 7
+  open question of who calls it) and operates on
+  `PTR_struct_of_at_least_0x300_size_80072ee0->_x142_LAP[...]`, deepening the existing
+  AFH/LAP-table theory for this function and its sibling. **MEDIUM-HIGH** (unchanged from
+  Pass 6 — no opcode literal or cross-confirmed xref available; `xrefs_to` remains broken
+  against this GZF).
+- **`0x80072924` (628B)** — Near-identical structure to `0x80072bac`: same `0x300`-size
+  struct, same field-offset pattern, same callee set (`FUN_80071a84`, `FUN_80072694`,
+  `possible_logger_called_if_no_patch3`); also calls the already-HIGH
+  `possible_logging_function__var_args`. Strongly confirms the Pass 6 sibling-pair
+  hypothesis. **MEDIUM-HIGH** (unchanged).
+- **`0x80078fdc` (344B)** — Re-decompiled; confirms Pass 8's finding (bit-field
+  pack/round-trip/unpack on `PTR_base_of_0x1ac_struct_array_0xA_large2_80079134` fields
+  `+0x44`..`+0x49` through an indirect call via `PTR_DAT_80079138`). **MEDIUM**, unchanged.
+- **`0x80071138` (306B)** — Re-decompiled; confirms Pass 8's finding (connection-slot
+  allocator chained to `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`,
+  `LMP__25C_called2`/`LMP__25C_called3`, `HCI_EVT_0x500_FUN_800707dc`,
+  `set_bos_bosi__0xb2_index_arg2`, `zero_initialize_6_bytes_at_param1`). **MEDIUM-HIGH**,
+  unchanged — clear role via named callees, but still no opcode literal of its own to
+  clear the HIGH bar.
+- **`0x80074940` (672B)** — Re-decompiled in full; confirms Pass 8's 5-case dispatch
+  structure (cases keyed by a `1<<n` bitmask read from `PTR_DAT_80074be4[0x26a]`), calling
+  through fn-ptr tables (`PTR_DAT_80074be8`) for cases 1/2/3/4, with case 2 delegating to
+  `FUN_800747b0`. Also touches the per-connection `0x1ac_struct_array` fields `+0x284`/
+  `+0x28c` and calls `FUN_80058680` (a CRC/checksum-style helper). Reads as an LMP
+  feature/parameter-negotiation response dispatcher. **MEDIUM-HIGH** (raised from Pass 8's
+  MEDIUM given the clearer view of the dispatch structure, but still no opcode literal).
+- **`0x800791d0` (608B)** — Re-decompiled in full; confirms Pass 8's finding that this
+  populates a 0x2c-byte output struct from a bit-packed page format (5-bit count + reserved
+  bits, multiple shift/mask bitfields matching the standard LMP feature-page octet layout),
+  logging every field via `possible_logging_function__var_args(3, 0x8e, ...)`. The fallback
+  path (when the top 3 bits of the size byte are nonzero) calls an indirect function
+  pointer (`PTR_DAT_80079438`) instead, suggesting this is the "page valid" fast path of a
+  larger feature-page parser with a slow-path fallback. **MEDIUM-HIGH**, unchanged.
+
+### Renamed this pass
+
+**None.** All 6 decompiled functions land at MEDIUM or MEDIUM-HIGH; none clear the
+project's HIGH bar (opcode-literal, or unambiguous structural identity, or
+cross-confirmed via working xref tooling — `xrefs_to`/`find_callers` remain broken against
+this GZF in process mode, a known gap already flagged in Passes 6-8, not something to
+silently work around per CLAUDE.md).
+
+### Region Status After Pass 9
+
+- Still 24/245 total functions HIGH confidence (no change from Pass 8 — 17 thin-named +
+  7 renamed-from-unnamed)
+- 184 unnamed functions remain untriaged
+- The AFH/LAP-table pair (`0x80072bac`/`0x80072924`) and the LMP feature-page parser pair
+  (`0x80074940`/`0x800791d0`) are now each internally self-consistent MEDIUM-HIGH clusters,
+  but neither cluster has an independent confirmation path while `xrefs_to` is broken
+  against this GZF
+- The quantizer pair (`0x8007814c`/`0x80077bcc`, still MEDIUM-HIGH, top of the fresh Top-20)
+  remains undecompiled this pass — deprioritized in favor of completing the ticket's
+  primary cold-triage requirement across a wider spread of candidates first
+
+### Pivot Decision (per ticket step 6)
+
+This pass yielded **0 new HIGH renames** (low-yield bucket, 0-2). Per the ticket's explicit
+pivot rule, this region (now 9 consecutive passes) should NOT receive a 10th
+self-chained continuation ticket. Checked `analysis/INDEX.md` for current pass status
+across all ROM regions:
+
+| Region | Status |
+|--------|--------|
+| `0x80000000` | COMPLETE |
+| `0x80010000` | Pass 2 done, 338 unnamed remain, next target staged (`HCI_OGF1_OCF0x4#` cluster) |
+| `0x80020000` | Pass 2 done, ~340 remain; Pass 3 `[BLOCKED]` (script compile failure) |
+| `0x80030000` | Pass 2 done, 285 unnamed remain |
+| `0x80040000` | Pass 6 done, **explicitly PARKED** (thin yield relative to effort) |
+| `0x80050000` | Pass 3c done, 3 newly HIGH, **next step already staged**: targeted xref/caller follow-up on 5 remaining MEDIUM-HIGH functions, or size-tier 21-40 |
+| `0x80060000` | **COMPLETE** |
+| `0x80070000` | Pass 9 done (this pass), 9 consecutive passes, 184 unnamed remain |
+
+**Decision: pivot to region `0x80050000`.** It has had fewer total passes (3) than
+`0x80070000` (9), has a concrete next-step already staged from its own Pass 3c writeup
+(not a cold restart), and is not parked like `0x80040000`. This is the best
+effort-to-yield ratio available among the less-explored regions.
+
 ---
 
-**NEXT**: Cold-triage pass over the ~184 unnamed functions in region 0x80070000-0x8007ffff
-outside the original Top-20 (rank by size/xref count via in-script `ReferenceManager`
-queries, per the established `ColdTriageRegion80070000PassN.java` pattern), looking for
-new HIGH-confidence candidates among the COMPLEX/HANDLER tiers.
+**[DONE]** — see `work-in-progress.txt` for the Pass 10/pivot ticket targeting
+region `0x80050000`.
