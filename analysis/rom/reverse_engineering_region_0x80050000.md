@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80050000-0x8005ffff
 
-**Status**: PASS 3b COMPLETE (TOP-20 BATCH DECOMPILE, PARTIAL RENAME) — 2026-06-23
+**Status**: PASS 3c COMPLETE (TOP-20 FULL REVIEW + RENAME) — 2026-06-23
 
 ## Overview
 
@@ -548,3 +548,69 @@ functions in one `RenameBatch` pass.
 **Status**: PASS 3b COMPLETE (decompiled all 20, reviewed 11/20 in detail,
 0 renames applied — confidence bar not yet met for persistence). PASS 3c
 (remaining 9 review + batch rename) staged as continuation.
+
+---
+
+## Pass 3c — Review Remaining 9-of-Top-20 + Batch Rename (2026-06-23)
+
+Continuation of Pass 3b. Re-decompiled the 12 functions whose C output fell
+in the unread middle gap of Pass 3b's 157KB log (#3, #4, #5, #12-20), using
+progressively smaller batch scripts (`BatchDecompile80050000Pass3cRemaining.java`,
+`BatchDecompile80050000Pass3cBatch1b.java`, `BatchDecompile80050000Pass3cBatch2.java`,
+`BatchDecompile80050000Pass3cLast.java`) so each batch's full output fit
+within one `read_ghidra_log` capture window. All 12 successfully decompiled
+and reviewed.
+
+### Newly reviewed findings (#3-5, #12-20)
+
+| # | Address | Size | Behavior summary | Confidence |
+|---|---------|------|-------------------|------------|
+| 3 | `0x80057ce8` | 1314B | Clock-offset/AFH-anchor recompute for a connection slot; heavy clock-tick division/modulo math, writes via `FUN_800573d8` register-write helper, sets `DAT_80058250`=1 update flag. | MEDIUM |
+| 4 | `0x800555bc` | 950B | Connection setup/teardown queue dispatcher; switches on `param_2` (1-8), validates role `bVar9`, dequeues next pending connection record, calls already-named `FUN_80054144`/`FUN_80054b14` (Pass 3b #6, #2). | MEDIUM-HIGH |
+| 5 | `0x8005b9d8` | 950B | Connection-record allocator/initializer for a new ACL/SCO/eSCO link (central or peripheral via `param_1&1`). `memset`+populates the full 0x1ac struct, default LST 0xa0a, default poll interval, PHY power tables via `FUN_80059684`, conditionally calls `VSC_0xfc97_*_variant_1/2`, sets final `puVar18[0x53]=1` "connection active" flag. | **HIGH** — renamed `init_connection_record` |
+| 12 | `0x80052c64` | 692B | Incoming LMP/baseband packet receive-and-dispatch handler; validates length, calls `FUN_80056988` (Pass 3b #9, AFH report handler — cross-confirms it), dispatches via function-pointer table `PTR_DAT_80052f28` indexed by packet type 0-0xf. | MEDIUM-HIGH |
+| 13 | `0x8005aba8` | 664B | Per-connection AFH channel-map periodic re-evaluation/apply function; calls `FUN_8005aaac`, `FUN_8005a7ec`, `FUN_80072bac`, `FUN_80059910`; checks config bit 0x4000 in `config_struct` field213-216. | MEDIUM-HIGH |
+| 14 | `0x80058dd4` | 628B | Register-commit half of a connection-parameter-commit pair (parallels Pass 3b #2/#7 but a different register block, ~15 fields `field409-449` written to `DAT_8005904c`-`800590a4`), calls `FUN_8002b894`. | MEDIUM |
+| 15 | `0x80053aa4` | 568B | 3-slot queue-scheduler commit, sibling of Pass 3b #8 (`FUN_800546e4`, 2-connection scheduler) — shares `FUN_8002b270`/`FUN_8002b28c`/`FUN_8004f898` helper trio. | MEDIUM-HIGH |
+| 16 | `0x8005c27c` | 550B | AFH "channel classification" worst-channel picker/reporter; magic event code 0x777; iterates the AFH bitmap (`field453`/`454`) incrementing the `UNK_000014f8`/`fc` counter table (shared with #13/#17), picks/reports the worst channel via `FUN_8005c100`. | **HIGH** — renamed `afh_report_worst_channel` |
+| 17 | `0x80056ca8` | 542B | Register-polling counterpart of already-named `FUN_80056988` (Pass 3b #9): offset-for-offset structural match writing the RX triple (`+0x28`/`0x2a`/`0x2c`) and TX triple (`+0x2e`/`0x30`/`0x32`) into `field319_0x14c`. | **HIGH** — renamed `afh_channel_quality_poll_commit` |
+| 18 | `0x80058740` | 534B | Generic device/key cache removal-by-BDADDR helper across 3 lookup tables (`param_1` selects table 0/1/2); unlinks the matching node, clears bitmap bits. | MEDIUM (mechanism clear; specific cache — link-key vs paging vs SCO-reservation — not pinned) |
+| 19 | `0x80059454` | 532B | LMP/baseband packet-completion event drain/dispatcher; drains a linked list of completed-packet records (`field301`, 0x6b stride), checks credit availability, posts completion via `FUN_8002b3b4(idx,3,...)`. | MEDIUM-HIGH |
+| 20 | `0x800577ec` | 516B | Register-write helper for a connection-record-pair commit; splits writes between two register-block addressing schemes (`FUN_800574c8` stride 0x1e when `param_1==0`, else `FUN_8005734c` stride 0x14), driven by a slot/role index and two 4-entry parameter arrays; verbose `possible_logging_function__var_args` calls suggest an error/diagnostic-path variant of the #14/#17 register-commit pattern. | MEDIUM |
+
+### Renames applied (HIGH confidence only)
+
+Per the project's rename convention (only rename at HIGH confidence — cross-xref
+or Kovah-label confirmed), 3 of the 20 cleared the bar and were renamed via
+`RenamePass3cHighConfidence.java` (GZF process mode, `SourceType.USER_DEFINED`):
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x8005b9d8` | `FUN_8005b9d8` | `init_connection_record` | Full-struct memset+populate of the 0x1ac connection record with sane defaults (LST, poll interval, PHY power tables) and a terminal "connection active" flag write — canonical allocator signature, used by both central and peripheral roles. |
+| `0x8005c27c` | `FUN_8005c27c` | `afh_report_worst_channel` | Cross-confirmed against the already-named `VSC_0xfc73_AFH_Channel_Assessment_*` cluster and the shared `UNK_000014f8`/`fc` counter table also touched by #13/#17; magic event code 0x777 and `FUN_8005c100` "pick worst channel" call pin the purpose precisely. |
+| `0x80056ca8` | `FUN_80056ca8` | `afh_channel_quality_poll_commit` | Structural mirror, offset-for-offset, of the already-named AFH report handler `FUN_80056988` (RX triple `+0x28/0x2a/0x2c`, TX triple `+0x2e/0x30/0x32` into `field319_0x14c`) — same struct, opposite data-flow direction (poll/commit vs report/receive). |
+
+The remaining 17 (including #2's sibling-cluster members `0x80054b14`,
+`0x800590b0`, `0x80054144`, `0x800546e4`, `0x80056988`, `0x8005a384`,
+`0x80057a00` from Pass 3b's MEDIUM/MEDIUM-HIGH tier, plus all 12 reviewed in
+this pass except the 3 above) remain unrenamed: their purposes are
+well-evidenced but not confirmed to the HIGH bar (no second independent
+cross-xref or Kovah label). A future pass could pursue targeted xref/caller
+analysis on the MEDIUM-HIGH tier (`0x800555bc`, `0x80052c64`, `0x8005aba8`,
+`0x80053aa4`, `0x80059454`) to try to clear the bar for those five next.
+
+### Pass 3c summary
+
+- 12/12 remaining functions decompiled and reviewed (100% of the top-20 now
+  reviewed, up from 11/20 after Pass 3b).
+- 3 renames applied and verified via Ghidra headless run (`RENAMED` lines in
+  run log, "RENAME COMPLETE: 3 success, 0 failed").
+- Region-wide unnamed count for `0x80050000-0x8005ffff` updated: 354 → 351
+  (see `rom_function_index.md`).
+
+**Status**: PASS 3c COMPLETE. Top-20-largest-unnamed sweep for this region is
+now fully reviewed; 13 of 20 still carry `FUN_*` names pending stronger
+cross-confirmation in a future pass. Next continuation candidate: targeted
+xref/caller follow-up on the 5 MEDIUM-HIGH-tier functions listed above, or
+move on to the next-largest tier (functions ranked 21-40 by size) per the
+region's overall sweep plan.

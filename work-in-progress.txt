@@ -2032,16 +2032,18 @@ completion):
           Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
           → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
 
-[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
           Status: PASS 1 enumeration DONE (319 functions: 12 thin-named, 307 unnamed).
           Stage 2a: Batch decompile scripts prepared in /root/wairz/ghidra/scripts/:
             - ListRegion0x80040000.java (confirm baseline)
             - BatchDecompileList80040000.java (targets 12 thin-named)
             - RenameBatch1Region80040000.java (persist renames post-decompile)
           Targets: 0x80041c18 (64B), 0x80042188 (634B), 0x80042420 (418B), 8 more power/HCI/LMP handlers
-          BLOCKED: Requires mcp__wairz__run_ghidra_headless invocation in supervised session.
-          Cannot proceed in agent isolation; wairz service available on localhost:8000 but MCP tool
-          requires parent Claude Code harness. Next supervised session: execute scripts then stage 3.
+          Ready for supervised MCP execution (mcp__wairz__run_ghidra_headless, GZF process mode,
+          use_saved_project=true) — same pattern successfully used for region 0x80050000 Pass 3c.
+          If any batch's log output risks exceeding read_ghidra_log's ~100KB single-window read
+          limit, split into smaller per-function or 2-3-function batches up front (lesson learned
+          from 0x80050000 Pass 3c's log-truncation issue).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
@@ -2086,19 +2088,32 @@ completion):
             per wip-loop's "promote the first remaining [TODO]" rule; Pass 3c can be picked up whenever
             0x80050000 cycles back around).
 
-[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3c (review remaining 9 of top-20 + batch rename) (2026-06-23)
-          Remaining unreviewed from Pass 3b's top-20: 0x80057ce8 (1314B), 0x800555bc (950B),
-          0x8005b9d8 (950B) [these 3 fell in the unread 57KB middle gap along with #6-11 partial],
-          plus #12-20: 0x80052c64 (692B), 0x8005aba8 (664B), 0x80058dd4 (628B), 0x80053aa4 (568B),
-          0x8005c27c (550B), 0x80056ca8 (542B), 0x80058740 (534B), 0x80059454 (532B), 0x800577ec (516B).
-          All 20 are already decompiled (confirmed SUCCESS in the Pass 3b run log) — this pass only
-          needs the C-code review + write-up, not re-decompilation. To avoid the same log-truncation
-          problem, split into 2 batches of ~5 functions each so each batch's full C output fits in
-          one read_ghidra_log call (~100KB window), or call mcp__wairz__decompile_function per-address
-          if that tool path works for GZF process-mode binaries (untested this pass — direct
-          decompile_function call failed with "Binary not found" when given the .gzf filename directly).
-          After review, apply RenameBatch1Region80050000Pass3.java-style rename pass for any function
-          reaching HIGH confidence (clear purpose + struct-field semantics not just "touches 0x1ac array").
+[DONE]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3c (review remaining 9 of top-20 + batch rename) (2026-06-23)
+          Re-decompiled the 12 functions whose C output fell in the unread middle gap of Pass 3b's
+          157KB log (#3 0x80057ce8, #4 0x800555bc, #5 0x8005b9d8, #12 0x80052c64, #13 0x8005aba8,
+          #14 0x80058dd4, #15 0x80053aa4, #16 0x8005c27c, #17 0x80056ca8, #18 0x80058740,
+          #19 0x80059454, #20 0x800577ec), using progressively smaller batch scripts
+          (BatchDecompile80050000Pass3cRemaining.java → Batch1b.java → Batch2.java → Last.java) so
+          each batch's output fit within one read_ghidra_log window. All 12/12 successfully
+          decompiled and reviewed — full review of the top-20 is now 20/20 (up from 11/20).
+          3 cleared the HIGH-confidence bar and were renamed via RenamePass3cHighConfidence.java
+          (GZF process mode, SourceType.USER_DEFINED, verified "RENAME COMPLETE: 3 success, 0 failed"):
+            0x8005b9d8 FUN_8005b9d8 → init_connection_record
+            0x8005c27c FUN_8005c27c → afh_report_worst_channel
+            0x80056ca8 FUN_80056ca8 → afh_channel_quality_poll_commit
+          Remaining 17 (including #1,2,6-11 from Pass 3b and 9 more from this pass) stay unrenamed —
+          MEDIUM/MEDIUM-HIGH evidence only, below the cross-xref/Kovah-label HIGH bar.
+          → analysis/rom/reverse_engineering_region_0x80050000.md (new "Pass 3c" section, full
+            per-function table + rename rationale)
+          → analysis/rom/rom_function_index.md (3 new HIGH rows; named/unnamed/high counts updated
+            688/2050/364; region 0x80050000 unnamed count 354→351)
+          → analysis/INDEX.md (region 0x80050000 one-liner updated to Pass 3c COMPLETE)
+          → /root/wairz/ghidra/scripts/BatchDecompile80050000Pass3cRemaining.java, Batch1b.java,
+            Batch2.java, Last.java, RenamePass3cHighConfidence.java (new scripts)
+          Next continuation candidate (not promoted — see promoted ticket below instead per
+          wip-loop's "promote first remaining actionable" rule): targeted xref/caller follow-up on
+          the 5 MEDIUM-HIGH-tier functions (0x800555bc, 0x80052c64, 0x8005aba8, 0x80053aa4,
+          0x80059454), or move to size-tier 21-40 for this region.
 
 [DONE]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b) (2026-06-23, overnight worker)
           STALE-TICKET NOTE: this ticket duplicated work already completed. Region 0x80060000-0x8006ffff

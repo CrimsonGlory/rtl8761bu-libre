@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 685 (681 + 4 region-0x80010000 pass-2 newly-named; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2053 (2057 − 4 region-0x80010000 pass-2 newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 361 (323 + 4 region-0x80010000 pass-2 newly-named-and-decompiled + 34 region-0x80010000 pass-2 thin-named upgraded to high via decompile-confirmation) |
+| Named functions (this doc's table) | 688 (685 + 3 region-0x80050000 Pass-3c newly-named, 2026-06-23; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2050 (2053 − 3 region-0x80050000 Pass-3c newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 364 (361 + 3 region-0x80050000 Pass-3c newly-named-and-decompiled) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
@@ -255,7 +255,7 @@ table below near their pass-1 siblings (not strictly appended).
 
 ---
 
-## Named functions (685, was 461 at the 2026-06-21 baseline)
+## Named functions (688, was 461 at the 2026-06-21 baseline)
 
 Confidence legend:
 - **high (decompiled+documented)** — appears in a dedicated `analysis/rom/*.md`
@@ -714,9 +714,12 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8005681c` | 84 | `VSC_0xfc73_AFH_Channel_Assessment_variant_3` | AFH channel assessment updates with connection context (variant 3) — see `region_0x80050000` | high (decompiled+documented) |
 | `0x80056878` | 84 | `VSC_0xfc73_AFH_Channel_Assessment_variant_2` | processes AFH channel assessment reports with global state update (variant 2) — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800568d4` | 94 | `VSC_0xfc73_AFH_Channel_Assessment_variant_1` | main AFH channel map update dispatcher with map flags and commitment (variant 1) — see `region_0x80050000` | high (decompiled+documented) |
+| `0x80056ca8` | 542 | `afh_channel_quality_poll_commit` | register-polling counterpart of the AFH report handler `0x80056988`; writes RX triple (+0x28/0x2a/0x2c) and TX triple (+0x2e/0x30/0x32) into the per-link sub-record — see `region_0x80050000` Pass 3c | high (decompiled+documented) |
 | `0x8005770c` | 166 | `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` | comprehensive extended advertising parameter handler with interval validation — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800596c8` | 50 | `query_config_struct_0x1ac_by_index` | config struct array accessor; retrieves 0x1ac-sized records by index (BD_ADDR/HW config blocks) — see `region_0x80050000` | high (decompiled+documented) |
 | `0x8005a298` | 62 | `query_current_PHY_by_connection_index` | PHY query helper; returns active TX or RX PHY for a connection — see `region_0x80050000` | high (decompiled+documented) |
+| `0x8005b9d8` | 950 | `init_connection_record` | connection-record allocator/initializer for a new ACL/SCO/eSCO link (central or peripheral); memset+populates the full 0x1ac struct, sets default LST/poll interval, PHY power tables, conditionally invokes the VSC_0xfc97 extended-advertising-parameter handlers — see `region_0x80050000` Pass 3c | high (decompiled+documented) |
+| `0x8005c27c` | 550 | `afh_report_worst_channel` | AFH channel-classification worst-channel picker/reporter (event code 0x777); iterates the AFH bitmap incrementing a shared counter table, then reports the worst channel — see `region_0x80050000` Pass 3c | high (decompiled+documented) |
 | `0x8005d26c` | 88 | `assign_pointer_to_0x1AC_offset_0x134` | assign pointer to 0x1AC offset 0x134 — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e23c` | 118 | `access_config_at_0xa5_and_0x1ac_stuct_stuff` | access config at 0xa5 and 0x1ac stuct stuff — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e3b8` | 80 | `fHCI_Read_Remote_Version_Information_config_handler` | HCI Read Remote Version Information handler; updates config struct 0x1ac with remote LMP version — see `region_0x80050000` | high (decompiled+documented) |
@@ -997,7 +1000,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 
 ---
 
-## Unnamed functions (2057, originally 2278)
+## Unnamed functions (2050, originally 2278)
 
 The remaining 2059 functions in the `rom` block (2739 total − 679 named − 1
 reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
@@ -1019,7 +1022,7 @@ granularity is meaningful until individual triage happens).
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
 | `0x80040000`–`0x8004ffff` | 307 | 15.0% |
-| `0x80050000`–`0x8005ffff` | 354 | 17.3% |
+| `0x80050000`–`0x8005ffff` | 351 (354 − 3 Pass-3c renames, 2026-06-23) | 17.1% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 193 | 9.4% |
 | **Total** | **2048** | **100%** |
