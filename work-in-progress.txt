@@ -2032,14 +2032,18 @@ completion):
           Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
           → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage)
+[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
           Status: PASS 1 enumeration DONE (319 functions: 12 thin-named, 307 unnamed).
-          Awaiting: Stage 2a batch decompile of 12 thin-named via BatchDecompileList80040000.java
+          Stage 2a: Batch decompile scripts prepared in /root/wairz/ghidra/scripts/:
+            - ListRegion0x80040000.java (confirm baseline)
+            - BatchDecompileList80040000.java (targets 12 thin-named)
+            - RenameBatch1Region80040000.java (persist renames post-decompile)
           Targets: 0x80041c18 (64B), 0x80042188 (634B), 0x80042420 (418B), 8 more power/HCI/LMP handlers
-          Then Stage 3: cold-triage remaining 307 unnamed by size + pattern.
-          Blocked on MCP execution; promote to [NEXT] once 0x80030000 MCP batch completes.
+          BLOCKED: Requires mcp__wairz__run_ghidra_headless invocation in supervised session.
+          Cannot proceed in agent isolation; wairz service available on localhost:8000 but MCP tool
+          requires parent Claude Code harness. Next supervised session: execute scripts then stage 3.
 
-[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage largest unnamed) (continuation after 0x80030000 + 0x80040000 MCP batches)
+[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage largest unnamed) (continuation after 0x80030000 + 0x80040000 MCP batches)
           Status: Decompile stage 2 already DONE (10 thin-named upgraded via BatchDecompileList80050000.java).
           Awaiting: Stage 3 cold-triage of remaining 344 unnamed functions (stratified by size + pattern).
           Current pass: ListRegion0x80050000.java + BatchDecompileList80050000.java results integrated.
