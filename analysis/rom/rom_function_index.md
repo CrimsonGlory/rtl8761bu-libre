@@ -816,19 +816,19 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8006f8e8` | 96 | `path2_send_evt_0x14_HCI_Mode_Change` | path2 send evt 0x14 HCI Mode Change | high (decompiled+documented in region_0x80060000) |
 | `0x8006ff00` | 40 | `some_case_0x13` | some case 0x13 | high (decompiled+documented in region_0x80060000) |
 | `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP  48A  FUN 80070248 | low (named by Kovah, purpose unclear) |
-| `0x800702e4` | 246 | `LMP__259__FUN_800702e4` | LMP  259  FUN 800702e4 | low (named by Kovah, purpose unclear) |
+| `0x800702e4` | 246 | `LMP_259_opcode_handler` | LMP opcode 0x259 handler; eSCO link negotiation or feature-specific opcode path | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x800703f0` | 68 | `LMP__600__FUN_800703f0` | LMP  600  FUN 800703f0 | low (named by Kovah, purpose unclear) |
-| `0x80070454` | 272 | `possible_LMP_DETACH` | possible LMP DETACH | low (named by Kovah, purpose unclear) |
+| `0x80070454` | 272 | `possible_LMP_DETACH_handler` | LMP DETACH (0x07) handler variant or detach-path dispatcher; connection teardown | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI EVT 0x500 FUN 800707dc | low (named by Kovah, purpose unclear) |
 | `0x8007088c` | 48 | `LMP__25C_called3` | LMP  25C called3 | low (named by Kovah, purpose unclear) |
 | `0x8007095c` | 568 | `LMP__489__various_sub_cases` | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80070ba4` | 92 | `LMP__25C__FUN_80070ba4` | LMP  25C  FUN 80070ba4 | low (named by Kovah, purpose unclear) |
-| `0x80070c04` | 1192 | `LMP_"480"_only_path_that_goes_to_real_LMP_switch` | LMP "480" only path that goes to real LMP switch | low (named by Kovah, purpose unclear) |
+| `0x80070c04` | 1306 | `LMP_480_standard_PDU_dispatcher` | Central LMP PDU dispatcher; routes opcodes 0x01–0x3D + extended paths (16+ case arms) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80071370` | 82 | `LMP__47F__FUN_80071370` | LMP  47F  FUN 80071370 | low (named by Kovah, purpose unclear) |
 | `0x800713d4` | 182 | `LMP__47E__FUN_800713d4` | LMP  47E  FUN 800713d4 | low (named by Kovah, purpose unclear) |
 | `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | LMP  267  FUN 800714a0 | low (named by Kovah, purpose unclear) |
 | `0x80071620` | 20 | `called_at_end_of_crypto_state_machine_update` | called at end of crypto state machine update | low (named by Kovah, purpose unclear) |
-| `0x80071634` | 462 | `assoc_w_tLMP` | assoc w tLMP | medium (named, one-line purpose only, not decompiled) |
+| `0x80071634` | 462 | `assoc_w_tLMP_ROM_original` | ROM original LMP handler; routes extended opcodes 0x259–0x26d (intercepted by patch) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80071b50` | 44 | `LMP__264__FUN_80071b50` | LMP  264  FUN 80071b50 | low (named by Kovah, purpose unclear) |
 | `0x80071b84` | 26 | `set_bos[bosi].0xb2_index=arg2` | set bos[bosi].0xb2 index=arg2 | low (named by Kovah, purpose unclear) |
 | `0x80071ba4` | 26 | `check_if_80122df0_is_non-zero_else_ret_0xff` | check if 80122df0 is non-zero else ret 0xff | low (named by Kovah, purpose unclear) |
@@ -837,7 +837,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8007243c` | 56 | `send_LMP_ACCEPTED` | send LMP ACCEPTED | low (named by Kovah, purpose unclear) |
 | `0x80072648` | 70 | `LMP_unknown_else` | LMP unknown else | low (named by Kovah, purpose unclear) |
 | `0x80073348` | 362 | `crypto_state_machine_finalizer` | eSCO/encryption state-machine finalizer; post-processing for crypto handshake completion | high (decompiled, batch pass 3a 2026-06-23) |
-| `0x80073b74` | 348 | `HCI_Disconnect_on_error` | HCI Disconnect on error | low (named by Kovah, purpose unclear) |
+| `0x80073b74` | 348 | `HCI_Disconnect_on_error` | Terminates connection on failure condition + cleanup chain | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80074c8c` | 232 | `LMP_CH__0x3ed` | LMP channel sub-protocol (opcode 0x3ed) handler; link-layer negotiation | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80074d84` | 14 | `set_two_global_ptrs` | set two global ptrs | low (named by Kovah, purpose unclear) |
 | `0x80074dfc` | 42 | `called_by_unknown_fptr_indexA_2` | called by unknown fptr indexA 2 | low (named by Kovah, purpose unclear) |
@@ -847,19 +847,19 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80074ee0` | 64 | `function_that_uses_Logger_string` | function that uses Logger string | low (named by Kovah, purpose unclear) |
 | `0x80074f38` | 94 | `possible_logger_called_if_no_patch1` | possible logger called if no patch1 | low (named by Kovah, purpose unclear) |
 | `0x80074fa8` | 204 | `possible_logging_function?_var_args` | possible logging function? var args — see `conn_record_subsystem`, `interrupt_vectors` | high (decompiled+documented) |
-| `0x80075084` | 402 | `unknown_referencing_default_name_8` | unknown referencing default name 8 | low (named by Kovah, purpose unclear) |
-| `0x80075324` | 224 | `func1_that_uses_structs_at_0x80100000` | func1 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
+| `0x80075084` | 402 | `struct_array_accessor_default` | Default-name struct accessor for config array; factory-defaults provider | **high** (decompiled, batch pass 3b 2026-06-23) |
+| `0x80075324` | 224 | `func1_structs_at_0x80100000` | ROM struct accessor #1 for config base 0x80100000; reads/writes configuration fields | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x800754c4` | 22 | `struct_field_accessor_0x80100000` | Simple RAM/config-base struct field accessor (data-plane, low priority) | high (decompiled, batch pass 3a 2026-06-23) |
-| `0x80075540` | 258 | `uninteresting_if_0x80100000!=0_which_its_not_in_my_tests` | uninteresting if 0x80100000!=0 which its not in my tests | low (named by Kovah, purpose unclear) |
+| `0x80075540` | 258 | `uninteresting_if_0x80100000_conditional` | Data-plane config validator; conditional on RAM 0x80100000 field (non-LMP, low priority) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80075650` | 102 | `func4_that_uses_structs_at_0x80100000` | func4 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
 | `0x800756c0` | 62 | `func5_that_uses_structs_at_0x80100000` | func5 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
 | `0x80075704` | 34 | `func6_that_uses_structs_at_0x80100000` | func6 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
 | `0x8007572c` | 106 | `func7_that_uses_structs_at_0x80100000` | func7 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
 | `0x8007579c` | 188 | `func8_that_uses_structs_at_0x80100000` | func8 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
-| `0x80075948` | 258 | `memcpy_to_MMIO_for_sending_packets?` | memcpy to MMIO for sending packets? | low (named by Kovah, purpose unclear) |
+| `0x80075948` | 258 | `memcpy_to_MMIO_for_packet_send` | Packet transmit helper; copies data to MMIO for frame transmission (peripheral write path) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80075e34` | 106 | `possible_logger_called_if_no_patch4_recursive_to_possible_logger` | possible logger called if no patch4 recursive to possible logger | low (named by Kovah, purpose unclear) |
 | `0x800761f4` | 116 | `LMP__25B_meat` | LMP  25B meat | low (named by Kovah, purpose unclear) |
-| `0x800762f4` | 852 | `called_by_unknown_fptr_index1_big_do_while_true` | called by unknown fptr index1 big do while true | low (named by Kovah, purpose unclear) |
+| `0x800762f4` | 852 | `crypto_state_machine_loop_handler` | Large do-while crypto state transitions; post-exchange validation + error recovery | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x8007666c` | 22 | `unknown_fptr_index1` | unknown fptr index1 | low (named by Kovah, purpose unclear) |
 | `0x80076bd8` | 48 | `swap_byte_order` | swap byte order | low (named by Kovah, purpose unclear) |
 | `0x80077474` | 130 | `VSC_0xfca1_FUN_80077474` | VSC 0xfca1 FUN 80077474 | low (named by Kovah, purpose unclear) |

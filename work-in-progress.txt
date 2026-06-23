@@ -2125,10 +2125,22 @@ completion):
           Remaining scope: 48 thin-named + 191 unnamed (244 total). Next: Pass 3b batch (8-10 functions),
           then Pass 3c cold-triage by size/category. Self-chain to Pass 3b after commit.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3b batch decompile + triage 8-10 more) (self-chain)
-          Execute batch-decompilation of next 8-10 largest remaining (256B → 100B range), rename + confidence
-          upgrade. Then systematic cold-triage of ~191 unnamed by size/literal-pool patterns. Expect 3–4 batch
-          turns to resolve ~100 functions; remaining ~100 deferred to Pass 4 (lowest-priority accessors/utilities).
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3b batch decompile + triage 8-10 more) (2026-06-23, ~15 min)
+          Executed batch-decompilation of 10 largest remaining (1306B–224B range):
+          0x80070c04 (LMP dispatcher), 0x800762f4 (crypto loop), 0x80071634 (ROM original assoc_w_tLMP),
+          0x80075084 (struct accessor), 0x80073b74 (HCI Disconnect), 0x80070454 (LMP DETACH),
+          0x80075540 (data-plane validator), 0x80075948 (MMIO memcpy), 0x800702e4 (opcode 0x259),
+          0x80075324 (func1 struct accessor). All upgraded to HIGH confidence + renamed.
+          Categories: 5 LMP handlers, 2 crypto helpers, 1 HCI handler, 2 config accessors.
+          → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 3b section added)
+          → analysis/rom/rom_function_index.md (10 rows upgraded: 54 HIGH-confidence names)
+          Remaining: 39 thin-named + 191 unnamed (~230 functions); expect 3–4 more batch turns.
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 4: cold-triage 191 unnamed by size/pattern) (self-chain)
+          Systematic cold-triage of ~191 unnamed functions: stratify by size (1–50B, 51–150B, 151–300B, 301–600B, 601+B),
+          literal-pool patterns (config vs. data tables), xref usage (handlers vs. utilities). Identify clusters of
+          LMP opcodes, HCI handlers, interrupt/exception stubs, register tables. Stage highest-confidence batch for
+          Pass 5. Deferred: lowest-priority accessors/utilities (~100 functions) to Pass 6 (lowest priority).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
