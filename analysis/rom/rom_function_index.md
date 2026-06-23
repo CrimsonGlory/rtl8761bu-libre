@@ -707,7 +707,9 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80045e8c` | 1032 | `send_evt_Meta_subevent_0x01_or_0x0a_HCI_LE_Connection_Complete_or_HCI_LE_Enhanced_Connection_Complete` | send evt Meta subevent 0x01 or 0x0a HCI LE Connection Complete or HCI LE Enhanced Connection Complete — see `ble_link_layer` | high (decompiled+documented) |
 | `0x80046620` | 34 | `put_0x1f4_struct_pointer_from_index_arg1_into_arg2` | put 0x1f4 struct pointer from index arg1 into arg2 — see `ble_link_layer`, `hci_command_router` | high (decompiled+documented) |
 | `0x8004a71c` | 16 | `VSC_0xfc95_clear_bit_helper` (was `VSC_0xfc95_called1`) | `*(ushort*)(base+0x16) &= ~(1 << (param&0x1f))` — clears one bit in a 16-bit mask at a fixed struct offset, indexed by param; small helper for VSC 0xfc95 | high (decompiled+documented, Pass 2) |
+| `0x80049d20` | 1476 | `HCI_Setup_Synchronous_Connection_handler` (was `FUN_80049d20`) | Validates a packed SCO/eSCO parameter block (bandwidth/packet-type/retransmission-window range checks matching SCO/eSCO bounds), writes results into `big_ol_struct` fields `+0x1a6..+0x1ce`, terminates with `send_evt_HCI_Command_Status` — canonical HCI command-handler signature; param shape matches HCI Setup/Accept Synchronous Connection | high (decompiled+documented, Pass 3) |
 | `0x8004c0f4` | 472 | `LMP_opcode_0x26F_LE_event_router` (was `LMP__26F__sends_LE_HCI_Events`) | big 11-case switch on low 5 bits of an LMP-0x26F PDU's opcode field, routing to `send_evt_HCI_Connection_Complete`/`Enhanced`, `send_evt_Meta_subevent_0x05/0x08/0x09/0x0c/0x14`, `hci_event_sender` (evt 0x30/0x4), and `send_evt_HCI_Disconnection_Complete` — confirms this is the central dispatcher feeding the already-documented LE Meta Event sender cluster (0x80044730-0x80046620) | high (decompiled+documented, Pass 2) |
+| `0x8004d8b8` | 1898 | `init_global_connection_table_and_bt_state` (was `FUN_8004d8b8`) | Global BT-state/connection-table initializer: memsets the entire `PTR_base_of_0x1ac_struct_array_0xA_large2` 11-entry connection-record array, sets default LST `0xa0a` (same constant `init_connection_record` uses), default poll intervals, BD_ADDR/feature fields from config struct, calls 4 sub-initializers — top-level counterpart to the per-record `init_connection_record` (0x8005b9d8) | high (decompiled+documented, Pass 3) |
 | `0x800525b4` | 36 | `send_evt_LE_Meta_Subevent_variant` | sends LE Meta subevent with pre-incremented length field — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800525d8` | 62 | `send_evt_LE_Meta_Subevent` | generic LE Meta subevent sender with HCI event 0x3E header — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800566f8` | 58 | `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1` | validates and applies extended advertising parameters for LE — see `region_0x80050000` | high (decompiled+documented) |
@@ -1021,7 +1023,7 @@ granularity is meaningful until individual triage happens).
 | `0x80010000`–`0x8001ffff` | 257 (263 authoritative-recount baseline, 2026-06-22 region-0x80010000 pass 1 — supersedes the original 268 estimate, see that region doc's scope note — minus 2 pass-1 renames minus 4 pass-2 renames) | 12.5% |
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
-| `0x80040000`–`0x8004ffff` | 307 | 15.0% |
+| `0x80040000`–`0x8004ffff` | 303 (305 at Pass-3 recount − 2 Pass-3 renames, 2026-06-23) | 14.8% |
 | `0x80050000`–`0x8005ffff` | 351 (354 − 3 Pass-3c renames, 2026-06-23) | 17.1% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 193 | 9.4% |

@@ -2064,22 +2064,48 @@ completion):
             RenameBatch1Region80040000.java (updated with real names, executed),
             ColdTriageRegion80040000Pass3.java (new, staged not executed)
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile top candidates from both halves) (2026-06-23)
-          No other [TODO] existed in this file to promote per wip-loop rule, so self-chaining the
-          natural continuation of this region's work.
-          Stage 3a script ColdTriageRegion80040000Pass3.java is staged (see ticket above) but not run.
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile top candidates from both halves) (2026-06-23)
+          Ran ColdTriageRegion80040000Pass3.java in GZF process mode (336 functions recounted, 305
+          unnamed). Got real top-15-per-half ranked candidates (lower: 0x80043e04(1168B) down to
+          0x80041028(336B); upper: 0x8004d8b8(1898B) down to 0x80045964(560B)).
+          Decompiled top-4 per half (8 total) via BatchDecompile80040000Pass3Lower.java/Lower4.java
+          (split after the 4th fn hit the log-truncation issue again — same lesson as 0x80050000
+          Pass 3c) and ...UpperA.java/UpperB.java (pre-split 2+2). All 8/8 decompiled successfully.
+          Attempted mcp__wairz__xrefs_to/find_callers for extra confirmation on the top 2 candidates,
+          but those tools' binary-path resolution does not find the GZF process-mode project (returns
+          "Binary not found" against the per-project cache path) — fell back to decompile content +
+          struct/constant cross-confirmation against already-named functions (init_connection_record's
+          0xa0a LST constant, PTR_base_of_0x1ac_struct_array_0xA_large2, send_evt_HCI_Command_Status),
+          consistent with the 0x80050000 Pass 3b/3c precedent.
+          2 of 8 cleared the HIGH bar and were renamed via RenameBatch1Region80040000Pass3.java:
+            0x8004d8b8 -> init_global_connection_table_and_bt_state (global BT-state/connection-table
+              initializer; top-level counterpart to init_connection_record)
+            0x80049d20 -> HCI_Setup_Synchronous_Connection_handler (SCO/eSCO param validation +
+              send_evt_HCI_Command_Status terminus)
+          Remaining 6 (0x80043e04, 0x80040a24, 0x8004147c, 0x80041dac, 0x8004d294, 0x8004ce70)
+          documented at MEDIUM/MEDIUM-HIGH, left as FUN_* for a future pass.
+          Updated reverse_engineering_region_0x80040000.md (full Pass 3 findings table + coverage
+          progress), rom_function_index.md (region count 307->303, added 2 new HIGH rows), INDEX.md.
+          NOTE TO USER (not silently worked around per CLAUDE.md): mcp__wairz__xrefs_to and
+          find_callers don't resolve the GZF filename the same way run_ghidra_headless does (GZF
+          process-mode project cache vs. whatever path these tools expect) — may need a wairz fix if
+          xref-based confidence checks are wanted for future passes against this GZF workflow.
+
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 continuation (remaining 22 top-15 candidates) (2026-06-23)
+          Pass 3 (above) only decompiled the top-4 of each half's top-15 list. 22 candidates remain
+          queued (11 lower-half, 11 upper-half) — see reverse_engineering_region_0x80040000.md's
+          "Remaining top-15 candidates not yet decompiled" section for the full address list.
           Next concrete steps:
-            1. Run ColdTriageRegion80040000Pass3.java (GZF process mode) to get the actual ranked
-               top candidates from both region halves (lower: conn-type dispatch/LC dispatchers;
-               upper: LE Meta Event cluster + helpers).
-            2. Write a BatchDecompile80040000Pass3Top*.java with the real top-N addresses from step 1's
-               output (the ranking script only has a dynamic algorithm, not literal addresses yet —
-               same gotcha hit during 0x80050000 Pass 3/3b).
-            3. Execute in 2-4-function batches (per the log-size lesson) via mcp__wairz__run_ghidra_headless.
-            4. Review each decompile; rename only functions clearing the HIGH-confidence bar (cross-xref
-               or clear single-purpose behavior) — leave MEDIUM/MEDIUM-HIGH evidence unrenamed per this
-               project's established practice (see 0x80050000 Pass 3b/3c precedent).
-            5. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
+            1. Prioritize 0x80043a60 (358B but xrefs:15 — unusually high for its size tier, worth
+               checking first) from the lower half.
+            2. Batch-decompile the rest in 2-4-function batches via mcp__wairz__run_ghidra_headless
+               (GZF process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
+               use_saved_project=true) — keep batches small per the recurring log-truncation lesson.
+            3. Review each decompile; rename only functions clearing the HIGH-confidence bar; leave
+               MEDIUM/MEDIUM-HIGH evidence unrenamed per established practice.
+            4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
+            5. Once both halves' top-15 lists are exhausted, consider this region's Pass 3 fully
+               complete and either start a Pass 4 (next size tier) or move to a different region.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).

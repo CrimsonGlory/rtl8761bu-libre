@@ -97,10 +97,10 @@ If enumeration script completes successfully:
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Region total functions | 319 | 319 |
-| Already high-confidence | ~52 (16.3%, +12 from Pass 2) | 319 (100%) |
-| Thin-named (decompile pending) | 0 (3.8% → 0, Pass 2 complete) | 0 (all high/medium) |
-| Unnamed (cold triage) | 307 (96%) | 0 (all named) |
+| Region total functions | 336 (recount at Pass 3) | 336 |
+| Already high-confidence | ~54 (16.1%, +2 from Pass 3) | 336 (100%) |
+| Thin-named (decompile pending) | 0 (Pass 2 complete) | 0 (all high/medium) |
+| Unnamed (cold triage) | 303 (90.2%, 6 newly at MEDIUM/MEDIUM-HIGH from Pass 3, 2 renamed HIGH) | 0 (all named) |
 
 ---
 
@@ -175,42 +175,76 @@ Full decompiled C for all 12 functions is preserved in the Ghidra run logs
 (see `mcp__wairz__list_ghidra_logs` for `BatchDecompile80040000_B1/B2/B3.java`
 and `RenameBatch1Region80040000.java` runs, 2026-06-23).
 
-## Pass 3 — Cold-Triage Staging for 307 Unnamed (2026-06-23)
+## Pass 3 — Cold-Triage + Batch Decompile EXECUTED (2026-06-23)
 
-Following the framework established for region `0x80050000` Pass 3
-(`ColdTriageRegion80050000Pass3.java` + `BatchDecompileList80050000Pass3Top20.java`),
-the same approach is staged here but not yet executed:
+`ColdTriageRegion80040000Pass3.java` was run in GZF process mode against the
+live project (336 total functions counted at this point, 305 unnamed —
+counts drift slightly run-to-run as earlier passes' renames land). Size-tier
+buckets: 1-50B:89, 51-150B:117, 151-300B:49, 301-600B:32, 601+B:18. Half
+split: lower (0x80040000-0x80044fff) 90 unnamed, upper (0x80045000-0x8004ffff)
+215 unnamed.
 
-**Stage 3a plan**:
-1. Run a `ColdTriageRegion80040000Pass3.java` script (to be created, mirroring
-   the 0x80050000 version) that buckets the 307 unnamed functions by size tier:
-   - Tier 1 (1-50B): expect ~10-15% — trivial accessors/setters (similar to the
-     power-val helpers just decompiled)
-   - Tier 2 (51-150B): expect ~10-15% — small state-check/update helpers
-   - Tier 3 (151-300B): expect ~15-20% — single-purpose handlers
-   - Tier 4 (301-600B): expect ~30-40% — medium dispatchers/handlers
-   - Tier 5 (601B+): expect ~15-20% — large dispatchers/state machines (e.g.
-     the just-confirmed `LC_event_RX_dispatcher` at 634B would land here)
-2. Rank by size × estimated xref count (proxy for architectural importance)
-   to produce a top-20/30 candidate list, same pattern as
-   `BatchDecompileList80050000Pass3Top20.java`.
-3. Given two confirmed sub-regions already exist in this 64KB span —
-   "lower half" (0x80040000-0x80045000, connection-type dispatch + LC RX/TX
-   dispatchers now confirmed) and "upper half" (0x80046000-0x8004ffff, LE
-   Meta Event cluster + surrounding helpers) — the top candidates should be
-   drawn from **both halves** to keep triage balanced, rather than letting
-   one half dominate.
+**Top-15 candidates per half** (size, descending):
 
-**Stage 3b (execution, not yet run)**: once the ranking script's top-20/30
-list is produced, batch-decompile via 2-4-function-per-batch scripts (per the
-log-size lesson reconfirmed in this Pass 2), review for HIGH-confidence
-candidates, rename, and update this doc + `rom_function_index.md` again.
+Lower half: `0x80043e04`(1168B), `0x80040a24`(988B), `0x8004147c`(934B),
+`0x80041dac`(876B), `0x80040594`(566B), `0x80041230`(560B), `0x80042640`(530B),
+`0x800401c4`(426B), `0x80040e60`(386B), `0x80041900`(376B), `0x80043c7c`(372B),
+`0x80043a60`(358B, xrefs:15 — notably high), `0x80041a94`(352B),
+`0x800435a8`(338B), `0x80041028`(336B).
 
-**Not yet done**: creating `ColdTriageRegion80040000Pass3.java` itself. This
-is the immediate next actionable step for whoever picks up Pass 3.
+Upper half: `0x8004d8b8`(1898B), `0x80049d20`(1476B), `0x8004d294`(1280B),
+`0x8004ce70`(908B), `0x8004c4a8`(894B), `0x800483c0`(866B), `0x80047628`(832B),
+`0x80047304`(780B), `0x8004cb48`(722B), `0x80047c50`(700B), `0x8004966c`(696B),
+`0x80046900`(682B), `0x800480b0`(682B), `0x8004b468`(624B), `0x80045964`(560B).
+
+**Decompiled this pass** (top-4 from each half, 8 functions total, via
+`BatchDecompile80040000Pass3Lower.java`/`Lower4.java` (split after the 4th
+function hit the log-truncation issue again — same lesson as 0x80050000
+Pass 3c) and `BatchDecompile80040000Pass3UpperA.java`/`UpperB.java` (2+2,
+pre-split to avoid the same issue)). All 8/8 decompiled successfully.
+
+### Findings summary
+
+| Address | Size | Behavior | Confidence |
+|---|---|---|---|
+| `0x8004d8b8` | 1898B | Global BT-state/connection-table initializer: `memset`s the entire `PTR_base_of_0x1ac_struct_array_0xA_large2` array (the project's established 11-entry `big_ol_struct` connection-record array), then loops `uVar14 < 0xb` setting default LST `0xa0a` (same constant `init_connection_record`/0x8005b9d8 uses), default poll intervals, BD_ADDR/feature fields from `config_struct`, and calls sub-initializers `FUN_8005bde0`, `FUN_80058a34`, `FUN_80009774`, `FUN_8005c988`. Structurally the top-level/global counterpart to the already-named per-record `init_connection_record`. | **HIGH** — renamed `init_global_connection_table_and_bt_state` |
+| `0x80049d20` | 1476B | Validates a packed parameter block (bandwidth/packet-type/retransmission-window fields with explicit range checks matching SCO/eSCO bounds, e.g. `0x3ffd`/`0xc7b`/`0xc77` window checks), writes results into `big_ol_struct` SCO/eSCO fields at offsets `+0x1a6..+0x1ce`, and terminates with `send_evt_HCI_Command_Status(*param_1, status)` — the canonical "this is an HCI command handler" signature. Parameter shape matches HCI Setup/Accept Synchronous Connection. | **HIGH** — renamed `HCI_Setup_Synchronous_Connection_handler` |
+| `0x80043e04` | 1168B | Dense register-programming function operating on connection-record fields; references several already-named eSCO/role helpers. Single coherent purpose visible but no confirmed cross-link strong enough for a precise verb-noun name yet. | MEDIUM-HIGH |
+| `0x80040a24` | 988B | Large dispatcher-shaped function in the lower-half conn-type cluster; switch-like structure but case semantics not yet individually confirmed. | MEDIUM |
+| `0x8004147c` | 934B | Already partially documented in `reverse_engineering_lc_lmp_state_machine.md` (referenced via `fptr_DAT_80036f5c` for HCI_Inquiry/0x419/0x43f) as "inquiry-train baseband programming / role-related setup" — dense register-programming, consistent with that prior note. Left unrenamed pending a more specific single-purpose confirmation. | MEDIUM-HIGH |
+| `0x80041dac` | 876B | `void FUN_80041dac(uint param_1)` — connection-teardown/cleanup-shaped handler operating on a `param_1`-indexed record; clears multiple fields consistent with link release. No confirmed cross-xref yet. | MEDIUM |
+| `0x8004d294` | 1280B | Large upper-half handler adjacent to the LE Meta Event cluster; plausible event-assembly routine but case/field semantics not individually confirmed this pass. | MEDIUM |
+| `0x8004ce70` | 908B | Already appears (unnamed) in `reverse_engineering_conn_feature_dispatch.md`'s xref list alongside `assoc_w_tLC_RX`/`FUN_80051368`/`FUN_80052f8c` — confirmed participant in the connection/feature dispatch graph, but specific behavior not yet isolated to a single clear purpose. | MEDIUM-HIGH |
+
+**Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
+confidence (`init_global_connection_table_and_bt_state`,
+`HCI_Setup_Synchronous_Connection_handler`); the remaining 6 documented above
+at MEDIUM/MEDIUM-HIGH and left as `FUN_*` for a future pass to pursue
+(xrefs_to/find_callers tooling against this GZF's process-mode project was
+attempted but the binary path used by those tools does not resolve against
+the GZF process-mode cache — see project tooling notes; confidence here was
+established via decompile content + struct/constant cross-confirmation
+against already-named functions instead, consistent with the 0x80050000
+Pass 3b/3c precedent).
+
+Full decompiled C for all 8 functions is preserved in the Ghidra run logs
+(`BatchDecompile80040000Pass3Lower.java`, `...Lower4.java`,
+`...UpperA.java`, `...UpperB.java`, plus `RenameBatch1Region80040000Pass3.java`,
+all 2026-06-23).
+
+### Remaining top-15 candidates not yet decompiled (future pass)
+
+Lower half: `0x80040594`, `0x80041230`, `0x80042640`, `0x800401c4`,
+`0x80040e60`, `0x80041900`, `0x80043c7c`, `0x80043a60` (xrefs:15, worth
+prioritizing next), `0x80041a94`, `0x800435a8`, `0x80041028`.
+
+Upper half: `0x8004c4a8`, `0x800483c0`, `0x80047628`, `0x80047304`,
+`0x8004cb48`, `0x80047c50`, `0x8004966c`, `0x80046900`, `0x800480b0`,
+`0x8004b468`, `0x80045964`.
 
 ---
 
-**NEXT**: Create and run `ColdTriageRegion80040000Pass3.java` (cold-triage
-ranking of the 307 unnamed functions by size/xref), then batch-decompile the
-resulting top-20/30 candidates across both region halves.
+**NEXT**: Batch-decompile the remaining top-15-per-half candidates listed
+above (11 lower + 11 upper = 22 functions, in 2-4-function batches), with
+`0x80043a60` (xrefs:15) prioritized first given its unusually high
+cross-reference count for its size tier.
