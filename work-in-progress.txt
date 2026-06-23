@@ -2187,7 +2187,7 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
           Execute batch-decompilation of staged 15 LMP encryption/pairing procedures via
           BatchDecompileList.java (addresses from region doc Pass 2 table), upgrade to high confidence
           via RenameBatch1.java. Then systematic cold-triage of remaining ~340 unnamed + thin-named:
