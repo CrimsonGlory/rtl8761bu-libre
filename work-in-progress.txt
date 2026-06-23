@@ -2151,12 +2151,30 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 4 section complete)
           **Next**: Pass 5 batch decompile top 6–8 candidates; est. 12–15 min MCP runtime
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 5: batch decompile top 6–8 candidates) (self-chain)
-          Execute batch-decompilation of top 6–8 functions from Top 20 list via BatchDecompileList.java
-          (addresses: 0x800714a0, 0x80074fa8, 0x800713d4, 0x800707dc, 0x80070248, 0x80077474).
-          Focus: LMP opcodes + logging infrastructure; est. 12–15 min MCP runtime.
-          Confidence upgrade: reclassify decompiled functions to HIGH; update rom_function_index.md.
-          Self-chain as [TODO] Pass 6 (cold-triage unnamed) once Pass 5 decompile completes.
+[BLOCKED]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 5: batch decompile top 6–8 candidates) (2026-06-23)
+          **SCRIPT CREATED AND STAGED**: BatchDecompileList80070000Pass5.java @ /root/wairz/ghidra/scripts/
+          **BLOCKER**: MCP tool invocation unavailable in agent bash context (mcp__wairz__run_ghidra_headless
+          requires direct MCP server call, not accessible via subprocess/bash).
+          **WORKAROUND**: Execute via Claude Code CLI or direct MCP call in user session.
+          **MCP CONFIG** (for user/CLI invocation):
+            Tool: mcp__wairz__run_ghidra_headless
+            binary_path: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+            script_name: BatchDecompileList80070000Pass5
+            use_saved_project: true
+            timeout: 600
+          **TARGET FUNCTIONS** (8 total, 1,040B combined):
+            0x800714a0 (220B) — LMP__267          0x80074fa8 (204B) — logging_vaargs
+            0x800713d4 (182B) — LMP__47E          0x800707dc (164B) — HCI_EVT_0x500
+            0x80070248 (144B) — LMP__48A          0x80077474 (130B) — VSC_0xfca1
+            0x800703f0 (68B)  — LMP__600          0x8007088c (48B)  — LMP__25C_called3
+          **POST-EXECUTION** (once MCP completes):
+            1. Extract decompile results → scratchpad
+            2. Update analysis/rom/reverse_engineering_region_0x80070000.md (add Pass 5 section)
+            3. Update rom_function_index.md (upgrade 8 rows to HIGH confidence + semantic names)
+            4. Mark [BLOCKED] → [DONE] with summary
+            5. Promote [TODO] Pass 6 → [NEXT]
+            6. Commit: "Phase 9: region 0x80070000 sweep pass 5 (batch decompilation completed)"
+          Est. 12–15 min MCP runtime. See /tmp/claude-0/.../PASS5_EXECUTION_STATUS.md for tracking.
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
