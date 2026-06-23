@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 688 (685 + 3 region-0x80050000 Pass-3c newly-named, 2026-06-23; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2050 (2053 − 3 region-0x80050000 Pass-3c newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 364 (361 + 3 region-0x80050000 Pass-3c newly-named-and-decompiled) |
+| Named functions (this doc's table) | 689 (688 + 1 region-0x80050000 Pass-4 newly-named, 2026-06-23; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2049 (2050 − 1 region-0x80050000 Pass-4 newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 365 (364 + 1 region-0x80050000 Pass-4 newly-named-and-decompiled) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
@@ -724,6 +724,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8005770c` | 166 | `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` | comprehensive extended advertising parameter handler with interval validation — see `region_0x80050000` | high (decompiled+documented) |
 | `0x800596c8` | 50 | `query_config_struct_0x1ac_by_index` | config struct array accessor; retrieves 0x1ac-sized records by index (BD_ADDR/HW config blocks) — see `region_0x80050000` | high (decompiled+documented) |
 | `0x8005a298` | 62 | `query_current_PHY_by_connection_index` | PHY query helper; returns active TX or RX PHY for a connection — see `region_0x80050000` | high (decompiled+documented) |
+| `0x80059454` | 532 | `lmp_packet_completion_event_drain_dispatch` | LMP/baseband packet-completion event drain/dispatcher; drains a linked list of completed-packet records (0x6b stride), checks credit availability, posts completion. Confirmed direct callee of `conn_index_status_bit_apply_and_log` (0x80007330, region 0x80000000) — called immediately after a connection is committed "active" (field297_0x130=1), matching the packet-completion-posting role exactly — see `region_0x80050000` Pass 4 | high (decompiled+documented) |
 | `0x8005b9d8` | 950 | `init_connection_record` | connection-record allocator/initializer for a new ACL/SCO/eSCO link (central or peripheral); memset+populates the full 0x1ac struct, sets default LST/poll interval, PHY power tables, conditionally invokes the VSC_0xfc97 extended-advertising-parameter handlers — see `region_0x80050000` Pass 3c | high (decompiled+documented) |
 | `0x8005c27c` | 550 | `afh_report_worst_channel` | AFH channel-classification worst-channel picker/reporter (event code 0x777); iterates the AFH bitmap incrementing a shared counter table, then reports the worst channel — see `region_0x80050000` Pass 3c | high (decompiled+documented) |
 | `0x8005d26c` | 88 | `assign_pointer_to_0x1AC_offset_0x134` | assign pointer to 0x1AC offset 0x134 — see `lmp_version_conn_setup` | high (decompiled+documented) |
@@ -1049,7 +1050,7 @@ granularity is meaningful until individual triage happens).
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
 | `0x80040000`–`0x8004ffff` | 301 (305 at Pass-3 recount − 2 Pass-3 renames − 1 Pass-3-continuation rename − 1 Pass-4 rename, 2026-06-23) | 14.7% |
-| `0x80050000`–`0x8005ffff` | 351 (354 − 3 Pass-3c renames, 2026-06-23) | 17.1% |
+| `0x80050000`–`0x8005ffff` | 350 (351 − 1 Pass-4 rename, 2026-06-23) | 17.1% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 9.3% |
 | **Total** | **2048** | **100%** |

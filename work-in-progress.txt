@@ -2549,28 +2549,58 @@ completion):
           writeup (targeted xref/caller follow-up on 5 remaining MEDIUM-HIGH functions, or size-tier
           21-40). Pivoting next ticket to region 0x80050000 — best effort-to-yield ratio available.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 4 (pivot from 0x80070000) (2026-06-23)
-          Pivoted here per the 0x80070000 Pass 9 ticket's mandatory pivot-decision rule: that
-          region has had 9 consecutive passes with diminishing HIGH yield (0 new HIGH in Pass 9),
-          while this region has had only 3 passes and an already-staged concrete next step from
-          its own Pass 3c writeup (analysis/rom/reverse_engineering_region_0x80050000.md).
-          Current status: 364 total functions (351 unnamed + 13 thin/HIGH-named after Pass 3c).
-          3 functions cleared HIGH in Pass 3c (init_connection_record, afh_report_worst_channel,
-          afh_channel_quality_poll_commit). 5 functions remain at MEDIUM-HIGH from Pass 3b/3c's
-          top-20 review, all touching the per-connection 0x1ac struct array (connection
-          state-machine / packet-type-negotiation / AFH-report cluster).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 4 (pivot from 0x80070000) (2026-06-23)
+          Pivoted here per the 0x80070000 Pass 9 ticket's mandatory pivot-decision rule. Per
+          step 1, re-tested xrefs_to/find_callers MCP tools directly against this GZF for THIS
+          region (not assumed broken): both failed identically ("Binary not found:
+          /data/firmware/projects/.../2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf"), confirming
+          the gap is GZF-path-resolution-wide, not region-specific — useful data point for the
+          wairz tooling investigation. Fell back to in-script ReferenceManager pattern via new
+          XrefFollowup80050000Pass4.java: walked callers+callees for all 5 remaining MEDIUM-HIGH
+          targets (0x800555bc, 0x80052c64, 0x8005aba8, 0x80053aa4, 0x80059454). Second-hop lookup
+          (LookupCallerNames80050000Pass4.java) resolved the 4 distinct caller addresses found:
+          2 of 5 targets are called by already-named HIGH-confidence functions in region
+          0x80000000 (ring_buffer_event_drain_dispatch_loop, conn_index_status_bit_apply_and_log).
+          0x80059454's caller conn_index_status_bit_apply_and_log is documented (line 622 of
+          reverse_engineering_region_0x80000000.md) as calling FUN_80059454 BY ADDRESS right
+          after marking a connection active — an exact, address-pinned independent confirmation
+          of the Pass 3c "packet-completion event drain/dispatcher" read. Renamed
+          0x80059454 -> lmp_packet_completion_event_drain_dispatch (verified via Ghidra headless
+          run log, RenamePass4Region80050000.java, "RENAME COMPLETE: 1 success, 0 failed").
+          0x8005aba8's caller ring_buffer_event_drain_dispatch_loop gave supporting-but-not-
+          address-exact evidence (stays MEDIUM-HIGH). The other 3 (0x800555bc, 0x80052c64,
+          0x80053aa4) only resolve to still-unnamed FUN_* callers — no new evidence, unrenamed.
+          0x80052c64 confirmed 0 direct callers, consistent with its function-pointer-table
+          dispatch read from Pass 3c. Region-wide unnamed count: 351 -> 350.
+          Updated reverse_engineering_region_0x80050000.md (new Pass 4 section),
+          rom_function_index.md (1 row added, summary counts + region count updated),
+          analysis/INDEX.md.
+          Status: PASS 4 COMPLETE. 1/5 cleared HIGH, 1/5 strengthened to firm MEDIUM-HIGH,
+          3/5 unchanged. Next continuation: decompile unnamed callers FUN_800559a0/FUN_800549fc
+          to try naming them first, or move to cold-triage size-tier 21-40.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 5 (caller-decompile + size-tier 21-40) (2026-06-23)
+          Continuation staged by the Pass 4 ticket. Two remaining angles on this region:
+            1. Decompile the two unnamed callers identified in Pass 4 as the only remaining
+               lead on 3 of the 5 original MEDIUM-HIGH targets: FUN_800559a0 (46B, sole caller
+               of 0x800555bc, itself called by unknown_fptr_index0@0x800138cc — check if that
+               fptr table slot is identifiable/named) and FUN_800549fc (270B, sole caller of
+               0x80053aa4, itself called only by the already-named-cluster FUN_80054b14). If
+               either resolves to a clearer purpose, it may retroactively support naming its
+               callee.
+            2. Move to cold-triage size-tier 21-40 (next size band below the already-fully-
+               reviewed top-20) via a fresh ColdTriageRegion80050000Pass5.java-style script
+               (size+xref ranking via in-script ReferenceManager, per the now twice-confirmed
+               GZF-wide xrefs_to/find_callers MCP gap — do not retry those tools, the gap is
+               confirmed structural, not region-specific).
           Steps:
-            1. EITHER (a) targeted xref/caller follow-up on the 5 remaining MEDIUM-HIGH functions
-               (re-check whether xrefs_to/find_callers MCP tools work against this GZF for THIS
-               region specifically before assuming the same broken-tooling gap as 0x80070000 — if
-               still broken, fall back to the in-script ReferenceManager pattern), OR
-               (b) move to cold-triage size-tier 21-40 (next size band below the already-reviewed
-               top-20) via a fresh ColdTriageRegion80050000PassN.java-style script.
-            2. Decompile the resulting candidates via single-address DecompileAddr.java calls
+            1. Try angle (1) first (cheap, 2 single-address decompiles); fall back to angle (2)
+               if it doesn't yield new HIGH-confidence evidence.
+            2. Decompile resulting candidates via single-address DecompileAddr.java-style calls
                against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
                use_saved_project=true).
             3. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 4 section),
+            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 5 section),
                rom_function_index.md (if renames), analysis/INDEX.md.
             5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
 

@@ -614,3 +614,105 @@ cross-confirmation in a future pass. Next continuation candidate: targeted
 xref/caller follow-up on the 5 MEDIUM-HIGH-tier functions listed above, or
 move on to the next-largest tier (functions ranked 21-40 by size) per the
 region's overall sweep plan.
+
+---
+
+## Pass 4 — Targeted Xref/Caller Follow-up on the 5 Remaining MEDIUM-HIGH (2026-06-23)
+
+Pivoted here from region `0x80070000` Pass 9 (9 consecutive passes there, 0 new
+HIGH in the last pass — diminishing returns; this region had the
+already-staged concrete next step below and fewer total passes).
+
+**Tooling re-check (per ticket step 1)**: re-tested `mcp__wairz__xrefs_to` and
+`mcp__wairz__find_callers` directly against this GZF for this region
+specifically, rather than assuming the `0x80070000` gap carries over. Both
+failed identically: `Error executing xrefs_to/find_callers: Binary not found:
+/data/firmware/projects/.../2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`.
+**Confirmed: the gap is GZF-wide, not region-specific** — both tools resolve
+the binary path incorrectly for any GZF-mode project regardless of which ROM
+region is queried. Useful data point for the wairz tooling investigation:
+this rules out a region-local cache/indexing issue as the cause.
+
+Fell back to the in-script `ReferenceManager` pattern (same as
+`ColdTriageRegion80070000Pass6/9.java`), via a new
+`XrefFollowup80050000Pass4.java` script: for each of the 5 MEDIUM-HIGH
+targets, walks `getReferencesTo()` for callers and the function body's
+instruction `Reference`s for callees.
+
+### Caller/callee results
+
+| Target | Callers | Callees (count) |
+|--------|---------|------------------|
+| `0x800555bc` | `FUN_800559a0` (1) | 13, incl. already-named-cluster siblings `FUN_80054144`/`FUN_80054b14` |
+| `0x80052c64` | **none** (0) | 12, incl. `FUN_80056988` (named AFH report handler) |
+| `0x8005aba8` | `FUN_80007af0` (2 call sites, same caller) | 9, incl. `FUN_80072bac`, `FUN_80059910` |
+| `0x80053aa4` | `FUN_800549fc` (1) | 6, incl. `FUN_8002b270`/`FUN_8002b28c`/`FUN_8004f898` (named scheduler-helper trio) |
+| `0x80059454` | `FUN_80007330` (2 call sites, same caller) | 5 |
+
+`0x80052c64` having 0 direct callers is consistent with the Pass 3c read
+("dispatches via function-pointer table `PTR_DAT_80052f28`") — it's reached
+indirectly through the table, not via a direct `jal`/`jalr` xref.
+
+A second-hop lookup (`LookupCallerNames80050000Pass4.java`) resolved the
+4 distinct caller addresses found above:
+
+| Caller | Name | Region |
+|--------|------|--------|
+| `0x800559a0` | `FUN_800559a0` (unnamed, 46B) | 0x80050000 — itself unnamed, no help |
+| `0x80007af0` | **`ring_buffer_event_drain_dispatch_loop`** (named, HIGH, 1978B) | 0x80000000 |
+| `0x800549fc` | `FUN_800549fc` (unnamed, 270B), itself called only by `FUN_80054b14` (named-cluster member from Pass 3b #2) | 0x80050000 |
+| `0x80007330` | **`conn_index_status_bit_apply_and_log`** (named, HIGH, 624B) | 0x80000000 |
+
+Two of the five targets are called by **already-named, HIGH-confidence,
+documented** functions in region `0x80000000` — a genuine independent
+cross-reference, not just same-region cluster membership:
+
+- **`0x80059454`**: caller `conn_index_status_bit_apply_and_log` is
+  documented in `reverse_engineering_region_0x80000000.md` (line 622) as
+  calling `FUN_80059454` *by address* immediately after committing a
+  connection record as "active" (`field297_0x130=1`), right before
+  allocating an output buffer for posting completion. This is an exact,
+  address-pinned match for Pass 3c's "LMP/baseband packet-completion event
+  drain/dispatcher" read — **clears the HIGH bar**.
+- **`0x8005aba8`**: caller `ring_buffer_event_drain_dispatch_loop` is
+  documented as reprogramming "RSSI-history/quality fields" among other
+  per-connection updates, but the existing writeup doesn't name
+  `0x8005aba8` by address as a specific callee (it describes callees
+  qualitatively, not exhaustively) — plausible match for the AFH
+  channel-map re-evaluation read, but **not an address-exact citation**, so
+  this stays at MEDIUM-HIGH per the project's strict rename bar.
+
+The other three (`0x800555bc`, `0x80052c64`, `0x80053aa4`) only resolve to
+still-unnamed `FUN_*` callers within the same region/cluster — no
+independent confirmation gained, remain MEDIUM/MEDIUM-HIGH.
+
+### Rename applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x80059454` | `FUN_80059454` | `lmp_packet_completion_event_drain_dispatch` | Address-exact documented callee of `conn_index_status_bit_apply_and_log` (region 0x80000000), called right after a connection is marked active — confirms the packet-completion-posting role independently of the same-region cluster evidence. |
+
+Applied via `RenamePass4Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log ("RENAMED
+0x80059454: FUN_80059454 -> lmp_packet_completion_event_drain_dispatch",
+"RENAME COMPLETE: 1 success, 0 failed").
+
+### Pass 4 summary
+
+- Re-confirmed (region-specific, not assumed): `xrefs_to`/`find_callers` MCP
+  tools are broken against this GZF — same "Binary not found" error as
+  region `0x80070000`, demonstrating the gap is GZF-path-resolution-wide,
+  not tied to a specific region's analysis state.
+- 1/5 targeted MEDIUM-HIGH functions cleared HIGH via independent
+  cross-region caller confirmation and was renamed.
+- 1/5 (`0x8005aba8`) gained supporting evidence but not an address-exact
+  citation — stays MEDIUM-HIGH.
+- 3/5 (`0x800555bc`, `0x80052c64`, `0x80053aa4`) gained no new evidence —
+  their only callers are themselves unnamed.
+- Region-wide unnamed count: 351 → 350.
+
+**Status**: PASS 4 COMPLETE. Targeted xref/caller follow-up exhausted for
+the original 5; further gains on the remaining 4 would require either
+decompiling their unnamed callers (`FUN_800559a0`, `FUN_800549fc`) to see if
+*they* can be named first, or moving to the next size tier (functions ranked
+21-40 by size) per the region's overall sweep plan.
