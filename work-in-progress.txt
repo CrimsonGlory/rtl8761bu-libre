@@ -2691,28 +2691,61 @@ completion):
           continuation: extend cold-triage past size-tier 21-40 (rank 26+) using
           ColdTriageRegion80050000Pass5.java's ranking logic as a template.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 8 (cold-triage size-tier 41+) (2026-06-23)
-          Continuation staged by the Pass 7 ticket: size-tier 21-40 (ranks 1-25 by
-          xref count among the 330 unnamed functions outside the original top-20) is
-          now fully exhausted across Passes 5-7, with no remaining low-cost
-          helper-confirmation candidates at that tier.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 8 (cold-triage size-tier 41+) (2026-06-23)
+          Extended cold-triage past size-tier 21-40 into rank 26-50 (size-tier 41+)
+          via new ColdTriageRegion80050000Pass8.java, excluding the full Top-40-
+          already-triaged set (301 unnamed remained outside that set).
+          Decompiled the top 3 by xref count via DecompileAddr.java:
+            - 0x80055204 (260B, 7 xrefs): cleared HIGH on self-contained evidence —
+              explicitly calls the already-named, Kovah-labeled send_evt_Meta_subevent_0x12
+              (LE Channel Selection Algorithm meta-subevent, 0x800454e8) immediately after
+              triggering conn_diagnostic_batch_dump, then performs per-channel-slot
+              enable/ref-count bookkeeping via FUN_8004fd6c and logs a status report —
+              an unambiguous connection-setup-completion notification dispatcher.
+              RENAMED -> le_channel_selection_algorithm_event_dispatch.
+            - 0x80055c80 (290B, 11 xrefs): PHY/role-class register-programming function.
+              Stays MEDIUM-HIGH, unrenamed (no independent confirming caller/callee).
+            - 0x80053710 (264B, 7 xrefs): slot-time/clock-offset commit function using
+              the 625us Bluetooth slot-time constant (0x271). Stays MEDIUM-HIGH, unrenamed.
+          1 new HIGH rename this pass. Updated analysis/rom/reverse_engineering_region_
+          0x80050000.md (Pass 8 section), rom_function_index.md (1 row added), and
+          analysis/INDEX.md (region history line extended with Pass 8 summary).
+          New scripts: ColdTriageRegion80050000Pass8.java, RenamePass8Region80050000.java
+          @ /root/wairz/ghidra/scripts/.
+          PIVOT DECISION: STAY on region 0x80050000. Per the pivot policy, 1+ HIGH
+          renames this pass means staying for one more pass is fine — and this region
+          has now sustained a 1+ HIGH-yield streak across 5 consecutive passes
+          (Pass 4:1, Pass 5:1, Pass 6:3, Pass 7:1, Pass 8:1), well ahead of the
+          diminishing-returns pattern that triggered pivots away from 0x80040000
+          (parked after 6 thin passes) and 0x80070000 (pivoted after 9 passes, yield
+          dropped to 0-2/pass). 344 unnamed remain in region 0x80050000.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 9 (cold-triage rank 26-50 continuation) (2026-06-23)
+          Continuation staged by the Pass 8 ticket: rank 26-50 (size-tier 41+) cold-triage
+          was only partially worked — 3 of the top candidates were decompiled (1 HIGH
+          rename, 2 MEDIUM-HIGH holdovers), but the rest of the rank 26-50 list (301
+          unnamed total outside the top-40-already-triaged set) is still unreviewed.
           Steps:
-            1. Re-run (or adapt) ColdTriageRegion80050000Pass5.java's in-script
-               ReferenceManager-based xref ranking against
+            1. Re-run ColdTriageRegion80050000Pass8.java (or extend its ALREADY_TRIAGED
+               set with 0x80055204/0x80055c80/0x80053710 plus this pass's any new
+               helper-confirmation callees) against
                2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
-               use_saved_project=true) to rank the ~345 remaining unnamed functions,
-               this time extending past rank 25 into rank 26+ (size-tier 41+).
-            2. Decompile the top 2-3 newly-ranked candidates via single-address
-               DecompileAddr.java-style calls. Stop early if a clear HIGH-confidence
-               answer emerges before trying all of them.
-            3. Only rename HIGH-confidence hits; leave remaining MEDIUM/MEDIUM-HIGH
+               use_saved_project=true) to get the next batch of ranked candidates.
+            2. Decompile the next 2-3 candidates by xref count: 0x8005b79c, 0x8005a924,
+               0x80057180 are next in line per Pass 8's ranked output. Stop early if a
+               clear HIGH-confidence answer emerges.
+            3. Optionally apply helper-confirmation (decompile immediate callees) to
+               Pass 8's 2 MEDIUM-HIGH holdovers (0x80055c80, 0x80053710) if no independent
+               confirming evidence turns up from the new candidates.
+            4. Only rename HIGH-confidence hits; leave remaining MEDIUM/MEDIUM-HIGH
                unrenamed but documented.
-            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 8
+            5. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 9
                section), rom_function_index.md (if renames), analysis/INDEX.md.
-            5. If this region's yield stays thin (per the project's pivot policy seen in
-               region 0x80040000/0x80070000), consider pivoting to a less-explored region
-               after this pass.
-            6. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT]
+            6. Pivot check: if this pass yields 0 HIGH renames, consider pivoting to a
+               less-explored region next (0x80010000/0x80020000/0x80030000 are
+               lower-pass-count candidates; 0x80040000 is parked; 0x80060000/0x80000000
+               are complete; 0x80070000 was pivoted away from after 9 passes).
+            7. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT]
                at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)

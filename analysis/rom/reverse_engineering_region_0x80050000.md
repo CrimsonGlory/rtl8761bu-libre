@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80050000-0x8005ffff
 
-**Status**: PASS 3c COMPLETE (TOP-20 FULL REVIEW + RENAME) — 2026-06-23
+**Status**: PASS 8 COMPLETE (cold-triage rank 26+) — 2026-06-23
 
 ## Overview
 
@@ -1082,3 +1082,126 @@ helper-confirmation candidates remain at this tier. Next continuation for
 this region: extend the cold-triage ranking past size-tier 21-40 (ranks
 26+) using `ColdTriageRegion80050000Pass5.java`'s ranking logic as a
 template, per the Pass 6/7 ticket's fallback instruction.
+
+## Pass 8 — Cold-triage rank 26+ (size-tier 41+) (2026-06-23)
+
+Continuation per the Pass 7 ticket's fallback instruction: extended the
+cold-triage ranking past size-tier 21-40 into rank 26+, using a new
+`ColdTriageRegion80050000Pass8.java` (same in-script `ReferenceManager`
+xref-ranking technique as Pass 5, with the full Top-40-already-triaged set
+excluded — Top-20 from Pass 3/3b/3c, size-tier 21-40 from Pass 5/6/7, plus
+follow-up callees decompiled along the way). 301 unnamed functions remained
+outside the already-triaged set; ranked the next 25 by size (rank 26-50,
+312B down to 228B):
+
+| # | Address | Size | Xrefs |
+|---|---------|------|-------|
+| 26 | `0x8005b79c` | 312B | 2 |
+| 27 | `0x8005a924` | 312B | 1 |
+| 28 | `0x80057180` | 310B | 3 |
+| 29 | `0x80055c80` | 290B | 11 |
+| 30 | `0x80053cec` | 290B | 3 |
+| 31 | `0x8005ae58` | 284B | 3 |
+| 32 | `0x800530a0` | 284B | 1 |
+| 33 | `0x8005a7ec` | 284B | 1 |
+| 34 | `0x8005ca30` | 278B | 0 |
+| 35 | `0x8005a0d4` | 272B | 1 |
+| 36 | `0x80055480` | 270B | 2 |
+| 37 | `0x80053710` | 264B | 7 |
+| 38 | `0x8005f260` | 262B | 1 |
+| 39 | `0x80055204` | 260B | 7 |
+| 40 | `0x8005c100` | 260B | 1 |
+| 41 | `0x8005efe8` | 256B | 2 |
+| 42 | `0x8005bf4c` | 252B | 0 |
+| 43 | `0x80056f00` | 248B | 4 |
+| 44 | `0x80059734` | 248B | 1 |
+| 45 | `0x80054044` | 242B | 2 |
+| 46 | `0x80059cec` | 242B | 0 |
+| 47 | `0x80053514` | 232B | 1 |
+| 48 | `0x8005aaac` | 232B | 1 |
+| 49 | `0x80053ebc` | 228B | 2 |
+| 50 | `0x8005c720` | 228B | 1 |
+
+Decompiled the top 3 by xref count (`0x80055c80` 11 xrefs, `0x80053710` and
+`0x80055204` tied at 7 xrefs) via `DecompileAddr.java` single-address calls.
+
+**`0x80055c80`** (290B, 11 xrefs): writes a packed feature-bit field
+(PHY/role-class bits extracted from `field68_0x44`/`field69_0x45`) into
+several `DAT_*` register slots, conditionally sets two status bits based on
+two extracted 2-bit sub-fields, toggles a final bit by a boolean parameter,
+and finishes with a function-pointer call passing constant `6`. Operates on
+`PTR_base_of_0x1ac_struct_array_0xA_large2` (the established connection
+record). Reads as a **PHY/role-class register-programming function**
+parallel to other register-commit functions in this region (e.g.
+`0x80054b14`/`0x800590b0` from Pass 3b) but the exact register semantics
+aren't pinned to a named constant or caller — stays **MEDIUM-HIGH**, not
+renamed.
+
+**`0x80053710`** (264B, 7 xrefs): checks an override hook, falls back to
+`FUN_8004fa64`, then branches on a role/type field (`param_1+8 & 7`).
+Case 2 performs slot-time arithmetic dividing by `0x271` (625 decimal — the
+standard Bluetooth 625µs slot-unit conversion constant) to compute and
+commit a clock/slot offset into the connection record, then calls the
+already-named telemetry logger `0x80074fa8` (`possible_logging_function`)
+with explicit numeric format codes and several connection-record fields as
+arguments. Reads clearly as a **slot-time/clock-offset commit function**,
+consistent with this region's scheduler cluster (Pass 3b's
+`0x80054b14`/`0x800546e4` etc.), but the specific commit semantics (which
+clock reference, which event) aren't independently confirmed — stays
+**MEDIUM-HIGH**, not renamed.
+
+**`0x80055204`** (260B, 7 xrefs): checks an override hook, then calls
+`FUN_8004f998(param_2)` to resolve a connection-record pointer, clears a
+status bit at `+0x1d`, calls the already-named
+`conn_diagnostic_batch_dump()` (Pass 6), and then calls the already-named,
+Kovah-labeled `send_evt_Meta_subevent_0x12` (`0x800454e8`, documented in
+`reverse_engineering_ble_link_layer.md` as the LE Channel Selection
+Algorithm meta-subevent sender). It then calls `FUN_8004e480()` to check a
+condition, updates a status byte accordingly, calls the already-documented
+per-channel-slot enable/ref-count setter `FUN_8004fd6c`
+(`reverse_engineering_region_0x80040000.md`, MEDIUM), and finishes by
+logging a detailed, fully-decoded status report (role, PHY-class bits for
+both ends of the link, slot index, clock offset) via
+`possible_logging_function__var_args`. This is **self-contained,
+unambiguous evidence**: an explicit call to the Kovah-named LE Channel
+Selection Algorithm event sender, immediately preceded by a diagnostic
+batch-dump trigger and immediately followed by per-channel-slot
+enable/ref-count bookkeeping — exactly the completion-notification pattern
+expected for "connection now has its channel-selection-algorithm decided,
+notify the host and update internal channel/slot bookkeeping." **Clears the
+HIGH bar.**
+
+### Rename applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x80055204` | `FUN_80055204` | `le_channel_selection_algorithm_event_dispatch` | Self-contained decompile: explicitly calls the already-named, Kovah-labeled `send_evt_Meta_subevent_0x12` (LE Channel Selection Algorithm meta-subevent) immediately after a diagnostic batch-dump trigger and immediately before per-channel-slot enable/ref-count bookkeeping — an unambiguous connection-setup-completion notification dispatcher. |
+
+Applied via `RenamePass8Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log ("RENAMED
+0x80055204: FUN_80055204 -> le_channel_selection_algorithm_event_dispatch",
+"RENAME COMPLETE").
+
+### Pass 8 summary
+
+- Extended cold-triage ranking from size-tier 21-40 (Pass 5/6/7) into rank
+  26-50 (size-tier 41+), 301 unnamed functions outside the already-triaged
+  set.
+- Decompiled the top 3 candidates by xref count. 1 new HIGH rename
+  (`0x80055204` → `le_channel_selection_algorithm_event_dispatch`), 2 new
+  MEDIUM-HIGH reads documented but not renamed (`0x80055c80` PHY/role-class
+  register-programming function, `0x80053710` slot-time/clock-offset commit
+  function).
+- Region-wide unnamed count: 345 → 344.
+
+**Status**: PASS 8 COMPLETE. Yield (1 HIGH) continues this region's
+productive streak (Pass 4: 1, Pass 5: 1, Pass 6: 3, Pass 7: 1, Pass 8: 1) —
+8 consecutive passes, none with a 0-HIGH-yield pass since Pass 3c. Per the
+project's pivot policy (parking only after thin/0 yield), this region
+remains productive and is **not** parked. Next continuation: either (a)
+decompile more of the rank-26-50 list (`0x8005b79c`, `0x8005a924`,
+`0x80057180`, the next-highest by xref count after the 3 already
+decompiled), or (b) apply the helper-confirmation technique to this pass's
+2 new MEDIUM-HIGH holdovers' callees (`FUN_8004fa64` for `0x80053710`;
+`0x80055c80`'s callees are all register-pointer writes with no further
+helper chain to confirm).
