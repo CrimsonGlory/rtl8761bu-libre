@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 2 (TARGETED TRIAGE) — 2026-06-22
+**Status**: PASS 2 COMPLETE (2026-06-23); PASS 3 (cold-triage of 307 unnamed) STAGED
 
 ## Overview
 
@@ -98,8 +98,8 @@ If enumeration script completes successfully:
 | Metric | Current | Target |
 |--------|---------|--------|
 | Region total functions | 319 | 319 |
-| Already high-confidence | ~40 (12.5%) | 319 (100%) |
-| Thin-named (decompile pending) | 12 (3.8%) | 0 (all high/medium) |
+| Already high-confidence | ~52 (16.3%, +12 from Pass 2) | 319 (100%) |
+| Thin-named (decompile pending) | 0 (3.8% → 0, Pass 2 complete) | 0 (all high/medium) |
 | Unnamed (cold triage) | 307 (96%) | 0 (all named) |
 
 ---
@@ -139,4 +139,78 @@ To be filled in after `BatchDecompileList.java` output is reviewed.
 
 ---
 
-**NEXT**: Execute step 1–3 above; then update rom_function_index.md + self-chain [TODO] for remaining 307 unnamed.
+## Pass 2 — Batch Decompile EXECUTED (2026-06-23)
+
+All 12 thin-named functions decompiled successfully via 3 split batches
+(`BatchDecompile80040000_B1/B2/B3.java`, 4 functions each — split up-front per
+the 0x80050000 Pass 3c log-truncation lesson; each batch's log stayed well
+under the 100KB single-window limit). All 12 reached **HIGH confidence** and
+were renamed via an updated `RenameBatch1Region80040000.java`.
+
+### Findings summary
+
+| Address | Old name | New name | Confidence basis |
+|---|---|---|---|
+| `0x80041c18` | `fHCI_Exit_Periodic_Inquiry_Mode_0x04` | *(unchanged)* | Confirmed: clears 4 state fields + EIR ptr/len, calls 2 helper fns — matches HCI Exit Periodic Inquiry Mode semantics |
+| `0x80042188` | `assoc_w_tLC_RX` | `LC_event_RX_dispatcher` | Confirmed: ~15-case switch on Link-Controller RX opcode field, calls many already-known helpers (`send_evt_Meta_subevent_0x11`, etc.) |
+| `0x80042420` | `assoc_w_tLC_TX` | `LC_event_TX_dispatcher` | Confirmed: ~14-case switch on LC TX opcode field, incl. interrupt-disable + free-list teardown loop |
+| `0x80042a14` | `check_new_power_val!=0` | `check_new_power_val_nonzero` | Trivial nonzero check, cosmetic rename only |
+| `0x80042a28` | `check_if_at_max_power_(6)` | `check_power_val_below_max_limit_6` | Confirmed comparison against configured max-limit byte |
+| `0x80042a3c` | `increment_new_power_val_if_<_6` | `increment_power_val_if_less_than_6` | Confirmed clamp-then-increment |
+| `0x80042a58` | `increment_new_power_val_if_!=_0` | `decrement_power_val_if_nonzero` | **Correction**: decompile shows `param - 1`, i.e. decrement, not increment as Kovah's original guess had it |
+| `0x80042b38` | `return_RSSI` | `return_RSSI_value` | Confirmed: optional HW-hook fn-pointer override, else config-struct-derived RSSI formula |
+| `0x80043810` | `called_by_fHCI_Remote_Name_Request_3` | `remote_name_request_feature_index_selector` | Confirmed: selects feature/connection index (0-0xff, 0xff = none) based on config flags + feature-page state |
+| `0x80044430` | `OGC_3_default_func_3` | `LMP_PDU_0xc6d_feature_page_bit_toggle` | Confirmed: handles only LMP opcode 0xc6d (toggles 2 feature-page bits); 0xc6c returns success, anything else returns error 0x12 — not a generic "default" stub |
+| `0x8004a71c` | `VSC_0xfc95_called1` | `VSC_0xfc95_clear_bit_helper` | Confirmed: single-bit-clear helper on a 16-bit mask |
+| `0x8004c0f4` | `LMP__26F__sends_LE_HCI_Events` | `LMP_opcode_0x26F_LE_event_router` | Confirmed: 11-case switch routing to the already-documented LE Meta Event sender cluster — this is the central dispatcher feeding that cluster |
+
+**Net effect**: all 12 thin-named functions upgraded low/medium → **HIGH
+confidence**. One factual correction (`0x80042a58`: increment → decrement).
+Two functions (`0x80042188`, `0x80042420`) confirmed as genuine LC-layer
+RX/TX dispatchers, tying the eSCO/SCO connection-type cluster together with
+the broader Link Controller event-handling machinery. `0x8004c0f4` confirmed
+as the dispatcher feeding the already-documented LE Meta Event cluster.
+
+Full decompiled C for all 12 functions is preserved in the Ghidra run logs
+(see `mcp__wairz__list_ghidra_logs` for `BatchDecompile80040000_B1/B2/B3.java`
+and `RenameBatch1Region80040000.java` runs, 2026-06-23).
+
+## Pass 3 — Cold-Triage Staging for 307 Unnamed (2026-06-23)
+
+Following the framework established for region `0x80050000` Pass 3
+(`ColdTriageRegion80050000Pass3.java` + `BatchDecompileList80050000Pass3Top20.java`),
+the same approach is staged here but not yet executed:
+
+**Stage 3a plan**:
+1. Run a `ColdTriageRegion80040000Pass3.java` script (to be created, mirroring
+   the 0x80050000 version) that buckets the 307 unnamed functions by size tier:
+   - Tier 1 (1-50B): expect ~10-15% — trivial accessors/setters (similar to the
+     power-val helpers just decompiled)
+   - Tier 2 (51-150B): expect ~10-15% — small state-check/update helpers
+   - Tier 3 (151-300B): expect ~15-20% — single-purpose handlers
+   - Tier 4 (301-600B): expect ~30-40% — medium dispatchers/handlers
+   - Tier 5 (601B+): expect ~15-20% — large dispatchers/state machines (e.g.
+     the just-confirmed `LC_event_RX_dispatcher` at 634B would land here)
+2. Rank by size × estimated xref count (proxy for architectural importance)
+   to produce a top-20/30 candidate list, same pattern as
+   `BatchDecompileList80050000Pass3Top20.java`.
+3. Given two confirmed sub-regions already exist in this 64KB span —
+   "lower half" (0x80040000-0x80045000, connection-type dispatch + LC RX/TX
+   dispatchers now confirmed) and "upper half" (0x80046000-0x8004ffff, LE
+   Meta Event cluster + surrounding helpers) — the top candidates should be
+   drawn from **both halves** to keep triage balanced, rather than letting
+   one half dominate.
+
+**Stage 3b (execution, not yet run)**: once the ranking script's top-20/30
+list is produced, batch-decompile via 2-4-function-per-batch scripts (per the
+log-size lesson reconfirmed in this Pass 2), review for HIGH-confidence
+candidates, rename, and update this doc + `rom_function_index.md` again.
+
+**Not yet done**: creating `ColdTriageRegion80040000Pass3.java` itself. This
+is the immediate next actionable step for whoever picks up Pass 3.
+
+---
+
+**NEXT**: Create and run `ColdTriageRegion80040000Pass3.java` (cold-triage
+ranking of the 307 unnamed functions by size/xref), then batch-decompile the
+resulting top-20/30 candidates across both region halves.

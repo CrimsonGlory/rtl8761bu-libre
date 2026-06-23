@@ -2032,18 +2032,54 @@ completion):
           Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
           → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
-          Status: PASS 1 enumeration DONE (319 functions: 12 thin-named, 307 unnamed).
-          Stage 2a: Batch decompile scripts prepared in /root/wairz/ghidra/scripts/:
-            - ListRegion0x80040000.java (confirm baseline)
-            - BatchDecompileList80040000.java (targets 12 thin-named)
-            - RenameBatch1Region80040000.java (persist renames post-decompile)
-          Targets: 0x80041c18 (64B), 0x80042188 (634B), 0x80042420 (418B), 8 more power/HCI/LMP handlers
-          Ready for supervised MCP execution (mcp__wairz__run_ghidra_headless, GZF process mode,
-          use_saved_project=true) — same pattern successfully used for region 0x80050000 Pass 3c.
-          If any batch's log output risks exceeding read_ghidra_log's ~100KB single-window read
-          limit, split into smaller per-function or 2-3-function batches up front (lesson learned
-          from 0x80050000 Pass 3c's log-truncation issue).
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
+          Status: PASS 1 enumeration was already DONE (319 functions: 12 thin-named, 307 unnamed).
+          Executed Pass 2 for real this iteration: split BatchDecompileList80040000.java into 3
+          smaller batches (BatchDecompile80040000_B1/B2/B3.java, 4 functions each) up front per the
+          0x80050000 Pass 3c log-truncation lesson — all 3 batches ran clean, well under the 100KB
+          read_ghidra_log window each. All 12/12 thin-named functions decompiled successfully (0
+          failures) via mcp__wairz__run_ghidra_headless (GZF process mode, use_saved_project=true).
+          Reviewed each decompile; all 12 reached HIGH confidence. Updated RenameBatch1Region80040000.java
+          with confirmed/corrected names and ran it: 12/12 renamed successfully. Highlights:
+            0x80042188 'assoc_w_tLC_RX' → 'LC_event_RX_dispatcher' (confirmed ~15-case LC RX opcode switch)
+            0x80042420 'assoc_w_tLC_TX' → 'LC_event_TX_dispatcher' (confirmed ~14-case LC TX opcode switch)
+            0x80042a58 'increment_new_power_val_if_!=_0' → 'decrement_power_val_if_nonzero'
+              (CORRECTION: decompile shows param-1, i.e. decrement — Kovah's original guess was wrong)
+            0x8004c0f4 'LMP__26F__sends_LE_HCI_Events' → 'LMP_opcode_0x26F_LE_event_router' (confirmed
+              as the dispatcher feeding the already-documented LE Meta Event sender cluster)
+          Full per-function findings + rename table in
+          analysis/rom/reverse_engineering_region_0x80040000.md's new "Pass 2 — Batch Decompile EXECUTED"
+          section. rom_function_index.md updated (12 rows upgraded to high confidence with decompile
+          evidence). analysis/INDEX.md one-liner updated.
+          Stage 3 triage (per ticket's "stage, don't necessarily execute" instruction): created
+          /root/wairz/ghidra/scripts/ColdTriageRegion80040000Pass3.java, mirroring
+          ColdTriageRegion80050000Pass3.java's size-tier framework but extended to rank candidates
+          separately from both region halves (lower 0x80040000-0x80044fff: conn-type dispatch / LC
+          RX-TX; upper 0x80045000-0x8004ffff: LE Meta Event cluster + helpers) so Pass 3b doesn't
+          let one half dominate. Script is staged, NOT yet executed.
+          → analysis/rom/reverse_engineering_region_0x80040000.md (Pass 2 complete + Pass 3 staging section)
+          → analysis/rom/rom_function_index.md (12 rows upgraded to HIGH)
+          → analysis/INDEX.md (region one-liner updated)
+          → /root/wairz/ghidra/scripts/BatchDecompile80040000_B1/B2/B3.java (new, executed),
+            RenameBatch1Region80040000.java (updated with real names, executed),
+            ColdTriageRegion80040000Pass3.java (new, staged not executed)
+
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile top candidates from both halves) (2026-06-23)
+          No other [TODO] existed in this file to promote per wip-loop rule, so self-chaining the
+          natural continuation of this region's work.
+          Stage 3a script ColdTriageRegion80040000Pass3.java is staged (see ticket above) but not run.
+          Next concrete steps:
+            1. Run ColdTriageRegion80040000Pass3.java (GZF process mode) to get the actual ranked
+               top candidates from both region halves (lower: conn-type dispatch/LC dispatchers;
+               upper: LE Meta Event cluster + helpers).
+            2. Write a BatchDecompile80040000Pass3Top*.java with the real top-N addresses from step 1's
+               output (the ranking script only has a dynamic algorithm, not literal addresses yet —
+               same gotcha hit during 0x80050000 Pass 3/3b).
+            3. Execute in 2-4-function batches (per the log-size lesson) via mcp__wairz__run_ghidra_headless.
+            4. Review each decompile; rename only functions clearing the HIGH-confidence bar (cross-xref
+               or clear single-purpose behavior) — leave MEDIUM/MEDIUM-HIGH evidence unrenamed per this
+               project's established practice (see 0x80050000 Pass 3b/3c precedent).
+            5. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
