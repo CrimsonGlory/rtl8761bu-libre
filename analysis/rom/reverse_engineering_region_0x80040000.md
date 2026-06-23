@@ -324,3 +324,62 @@ candidate `0x80045964`) over the HIGH bar. Pass 3 (top-15-per-half sweep) is
 considered **complete**; a future pass should either (a) retry once the
 xrefs tooling gap is resolved, or (b) continue cold-triaging the remaining
 ~280 unnamed functions in this region outside the top-15-per-half lists.
+
+---
+
+## Pass 4 — Cold-triage of remaining ~281 unnamed (outside top-15 lists) EXECUTED (2026-06-23)
+
+`ColdTriageRegion80040000Pass4.java` re-ran the cold-triage, explicitly
+excluding the 30 addresses already triaged in Pass 3 + continuation, and
+added in-script xref counts (using `ReferenceManager.getReferencesTo`, which
+works fine from inside a Ghidra script context — distinct from the MCP
+`xrefs_to`/`find_callers` wrapper tools, which still fail with "Binary not
+found" against this GZF in process mode; this script-side query sidesteps
+that specific gap for ranking purposes only, not as a general fix).
+
+Result: 275 unnamed functions remain outside the top-15 lists (size tiers:
+89 in 1-50B, 117 in 51-150B, 49 in 151-300B, 20 in 301-600B, 0 above 600B —
+the >600B tier is now fully exhausted by Pass 3's top-15 sweep). Ranking the
+151-600B tier (69 functions) by xref count then size produced a short list
+of high-value candidates topped by `0x8004090c` (246B, 11 xrefs),
+`0x8004ca7c` (192B, 8 xrefs), `0x8004f580` (314B, 7 xrefs), `0x8004bde8`
+(354B, 6 xrefs), `0x800431a0` (184B, 5 xrefs).
+
+**Decompiled this pass** (top-3 by xref count, via `BatchDecompile80040000Pass4A.java`):
+
+| Address | Size | xrefs | Behavior | Confidence |
+|---|---|---|---|---|
+| `0x8004090c` | 246B | 11 | `void FUN_8004090c(void)`: disables interrupts, calls `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot` to find a free/mismatched connection slot, reads a per-slot byte field from `big_ol_struct`, conditionally calls `FUN_80043158` (lookup-table indexed by that byte) and `LMP__259__FUN_800702e4`, then conditionally calls `possible_logger_called_if_no_patch3` (event-ish call with const `600`) before re-enabling interrupts. Looks like a connection-slot mismatch/cleanup handler tied into the LMP_259 event path, but no single confirmed purpose distinguishes it from a generic "BD_ADDR slot reconciliation" helper. | MEDIUM-HIGH |
+| `0x8004ca7c` | 192B | 8 | `void FUN_8004ca7c(uint param_1, uint param_2)`: indexes the established `big_ol_struct`-family connection-record array by `param_1` (conn index), gated on flag bit 0 of `field3_0x3`. When `param_2==0`, clears the 4 already-confirmed RSSI/link-quality rolling counters (`field70_0x46`/`field76_0x4c`/`field74_0x4a`/`field68_0x44` — "good"/"bad-class-A"/"bad-class-B"/"marginal", per the already-documented `conn_rssi_quality_history_update`), copies the RSSI field (`field40_0x28`) into `field72_0x48`, then calls `VSC_0xfc95_called2`. The `param_2!=0` branch does the analogous reset on a sibling pair of fields and, for `param_2==2`, sets a flag byte (`field135_0x8e`). Both branches converge on the established VSC_0xfc95 triad (`LMP__25B__most_common_for_VSCs1`/`VSC_0xfc95_called2`/`LMP__268__most_common_for_VSCs2_checks_fptr_patch`) — the exact same 3-function call pattern documented gating the `link_state6_afh_or_channel_feature_toggle1/2/3` siblings in region 0x80000000. The combination of (a) touching all 4 independently-confirmed quality-history fields together and (b) the confirmed VSC_0xfc95 triad gives two independent cross-confirmations. | **HIGH** — renamed `conn_link_quality_history_reset_and_vsc_0xfc95_trigger` |
+| `0x8004f580` | 314B | 7 | `undefined4 FUN_8004f580(int *param_1)`: classic intrusive doubly-linked-list insert, sorted by a wraparound-masked delta key (`DAT_8004f6c4`/`c8` masks), inserting into one of two lists selected by a bit in `*(byte*)(param_1+2)` (with a third early-return path logging via `possible_logging_function__var_args` when `param_1[1]!=0`). No HCI-handler signature, no VSC/LMP call — pure internal data-structure helper (looks like the generic timer/event-queue insertion primitive used elsewhere in the firmware). | MEDIUM (clear generic-infra purpose, not specific enough for a precise verb-noun name without knowing which timer/queue subsystem calls it) |
+
+**Net effect this pass**: 1 of 3 decompiled candidates renamed to HIGH
+confidence (`conn_link_quality_history_reset_and_vsc_0xfc95_trigger`); the
+other 2 documented above at MEDIUM/MEDIUM-HIGH and left as `FUN_*`.
+
+**Tooling note (re-confirmed, not re-investigated)**: the MCP
+`xrefs_to`/`find_callers` tools still fail with "Binary not found" against
+this GZF in process mode. This pass's xref counts came from an in-script
+`ReferenceManager` query inside `ColdTriageRegion80040000Pass4.java` itself
+(which runs fine, since it executes inside the live Ghidra script context
+rather than going through the separate MCP wrapper) — this is a usable
+workaround for ranking purposes within a single script run, not a fix for
+the underlying MCP tool gap, which remains open.
+
+Full decompiled C for all 3 functions is preserved in the Ghidra run log for
+`BatchDecompile80040000Pass4A.java` (2026-06-23).
+
+### Region 0x80040000 Pass 4 status: 272 unnamed functions remain untriaged
+
+After this pass, 272 of the original ~281 "outside top-15" unnamed functions
+remain completely untouched (3 were decompiled this pass: 1 renamed, 2
+parked at MEDIUM/MEDIUM-HIGH). The remaining 151-600B tier still has 66
+ranked-but-undecompiled candidates (next up: `0x8004bde8` at 354B/6 xrefs,
+`0x800431a0` at 184B/5 xrefs, `0x8004ef08` at 526B/4 xrefs, `0x8004e5ac` at
+188B/4 xrefs, `0x80040060` at 184B/4 xrefs, `0x8004326c` at 166B/4 xrefs,
+`0x8004b3c0` at 162B/4 xrefs — see `ColdTriageRegion80040000Pass4.java`'s
+full ranked output for the complete list). The 1-150B tiers (206 functions)
+remain essentially unexplored — likely diminishing returns for HIGH-confidence
+renames given their size (less code = less distinguishing behavior to
+cross-confirm), but a future pass could still spot-check the highest-xref
+ones in that tier if the mid-tier list gets exhausted first.

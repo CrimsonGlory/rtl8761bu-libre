@@ -2115,26 +2115,49 @@ completion):
           limiting factor keeping several MEDIUM-HIGH candidates (the sibling pairs, the scan-activity
           candidate) from reaching HIGH confidence without further work.
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 4 (cold-triage remaining ~281 unnamed outside top-15 lists) (2026-06-23)
-          Pass 3 + continuation exhausted the top-15-largest-per-half candidate lists (30 functions),
-          yielding 3 HIGH-confidence renames total (init_global_connection_table_and_bt_state,
-          HCI_Setup_Synchronous_Connection_handler, HCI_Accept_Synchronous_Connection_Request_handler)
-          plus ~27 functions parked at MEDIUM/MEDIUM-HIGH. ~281 unnamed functions remain in this
-          region (0x80040000-0x8004ffff) outside those top-15 lists, mostly in the smaller size tiers
-          (1-300B) per ColdTriageRegion80040000Pass3.java's size-tier buckets (89 in 1-50B, 117 in
-          51-150B, 49 in 151-300B). Next concrete steps:
-            1. Run a fresh cold-triage pass (reuse/extend ColdTriageRegion80040000Pass3.java) to
-               re-rank the remaining unnamed functions, this time including xref counts where
-               available, to find the next-most-promising tier-3/tier-4 (151-600B) candidates.
-            2. Batch-decompile in 2-3-function batches via mcp__wairz__run_ghidra_headless (GZF
-               process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
-               use_saved_project=true) — keep batches small per the recurring log-truncation lesson.
-            3. Before deep manual cross-confirmation work, consider asking the user whether the
-               mcp__wairz__xrefs_to / find_callers "Binary not found" gap against GZF process-mode
-               projects can be fixed — several MEDIUM-HIGH candidates from this and the prior pass
-               are blocked on exactly that tooling gap (per CLAUDE.md: do not work around wairz
-               limitations silently, flag them).
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 4 (cold-triage remaining ~281 unnamed outside top-15 lists) (2026-06-23)
+          Created ColdTriageRegion80040000Pass4.java, explicitly excluding the 30 addresses already
+          triaged in Pass 3 + continuation, with in-script xref counts (ReferenceManager query —
+          works fine inside a live Ghidra script context, unlike the MCP xrefs_to/find_callers
+          wrapper tools which still fail "Binary not found" against this GZF; used only for ranking,
+          not as a fix for that gap). Result: 275 unnamed remain outside top-15 (89/117/49/20/0 across
+          the five size tiers — 601+B tier now fully exhausted). Ranked the 151-600B tier (69
+          functions) by xref count; decompiled top-3 via BatchDecompile80040000Pass4A.java:
+            0x8004090c (246B, 11 xrefs): slot-mismatch/cleanup handler tied to LMP_259 event path —
+              MEDIUM-HIGH, no single confirming signature, left as FUN_*.
+            0x8004ca7c (192B, 8 xrefs): clears the 4 already-named RSSI/quality-history counters
+              (field70/76/74/68, "good"/"bad-A"/"bad-B"/"marginal") and calls the established
+              VSC_0xfc95 triad (LMP__25B/VSC_0xfc95_called2/LMP__268) — same triad confirmed gating
+              the link_state6_afh_or_channel_feature_toggle1/2/3 siblings. Two independent
+              cross-confirmations -> HIGH, renamed conn_link_quality_history_reset_and_vsc_0xfc95_trigger
+              via RenameBatch80040000Pass4.java.
+            0x8004f580 (314B, 7 xrefs): generic intrusive doubly-linked-list insert (timer/event-queue
+              primitive) — no HCI/LMP/VSC signature — MEDIUM, left as FUN_*.
+          Net: 1 of 3 decompiled candidates reached HIGH. ~272 unnamed remain untriaged in this region
+          (66 more ranked-but-undecompiled 151-600B candidates, plus the unexplored 1-150B tiers).
+          Updated reverse_engineering_region_0x80040000.md (new Pass 4 section), rom_function_index.md
+          (new HIGH row for 0x8004ca7c, region count 303->301 reconciling the missed Pass-3-continuation
+          rename), analysis/INDEX.md.
+
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 5 (continue 151-600B tier cold-triage) (2026-06-23)
+          Pass 4 ranked the 69 remaining 151-600B-tier unnamed functions (outside the top-15 lists) by
+          xref count and decompiled only the top 3 (1 HIGH rename: conn_link_quality_history_reset_and_vsc_0xfc95_trigger
+          at 0x8004ca7c). 66 ranked candidates remain undecompiled in that tier; the 1-150B tiers
+          (206 functions) are entirely unexplored. Next concrete steps:
+            1. Batch-decompile the next ~6-9 candidates from ColdTriageRegion80040000Pass4.java's
+               ranked output in 2-3-function batches via mcp__wairz__run_ghidra_headless (GZF process
+               mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf, use_saved_project=true)
+               — keep batches small per the recurring log-truncation lesson. Priority order from Pass 4:
+               0x8004bde8 (354B,6 xrefs), 0x800431a0 (184B,5), 0x8004ef08 (526B,4), 0x8004e5ac (188B,4),
+               0x80040060 (184B,4), 0x8004326c (166B,4), 0x8004b3c0 (162B,4), then the xrefs:3/2 tier.
+            2. Cross-confirm against already-named structs/constants/call patterns as in Pass 4 (the
+               mcp__wairz__xrefs_to / find_callers "Binary not found" gap against this GZF in process
+               mode remains open and does not need re-flagging unless directly blocking a specific
+               candidate worth calling out).
+            3. Only rename functions reaching HIGH confidence; leave MEDIUM/MEDIUM-HIGH unrenamed.
             4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
+            5. If the 151-600B tier gets fully exhausted before easy wins run out, consider spot-checking
+               the highest-xref candidates in the 51-150B tier next, or pivot to a different region.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
