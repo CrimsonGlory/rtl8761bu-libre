@@ -2154,23 +2154,49 @@ completion):
           reverse_engineering_region_0x80040000.md (Pass 5 section) and analysis/INDEX.md.
           rom_function_index.md summary counts unchanged (no renames to record this pass).
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 6 (finish xrefs:2 tier, then pivot if exhausted) (2026-06-23)
-          Pass 5 left the 151-600B tier at 59 ranked-but-undecompiled candidates. The xrefs:2 tier
-          (9 functions) is the next cheap target: 0x8004eb18 (404B), 0x8004f374 (368B), 0x8004f730 (230B),
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 6 (finish xrefs:2 tier, then pivot if exhausted) (2026-06-23)
+          Batch-decompiled the remaining 9 xrefs:2-tier candidates in 3 small batches
+          (BatchDecompile80040000Pass6A/B/C.java): 0x8004eb18 (404B), 0x8004f374 (368B), 0x8004f730 (230B),
           0x800442bc (222B), 0x8004ea2c (220B), 0x80043884 (210B), 0x8004c940 (194B), 0x8004f25c (186B),
-          0x80043984 (178B). Next concrete steps:
-            1. Batch-decompile these 9 in 2-3 small batches (3+3+3) via mcp__wairz__run_ghidra_headless
-               (GZF process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
-               use_saved_project=true) — keep batches small per the recurring log-truncation lesson.
-            2. Cross-confirm against already-named structs/constants/call patterns (the xrefs_to/
-               find_callers "Binary not found" gap against this GZF remains open; no need to re-flag).
+          0x80043984 (178B). 2 of 9 reached HIGH confidence and were renamed: 0x80043884 ->
+          remote_name_request_feature_apply_8, 0x80043984 -> remote_name_request_feature_apply_4 — both
+          confirmed via exact structural identity (same field208_0xd8/byte_0x16a/int_0x10 gating fields)
+          with the already-HIGH sibling remote_name_request_feature_index_selector (0x80043810). The
+          other 7 sit at MEDIUM/MEDIUM-HIGH (2 new structural-sibling pairs identified: register-
+          programming pair 0x8004eb18/0x8004ea2c, and 0x8004f25c joining the Pass 4/5 generic-queue
+          cluster as its search/remove counterpart). Updated reverse_engineering_region_0x80040000.md
+          (Pass 6 section), rom_function_index.md (2 new entries), analysis/INDEX.md.
+          Pivot decision: per the ticket's own policy (6 consecutive passes on this region's remainder
+          with thin yield relative to effort — this pass's 2-of-9 came from one already-adjacent family,
+          not fresh discovery), region 0x80040000 work is parked here. Checked analysis/INDEX.md:
+          region 0x80060000 is already COMPLETE (zero unclassified, Pass 3 final). Region 0x80070000 has
+          the most remaining unexplored work of any ROM region (245 total functions, 191 unnamed, only
+          Pass 1 enumeration + Pass 2's 6-function spot-decompile done) — selected as the pivot target.
+
+[NEXT]   Full RE: ROM region 0x80070000-0x8007ffff PASS 3 (batch-decompile staged Pass 2 targets) (2026-06-23)
+          Region status (from analysis/INDEX.md): 245 total functions (191 unnamed + 54 thin-named).
+          Pass 1 (2026-06-22) enumerated and categorized the region (LMP/HCI/utility/accessor/VSC
+          clusters), confirming the largest function LMP_480_only_path_that_goes_to_real_LMP_switch
+          (0x80070c04, 1306B) and the HIGH-confidence assoc_w_tLMP dispatcher (0x80071634, 462B).
+          Pass 2 (2026-06-22) batch-decompiled 6 largest functions, all reaching HIGH confidence
+          (incl. 0x80070c04 confirmed as central LMP PDU dispatcher with 16+ case arms; 0x80074fa8
+          confirmed as VSC/logging event logger). Pass 2 staged concrete next targets — pick these up:
+            1. Batch-decompile the 5 staged Pass 2 targets in 2 small batches (3+2) via
+               mcp__wairz__run_ghidra_headless (GZF process mode,
+               binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf, use_saved_project=true):
+               0x8007095c (568B opcode variant dispatcher), 0x800754c4 (402B struct init),
+               0x80073348 (362B crypto post), 0x80071d98 (306B feature negotiation),
+               0x80074c8c (232B LMP_CH). Keep batches small per the recurring log-truncation lesson.
+            2. Cross-confirm against already-named structs/constants/call patterns from this region's
+               LMP/HCI/VSC clusters and from other regions' already-documented send_LMP_pkt/
+               hci_event_sender primitives.
             3. Only rename functions reaching HIGH confidence; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md (if any renames),
+            4. Update reverse_engineering_region_0x80070000.md, rom_function_index.md (if any renames),
                analysis/INDEX.md.
-            5. Given 5 straight passes with no/low HIGH-rename yield in this region's remainder, if this
-               pass also yields 0-1 HIGH renames, STRONGLY consider pivoting to a less-explored region
-               (e.g. 0x80060000 or 0x80070000 — check analysis/INDEX.md for current pass status of each)
-               for the next ticket rather than continuing to grind this region's xrefs:1 tier.
+            5. If a fresh top-N-by-size or cold-triage ranking script for this region would help target
+               the remaining 185 unnamed functions (191 minus the 6 from Pass 2), consider creating one
+               (following the ColdTriageRegion800X0000PassN.java pattern used in other regions) before
+               the next pass, since this region currently lacks a triage script of its own.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).

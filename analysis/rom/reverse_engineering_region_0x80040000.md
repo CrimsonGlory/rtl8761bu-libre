@@ -444,3 +444,57 @@ either (a) continue the xrefs:2/1 tier for a few more easy-win attempts, or
 (b) pivot to a different, less-explored region (e.g. 0x80060000 or
 0x80070000) where fresh top-15-by-size sweeps may yield a better HIGH-rename
 hit rate than this region's now-thoroughly-picked-over remainder.
+
+## Pass 6 — Finish xrefs:2 tier EXECUTED (2026-06-23)
+
+Batch-decompiled the remaining 9 xrefs:2-tier candidates in 3 small batches
+(`BatchDecompile80040000Pass6A/B/C.java`, 3 each): `0x8004eb18` (404B),
+`0x8004f374` (368B), `0x8004f730` (230B), `0x800442bc` (222B), `0x8004ea2c`
+(220B), `0x80043884` (210B), `0x8004c940` (194B), `0x8004f25c` (186B),
+`0x80043984` (178B).
+
+| Address | Size | Behavior | Confidence |
+|---|---|---|---|
+| `0x80043884` | 210B | `uint FUN_80043884(void)`: gates on the exact same struct-field pattern already confirmed HIGH in `remote_name_request_feature_index_selector` (`0x80043810`, 102B) — `field208_0xd8`, `byte_0x16a`/`int_0x10` on `the_0x300` struct, `field_0x173`/`field_0x171`, `DAT_*` config flags — but where `0x80043810` only *selects* an index, this function goes further: after the gate passes (mask `field208_0xd8 & 8`), it computes an offset from a feature-page ushort field and calls `FUN_8003ca28()` to commit/apply it, writing the result into a struct field at `+0x11c`. This is the **apply-side counterpart** to the already-confirmed selector, sharing every gating field 1:1 — sufficient direct structural identity with an existing HIGH function to clear the bar without a caller xref. | **HIGH** — renamed `remote_name_request_feature_apply_8` |
+| `0x80043984` | 178B | `void FUN_80043984(void)`: near-byte-identical twin of `0x80043884` — same gate fields, same `the_0x300`/`config_struct` layout, differing only in the bitmask tested on `field208_0xd8` (`4` instead of `8`) and the commit function called (`FUN_8003c94c` instead of `FUN_8003ca28`). Same reasoning as above: direct structural sibling of an existing HIGH function, clears the bar. | **HIGH** — renamed `remote_name_request_feature_apply_4` |
+| `0x8004eb18` | 404B | `void FUN_8004eb18(undefined4,int,ushort)`: a long sequence of unaligned bitfield writes into ~14 different `DAT_*`-pointed hardware/config registers, packing source values from a `puVar3` struct (offsets 5/8/0xc/0xe/0x10/0x11/0x12/0x14/0x16) and from `param_2` (offsets 4/0xa/0xc/0xe/0x10/0x12) — classic "apply negotiated connection parameters to baseband/HW registers" shape (akin to other per-connection register-programming routines elsewhere in this region), but no command-name-level signature distinguishes which specific parameter set this is. | MEDIUM |
+| `0x8004f374` | 368B | `void FUN_8004f374(int,undefined4*,int)`: pure diagnostic/logging dump — 5 separate `possible_logging_function__var_args` calls covering different sub-structs reachable from `param_2[0..4]`, gated by a byte-field bitmask (`bVar1 & 0x3f`). No control-flow side effects beyond logging; a "dump connection/LMP state for debug" helper. | MEDIUM |
+| `0x8004f730` | 230B | `void FUN_8004f730(int)`: optional fn-pointer-hook short-circuit (`PTR_DAT_8004f818`), then a bit-scan loop (5 iterations) over a byte field, conditionally patching 2-3 byte fields from an "active" struct into a "current" struct (cases differ by `param_1+8 & 7`), with a logging call on one path. Generic per-connection state-field copy/sync helper; pattern resembles a feature/parameter sync routine but no unique terminator. | MEDIUM |
+| `0x800442bc` | 222B | `void FUN_800442bc(void)`: a large reset/zero-out routine — zeroes ~20 `DAT_*` globals and struct fields, loops clearing a 0xc-entry array and a 10-entry array (interrupt-disabled for the second), and conditionally calls `LMP__25B__most_common_for_VSCs1()` if a sentinel field is not `-1`. Shape strongly resembles a **subsystem-wide state-reset/teardown** routine (clearing connection counters, feature flags, and an outstanding-VSC-request sentinel), parallel in spirit to the codec/role-switch reset sweep already documented at `0x8004326c`, but the breadth of unrelated-looking fields touched (no single named struct family) keeps this below HIGH absent a caller xref. | MEDIUM-HIGH |
+| `0x8004ea2c` | 220B | `void FUN_8004ea2c(undefined4,byte*,ushort)`: short, dense bitfield-pack routine writing into 3 `DAT_*`-pointed HW config registers from `param_2`/`param_3`/a struct field, with 2 follow-up OR-flag sets gated on 2-bit sub-fields exceeding 1. Same general "apply negotiated parameter to baseband register" shape as `0x8004eb18` (smaller variant, fewer registers) — likely a sibling/simplified-path version of that function, but no unique signature to confirm which parameter. | MEDIUM |
+| `0x8004c940` | 194B | `void FUN_8004c940(uint param_1)`: indexes the `big_ol_struct` connection-record array (`0x1ac` stride) by `param_1`, under interrupt-disable swaps out and clears 3 fields (`field403_0x1a0`/`field407_0x1a4`/`field411_0x1a8` — an inline embedded list head), then walks the extracted list unlinking each node (clearing a 4-byte field at node+0x100) and calling a function-pointer hook with `(node, 5)` — logging on nonzero return — before incrementing a byte counter (`field89_0x59`) by the saved count and finally calling the already-named `send_evt_HCI_Number_Of_Completed_Packets()`. This is a **per-connection pending-packet list drain that feeds the HCI_Number_Of_Completed_Packets event**, a clear and specific purpose confirmed by the call terminus into an already-HIGH-confidence named function — but the exact list (TX queue vs ACL fragment queue) isn't independently confirmable without the struct field's name, so held at MEDIUM-HIGH rather than HIGH. | MEDIUM-HIGH |
+| `0x8004f25c` | 186B | `int* FUN_8004f25c(int,ushort*)`: a 2-list linked-list search (2 list heads at `local_10[0]/[1]`) with wraparound-masked delta-key comparison (matching the `0x8004f580`/`0x8004ef08` queue-key pattern from Pass 4/5) and an optional secondary match on a packed connection-handle-like ushort derived from list-node fields `0xb`/`0xc`. On match, unlinks the node from its list and returns it. This is the **search/remove counterpart** to the Pass 4/5 queue-insert/dequeue pair (`0x8004f580` insert, `0x8004ef08` dequeue, this one a keyed lookup-and-remove) — strengthens that cluster's identification as a generic timer/event queue, but still no command-specific name available. | MEDIUM-HIGH |
+
+**Net effect this pass**: 2 of 9 decompiled candidates renamed to HIGH
+confidence (`remote_name_request_feature_apply_8`,
+`remote_name_request_feature_apply_4`) — both confirmed via exact structural
+identity (same gating struct fields) with the already-HIGH
+`remote_name_request_feature_index_selector` sibling. The other 7 sit at
+MEDIUM/MEDIUM-HIGH; two pairs of structural siblings were identified
+(`0x8004eb18`/`0x8004ea2c` register-programming pair, and `0x8004f25c`
+joining the Pass 4/5 queue-insert/dequeue cluster as its search/remove
+counterpart) but none independently confirm a command-specific name. This
+breaks the 5-pass HIGH-rename drought, though the yield (2 of 9, both from
+one tight family) confirms the region's broader remainder is still
+low-density for HIGH-confidence work absent the `xrefs_to`/`find_callers`
+tooling fix.
+
+Full decompiled C for all 9 functions is preserved in the Ghidra run logs for
+`BatchDecompile80040000Pass6A/B/C.java` (2026-06-23).
+
+### Region 0x80040000 Pass 6 status: pivoting to region 0x80070000
+
+The xrefs:2 tier is now fully exhausted (9/9 decompiled). 58 unnamed
+functions remain in the 151-600B tier (the xrefs:1 tier, next topped by
+`0x8004ba34` (534B), `0x8004a730` (456B), `0x8004ae74` (452B)), plus the
+fully-unexplored 1-150B tiers (206 functions). Per the project's standing
+pivot policy (6 consecutive passes — 3/3-cont/4/5/6 — with thin HIGH-rename
+yield relative to effort spent, this pass's 2-of-9 notwithstanding since both
+came from one already-adjacent family rather than fresh discovery), this
+region is parked here. Per `analysis/INDEX.md`, region `0x80060000` is
+**already complete** (zero unclassified), so it is not a candidate. Region
+`0x80070000` has the most remaining unexplored work of any ROM region: 245
+total functions, 191 unnamed, only Pass 1 (enumeration) and Pass 2 (6
+functions decompiled) done — Pass 2 already staged concrete next targets
+(`0x8007095c` 568B, `0x800754c4` 402B, `0x80073348` 362B, `0x80071d98` 306B,
+`0x80074c8c` 232B). The next ticket pivots there.
