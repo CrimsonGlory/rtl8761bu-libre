@@ -973,3 +973,112 @@ the cold-triage ranking past size-tier 21-40 (ranks 26+) if (a) doesn't
 yield new HIGH hits. Given three consecutive passes of modest-to-strong
 yield (Pass 4: 1, Pass 5: 1, Pass 6: 3), this region remains productive
 and is not yet a candidate for deprioritization vs. other regions.
+
+## Pass 7 — Helper confirmation on Pass 6 holdovers (2026-06-23)
+
+Continuation of the Pass 6 helper-confirmation technique, applied to both
+of Pass 6's new MEDIUM-HIGH holdovers (`0x8005faec`'s state-transition
+callees, `0x80058bb8`'s type-specific allocation helpers).
+
+### Angle 1: `0x8005faec`'s state-transition callees
+
+Decompiled all three: `FUN_8005d66c` (192B), `FUN_8005d7bc` (108B),
+`FUN_8005d744` (108B). All three share an identical structural pattern:
+each calls a shared lookup helper `FUN_8005d438` with a distinct constant
+key (`0x18`, `0x16`, `0x17` respectively), reads a small number of fields
+from the same `0x1ac`-stride per-connection struct array (offsets
+`0x11a`/`0x11b` for the two smaller functions, `0x21a`/`0x21c`/`0x11e`/
+`0x11f` plus a computed value written to `+0x120` for the larger one),
+invokes a function pointer read from a fixed `PTR_DAT`, and finishes by
+calling `possible_logging_function__var_args` with a fixed severity/format
+code (`0xcc` plus a distinct string-table offset per function) and the
+fields just read.
+
+This confirms `0x8005faec`'s callees are a small family of **per-state-key
+event dispatch handlers** — each one keyed by a different constant passed
+to the shared `FUN_8005d438` lookup, copying a couple of connection-record
+fields into a buffer, invoking a registered callback, and logging the
+result. This is consistent with (and supports) the Pass 6 hypothesis that
+`0x8005faec` is a per-connection link state-machine event handler dispatching
+to per-state callees. However, the constants `0x16`/`0x17`/`0x18` and struct
+fields `0x11a`/`0x11b`/`0x21a`/`0x21c` aren't pinned to named LMP/baseband
+opcodes or struct members — there's no string, comment, or other
+self-contained evidence in any of the three decompiles that names the
+specific phase/state each constant represents. This **does not clear the
+HIGH bar**: it confirms the dispatcher-family *shape* but not the specific
+semantic identity needed to safely rename `0x8005faec` or the state values.
+`0x8005faec` and its three callees remain unrenamed (still MEDIUM-HIGH /
+unnamed respectively).
+
+### Angle 2: `0x80058bb8`'s type-specific allocation helpers
+
+Decompiled both: `FUN_80058974` (184B, types 0/1) and `FUN_80058a5c` (340B,
+type 2).
+
+**`FUN_80058974`**: an unambiguous **circular free-list slot allocator**
+over a fixed 32-entry, 8-byte-record pool (selected via one of two
+`PTR_PTR` pool descriptors depending on the type-0-vs-1 argument). Pops the
+free-list head index, returns the pool-full sentinel `0xff` when the pool
+is exhausted, otherwise zeroes the new record's first two words, relinks
+the free list, sets type/role/flag bits in the record's status byte, and
+copies a 6-byte BD_ADDR into the record via `optimized_memcpy`. Pure,
+self-contained slot-allocate logic with no other side effects.
+
+**`FUN_80058a5c`**: the same circular free-list idiom over a different,
+larger 32-entry, `0x34`-byte-record pool (type 2). Pops the free-list head,
+zeroes the new record (`memset` 0x28 bytes), relinks the free list, copies
+a 6-byte BD_ADDR plus two 16-byte fields (offsets `+0x20` and `+0x10`/
+`+0x20` relative to the record base — consistent with link/encryption key
+material given the size) via `optimized_memcpy`, and sets several flag
+bits including explicit `memcmp`-against-all-zero checks on each 16-byte
+field (to record whether each key field was actually populated or left
+zero). Otherwise the same self-contained slot-allocate shape as
+`FUN_80058974`.
+
+Both helpers are themselves pure, self-contained slot-allocate-and-populate
+primitives — no other logic, no ambiguity. This **clears the HIGH bar** for
+`0x80058bb8`: its caller is confirmed to dispatch on type code to exactly
+this pair of free-list slot allocators, validate the result, and commit
+status-table fields — i.e., a connection-slot allocate+commit dispatcher,
+exactly as hypothesized in Pass 6. Promoted to **HIGH** and renamed.
+
+`FUN_80058974` and `FUN_80058a5c` themselves are decompiled with
+high-confidence understanding but are generic enough (free-list pop +
+field copy, no protocol-specific markers) that a more specific name than
+"slot allocator" isn't warranted — left unrenamed (still `FUN_`-named) per
+the splitting rule for helpers that are understood but not uniquely
+nameable.
+
+### Renames applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x80058bb8` | `FUN_80058bb8` | `conn_slot_alloc_and_commit_dispatch` | Promoted from Pass 6 MEDIUM-HIGH to HIGH: both type-specific allocation helpers (`FUN_80058974` types 0/1, `FUN_80058a5c` type 2) are confirmed self-contained circular free-list slot allocators over fixed-size record pools, retroactively confirming the caller's connection-slot allocate+commit dispatcher role. |
+
+Applied via `RenamePass7Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log
+("RENAMED 0x80058bb8: FUN_80058bb8 -> conn_slot_alloc_and_commit_dispatch",
+"RENAME COMPLETE: 1 success, 0 failed").
+
+### Pass 7 summary
+
+- Angle 1 (`0x8005faec`'s callees): confirmed a small per-state-key event
+  dispatch handler family, supporting but not confirming the specific
+  state semantics needed for a HIGH rename. `0x8005faec` stays MEDIUM-HIGH,
+  unrenamed.
+- Angle 2 (`0x80058bb8`'s callees): both type-specific allocation helpers
+  are confirmed self-contained free-list slot allocators, clearing the
+  HIGH bar. `0x80058bb8` promoted to HIGH and renamed.
+- 1 new HIGH-confidence rename this pass (`0x80058bb8`).
+- Region-wide unnamed count: 346 → 345.
+
+**Status**: PASS 7 COMPLETE. The helper-confirmation technique again
+proved useful, though asymmetrically this time — one holdover (`0x80058bb8`)
+cleared the HIGH bar cleanly, the other (`0x8005faec`) did not, because its
+callees' shared lookup keys/struct fields aren't tied to named constants in
+this decompile. Both remaining size-tier 21-40 holdovers from Pass 6 have
+now had their immediate callee chains checked; no further low-cost
+helper-confirmation candidates remain at this tier. Next continuation for
+this region: extend the cold-triage ranking past size-tier 21-40 (ranks
+26+) using `ColdTriageRegion80050000Pass5.java`'s ranking logic as a
+template, per the Pass 6/7 ticket's fallback instruction.

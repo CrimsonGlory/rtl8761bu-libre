@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 693 (690 + 3 region-0x80050000 Pass-6 newly-named, 2026-06-23; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2045 (2048 − 3 region-0x80050000 Pass-6 newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 369 (366 + 3 region-0x80050000 Pass-6 newly-named-and-decompiled) |
+| Named functions (this doc's table) | 694 (690 + 3 region-0x80050000 Pass-6 newly-named + 1 region-0x80050000 Pass-7 newly-named, 2026-06-23; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2044 (2048 − 3 region-0x80050000 Pass-6 newly-named − 1 region-0x80050000 Pass-7 newly-named) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 370 (366 + 3 region-0x80050000 Pass-6 newly-named-and-decompiled + 1 region-0x80050000 Pass-7 newly-named-and-decompiled) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
@@ -731,6 +731,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80050304` | 408 | `conn_diagnostic_batch_dump` | per-connection diagnostic/status batch-dump; collects metrics across active connections and flushes in groups of 5 via `diagnostic_batch_entry_log_emit`; promoted to high after confirming the callee is a pure log-emit primitive — see `region_0x80050000` Pass 6 | high (decompiled+documented) |
 | `0x8004fe64` | 124 | `diagnostic_batch_entry_log_emit` | pure per-entry diagnostic log-emit helper; calls `possible_logging_function__var_args` with 5 paired entries from its array arguments, no other logic — see `region_0x80050000` Pass 6 | high (decompiled+documented) |
 | `0x8005261c` | 338 | `hci_evt_pack_conn_field_into_buf` | HCI event-buffer field-packer; packs connection-record fields (handle, conditional BD_ADDR, role/mode bitfields, clock offset, variable tail) into a serial buffer, flushing via `send_evt_Meta_buf_at_arg1` on overflow — see `region_0x80050000` Pass 6 | high (decompiled+documented) |
+| `0x80058bb8` | 508 | `conn_slot_alloc_and_commit_dispatch` | connection-slot allocate+commit dispatcher; dispatches on type code (0/1/2) to type-specific free-list slot allocators (`FUN_80058974` types 0/1, `FUN_80058a5c` type 2 — both confirmed circular free-list slot-pop primitives over fixed-size record pools, copying a 6-byte BD_ADDR plus type-specific key material into the new record), validates capacity, logs success/failure, commits HW/status-table fields via `FUN_80057094`; promoted to high after confirming both type-specific helpers are self-contained slot-allocate primitives — see `region_0x80050000` Pass 7 | high (decompiled+documented) |
 | `0x8005d26c` | 88 | `assign_pointer_to_0x1AC_offset_0x134` | assign pointer to 0x1AC offset 0x134 — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e23c` | 118 | `access_config_at_0xa5_and_0x1ac_stuct_stuff` | access config at 0xa5 and 0x1ac stuct stuff — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8005e3b8` | 80 | `fHCI_Read_Remote_Version_Information_config_handler` | HCI Read Remote Version Information handler; updates config struct 0x1ac with remote LMP version — see `region_0x80050000` | high (decompiled+documented) |
@@ -1054,7 +1055,7 @@ granularity is meaningful until individual triage happens).
 | `0x80020000`–`0x8002ffff` | 321 | 15.6% |
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
 | `0x80040000`–`0x8004ffff` | 301 (305 at Pass-3 recount − 2 Pass-3 renames − 1 Pass-3-continuation rename − 1 Pass-4 rename, 2026-06-23) | 14.7% |
-| `0x80050000`–`0x8005ffff` | 346 (349 − 3 Pass-6 renames, 2026-06-23) | 17.0% |
+| `0x80050000`–`0x8005ffff` | 345 (349 − 3 Pass-6 renames − 1 Pass-7 rename, 2026-06-23) | 16.9% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
 | `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 9.3% |
 | **Total** | **2048** | **100%** |

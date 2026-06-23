@@ -2652,38 +2652,67 @@ completion):
           FUN_80058a5c), or extend cold-triage past size-tier 21-40 (rank 26+) if that
           doesn't yield new HIGH hits.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 7 (helper-confirmation on Pass 6 holdovers) (2026-06-23)
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 7 (helper-confirmation on Pass 6 holdovers) (2026-06-23)
           Continuation staged by the Pass 6 ticket, which had its best yield since
           Pass 3c (3 HIGH renames) using a helper-confirmation technique: decompiling a
           MEDIUM-HIGH function's callee to see if it retroactively confirms the
           caller's role via self-contained structural evidence (same idiom that worked
           for 0x80050304 this pass and 0x800538b4 in Pass 5).
-          Two remaining MEDIUM-HIGH holdovers from Pass 6, each with undecompiled
-          callees worth checking:
-            1. 0x8005faec (per-connection link state-machine event handler, state
-               values 1/3/4/5/7): decompile its state-transition callees FUN_8005d66c,
-               FUN_8005d7bc, FUN_8005d744 — if any reveal an unambiguous specific role
-               (e.g. a named LMP/baseband phase transition), this could push 0x8005faec
-               to HIGH and let the state values be named too.
-            2. 0x80058bb8 (connection-slot allocator dispatcher, types 0/1/2): decompile
-               its type-specific allocation helpers FUN_80058974 (types 0/1) and
-               FUN_80058a5c (type 2) — confirming their exact slot-allocation semantics
-               could push 0x80058bb8 to HIGH.
+          Both Pass 6 MEDIUM-HIGH holdovers' callees decompiled via single-address
+          DecompileAddr.java calls (GZF process mode, use_saved_project=true):
+            1. 0x8005faec's state-transition callees FUN_8005d66c (192B), FUN_8005d7bc
+               (108B), FUN_8005d744 (108B): all three share an identical structural
+               pattern (shared FUN_8005d438 lookup keyed by a distinct constant per
+               function — 0x18/0x16/0x17 — reading per-connection 0x1ac-stride struct
+               fields, invoking a registered callback, logging via
+               possible_logging_function__var_args). Confirms a small per-state-key
+               event dispatch handler family (supports the dispatcher *shape*) but the
+               0x16/0x17/0x18 keys and struct fields aren't pinned to named LMP/baseband
+               opcodes — does NOT clear the HIGH bar. 0x8005faec stays MEDIUM-HIGH,
+               unrenamed.
+            2. 0x80058bb8's type-specific allocators FUN_80058974 (184B, types 0/1) and
+               FUN_80058a5c (340B, type 2): both decompiled to unambiguous, self-contained
+               circular free-list slot allocators over fixed-size (8-byte / 0x34-byte)
+               32-entry record pools, copying a 6-byte BD_ADDR (+ two 16-byte key-shaped
+               fields for type 2) via optimized_memcpy. This retroactively confirms
+               0x80058bb8's connection-slot allocate+commit dispatcher role — CLEARS the
+               HIGH bar.
+          1 new HIGH rename this pass via RenamePass7Region80050000.java (GZF process
+          mode, SourceType.USER_DEFINED), verified via Ghidra headless run log
+          ("RENAMED 0x80058bb8: FUN_80058bb8 -> conn_slot_alloc_and_commit_dispatch",
+          "RENAME COMPLETE: 1 success, 0 failed"). Region-wide unnamed count: 346 -> 345.
+          Updated reverse_engineering_region_0x80050000.md (new Pass 7 section),
+          rom_function_index.md (1 row added/promoted, summary counts + region count
+          updated), analysis/INDEX.md.
+          Status: PASS 7 COMPLETE. Asymmetric yield — one holdover cleared HIGH cleanly,
+          the other didn't because its callees' shared lookup keys aren't tied to named
+          constants. Both Pass 6 holdovers' immediate callee chains now checked; no more
+          low-cost helper-confirmation candidates remain at size-tier 21-40. Next
+          continuation: extend cold-triage past size-tier 21-40 (rank 26+) using
+          ColdTriageRegion80050000Pass5.java's ranking logic as a template.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 8 (cold-triage size-tier 41+) (2026-06-23)
+          Continuation staged by the Pass 7 ticket: size-tier 21-40 (ranks 1-25 by
+          xref count among the 330 unnamed functions outside the original top-20) is
+          now fully exhausted across Passes 5-7, with no remaining low-cost
+          helper-confirmation candidates at that tier.
           Steps:
-            1. Decompile the above candidates via single-address DecompileAddr.java-style
-               calls against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process
-               mode, use_saved_project=true). Start with whichever callee is cheaper/
-               smaller; stop early if a clear HIGH-confidence answer emerges before
-               trying all of them.
-            2. Only rename HIGH-confidence hits (the original MEDIUM-HIGH function, and/or
-               the callee itself if it's also unnamed and clearly purposed); leave
-               remaining MEDIUM/MEDIUM-HIGH unrenamed.
-            3. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 7
+            1. Re-run (or adapt) ColdTriageRegion80050000Pass5.java's in-script
+               ReferenceManager-based xref ranking against
+               2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
+               use_saved_project=true) to rank the ~345 remaining unnamed functions,
+               this time extending past rank 25 into rank 26+ (size-tier 41+).
+            2. Decompile the top 2-3 newly-ranked candidates via single-address
+               DecompileAddr.java-style calls. Stop early if a clear HIGH-confidence
+               answer emerges before trying all of them.
+            3. Only rename HIGH-confidence hits; leave remaining MEDIUM/MEDIUM-HIGH
+               unrenamed but documented.
+            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 8
                section), rom_function_index.md (if renames), analysis/INDEX.md.
-            4. If this technique doesn't yield new HIGH hits, fall back to extending
-               cold-triage past size-tier 21-40 (rank 26+) using
-               ColdTriageRegion80050000Pass5.java's ranking logic as a template.
-            5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT]
+            5. If this region's yield stays thin (per the project's pivot policy seen in
+               region 0x80040000/0x80070000), consider pivoting to a less-explored region
+               after this pass.
+            6. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT]
                at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
