@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 6 (cold-triage of 191 unnamed functions; 2 renamed HIGH) — 2026-06-23
+**Status**: PASS 7 (remaining Top-20 decompiled + 2 more renamed HIGH; AFH/LAP-table theory corroborated) — 2026-06-23
 
 ## Overview
 
@@ -588,6 +588,158 @@ above and 12-14 further Top-20 candidates not yet decompiled.
    opcode-literal evidence to push them to HIGH
 3. Continue cold-triage of the remaining ~177 unnamed functions outside the Top-20,
    focusing on the COMPLEX (301-600B) and HANDLER (151-300B) tiers next
+
+---
+
+## Pass 7 Results — Remaining Top-20 Decompiled + 2 More HIGH Renames (2026-06-23)
+
+Re-ran `ColdTriageRegion80070000Pass6.java` (GZF process mode) to recover the full
+ranked Top-20 list (the prior pass's MCP stdout was not persisted to the analysis doc
+beyond entries 1-8). Note the unnamed-function count is now 189, not 191 — the 2 Pass 6
+renames (`connection_teardown_HCI_event_finalizer`, `LMP_role_switch_completion_handler`)
+removed those addresses from the `FUN_*` unnamed pool, as expected.
+
+### Full Top-20 (verified re-run)
+
+| Rank | Address | Size | Status |
+|------|---------|------|--------|
+| 1 | 0x8007814c | 1388B | MEDIUM-HIGH (Pass 6, not renamed) |
+| 2 | 0x80077bcc | 1388B | MEDIUM-HIGH (Pass 6, not renamed) |
+| 3 | 0x80072bac | 814B | MEDIUM-HIGH (Pass 6; **revisited this pass**, see below) |
+| 4 | 0x80074940 | 672B | not yet decompiled |
+| 5 | 0x80072924 | 628B | MEDIUM-HIGH (Pass 6; **revisited this pass**, see below) |
+| 6 | 0x800791d0 | 608B | not yet decompiled |
+| 7 | 0x8007718c | 524B | decompiled this pass — MEDIUM (see below) |
+| 8 | 0x800734c4 | 466B | **decompiled + renamed HIGH this pass** |
+| 9 | 0x80072ff8 | 452B | **decompiled + renamed HIGH this pass** |
+| 10 | 0x8007276c | 424B | decompiled this pass — corroborating evidence only, not renamed |
+| 11 | 0x800747b0 | 390B | not yet decompiled |
+| 12 | 0x800731bc | 368B | not yet decompiled |
+| 13 | 0x80076a20 | 348B | not yet decompiled |
+| 14 | 0x80078fdc | 344B | not yet decompiled |
+| 15 | 0x800796b8 | 336B | not yet decompiled |
+| 16 | 0x800745d8 | 308B | not yet decompiled |
+| 17 | 0x80071138 | 306B | not yet decompiled |
+| 18 | 0x800767ec | 278B | not yet decompiled |
+| 19 | 0x80077020 | 240B | not yet decompiled (called by #7, #9 below — already partially understood as a callee) |
+| 20 | 0x80077508 | 230B | not yet decompiled |
+
+### Decompiled This Pass
+
+**0x800734c4 (466B) → renamed `LMP_power_control_RSSI_trigger`** — **HIGH confidence, RENAMED**
+- RSSI-driven LMP power-control trigger. Computes RSSI via `return_RSSI_value()`, compares
+  against per-connection power-control bounds obtained through a function-pointer table
+  (`PTR_DAT_800736b0`, called twice with arg `0`/`1` for low/high threshold)
+- Gates on connection-state fields `field_0xdc` (tri-state: 0=none/1=down-in-flight/
+  2=up-in-flight) and `field_0x211` (outstanding-request guard, set to `1` at the end of
+  the function — classic "don't double-send" pattern)
+- Reads config bit `pcVar4->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 1` (an
+  **already-named** config struct field) to decide whether to proceed
+- Builds a 3-byte LMP PDU with opcode byte `0x1f` (low-RSSI path) or `0x20` (high-RSSI
+  path) and sends it via `send_LMP_pkt(param_1, local_38, 3, local_30)` — **0x1F and 0x20
+  are exactly LMP_INCR_POWER_REQ and LMP_DECR_POWER_REQ** per the Bluetooth Core Spec LMP
+  opcode table
+- Evidence tier: explicit opcode-literal match (0x1f/0x20) + named config-flag callee +
+  `send_LMP_pkt` call — clears the project's HIGH bar
+
+**0x80072ff8 (452B) → renamed `LMP_SCO_LINK_REQ_0x17_handler`** — **HIGH confidence, RENAMED**
+- Handles incoming/outgoing SCO link parameter negotiation. Validates `D_sco`/`T_sco`-style
+  packet-interval/offset parameters (params named `local_38`/`local_34`/`local_30` map to
+  SCO handle, D_sco, T_sco by position) against a vendor SCO-parameter callback
+  (`PTR_DAT_8007332c`) and a second post-validation callback (`PTR_DAT_80073340`)
+- Calls `send_LMP_ACCEPTED(local_2c, 0x17, local_28, 0x16, 0)` on the accept path —
+  **0x17 = LMP_SCO_LINK_REQ** per the Bluetooth Core Spec LMP opcode table
+  (0x16 referenced alongside is LMP_REMOVE_SCO_LINK_REQ's sibling opcode context)
+- On the negotiate/modify path, builds an 11-byte LMP PDU starting with opcode byte
+  `0x17` and sends it via `send_LMP_pkt(local_2c, auStack_44, 0xb, local_28, 0x10, 0)`
+- Finishes by calling `get_status_bits_by_LMP_Opcode(0x17, 0)` (an **already-named**
+  helper) to set the outstanding-PDU status bitmask — third independent confirmation of
+  opcode 0x17
+- Evidence tier: triple opcode-literal confirmation (`send_LMP_ACCEPTED` arg,
+  PDU first byte, `get_status_bits_by_LMP_Opcode` arg) — clears the HIGH bar easily
+- **Important side effect**: this function calls both `FUN_80072924` and `FUN_80072bac`
+  (the Pass 6 MEDIUM-HIGH "AFH/LAP-table pair") passing the SCO connection handle and
+  packet-interval-derived args — at first glance this looked like it might mean the pair
+  is SCO-link-parameter validators rather than AFH/LAP channel-table functions. See the
+  AFH/LAP re-investigation below, which found contradicting and ultimately more convincing
+  evidence in the *other* direction.
+
+**0x8007718c (524B)** — decompiled, **MEDIUM** (not renamed)
+- Slot-instant / clock-window comparator: computes a modulo-1250 (`0x4e2`) wraparound
+  distance between a watched "instant" value and the current one, compares against a
+  threshold field (`*(puVar6+0x1c)`), and on threshold-exceeded calls
+  `possible_logging_function__var_args(4, 0x71, 0x238, 0x1247, 0x13, ...)` (HCI/VSC
+  event-class `0x71`)
+- Updates two 3-bit status-enum fields (masked `& 0xf8` / `& 0x07`) via helper functions
+  `FUN_80076ce4`/`FUN_80076dc8`/`FUN_80076e58`/`FUN_80076f10`/`FUN_80076f58`/`FUN_80077020`/
+  `FUN_80076fa8` — a tight cluster of small siblings, all still unnamed
+- Behavioral shape (mod-1250 native-clock-style window, 3-bit status enum, logging on
+  timeout) is consistent with a connection/link supervision-timeout or clock-offset
+  refresh path, but no named callee or opcode literal pins down the exact LMP/HCI
+  procedure — held below HIGH per project policy
+
+**0x8007276c (424B)** — decompiled, **not renamed** (used as corroborating evidence, see below)
+- Operates directly on `struct_of_at_least_0x300_size`'s `_x142_LAP` array fields at the
+  same offsets flagged in Pass 6 (`+0x49` LAP/handle match, `+0x55`, `+0x5b`, `+0x67`,
+  `+0x6e`), iterating up to 6 table slots searching for a LAP/handle match
+- On a match, zeroes a 36-byte (`0x24`) local buffer in windows derived from the matched
+  slot's `+0x55`/`+0x5b`/`+0x67` fields (a "clear used channels in this window" pattern),
+  then calls `FUN_80072694(param_1, ..., 1)` (a function this region's Pass 5 notes
+  already associated with the same struct) to populate a result, and finally walks the
+  36-byte buffer in additional windows checking for any zero byte
+  (`if (acStack_44[uVar8] == '\0') { local_48[0] = 1; break; }`)
+- This is a textbook **AFH channel-classification bitmap** shape: 79/79-rounded-to-36-byte
+  bitmap, windowed clear-and-rebuild, "any unused channel in this window" test — directly
+  supporting the original Pass 6 hypothesis that the `0x80072bac`/`0x80072924` sibling
+  pair (same struct, overlapping field offsets) are AFH/LAP channel-table functions
+- Not renamed itself (still `FUN_8007276c`) because its own specific protocol role
+  (LAP-paging-channel selection vs. true AFH classification refresh) is not yet
+  cross-confirmed via a named caller — but it substantially **raises confidence** in the
+  Pass 6 AFH/LAP-table theory for its siblings
+
+### AFH/LAP-Table Pair Re-Investigation (0x80072bac / 0x80072924)
+
+Pass 6 flagged these two as MEDIUM-HIGH "AFH/LAP-table" candidates based on shared struct
+field offsets with `reverse_engineering_region_0x80050000.md`'s named AFH functions.
+This pass found two pieces of new evidence pulling in different directions:
+
+- **Against** (from `0x80072ff8`, the newly-renamed `LMP_SCO_LINK_REQ_0x17_handler`):
+  calls both functions with SCO-connection-handle-shaped arguments, suggesting a possible
+  SCO-link role
+- **For** (from `0x8007276c`, decompiled this pass): directly manipulates the same
+  `_x142_LAP` struct fields in a textbook AFH channel-classification bitmap pattern, and
+  calls the closely-related `FUN_80072694` — strongly suggesting the struct really is
+  AFH/LAP infrastructure, and that `0x80072ff8`'s calls to the pair are simply the
+  SCO-link-setup path *consulting* the AFH/LAP channel table (e.g. to pick a safe channel
+  for the new SCO link), not evidence that the pair *is* SCO-specific
+- **Net assessment**: the "for" evidence is more direct (same struct fields manipulated
+  in-place vs. indirect call args) and resolves the apparent conflict naturally (SCO setup
+  consulting AFH data is expected BT behavior). The pair remains MEDIUM-HIGH, not
+  promoted to HIGH — their *exact* role (full AFH channel classification vs. a narrower
+  LAP-keyed channel-reservation check) is still not nailed down by a named caller or
+  opcode literal — but the working theory is now AFH/LAP-table, not SCO, with higher
+  confidence than before this pass.
+
+### Region Status After Pass 7
+
+- 21/245 total functions now HIGH confidence (17 thin-named + 4 renamed-from-unnamed:
+  2 from Pass 6, 2 from Pass 7)
+- 187 unnamed functions remain untriaged, including the 4 MEDIUM/MEDIUM-HIGH candidates
+  carried over (0x8007814c/0x80077bcc quantizer pair, 0x80072bac/0x80072924 AFH/LAP pair)
+  and 2 newly-decompiled-but-unrenamed MEDIUM functions (0x8007718c, 0x8007276c)
+- 10 of the Top-20 candidates remain fully un-decompiled (ranks 4, 6, 11-20 except where
+  noted)
+
+### Next Steps (Self-Chaining → Pass 8)
+
+1. Decompile remaining Top-20 candidates: 0x80074940, 0x800791d0, 0x800747b0,
+   0x800731bc, 0x80076a20, 0x80078fdc, 0x800796b8, 0x800745d8, 0x80071138, 0x800767ec,
+   0x80077020, 0x80077508
+2. Attempt the quantizer pair (0x8007814c/0x80077bcc) cross-confirmation via their
+   shared helper trio (`FUN_800779d0`/`FUN_80077ac4`/`FUN_80077988`/`FUN_80077928`) —
+   decompiling those small siblings may reveal the protocol role faster than the large
+   functions themselves
+3. Continue cold-triage of the remaining ~177 unnamed functions outside the Top-20
 
 ---
 
