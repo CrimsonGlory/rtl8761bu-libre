@@ -2610,28 +2610,81 @@ completion):
           (0x8005faec 4 xrefs, 0x8005261c 4 xrefs, 0x80058bb8 3 xrefs), or decompile
           0x80050304's helper FUN_8004fe64 to try pushing it to HIGH.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 6 (size-tier 21-40 continuation) (2026-06-23)
-          Continuation staged by the Pass 5 ticket. Two remaining angles on this region:
-            1. Continue cold-triage size-tier 21-40 with the next-highest-xref candidates
-               from the Pass 5 ColdTriageRegion80050000Pass5.java ranking not yet decompiled:
-               0x8005faec (514B, 4 xrefs), 0x8005261c (338B, 4 xrefs), 0x80058bb8 (508B,
-               3 xrefs). Decompile via single-address DecompileAddr.java-style calls.
-            2. Decompile 0x80050304's helper FUN_8004fe64 (the 5-entry batch-flush callee)
-               to confirm its role (batch log-emit vs. something else) — if confirmed as a
-               logging/diagnostic-emit primitive, this would retroactively push the Pass 5
-               MEDIUM-HIGH read of 0x80050304 ("per-connection diagnostic batch-dump") to
-               HIGH via the same self-contained-structural-evidence precedent used for
-               0x800538b4.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 6 (size-tier 21-40 continuation) (2026-06-23)
+          Both angles executed. Angle 1: decompiled the 3 remaining size-tier 21-40
+          high-xref candidates via single-address DecompileAddr.java calls (GZF process
+          mode, use_saved_project=true): 0x8005faec (514B, 4 xrefs) reads as a
+          per-connection link state-machine event handler (switches on a 4-bit state
+          nibble, values 1/3/4/5/7, with state-transition bookkeeping and conditional
+          logging) — stays MEDIUM-HIGH, exact state semantics unconfirmed. 0x8005261c
+          (338B, 4 xrefs) decompiled to an unambiguous HCI event-buffer field-packer
+          (packs connection-record fields — handle, conditional BD_ADDR via
+          optimized_memcpy, role/mode bitfields, clock offset, variable tail — into a
+          serial buffer, flushing via send_evt_Meta_buf_at_arg1 on overflow) — matches
+          this region's established HCI meta-event buffer-append pattern, self-contained
+          structural evidence, cleared HIGH and renamed hci_evt_pack_conn_field_into_buf.
+          0x80058bb8 (508B, 3 xrefs) reads as a connection-slot allocator dispatcher
+          (type-coded allocation via FUN_80058974/FUN_80058a5c, capacity validation,
+          success/failure logging, HW/status-table field writes via FUN_80057094) —
+          stays MEDIUM-HIGH, per-type field semantics unconfirmed.
+          Angle 2: decompiled 0x80050304's batch-flush callee FUN_8004fe64 (124B) —
+          confirmed it does nothing but call possible_logging_function__var_args with
+          5 paired entries from its array args, a pure log-emit primitive with no other
+          logic. This retroactively confirms 0x80050304's per-connection diagnostic
+          batch-dump role via the same self-contained-structural-evidence precedent as
+          0x800538b4/afh_channel_quality_poll_commit — promoted 0x80050304 from MEDIUM-HIGH
+          to HIGH. Renamed both: 0x80050304 -> conn_diagnostic_batch_dump,
+          0x8004fe64 -> diagnostic_batch_entry_log_emit.
+          3 new HIGH renames this pass via RenamePass6Region80050000.java (GZF process
+          mode, SourceType.USER_DEFINED), verified via Ghidra headless run log
+          ("RENAME COMPLETE: 3 success, 0 failed"). Region-wide unnamed count: 349 -> 346.
+          Updated reverse_engineering_region_0x80050000.md (new Pass 6 section),
+          rom_function_index.md (3 rows added, summary counts + region count updated),
+          analysis/INDEX.md.
+          Status: PASS 6 COMPLETE. Best yield since Pass 3c (3 HIGH vs. 1 each in
+          Pass 4/5) — the helper-confirmation technique (decompiling a MEDIUM-HIGH
+          function's callee to retroactively confirm its role) proved effective and
+          should be retried on remaining holdovers. Region remains productive
+          (Pass 4: 1, Pass 5: 1, Pass 6: 3 HIGH), not yet a pivot candidate.
+          Next continuation: apply the same helper-confirmation technique to this
+          pass's new MEDIUM-HIGH holdovers (0x8005faec's callees FUN_8005d66c/
+          FUN_8005d7bc/FUN_8005d744, or 0x80058bb8's callees FUN_80058974/
+          FUN_80058a5c), or extend cold-triage past size-tier 21-40 (rank 26+) if that
+          doesn't yield new HIGH hits.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 7 (helper-confirmation on Pass 6 holdovers) (2026-06-23)
+          Continuation staged by the Pass 6 ticket, which had its best yield since
+          Pass 3c (3 HIGH renames) using a helper-confirmation technique: decompiling a
+          MEDIUM-HIGH function's callee to see if it retroactively confirms the
+          caller's role via self-contained structural evidence (same idiom that worked
+          for 0x80050304 this pass and 0x800538b4 in Pass 5).
+          Two remaining MEDIUM-HIGH holdovers from Pass 6, each with undecompiled
+          callees worth checking:
+            1. 0x8005faec (per-connection link state-machine event handler, state
+               values 1/3/4/5/7): decompile its state-transition callees FUN_8005d66c,
+               FUN_8005d7bc, FUN_8005d744 — if any reveal an unambiguous specific role
+               (e.g. a named LMP/baseband phase transition), this could push 0x8005faec
+               to HIGH and let the state values be named too.
+            2. 0x80058bb8 (connection-slot allocator dispatcher, types 0/1/2): decompile
+               its type-specific allocation helpers FUN_80058974 (types 0/1) and
+               FUN_80058a5c (type 2) — confirming their exact slot-allocation semantics
+               could push 0x80058bb8 to HIGH.
           Steps:
-            1. Try angle (1) first (cheap, up to 3 single-address decompiles); fall back to
-               or combine with angle (2) if angle (1) doesn't yield new HIGH-confidence hits.
-            2. Decompile resulting candidates via single-address DecompileAddr.java-style calls
-               against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
-               use_saved_project=true).
-            3. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 6 section),
-               rom_function_index.md (if renames), analysis/INDEX.md.
-            5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
+            1. Decompile the above candidates via single-address DecompileAddr.java-style
+               calls against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process
+               mode, use_saved_project=true). Start with whichever callee is cheaper/
+               smaller; stop early if a clear HIGH-confidence answer emerges before
+               trying all of them.
+            2. Only rename HIGH-confidence hits (the original MEDIUM-HIGH function, and/or
+               the callee itself if it's also unnamed and clearly purposed); leave
+               remaining MEDIUM/MEDIUM-HIGH unrenamed.
+            3. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 7
+               section), rom_function_index.md (if renames), analysis/INDEX.md.
+            4. If this technique doesn't yield new HIGH hits, fall back to extending
+               cold-triage past size-tier 21-40 (rank 26+) using
+               ColdTriageRegion80050000Pass5.java's ranking logic as a template.
+            5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT]
+               at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).

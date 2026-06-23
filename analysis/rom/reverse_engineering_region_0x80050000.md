@@ -857,3 +857,119 @@ triage with the remaining high-xref candidates (`0x8005faec` 4 xrefs,
 `0x8005261c` 4 xrefs, `0x80058bb8` 3 xrefs), or decompile `0x80050304`'s
 helper `FUN_8004fe64` to see if confirming its role (batch
 flush/log-emit) retroactively pushes `0x80050304` to HIGH.
+
+## Pass 6 — Size-tier 21-40 continuation + `0x80050304` helper confirmation (2026-06-23)
+
+Two angles, both executed (angle 1 cheap/3 single-address decompiles, then
+angle 2 with the helper confirmation).
+
+### Angle 1: remaining size-tier 21-40 high-xref candidates
+
+**`0x8005faec`** (514B, 4 xrefs): decompiles to a **per-connection link
+state-machine event handler**. Indexes a 0x1ac-stride struct array by a
+link/connection ID (computed via `mult`/`mflo`), reads a 4-bit state
+nibble, and switches on state values 1/3/4/5/7 — calling helper functions
+(`FUN_8005d66c`, `FUN_8005d7bc`, `FUN_8005d744`), incrementing/wrapping
+the state nibble, and logging invalid states via
+`possible_logging_function__var_args`. Finishes by always invoking a
+post-transition callback (`PTR_DAT_8005fd00`) and, on certain transitions,
+a second callback (`PTR_DAT_8005fd08`) plus a final pointer-store
+(`assign_pointer_to_0x1AC_offset_0x134`). Reads clearly as a **connection
+link-state transition handler**, consistent with this region's established
+per-connection (0x1ac-stride) struct-array idiom. Exact state-number
+semantics (which LMP/baseband phase states 1/3/4/5/7 represent) aren't
+confirmed against named constants — stays **MEDIUM-HIGH**, not renamed.
+
+**`0x8005261c`** (338B, 4 xrefs): decompiles to an **unambiguous HCI
+event-buffer field-packer**. Packs fields from a connection-record struct
+(`param_2`) into a serial output buffer (`param_1`): copies a 2-byte
+handle/ID field, a conditional BD_ADDR block (6 bytes via
+`optimized_memcpy`, or an `0xff`-filled placeholder when a "no address"
+flag bit is set), packed role/mode bitfields (extracted via explicit
+shift-and-mask sequences), clock-offset halfword, and a variable-length
+trailing payload (length-prefixed, copied via `optimized_memcpy`).
+Flushes the buffer via `send_evt_Meta_buf_at_arg1` when it would overflow
+the 0xff-byte limit, then advances the buffer's length/count fields.
+This is **self-contained structural evidence** — the explicit bitfield
+layout plus the flush-on-full idiom is an unambiguous match for this
+region's established HCI vendor/meta-event buffer-append pattern (same
+family as `send_evt_LE_Meta_Subevent`/`send_evt_LE_Meta_Subevent_variant`
+already named in this region). **Clears the HIGH bar.**
+
+**`0x80058bb8`** (508B, 3 xrefs): decompiles to a **connection-slot
+allocator dispatcher**. Dispatches on a type code (`param_1` = 0/1/2) to
+type-specific slot-allocation helpers (`FUN_80058974` for types 0/1,
+`FUN_80058a5c` for type 2), validates the returned slot index against a
+type-specific capacity ceiling (0xa0/0xe0/derived-from-`PTR_DAT`), and
+logs allocation success or failure via
+`possible_logging_function__var_args` with distinct format codes per
+outcome. On success for type 2, it additionally programs three bitmask
+status-tracker arrays from per-record flag bits and pushes 10 fields out
+via `FUN_80057094` (the HW/status-register write helper used elsewhere in
+this region); for types 0/1 it pushes 2 fields via the same helper. Reads
+clearly as a **connection-slot allocate + hardware/status-table commit**
+function, but the exact semantics of the 10-field vs. 2-field writes per
+type aren't pinned to named struct offsets — stays **MEDIUM-HIGH**, not
+renamed.
+
+### Angle 2: `0x80050304` helper confirmation
+
+Decompiled `FUN_8004fe64` (124B), the batch-flush callee invoked 5 times
+per batch inside the Pass 5 MEDIUM-HIGH read `0x80050304`
+("per-connection diagnostic/status batch-dump"). The decompile shows
+`FUN_8004fe64` does **nothing except** call
+`possible_logging_function__var_args` with fixed severity/format codes
+and 5 paired entries pulled from its three input array arguments — no
+control flow, no state mutation, purely a vararg log-emit wrapper.
+
+This is unambiguous, self-contained confirmation of the batch-dump
+hypothesis: the function that `0x80050304` calls once per filled batch of
+5 is *provably* a pure diagnostic-log primitive, which retroactively
+confirms `0x80050304` itself is a periodic per-connection
+diagnostic/status batch-logger — same self-contained-structural-evidence
+precedent used for `0x800538b4` (Pass 5) and
+`afh_channel_quality_poll_commit` (Pass 3b). **Clears the HIGH bar.**
+
+### Renames applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x80050304` | `FUN_80050304` | `conn_diagnostic_batch_dump` | Promoted from Pass 5 MEDIUM-HIGH to HIGH: its batch-flush callee `FUN_8004fe64` is confirmed to be a pure log-emit primitive, retroactively confirming the caller's per-connection diagnostic/status batch-dump role via self-contained structural evidence. |
+| `0x8004fe64` | `FUN_8004fe64` | `diagnostic_batch_entry_log_emit` | Decompile shows the function does nothing but call `possible_logging_function__var_args` with 5 paired entries from its array arguments — a pure per-entry diagnostic log-emit helper. |
+| `0x8005261c` | `FUN_8005261c` | `hci_evt_pack_conn_field_into_buf` | Self-contained decompile: packs connection-record fields (handle, conditional BD_ADDR, role/mode bitfields, clock offset, variable tail) into a serial HCI event buffer, flushing via `send_evt_Meta_buf_at_arg1` on overflow — matches this region's established HCI meta-event buffer-append pattern. |
+
+Applied via `RenamePass6Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log
+("RENAMED 0x80050304: FUN_80050304 -> conn_diagnostic_batch_dump",
+"RENAMED 0x8004fe64: FUN_8004fe64 -> diagnostic_batch_entry_log_emit",
+"RENAMED 0x8005261c: FUN_8005261c -> hci_evt_pack_conn_field_into_buf",
+"RENAME COMPLETE: 3 success, 0 failed").
+
+### Pass 6 summary
+
+- Angle 1 (cold triage continuation): decompiled the 3 remaining
+  size-tier 21-40 high-xref candidates. 1 new HIGH (`0x8005261c`), 2 new
+  MEDIUM-HIGH documented but not renamed (`0x8005faec` link-state
+  handler, `0x80058bb8` connection-slot allocator dispatcher).
+- Angle 2 (helper confirmation): confirmed `FUN_8004fe64` is a pure
+  log-emit primitive, promoting `0x80050304` from MEDIUM-HIGH to HIGH and
+  renaming both functions.
+- 3 new HIGH-confidence renames total this pass (`0x80050304`,
+  `0x8004fe64`, `0x8005261c`).
+- 2 new MEDIUM-HIGH reads documented but not renamed (`0x8005faec`,
+  `0x80058bb8`).
+- Region-wide unnamed count: 349 → 346.
+
+**Status**: PASS 6 COMPLETE. HIGH-rename yield this pass (3) is markedly
+better than Pass 4/5 (1 each) — angle 2's helper-confirmation technique
+paid off well. Remaining size-tier 21-40 candidates are exhausted (all 3
+top-25-by-size unreviewed entries beyond the original top-2 now
+decompiled). Next continuation for this region: either (a) decompile the
+new MEDIUM-HIGH holdovers' own helper/caller chains
+(`0x8005faec`'s state-transition callees `FUN_8005d66c`/`FUN_8005d7bc`/
+`FUN_8005d744`, or `0x80058bb8`'s `FUN_80058974`/`FUN_80058a5c`) using the
+same helper-confirmation technique that worked this pass, or (b) extend
+the cold-triage ranking past size-tier 21-40 (ranks 26+) if (a) doesn't
+yield new HIGH hits. Given three consecutive passes of modest-to-strong
+yield (Pass 4: 1, Pass 5: 1, Pass 6: 3), this region remains productive
+and is not yet a candidate for deprioritization vs. other regions.
