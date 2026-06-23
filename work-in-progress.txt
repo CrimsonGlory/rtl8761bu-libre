@@ -2091,21 +2091,50 @@ completion):
           process-mode project cache vs. whatever path these tools expect) — may need a wairz fix if
           xref-based confidence checks are wanted for future passes against this GZF workflow.
 
-[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 continuation (remaining 22 top-15 candidates) (2026-06-23)
-          Pass 3 (above) only decompiled the top-4 of each half's top-15 list. 22 candidates remain
-          queued (11 lower-half, 11 upper-half) — see reverse_engineering_region_0x80040000.md's
-          "Remaining top-15 candidates not yet decompiled" section for the full address list.
-          Next concrete steps:
-            1. Prioritize 0x80043a60 (358B but xrefs:15 — unusually high for its size tier, worth
-               checking first) from the lower half.
-            2. Batch-decompile the rest in 2-4-function batches via mcp__wairz__run_ghidra_headless
-               (GZF process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
+[DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 continuation (remaining 22 top-15 candidates) (2026-06-23)
+          All 22 remaining top-15-per-half candidates (11 lower + 11 upper) decompiled via 9 small
+          batches (BatchDecompile80040000Pass3RemA.java through ...RemI.java, 2-3 functions each).
+          0x80043a60 (xrefs:15) was checked first as instructed but did not yield a distinguishing
+          confirmation beyond MEDIUM. 1 of 22 reached HIGH confidence and was renamed:
+          0x8004966c -> HCI_Accept_Synchronous_Connection_Request_handler (sibling to the
+          already-named HCI_Setup_Synchronous_Connection_handler at 0x80049d20 — nearly identical
+          SCO/eSCO param bounds checks, writes into the same connection-record fields, terminates via
+          send_evt_HCI_Command_Status on every path). Remaining 21 documented at MEDIUM/MEDIUM-HIGH,
+          left as FUN_* (notably: near-identical sibling pair 0x80047628/0x80047304 likely a paired
+          HCI command for chunked variable-length data; 0x8004cb48 and 0x80047c50 both call the known
+          eSCO table processor FUN_80044730; 0x80045964 strongly resembles HCI_Write_Page_Scan_Activity
+          or HCI_Write_Inquiry_Scan_Activity but the two commands share an indistinguishable param
+          shape without xref confirmation; 0x8004b468 is internal TX/scheduling infra, no HCI-handler
+          signature). Updated reverse_engineering_region_0x80040000.md (new "Pass 3 continuation"
+          section + region status + coverage table), rom_function_index.md (new HIGH row for
+          0x8004966c), analysis/INDEX.md. Both halves' top-15 lists now fully exhausted — Pass 3
+          (top-15-per-half sweep, 30 functions total) is COMPLETE for this region.
+          RE-CONFIRMED (not re-investigated, already flagged): mcp__wairz__xrefs_to and
+          mcp__wairz__find_callers still fail with "Binary not found" against this GZF in process
+          mode — this is the same known wairz tooling gap from the prior pass; it is likely the
+          limiting factor keeping several MEDIUM-HIGH candidates (the sibling pairs, the scan-activity
+          candidate) from reaching HIGH confidence without further work.
+
+[NEXT]   Full RE: ROM region 0x80040000-0x8004ffff PASS 4 (cold-triage remaining ~281 unnamed outside top-15 lists) (2026-06-23)
+          Pass 3 + continuation exhausted the top-15-largest-per-half candidate lists (30 functions),
+          yielding 3 HIGH-confidence renames total (init_global_connection_table_and_bt_state,
+          HCI_Setup_Synchronous_Connection_handler, HCI_Accept_Synchronous_Connection_Request_handler)
+          plus ~27 functions parked at MEDIUM/MEDIUM-HIGH. ~281 unnamed functions remain in this
+          region (0x80040000-0x8004ffff) outside those top-15 lists, mostly in the smaller size tiers
+          (1-300B) per ColdTriageRegion80040000Pass3.java's size-tier buckets (89 in 1-50B, 117 in
+          51-150B, 49 in 151-300B). Next concrete steps:
+            1. Run a fresh cold-triage pass (reuse/extend ColdTriageRegion80040000Pass3.java) to
+               re-rank the remaining unnamed functions, this time including xref counts where
+               available, to find the next-most-promising tier-3/tier-4 (151-600B) candidates.
+            2. Batch-decompile in 2-3-function batches via mcp__wairz__run_ghidra_headless (GZF
+               process mode, binary_path=2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf,
                use_saved_project=true) — keep batches small per the recurring log-truncation lesson.
-            3. Review each decompile; rename only functions clearing the HIGH-confidence bar; leave
-               MEDIUM/MEDIUM-HIGH evidence unrenamed per established practice.
+            3. Before deep manual cross-confirmation work, consider asking the user whether the
+               mcp__wairz__xrefs_to / find_callers "Binary not found" gap against GZF process-mode
+               projects can be fixed — several MEDIUM-HIGH candidates from this and the prior pass
+               are blocked on exactly that tooling gap (per CLAUDE.md: do not work around wairz
+               limitations silently, flag them).
             4. Update reverse_engineering_region_0x80040000.md, rom_function_index.md, analysis/INDEX.md.
-            5. Once both halves' top-15 lists are exhausted, consider this region's Pass 3 fully
-               complete and either start a Pass 4 (next size tier) or move to a different region.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
           Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).

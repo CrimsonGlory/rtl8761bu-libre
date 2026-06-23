@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 2 COMPLETE (2026-06-23); PASS 3 (cold-triage of 307 unnamed) STAGED
+**Status**: PASS 2 COMPLETE (2026-06-23); PASS 3 (top-15-per-half sweep, 30 functions) COMPLETE (2026-06-23); cold-triage of remaining unnamed functions outside top-15 lists still open
 
 ## Overview
 
@@ -98,9 +98,9 @@ If enumeration script completes successfully:
 | Metric | Current | Target |
 |--------|---------|--------|
 | Region total functions | 336 (recount at Pass 3) | 336 |
-| Already high-confidence | ~54 (16.1%, +2 from Pass 3) | 336 (100%) |
+| Already high-confidence | ~55 (16.4%, +3 from Pass 3/3-continuation) | 336 (100%) |
 | Thin-named (decompile pending) | 0 (Pass 2 complete) | 0 (all high/medium) |
-| Unnamed (cold triage) | 303 (90.2%, 6 newly at MEDIUM/MEDIUM-HIGH from Pass 3, 2 renamed HIGH) | 0 (all named) |
+| Unnamed (cold triage) | ~281 (83.6%; 30 functions triaged across Pass 3 + continuation: 3 renamed HIGH, 27 at MEDIUM/MEDIUM-HIGH and left as FUN_*) | 0 (all named) |
 
 ---
 
@@ -244,7 +244,83 @@ Upper half: `0x8004c4a8`, `0x800483c0`, `0x80047628`, `0x80047304`,
 
 ---
 
-**NEXT**: Batch-decompile the remaining top-15-per-half candidates listed
-above (11 lower + 11 upper = 22 functions, in 2-4-function batches), with
-`0x80043a60` (xrefs:15) prioritized first given its unusually high
-cross-reference count for its size tier.
+## Pass 3 continuation — Remaining 22 top-15 candidates EXECUTED (2026-06-23)
+
+All 22 remaining top-15-per-half candidates (11 lower + 11 upper) decompiled
+successfully via 9 small batches (`BatchDecompile80040000Pass3RemA`
+through `...RemI.java`, 2-3 functions each, per the established
+log-truncation-avoidance practice). `0x80043a60` (xrefs:15) was prioritized
+first as instructed.
+
+### Findings summary — lower half (11 functions, none reached HIGH)
+
+| Address | Size | Behavior | Confidence |
+|---|---|---|---|
+| `0x80043a60` | 358B | High xref count (15) for its size tier but decompile shows a fairly generic field-update/state-transition helper; no single confirmed call site distinguishes its purpose precisely. | MEDIUM |
+| `0x80040594` | 566B | Dense register/field-programming routine in the lower conn-type cluster; coherent but unconfirmed single purpose. | MEDIUM |
+| `0x80041230` | 560B | Similar register-programming shape to neighboring lower-half functions; no distinguishing confirmation. | MEDIUM |
+| `0x80042640` | 530B | Field-update logic operating on connection-record-shaped data; plausible LC-layer helper but unconfirmed. | MEDIUM |
+| `0x800401c4` | 426B | Compact dispatch-shaped function; case semantics not individually confirmed. | MEDIUM |
+| `0x80040e60` | 386B | Connection-record field manipulator; no cross-xref confirmation available (tooling gap, see below). | MEDIUM |
+| `0x80041900` | 376B | Similar shape to other lower-half record-field helpers. | MEDIUM |
+| `0x80043c7c` | 372B | Small state-check/update helper; plausible but unconfirmed single purpose. | MEDIUM |
+| `0x80041a94` | 352B | Field manipulator, lower conn-type cluster. | MEDIUM |
+| `0x800435a8` | 338B | Field manipulator, lower conn-type cluster. | MEDIUM |
+| `0x80041028` | 336B | Field manipulator, lower conn-type cluster. | MEDIUM |
+
+**Net effect (lower half)**: no renames this pass — all 11 stay at MEDIUM,
+documented above for a future targeted pass (likely needs working
+`xrefs_to`/`find_callers` against this GZF to push further, since the
+decompiled shapes are individually plausible but not distinguishable from
+each other on content alone).
+
+### Findings summary — upper half (11 functions, 1 reached HIGH)
+
+| Address | Size | Behavior | Confidence |
+|---|---|---|---|
+| `0x8004c4a8` | 894B | Large handler, shape and field-touches not yet isolated to one specific purpose. | MEDIUM |
+| `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
+| `0x80047628` | 832B | Near-identical sibling shape to `0x80047304` — likely a paired HCI command for chunked variable-length data (e.g. a read/write variant pair). | MEDIUM-HIGH |
+| `0x80047304` | 780B | Sibling of `0x80047628` (see above). | MEDIUM-HIGH |
+| `0x8004cb48` | 722B | Calls the known eSCO table processor `FUN_80044730` twice — strong structural link to the eSCO cluster. | MEDIUM-HIGH |
+| `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
+| `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
+| `0x80046900` | 682B | Validates packet-type/role bitmask fields; plausible HCI command parameter validator for a multi-entry SCO/eSCO table, not individually confirmed beyond shape. | MEDIUM-HIGH |
+| `0x800480b0` | 682B | Validates connection params via `get_0x1ac_struct_ptr_by_index`, checks a bitmask with sub-cases 0/1/2, conditionally calls `FUN_8005fe90`, terminates exclusively via `send_evt_HCI_Command_Status` on every path — shape consistent with an HCI command handler toggling a per-connection link-policy/mode flag (e.g. Sniff/Hold/Park-style), but no definitive single name confirmed. | MEDIUM-HIGH |
+| `0x8004b468` | 624B | No HCI event/status sender at all — pure internal queue/scheduler logic over `0x1ac`-strided struct array entries via `FUN_8004b344`/`FUN_8004b170`/`FUN_8004b0f8`/`FUN_8004b3c0`; disables/enables interrupts around a critical section; manages a linked list with byte-budget accounting. Likely the TX/scheduling fragmentation engine for per-connection ACL/SCO data queues — internal infra, not an HCI command handler. | MEDIUM |
+| `0x80045964` | 560B | Validates page-scan/inquiry-scan-style window/interval parameter pairs (bounded `0x1f..0x4000`), bit-packs results into a `the_0x300`-sized struct's offset `0x28-0x2f` region, terminates via `hci_event_sender(0xe,...)` (Command Complete). Strong shape match to HCI_Write_Page_Scan_Activity / HCI_Write_Inquiry_Scan_Activity, but two near-identical HCI commands share this exact bounds pattern in the spec — can't be distinguished to HIGH without a confirming xref. | MEDIUM-HIGH |
+
+**Net effect (upper half)**: 1 of 11 renamed to HIGH confidence
+(`HCI_Accept_Synchronous_Connection_Request_handler`, sibling to the
+already-named `HCI_Setup_Synchronous_Connection_handler`); 5 documented at
+MEDIUM-HIGH (strong structural evidence — cluster membership or near-identical
+sibling shape — but lacking a distinguishing confirmation), 1 at MEDIUM
+(internal scheduler/queue infra, no HCI-handler signature), and 4 more at
+MEDIUM/MEDIUM-HIGH per the table above.
+
+**Tooling note (re-confirmed, not re-investigated)**: `xrefs_to` and
+`find_callers` continue to fail with "Binary not found" against this GZF in
+process mode, consistent with the previously-flagged wairz tooling gap. All
+confidence assessments this pass were made via decompile-content +
+struct/constant cross-confirmation only.
+
+Full decompiled C for all 22 functions is preserved in the Ghidra run logs
+(`BatchDecompile80040000Pass3RemA.java` through `...RemI.java`, plus
+`RenameBatch80040000Pass3Cont.java`, all 2026-06-23).
+
+### Region 0x80040000 Pass 3 status: top-15-per-half lists exhausted
+
+Both halves' top-15 candidate lists (30 total, 8 from the initial Pass 3 batch
++ 22 from this continuation) are now fully decompiled and triaged. 3 functions
+total reached HIGH confidence across the two batches
+(`init_global_connection_table_and_bt_state`,
+`HCI_Setup_Synchronous_Connection_handler`,
+`HCI_Accept_Synchronous_Connection_Request_handler`); the remainder sit at
+MEDIUM/MEDIUM-HIGH, which is an expected outcome given the known
+`xrefs_to`/`find_callers` tooling gap against this GZF — those tools would
+likely be needed to push several MEDIUM-HIGH candidates (especially the
+near-identical sibling pairs `0x80047628`/`0x80047304` and the scan-activity
+candidate `0x80045964`) over the HIGH bar. Pass 3 (top-15-per-half sweep) is
+considered **complete**; a future pass should either (a) retry once the
+xrefs tooling gap is resolved, or (b) continue cold-triaging the remaining
+~280 unnamed functions in this region outside the top-15-per-half lists.
