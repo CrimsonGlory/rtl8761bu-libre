@@ -95,7 +95,61 @@ Plus dispatchers and reply wrappers (6 functions, 460 B total).
 ## Remaining Gaps
 
 - **Core encryption opcodes (0x09/0x0B/0x0C)**: COMB_KEY, AU_RAND, SRES not found — likely in upper region 0x80070000 or dispatched via callback.
-- **`unknown_referencing_default_name_9` at 0x80067a2c (680 B)**: Largest unclassified function. Candidate: vendor LMP extension or feature-page processor. Decompile recommended for next pass.
+- ~~**`unknown_referencing_default_name_9` at 0x80067a2c (680 B)**~~ — RESOLVED in Pass 3, see below.
+
+---
+
+## Pass 3 (2026-06-23) — `unknown_referencing_default_name_9` (0x80067a2c) decompiled
+
+Decompiled the region's single remaining unclassified function via a one-off
+`DecompileAddr80067a2c.java` script (GZF process mode). Full disassembly +
+pseudo-C + caller/callee xrefs captured.
+
+**Finding: BT inquiry/page/discoverability state-block initializer.**
+
+- Zeroes a `0x308`-byte struct (`PTR_struct_of_at_least_0x300_size_80067cd4`) —
+  this is the per-device LC (Link Controller) inquiry/page/GAP state block.
+- Copies config-blob fields into the struct: `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ`
+  feature-enable byte (selects a packet-type/role default 5–10 based on bit
+  pattern), four feature-page bytes (`field204_0xd4`..`0xd7`), and six BD-config
+  bytes (`0xb2`..`0xb9`, copied in pairs into struct offsets `0x14`–`0x1f`) —
+  i.e. supported-feature mask and class-of-device-adjacent fields from the
+  appended config blob (same blob read by `copies_config_bdaddr`,
+  `0x8000fd38`).
+- Copies BD_ADDR tail bytes (`configed_bdaddr[0x1a..]`) into a local-name-style
+  buffer (`field_0x38`) until a zero terminator or 0x20 bytes, sets
+  `_x164_local_name_length` — looks like a fallback "local name" seeded from
+  BD_ADDR when no friendly name is configured.
+- **Hardcodes the GIAC (General Inquiry Access Code) LAP `0x9E8B33`** into
+  `_x142_LAP[0..2]` (bytes `0x33, 0x8B, 0x9E`, little-endian-loaded) — this is
+  the standard Bluetooth inquiry-access-code constant per the Core Spec
+  (Vol 2, Part B, App. A), confirming the struct is the **inquiry/discoverability
+  state block**, not just a generic config mirror.
+- Initializes inquiry/page scan-window/interval-like fields (`field_0x176..0x178`,
+  `field_0x166/0x168/0x175`), EIR pointer (`ptr_to_EIR_data = NULL`), and clears
+  several `0xff`-filled small arrays (likely AFH/channel-map placeholders at
+  `_x142_LAP[0x49..0x6e]`-relative offsets — reused array beyond the 3-byte LAP).
+- Tail-calls three ROM helpers unconditionally — `FUN_80067658` (in-region,
+  no other named callers yet), `FUN_80021da0`, `FUN_80021d00` — plus
+  conditionally `FUN_80021d7c` when feature-enable bit 0 is set. These three
+  `FUN_80021dxx` helpers are outside this region's scope (likely shared
+  baseband-state init in `0x80020000` region) and are flagged for the
+  `0x80020000` region's own pass rather than renamed here.
+- **Only caller**: `FUN_800681d8` (this region, currently unnamed) — strongly
+  suggests `FUN_800681d8` is itself a higher-level "BT stack cold-init" or
+  "reset to default config" routine that this function is one step of.
+
+**Confidence: HIGH** (purpose, not just touched-fields). Rename applied:
+`unknown_referencing_default_name(2x)_9` → `init_inquiry_page_state_from_config`.
+
+**New follow-on (not yet renamed, out of scope for this pass)**:
+- `FUN_800681d8` (caller) — likely `bb_state_cold_init_from_config` or similar;
+  candidate for region 0x80060000's next pass since it's in-region.
+- `FUN_80067658` (in-region callee, 1 unconditional call, no decompile yet).
+
+No change to **Libre Implications** — this remains pure ROM-resident
+initialization (reads config blob + BD_ADDR, both already documented data
+sources); not reimplemented by the libre patch.
 
 ---
 
@@ -112,4 +166,13 @@ Region contains **pure protocol**; no hardware I/O or crypto inline. All handler
 ### Pass 2 (2026-06-22) — Complete
 
 Categorized all 96 thin-named functions by opcode family using Kovah names + LMP dispatcher cross-reference. All → high confidence. Doc written. rom_function_index.md updated. ~6 minutes.
+
+### Pass 3 (2026-06-23) — Complete
+
+Decompiled the region's last unclassified function, `unknown_referencing_default_name_9`
+(0x80067a2c, 680 B) → identified as inquiry/page/discoverability state-block
+initializer (GIAC LAP constant + config-blob feature copy). Renamed to
+`init_inquiry_page_state_from_config`. Region 0x80060000-0x8006ffff now has
+**zero unclassified functions** — all 97 named functions (96 LMP handlers +
+1 init routine) at HIGH confidence. ~10 minutes.
 

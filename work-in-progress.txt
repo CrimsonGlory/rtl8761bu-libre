@@ -2086,7 +2086,7 @@ completion):
             per wip-loop's "promote the first remaining [TODO]" rule; Pass 3c can be picked up whenever
             0x80050000 cycles back around).
 
-[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3c (review remaining 9 of top-20 + batch rename) (2026-06-23)
+[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3c (review remaining 9 of top-20 + batch rename) (2026-06-23)
           Remaining unreviewed from Pass 3b's top-20: 0x80057ce8 (1314B), 0x800555bc (950B),
           0x8005b9d8 (950B) [these 3 fell in the unread 57KB middle gap along with #6-11 partial],
           plus #12-20: 0x80052c64 (692B), 0x8005aba8 (664B), 0x80058dd4 (628B), 0x80053aa4 (568B),
@@ -2100,12 +2100,38 @@ completion):
           After review, apply RenameBatch1Region80050000Pass3.java-style rename pass for any function
           reaching HIGH confidence (clear purpose + struct-field semantics not just "touches 0x1ac array").
 
-[NEXT]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
-          LMP opcode cluster already categorized by family (extended 0x7F, standard 0x00-0x3E, power, AFH, etc).
-          All 94 thin-named handlers use shared send_LMP_pkt TX primitive — pure protocol layer (no HW I/O).
-          Next: Batch decompile largest 15-20 thin-named to confirm naming accuracy + HIGH confidence.
-          Expected confidence upgrade: 94 thin-named → ~80-90 HIGH after batch pass; ~50 large unnamed triage.
-          Estimated 1-2 batch passes to complete region (similar to 0x80070000 execution pattern).
+[DONE]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b) (2026-06-23, overnight worker)
+          STALE-TICKET NOTE: this ticket duplicated work already completed. Region 0x80060000-0x8006ffff
+          was fully enumerated + categorized in an earlier "[DONE] Full RE: ROM region 0x80060000-0x8006ffff
+          (238 unnamed + 94 thin-named fns) (2026-06-22)" entry (further down this file) and marked
+          **Phase 9 Pass 2 [COMPLETE]** in analysis/INDEX.md — all 96 thin-named LMP opcode handlers were
+          already upgraded to HIGH confidence via opcode-naming + dispatcher cross-reference. No re-run
+          needed; verified via analysis/rom/reverse_engineering_region_0x80060000.md and
+          analysis/rom/rom_function_index.md (96 rows already "high (decompiled+documented in
+          region_0x80060000)").
+          ACTUAL WORK THIS TURN: the region doc's own "Remaining Gaps" section flagged one true gap —
+          the single largest unclassified function, `unknown_referencing_default_name(2x)_9` @ 0x80067a2c
+          (680B) — not yet decompiled. Wrote one-off DecompileAddr80067a2c.java (GZF process mode,
+          mcp__wairz__run_ghidra_headless, use_saved_project=true) to decompile + dump disassembly/
+          callers/callees. Finding: BT inquiry/page/discoverability state-block initializer — zeroes a
+          0x308B struct, copies feature-enable + BD-config bytes from the appended config blob, hardcodes
+          the Bluetooth GIAC LAP constant 0x9E8B33 (bytes 0x33/0x8B/0x9E), seeds a fallback local-name
+          from BD_ADDR tail bytes, and tail-calls 3 helpers in region 0x80020000 (FUN_80021d00/da0/d7c)
+          plus in-region FUN_80067658. Only caller: FUN_800681d8 (in-region, unnamed — candidate
+          "BT stack cold-init" routine, flagged as follow-on, not renamed this pass).
+          Renamed via RenamePass3Region80060000.java: unknown_referencing_default_name(2x)_9 →
+          init_inquiry_page_state_from_config. Region now has **zero unclassified functions** (97/97
+          HIGH confidence).
+          → analysis/rom/reverse_engineering_region_0x80060000.md (new "Pass 3" section + Remaining
+            Gaps updated)
+          → analysis/rom/rom_function_index.md (1 row: renamed + high confidence + Pass 3 note)
+          → analysis/INDEX.md (region 0x80060000 one-liner updated to Pass 3 COMPLETE)
+          → /root/wairz/ghidra/scripts/DecompileAddr80067a2c.java,
+            RenamePass3Region80060000.java (new scripts, follow the existing per-region script
+            naming convention)
+          Follow-on candidates noted but out of scope: FUN_800681d8 (caller, in-region 0x80060000),
+          FUN_80067658 (in-region callee), FUN_80021d00/da0/d7c (region 0x80020000 — flagged for
+          that region's own pass).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff (pass 2 BATCH DECOMPILE) (self-chain) (2026-06-22)
         Enumeration confirmed 364 total functions (10 thin-named, 354 unnamed).

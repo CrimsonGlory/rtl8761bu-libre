@@ -758,7 +758,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x800656bc` | 256 | `LMP_CH__0x3ea__FUN_800656bc` | LMP CH  0x3ea  FUN 800656bc | high (decompiled+documented in region_0x80060000) |
 | `0x80066e68` | 200 | `assoc_w_tLMP_CH` | assoc w tLMP CH | high (decompiled+documented in region_0x80060000) |
 | `0x80067128` | 160 | `set_check_for_1_to_1` | set check for 1 to 1 | high (decompiled+documented in region_0x80060000) |
-| `0x80067a2c` | 680 | `unknown_referencing_default_name(2x)_9` | unknown referencing default name(2x) 9 | high (decompiled+documented in region_0x80060000) |
+| `0x80067a2c` | 680 | `init_inquiry_page_state_from_config` | inquiry/page/discoverability state-block initializer; hardcodes GIAC LAP 0x9E8B33, copies feature/BD-config bytes from config blob | high (decompiled+documented in region_0x80060000, Pass 3) |
 | `0x800683d8` | 40 | `calls_fptr` | calls fptr | high (decompiled+documented in region_0x80060000) |
 | `0x80068400` | 40 | `c_by_LMP_ENCAPSULATED_PAYLOAD_0x3E_call_fptr` | c by LMP ENCAPSULATED PAYLOAD 0x3E call fptr | high (decompiled+documented in region_0x80060000) |
 | `0x8006845c` | 78 | `call_if_encapsulated_payload_or_header_rejected` | call if encapsulated payload or header rejected | high (decompiled+documented in region_0x80060000) |
