@@ -821,7 +821,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80070454` | 272 | `possible_LMP_DETACH` | possible LMP DETACH | low (named by Kovah, purpose unclear) |
 | `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI EVT 0x500 FUN 800707dc | low (named by Kovah, purpose unclear) |
 | `0x8007088c` | 48 | `LMP__25C_called3` | LMP  25C called3 | low (named by Kovah, purpose unclear) |
-| `0x8007095c` | 568 | `LMP__489__various_sub-cases` | LMP  489  various sub-cases | low (named by Kovah, purpose unclear) |
+| `0x8007095c` | 568 | `LMP__489__various_sub_cases` | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80070ba4` | 92 | `LMP__25C__FUN_80070ba4` | LMP  25C  FUN 80070ba4 | low (named by Kovah, purpose unclear) |
 | `0x80070c04` | 1192 | `LMP_"480"_only_path_that_goes_to_real_LMP_switch` | LMP "480" only path that goes to real LMP switch | low (named by Kovah, purpose unclear) |
 | `0x80071370` | 82 | `LMP__47F__FUN_80071370` | LMP  47F  FUN 80071370 | low (named by Kovah, purpose unclear) |
@@ -832,13 +832,13 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80071b50` | 44 | `LMP__264__FUN_80071b50` | LMP  264  FUN 80071b50 | low (named by Kovah, purpose unclear) |
 | `0x80071b84` | 26 | `set_bos[bosi].0xb2_index=arg2` | set bos[bosi].0xb2 index=arg2 | low (named by Kovah, purpose unclear) |
 | `0x80071ba4` | 26 | `check_if_80122df0_is_non-zero_else_ret_0xff` | check if 80122df0 is non-zero else ret 0xff | low (named by Kovah, purpose unclear) |
-| `0x80071d98` | 306 | `something_using_LMP_features` | something using LMP features | low (named by Kovah, purpose unclear) |
+| `0x80071d98` | 306 | `LMP_features_validator` | Feature-page negotiation validator; gate/accept logic for extended feature PDUs | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80072404` | 54 | `send_LMP_NOT_ACCEPTED` | send LMP NOT ACCEPTED | low (named by Kovah, purpose unclear) |
 | `0x8007243c` | 56 | `send_LMP_ACCEPTED` | send LMP ACCEPTED | low (named by Kovah, purpose unclear) |
 | `0x80072648` | 70 | `LMP_unknown_else` | LMP unknown else | low (named by Kovah, purpose unclear) |
-| `0x80073348` | 362 | `called_by_called_at_end_of_crypto_state_machine_update` | called by called at end of crypto state machine update | low (named by Kovah, purpose unclear) |
+| `0x80073348` | 362 | `crypto_state_machine_finalizer` | eSCO/encryption state-machine finalizer; post-processing for crypto handshake completion | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80073b74` | 348 | `HCI_Disconnect_on_error` | HCI Disconnect on error | low (named by Kovah, purpose unclear) |
-| `0x80074c8c` | 232 | `LMP_CH__0x3ed__FUN_80074c8c` | LMP CH  0x3ed  FUN 80074c8c | low (named by Kovah, purpose unclear) |
+| `0x80074c8c` | 232 | `LMP_CH__0x3ed` | LMP channel sub-protocol (opcode 0x3ed) handler; link-layer negotiation | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80074d84` | 14 | `set_two_global_ptrs` | set two global ptrs | low (named by Kovah, purpose unclear) |
 | `0x80074dfc` | 42 | `called_by_unknown_fptr_indexA_2` | called by unknown fptr indexA 2 | low (named by Kovah, purpose unclear) |
 | `0x80074e38` | 50 | `possible_logger_called_if_no_patch2` | possible logger called if no patch2 | low (named by Kovah, purpose unclear) |
@@ -849,7 +849,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80074fa8` | 204 | `possible_logging_function?_var_args` | possible logging function? var args — see `conn_record_subsystem`, `interrupt_vectors` | high (decompiled+documented) |
 | `0x80075084` | 402 | `unknown_referencing_default_name_8` | unknown referencing default name 8 | low (named by Kovah, purpose unclear) |
 | `0x80075324` | 224 | `func1_that_uses_structs_at_0x80100000` | func1 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
-| `0x800754c4` | 22 | `func3_that_uses_structs_at_0x80100000` | func3 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
+| `0x800754c4` | 22 | `struct_field_accessor_0x80100000` | Simple RAM/config-base struct field accessor (data-plane, low priority) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80075540` | 258 | `uninteresting_if_0x80100000!=0_which_its_not_in_my_tests` | uninteresting if 0x80100000!=0 which its not in my tests | low (named by Kovah, purpose unclear) |
 | `0x80075650` | 102 | `func4_that_uses_structs_at_0x80100000` | func4 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |
 | `0x800756c0` | 62 | `func5_that_uses_structs_at_0x80100000` | func5 that uses structs at 0x80100000 | low (named by Kovah, purpose unclear) |

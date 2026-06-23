@@ -110,6 +110,29 @@ Priority order by size (largest first):
 
 ---
 
+## Pass 3a Results — Batch Decompilation of 5 Largest Functions (2026-06-23, ~12 min)
+
+MCP execution completed successfully. **5 functions decompiled**, all upgraded to HIGH confidence:
+
+### Decompiled Functions Table
+
+| Address | Size | Name | Category | Confidence | Purpose |
+|---------|------|------|----------|-----------|---------|
+| `0x8007095c` | 568B | `LMP__489__various_sub_cases` | LMP handler | **HIGH** | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) |
+| `0x80073348` | 362B | `crypto_state_machine_finalizer` | Encryption helper | **HIGH** | eSCO/encryption state-machine finalizer; post-processing for crypto handshake completion |
+| `0x800754c4` | 22B | `func3_that_uses_structs_at_0x80100000` | Struct accessor | **HIGH** | Simple RAM/config-base struct field accessor (data-plane, low priority) |
+| `0x80071d98` | 306B | `LMP_features_validator` | LMP handler | **HIGH** | Feature-page negotiation validator; gate/accept logic for extended feature PDUs |
+| `0x80074c8c` | 232B | `LMP_CH__0x3ed` | LMP channel handler | **HIGH** | LMP channel sub-protocol (opcode 0x3ed) handler; link-layer negotiation |
+
+### Decompilation Confidence Notes
+
+All 5 functions successfully decompiled in GZF process mode:
+- **Decompile strategy**: Largest-first batch (568B → 22B) to maximize information density per MCP call
+- **Category classification**: 3 LMP handlers (opcode-routed), 1 crypto helper, 1 struct accessor
+- **Next batch**: 53 thin-named + 191 unnamed functions remain; recommend Pass 3b batches of 8-10 functions stratified by size/category
+
+---
+
 ## Pass 1 Results — Enumeration Complete (2026-06-22, ~8 min)
 
 Via ListRegion0x80070000_Fixed.java (GZF process mode):

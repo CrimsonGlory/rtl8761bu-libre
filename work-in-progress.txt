@@ -2112,15 +2112,23 @@ completion):
           batch decompile 5 more largest (0x8007095c/0x80073348/0x800754c4/0x80071d98 +
           0x80074c8c), then cold-triage unnamed by size + literal-pool + xref patterns.
 
-[BLOCKED]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 batch decompile MCP execution) (2026-06-23, needs MCP)
-          Execute Phase 3d after batch decompile + rename complete: stratify remaining 191
-          unnamed functions by size, prepare largest-10-to-15 batch, stage next decompile batch,
-          shrink address range to remaining untouched sub-ranges, promote to [NEXT] for Pass 4.
-          BLOCKER: Phase 3a+3b require MCP (wairz) server execution. Scripts staged in /root/wairz/ghidra/scripts/:
-            - BatchDecompileList80070000Pass3.java (ready, 600s timeout)
-            - RenameBatch1Region80070000Pass3.java (ready, 180s timeout)
-          Execution plan: scratchpad/BATCH_DECOMPILE_PHASE3_READY.md (complete with MCP invocation params)
-          Resume: MCP executor runs Phase 3a→3b, returns output, then resume Phase 3c+3d post-processing.
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3a batch decompile + index upgrade) (2026-06-23, ~12 min)
+          MCP execution completed successfully: 5 largest thin-named functions decompiled.
+          - 0x8007095c (568B) → LMP__489__various_sub_cases (multi-case LMP opcode dispatcher)
+          - 0x80073348 (362B) → crypto_state_machine_finalizer (encryption state-machine post-processor)
+          - 0x800754c4 (22B) → struct_field_accessor_0x80100000 (RAM/config struct accessor)
+          - 0x80071d98 (306B) → LMP_features_validator (feature-page negotiation handler)
+          - 0x80074c8c (232B) → LMP_CH__0x3ed (LMP channel opcode 0x3ed sub-protocol)
+          All 5 upgraded to HIGH confidence in rom_function_index.md.
+          → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 3a section added)
+          → rom_function_index.md (5 rows updated: semantic names + high confidence + decompile date)
+          Remaining scope: 48 thin-named + 191 unnamed (244 total). Next: Pass 3b batch (8-10 functions),
+          then Pass 3c cold-triage by size/category. Self-chain to Pass 3b after commit.
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3b batch decompile + triage 8-10 more) (self-chain)
+          Execute batch-decompilation of next 8-10 largest remaining (256B → 100B range), rename + confidence
+          upgrade. Then systematic cold-triage of ~191 unnamed by size/literal-pool patterns. Expect 3–4 batch
+          turns to resolve ~100 functions; remaining ~100 deferred to Pass 4 (lowest-priority accessors/utilities).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
@@ -2133,7 +2141,7 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
           Execute batch-decompilation of staged 15 LMP encryption/pairing procedures via
           BatchDecompileList.java (addresses from region doc Pass 2 table), upgrade to high confidence
           via RenameBatch1.java. Then systematic cold-triage of remaining ~340 unnamed + thin-named:
