@@ -2579,28 +2579,57 @@ completion):
           3/5 unchanged. Next continuation: decompile unnamed callers FUN_800559a0/FUN_800549fc
           to try naming them first, or move to cold-triage size-tier 21-40.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 5 (caller-decompile + size-tier 21-40) (2026-06-23)
-          Continuation staged by the Pass 4 ticket. Two remaining angles on this region:
-            1. Decompile the two unnamed callers identified in Pass 4 as the only remaining
-               lead on 3 of the 5 original MEDIUM-HIGH targets: FUN_800559a0 (46B, sole caller
-               of 0x800555bc, itself called by unknown_fptr_index0@0x800138cc — check if that
-               fptr table slot is identifiable/named) and FUN_800549fc (270B, sole caller of
-               0x80053aa4, itself called only by the already-named-cluster FUN_80054b14). If
-               either resolves to a clearer purpose, it may retroactively support naming its
-               callee.
-            2. Move to cold-triage size-tier 21-40 (next size band below the already-fully-
-               reviewed top-20) via a fresh ColdTriageRegion80050000Pass5.java-style script
-               (size+xref ranking via in-script ReferenceManager, per the now twice-confirmed
-               GZF-wide xrefs_to/find_callers MCP gap — do not retry those tools, the gap is
-               confirmed structural, not region-specific).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 5 (caller-decompile + size-tier 21-40) (2026-06-23)
+          Angle 1 (decompiled the two unnamed callers FUN_800559a0/FUN_800549fc via
+          DecompileAddr.java): FUN_800559a0 is a trivial bit-flag guard wrapper around
+          FUN_800555bc (no new semantic content); FUN_800549fc is a status-bit dispatcher
+          that calls FUN_80053aa4 as one of several sibling handlers (supports but doesn't
+          address-exact-confirm the existing MEDIUM-HIGH read). Neither cleared HIGH for
+          their callees (0x800555bc, 0x80053aa4) — fell back to angle 2.
+          Angle 2 (cold-triage size-tier 21-40): wrote ColdTriageRegion80050000Pass5.java
+          (in-script ReferenceManager xref ranking; GZF-wide xrefs_to/find_callers MCP gap
+          re-confirmed structural, not retried). 330 unnamed functions outside the
+          already-reviewed top-20; ranked top 25 by size (514B-318B). Decompiled the 2
+          highest-xref candidates: 0x80050304 (408B, 8 xrefs) reads as a per-connection
+          diagnostic/status batch-dump (flushes 5-entry batches via FUN_8004fe64) — stays
+          MEDIUM-HIGH, exact field semantics unconfirmed. 0x800538b4 (352B, 7 xrefs)
+          decompiled to an unambiguous sorted doubly-linked-list insertion keyed by a
+          wraparound-masked time/slot field, with neighbor-duration-field (+0x26) pushback
+          to resolve time-window overlap — a timer-wheel/scheduled-event queue insert.
+          Self-contained structural evidence (no caller citation needed, same precedent as
+          Pass 3b's afh_channel_quality_poll_commit) — cleared HIGH and renamed
+          sched_event_sorted_insert_with_overlap_pushback. Verified via Ghidra headless run
+          log ("RENAMED 0x800538b4: ... ", "RENAME COMPLETE: 1 success, 0 failed").
+          Region-wide unnamed count: 350 -> 349.
+          Updated reverse_engineering_region_0x80050000.md (new Pass 5 section),
+          rom_function_index.md (1 row added, summary counts + region count updated),
+          analysis/INDEX.md.
+          Status: PASS 5 COMPLETE. 1 new HIGH rename, 1 new MEDIUM-HIGH documented read,
+          2 angle-1 callers decompiled with no new HIGH yield on their callees. Next
+          continuation: continue size-tier 21-40 with remaining high-xref candidates
+          (0x8005faec 4 xrefs, 0x8005261c 4 xrefs, 0x80058bb8 3 xrefs), or decompile
+          0x80050304's helper FUN_8004fe64 to try pushing it to HIGH.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 6 (size-tier 21-40 continuation) (2026-06-23)
+          Continuation staged by the Pass 5 ticket. Two remaining angles on this region:
+            1. Continue cold-triage size-tier 21-40 with the next-highest-xref candidates
+               from the Pass 5 ColdTriageRegion80050000Pass5.java ranking not yet decompiled:
+               0x8005faec (514B, 4 xrefs), 0x8005261c (338B, 4 xrefs), 0x80058bb8 (508B,
+               3 xrefs). Decompile via single-address DecompileAddr.java-style calls.
+            2. Decompile 0x80050304's helper FUN_8004fe64 (the 5-entry batch-flush callee)
+               to confirm its role (batch log-emit vs. something else) — if confirmed as a
+               logging/diagnostic-emit primitive, this would retroactively push the Pass 5
+               MEDIUM-HIGH read of 0x80050304 ("per-connection diagnostic batch-dump") to
+               HIGH via the same self-contained-structural-evidence precedent used for
+               0x800538b4.
           Steps:
-            1. Try angle (1) first (cheap, 2 single-address decompiles); fall back to angle (2)
-               if it doesn't yield new HIGH-confidence evidence.
+            1. Try angle (1) first (cheap, up to 3 single-address decompiles); fall back to
+               or combine with angle (2) if angle (1) doesn't yield new HIGH-confidence hits.
             2. Decompile resulting candidates via single-address DecompileAddr.java-style calls
                against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
                use_saved_project=true).
             3. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 5 section),
+            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 6 section),
                rom_function_index.md (if renames), analysis/INDEX.md.
             5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
 

@@ -716,3 +716,144 @@ the original 5; further gains on the remaining 4 would require either
 decompiling their unnamed callers (`FUN_800559a0`, `FUN_800549fc`) to see if
 *they* can be named first, or moving to the next size tier (functions ranked
 21-40 by size) per the region's overall sweep plan.
+
+## Pass 5 — Caller decompile follow-up + size-tier 21-40 cold triage (2026-06-23)
+
+### Angle 1: decompile the two unnamed callers from Pass 4
+
+Decompiled `FUN_800559a0` (46B) and `FUN_800549fc` (270B) via
+`DecompileAddr.java` single-address calls against the live GZF.
+
+- **`FUN_800559a0`**: trivial bit-flag guard wrapper — checks bit 2 of a
+  status byte (`*PTR_DAT_800559d0`), and if set, calls `FUN_800555bc`
+  (param_1, param_2) then clears that bit. Confirms `0x800555bc` is
+  conditionally invoked behind a pending-flag, but adds no new semantic
+  content about what `0x800555bc` itself does — does not clear the HIGH bar.
+- **`FUN_800549fc`**: a status-bit dispatcher — switches on
+  `(*(byte*)(param_1+8) & 7)`: case 2 logs via
+  `possible_logging_function__var_args`; case 0 sub-dispatches on further
+  flag bits to `FUN_80053e20`, `FUN_80053aa4` (when bit `0x10` of
+  `param_1+0xb` is set), or inline slot-count logic feeding
+  `FUN_80053cec`; default calls `FUN_800546e4`. Confirms `0x80053aa4` is one
+  of several sibling per-connection-state handlers selected by a status
+  bit, comparable in abstraction to `FUN_80053e20`/`FUN_800546e4` (already
+  read as "scheduler" functions in Pass 3b) — supports the existing
+  MEDIUM-HIGH "3-slot queue-scheduler commit" read but is not an
+  independent, address-exact identity confirmation. Does not clear HIGH.
+
+Neither decompile yielded new HIGH-confidence evidence for the Pass 4
+targets. Angle 1 exhausted; fell back to angle 2 per the ticket's plan.
+
+### Angle 2: cold-triage size-tier 21-40
+
+Wrote `ColdTriageRegion80050000Pass5.java` (in-script `ReferenceManager`
+xref ranking — the GZF-wide `xrefs_to`/`find_callers` MCP gap is now
+confirmed structural across three regions and is not retried). Excluded the
+already-fully-triaged top-20 (Pass 3/3b/3c) plus the two angle-1 callers
+just decompiled. 330 unnamed functions remain in the region; ranked the top
+25 by size (514B down to 318B — the 21-40 tier immediately below the
+top-20's ~516B floor):
+
+| # | Address | Size | Xrefs |
+|---|---------|------|-------|
+| 1 | `0x8005faec` | 514B | 4 |
+| 2 | `0x80058bb8` | 508B | 3 |
+| 3 | `0x8005840c` | 506B | 2 |
+| 4 | `0x8005dd9c` | 494B | 2 |
+| 5 | `0x8005f69c` | 484B | 0 |
+| 6 | `0x80050b2c` | 470B | 2 |
+| 7 | `0x80052a38` | 464B | 1 |
+| 8 | `0x80059b18` | 450B | 1 |
+| 9 | `0x80051368` | 426B | 2 |
+| 10 | `0x8005db5c` | 424B | 0 |
+| 11 | `0x8005eb6c` | 416B | 0 |
+| 12 | `0x80050304` | 408B | 8 |
+| 13 | `0x80058254` | 400B | 2 |
+| 14 | `0x80051d54` | 386B | 1 |
+| 15 | `0x800528b0` | 358B | 1 |
+| 16 | `0x800506ac` | 354B | 1 |
+| 17 | `0x800538b4` | 352B | 7 |
+| 18 | `0x80050194` | 350B | 1 |
+| 19 | `0x8005f428` | 348B | 1 |
+| 20 | `0x80058a5c` | 340B | 1 |
+| 21 | `0x8005261c` | 338B | 4 |
+| 22 | `0x80054570` | 338B | 1 |
+| 23 | `0x8005ee8c` | 328B | 0 |
+| 24 | `0x8005e950` | 326B | 1 |
+| 25 | `0x80052008` | 318B | 1 |
+
+Decompiled the two highest-xref candidates (`0x80050304`, 8 xrefs;
+`0x800538b4`, 7 xrefs) via `DecompileAddr.java`.
+
+**`0x80050304`** (408B): walks two singly-linked lists to count entries,
+calls a function-pointer (`PTR_DAT_800504a4`) to get a base value, then
+iterates a third list (`PTR_DAT_800504a8+0xc`) building a 5-entry batch of
+per-entry diagnostic bytes (signal/status byte via `FUN_8004f998`, a
+nibble-packed flags byte, and a 32-bit field from the list node) and
+flushing each full batch of 5 via `FUN_8004fe64`, with a final partial-batch
+flush and a closing log call. Reads as a **periodic per-connection
+diagnostic/status batch-dump function** (collects metrics across all active
+connections, flushes in groups of 5). Purpose is reasonably clear but the
+exact semantics of the per-entry fields aren't confirmed against named
+structs — stays **MEDIUM-HIGH**, not renamed.
+
+**`0x800538b4`** (352B): decompiles to an unambiguous **sorted
+doubly-linked-list insertion with time-window overlap resolution**. Takes
+`param_1` (a connection/event record pointer), and:
+- Calls an optional override hook (`PTR_DAT_80053a14`) first (same
+  conditional-override idiom seen on `0x800549fc`/`0x800559a0`).
+- Validates a 3-bit field at `param_1[2]` against a small bitmask (`0xb`),
+  logging via `possible_logging_function__var_args` if invalid.
+- If the list (`PTR_DAT_80053a18`) is empty, inserts as the sole node.
+- Otherwise walks the list comparing a wraparound-masked time/slot field
+  (`param_1[3]`, vs `DAT_80053a20` mask) against each node's slot value,
+  finds the correct sorted insertion point, and **adjusts the duration
+  field (`+0x26`, halfword, read via `FUN_8004f998`) of the neighboring
+  node(s) to push back and resolve overlap** with the newly inserted
+  entry's time window — classic timer-wheel / scheduled-event queue
+  insertion logic.
+- Finishes by linking the node into the doubly-linked list (prev/next
+  pointers at offsets `0x0`/`0x4`) and updating head/tail pointers as
+  needed.
+- Conditionally calls already-present `FUN_80053710` based on flag bits
+  at the end (same conditional-dispatch idiom as elsewhere in the region).
+
+This is **self-contained, unambiguous evidence** — the algorithm's
+structure (sorted insert + neighbor-duration pushback to avoid time-slot
+collision) is the confirmation itself, no external caller citation needed,
+consistent with the project's HIGH-confidence precedent set by
+`afh_channel_quality_poll_commit` (Pass 3b, also confirmed via pure
+structural/offset-pattern match). Also consistent with this region's
+established cluster of connection-scheduling functions
+(`0x800546e4`/`0x80054b14`/`0x80054144` from Pass 3b). **Clears the HIGH
+bar.**
+
+### Rename applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x800538b4` | `FUN_800538b4` | `sched_event_sorted_insert_with_overlap_pushback` | Self-contained decompile shows an unambiguous sorted doubly-linked-list insertion by time-slot field, with neighbor-duration-field pushback to resolve time-window overlap — a timer-wheel/scheduled-event queue insert, confirmed by code structure alone. |
+
+Applied via `RenamePass5Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log ("RENAMED
+0x800538b4: FUN_800538b4 -> sched_event_sorted_insert_with_overlap_pushback",
+"RENAME COMPLETE: 1 success, 0 failed").
+
+### Pass 5 summary
+
+- Angle 1 (caller decompile): both callers decompiled successfully but
+  yielded no new HIGH-confidence evidence for the Pass 4 holdovers
+  (`0x800555bc`, `0x80053aa4`) — they remain MEDIUM/MEDIUM-HIGH.
+- Angle 2 (cold triage): ranked size-tier 21-40 (330 unnamed functions
+  outside the top-20), decompiled the top 2 by xref count.
+- 1 new HIGH-confidence rename (`0x800538b4` →
+  `sched_event_sorted_insert_with_overlap_pushback`).
+- 1 new MEDIUM-HIGH read documented but not renamed (`0x80050304`,
+  per-connection diagnostic batch-dump).
+- Region-wide unnamed count: 350 → 349.
+
+**Status**: PASS 5 COMPLETE. Next continuation: continue size-tier 21-40
+triage with the remaining high-xref candidates (`0x8005faec` 4 xrefs,
+`0x8005261c` 4 xrefs, `0x80058bb8` 3 xrefs), or decompile `0x80050304`'s
+helper `FUN_8004fe64` to see if confirming its role (batch
+flush/log-emit) retroactively pushes `0x80050304` to HIGH.
