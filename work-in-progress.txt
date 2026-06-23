@@ -2445,30 +2445,70 @@ completion):
           Next: Pass 6 cold-triage of the 191 unnamed functions (thin-named backlog is now shallow —
           37 MEDIUM/LOW remain as opportunistic follow-ups, no large fresh targets left there).
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 6 (cold-triage 191 unnamed functions) (2026-06-23)
-          Self-chained continuation (no other [TODO] available to promote). Pass 5 closed out the
-          thin-named backlog's large/clear-cut candidates (17/54 now HIGH; remaining 37 are
-          MEDIUM/LOW opportunistic follow-ups with no large fresh targets). The region's biggest
-          remaining body of work is the 191 unnamed (FUN_*) functions, never yet triaged for this
-          region specifically (Pass 4 only cold-triaged/projected by category, did not enumerate the
-          actual unnamed function list with real addresses/sizes/xrefs).
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 6 (cold-triage 191 unnamed functions) (2026-06-23)
+          New ColdTriageRegion80070000Pass6.java (GZF process mode, use_saved_project=true, written
+          directly to /root/wairz/ghidra/scripts/ via Write tool per the mandatory workaround for
+          save_ghidra_script) produced the first real (non-projected) enumeration of all 191 unnamed
+          functions in this region: size + xref-in/xref-out per function via in-script
+          ReferenceManager/Listing walk (xrefs_to/find_callers MCP tools remain broken against this
+          GZF in process mode). Size distribution: 60 STUB(1-50B)/79 SIMPLE(51-150B)/33
+          HANDLER(151-300B)/13 COMPLEX(301-600B)/6 CRITICAL(601B+); 26456 total bytes, 138.5B avg.
+          Top-20 ranked by size x xref-cluster captured in full.
+          Decompiled 6 of the Top-20 via single-address DecompileAddr.java calls (batch-script
+          approach correctly avoided per Pass 5's tooling note — directory-wide javac poisoning from
+          ~15+ unrelated broken legacy scripts confirmed present again this pass, cosmetic only,
+          every call still exit 0 with correct output).
+          2 reached HIGH confidence and were renamed via new RenamePass6Region80070000.java
+          (verified "RENAME COMPLETE: 2 success, 0 failed"):
+            0x80070084 (414B) -> LMP_role_switch_completion_handler
+              (explicit bdaddr_random_ ^= 1 role-bit toggle + send_evt_HCI_Role_Change(...) call;
+              dispatches to named LMP__25C_called1/LMP__268_.../LMP__25B_.../VSC_0xfc95_called2)
+            0x80070574 (582B) -> connection_teardown_HCI_event_finalizer
+              (explicit send_evt_HCI_Disconnection_Complete/send_evt_HCI_Connection_Complete/
+              send_evt_HCI_Remote_Name_Request_Complete dispatch gated on byte_0x203 connection
+              state; calls already-named FUN_80041dac)
+          4 more decompiled but held at MEDIUM-HIGH (insufficient cross-confirmation for HIGH bar):
+            0x8007814c/0x80077bcc (1388B sibling pair) - quantizer/threshold-search loop variants
+              (80-entry vs 40-entry array), same helper trio, protocol role not cross-confirmed
+            0x80072bac/0x80072924 (814B/628B sibling pair) - share struct_of_at_least_0x300_size
+              global table (same field offsets as VSC_0xfc73_AFH_Channel_Assessment_variant_* in
+              region 0x80050000) + big_ol_struct; AFH/LAP-table registration semantics inferred from
+              struct layout but not cross-confirmed via named caller or opcode literal
+          -> analysis/rom/reverse_engineering_region_0x80070000.md (new "Pass 6 Results" section,
+            full stats + per-function writeups + tooling note; Status line updated)
+          -> analysis/rom/rom_function_index.md (2 new HIGH rows for the renamed functions; region
+            unnamed-count corrected 193->191)
+          -> analysis/INDEX.md (region 0x80070000 entry extended with Pass 6 summary + Pass 7 pointer)
+          -> /root/wairz/ghidra/scripts/ColdTriageRegion80070000Pass6.java (new script)
+          -> /root/wairz/ghidra/scripts/RenamePass6Region80070000.java (new script)
+          Region status: 19/245 functions now HIGH (17 thin-named + 2 newly-renamed unnamed); 189
+          unnamed remain untriaged, incl. the 4 MEDIUM-HIGH siblings above and ~12-14 more Top-20
+          entries (0x8007718c 524B, 0x800734c4 466B, etc.) not yet decompiled.
+          Next: Pass 7 - decompile remaining Top-20 entries, attempt to cross-confirm the 4
+          MEDIUM-HIGH sibling-pair candidates to HIGH, then continue cold-triage of the ~177 unnamed
+          functions outside the Top-20 (COMPLEX/HANDLER tiers next).
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 7 (remaining Top-20 + MEDIUM-HIGH cross-confirm) (2026-06-23)
+          Self-chained continuation (no other [TODO] available to promote). Pass 6 produced the real
+          Top-20 ranked list of unnamed functions and decompiled 6 of them (2 renamed HIGH, 4 at
+          MEDIUM-HIGH). This pass continues down that list and tries to close the MEDIUM-HIGH gap.
           Steps:
-            1. Write/run a ColdTriageRegion80070000Pass6.java (or similarly named) script — GZF
-               process mode, mcp__wairz__run_ghidra_headless, use_saved_project=true — that
-               enumerates all unnamed (FUN_*) functions in 0x80070000-0x8007ffff with size + xref
-               count (use the in-script ReferenceManager pattern from other regions' Pass 4 scripts
-               to sidestep the still-broken xrefs_to/find_callers MCP tools against this GZF).
-               IMPORTANT: write the script directly to /root/wairz/ghidra/scripts/ (the
-               save_ghidra_script MCP tool did not make a script visible to the headless runner in
-               this session — write via the Write tool instead, matching the working convention).
-            2. Rank top 15-20 by size x xref count; stage them as concrete next-pass targets.
-            3. If time/context allows in the same pass, batch-decompile the top 5-8 of those via
-               DecompileAddr.java (single-address mode — the batch-script approach is unreliable in
-               this environment due to directory-wide compile poisoning, see Pass 5's tooling note).
-            4. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
-            5. Update analysis/rom/reverse_engineering_region_0x80070000.md (new Pass 6 section),
+            1. Decompile the remaining ~12-14 Top-20 entries not yet covered in Pass 6 (starting with
+               0x8007718c [524B] and 0x800734c4 [466B]) via single-address DecompileAddr.java calls
+               against 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (GZF process mode,
+               use_saved_project=true). Full ranked list is in
+               /root/wairz/ghidra/scripts/ColdTriageRegion80070000Pass6.java's prior run output /
+               analysis/rom/reverse_engineering_region_0x80070000.md's Pass 6 section.
+            2. Attempt to cross-confirm the 4 MEDIUM-HIGH candidates from Pass 6 to HIGH:
+               0x8007814c/0x80077bcc (quantizer/threshold-search sibling pair) and
+               0x80072bac/0x80072924 (AFH/LAP-table sibling pair, cf.
+               analysis/rom/reverse_engineering_region_0x80050000.md's VSC_0xfc73_AFH_Channel_
+               Assessment_variant_* functions for the matching struct field offsets). Look for a
+               named caller or opcode literal that pins down the exact protocol role.
+            3. Only rename HIGH-confidence hits; leave MEDIUM/MEDIUM-HIGH unrenamed.
+            4. Update analysis/rom/reverse_engineering_region_0x80070000.md (new Pass 7 section),
                rom_function_index.md (if renames), analysis/INDEX.md.
-            6. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
+            5. Mandatory ticket-state closeout per wip-loop protocol (exactly one [NEXT] at end).
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).

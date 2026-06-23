@@ -833,6 +833,8 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8007095c` | 568 | `LMP__489__various_sub_cases` | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80070ba4` | 92 | `LMP__25C__FUN_80070ba4` | LMP  25C  FUN 80070ba4 | low (named by Kovah, purpose unclear) |
 | `0x80070c04` | 1306 | `LMP_480_standard_PDU_dispatcher` | Central LMP PDU dispatcher; routes opcodes 0x01–0x3D + extended paths (16+ case arms) | **high** (decompiled, batch pass 3b 2026-06-23) |
+| `0x80070084` | 414 | `LMP_role_switch_completion_handler` (was unnamed `FUN_80070084`) | Toggles master/slave role bit (`bdaddr_random_ ^= 1`), fires `send_evt_HCI_Role_Change`, dispatches to `LMP__25C_called1`/`LMP__268__most_common_for_VSCs2_checks_fptr_patch`/`LMP__25B__most_common_for_VSCs1`/`VSC_0xfc95_called2` | **high** (decompiled+renamed, cold-triage pass 6 2026-06-23) |
+| `0x80070574` | 582 | `connection_teardown_HCI_event_finalizer` (was unnamed `FUN_80070574`) | Connection-record teardown finalizer; dispatches `send_evt_HCI_Disconnection_Complete`/`send_evt_HCI_Connection_Complete`/`send_evt_HCI_Remote_Name_Request_Complete` based on `byte_0x203` connection-state; calls already-named `FUN_80041dac` | **high** (decompiled+renamed, cold-triage pass 6 2026-06-23) |
 | `0x80071370` | 82 | `LMP__47F__FUN_80071370` | LMP  47F  FUN 80071370 | low (named by Kovah, purpose unclear) |
 | `0x800713d4` | 182 | `send_LMP_FEATURES_REQ_page1_trigger` (was `LMP__47E__FUN_800713d4`) | Explicitly sends `send_LMP_FEATURES_REQ_or_RES(conn_idx, 0x27, 3)` (decompiler comment: "0x27 = LMP_FEATURES_REQ"); sets outstanding-PDU status bits for opcode 0x28 (LMP_FEATURES_RES) reply; gated on per-connection status byte == 0x02/0x05. Clear LMP page-1 features-negotiation trigger; original "47E" label unrelated | **high** (decompiled+renamed, batch pass 5 2026-06-23) |
 | `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | Connection-setup feature/timer finalizer: conditionally fires VSC 0xfc95 + `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when feature-page bit 2 set; conditional role-switch-style call `FUN_80061538`; services a watchdog-style timer triple (`FUN_80009b1c`/`...9a6c`/`...9a04`); finishes with `FUN_80017d2c(conn_idx, byte_0xCC, 0xffff)` | medium-high (decompiled, batch pass 5 2026-06-23; behavior clear, exact LMP opcode tie not cross-confirmed) |
@@ -1030,7 +1032,7 @@ granularity is meaningful until individual triage happens).
 | `0x80040000`–`0x8004ffff` | 301 (305 at Pass-3 recount − 2 Pass-3 renames − 1 Pass-3-continuation rename − 1 Pass-4 rename, 2026-06-23) | 14.7% |
 | `0x80050000`–`0x8005ffff` | 351 (354 − 3 Pass-3c renames, 2026-06-23) | 17.1% |
 | `0x80060000`–`0x8006ffff` | 238 | 11.6% |
-| `0x80070000`–`0x8007ffff` | 193 | 9.4% |
+| `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 9.3% |
 | **Total** | **2048** | **100%** |
 
 (Note: the doc-wide "Unnamed (`FUN_*`) functions" summary metric above still

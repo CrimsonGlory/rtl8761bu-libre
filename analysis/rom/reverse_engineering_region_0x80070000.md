@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 3b (BATCH DECOMPILE: 10 functions completed) — 2026-06-23
+**Status**: PASS 6 (cold-triage of 191 unnamed functions; 2 renamed HIGH) — 2026-06-23
 
 ## Overview
 
@@ -474,6 +474,120 @@ All 54 user-defined addresses extracted and logged:
 | Already high-confidence | ~15 (6.1%) | 244 (100%) |
 | Thin-named (decompile pending) | 51 (20.9%) | 0 (all high/medium) |
 | Unnamed (cold triage) | 193 (79.1%) | 0 (all named) |
+
+---
+
+## Pass 6 Results — Real Cold-Triage of 191 Unnamed Functions (2026-06-23)
+
+Pass 5 closed out the large/clear-cut thin-named backlog (17/54 HIGH). Pass 4 had only
+*projected* the unnamed-function distribution by category; it never enumerated the actual
+191 unnamed (`FUN_*`) functions in this region with real addresses/sizes/xrefs. This pass
+produces that real dataset via a new script, `ColdTriageRegion80070000Pass6.java`
+(GZF process mode, `use_saved_project=true`), using the in-script `ReferenceManager` /
+`Listing` xref-walk pattern established in `ColdTriageRegion80040000Pass4.java` (the
+`xrefs_to`/`find_callers` MCP tools remain broken against this GZF in process mode; the
+in-script queries work fine from inside a running Ghidra script).
+
+### Enumeration Stats (verified, not projected)
+
+- **Total unnamed functions**: 191 (exact match to documented region total)
+- **Total bytes**: 26,456; **average size**: 138.5B
+- **Size distribution**:
+
+| Tier | Range | Count |
+|------|-------|-------|
+| STUB | 1–50B | 60 |
+| SIMPLE | 51–150B | 79 |
+| HANDLER | 151–300B | 33 |
+| COMPLEX | 301–600B | 13 |
+| CRITICAL | 601B+ | 6 |
+
+### Top 20 Candidates (ranked by size, tie-broken by xref-in + xref-out)
+
+1. 0x8007814c (1388B)
+2. 0x80077bcc (1388B)
+3. 0x80072bac (814B)
+4. 0x80072924 (628B)
+5. 0x80070574 (582B) — **decompiled, renamed**
+6. 0x8007718c (524B)
+7. 0x800734c4 (466B)
+8. 0x80070084 (414B) — **decompiled, renamed**
+9–20. (remaining mid-COMPLEX/HANDLER tier entries from the full ranked list, captured in
+   script output; candidates for a Pass 7 continuation)
+
+### Decompiled Functions (6 of top 8, single-address `DecompileAddr.java` calls)
+
+**0x80070574 (582B) → renamed `connection_teardown_HCI_event_finalizer`** — **HIGH confidence, RENAMED**
+- Operates on the `big_ol_struct` connection-record array indexed by connection handle
+  (`param_1 & 0xffff`)
+- Explicitly calls `send_evt_HCI_Disconnection_Complete`, `send_evt_HCI_Connection_Complete`,
+  `send_evt_HCI_Remote_Name_Request_Complete` gated on `byte_0x203` connection-state value
+  (`==3` → disconnection path; status-bit `0x40` → remote-name-complete path; else →
+  connection-complete path)
+- Calls already-named `FUN_80041dac` (connection cleanup), `FUN_800364c8`, `FUN_80043a60`
+- Clears `BDADDR` field and decrements an outstanding-request counter at the end
+- Evidence tier: explicit named HCI-event-sender calls — matches the project's HIGH bar
+  used throughout Pass 5
+
+**0x80070084 (414B) → renamed `LMP_role_switch_completion_handler`** — **HIGH confidence, RENAMED**
+- Toggles the master/slave role bit: `pbVar7[uVar15].bdaddr_random_ ^= 1`
+- Explicitly calls `send_evt_HCI_Role_Change(0, BDADDR, bdaddr_random_)` immediately after
+- Calls already-named LMP role-switch infrastructure: `LMP__25C_called1`,
+  `LMP__268__most_common_for_VSCs2_checks_fptr_patch`, `LMP__25B__most_common_for_VSCs1`,
+  `VSC_0xfc95_called2`
+- Status-array dispatch on `_xb2_byte_minus_4_used_as_status_array_index` (values 0xa/0xe)
+  routing to `FUN_80060898`/`FUN_8006ff50`/`FUN_80022098` depending on link-state flags
+- Evidence tier: explicit role-bit XOR + `send_evt_HCI_Role_Change` call — HIGH bar met
+
+**0x8007814c (1388B) and 0x80077bcc (1388B)** — **MEDIUM-HIGH, not renamed**
+- Sibling/variant implementations of the same threshold/quantizer search-loop algorithm
+  operating over differently-sized arrays (80-entry vs. 40-entry variant respectively)
+- Both call the same helper trio (`FUN_800779d0`/`FUN_80077ac4`/`FUN_80077988` or
+  `FUN_80077928`), gated by `possible_logging_function__var_args` logging infrastructure
+- Clear algorithmic shape (quantizer/threshold search) but the exact protocol role
+  (which BT procedure consumes this) was not cross-confirmed against other documented
+  call sites — left unrenamed per "only rename HIGH-confidence hits"
+
+**0x80072bac (814B) and 0x80072924 (628B)** — **MEDIUM-HIGH, not renamed**
+- Sibling functions sharing the same `struct_of_at_least_0x300_size` global table with
+  identical field offsets (+0x49/+0x4f/+0x55/+0x5b/+0x61/+0x67/+0x6e — the same LAP-keyed
+  table documented in `reverse_engineering_region_0x80050000.md`'s
+  `VSC_0xfc73_AFH_Channel_Assessment_variant_*` functions) and the same `big_ol_struct`
+  connection-record type
+- Strongly resembles AFH channel-map / LAP-keyed table registration logic with
+  collision-avoidance checks, consistent with the AFH theme already established in
+  `reverse_engineering_baseband_reg_helpers.md`
+- Not renamed: the exact protocol semantics (LAP for paging/inquiry vs. true AFH channel
+  classification) were inferred from shared struct layout, not cross-confirmed via a
+  named caller or opcode literal — below the project's HIGH bar
+
+### Tooling Note (repeat of known gap, reconfirmed this pass)
+
+`xrefs_to`/`find_callers` MCP tools still fail against this GZF in process mode. The
+in-script `ReferenceManager.getReferencesTo()` (in-degree) + `Listing` instruction walk
+filtering `Reference.getReferenceType().isCall()` (out-degree) pattern continues to work
+correctly from inside a running Ghidra script, as established in prior passes. Every
+`run_ghidra_headless` call in this pass also produced ~30–50KB of stderr noise from
+~15+ pre-existing broken legacy scripts in the shared scripts directory (missing
+`GhidraScript` import, removed Ghidra 12.1.2 decompiler API, bare `currentProgram`/
+`println`/`monitor` references in old non-script-class code). This is cosmetic only —
+every call still returned exit code 0 with complete, correct stdout. Per task constraints,
+these legacy scripts were not touched.
+
+Region status: 19/245 total functions now HIGH confidence (17 thin-named + 2 newly-renamed
+unnamed); 189 unnamed functions remain untriaged, including the 6 MEDIUM-HIGH candidates
+above and 12-14 further Top-20 candidates not yet decompiled.
+
+### Next Steps (Self-Chaining → Pass 7)
+
+1. Decompile remaining Top-20 candidates not yet covered (0x8007718c, 0x800734c4, and
+   entries 9–20 from the ranked list captured in `ColdTriageRegion80070000Pass6.java`
+   script output)
+2. Attempt to cross-confirm the 4 MEDIUM-HIGH candidates above (0x8007814c/0x80077bcc
+   quantizer pair; 0x80072bac/0x80072924 AFH/LAP-table pair) via additional callers or
+   opcode-literal evidence to push them to HIGH
+3. Continue cold-triage of the remaining ~177 unnamed functions outside the Top-20,
+   focusing on the COMPLEX (301-600B) and HANDLER (151-300B) tiers next
 
 ---
 
