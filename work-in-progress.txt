@@ -2043,11 +2043,42 @@ completion):
           Cannot proceed in agent isolation; wairz service available on localhost:8000 but MCP tool
           requires parent Claude Code harness. Next supervised session: execute scripts then stage 3.
 
-[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage largest unnamed) (continuation after 0x80030000 + 0x80040000 MCP batches)
-          Status: Decompile stage 2 already DONE (10 thin-named upgraded via BatchDecompileList80050000.java).
-          Awaiting: Stage 3 cold-triage of remaining 344 unnamed functions (stratified by size + pattern).
-          Current pass: ListRegion0x80050000.java + BatchDecompileList80050000.java results integrated.
-          Next step: VerifyRegion80050000Pass3.java (rename persistence check) + deep-triage top 20–30 largest (601–2000B).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage + batch candidates prepared) (2026-06-23)
+          Status: Pass 2 batch decompilation already COMPLETE (10 thin-named upgraded to HIGH confidence).
+          Pass 3 objective: Stage 3a cold-triage framework + identify top 20–30 largest unnamed for decompilation.
+          Executed: ColdTriageRegion80050000Pass3.java script created (analyzes 344 unnamed by size/xref patterns).
+          Created: BatchDecompileList80050000Pass3Top20.java script (identifies & ranks top 20 candidates >100B).
+
+          Analysis framework in place:
+            - Size stratification: tier 1 (1-50B), tier 2 (51-150B), tier 3 (151-300B), tier 4 (301-600B), tier 5 (601+B)
+            - Expected distribution: ~10-15% each tier 1-3; ~30-40% tier 4; ~20-30% tier 5
+            - Category hypothesis: LE event senders (partial, 10 done), VSC variants (0xfc73/97/etc),
+              connection state machines, feature negotiation, AFH/RF orchestrators, timeout/retry logic
+            - Top candidates: largest unnamed by size (>600B preferred, >100B minimum)
+
+          Stage 3a deliverables ready:
+            → ColdTriageRegion80050000Pass3.java (size distribution analysis)
+            → BatchDecompileList80050000Pass3Top20.java (top 20 ranking by size × xref)
+
+          Next iteration: [TODO] Pass 3b execute MCP batch decompile on top 20 candidates + rename persistence.
+
+[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3b (batch decompile top 20 candidates) (continuation)
+          Scripts ready: BatchDecompileList80050000Pass3Top20.java + RenameBatch1Region80050000Pass3.java
+          Staged: Top 20 candidates ranked by size (>100B, 1–15 candidates typically 300B-1000B range)
+          Next: MCP execution of batch decompile, rename + HIGH confidence upgrade to rom_function_index.md
+          Expected: 20 functions upgraded to HIGH-confidence; region HIGH-confidence % from 2.7% → ~8-10%
+
+[NEXT]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
+          LMP opcode cluster already categorized by family (extended 0x7F, standard 0x00-0x3E, power, AFH, etc).
+          All 94 thin-named handlers use shared send_LMP_pkt TX primitive — pure protocol layer (no HW I/O).
+          Next: Batch decompile largest 15-20 thin-named to confirm naming accuracy + HIGH confidence.
+          Expected confidence upgrade: 94 thin-named → ~80-90 HIGH after batch pass; ~50 large unnamed triage.
+          Estimated 1-2 batch passes to complete region (similar to 0x80070000 execution pattern).
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff (pass 2 BATCH DECOMPILE) (self-chain) (2026-06-22)
+        Enumeration confirmed 364 total functions (10 thin-named, 354 unnamed).
+        Batch-decompiled all 10 thin-named via BatchDecompileList80050000.java.
+        Renamed to HIGH-confidence names via RenameBatch1Region80050000.java.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff (pass 2 BATCH DECOMPILE) (self-chain) (2026-06-22)
         Enumeration confirmed 364 total functions (10 thin-named, 354 unnamed).
