@@ -188,14 +188,32 @@ Promote next TODO; overnight wip-loop.
 
 ### 5. Loop or stop
 
-`SHOULD_CONTINUE=yes` → step 1. Otherwise report counts and list new `[BLOCKED]` items.
+**CRITICAL: NEVER STOP WHILE [NEXT] EXISTS.**
+
+- If `NEXT=1` (exactly 1 [NEXT] item): **MUST loop** → go to step 1 (no exceptions)
+- If `NEXT=0` AND `TODO>0`: Launch recovery worker to fix ticket closure, then loop
+- If `NEXT=0` AND `TODO=0`: All work done → stop and report final counts
+- Progress tracking: Write detailed completion notes to commit messages (do NOT stop to report)
+
+Stop ONLY on:
+  - `[FAILED]` (hard build/RE failure)
+  - `stuck` (recovery failed twice on same [NEXT] item)
+  - MAX_ITERATIONS reached AND [NEXT] item completed
+  - `NEXT=0` AND `TODO=0` (all work done)
+
+**DO NOT STOP for**:
+  - `[BLOCKED]` items (mark as blocked, promote [TODO], continue)
+  - `no_progress` (run recovery worker, continue)
+  - Pauses for progress reporting (write to commit, continue looping)
 
 ## Safety limits
 
 - Default **max iterations: 300** unless the user sets another limit.
+- **Loop continues indefinitely while [NEXT] exists** — max iterations only constrains total attempts, does NOT stop mid-work.
 - Stop on `[FAILED]` or `stuck` (recovery failed twice).
 - Do **not** stop on `no_progress` — run recovery instead.
 - Never force-push or skip hooks.
+- **All progress (DONE count, findings, analysis) is recorded in commit messages and work-in-progress.txt.**
 
 ## Quick start
 
