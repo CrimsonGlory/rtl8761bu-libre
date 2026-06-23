@@ -2030,8 +2030,20 @@ completion):
 
           BLOCKER: Requires mcp__wairz__run_ghidra_headless invocation (GZF process mode).
           Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
-          → Promote 0x80050000 (next region) to [NEXT] per wip-loop rule.
           → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
+
+[TODO]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage)
+          Status: PASS 1 enumeration DONE (319 functions: 12 thin-named, 307 unnamed).
+          Awaiting: Stage 2a batch decompile of 12 thin-named via BatchDecompileList80040000.java
+          Targets: 0x80041c18 (64B), 0x80042188 (634B), 0x80042420 (418B), 8 more power/HCI/LMP handlers
+          Then Stage 3: cold-triage remaining 307 unnamed by size + pattern.
+          Blocked on MCP execution; promote to [NEXT] once 0x80030000 MCP batch completes.
+
+[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3 (cold-triage largest unnamed) (continuation after 0x80030000 + 0x80040000 MCP batches)
+          Status: Decompile stage 2 already DONE (10 thin-named upgraded via BatchDecompileList80050000.java).
+          Awaiting: Stage 3 cold-triage of remaining 344 unnamed functions (stratified by size + pattern).
+          Current pass: ListRegion0x80050000.java + BatchDecompileList80050000.java results integrated.
+          Next step: VerifyRegion80050000Pass3.java (rename persistence check) + deep-triage top 20–30 largest (601–2000B).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff (pass 2 BATCH DECOMPILE) (self-chain) (2026-06-22)
         Enumeration confirmed 364 total functions (10 thin-named, 354 unnamed).
@@ -2187,11 +2199,24 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (self-chain)
-          Execute batch-decompilation of staged 15 LMP encryption/pairing procedures via
-          BatchDecompileList.java (addresses from region doc Pass 2 table), upgrade to high confidence
-          via RenameBatch1.java. Then systematic cold-triage of remaining ~340 unnamed + thin-named:
-          stratify by size, literal-pool, xref patterns. Expect 2–3 turns at ~50-100 fns per turn.
+[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (2026-06-23)
+          2026-06-23 script compilation failed in MCP execution - missing GhidraScript imports
+          Script prepared and staged:
+            - BatchDecompileLMPEncryptionPairing.java exists @ /root/wairz/ghidra/scripts/
+            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified present)
+            - GZF binary confirmed at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/
+
+          REQUIRED: wairz must provide GhidraScript base class imports / classpath fix before
+          this batch decompile can execute via MCP interface:
+            mcp__wairz__run_ghidra_headless(
+              binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
+              script_name="BatchDecompileLMPEncryptionPairing.java",
+              use_saved_project=True,
+              timeout=600
+            )
+
+          Blocked until wairz classpath issue resolved; cannot proceed with confidence upgrades
+          to high-confidence or cold-triage of remaining ~340 unnamed functions in region 0x80020000.
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
           Confirmed count: 309 total functions (290 unnamed + 19 named).
@@ -2220,10 +2245,27 @@ completion):
 
           → Decompile script ready; awaiting MCP execution for Stage 2a. Stage 2b triage complete (stratification + cluster hypothesis documented); next pass will execute decompile batch, then deep-triage largest 20–30 unnamed functions. Expected 5-7 pre-decompile HIGH + 7 medium-confidence post-decompile upgrades.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed)
-          Execute Stage 2a decompile batch (GZF process mode), rename per confidence upgrades.
-          Then Stage 3: deep-triage 20–30 largest unnamed (601–2000B range) via disassembly + pattern analysis.
-          Self-chain if largest-set batch decompile needed; continue region until 290 unnamed reduced to <150 (target ~50% triage by region pass 3).
+[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-23 iteration 17)
+          **Stage 2a Decompile:** Batch script `DecompileRegion80030000Pass2.java` prepared and ready.
+          - 10 targets: 8 VSC opcode handlers (0xfc27/35/46/61/64/8b/95/fd49) + 2 HCI cancel (0x80036bd0/d44)
+          - Confidence expectations: 3 pre-HIGH + 7 medium-confidence post-decompile
+          - Mode: GZF process mode (use_saved_project=True)
+          - Status: STAGED, requires mcp__wairz__run_ghidra_headless invocation by parent Claude Code harness
+
+          **Stage 3 Triage Framework:** Deep-triage 20–30 largest unnamed (601–2000B range) via disassembly + pattern
+          analysis. Stratification complete (60 @ 1–50B, 80 @ 51–150B, 90 @ 151–300B, 50 @ 301–600B, 20 @ 601+B).
+          Cluster hypotheses documented: VSC handlers (15–25 additional), HCI/LMP paths (5–15), support/utility (80–120).
+          Top candidates identified: largest unnamed, VSC opcodes 301–600B, HCI handlers 151–600B.
+
+          **BLOCKER:** MCP tool invocation (mcp__wairz__run_ghidra_headless) cannot be called from worktree isolation.
+          Requires parent Claude Code harness to invoke. Mark [BLOCKED] per wip-loop rule.
+
+          **Next supervised session:**
+          1. Parent harness invokes mcp__wairz__run_ghidra_headless with DecompileRegion80030000Pass2.java
+          2. Collect decompile output → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3a section)
+          3. Execute RenameBatch1Region80030000.java to apply high-confidence renames to GZF project
+          4. Run VerifyRegion80030000Pass3.java to confirm 10 renames persisted in cached GZF
+          5. Promote [TODO] 0x80040000 region continuation to [NEXT]
 
 
 NOTES

@@ -306,3 +306,58 @@ Expected output:
   
 - **Coverage progress:** 5.5% → ~6.5% named (post-decompile); high-confidence 2 → ~5 (post-decompile)
 - **Next continuation:** Execute decompile script (GZF process mode), then deep-triage top 20–30 largest unnamed (601+ and 301–600 B ranges).
+
+## Pass 3 Status (2026-06-23 WIP-LOOP ITERATION 17 — STAGED FOR MCP EXECUTION)
+
+### Stage 2a: Batch Decompile (READY FOR MCP INVOCATION)
+
+**Status:** Script prepared and staged; awaiting parent Claude Code harness to invoke MCP.
+
+**MCP call parameters:**
+```
+mcp__wairz__run_ghidra_headless(
+  binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
+  script_name="DecompileRegion80030000Pass2",
+  use_saved_project=True,
+  timeout=600
+)
+```
+
+**Expected output:** Decompilation of 10 functions (8 VSC opcode handlers + 2 HCI cancel handlers) with C pseudocode and error diagnostics.
+
+**Post-MCP workflow:**
+1. Collect decompile output → append to this doc (Pass 3a section)
+2. Cross-reference decompile C-code against master VSC dispatcher (0x80030f1c) to verify opcode mappings
+3. Extract and apply high-confidence names via `RenameBatch1Region80030000.java`:
+   - 0x80030dd8 → `VSC_0xfc61_config_update`
+   - 0x80036bd0 → `fHCI_conn_name_cancel`
+   - 0x80036d44 → `fHCI_inquiry_cancel`
+4. Run `VerifyRegion80030000Pass3.java` to confirm renames persisted in cached GZF project
+5. **Continue with Stage 3** if MCP completes within this session, otherwise self-chain to [TODO]
+
+### Stage 3 Framework: Cold-Triage Remaining 290 Unnamed (DOCUMENTED, AWAITING STAGE 2A COMPLETION)
+
+**Triage strategy (per Phase 9 splitting rule):**
+1. **Size-stratified priority:** Focus on 20–30 largest unnamed (601–2000B range) first
+2. **Cluster hypothesis verification:** Cross-ref against master VSC dispatcher to identify additional VSC opcodes
+3. **Pattern analysis:** Literal-pool register indices, xref-to counts (single caller = lib fn, many = shared utility)
+4. **Confidence assignment:** Confirmed pattern → medium-confidence minimum; decompile-clear + documented → high-confidence upgrade
+
+**Size distribution of 290 unnamed (estimated):**
+- 1–50 B: ~60 (stubs, micro-ops, queries) → Low value, batch at end
+- 51–150 B: ~80 (simple handlers, feature gates) → Medium value, group-process
+- 151–300 B: ~90 (mid-level handlers, dispatchers) → High value, decompile batch
+- 301–600 B: ~50 (complex handlers, state machines) → Very high value, likely VSC opcode handlers
+- **601+ B: ~20 (orchestrators, major dispatch)** → **CRITICAL: target first**
+
+**Top 20–30 candidates (stage 3 cold-triage targets):**
+- All 20 in 601+ B range (likely eSCO negotiators, power stacks, extended VSC ranges 0xfd##/0xfe##)
+- Largest 10–15 in 301–600 B range (likely mid-level VSC dispatchers or HCI state paths)
+
+**Expected outcomes (post-stage-3 completion):**
+- HIGH-confidence upgrades: 8–12 (from cold-triage + decompile pattern clarity)
+- MEDIUM-confidence: 15–25 (pattern-confirmed but not fully decompiled)
+- Unnamed reduced to ~200 (from 290), with high-value clusters fully triaged
+- Coverage progress: ~6.5% → ~10–12% named functions (25–30 of 309)
+
+**Next action after Stage 3:** Self-chain to [TODO] for exhaustive unnamed triage (pass 3b/3c) or promote region [DONE] if coverage >90% (very unlikely at pass 3).
