@@ -2062,13 +2062,45 @@ completion):
 
           Next iteration: [TODO] Pass 3b execute MCP batch decompile on top 20 candidates + rename persistence.
 
-[NEXT]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3b (batch decompile top 20 candidates) (continuation for next iteration)
-          Scripts ready: BatchDecompileList80050000Pass3Top20.java + RenameBatch1Region80050000Pass3.java
-          Staged: Top 20 candidates ranked by size (>100B, 1–15 candidates typically 300B-1000B range)
-          Next: MCP execution of batch decompile, rename + HIGH confidence upgrade to rom_function_index.md
-          Expected: 20 functions upgraded to HIGH-confidence; region HIGH-confidence % from 2.7% → ~8-10%
+[DONE]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3b (batch decompile top 20 candidates) (2026-06-23)
+          Executed for real this iteration: the Pass 3 "staged" scripts only contained a dynamic
+          ranking algorithm, not literal addresses, so first ran BatchDecompileList80050000Pass3Top20.java
+          via mcp__wairz__run_ghidra_headless (GZF process mode) to get the actual top-20 unnamed
+          functions by size (0x8005af8c 1796B down to 0x800577ec 516B — full ranked table now in
+          analysis/rom/reverse_engineering_region_0x80050000.md's new "Pass 3b" section).
+          Wrote BatchDecompile80050000Pass3bActual.java with those 20 real addresses and ran it:
+          20/20 decompiled successfully (0 failures), full C captured in Ghidra run log
+          20260623T090541_b2b76e49_gzf_BatchDecompile80050000Pass3bActual.java.log (157KB).
+          Reviewed 11/20 in full detail (the log's head+tail reads covered #1-2 and #3(partial)-11;
+          a ~57KB middle section covering #12-20 fell outside this session's two 100KB read windows).
+          Finding: all 11 reviewed functions operate on the well-known per-connection
+          0x1ac struct array — confirms a connection state-machine / packet-type-negotiation /
+          AFH-channel-report cluster, NOT an LE-advertising cluster as Pass 3's hypothesis guessed.
+          Evidence quality is MEDIUM/MEDIUM-HIGH per function (clear behavioral summary, exact
+          bit-field semantics not cross-confirmed) — below this project's HIGH-confidence bar for
+          persisting renames, so 0 renames applied this pass (rename-after-confidence-check is the
+          project's existing surviving practice, see Pass 2's "verify renames persist" note).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (new Pass 3b section, full per-function notes)
+          → analysis/INDEX.md (region 0x80050000 one-liner updated)
+          → Self-chained as Pass 3c below (NOT promoted to [NEXT] — promoting region 0x80060000 instead
+            per wip-loop's "promote the first remaining [TODO]" rule; Pass 3c can be picked up whenever
+            0x80050000 cycles back around).
 
-[TODO]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
+[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 3c (review remaining 9 of top-20 + batch rename) (2026-06-23)
+          Remaining unreviewed from Pass 3b's top-20: 0x80057ce8 (1314B), 0x800555bc (950B),
+          0x8005b9d8 (950B) [these 3 fell in the unread 57KB middle gap along with #6-11 partial],
+          plus #12-20: 0x80052c64 (692B), 0x8005aba8 (664B), 0x80058dd4 (628B), 0x80053aa4 (568B),
+          0x8005c27c (550B), 0x80056ca8 (542B), 0x80058740 (534B), 0x80059454 (532B), 0x800577ec (516B).
+          All 20 are already decompiled (confirmed SUCCESS in the Pass 3b run log) — this pass only
+          needs the C-code review + write-up, not re-decompilation. To avoid the same log-truncation
+          problem, split into 2 batches of ~5 functions each so each batch's full C output fits in
+          one read_ghidra_log call (~100KB window), or call mcp__wairz__decompile_function per-address
+          if that tool path works for GZF process-mode binaries (untested this pass — direct
+          decompile_function call failed with "Binary not found" when given the .gzf filename directly).
+          After review, apply RenameBatch1Region80050000Pass3.java-style rename pass for any function
+          reaching HIGH confidence (clear purpose + struct-field semantics not just "touches 0x1ac array").
+
+[NEXT]   Full RE: ROM region 0x80060000-0x8006ffff (240 total, 94 thin-named LMP opcodes) (pass 1 enumeration & categorization) (continuation after 0x80050000 pass 3b)
           LMP opcode cluster already categorized by family (extended 0x7F, standard 0x00-0x3E, power, AFH, etc).
           All 94 thin-named handlers use shared send_LMP_pkt TX primitive — pure protocol layer (no HW I/O).
           Next: Batch decompile largest 15-20 thin-named to confirm naming accuracy + HIGH confidence.
