@@ -2112,12 +2112,26 @@ completion):
           batch decompile 5 more largest (0x8007095c/0x80073348/0x800754c4/0x80071d98 +
           0x80074c8c), then cold-triage unnamed by size + literal-pool + xref patterns.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 cold triage) (self-chain)
-          Continue with 5 more largest thin-named via batch decompile + rename. Then
-          systematic cold-triage of 191 unnamed functions: stratify by size, literal-pool
-          footprint, xref patterns, and semantic matches (e.g., RX/TX chains, timers,
-          BLE-specific). Expect 2–3 turns per 191-function batch at ~50–60 per turn;
-          region completion target within 3–4 total passes.
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 batch decompile) (2026-06-23, STAGED)
+          STAGING COMPLETE (2026-06-23, cold-triage prep phase):
+            - BatchDecompileList80070000Pass3.java created (5 targets ready)
+            - RenameBatch1Region80070000Pass3.java created (placeholder rename mapping)
+            - Scripts staged at /root/wairz/ghidra/scripts/
+            - MCP invocation parameters documented in scratchpad/PHASE9_REGION_0x80070000_PASS3_STAGING.md
+
+          AWAITING MCP EXECUTION (via mcp__wairz__run_ghidra_headless):
+            Phase 3a: BatchDecompileList80070000Pass3.java (GZF process mode, ~10 min)
+            Phase 3b: Review decompilation output, update RenameBatch1 names, execute rename (~3 min)
+            Phase 3c: Document findings in region doc + update rom_function_index.md (~8 min)
+            Phase 3d: Prepare cold-triage continuation ([TODO] self-chain with shrunk address range)
+
+          Upon completion: promote [TODO] Pass 3 cold-triage continuation to [NEXT].
+          If blocked on MCP: mark [BLOCKED], leave staged scripts intact, escalate for unblock.
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff (PASS 3 cold-triage continuation) (self-chain)
+          Execute Phase 3d after batch decompile + rename complete: stratify remaining 191
+          unnamed functions by size, prepare largest-10-to-15 batch, stage next decompile batch,
+          shrink address range to remaining untouched sub-ranges, promote to [NEXT] for Pass 4.
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
