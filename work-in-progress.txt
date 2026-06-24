@@ -3210,7 +3210,7 @@ sweep beyond enumeration and is the most out-of-date):
           in analysis/rom/reverse_engineering_hci_command_router.md. Comprehensive triage strategy
           documented for remaining 321 unnamed functions.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (decompile 22 event-sender+utility functions) (2026-06-24)
+[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
           PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)
           + LMP utility wrappers (5 functions). All 22 addresses staged in /tmp/pass5_batch_addresses.txt.
           Execution instructions documented in analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md.
@@ -3229,7 +3229,7 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md (new, complete execution guide)
           → /tmp/pass5_batch_addresses.txt (22 target addresses)
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain)
           PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining
           unnamed by size (see Pass 4 section of `reverse_engineering_region_0x80030000.md`: 60 stubs
           1-50B, 80 handlers 51-150B, 90 mid-level 151-300B, 26 utility 301-600B). Continue down that
