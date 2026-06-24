@@ -2024,33 +2024,19 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3 results documented)
           → coverage: 27 of 309 functions now named (8.7%)
 
-[TODO]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile remaining 300+ unnamed) (2026-06-24)
-          PASS 1 (2026-06-22, ENUMERATION — DONE): confirmed 319 total functions (307 unnamed + 12 thin-named).
-          PASS 2 (2026-06-23, BATCH DECOMPILE — DONE, 12/12 thin-named decompiled + renamed to HIGH)
-          PASS 3 (2026-06-24, COLD-TRIAGE READY — awaiting MCP execution now that wairz is fixed):
+[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile remaining 300+ unnamed) (2026-06-24)
+          STALE-TICKET NOTE: This ticket describes "awaiting MCP execution" for Pass 3, but the work has
+          already been completed in subsequent [DONE] entries below:
+          - PASS 1 (2026-06-22): enumeration DONE
+          - PASS 2 (2026-06-23): batch decompile DONE (12/12 targets)
+          - PASS 3 (2026-06-23): cold-triage + batch decompile DONE (top-15 candidates)
+          - PASS 3 continuation (2026-06-23): all 22 top-15-per-half candidates DONE
+          - PASS 4 (2026-06-23): 151-600B tier DONE (1 new HIGH rename)
+          - PASS 5 (2026-06-23): continue 151-600B tier DONE
+          - PASS 6 (2026-06-23): finish xrefs:2 tier DONE (2 new HIGH renames, region parked)
 
-          Scripts prepared in /root/wairz/ghidra/scripts/:
-            - ListRegion0x80040000.java: enumeration (confirm 319 baseline)
-            - BatchDecompileList80040000.java: decompile 12 thin-named targets
-            - RenameBatch1Region80040000.java: rename to high-confidence names post-decompile
-
-          12 thin-named targets ready for decompilation:
-            0x80041c18 (fHCI_Exit_Periodic_Inquiry_Mode_0x04, 64B)
-            0x80042188 (assoc_w_tLC_RX, 634B) — Link Controller RX handler
-            0x80042420 (assoc_w_tLC_TX, 418B) — Link Controller TX handler
-            0x80042a14 (check_new_power_val!=0, 18B)
-            0x80042a28 (check_if_at_max_power_(6), 16B)
-            0x80042a3c (increment_new_power_val_if_<_6, 22B)
-            0x80042a58 (increment_new_power_val_if_!=_0, 16B)
-            0x80042b38 (return_RSSI, 62B)
-            0x80043810 (called_by_fHCI_Remote_Name_Request_3, 102B)
-            0x80044430 (OGC_3_default_func_3, 90B)
-            0x8004a71c (VSC_0xfc95_called1, 16B)
-            0x8004c0f4 (LMP__26F__sends_LE_HCI_Events, 472B)
-
-          BLOCKER: Requires mcp__wairz__run_ghidra_headless invocation (GZF process mode).
-          Cannot be executed in worktree isolation; parent Claude Code harness must invoke.
-          → Self-chain as [TODO] Pass 2 continuation once MCP execution unblocked.
+          Region 0x80040000 work is complete and parked per Pass 6's pivot decision.
+          No action required — this is superseded-work housekeeping.
 
 [DONE]   Full RE: ROM region 0x80040000-0x8004ffff PASS 2 continuation (batch decompile + stage 3 triage) (2026-06-23)
           Status: PASS 1 enumeration was already DONE (319 functions: 12 thin-named, 307 unnamed).
@@ -2779,7 +2765,7 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[TODO]   Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
+[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
           Prior issue (2026-06-23): script compilation failed in MCP execution - missing GhidraScript imports.
           Status update (2026-06-24): wairz MCP has been fixed; classpath issue resolved.
 
@@ -2796,6 +2782,8 @@ completion):
               timeout=600
             )
 
+          BLOCKER: Cannot invoke mcp__wairz__run_ghidra_headless from worktree isolation.
+          Parent Claude Code harness must invoke this MCP tool. Mark [BLOCKED] per wip-loop rule.
           Remaining work: confidence upgrades to high-confidence + cold-triage of remaining ~340 unnamed functions in region 0x80020000.
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
@@ -2903,7 +2891,7 @@ NOTES
           - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
           - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings
 
-[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
           Continuation of the productive region 0x80050000 per wip-loop rules.
           Region status at end of PASS 9:
             - 6/9 passes productive (1+ HIGH each: yields 1/1/3/1/1/1/0/1/1)
@@ -2926,6 +2914,8 @@ NOTES
           5. Rename via RenamePass10Region80050000.java and commit
           6. Update docs: reverse_engineering_region_0x80050000.md, rom_function_index.md, INDEX.md
 
+          BLOCKER: Cannot invoke mcp__wairz__run_ghidra_headless from worktree isolation.
+          Parent Claude Code harness must invoke this MCP tool. Mark [BLOCKED] per wip-loop rule.
           Expected yield: 1-2 HIGH renames (per 6-pass productive streak pattern)
 
 OVERNIGHT WIP-LOOP SESSION REPORT (2026-06-24, automated worker)
