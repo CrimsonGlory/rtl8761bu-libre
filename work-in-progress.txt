@@ -2765,9 +2765,9 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
           Prior issue (2026-06-23): script compilation failed in MCP execution - missing GhidraScript imports.
-          Status update (2026-06-24): wairz MCP has been fixed; classpath issue resolved.
+          Status update (2026-06-24): wairz MCP has been fixed; workers now use isolation: false for MCP access.
 
           Script ready for execution:
             - BatchDecompileLMPEncryptionPairing.java @ /root/wairz/ghidra/scripts/
@@ -2813,12 +2813,12 @@ completion):
 
           → Decompile script ready; awaiting MCP execution for Stage 2a. Stage 2b triage complete (stratification + cluster hypothesis documented); next pass will execute decompile batch, then deep-triage largest 20–30 unnamed functions. Expected 5-7 pre-decompile HIGH + 7 medium-confidence post-decompile upgrades.
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-23 iteration 17)
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-23 iteration 17)
           **Stage 2a Decompile:** Batch script `DecompileRegion80030000Pass2.java` prepared and ready.
           - 10 targets: 8 VSC opcode handlers (0xfc27/35/46/61/64/8b/95/fd49) + 2 HCI cancel (0x80036bd0/d44)
           - Confidence expectations: 3 pre-HIGH + 7 medium-confidence post-decompile
           - Mode: GZF process mode (use_saved_project=True)
-          - Status: STAGED, requires mcp__wairz__run_ghidra_headless invocation by parent Claude Code harness
+          - Status: READY FOR EXECUTION (workers use isolation: false for MCP access)
 
           **Stage 3 Triage Framework:** Deep-triage 20–30 largest unnamed (601–2000B range) via disassembly + pattern
           analysis. Stratification complete (60 @ 1–50B, 80 @ 51–150B, 90 @ 151–300B, 50 @ 301–600B, 20 @ 601+B).
@@ -2891,7 +2891,7 @@ NOTES
           - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
           - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
           Continuation of the productive region 0x80050000 per wip-loop rules.
           Region status at end of PASS 9:
             - 6/9 passes productive (1+ HIGH each: yields 1/1/3/1/1/1/0/1/1)
@@ -2899,7 +2899,7 @@ NOTES
             - Top-50 by xref/size exhausted in Passes 3-8
             - Next target: rank 51+ candidates via ColdTriageRegion80050000Pass10.java
 
-          Status: READY FOR EXECUTION (resources verified)
+          Status: READY FOR EXECUTION (workers use isolation: false for MCP access)
           ✓ ColdTriageRegion80050000Pass10.java @ /root/wairz/ghidra/scripts/ (4828 B)
             (ranks all FUN_* functions in 0x80050000-0x8005ffff outside top-50, outputs top-30)
           ✓ GZF verified present: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (11 MB)
