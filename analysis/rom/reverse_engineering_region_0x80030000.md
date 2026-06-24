@@ -501,4 +501,38 @@ Expected output:
 
 **Estimated HIGH-confidence outcomes (if decompiled):** 6–10 functions with clear semantic purposes (state validators, handler dispatchers, resource allocators); medium-confidence: 15–20 (pattern-confirmed operations without full decompile clarity).
 
+---
+
+## Pass 7: Batch Decompile Top 6 CRITICAL+HIGH Priority (2026-06-24 prepared, awaiting MCP execution)
+
+**Preparation:** Created script `DecompileRegion80030000Pass7Top6.java` targeting the 6 highest-priority utility-tier candidates from Pass 6, ordered by xref count (descending).
+
+**Top 6 candidates (prioritized by xref):**
+
+| # | Address | Size | Xrefs | Priority | Expected Purpose |
+|---|---------|------|-------|----------|-----------------|
+| 1 | 0x80039f54 | 426B | 9 | **CRITICAL** | High-level dispatcher/state validator (9 callers) |
+| 2 | 0x80033794 | 578B | 5 | **CRITICAL** | State machine/handler orchestrator |
+| 3 | 0x8003229c | 566B | 2 | HIGH | Secondary handler/feature negotiator |
+| 4 | 0x80035b4c | 352B | 2 | HIGH | Specialized utility function |
+| 5 | 0x8003c7cc | 310B | 3 | HIGH | Secondary handler/feature negotiator |
+| 6 | 0x8003d630 | 340B | 3 | HIGH | Secondary handler/feature negotiator |
+
+**Execution plan:**
+1. Run `mcp__wairz__run_ghidra_headless` with:
+   - `binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf"`
+   - `script_name="DecompileRegion80030000Pass7Top6.java"`
+   - `use_saved_project=True` (GZF process mode)
+   - `timeout=600` (allow 10 minutes for decompilation)
+
+2. Analyze decompile output against expected semantic purposes
+
+3. Assign HIGH-confidence names via `RenameBatch1Region80030000Pass7.java` (to be created post-decompile)
+
+4. Update `rom_function_index.md` with new HIGH-confidence entries
+
+5. Continue to Pass 8: remaining 20 MEDIUM-priority candidates from Pass 6 tier
+
+**Status:** Script prepared, awaiting MCP execution slot. Estimated decompile time: 2-3 minutes for 6 functions.
+
 **Next action:** Execute batch decompile on top 6 critical/high candidates; update rom_function_index.md with tier-2 counts; commit pass 6 findings.

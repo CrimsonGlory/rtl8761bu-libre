@@ -3323,7 +3323,22 @@ sweep beyond enumeration and is the most out-of-date):
           - analysis/rom/rom_function_index.md (3 rows for new named functions, counts TBD after rename persist)
           - analysis/INDEX.md (region summary TBD)
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (batch decompile top 6 CRITICAL+HIGH candidates) (2026-06-24 prepared, awaiting MCP)
+          Status: PASS 6 extraction complete (26 utility-tier 301-600B candidates ranked by xref).
+          Stage 1: Created DecompileRegion80030000Pass7Top6.java script targeting 6 highest-priority:
+            0x80039f54 (426B, xref:9)   — CRITICAL highest-referenced
+            0x80033794 (578B, xref:5)   — CRITICAL
+            0x8003229c (566B, xref:2)   — HIGH
+            0x80035b4c (352B, xref:2)   — HIGH
+            0x8003c7cc (310B, xref:3)   — HIGH
+            0x8003d630 (340B, xref:3)   — HIGH
+          Execution: Run via `mcp__wairz__run_ghidra_headless` (GZF process mode, binary_path=
+          "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", script_name=
+          "DecompileRegion80030000Pass7Top6.java", use_saved_project=True, timeout=600).
+          Next: analyze decompile output, upgrade HIGH-confidence renames via RenameBatch script,
+          update rom_function_index.md coverage, continue to Pass 8 (remaining 20 MEDIUM-priority).
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain)
           PASS 6 "parked" this region after finishing the xrefs:2 tier (per its own pivot decision,
