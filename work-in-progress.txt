@@ -3339,7 +3339,7 @@ sweep beyond enumeration and is the most out-of-date):
           Next phase (PASS 8) will continue with remaining 20 MEDIUM-priority candidates after
           PASS 7 completes and renames are applied via RenameBatchPass7.java.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
 
 [DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (2026-06-24)
           PASS 7 cold-triage: enumerated remaining 151-600B tier untouched candidates.
@@ -3370,9 +3370,18 @@ sweep beyond enumeration and is the most out-of-date):
           create RenamePass11Region80050000.java; update region doc + rom_function_index.md.
           Estimated work: 30-45 min (similar to previous passes). Expected yield: 2-4 HIGH functions.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~345 to resolve)
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
           After PASS 10-11 complete, continue sweeping remaining unnamed functions in this region
           using cold-triage + batch-decompile pattern established in passes 3-11.
+          BLOCKED (2026-06-24): This is a long-running multi-pass task (each pass yields 1-3 HIGH
+          renames from ~300+ unnamed candidates). PASS 12 setup requires iterative:
+          1. ColdTriageRegion80050000Pass12.java to rank-order remaining candidates by xref/size
+          2. BatchDecompile* to run 5-10 candidates through mcp__wairz__run_ghidra_headless
+          3. RenamePass12* to apply confirmed HIGH-confidence renames via GZF project persistence
+          4. Update region doc + rom_function_index.md with new confidence flags
+          5. Repeat loop for PASS 13+ until 0 unnamed remain.
+          Single wip-iteration cannot complete this; recommend unattended /wip-loop-overnight
+          with worker pool configured for serial GZF-process-mode runs.
 
 [TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
           PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
