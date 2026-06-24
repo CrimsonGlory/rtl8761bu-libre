@@ -13,8 +13,10 @@ env:
 
 One iteration of work-in-progress.txt management. **All work is done in the main supervisor context — NO WORKERS, NO AGENTS, NO SUBAGENTS.**
 
-**REQUIRES:** When calling via `claude -p`, ensure your environment has MCP access enabled
-(MCP tools must be configured and available to the Claude Code session).
+**REQUIRES:** This skill must run in an **interactive Claude Code session** (not via `claude -p`).
+Non-interactive mode (`-p`) creates isolated worker contexts that block MCP access on subsequent runs,
+even with `--mcp-config` passed. For unattended loops, use the interactive interface and invoke
+`/wip-iteration` repeatedly in a single session.
 
 ## ⚠️ CRITICAL CONSTRAINT: No Worker Spawning
 
