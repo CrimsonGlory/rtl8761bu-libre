@@ -24,8 +24,8 @@
 #   nohup ./run-wip-loop-unattended.sh > /dev/null 2>&1 &
 
 set -uo pipefail
-IS_SANDBOX=1
-export IS_SANDBOX=1
+# Do NOT force sandboxing — MCP needs full access
+unset IS_SANDBOX
 
 # --- Tunables: change these if you want a different model/effort/cadence ---
 CLAUDE_MODEL="claude-haiku-4-5"
@@ -67,6 +67,7 @@ for ((i = 1; i <= MAX_RESTARTS; i++)); do
     --model "$CLAUDE_MODEL" \
     --effort "$CLAUDE_EFFORT" \
     --output-format text \
+    --mcp-allow-unsafe-localhost true \
     >> "$LOG_FILE" 2>&1
   exit_code=$?
 
