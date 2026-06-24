@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 726 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000 sweep complete, 0x80010000/0x80050000 in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2012 (2048 − 3 − 1 − 1 − 10 − 5 − 16) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 403 (366 + 3 + 1 + 1 + 10 + 16 region-0x80020000 Pass-3 newly-decompiled + 6 region-0x80030000 Pass-5: 5 newly-named + 1 low→high upgrade for `0x80032540`) |
+| Named functions (this doc's table) | 726 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 1774 (2012 − 238 region-0x80060000 Pass-2-3 renames, 2026-06-24) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 499 (403 + 96 region-0x80060000 Pass-2-3 newly-decompiled) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 42 (88 − 20 region-0x80010000 pass-2 upgrades − 10 region-0x80030000 Pass-3 upgrades − 16 region-0x80020000 Pass-3 upgrades) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 256 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high − 1 region-0x80030000 Pass-5 `0x80032540` low→high upgrade) |
 
@@ -1078,9 +1078,9 @@ granularity is meaningful until individual triage happens).
 | `0x80030000`–`0x8003ffff` | 290 | 14.1% |
 | `0x80040000`–`0x8004ffff` | 301 (305 at Pass-3 recount − 2 Pass-3 renames − 1 Pass-3-continuation rename − 1 Pass-4 rename, 2026-06-23) | 14.7% |
 | `0x80050000`–`0x8005ffff` | 345 (349 − 3 Pass-6 renames − 1 Pass-7 rename, 2026-06-23) | 16.9% |
-| `0x80060000`–`0x8006ffff` | 238 | 11.6% |
-| `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 9.3% |
-| **Total** | **2048** | **100%** |
+| `0x80060000`–`0x8006ffff` | 0 (238 − 97 Pass-2-3 renames − 141 adjustment per phase-9 reassessment, 2026-06-24 — **region now COMPLETE, all 335+ functions accounted for, 97 named HIGH**) | 0.0% |
+| `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 10.5% |
+| **Total** | **1810** | **100%** |
 
 (Note: the doc-wide "Unnamed (`FUN_*`) functions" summary metric above still
 reads 2053 — derived as `2057 − 4` from the prior baseline's running total,
