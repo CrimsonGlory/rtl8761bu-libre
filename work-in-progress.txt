@@ -3191,12 +3191,13 @@ sweep beyond enumeration and is the most out-of-date):
           doc verified complete with 0 remaining gaps. Updated rom_function_index.md summary table
           entry from "238 unnamed" → "0 unnamed" to reflect post-Pass-3 actual state.
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 3 (continue OGF/OCF sweep, ~257 unnamed remain)
-          Pass 1 resolved the `send_evt_HCI_*` cluster (32 fns), Pass 2 resolved the `OGC_3_OCF_*`
-          cluster (38 fns). Pick up Pass 2's own "Remaining scope" recommendation
-          (`HCI_OGF1_OCF0x4#` cluster, `0x8001c490`-`0x8001c788`) per
-          `reverse_engineering_region_0x80010000.md`. Same triage/decompile/rename/document loop as above.
 
+[DONE]  Full RE: ROM region 0x80010000-0x8001ffff PASS 3 (HCI_OGF1_OCF0x4# cluster, 6 functions + 1 dispatcher resolved) (2026-06-24)
+          Pass 1 resolved the `send_evt_HCI_*` cluster (32 fns), Pass 2 resolved the `OGC_3_OCF_*`
+          cluster (38 fns), Pass 3 resolved the `HCI_OGF1_OCF0x4#` cluster (6 handlers + 1 dispatcher).
+          All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
+          Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
+          32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
 [TODO]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve)
           Continue cold-triaging this region's remaining clusters tier-by-tier (likely several more
           OGF/OCF-style command clusters plus general support functions) until the region's unnamed
