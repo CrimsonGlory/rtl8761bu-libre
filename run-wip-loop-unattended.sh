@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
-# Unattended driver for the wip-loop-overnight skill.
+# Unattended driver for wip-iteration.
 #
-# Repeatedly invokes `claude -p` (non-interactive mode) to work through
-# work-in-progress.txt's [NEXT]/[TODO] tickets without any human in the loop.
+# Shell-level loop (NOT worker spawning) that repeatedly invokes `claude -p`
+# (non-interactive mode) to work through work-in-progress.txt's [NEXT]/[TODO]
+# tickets without any human in the loop.
+#
+# **DESIGN PRINCIPLE**: This loop keeps everything in the SUPERVISOR CONTEXT.
+# Each `claude -p /wip-iteration` invocation runs with MCP access available
+# (isolation: false in SKILL.md). The /wip-iteration skill MUST NOT spawn
+# any Agent workers or subagents — all RE/analysis work is done directly in
+# the supervisor session. This ensures wairz MCP tools are always accessible.
+#
 # Each invocation is a fresh, stateless process — progress persists via
 # work-in-progress.txt + git commits, not conversation memory, so restarting
 # after a crash/timeout/iteration-cap just picks back up where it left off.

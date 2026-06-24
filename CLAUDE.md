@@ -35,12 +35,14 @@ If this fails or MCP tools are inaccessible, **EXIT IMMEDIATELY** with a message
 **Isolated workers are forbidden on this project.** Every worker must have full MCP access
 to invoke wairz tools. Do not attempt workarounds; exit cleanly so the supervisor can respawn.
 
-**SUPERVISOR NOTE — wip-loop-overnight invocation**: When invoking `/wip-loop-overnight`,
-ensure the skill itself runs with **no isolation**. Even though SKILL.md documents `isolation: false`
-for worker spawning, the supervisor must have MCP access to configure this. If workers report
-MCP unavailable, the supervisor likely has worktree isolation enabled — this is a configuration issue
-on the invocation side, not the worker's responsibility. Users: verify your Claude Code environment
-has MCP access before running overnight loops.
+**SUPERVISOR NOTE — Unattended loops must stay in supervisor context**: For overnight unattended
+work, use `./run-wip-loop-unattended.sh` (shell-level loop at supervisor scope) rather than
+`/wip-loop-overnight` (which spawns workers). The shell loop keeps MCP access available by running
+each iteration with `claude -p /wip-iteration` in the supervisor context. **The `/wip-iteration`
+skill MUST NOT spawn any workers or agents** — all RE/decompilation/analysis work is done directly
+in that session. Worker spawning introduces isolation barriers that block MCP access, breaking
+the entire pipeline. If you must run `wip-iteration` interactively (not via shell loop), ensure
+the Claude Code environment itself has MCP access enabled before starting.
 
 **IMPORTANT — wairz modifications**: If any limitation in wairz blocks analysis
 (missing tool, unsupported mode, wrong behavior), do NOT try to work around it

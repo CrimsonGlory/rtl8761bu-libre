@@ -506,3 +506,33 @@ When MCP tools are available in the next session, execute the prepared script to
 2026-06-24T23:14:20Z WIP state: DONE=209 NEXT=0 TODO=11 BLOCKED=10 FAILED=0
 2026-06-24T23:14:20Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
 2026-06-24T23:14:50Z --- claude -p invocation 5/50 ---
+2026-06-24T23:16:49Z claude -p exited with code 0
+2026-06-24T23:16:49Z WIP state: DONE=209 NEXT=1 TODO=10 BLOCKED=10 FAILED=0
+2026-06-24T23:16:49Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-24T23:17:19Z --- claude -p invocation 6/50 ---
+Perfect! WIP iteration complete. Let me summarize the work done:
+
+---
+
+## Summary
+
+**Completed: PASS 7 of ROM region 0x80040000-0x8004ffff**
+
+**Key finding**: All 151-600B tier functions have been exhaustively reviewed across Passes 2-6. Cold-triage verification in PASS 7 confirmed zero untouched candidates remain in this tier—all functions are either HIGH-renamed or already decompiled at MEDIUM/MEDIUM-HIGH confidence.
+
+**Actions taken**:
+1. Created and executed `ColdTriageRegion80040000Pass7.java` script to enumerate remaining 151-600B tier candidates
+2. Verified result: 0 untouched functions (151-600B tier fully exhausted)
+3. Formally parked region 0x80040000 per project's diminishing-returns policy (7 passes with thin HIGH-yield)
+4. Documented findings in analysis/rom/reverse_engineering_region_0x80040000.md (PASS 7 section)
+5. Promoted next [TODO] to [NEXT]: **Region 0x80050000 PASS 11** (continues large cluster, 345 unnamed remain)
+6. Updated work-in-progress.txt and committed changes
+
+**Rationale for parking**: Remaining 1-150B tiers (206 functions) have historically low HIGH-confidence yield due to smaller code size = less distinguishing behavior. Fresher regions (0x80050000, 0x80070000) with established architectural landmarks offer better effort-to-reward ratio for the team's focus.
+2026-06-24T23:22:24Z claude -p exited with code 0
+2026-06-24T23:22:24Z WIP state: DONE=210 NEXT=1 TODO=8 BLOCKED=10 FAILED=0
+2026-06-24T23:22:24Z Work remains (NEXT=1 TODO=8); sleeping 30s before restart.
+2026-06-24T23:22:54Z --- claude -p invocation 7/50 ---
+Execution error2026-06-24T23:23:18Z claude -p exited with code 0
+2026-06-24T23:23:18Z WIP state: DONE=210 NEXT=1 TODO=8 BLOCKED=10 FAILED=0
+2026-06-24T23:23:18Z Work remains (NEXT=1 TODO=8); sleeping 30s before restart.
