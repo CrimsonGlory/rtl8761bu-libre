@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 2 COMPLETE (2026-06-23); PASS 3 (top-15-per-half sweep, 30 functions) COMPLETE (2026-06-23); cold-triage of remaining unnamed functions outside top-15 lists still open
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tiers (206 functions) remain as low-priority future work per diminishing-returns policy
 
 ## Overview
 
@@ -498,3 +498,29 @@ total functions, 191 unnamed, only Pass 1 (enumeration) and Pass 2 (6
 functions decompiled) done — Pass 2 already staged concrete next targets
 (`0x8007095c` 568B, `0x800754c4` 402B, `0x80073348` 362B, `0x80071d98` 306B,
 `0x80074c8c` 232B). The next ticket pivots there.
+
+## Pass 7 — 151-600B Tier Exhaustion Verification (2026-06-24)
+
+`ColdTriageRegion80040000Pass7.java` was run in GZF process mode against the
+live project to verify the 151-600B tier status (next tier after xrefs:2
+exhaustion in Pass 6).
+
+**Finding**: ZERO untouched functions remain in the 151-600B tier. All have been
+either HIGH-renamed (Passes 2-6) or already decompiled and documented at
+MEDIUM/MEDIUM-HIGH (Passes 3-6). The 151-600B tier is **fully exhausted**.
+
+### Region 0x80040000 status: PARKED after Pass 7
+
+Remaining work: 1-150B tiers (206 functions per Pass 6's breakdown). Per the
+project's standing pivot policy (7 consecutive passes on this region with
+thin HIGH-confidence yield), and Pass 6's conclusion that "six consecutive
+passes yield mostly MEDIUM/MEDIUM-HIGH outcomes... pivot to a different
+region for better HIGH-rename hit rate," this region is **formally parked**.
+
+The 1-150B tiers remain as lower-priority future work: smaller code size = less
+behavioral distinction per function, historically lower HIGH-confidence yield.
+No structural signal suggests sudden improvement in that tier (consistent with
+observations across other 64KiB regions). Estimated effort-to-reward ratio for
+the 206 remaining functions is unfavorable relative to fresher regions
+(0x80050000 with 345 unnamed, 0x80070000 with 191 unnamed) where prior cluster
+work has established clearer architectural landmarks and naming conventions.
