@@ -72,11 +72,15 @@ this environment:
 
 - NeoPC / UB500 hardware test, `journalctl` paste, `try_new_firmware.sh`
 - Bisect SPLIT waiting on flash result
-- Missing MCP/tool access the worker cannot obtain
+- **Missing MCP/tool access** (but first verify: use `isolation: false` when spawning workers — worktree isolation blocks MCP access)
 - User decision or credentials required
 
 Do **not** block for hard failures (build broken, decompile error, wrong approach) —
 use `[FAILED]` or fix inline. Supervisor **stops** on `[FAILED]`.
+
+**MCP access note:** If a worker can't access wairz tools due to "worktree isolation"
+or "CLI sandboxing," the supervisor should re-spawn with `isolation: false` instead
+of marking the item `[BLOCKED]`. The worker can then execute MCP tool invocations.
 
 ## Worker prompts
 
@@ -155,8 +159,19 @@ Repeat until stop:
 
 Pick prompt: bisect (overnight rules) / default / first TODO / stop if no work.
 
-Use the **Agent** tool with `subagent_type: general-purpose`. Wait for completion
-before continuing (do not run the next iteration in parallel).
+Use the **Agent** tool with `subagent_type: general-purpose` and **`isolation: false`**
+to enable MCP access (workers need full environment to invoke wairz tools). Wait for
+completion before continuing (do not run the next iteration in parallel).
+
+Example:
+```
+Agent({
+  description: "Overnight wip-loop worker",
+  subagent_type: "general-purpose",
+  isolation: false,
+  prompt: "..."
+})
+```
 
 **Verify ticket closure:** after each worker, the active line must not still be
 `[NEXT]` unless `[DONE]` or `[BLOCKED]` rose. Open `[NEXT]` → `needs_block` → recovery.
