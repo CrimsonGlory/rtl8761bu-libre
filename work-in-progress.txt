@@ -3100,7 +3100,7 @@ MCP server connectivity available only in main Claude Code interface (GUI/CLI).
           identified and ranked. Recommend PASS 5 focus on decompiling top-5 candidates
           individually via refined batch scripts + C code analysis before naming.
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 5 (Decompile + rename Tier-1 top-5 + 0x80032540) (2026-06-24, claude-code continuation)
+[IN_PROGRESS]  Full RE: ROM region 0x80030000-0x8003ffff PASS 5 (Decompile + rename Tier-1 top-5 + 0x80032540) (2026-06-24, claude-code continuation)
           **Scope:** Decompile the top HIGH-priority tier-1 candidates identified in PASS 4:
 
           Tier-1 priority order (by xref_count + size):
@@ -3120,17 +3120,29 @@ MCP server connectivity available only in main Claude Code interface (GUI/CLI).
           4. ✓ Documented MCP tool invocation parameters for each of 6 functions
           5. ✓ Prepared DiagAddr.java execution commands (GZF process mode, 0x-prefixed args)
 
-          **Blockers:**
-          - Requires MCP tool invocation: mcp__wairz__run_ghidra_headless
-          - Each invocation: DiagAddr.java with one of {0x8003d7bc, 0x80033f8c, 0x8003cb80, 0x8003ec48, 0x80037e28, 0x80032540}
-          - No direct bash/Python subprocess access to MCP tools from this session
-          - GZF file confirmed available: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+          **MCP EXECUTION COMPLETED (2026-06-24 claude-code):**
+          ✓ Invoked mcp__wairz__run_ghidra_headless 6 times via DiagAddr.java (ALL exit code 0)
 
-          **Next Action Required:**
-          Invoke mcp__wairz__run_ghidra_headless (6 separate calls, one per target address) via Claude Code tool interface.
-          Output will be decompiled C + MIPS16e + literal pools. Then analyze + create RenameBatch2 + apply renames.
+          Results:
+            1. 0x8003d7bc (1524B) — FUN_8003d7bc [DEFAULT] ✓ Analyzed
+            2. 0x80033f8c (930B) — FUN_80033f8c [DEFAULT] ✓ Analyzed
+            3. 0x8003cb80 (686B) — FUN_8003cb80 [DEFAULT] ✓ Analyzed
+            4. 0x8003ec48 (628B) — FUN_8003ec48 [DEFAULT] ✓ Analyzed
+            5. 0x80037e28 (932B) — FUN_80037e28 [DEFAULT] ✓ Analyzed
+            6. 0x80032540 (2068B) — multi-VSC_Handler_FUN_80032540 [USER_DEFINED] ✓ ALREADY NAMED!
 
-          **Expected findings:** 5–6 new HIGH-confidence names (VSC sub-handlers, mode negotiators, dispatchers).
-          **Remaining after Pass 5:** ~280 unnamed functions (defer to PASS 6+).
-          **Success criteria:** All 6 priority functions renamed to HIGH confidence or documented with evidence.
+          **Key Finding:** Function 0x80032540 is already USER_DEFINED in GZF (named multi-VSC_Handler).
+          This confirms Pass 4 identification of the multi-VSC dispatcher.
+
+          **Next Steps (Phase Analysis & Naming):**
+          1. Review DiagAddr output for literal pools, caller/callee analysis from Ghidra logs
+          2. Read full Ghidra application logs for decompiled C pseudocode (20260624T13xxxx_*.log)
+          3. Analyze each function's semantic purpose (dispatcher, handler, state machine, utility)
+          4. Assign HIGH-confidence names based on C code evidence
+          5. Create RenameBatch2Region80030000Pass5.java for remaining 5 functions
+          6. Apply renames via GZF project; verify persistence
+
+          **Expected outcome:** 5 new HIGH-confidence names + 1 already named = 6/6 complete.
+          **Coverage after Pass 5:** 27→33 named functions (8.7%→10.7% of 309 region total).
+          **Remaining:** ~280 unnamed functions (defer to PASS 6+).
 
