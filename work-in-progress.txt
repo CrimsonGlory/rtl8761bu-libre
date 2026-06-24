@@ -3245,18 +3245,32 @@ sweep beyond enumeration and is the most out-of-date):
           stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
           301-600B "utility" tier (26 functions).
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
-          **Status:** PASS 6 targeting 26 functions in 301-600B utility tier (identified in PASS 4 cold-triage).
-          Next worker session: execute the following steps:
-          1. Run ColdTriageRegion80030000Pass4.java via mcp__wairz__run_ghidra_headless (GZF process mode)
-             to extract exact function addresses of all 289 unnamed; filter for 301–600B range
-          2. Batch-decompile the 26 functions via BatchDecompile or individual DiagAddr.java calls
-          3. Analyze decompiled pseudocode; identify 15-20 HIGH-confidence naming candidates
-          4. Create RenameBatch script with confirmed renames; apply via GZF; verify persistence
-          5. Update analysis/rom/reverse_engineering_region_0x80030000.md with Pass 6 section
-          6. Update analysis/rom/rom_function_index.md and analysis/INDEX.md
-          7. Commit: "PASS 6: ROM region 0x80030000 utility tier (301–600B) — N new HIGH"
-          **Expected outcome:** 15–20 new HIGH-confidence names; ~260 unnamed remain deferred to PASS 7+.
+[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (2026-06-24 17:47 UTC)
+          Ghidra headless decompiler API unavailable for batch decompilation.
+
+          **Status:** ✓ COMPLETED extraction (step 1):
+          - Ran ColdTriageRegion80030000Pass4.java → identified 26 candidates in 301–600B tier
+          - Ran Pass6UtilityTierSimple.java → extracted all 26 addresses, sizes, xref counts
+          - Top 2 CRITICAL candidates: 0x80039f54 (426B, xref:9), 0x80033794 (578B, xref:5)
+          - Next 4 HIGH: 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630 (all xref:2–3)
+          - Remaining 20 MEDIUM/LOW candidates for PASS 7+
+          - → analysis/rom/reverse_engineering_region_0x80030000.md (PASS 6 section added)
+
+          ✗ BLOCKED at step 2 (batch decompile):
+          - Attempted DecompilePass6TopCandidates.java (DecompilerCallback API)
+          - Error: java.lang.ClassNotFoundException: DecompilerCallback not found by bundle
+          - Attempted Pass6UtilityTierDecompile.java (alternative API)
+          - Error: ghidra.app.decompiler.DecompileResults.getDecompilation() method not in headless API
+          - Root cause: Ghidra headless analyzer does not expose full decompiler callback classes;
+            previous working decompiles (PASS 3, PASS 5) used mcp__wairz__decompile_function tool
+            directly on individual functions, not batch-via-callback pattern
+
+          **Workaround:** Use mcp__wairz__decompile_function on each top-6 critical/high
+          candidates individually (0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c,
+          0x8003c7cc, 0x8003d630) rather than batch script. Then promote [TODO] PASS 7
+          to [NEXT] for continuation on remaining 20.
+
+          **Next worker session:** Await supervisor respawn with next [NEXT] item.
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7+ (continue until 0 unnamed remain, ~277 to resolve)
 

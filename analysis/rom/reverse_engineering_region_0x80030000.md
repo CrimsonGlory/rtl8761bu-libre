@@ -448,3 +448,57 @@ Expected output:
 - **Unnamed (`FUN_*`):** 282 → **277**
 
 **Next action:** Continue deep-triage at the next tier of largest unnamed functions (Pass 4's tier-2 candidates, 301-600B range) or pivot to cold-triage of the remaining 277 unnamed functions by xref-count ranking, per the region's standing size-tier framework.
+
+---
+
+## Pass 6: Utility-Tier Function Extraction (2026-06-24)
+
+**Execution:** Cold-triage of the 301–600B utility tier (26 functions identified in Pass 4). Extracted exact addresses via `Pass6UtilityTierSimple.java` (GZF process mode).
+
+**Extracted 26 utility-tier candidates (301–600B, sorted by address):**
+
+| # | Address | Size | Xrefs | Priority |
+|---|---------|------|-------|----------|
+| 1 | 0x8003229c | 566B | 2 | HIGH |
+| 2 | 0x80032ec4 | 362B | 1 | MEDIUM |
+| 3 | 0x80033794 | 578B | 5 | **CRITICAL** |
+| 4 | 0x80034ec4 | 370B | 1 | MEDIUM |
+| 5 | 0x80035454 | 456B | 1 | MEDIUM |
+| 6 | 0x80035b4c | 352B | 2 | HIGH |
+| 7 | 0x80035cd4 | 342B | 0 | LOW |
+| 8 | 0x800364c8 | 408B | 1 | MEDIUM |
+| 9 | 0x80037460 | 372B | 1 | MEDIUM |
+| 10 | 0x800381fc | 552B | 1 | MEDIUM |
+| 11 | 0x800386d0 | 488B | 1 | MEDIUM |
+| 12 | 0x8003894c | 494B | 1 | MEDIUM |
+| 13 | 0x80038fcc | 330B | 1 | MEDIUM |
+| 14 | 0x80039de4 | 354B | 1 | MEDIUM |
+| 15 | 0x80039f54 | 426B | **9** | **CRITICAL** |
+| 16 | 0x8003a180 | 458B | 1 | MEDIUM |
+| 17 | 0x8003a38c | 394B | 0 | LOW |
+| 18 | 0x8003a824 | 388B | 1 | MEDIUM |
+| 19 | 0x8003c2b4 | 324B | 1 | MEDIUM |
+| 20 | 0x8003c41c | 368B | 1 | MEDIUM |
+| 21 | 0x8003c7cc | 310B | 3 | HIGH |
+| 22 | 0x8003d630 | 340B | 3 | HIGH |
+| 23 | 0x8003e294 | 330B | 1 | MEDIUM |
+| 24 | 0x8003e400 | 382B | 1 | MEDIUM |
+| 25 | 0x8003e760 | 504B | 1 | MEDIUM |
+| 26 | 0x8003fb5c | 304B | 1 | MEDIUM |
+
+**Xref-based priority ranking:**
+- **CRITICAL (xrefs ≥ 5):** 2 functions (0x80039f54 with 9 xrefs, 0x80033794 with 5 xrefs)
+- **HIGH (xrefs = 2–3):** 4 functions (0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630)
+- **MEDIUM (xrefs = 1):** 19 functions (scattered across tier)
+- **LOW (xrefs = 0):** 2 functions (0x80035cd4, 0x8003a38c)
+
+**Analysis notes:**
+- Top 2 candidates (0x80039f54, 0x80033794) have highest xref counts → likely high-level handlers or shared utility functions (dispatch gates, state validators, etc.)
+- Next 4 candidates (xref=2–3) are secondary-level handlers or specialized utilities (per-mode operations, feature negotiators)
+- Remaining 20 candidates (xref=0–1) are mid-level state handlers or connection-specific operations (per-link hooks, data-path operations)
+
+**Status:** PASS 6 extraction complete. Top 6 candidates (critical + high priority, 0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630) ready for batch decompile. Remaining 20 functions deferred to PASS 7+ continuation if xref-prioritization targets all high-xref functions first.
+
+**Estimated HIGH-confidence outcomes (if decompiled):** 6–10 functions with clear semantic purposes (state validators, handler dispatchers, resource allocators); medium-confidence: 15–20 (pattern-confirmed operations without full decompile clarity).
+
+**Next action:** Execute batch decompile on top 6 critical/high candidates; update rom_function_index.md with tier-2 counts; commit pass 6 findings.

@@ -167,3 +167,68 @@ Would you like me to help diagnose your MCP configuration, or should you restart
 2026-06-24T16:57:18Z WIP state: DONE=208 NEXT=0 TODO=13 BLOCKED=7 FAILED=0
 2026-06-24T16:57:18Z Work remains (NEXT=0 TODO=13); sleeping 30s before restart.
 2026-06-24T16:57:48Z --- claude -p invocation 6/50 ---
+**Summary:**
+
+MCP access is unavailable — this worker cannot proceed with the ROM reverse-engineering task. Per the CLAUDE.md critical requirement, the wairz MCP server is necessary for running Ghidra analysis scripts (`mcp__wairz__run_ghidra_headless`), and I've exited cleanly after:
+
+1. Marked PASS 6 of ROM region 0x80030000 as [BLOCKED] with the reason (MCP unavailable)
+2. Promoted the duplicate [TODO] entry to [NEXT] (per wip-loop protocol)
+3. Committed the current state
+
+**Supervisor:** This worker needs to be respawned with MCP enabled (`isolation: false` or similar configuration that ensures wairz MCP server access). The task cannot resume without it.
+2026-06-24T16:58:54Z claude -p exited with code 0
+2026-06-24T16:58:54Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
+2026-06-24T16:58:54Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T16:59:24Z --- claude -p invocation 7/50 ---
+**MCP access unavailable — this worker cannot proceed.** The wairz MCP server is not accessible in the current session. Per CLAUDE.md, isolated workers are forbidden on this project.
+
+**Supervisor must respawn this session with MCP access enabled.** Verify that Claude Code has:
+1. MCP servers enabled in settings
+2. No worktree isolation on the session
+3. wairz MCP server configured and running
+
+If you've just started Claude Code, MCP may still be connecting. Check the system reminders at the top of the conversation — the `wairz` server is listed as "still connecting." **Try again in a moment** once the MCP server has fully initialized.
+
+Once MCP is available, run `/wip-iteration` again.
+2026-06-24T16:59:33Z claude -p exited with code 0
+2026-06-24T16:59:33Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
+2026-06-24T16:59:33Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T17:00:03Z --- claude -p invocation 8/50 ---
+**MCP access unavailable — this worker cannot proceed.** Supervisor must respawn with proper MCP configuration enabled.
+
+The wairz MCP server is not available in this session. According to the project CLAUDE.md requirements, **isolated workers are forbidden** — every worker must have full MCP access to invoke wairz tools. This is a configuration issue on the supervisor side, not a worker problem.
+
+**What's needed:** The supervisor must ensure that:
+1. MCP tools are initialized and available before invoking `/wip-iteration`
+2. If using `wip-loop-overnight`, ensure the skill itself runs with **no isolation**
+
+Please reconfigure your Claude Code environment to enable MCP access, then retry this work.
+2026-06-24T17:00:23Z claude -p exited with code 0
+2026-06-24T17:00:23Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
+2026-06-24T17:00:23Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T17:00:53Z --- claude -p invocation 9/50 ---
+**MCP access unavailable — this worker cannot proceed.** The wairz/Ghidra tools required for this project are not accessible. Per CLAUDE.md, isolated workers cannot continue work without full MCP access.
+
+This is a configuration issue on the invocation side: the Claude Code session was started with MCP disabled or improperly configured. To resume work:
+
+1. Ensure your Claude Code environment has MCP access enabled
+2. Respawn the session/worker with MCP tools initialized
+3. Then retry `/wip-iteration`
+2026-06-24T17:01:01Z claude -p exited with code 0
+2026-06-24T17:01:01Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
+2026-06-24T17:01:01Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T17:01:31Z --- claude -p invocation 10/50 ---
+❌ **MCP access unavailable** — this worker cannot proceed. MCP tools (wairz) are required for all reverse-engineering work on this project, and the system cannot find them initialized.
+
+The `/wip-iteration` skill requires full MCP access to run. Per the CLAUDE.md instructions: "Do not attempt workarounds; exit cleanly so the supervisor can respawn."
+
+**Next step:** Your Claude Code session needs MCP configured with the wairz server available. You'll need to:
+1. Verify your Claude Code environment has MCP servers enabled in settings.json
+2. Ensure the wairz MCP server is configured and accessible
+3. Respawn the worker session with MCP initialized
+
+Once MCP is available, re-run `/wip-iteration` and work will proceed normally.
+2026-06-24T17:01:46Z claude -p exited with code 0
+2026-06-24T17:01:46Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
+2026-06-24T17:01:46Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T17:02:16Z --- claude -p invocation 11/50 ---
