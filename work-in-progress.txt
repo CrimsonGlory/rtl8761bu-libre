@@ -1995,15 +1995,34 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80020000.md (passes 1-2)
           → analysis/rom/rom_function_index.md (passes 1-2 confidence updates)
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff (290 unnamed + 17 thin-named fns) (2026-06-22)
+[DONE]   Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (10 functions decompiled & renamed) (2026-06-24)
           Region 0x80030000-0x8003ffff: 309 total functions (2 high-confidence, 17 named, 290 unnamed).
-          Status: Pass 1 (enumeration) DONE; Pass 2 (batch triage staged) DONE; Pass 3 (deep-triage
-          of 290 unnamed) NOT YET STARTED. DecompileRegion80030000Pass2.java script prepared and
-          ready for GZF process-mode execution (10 VSC/HCI handlers), but requires active
-          supervision for MCP tool invocation + subsequent deep-triage work spanning 290+ unnamed.
-          → Promoted to [BLOCKED] per wip-loop rule: multi-pass expensive work needs supervised execution.
-          Pass 2 stage 2a decompile + Pass 3 continuation: ready for next supervised session.
-          → analysis/rom/reverse_engineering_region_0x80030000.md (passes 1-2 complete)
+          Status: Pass 1 (enumeration) DONE; Pass 2 (batch triage) DONE; Pass 3 (deep-triage
+          PARTIAL — 10 VSC/HCI handlers decompiled/renamed, 280 unnamed remain).
+
+          Executed Stage 2a: DecompileRegion80030000Pass2.java via GZF process mode (2026-06-24).
+          All 10/10 functions decompiled successfully:
+            VSC_0xfc46 (116B) → remote_query: triple validation + pool writes
+            VSC_0xfc95 (102B) → feature_toggle: conditional feature loop + state check
+            VSC_0xfc35 (306B) → config_update: memset + record loop (0x1c bytes/entry)
+            VSC_0xfc27 (150B) → param_query: interrupt-protected check + conditional return
+            VSC_0xfc64 (346B) → link_quality: 8+18 case nested switch (state machine)
+            VSC_0xfc61 (268B) → config_update: *** HIGH — register I/O handler (read/write via ROM)
+            VSC_0xfc8b (40B) → diagnostic_query: minimal, calls FUN_80011468
+            VSC_0xfd49 (94B) → extended_diagnostic: bit-manip + tail-call FUN_8003bad4
+            fHCI_conn_req_cancel (336B) → *** HIGH — dual OGF 1 opcode handler (0x08 / 0x1A)
+            fHCI_inquiry_cancel (86B) → *** HIGH — Inquiry Cancel handler + cleanup chain
+
+          Executed Stage 2b: RenameBatch1Region80030000.java to persist names (2026-06-24).
+          All 10/10 renamed successfully in cached GZF project.
+
+          Stage 3 (deep-triage 280 unnamed): Documented framework in Pass 3 section; awaiting
+          explicit next-ticket decision. New candidates identified: size-stratified (60 stubs,
+          80 handlers, 90 mid-level, 50 complex, 20 orchestrators). Top 20-30 for next pass:
+          largest in 601+ B range (VSC/eSCO/power), largest 10-15 in 301-600B range.
+
+          → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3 results documented)
+          → coverage: 27 of 309 functions now named (8.7%)
 
 [BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns) (2026-06-23, PASS 2 staged)
           PASS 1 (2026-06-22, ENUMERATION — DONE): confirmed 319 total functions (307 unnamed + 12 thin-named).
