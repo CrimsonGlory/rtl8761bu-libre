@@ -232,3 +232,125 @@ Once MCP is available, re-run `/wip-iteration` and work will proceed normally.
 2026-06-24T17:01:46Z WIP state: DONE=208 NEXT=1 TODO=11 BLOCKED=8 FAILED=0
 2026-06-24T17:01:46Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
 2026-06-24T17:02:16Z --- claude -p invocation 11/50 ---
+Excellent! The work is done and committed. Let me create a quick summary:
+
+## PASS 6 Work Summary
+
+**Status:** ✓ EXTRACTED, ✗ BLOCKED on full decompilation
+
+### What Was Completed
+
+1. **Step 1 (Extraction)** — Successfully extracted all 26 utility-tier functions (301–600B range) from ROM region 0x80030000-0x8003ffff:
+   - Used `ColdTriageRegion80030000Pass4.java` to confirm tier distribution
+   - Used `Pass6UtilityTierSimple.java` to extract exact addresses, sizes, and xref counts
+   - Identified priority ranking: 2 CRITICAL, 4 HIGH, 20 MEDIUM/LOW candidates
+
+2. **Documentation** — Updated `analysis/rom/reverse_engineering_region_0x80030000.md` with complete PASS 6 extraction findings
+
+### Top Candidates Identified
+
+**Critical Priority (xref ≥ 5):**
+- `0x80039f54` (426B, xref:9) — high-level dispatcher/gate
+- `0x80033794` (578B, xref:5) — high-level dispatcher/gate
+
+**High Priority (xref = 2–3):**
+- `0x8003229c` (566B, xref:2)
+- `0x80035b4c` (352B, xref:2)
+- `0x8003c7cc` (310B, xref:3)
+- `0x8003d630` (340B, xref:3)
+
+### Blocker
+
+Step 2 (batch decompilation) hit a Ghidra headless API limitation — `DecompilerCallback` class is not exposed in headless mode. The workaround is to use individual `mcp__wairz__decompile_function` MCP calls (the pattern that worked in PASS 3 and PASS 5).
+
+### Next Action
+
+Next worker should either:
+1. Use individual `mcp__wairz__decompile_function` calls on the top 6 critical/high candidates, OR
+2. Promote the [TODO] PASS 7 to [NEXT] and continue to the next tier
+
+The extracted data is ready for immediate decompilation when the session resumes.
+2026-06-24T17:05:32Z claude -p exited with code 0
+2026-06-24T17:05:32Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T17:05:32Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T17:06:02Z --- claude -p invocation 12/50 ---
+❌ **MCP access unavailable.** The `mcp__wairz__run_ghidra_headless` command is not available, which means this worker session cannot proceed with RE tasks.
+
+According to CLAUDE.md, **isolated workers are forbidden on this project**. Every worker must have full MCP access to invoke wairz tools. 
+
+**Please respawn this session with MCP access enabled** — this worker cannot continue without it.
+2026-06-24T17:06:19Z claude -p exited with code 0
+2026-06-24T17:06:19Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T17:06:19Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T17:06:49Z --- claude -p invocation 13/50 ---
+**MCP access unavailable** — this worker cannot proceed. The wairz MCP server is not available in the current session. Supervisor must respawn with MCP access enabled.
+
+This is a configuration issue on the invocation side. The supervisor should ensure:
+1. MCP servers are initialized in the Claude Code session
+2. When invoking `/wip-loop-overnight`, the skill runs with **no isolation** (so MCP access is inherited)
+
+**Action:** Exit and request supervisor respawn with full MCP access.
+2026-06-24T17:07:01Z claude -p exited with code 0
+2026-06-24T17:07:01Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T17:07:01Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T17:07:31Z --- claude -p invocation 14/50 ---
+**MCP access unavailable — this worker cannot proceed.** The wairz MCP server tools are not available in this session. Per CLAUDE.md, isolated workers are forbidden on this project.
+
+**Supervisor must respawn without isolation** (or ensure MCP is configured in the current session). The `/wip-iteration` skill requires full MCP access to invoke `mcp__wairz__run_ghidra_headless` for reverse-engineering work.
+
+If you're running locally, verify that your Claude Code environment has MCP servers enabled in `settings.json`. If you spawned this as a worktree agent, try re-invoking without `isolation: worktree`.
+2026-06-24T17:07:42Z claude -p exited with code 0
+2026-06-24T17:07:42Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T17:07:42Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T17:08:12Z --- claude -p invocation 15/50 ---
+❌ **MCP access unavailable** — MCP tools are not initialized in this session. The `wip-iteration` skill requires full MCP access to invoke wairz/Ghidra tools.
+
+Per the CLAUDE.md instructions: **Isolated workers are forbidden on this project.** The system must respawn this session with **no isolation** so MCP can be configured and wairz tools become available.
+
+**Next steps:**
+- You'll need to restart Claude Code without worktree isolation, or
+- Configure MCP in your current session's settings, then re-invoke `/wip-iteration`
+
+If you're running this via `claude -p` on the CLI, ensure your environment has MCP configured before starting the tool.
+2026-06-24T17:08:21Z claude -p exited with code 0
+2026-06-24T17:08:21Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T17:08:21Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T22:21:16Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-24T22:21:17Z --- claude -p invocation 1/50 ---
+
+=== WIP Iteration (2026-06-24 22:15 UTC) ===
+Status: BLOCKED on MCP disconnection
+Current [NEXT]: PASS 6 continuation (finish 301-600B utility tier)
+
+Blocker Check: ✓ PASS (wairz_requested_changes.txt clear)
+MCP Access: ✓ AVAILABLE (initially); ✗ DISCONNECTED (after 3 decompiles)
+
+Execution:
+- Verified MCP wairz tools available via ToolSearch
+- Executed partial workaround: decompile 6 top-tier candidates individually
+- Results: 3/6 successful (FUN_8003229c, FUN_80035b4c, FUN_8003c7cc)
+         2/6 timeouts (FUN_80039f54, FUN_80033794)
+         1/6 MCP disconnected (FUN_8003d630)
+
+Findings (3 decompiles):
+1. FUN_8003229c (566B): ACL queue/buffer ring buffer manager
+   - Circular queue at 0x8012bxxx with mask-based indexing
+   - Calls indirect fns *0x80120f80/*0x80120f0c
+   - Manages ACL packet allocation/deallocation
+
+2. FUN_80035b4c (352B): param dispatch with ROM indirect calls
+   - Writes state flags at 0x8012303x/0x8012305x
+   - Conditional dispatch on DAT_80120f80/cb0 bitmasks
+   - Calls ROM FUN_80033744/FUN_80033f4/FUN_80034ccc/FUN_80034d88
+
+3. FUN_8003c7cc (310B): HW register config + BB init chain
+   - Reads config bytes 0x8012xxfe/0xff
+   - Programs BB regs 0x6c/0xd8 via indirect fn
+   - Timeout polling with FUN_80009694
+   - VSC opcode 0xfd49 call; config bit 0x1d0 gate
+
+Status Change: [BLOCKED] PASS 6 - MCP disconnected mid-decompile
+Mark: [BLOCKED] with date 2026-06-24 22:15 UTC, reason: MCP unavailable
+Next: Await supervisor respawn with MCP enabled
+
+Commit: 2facab7 "PASS 6: ROM region 0x80030000 utility tier — partial decompile"
