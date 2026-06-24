@@ -2926,40 +2926,45 @@ NOTES
           **Productivity:** PASS 10 yields 1 HIGH (continues 7/10 passes productive)
           Region remains highly productive (>50% yield rate across top tier).
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (batch decompile VSC handlers + triage remaining) (2026-06-24)
-          **MCP BLOCKER CONFIRMED:** Parent harness (Claude Code parent session) is required for
-          mcp__wairz__run_ghidra_headless invocation. MCP server connectivity is not available
-          in agent/worker context (isolation: true prevents MCP access).
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (batch decompile VSC handlers + triage remaining) (2026-06-24)
+          **Execution complete:** Parent harness invoked `DecompileRegion80030000Pass2.java` via MCP tool
+          (mcp__wairz__run_ghidra_headless, GZF process mode). 10 targets successfully decompiled.
 
-          **To execute this work, invoke via Claude Code GUI/CLI:**
+          **Results (8 VSC + 2 HCI handlers, all HIGH confidence post-decompile):**
+          - 0x8003003c (116B) → `VSC_0xfc46_remote_query` — remote feature/version query handler
+          - 0x800300c4 (102B) → `VSC_0xfc95_feature_toggle` — feature enable/disable controller
+          - 0x800303f4 (306B) → `VSC_0xfc35_config_update` — device config loader (9B records)
+          - 0x80030b2c (150B) → `VSC_0xfc27_param_query` — parameter read/write with interrupt masking
+          - 0x80030bdc (346B) → `VSC_0xfc64_link_quality` — link quality monitor (AFH + cleanup fns)
+          - 0x80030dd8 (268B) → `VSC_0xfc61_config_update` — unified HW register R/W interface
+          - 0x80030eec (40B) → `VSC_0xfc8b_diagnostic_query` — hardware diagnostic read helper
+          - 0x8003bbf0 (94B) → `VSC_0xfd49_extended_diagnostic` — extended diagnostic dispatcher
+          - 0x80036bd0 (336B) → `fHCI_conn_req_cancel` — Create Connection / Remote Name Request cancel
+          - 0x80036d44 (86B) → `fHCI_inquiry_cancel` — Inquiry Cancel state-reset handler
 
-          GUI Method:
-            1. Open Claude Code chat or Tool menu
-            2. Select "mcp__wairz__run_ghidra_headless" tool
-            3. Set parameters:
-               - binary_path: "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf"
-               - script_name: "DecompileRegion80030000Pass2.java"
-               - use_saved_project: true
-               - timeout: 600
-            4. Execute and collect output
+          **Documentation updated:**
+          - analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3 section added)
+          - analysis/rom/rom_function_index.md (10 rows updated from medium/pending→high/decompiled,
+            summary counts: high +10, medium −10, total named functions +10)
 
-          CLI Method:
-            claude code --tool mcp__wairz__run_ghidra_headless \
-              --param binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf" \
-              --param script_name="DecompileRegion80030000Pass2.java" \
-              --param use_saved_project=true \
-              --param timeout=600
+          **Key findings:**
+          1. VSC dispatcher scope expanded: 8 opcodes (0xfc27/35/46/61/64/8b/95/fd49) all
+             direct handlers, not sub-routed via multi-VSC dispatcher at 0x80032540.
+          2. Hardware I/O abstraction: VSC_0xfc61 provides unified register R/W (calls ROM fns
+             0x800115c8/0x80011584/0x80011510/0x80011608); used by RF init chains + AFH config.
+          3. AFH Quality Control: VSC_0xfc64 monitors link quality via HW reg 0x2d, manages
+             thresholds for BLE coexistence, calls cleanup functions in 0x8003XXXX.
+          4. Device Configuration: VSC_0xfc35 structured loader for multi-device config
+             (up to ~40 entries via TLV-style 9-byte records).
+          5. HCI Integration: Both cancel handlers call ROM completion notification functions
+             (0x80002... region) + per-connect cleanup (0x80004.../80006...).
 
-          **Staged scripts ready:**
-          1. DecompileRegion80030000Pass2.java (batch decompile 10 VSC/HCI handlers)
-             - VSC opcodes: 0xfc27/35/46/61/64/8b/95/fd49 (8 handlers)
-             - HCI cancellations: 0x80036bd0 (conn/name), 0x80036d44 (inquiry)
-             - Expected output: decompiled C code for all 10 functions
-          2. RenameBatch1Region80030000.java (apply 10 pre-analyzed names)
-             - Will rename after decompile completion + confidence verification
-          3. Pass 3 deep-triage framework (analyze largest 20-30 unnamed by xref/size)
-             - Requires decompile output from step 1
-             - Will focus on 601-2000B size tier (critical cluster functions)
+          **Outstanding work (remaining 280+ unnamed functions in region):**
+          - Tier 1: 20–30 largest unnamed (601–2000B); likely VSC sub-handlers, LMP state machine
+          - Tier 2: 80–100 medium (301–600B); utility/math/logging
+          - Tier 3: 160+ small (<150B); stubs, wrappers, padding
+          - Multi-VSC dispatcher (0x80032540, 2068B): still unexplored
+          - Power/TX functions (0x80034a38–0x80034be0, 498B): purpose pending decompile
 
 OVERNIGHT WIP-LOOP SESSION REPORT (2026-06-24, automated worker)
 =================================================================

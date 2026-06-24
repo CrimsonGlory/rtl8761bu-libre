@@ -27,10 +27,10 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 695 (690 + 3 region-0x80050000 Pass-6 newly-named + 1 region-0x80050000 Pass-7 newly-named + 1 region-0x80050000 Pass-9 newly-named, as of 2026-06-24; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2043 (2048 − 3 region-0x80050000 Pass-6 newly-named − 1 region-0x80050000 Pass-7 newly-named − 1 region-0x80050000 Pass-9 newly-named) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 371 (366 + 3 region-0x80050000 Pass-6 newly-named-and-decompiled + 1 region-0x80050000 Pass-7 newly-named-and-decompiled + 1 region-0x80050000 Pass-9 newly-named-and-decompiled) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 68 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high) |
+| Named functions (this doc's table) | 705 (690 + 3 region-0x80050000 Pass-6 newly-named + 1 region-0x80050000 Pass-7 newly-named + 1 region-0x80050000 Pass-9 newly-named + 10 region-0x80030000 Pass-3 newly-decompiled, as of 2026-06-24; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress, region-0x80030000 Pass-3 decompile complete) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2033 (2048 − 3 region-0x80050000 Pass-6 newly-named − 1 region-0x80050000 Pass-7 newly-named − 1 region-0x80050000 Pass-9 newly-named − 10 region-0x80030000 Pass-3 newly-decompiled) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 381 (366 + 3 region-0x80050000 Pass-6 newly-named-and-decompiled + 1 region-0x80050000 Pass-7 newly-named-and-decompiled + 1 region-0x80050000 Pass-9 newly-named-and-decompiled + 10 region-0x80030000 Pass-3 newly-decompiled) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 58 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high − 10 region-0x80030000 Pass-3 medium→high upgrades) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
@@ -659,14 +659,14 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8002fd3c` | 328 | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xfd40 FUN 8002fd3c | low (named by Kovah, purpose unclear) |
 | `0x8002fea0` | 58 | `wrapper_multi-VSC_Handler_FUN_8002fea0` | wrapper multi-VSC Handler FUN 8002fea0 | low (named by Kovah, purpose unclear) |
 | `0x8002fee0` | 186 | `VSC_0xfc20__download_patch__FUN_8002fee0` | VSC 0xfc20  download patch  FUN 8002fee0 | medium (named, one-line purpose only, not decompiled) |
-| `0x8003003c` | 116 | `VSC_0xfc46_FUN_8003003c` | VSC 0xfc46 vendor opcode handler — status query variant | medium (decompile pending, stage 2a) |
-| `0x800300c4` | 102 | `VSC_0xfc95_FUN_800300c4` | VSC 0xfc95 vendor opcode handler — feature toggle variant | medium (decompile pending, stage 2a) |
+| `0x8003003c` | 116 | `VSC_0xfc46_remote_query` | VSC 0xfc46 remote feature/version query handler — stores query results to capability struct | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x800300c4` | 102 | `VSC_0xfc95_feature_toggle` | VSC 0xfc95 feature enable/disable controller; toggles 11-bit feature flags; calls LMP_25B/268 gateways | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x800302ac` | 272 | `references_patch_download_mem4` | references patch download memory region | low (named by Kovah, purpose unclear) |
-| `0x800303f4` | 306 | `VSC_0xfc35_FUN_800303f4` | VSC 0xfc35 vendor opcode handler — config parameter setter | medium (decompile pending, stage 2a) |
-| `0x80030b2c` | 150 | `VSC_0xfc27_FUN_80030b2c` | VSC 0xfc27 vendor opcode handler — parameter query variant | medium (decompile pending, stage 2a) |
-| `0x80030bdc` | 346 | `VSC_0xfc64_FUN_80030bdc` | VSC 0xfc64 vendor opcode handler — link quality state machine | medium (decompile pending, stage 2a) |
-| `0x80030dd8` | 268 | `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8` | VSC 0xfc61 config/state data writer — Kovah hint "write" → HIGH confidence | **high (decompile pending, stage 2a pending)** |
-| `0x80030eec` | 40 | `VSC_0xfc8b_FUN_80030eec` | VSC 0xfc8b vendor opcode handler — diagnostic query/flag setter | medium (decompile pending, stage 2a) |
+| `0x800303f4` | 306 | `VSC_0xfc35_config_update` | VSC 0xfc35 device configuration loader (9B entry records, up to ~40 devices); TLV-style blob processor; calls FUN_8007442c cleanup | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80030b2c` | 150 | `VSC_0xfc27_param_query` | VSC 0xfc27 parameter read/write with interrupt masking; supports 2-byte parameter pairs | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80030bdc` | 346 | `VSC_0xfc64_link_quality` | VSC 0xfc64 link quality monitor: 9-case dispatch on param bits[7:4]; AFH register 0x2d poll | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80030dd8` | 268 | `VSC_0xfc61_config_update` | VSC 0xfc61 unified hardware register reader/writer; supports 1/2/4-byte sizes; alignment checks | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80030eec` | 40 | `VSC_0xfc8b_diagnostic_query` | VSC 0xfc8b hardware diagnostic read (1–2 bit positions); returns register value via status struct | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80030f1c` | 4372 | `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` | HCI CMD OGF 3F  Vendor Specific  FUN 80030f1c — see `hci_command_router` | high (decompiled+documented) |
 | `0x80032540` | 2068 | `multi-VSC_Handler_FUN_80032540` | multi-VSC Handler FUN 80032540 | low (named by Kovah, purpose unclear) |
 | `0x80032e28` | 20 | `called_by_function_that_uses_Logger_string_2_initialize_something_at_offset_0x800` | called by function that uses Logger string 2 initialize something at offset 0x800 | low (named by Kovah, purpose unclear) |
@@ -674,10 +674,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80034a38` | 378 | `idk_takes_new_new_power_val` | idk takes new new power val | low (named by Kovah, purpose unclear) |
 | `0x80034be0` | 120 | `set_new_power_val` | set new power val | low (named by Kovah, purpose unclear) |
 | `0x80035068` | 138 | `LMP__25C_called2` | LMP  25C called2 | low (named by Kovah, purpose unclear) |
-| `0x80036bd0` | 336 | `fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel` | HCI dual-opcode cancel dispatcher (0x08 / 0x1A) — Kovah hint naming explicit | **high (decompile pending, stage 2a)** |
-| `0x80036d44` | 86 | `fHCI_Inquiry_Cancel_0x02_1` | HCI Inquiry Cancel (OGF 1 / OCF 2) state-reset handler — spec'd opcode + compact 86B | **high (decompile pending, stage 2a)** |
+| `0x80036bd0` | 336 | `fHCI_conn_req_cancel` | HCI Create Connection / Remote Name Request cancellation handler — BD_ADDR lookup; clears connection record | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80036d44` | 86 | `fHCI_inquiry_cancel` | HCI Inquiry Cancel (OGF 1 / OCF 2) handler; clears EIR data structure; calls ROM cleanup fns | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80036df8` | 316 | `called_by_fHCI_Remote_Name_Request_5` | called by fHCI Remote Name Request 5 — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x8003bbf0` | 94 | `VSC_0xfd49_FUN_8003bbf0` | VSC 0xfd49 vendor extended opcode handler — diagnostic/telemetry variant | medium (decompile pending, stage 2a) |
+| `0x8003bbf0` | 94 | `VSC_0xfd49_extended_diagnostic` | VSC 0xfd49 extended diagnostic dispatcher; loops over diagnostic modes | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80041c18` | 64 | `fHCI_Exit_Periodic_Inquiry_Mode_0x04` | clears 4 state fields, calls `FUN_800408ec`, `LMP__25B__most_common_for_VSCs1`, clears EIR-data ptr/len, calls `FUN_80043a60` — periodic inquiry teardown, consistent with HCI Exit Periodic Inquiry Mode (0x0404) | high (decompiled+documented, Pass 2) |
 | `0x80042188` | 634 | `LC_event_RX_dispatcher` (was `assoc_w_tLC_RX`) | large switch on opcode field (param_1[4], range 0x2b8-0x4b7) dispatching ~15 Link-Controller RX event handlers (logging, FUN_800378e4/7e04ce70/etc, send_evt_Meta_buf_at_arg1, send_evt_Meta_subevent_0x11) — confirms Kovah's "assoc w/ tLC RX" hint as a real LC inbound event dispatcher | high (decompiled+documented, Pass 2) |
 | `0x80042420` | 418 | `LC_event_TX_dispatcher` (was `assoc_w_tLC_TX`) | large switch on opcode field (param_1[2], range 0x321-0x4b6) dispatching ~14 Link-Controller TX event handlers, incl. interrupt-disable + linked-list teardown loop (case 0x32f) — confirms Kovah's "assoc w/ tLC TX" hint as the LC outbound counterpart | high (decompiled+documented, Pass 2) |

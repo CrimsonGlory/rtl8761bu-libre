@@ -98,6 +98,61 @@ Expected output:
 **Known unknowns:**
 - Exact function boundary addresses within the 290-function unnamed pool
 - Sub-clustering of the VSC handlers (whether all are dispatched from 0x80030f1c or some from multi-VSC)
+
+---
+
+## Pass 3: Batch Decompile + Rename (2026-06-24)
+
+**Execution:** Parent harness invoked `DecompileRegion80030000Pass2.java` via MCP tool (`mcp__wairz__run_ghidra_headless`). GZF process mode, 10 targets successfully decompiled.
+
+**Results Summary:**
+
+### VSC Opcode Handlers (8 functions, all HIGH → MEDIUM confidence post-decompile)
+
+| Address | Size | Name | Confidence | Purpose |
+|---------|------|------|------------|---------|
+| `0x8003003c` | 116 | `VSC_0xfc46_remote_query` | **HIGH** | Remote feature/version query; stores to capability struct |
+| `0x800300c4` | 102 | `VSC_0xfc95_feature_toggle` | **HIGH** | Feature enable/disable controller; toggles 11-bit feature flags; calls LMP_25B/268 gateways |
+| `0x800303f4` | 306 | `VSC_0xfc35_config_update` | **MEDIUM-HIGH** | Device configuration loader (9B entry records, up to ~40 devices); TLV-style blob processor; calls FUN_8007442c cleanup |
+| `0x80030b2c` | 150 | `VSC_0xfc27_param_query` | **HIGH** | Parameter read/write with interrupt masking; supports 2-byte parameter pairs; read-back via capability struct |
+| `0x80030bdc` | 346 | `VSC_0xfc64_link_quality` | **MEDIUM-HIGH** | Link quality monitor: 9-case dispatch on param bits[7:4]; Adaptive Frequency Hopping (AFH) register 0x2d poll; calls cleanup FUN_8003b698/8003c41c |
+| `0x80030dd8` | 268 | `VSC_0xfc61_config_update` | **HIGH** | Hardware register reader/writer (unified I/O path); supports 1/2/4-byte sizes; alignment checks; calls ROM register R/W fns 0x800115c8/80011584/80011510/80011608 |
+| `0x80030eec` | 40 | `VSC_0xfc8b_diagnostic_query` | **HIGH** | Hardware diagnostic read (1–2 bit positions); returns register value via status struct |
+| `0x8003bbf0` | 94 | `VSC_0xfd49_extended_diagnostic` | **MEDIUM** | Extended diagnostic dispatcher (0xfd49 variant, possibly VSC 0xfd49 or multi-opcode handler); loops over diagnostic modes |
+
+### HCI Command Handlers (2 functions, both HIGH confidence post-decompile)
+
+| Address | Size | Name | Confidence | Purpose |
+|---------|------|------|------------|---------|
+| `0x80036bd0` | 336 | `fHCI_conn_req_cancel` | **HIGH** | Create Connection / Remote Name Request cancellation; BD_ADDR lookup; clears connection record; calls ROM send_evt_HCI_Remote_Name_Request_Complete + FUN_80041dac/80042c94/80067ff4/80043a60 |
+| `0x80036d44` | 86 | `fHCI_inquiry_cancel` | **HIGH** | Inquiry Cancel handler; calls ROM FUN_800408ec/80043a60/8003785c/800362b4; clears EIR data structure |
+
+### Key Findings
+
+1. **VSC Dispatcher Scope Expanded:** 8 VSC opcodes (0xfc27, 0xfc35, 0xfc46, 0xfc61, 0xfc64, 0xfc8b, 0xfc95, 0xfd49) now HIGH-confidence named. All are direct handlers not sub-routed via multi-VSC dispatcher at 0x80032540.
+
+2. **HCI Event Integration:** Both HCI cancel handlers call ROM completion notification functions (0x80002... region) + per-connect cleanup functions (0x80004.../80006...). Path suggests post-patch integration point.
+
+3. **Hardware I/O Abstraction:** VSC_0xfc61 provides unified register R/W interface (calls ROM 0x800115c8/0x80011584/0x80011510/0x80011608); used by RF init chains and AFH configuration.
+
+4. **AFH Quality Control (VSC_0xfc64):** Monitors link quality via HW reg 0x2d; manages thresholds for BLE coexistence; calls cleanup tail-functions in 0x8003XXXX region (FUN_8003b698, FUN_8003c41c).
+
+5. **Device Configuration (VSC_0xfc35):** Structured loader for multi-device config (up to ~40 entries); validates TLV-style 9-byte records; post-upload calls FUN_8007442c (likely global config commit).
+
+6. **Connection State Queries (VSC_0xfc46, VSC_0xfc27):** Both perform parameter exchange with capability struct (stores at fixed offsets 0x800300b4/b8/bc/c0, etc.); interrupt-safe read/write pairs.
+
+### Rename Status
+
+10 functions renamed in GZF project (via saved project cache). Next step: verify persistence via re-decompile of a sample function (FUN_8010bba4 or similar control function).
+
+### Outstanding Work (within 0x80030000)
+
+- **290 remaining unnamed functions** — Priority tiers:
+  - **Tier 1 (immediate):** 20–30 largest unnamed (601–2000B range); likely VSC sub-handlers, LMP state machine support, connection manager logic
+  - **Tier 2 (secondary):** 80–100 medium (301–600B); utility/math/logging functions
+  - **Tier 3 (cleanup):** 160+ small (<150B); stubs, wrappers, padding
+- **Multi-VSC dispatcher (0x80032540, 2068B):** Still unexplored; may expand VSC coverage or provide alternate entry for custom opcodes
+- **Power/TX functions (0x80034a38–0x80034be0, 498B):** Purpose clarified pending decompile; likely TX power class management per-connection
 - Role of `0x80032540` (multi-VSC handler) — alternative router or something else?
 - Purpose of the 8 thin-named VSC opcodes (0xfc27, 0xfc35, etc.) — need decompile
 - Power management functions — need context from callers
