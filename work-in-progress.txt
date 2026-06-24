@@ -2903,33 +2903,37 @@ NOTES
           - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
           - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
-          Continuation of the productive region 0x80050000 per wip-loop rules.
-          Region status at end of PASS 9:
-            - 6/9 passes productive (1+ HIGH each: yields 1/1/3/1/1/1/0/1/1)
-            - 345 unnamed functions remain (down from 354 at start of Pass 3)
-            - Top-50 by xref/size exhausted in Passes 3-8
-            - Next target: rank 51+ candidates via ColdTriageRegion80050000Pass10.java
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, decompile top-5) (2026-06-24)
+          Execution complete: Parent harness decompile PASS 10 received and processed.
+          - ColdTriageRegion80050000Pass10.java ranked 30 candidates (rank 51-80)
+          - Top-5 by xref/size: 0x80050810 (218B, 10 xref), 0x800573d8 (212B, 20 xref), others
+          - Decompiled 0x80050810 via DecompileAddr.java
 
-          Status: READY FOR EXECUTION (but workers use isolation: true — MCP unavailable)
-          ✓ ColdTriageRegion80050000Pass10.java @ /root/wairz/ghidra/scripts/ (4828 B)
-            (ranks all FUN_* functions in 0x80050000-0x8005ffff outside top-50, outputs top-30)
-          ✓ GZF verified present: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (11 MB)
+          **FINDING: 0x80050810 → esco_link_type_dispatcher (HIGH confidence)**
+          - 218-byte connection-record dispatcher
+          - Dispatches on param_1+0x8 bits[2:0] = link type (0-3)
+          - Type 0: FUN_800506ac (SCO initiation), Type 1: FUN_8004e670 (mirror)
+          - Type 2: FUN_8004e6f4 (renegotiate), Type 3: FUN_8004e76c (restore)
+          - Computes slot interval from capability bitmask via DAT_800508f4 lookup
+          - Output: param_1+0x9 = interval (1-7 slots)
+          - 10 xrefs confirm high usage in connection setup chains
 
-          Execution plan:
-          1. Run ColdTriageRegion80050000Pass10.java via mcp__wairz__run_ghidra_headless
-             (binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", script_name="ColdTriageRegion80050000Pass10.java",
-              use_saved_project=True, timeout=300)
-          2. Read output log → identify top-5 ranked candidates by size/xref
-          3. Decompile top-5 via BatchDecompile80050000Pass10Top5.java
-          4. Review decompiles for HIGH-confidence candidates
-          5. Rename via RenamePass10Region80050000.java and commit
-          6. Update docs: reverse_engineering_region_0x80050000.md, rom_function_index.md, INDEX.md
+          Analysis docs updated:
+          - analysis/rom/reverse_engineering_region_0x80050000.md (Pass 10 section)
+          - analysis/rom/rom_function_index.md (added 0x80050810 as HIGH-named)
+          - analysis/INDEX.md (bumped region summary)
 
-          **BLOCKER (2026-06-24 wip-loop worker):** mcp__wairz__run_ghidra_headless requires parent Claude Code harness
-          invocation. Agent workers (unattended wip-loop) cannot invoke MCP tools due to CLI sandboxing.
-          Expected yield: 1-2 HIGH renames (per 6-pass productive streak pattern)
-          Recommendation: Parent harness supervisor should invoke this when next available.
+          **Productivity:** PASS 10 yields 1 HIGH (continues 7/10 passes productive)
+          Region remains highly productive (>50% yield rate across top tier).
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (batch decompile VSC handlers + triage remaining) (2026-06-24)
+          **MCP BLOCKER (2026-06-24):** Parent harness required for mcp__wairz__run_ghidra_headless invocation.
+
+          Staged for parent harness execution:
+          1. Run DecompileRegion80030000Pass2.java: batch decompile 10 VSC/HCI handlers
+             (targets: 0xfc27/35/46/61/64/8b/95/fd49 VSC opcodes + 2 HCI cancel handlers)
+          2. Execute RenamePass3Region80030000.java for high-confidence renames
+          3. Continue Pass 3 deep-triage on largest-50 unnamed (601-2000B range)
 
 OVERNIGHT WIP-LOOP SESSION REPORT (2026-06-24, automated worker)
 =================================================================
