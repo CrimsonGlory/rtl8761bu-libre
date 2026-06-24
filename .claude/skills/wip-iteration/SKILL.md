@@ -2,22 +2,36 @@
 name: wip-iteration
 description: >-
   Single WIP iteration: execute one [NEXT] item from work-in-progress.txt,
-  mark done/blocked, promote first [TODO]. No loop, no agents. Inline execution.
+  mark done/blocked, promote first [TODO].
 disable-model-invocation: false
+isolation: false
+env:
+  MCP_ALLOW_UNSAFE_LOCALHOST: "true"
 ---
 
 # WIP Iteration — Single Step
 
-One iteration of work-in-progress.txt management. No looping; meant to run repeatedly
-via external orchestration (cron, user scripts, etc.).
+One iteration of work-in-progress.txt management.
+
+**REQUIRES:** When calling via `claude -p`, ensure your environment has MCP access enabled
+(MCP tools must be configured and available to the Claude Code session).
 
 ## Startup check
 
-🔴 **First:** Verify MCP access.
+🔴 **First:** Verify MCP access — test both that MCP is available and that wairz is responsive.
 ```bash
-mcp__wairz__run_ghidra_headless --help
+if ! command -v mcp__wairz__run_ghidra_headless &>/dev/null; then
+  echo "❌ MCP tools not available. Ensure MCP is initialized in your Claude Code session."
+  exit 1
+fi
+
+mcp__wairz__run_ghidra_headless --help 2>&1 | head -5
+if [ $? -ne 0 ]; then
+  echo "❌ MCP access failed or wairz unavailable."
+  exit 1
+fi
+echo "✅ MCP access confirmed."
 ```
-If fails → EXIT: "MCP unavailable."
 
 🔴 **Second:** Check wairz blockers.
 ```bash
@@ -43,10 +57,3 @@ analyze, document findings. For prep tasks: stage scripts, create analysis docs.
 6. **Commit:** Stage files, create commit with summary of work done
 
 **DO NOT leave [NEXT] as [NEXT] when exiting.** Rename to [DONE] or [BLOCKED].
-
-## Key differences from wip-loop-overnight
-
-- **No spawned agents** — you run the work directly
-- **No supervisor/worker roles** — just do the thing
-- **One iteration only** — no loop logic
-- **No loop config** — external tool orchestrates repetition

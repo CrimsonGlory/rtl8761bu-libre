@@ -1,0 +1,22 @@
+# PASS 6: Utility Tier Functions (301-600B)
+
+Status: [NEXT] - Starting execution
+
+From PASS 4 cold-triage results:
+- Total unnamed in 0x80030000: 289
+- Tier distribution:
+  - Stubs (1–50B): 79
+  - Helpers (51–150B): 113
+  - Dispatch (151–300B): 56
+  - Utility (301–600B): 26 ← TARGET THIS PASS
+  - Critical (601+B): 14 ← DONE in PASS 5
+
+Execution plan:
+1. Run ColdTriageRegion80030000Pass4.java to extract 301-600B functions
+2. Decompile each via batch script
+3. Analyze and name HIGH-confidence functions
+4. Document in analysis/rom/reverse_engineering_region_0x80030000.md PASS 6 section
+5. Update rom_function_index.md with new named functions
+6. Commit findings
+
+Progress: Starting step 1...

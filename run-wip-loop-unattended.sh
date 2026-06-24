@@ -44,8 +44,7 @@ fi
 log "=== run-wip-loop-unattended.sh starting (model=$CLAUDE_MODEL effort=$CLAUDE_EFFORT) ==="
 
 PROMPT=$(cat <<EOF
-/wip-loop-overnight
-Loop until stop. Max ${MAX_ITERATIONS_PER_RUN} iterations.
+/wip-iteration
 EOF
 )
 

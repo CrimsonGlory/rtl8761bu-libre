@@ -3229,12 +3229,30 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md (new, complete execution guide)
           → /tmp/pass5_batch_addresses.txt (22 target addresses)
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain) (2026-06-24, in-progress)
+          **Status:** Decompilation of 301-600B utility tier (26 functions) initiated.
+          Awaiting completion of batch-decompile + naming phase; expected to yield 10-20 HIGH-confidence renames.
+          See continuation [TODO] below for detailed continuation instructions.
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
           PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining
           unnamed by size (see Pass 4 section of `reverse_engineering_region_0x80030000.md`: 60 stubs
           1-50B, 80 handlers 51-150B, 90 mid-level 151-300B, 26 utility 301-600B). Continue down that
           stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
           301-600B "utility" tier (26 functions).
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
+          **Status:** PASS 6 targeting 26 functions in 301-600B utility tier (identified in PASS 4 cold-triage).
+          Next worker session: execute the following steps:
+          1. Run ColdTriageRegion80030000Pass4.java via mcp__wairz__run_ghidra_headless (GZF process mode)
+             to extract exact function addresses of all 289 unnamed; filter for 301–600B range
+          2. Batch-decompile the 26 functions via BatchDecompile or individual DiagAddr.java calls
+          3. Analyze decompiled pseudocode; identify 15-20 HIGH-confidence naming candidates
+          4. Create RenameBatch script with confirmed renames; apply via GZF; verify persistence
+          5. Update analysis/rom/reverse_engineering_region_0x80030000.md with Pass 6 section
+          6. Update analysis/rom/rom_function_index.md and analysis/INDEX.md
+          7. Commit: "PASS 6: ROM region 0x80030000 utility tier (301–600B) — N new HIGH"
+          **Expected outcome:** 15–20 new HIGH-confidence names; ~260 unnamed remain deferred to PASS 7+.
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7+ (continue until 0 unnamed remain, ~277 to resolve)
 

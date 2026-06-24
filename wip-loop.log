@@ -34,3 +34,40 @@ The loop will resume in ~5 minutes to execute region 0x80020000 PASS 5 and conti
 Execution error2026-06-24T15:51:23Z claude -p exited with code 0
 2026-06-24T15:51:23Z WIP state: DONE=207 NEXT=1 TODO=11 BLOCKED=7 FAILED=0
 2026-06-24T15:51:23Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T16:46:34Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-24T16:46:34Z --- claude -p invocation 1/50 ---
+**MCP unavailable — wairz cannot be reached.** Per the project instructions, this worker cannot proceed without MCP access. Workers are forbidden from being isolated on this project.
+
+Please respawn without isolation: `isolation: false` in the agent/worktree configuration, or run from a non-isolated Claude Code session.
+2026-06-24T16:46:43Z claude -p exited with code 0
+2026-06-24T16:46:43Z WIP state: DONE=207 NEXT=1 TODO=11 BLOCKED=7 FAILED=0
+2026-06-24T16:46:43Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T16:47:13Z --- claude -p invocation 2/50 ---
+🔴 **MCP unavailable.** The wairz MCP tools are not accessible in this session.
+
+**EXIT: MCP access unavailable — this worker cannot proceed. The supervisor must respawn the session with MCP access enabled (isolation: false or full access configuration). Isolated workers are forbidden on this project.**
+
+Since the CLAUDE.md instructions are explicit: "CRITICAL — Worker MCP Access Requirement... Isolated workers are forbidden on this project. Every worker must have full MCP access... Do not attempt workarounds; exit cleanly so the supervisor can respawn" — I cannot proceed with this /wip-iteration skill.
+
+**Action needed:** Restart the session with MCP/wairz access enabled. You may need to:
+1. Check Claude Code settings for MCP server configuration
+2. Ensure wairz MCP server is running and accessible
+3. Reinvoke /wip-iteration once MCP is available
+2026-06-24T16:47:23Z claude -p exited with code 0
+2026-06-24T16:47:23Z WIP state: DONE=207 NEXT=1 TODO=11 BLOCKED=7 FAILED=0
+2026-06-24T16:47:23Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T16:48:17Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-24T16:48:17Z --- claude -p invocation 1/50 ---
+🔴 **MCP unavailable** — this worker cannot proceed. The wairz MCP server tools are not accessible. Per CLAUDE.md:
+
+> If this fails or MCP tools are inaccessible, **EXIT IMMEDIATELY** with a message like:
+> "MCP access unavailable — this worker cannot proceed. Supervisor must respawn with isolation: false."
+
+**MCP access unavailable** — this worker cannot proceed. Supervisor must respawn the `wip-iteration` skill with full MCP access (isolation disabled or MCP explicitly enabled).
+
+This is a configuration issue on the supervisor side, not a fault in the work. The `/wip-iteration` skill requires wairz tools to execute RE tasks, and they are not available in this context.
+2026-06-24T16:48:27Z claude -p exited with code 0
+2026-06-24T16:48:27Z WIP state: DONE=207 NEXT=1 TODO=11 BLOCKED=7 FAILED=0
+2026-06-24T16:48:27Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-24T16:51:39Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-24T16:51:39Z --- claude -p invocation 1/50 ---
