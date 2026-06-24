@@ -13,10 +13,8 @@ env:
 
 One iteration of work-in-progress.txt management. **All work is done in the main supervisor context — NO WORKERS, NO AGENTS, NO SUBAGENTS.**
 
-**REQUIRES:** This skill must run in an **interactive Claude Code session** (not via `claude -p`).
-Non-interactive mode (`-p`) creates isolated worker contexts that block MCP access on subsequent runs,
-even with `--mcp-config` passed. For unattended loops, use the interactive interface and invoke
-`/wip-iteration` repeatedly in a single session.
+This skill works fine via `claude -p` (non-interactive mode) as long as `.mcp.json` is loaded
+(pass `--mcp-config .mcp.json`) and wairz is not in `disabledMcpjsonServers`.
 
 ## ⚠️ CRITICAL CONSTRAINT: No Worker Spawning
 
@@ -31,14 +29,20 @@ The reason: Worker spawning introduces isolation, which blocks MCP access. The s
 
 ## Startup check
 
-🔴 **First:** Verify MCP access
-MCP tools (like `mcp__wairz__list_projects` and `mcp__wairz__run_ghidra_headless`) are Claude Code tools, not shell commands. Access is verified when the skill invokes its first MCP tool call. If that call fails, MCP is unavailable and the skill will exit with an error.
+🔴 **First:** Load wairz MCP tool schemas — they are deferred, not pre-loaded
+`mcp__wairz__*` tools do **not** appear as directly callable at session start. Calling one
+directly without loading it first fails and looks like "MCP unavailable" — it is not; the
+schema just hasn't been fetched. Call `ToolSearch` first:
 
-```bash
-mcp__wairz__run_ghidra_headless --help
+```
+ToolSearch({ query: "select:mcp__wairz__run_ghidra_headless,mcp__wairz__list_projects", max_results: 5 })
 ```
 
-If this fails → EXIT IMMEDIATELY with "MCP access unavailable — cannot proceed." Do not attempt workarounds.
+If this returns the tool schemas, MCP is available — proceed normally using the now-loaded
+`mcp__wairz__*` tools. Only conclude MCP is genuinely unavailable if `ToolSearch` itself errors
+or returns zero matches for `mcp__wairz__*`. If that happens → EXIT IMMEDIATELY with "MCP access
+unavailable — cannot proceed." Do not attempt workarounds, and do not blame worker isolation
+without first confirming `ToolSearch` was tried.
 
 🔴 **Second:** Check wairz blockers
 ```bash

@@ -25,15 +25,21 @@ ROM-only findings live in `analysis/rom/`.
 All disassembly and decompilation is done through **wairz** (MCP server) using
 `mcp__wairz__run_ghidra_headless`.
 
-**CRITICAL — Worker MCP Access Requirement**: At the start of **every worker session**,
-**before reading any files or starting work**, verify MCP access is available:
-```bash
-mcp__wairz__run_ghidra_headless --help
+**CRITICAL — MCP tools are deferred, not pre-loaded.** wairz tools (`mcp__wairz__*`) do not
+appear as directly callable tools at session start — they are deferred behind the `ToolSearch`
+tool. Calling `mcp__wairz__run_ghidra_headless` (or any `mcp__wairz__*` tool) directly, without
+loading it first, fails — and superficially looks like "MCP is unavailable," but it is not;
+the tool schema just hasn't been fetched yet.
+
+**At the start of every session, before doing any RE work:**
 ```
-If this fails or MCP tools are inaccessible, **EXIT IMMEDIATELY** with a message like:
-"MCP access unavailable — this worker cannot proceed. Supervisor must respawn with isolation: false."
-**Isolated workers are forbidden on this project.** Every worker must have full MCP access
-to invoke wairz tools. Do not attempt workarounds; exit cleanly so the supervisor can respawn.
+ToolSearch({ query: "select:mcp__wairz__run_ghidra_headless,mcp__wairz__list_projects", max_results: 5 })
+```
+This loads the real schemas so the tools become callable. Only treat MCP as genuinely
+unavailable if `ToolSearch` itself errors or returns no matches for `mcp__wairz__*` queries —
+not if a direct, unloaded tool call fails with "not found"/"unknown tool". Do **not** exit or
+ask to "respawn with isolation: false" based on a direct-call failure alone; call `ToolSearch`
+first and retry.
 
 **SUPERVISOR NOTE — Unattended loops must stay in supervisor context**: For overnight unattended
 work, use `./run-wip-loop-unattended.sh` (shell-level loop at supervisor scope) rather than
