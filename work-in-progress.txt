@@ -3234,14 +3234,18 @@ sweep beyond enumeration and is the most out-of-date):
           Awaiting completion of batch-decompile + naming phase; expected to yield 10-20 HIGH-confidence renames.
           See continuation [TODO] below for detailed continuation instructions.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
+[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
+          MCP (wairz) unavailable — mcp__wairz__run_ghidra_headless not accessible in this session.
+          Per CLAUDE.md section "CRITICAL — Worker MCP Access Requirement", cannot proceed without MCP.
+          Awaiting supervisor respawn with MCP enabled.
+
           PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining
           unnamed by size (see Pass 4 section of `reverse_engineering_region_0x80030000.md`: 60 stubs
           1-50B, 80 handlers 51-150B, 90 mid-level 151-300B, 26 utility 301-600B). Continue down that
           stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
           301-600B "utility" tier (26 functions).
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier)
           **Status:** PASS 6 targeting 26 functions in 301-600B utility tier (identified in PASS 4 cold-triage).
           Next worker session: execute the following steps:
           1. Run ColdTriageRegion80030000Pass4.java via mcp__wairz__run_ghidra_headless (GZF process mode)
