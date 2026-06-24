@@ -2765,28 +2765,50 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
-          **SCRIPT COMPILATION ERROR:** BatchDecompileLMPEncryptionPairing.java has Ghidra API issues
-          (DecompilerCallback import fails; may be version-incompatible or unavailable in current Ghidra).
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
+          **Script Fix Applied:** BatchDecompileLMPEncryptionPairing.java rewritten to use DecompInterface
+          (compatible Ghidra API, modeled on working DecompileRegion80030000Pass2.java).
 
-          Error on execution attempt:
-            - ERROR: The class could not be found: BatchDecompileLMPEncryptionPairing not found
-            - Cause: Compilation failed due to missing DecompilerCallback API
+          **Execution successful:** All 16 LMP encryption/pairing functions decompiled (HIGH confidence).
 
-          **Workaround needed:** Either:
-            1. Fix the script to use compatible Ghidra API (check available decompiler interfaces)
-            2. Use an alternative script template (e.g., similar to DecompileRegion80030000Pass2.java, which works)
-            3. Manually decompile the 16 targets via Ghidra GUI + capture output
+          **Decompiled functions (16 total, all HIGH confidence post-decompile):**
 
-          **Staged targets (16 LMP encryption/pairing handlers):**
-            0x80026c38 (LMP_ENCRYPTION_MODE_REQ_0x0F), 0x80027de0 (LMP_KEY_SIZE_REQ),
-            0x80026e64 (LMP_KEY_SIZE_REQ_alt), 0x80027f30 (MASK_RES), 0x80027f80 (MASK_REQ),
-            0x80027fd4 (STOP_ENCRYPTION_REQ), 0x80026f54 (COMB_KEY), 0x8002763c (AU_RAND),
-            0x80027100 (SRES), 0x80027454 (IN_RAND), 0x80028bb8 (SSP_CONFIRM), 0x80028950 (SSP_NUMBER),
-            0x800287b8 (DHKEY_CHECK), 0x80028904 (wraps_DHKEY_CHECK), 0x80028fc4 (PAUSE_ENCRYPTION_AES),
-            0x800297bc (SEMI_PERMANENT_KEY)
+          Encryption & Key Management (7):
+          - 0x80026c38 (536B) → `LMP_ENCRYPTION_MODE_REQ_0x0F` — encryption mode negotiator
+          - 0x80027de0 (326B) → `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` — key size selector + bounds checking
+          - 0x80026e64 (232B) → `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` — key size alt path
+          - 0x80027f30 (74B) → `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` — mask response (master only)
+          - 0x80027f80 (76B) → `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` — mask request handler
+          - 0x80027fd4 (206B) → `LMP_STOP_ENCRYPTION_REQ_0x12` — encryption terminator
+          - 0x80026f54 (416B) → `LMP_COMB_KEY_0x09` — combination key (legacy auth)
 
-          Remaining work: fix script + decompile 16 targets + update rom_function_index.md (confidence upgrades) + cold-triage ~340 unnamed functions.
+          Authentication (4):
+          - 0x8002763c (834B) → `LMP_AU_RAND_0x0B` — authentication random generator
+          - 0x80027100 (364B) → `LMP_SRES_0x0C` — authentication response calculator
+          - 0x80027454 (466B) → `LMP_IN_RAND_0x08` — input random validator
+          - 0x80028bb8 (294B) → `LMP_SIMPLE_PAIRING_CONFIRM_0x3F` — SSP confirm validator
+
+          Simple Pairing (5):
+          - 0x80028950 → `LMP_SIMPLE_PAIRING_NUMBER_0x40` — SSP number exchange (see stdout)
+          - 0x800287b8 → `LMP_DHKEY_CHECK_0x41` — ECDH public key verification (see stdout)
+          - 0x80028904 → `wraps_LMP_DHKEY_CHECK_0x41` — DHKEY wrapper/dispatcher (see stdout)
+          - 0x80028fc4 → `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` — encryption pause handler (see stdout)
+          - 0x800297bc → `LMP_USE_SEMI_PERMANENT_KEY_0x32` — SPK activation (see stdout)
+
+          **Key findings:**
+          1. Encryption mode negotiator (0x80026c38): complex 536B state machine with 7+ sub-states
+             (idle 0x00, initiating 0x0e/0x0f, pending 0x3e/0x40/0x45/0x48)
+          2. Key size negotiator (0x80027de0): bounds-checked size selection from 7–16 bytes
+             with per-state logic (idle/pending/negotiating)
+          3. AU_RAND (0x8002763c): largest function (834B), complex multi-state random handler
+             with SSP integration, challenge validation chains
+          4. SIMPLE_PAIRING_CONFIRM: state-dependent confirm validation (3 variants for role/timing)
+          5. All handlers validate connection state + role bits + capability flags before proceeding
+
+          **Outstanding work (region 0x80020000):**
+          - Full function index entries for 16 newly-named HIGH-confidence functions
+          - Cold-triage of remaining ~340 unnamed functions (size-stratified)
+          - Update analysis/rom/reverse_engineering_region_0x80020000.md (Pass 3 section + findings)
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
           Confirmed count: 309 total functions (290 unnamed + 19 named).
