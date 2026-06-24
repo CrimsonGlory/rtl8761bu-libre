@@ -3150,3 +3150,133 @@ MCP server connectivity available only in main Claude Code interface (GUI/CLI).
           Also closed two stale [BLOCKED] tickets in this session (0x80040000 PASS 3, 0x80030000 PASS 3)
           that described work already completed by later [DONE] entries — see "closed as stale" notes above.
 
+
+=== PHASE 9 GOAL: drive analysis/rom/rom_function_index.md to 100% HIGH confidence (2026-06-24) ===
+
+Per user request: every function in the `rom` block — not just the 2012
+unnamed `FUN_*` functions, but also the 42 medium-confidence and 256
+low-confidence *named* functions — needs to reach **high confidence**
+(decompiled + written up in a dedicated `rom/*.md`, per this doc's own
+confidence legend). Current state (rom_function_index.md Summary table,
+2026-06-24): 726 named (403 high / 42 medium / 256 low — see doc's known
++1 tally-drift caveat) + 2012 unnamed = 2738 total real functions.
+
+This is necessarily many more passes than any single session can do —
+the tickets below continue the existing per-region sweep pattern
+(see PASS 1-5/6/9/10 entries above for each region) until each region's
+unnamed count hits 0 and its medium/low-confidence rows are upgraded.
+Each region ticket should, like prior passes: cold-triage by
+size/xref-count, batch-decompile via wairz GZF process mode, assign
+HIGH-confidence names/purposes from the actual decompiled C, write a
+Pass-N section into that region's `reverse_engineering_region_0x800X0000.md`,
+and update `rom_function_index.md`'s table + Summary counts + `INDEX.md`
+one-liner — per CLAUDE.md's "Documentation Always Comes After Work" rule.
+Definition of done for the whole goal: `rom_function_index.md`'s Summary
+table reads 0 medium, 0 low, 0 unnamed; 100% of the 2738 are high confidence.
+
+Regions ordered by current completion state (continue partially-swept
+regions before less-started ones, except 0x80060000 which has had no
+sweep beyond enumeration and is the most out-of-date):
+
+[NEXT]  Full RE: ROM region 0x80060000-0x8006ffff PASS 2 (cold-triage + batch decompile, 238 unnamed)
+          Only PASS 1 (enumeration & categorization: 240 total, 94 thin-named LMP opcodes) exists for
+          this region — no decompile/rename work has happened yet. Start the same triage pattern used
+          in every other region: pull the full function list via `ListAllFunctions.java`-style script
+          filtered to this range, stratify by size (1-50B / 51-150B / 151-300B / 301-600B / 601+B) and
+          xref count, batch-decompile the top candidates (largest + highest-xref first — these tend to
+          be dispatchers/orchestrators that resolve callee context for free), assign names from the
+          decompiled C, write Pass-2 section into `analysis/rom/reverse_engineering_region_0x80060000.md`
+          (create if it doesn't exist), update `rom_function_index.md` + `INDEX.md`. Expect this region
+          to need ~8-10 passes total (matching 0x80050000/0x80070000's pace for similarly-sized regions).
+
+[TODO]  Full RE: ROM region 0x80060000-0x8006ffff PASS 3+ (continue until 0 unnamed remain)
+          Repeat the PASS 2 pattern — cold-triage next size/xref tier, batch-decompile, rename, document
+          — across as many passes as needed. Each pass should end with an updated remaining-count in
+          this region's analysis doc. Do not mark this region's work fully [DONE] until a fresh
+          `ListAllFunctions.java`/`ExtractAnnotations.java` re-run confirms 0 `FUN_*`/unnamed entries
+          AND every named row in that region is "high" in `rom_function_index.md`.
+
+[TODO]  Full RE: ROM region 0x80010000-0x8001ffff PASS 3 (continue OGF/OCF sweep, ~257 unnamed remain)
+          Pass 1 resolved the `send_evt_HCI_*` cluster (32 fns), Pass 2 resolved the `OGC_3_OCF_*`
+          cluster (38 fns). Pick up Pass 2's own "Remaining scope" recommendation
+          (`HCI_OGF1_OCF0x4#` cluster, `0x8001c490`-`0x8001c788`) per
+          `reverse_engineering_region_0x80010000.md`. Same triage/decompile/rename/document loop as above.
+
+[TODO]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve)
+          Continue cold-triaging this region's remaining clusters tier-by-tier (likely several more
+          OGF/OCF-style command clusters plus general support functions) until the region's unnamed
+          count and medium/low-confidence count both reach 0.
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain)
+          PASS 1+2 did enumeration & LMP staging; PASS 3 batch-decompiled 16 LMP encryption/pairing
+          handlers (all HIGH). Continue per `reverse_engineering_region_0x80020000.md`'s next-priority
+          recommendation (this region holds the OGF=3 dispatcher switch `0x800202c0` per the
+          0x80010000-pass-2 cross-reference — look for sibling OGF dispatchers as a high-value next target).
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5+ (continue until 0 unnamed remain, ~321 to resolve)
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain)
+          PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining
+          unnamed by size (see Pass 4 section of `reverse_engineering_region_0x80030000.md`: 60 stubs
+          1-50B, 80 handlers 51-150B, 90 mid-level 151-300B, 26 utility 301-600B). Continue down that
+          stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
+          301-600B "utility" tier (26 functions).
+
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7+ (continue until 0 unnamed remain, ~277 to resolve)
+
+[TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain)
+          PASS 6 "parked" this region after finishing the xrefs:2 tier (per its own pivot decision,
+          documented as superseded-work housekeeping in the now-closed stale PASS-3 ticket above).
+          Resume by re-deriving the next-largest untouched size/xref tier from
+          `reverse_engineering_region_0x80040000.md`'s tables — do not re-decompile anything already
+          marked high in that doc.
+
+[TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 8+ (continue until 0 unnamed remain, ~301 to resolve)
+
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 11 (continue sweep, 345 unnamed remain)
+          PASS 1-10 resolved the largest set of clusters of any region so far (eSCO/SCO, codec, LMP
+          opcode handlers — see `reverse_engineering_region_0x80050000.md`'s pass log). Continue from
+          Pass 10's own "Remaining scope" / cold-triage rank 51+ recommendation.
+
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~345 to resolve)
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
+          PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
+          (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
+          size/xref tier.
+
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~191 to resolve)
+
+[TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
+          This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
+          targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
+          distribution table still counts 88 unnamed functions in this region that were always
+          *outside* that gap scope (e.g. the excluded interrupt-vector sub-range). Since the goal is
+          now literally every function in the block, triage and resolve these 88 too, following the
+          same pattern; document as a new section in `reverse_engineering_region_0x80000000.md` rather
+          than reopening the already-closed gap-sweep ticket.
+
+[TODO]  Cross-region: upgrade all medium-confidence named functions to high (42 functions, per Summary table)
+          These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
+          or a root-level cross-cutting doc) but no dedicated decompile + write-up. Batch-decompile each
+          (group by region to reuse GZF process-mode loads), confirm or correct the existing name/purpose
+          against the actual C, and add/extend the relevant `analysis/rom/*.md` doc. Re-derive the
+          current list via `rom_function_index.md`'s named-function table (filter Confidence column ==
+          "medium") rather than trusting the count above, since per-pass edits may have shifted it.
+
+[TODO]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
+          Same process as the medium-confidence ticket, for the larger low-confidence set (`unknown_*`,
+          `possible_*`, trailing-`?` names, or no doc cross-reference at all). These are likely to need
+          more decompile effort per function since the existing name often signals genuine uncertainty
+          rather than just "not yet written up" — expect some renames, not just confidence-flag bumps.
+          Re-derive the current list from the table (filter Confidence column == "low") at ticket start.
+
+[TODO]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md
+          Re-run `RomNamedFuncAddrs.java` + `ExtractAnnotations.java` + `ListAllFunctions.java` (see this
+          doc's "How to re-run" section) plus a fresh `RomCoverageStats.java` pass, regenerate the Summary
+          table and the per-region distribution table from scratch (not incremental deltas, to resolve
+          the doc's own carried-forward tally-drift caveats), and confirm: unnamed count == 0, medium
+          count == 0, low count == 0, high count == total real functions in the rom block. Update
+          `rom_function_index.md`'s Summary + intro text to state the sweep is complete, and update
+          `analysis/INDEX.md` accordingly. Only after this should the umbrella goal above be considered done.
+
