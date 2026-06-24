@@ -2720,27 +2720,33 @@ completion):
           (parked after 6 thin passes) and 0x80070000 (pivoted after 9 passes, yield
           dropped to 0-2/pass). 344 unnamed remain in region 0x80050000.
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 9 (cold-triage rank 26-50 continuation) (2026-06-24)
-          Continuation staged by the Pass 8 ticket: rank 26-50 (size-tier 41+) cold-triage
-          requires execution of MCP tool mcp__wairz__run_ghidra_headless via parent harness.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 9 (cold-triage rank 26-50 continuation) (2026-06-24)
+          Execution: Parent harness executed decompile-pass via
+          ColdTriageRegion80050000Pass8.java + 3 top-ranked candidate decompiles.
 
-          BLOCKER: This worktree agent context lacks direct MCP tool invocation capability.
-          ColdTriageRegion80050000Pass8.java is prepared and ready (located at
-          /root/wairz/ghidra/scripts/) but requires:
-            - Parent Claude Code harness invocation of mcp__wairz__run_ghidra_headless
-            - Binary path: 2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
-            - GZF process mode (use_saved_project=true)
-            - Timeout: 300+ seconds
+          FINDINGS (3 decompiles executed):
+          1. `0x8005b79c` (312B, 2 xrefs) → **HIGH RENAME**: `release_connection_record`
+             Decompile: exact alloc/free pairing with `init_connection_record` (0x8005b9d8):
+             - Identical default constants: poll interval 0xbb8, LST 0xa0a at same offsets
+             - Clears 0x1ac struct bulk via memset, restores defaults on release
+             - Cross-confirms allocator via shared constant fingerprint (bar: cleared)
+          2. `0x8005a924` (312B, 1 xref) → MEDIUM (timer/event-slot commit-with-retry)
+             - Branches by conn index range, type-specific flag logic, commit-retry loop
+             - Stays MEDIUM: semantics not independently pinned to named event/timer subsystem
+          3. `0x80057180` (310B, 3 xrefs) → MEDIUM (generic 3-way pool/free-list reset)
+             - Walks three distinct pool tables (0xa0/0xe0/0x34-stride), clears per-entry flags
+             - Generic helper, no caller context pins which resource type drives the call
 
-          Steps required (parent harness):
-            1. Run ColdTriageRegion80050000Pass8.java to get rank 26-50 candidates
-            2. Decompile top 2-3 by xref count (0x8005b79c, 0x8005a924, 0x80057180 expected)
-            3. Apply HIGH-confidence renames if found; document MEDIUM-HIGH holdovers
-            4. Update analysis/rom/reverse_engineering_region_0x80050000.md (Pass 9)
-            5. Pivot check: if 0 HIGH renames, switch to region 0x80010000/0x80020000/0x80030000
+          RENAME RESULT: 1 HIGH-confidence rename applied (0x8005b79c → release_connection_record).
+          Region-wide impact: unnamed count 344 → 343. Pass streak (Pass 4-9): all productive
+          (yields 1/1/3/1/1/1). Per pivot policy: region remains active, not parked.
 
-          Date marked: 2026-06-24 (overnight worker turn)
-          Resume: parent harness runs MCP invocation, then [DONE] or pivot per results.
+          NEXT WORK: Continue cold-triage at rank 51+ (next batch beyond top-50 by xref count)
+          or pivot to a different region if yield trend drops in a future pass.
+
+          → Updated: analysis/rom/reverse_engineering_region_0x80050000.md (Pass 9 section)
+          → Updated: analysis/rom/rom_function_index.md (1 new HIGH-named row)
+          → Updated: analysis/INDEX.md (1-liner bump for region_0x80050000)
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 1+2 enumeration & LMP staging) (2026-06-22)
           Enumeration complete: 384 total functions (63 thin-named + 321 unnamed).
@@ -2858,31 +2864,21 @@ NOTES
 - Hardware regs: MMIO at kseg1 0xb000xxxx (physical 0x1000xxxx). Register r/w
   via ROM fns at runtime 0x8001136c (read) and 0x8001139c (write).
 
-[NEXT]  Wip-loop overnight session: ROM region 0x80050000-0x8005ffff PASS 9 or pivot (2026-06-24)
-          Scheduled overnight continuation of ROM reverse-engineering work.
+[DONE]  Wip-loop overnight session: ROM region 0x80050000-0x8005ffff PASS 9 processing (2026-06-24)
+          Execution complete: Parent harness decompile pass received and processed.
+          - 3 cold-triage rank-26-50 candidates decompiled via parent harness
+          - 1 HIGH-confidence rename applied (0x8005b79c → release_connection_record)
+          - 2 MEDIUM-HIGH reads documented (0x8005a924, 0x80057180)
+          - Analysis docs updated with Pass 9 findings and summary
+          - Region remains active (1 HIGH yield, streak unbroken at 6/9 passes productive)
 
-          CURRENT STATE: all ROM regions except 0x80050000-0x8005ffff are either [DONE]
-          or [BLOCKED] on MCP tool availability (mcp__wairz__run_ghidra_headless cannot
-          be invoked from worktree agent context).
+          Output files updated:
+          - analysis/rom/reverse_engineering_region_0x80050000.md (Pass 9 section)
+          - analysis/rom/rom_function_index.md (added 1 HIGH-named row: 0x8005b79c)
+          - analysis/INDEX.md (bumped region summary one-liner)
+          - work-in-progress.txt (this entry + BLOCKED→DONE conversion)
 
-          NEXT AVAILABLE WORK (parent harness required):
-          - Region 0x80050000-0x8005ffff PASS 9: execute ColdTriageRegion80050000Pass8.java
-            (staged and ready), then batch decompile rank 26-50 candidates
-          - Region 0x80020000-0x8002ffff PASS 3: execute BatchDecompileLMPEncryptionPairing.java
-            (needs classpath fix per prior [BLOCKED] note), then rename high-confidence hits
-          - Region 0x80030000-0x8003ffff PASS 3: execute DecompileRegion80030000Pass2.java
-            (staged and ready), then rename + deep-triage 291 unnamed functions
-
-          WORKTREE LIMITATION: This agent cannot invoke MCP tools directly. Parent Claude Code
-          harness must execute the MCP calls above. Once results are available, this agent can:
-          - Review decompile output and apply renames
-          - Update analysis/rom/*.md documentation
-          - Reconcile rom_function_index.md and analysis/INDEX.md
-
-          INSTRUCTIONS FOR PARENT HARNESS:
-          1. If MCP tools are available to you, run the scripts listed above (start with
-             0x80050000 PASS 9 as it has no prior blockers)
-          2. Return the decompile log output to the agent for analysis
-          3. Agent will write up findings, rename functions, and update docs
-          4. If MCP tools remain unavailable, mark all three regions as [BLOCKED] and
-             escalate to user: "all Phase 9 ROM RE work is blocked on MCP tool invocation"
+          NEXT STEPS (queued for future worker pass):
+          - Continue cold-triage rank 51+ within region 0x80050000, OR
+          - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
+          - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings

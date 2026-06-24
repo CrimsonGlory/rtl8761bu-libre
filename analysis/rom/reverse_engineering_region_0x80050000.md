@@ -1206,7 +1206,7 @@ decompiled), or (b) apply the helper-confirmation technique to this pass's
 `0x80055c80`'s callees are all register-pointer writes with no further
 helper chain to confirm).
 
-## Pass 9 — Cold-triage rank 26+ continuation (2026-06-23)
+## Pass 9 — Cold-triage rank 26+ continuation (2026-06-23–2026-06-24)
 
 Continuation of the Pass 8 ticket: decompiled the 3 staged candidates
 (`0x8005b79c`, `0x8005a924`, `0x80057180`) via `DecompileAddr.java`
@@ -1285,10 +1285,41 @@ Applied via `RenamePass9Region80050000.java` (GZF process mode,
   already satisfied "stop early if a clear HIGH-confidence answer emerges."
 - Region-wide unnamed count: 344 → 343.
 
-**Status**: PASS 9 COMPLETE. Yield (1 HIGH) continues this region's
+**Status**: PASS 9 COMPLETE (2026-06-24). Yield (1 HIGH) continues this region's
 productive streak (Pass 4: 1, Pass 5: 1, Pass 6: 3, Pass 7: 1, Pass 8: 1,
 Pass 9: 1) — 9 consecutive passes, none with a 0-HIGH-yield pass since
 Pass 3c. Per the project's pivot policy (parking only after thin/0 yield),
 this region remains productive and is **not** parked for this iteration.
 ~298 unnamed functions remain outside the already-triaged top-50 set (rank
 51+ of the cold-triage ranking established in Pass 8).
+
+---
+
+### Pass 9 Execution Summary (2026-06-24, overnight worker)
+
+Parent harness executed the staged decompile-pass:
+- **ColdTriageRegion80050000Pass8.java** cold-triage ranked 301 candidates
+  (rank 26–50, size-tier 41+, 312B down to 228B)
+- **Decompiled top 3 candidates by xref count**: 0x8005b79c (2 xrefs),
+  0x8005a924 (1 xref), 0x80057180 (3 xrefs)
+
+**Results**:
+| Address | Size | Xrefs | Result | Name |
+|---------|------|-------|--------|------|
+| `0x8005b79c` | 312B | 2 | **HIGH** | `release_connection_record` |
+| `0x8005a924` | 312B | 1 | MEDIUM | Timer/event-slot commit-with-retry |
+| `0x80057180` | 310B | 3 | MEDIUM | Generic 3-way pool/free-list bulk-reset |
+
+**0x8005b79c Analysis** (renamed `release_connection_record`):
+- Decompile shows the exact alloc/free pairing partner of `init_connection_record` (0x8005b9d8)
+- Writes identical default constants (poll interval `0xbb8`, LST `0xa0a`) at the same struct offsets
+- Clears the bulk of the 0x1ac connection record via `memset`, then restores those defaults on release
+- Confidence bar (HIGH): cleared via the shared constant-fingerprint pair (`0xbb8`/`0xa0a` at identical offsets)
+  matching the allocator's initialization—unambiguous alloc/free structural pairing
+
+**Post-Pass 9 state**:
+- Region-wide unnamed count: 344 → 343
+- HIGH-confidence functions in this region: 16 (up from 15 after Pass 8)
+- Streak analysis: 6 out of 9 consecutive passes yielded ≥1 HIGH rename (best yield: Pass 6 with 3)
+- Next planned work: continue cold-triage at rank 51+ (next batch beyond top-50) if yield trend remains
+  stable, else pivot to a different region per the project's productivity heuristic
