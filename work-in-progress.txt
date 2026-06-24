@@ -3014,3 +3014,68 @@ MCP server connectivity available only in main Claude Code interface (GUI/CLI).
 - Document MCP invocation instructions for future sessions
 - Continue with non-MCP analysis work (Pass 3 framework, rename script prep)
 - Mark [BLOCKED] with explicit instructions for CLI/GUI invocation
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 4 (Tier-1 largest unnamed: 0x80032540 + Power/TX cluster) (2026-06-24)
+          **Scope:** Triage the 20–30 largest unnamed functions (601–2000B) identified in PASS 3.
+          Pass 3 decompiled 10 VSC/HCI handlers (now HIGH confidence). This pass targets the
+          remaining 280+ completely unnamed functions in region 0x80030000, focusing on Tier 1
+          (largest 601–2000B) which are most likely to yield HIGH-confidence findings.
+
+          Priority targets (in order):
+          1. 0x80032540 (2068B) — Multi-VSC dispatcher (OUTSIDE tier1 cutoff, HIGHEST priority, 2000+ B)
+          2. Tier 1 functions ranked by size (601–2000B range) — top 30 candidates
+          3. Within tier1: prioritize xref_count > 5 (widely called, likely high-level dispatch)
+          4. Expected findings: VSC sub-handlers, LMP state machine, power management, link quality
+
+          **Script prepared:** ColdTriageRegion80030000Pass4.java (created 2026-06-24)
+          - Enumerates all 280+ remaining unnamed functions
+          - Ranks by size (descending) × xref_count (tiebreak)
+          - Shows Tier 1 (601–2000B) top 30 + special flag for 0x80032540 (2068B)
+          - Reports size distribution across all tiers
+
+          **MCP execution steps (requires Claude Code GUI/CLI with mcp__wairz access):**
+          1. Run ColdTriageRegion80030000Pass4.java:
+             mcp__wairz__run_ghidra_headless \
+               --binary_path "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf" \
+               --use_saved_project true \
+               --script_name "ColdTriageRegion80030000Pass4.java" \
+               --timeout 60
+             Collect output → identify top 10–15 candidates from tier1 + the 2068B 0x80032540
+
+          2. Decompile each of top candidates individually via DiagAddr.java:
+             For each address (start with 0x80032540, then tier1 top-10 by xref):
+             mcp__wairz__run_ghidra_headless \
+               --binary_path "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf" \
+               --use_saved_project true \
+               --script_name "DiagAddr.java" \
+               --script_args "0xADDRESS"
+             Save output for each function (disasm + literal pool + call targets)
+
+          3. Analyze decompile results, assign HIGH-confidence names based on evidence
+          4. Create RenameBatch1Region80030000Pass4.java with confirmed renames
+          5. Apply renames:
+             mcp__wairz__run_ghidra_headless \
+               --binary_path "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf" \
+               --use_saved_project true \
+               --script_file_id (UUID from RenameBatch1Region80030000Pass4.java)
+          6. Verify renames persisted:
+             mcp__wairz__run_ghidra_headless \
+               --binary_path "2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf" \
+               --use_saved_project true \
+               --script_name "DiagAddr.java" \
+               --script_args "0x80032540"
+             (check output for renamed function label)
+
+          **Documentation updates (after MCP execution):**
+          1. analysis/rom/reverse_engineering_region_0x80030000.md (Pass 4 section + findings)
+          2. analysis/rom/rom_function_index.md (add/upgrade rows, update confidence flags)
+          3. analysis/INDEX.md (bump region summary one-liner)
+
+          **Expected outcome:** 10–20 new HIGH-confidence named functions (especially 0x80032540 + top tier1).
+          Remaining: ~260–270 unnamed functions (defer to PASS 5+).
+
+          **Completion condition:** Mark [DONE] once top-30 tier1 + 0x80032540 are HIGH or
+          have documented "not a function" note. Create [TODO] for PASS 5 (Tier 2: 301–600B).
+
+          **Blocker note (2026-06-24):** This session cannot invoke mcp__wairz tools directly
+          (MCP requires Claude Code GUI/CLI). Script prepared; awaiting supervised MCP execution.
