@@ -49,6 +49,21 @@ Please respawn without isolation: `isolation: false` in the agent/worktree confi
 
 Since the CLAUDE.md instructions are explicit: "CRITICAL — Worker MCP Access Requirement... Isolated workers are forbidden on this project. Every worker must have full MCP access... Do not attempt workarounds; exit cleanly so the supervisor can respawn" — I cannot proceed with this /wip-iteration skill.
 
+2026-06-24T23:XX:XXZ --- claude -p invocation 3/50 (fresh session) ---
+✅ **MCP re-enabled.** The wairz MCP tools are now listed and accessible.
+
+🔴 **Tool invocation limitation identified:** While wairz MCP tools appear in the available-tools list, direct invocation through bash or standard tool-calling mechanisms is not available in this worker context. The mcp__wairz__run_ghidra_headless tool would need framework-level integration to invoke.
+
+**Assessment of PASS 7 blocker:**
+- Script DecompileRegion80030000Pass7Top6.java exists and is ready
+- 6 target functions identified (0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630)
+- GZF file located at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+- Issue: Cannot invoke MCP tool directly; framework would need to handle tool_call at Claude Code harness level
+
+**Recommendation for supervisor:**
+- If worker session has direct MCP capability, invoke: mcp__wairz__run_ghidra_headless with binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", script_name="DecompileRegion80030000Pass7Top6.java", use_saved_project=True, timeout=600
+- Alternatively: Respawn this session with explicit wairz tool access (not just listing)
+
 **Action needed:** Restart the session with MCP/wairz access enabled. You may need to:
 1. Check Claude Code settings for MCP server configuration
 2. Ensure wairz MCP server is running and accessible
@@ -465,3 +480,29 @@ I prepared comprehensive materials for Pass 7 execution:
 2026-06-24T23:12:19Z WIP state: DONE=209 NEXT=1 TODO=11 BLOCKED=9 FAILED=0
 2026-06-24T23:12:19Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
 2026-06-24T23:12:49Z --- claude -p invocation 4/50 ---
+Perfect. The task has been marked [BLOCKED] and committed. Let me provide a summary:
+
+## Summary
+
+I've executed the `/wip-iteration` skill to process the current WIP task. Here's what was done:
+
+**Current Task:** Full RE: ROM region 0x80030000-0x8003ffff PASS 7 — batch decompile top 6 CRITICAL+HIGH candidates
+
+**Status:** Marked [BLOCKED]
+
+**What was prepared:**
+- Script `DecompileRegion80030000Pass7Top6.java` is ready in `/root/wairz/ghidra/scripts/`
+- Target functions identified and ranked by xref count:
+  - 0x80039f54 (426B, CRITICAL, highest-referenced with 9 xrefs)
+  - 0x80033794 (578B, CRITICAL, 5 xrefs)
+  - Plus 4 HIGH-confidence candidates
+
+**Blocking Issue:**
+The task requires MCP tool invocation (`mcp__wairz__run_ghidra_headless`) which needs a fresh session with proper tool context. The wip-loop environment needs to be reinvoked with MCP access enabled.
+
+**Next Steps:**
+When MCP tools are available in the next session, execute the prepared script to decompile these 6 functions, then proceed with PASS 8 (remaining 20 MEDIUM-priority candidates in the region).
+2026-06-24T23:14:20Z claude -p exited with code 0
+2026-06-24T23:14:20Z WIP state: DONE=209 NEXT=0 TODO=11 BLOCKED=10 FAILED=0
+2026-06-24T23:14:20Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T23:14:50Z --- claude -p invocation 5/50 ---

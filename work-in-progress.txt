@@ -3341,12 +3341,15 @@ sweep beyond enumeration and is the most out-of-date):
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
 
-[TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain)
+[NEXT]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain) (2026-06-24)
           PASS 6 "parked" this region after finishing the xrefs:2 tier (per its own pivot decision,
           documented as superseded-work housekeeping in the now-closed stale PASS-3 ticket above).
           Resume by re-deriving the next-largest untouched size/xref tier from
           `reverse_engineering_region_0x80040000.md`'s tables — do not re-decompile anything already
           marked high in that doc.
+          **Promoted to [NEXT]:** Region 0x80030000 PASS 7 remains [BLOCKED] due to MCP tool invocation
+          limitation (decompile script ready but cannot invoke mcp__wairz__run_ghidra_headless directly).
+          Region 0x80040000 PASS 7 is independent and can proceed in parallel.
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 8+ (continue until 0 unnamed remain, ~301 to resolve)
 
