@@ -301,6 +301,90 @@ in per-sub-range form, similar to the `region_0x80000000` pass-by-pass structure
 
 ### Outstanding Work (region 0x80020000)
 
-- Update `rom_function_index.md` with 16 new HIGH-confidence rows (names + one-line purposes + confidence flags)
+- Update `rom_function_index.md` with 16 new HIGH-confidence rows (names + one-line purposes + confidence flags) ✓ **DONE**
 - Cold-triage remaining ~340 unnamed functions (size-stratified; expected clusters: LMP procedures for other opcodes, utility/event-senders, VSC handlers)
 - Consider grouping by opcode family (encryption cluster complete; next: pairing/discovery/power/AFH)
+
+---
+
+## Pass 4 (2026-06-24) — HCI Command Router Documentation
+
+**Execution:** Parent harness completed analysis of HCI command dispatcher layer.
+
+**Results Summary:** Documented the top-level HCI command dispatcher (`assoc_w_tHCI_CMD` @ 0x80020ee0, 672B) and identified all 8 standard OGF groups (0x01–0x08) with their handler addresses.
+
+**Key Findings:**
+- OGF 0x01 (Link Control): `0x80020814` (872B) — already named by Kovah
+- OGF 0x02 (Link Policy): `0x8002060c` (464B) — already named by Kovah  
+- OGF 0x03 (Controller & Baseband): `0x800202c0` (600B) — already named by Kovah
+- OGF 0x04 (Informational Parameters): `0x8002013c` (74B) — **newly identified**, fully decompiled
+- OGF 0x05 (Status Parameters): `0x80020188` (288B) — already named by Kovah
+- OGF 0x06 (Test Mode): `0x800200a8` (142B) — already named by Kovah
+- OGF 0x08 (LE): dispatcher @ `0x8004472c` — already identified in `reverse_engineering_ble_link_layer.md`
+
+**Outstanding Questions:**
+- 321+ unnamed functions still remain in region (after PASS 3's 16 LMP encryption/pairing handlers)
+- Next priority: event-sender cluster (`send_evt_HCI_*` functions @ 0x80021xxx–0x80023xxx range), then utility wrappers, then VSC handlers
+
+**Document Location:** `reverse_engineering_hci_command_router.md` (comprehensive 372-line pass with full decompile details)
+
+---
+
+## Pass 5 (2026-06-24) — Event-Sender Cluster & Utility Triage (IN PROGRESS)
+
+**Execution Plan:** 
+1. Batch decompile event-sender cluster (`send_evt_HCI_*` functions, ~20 functions @ 0x80021xxx–0x80023xxx range)
+2. Batch decompile LMP utility wrappers (`wrap_send_LMP_*`, crypto struct utilities, ~5 functions)
+3. Cold-triage and stratify remaining ~300+ unnamed functions by size/xrefs
+4. Identify next batch for PASS 6 (LMP non-encryption procedures, VSC handlers)
+
+**Target Addresses for Decompilation (20 event-sender + 5 utility = 25 total):**
+
+### Event Senders (`send_evt_HCI_*` cluster — all LOW confidence, Kovah names)
+
+| Address | Size | Name | Priority |
+|---------|------|------|----------|
+| `0x8002271c` | 60 | `send_evt_HCI_Encryption_Change[v1]` | HIGH |
+| `0x8002275c` | 52 | `send_evt_HCI_Change_Connection_Link_Key_Complete` | HIGH |
+| `0x80022794` | 278 | `send_evt_HCI_Link_Key_Notification` | HIGH |
+| `0x800228b4` | 52 | `send_evt_HCI_Authentication_Complete_0x06` | HIGH |
+| `0x800228ec` | 100 | `send_evt_HCI_Return_Link_Keys` | HIGH |
+| `0x80022c40` | 66 | `send_evt_HCI_PIN_Code_Request` | HIGH |
+| `0x80022eec` | 104 | `many_sub_if_else_cases_on_param2` | MEDIUM |
+| `0x80022f54` | 66 | `send_evt_HCI_Link_Key_Request` | HIGH |
+| `0x80023ba4` | 52 | `send_evt_HCI_Encryption_Key_Refresh_Complete` | HIGH |
+| `0x80023c4c` | 64 | `send_evt_HCI_Keypress_Notification` | HIGH |
+| `0x80023c90` | 52 | `send_evt_HCI_Simple_Pairing_Complete_0x36` | HIGH |
+| `0x80023cc8` | 72 | `send_evt_HCI_IO_Capability_Response` | HIGH |
+| `0x80023e38` | 70 | `send_evt_HCI_User_Passkey_Notification` | HIGH |
+| `0x80023e84` | 66 | `send_evt_HCI_Remote_OOB_Data_Request` | HIGH |
+| `0x80023ecc` | 66 | `send_evt_HCI_User_Passkey_Request` | HIGH |
+| `0x80023f14` | 84 | `send_evt_HCI_User_Confirmation_Request` | HIGH |
+| `0x80023f6c` | 66 | `send_evt_HCI_IO_Capability_Request` | HIGH |
+
+### Utility Wrappers (5 functions — all LOW confidence)
+
+| Address | Size | Name | Priority |
+|---------|------|------|----------|
+| `0x8002442c` | 62 | `wrap_send_LMP_NOT_ACCEPTED` | HIGH |
+| `0x8002469c` | 92 | `wrap_send_LMP_ACCEPTED_and_some_other_things` | HIGH |
+| `0x80024bd8` | 48 | `copy_fields_within_crypto_struct` | MEDIUM |
+| `0x80022030` | 86 | `LMP__266__FUN_80022030` | MEDIUM |
+| `0x80025cb4` | 118 | `LMP__271__FUN_80025cb4` | MEDIUM |
+
+**Rationale:** 
+- Event senders are thin wrappers around a shared `send_HCI_event` function (similar to LMP `send_LMP_pkt`)
+- All follow a stereotyped pattern: build PDU, call ROM sender, return
+- Low risk of unknown dependencies; high confidence upgrade expected
+- Decompiling these ~25 functions will resolve a major "thin-named" cluster and improve rom_function_index.md's medium-confidence count dramatically
+
+**Status**: [IN_PROGRESS] — awaiting MCP script execution
+
+---
+
+## Remaining Scope (post-PASS 5)
+
+After PASS 5 completes (event-senders + utilities):
+- ~300 completely unnamed functions (LMP procedures for non-encryption opcodes, subsystem utilities, data processors)
+- Recommended stratification by size/xrefs for PASS 6+
+- VSC handlers cluster (lower priority, but isolated and high-value)

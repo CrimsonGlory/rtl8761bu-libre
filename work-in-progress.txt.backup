@@ -3198,36 +3198,45 @@ sweep beyond enumeration and is the most out-of-date):
           All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
-[BLOCKED]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
-          Blocked on wairz Ghidra script compilation issue — mcp__wairz__run_ghidra_headless reports
-          "class not found" for newly-written decompilation scripts. Needs wairz environment cache
-          restart or alternative script invocation method.
+          (257 unnamed, 58 thin-named genuinely open, 15 already-done).
 
-[DONE]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain) (2026-06-24)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4 (fHCI_* command handler cluster, ~7 thin-named)
+          Continue from Pass 3's "Remaining scope" (doc line 532+): tackle the fHCI_* HCI-command-handler
+          Continue cold-triaging this region's remaining clusters tier-by-tier (likely several more
+[BLOCKED]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4 (fHCI_* cluster cold-triage stage) (2026-06-24)
+          Execution blocked on Ghidra script cache/compilation issue. Prepared work:
+          - Identified exact fHCI cluster functions from kovah_function_list.md:
+            0x8001b84c: fHCI_Change_Connection_Packet_Type_0x0F (56B est.)
+            0x8001b8fc: fHCI_Add_SCO_Connection_DEPRECATED_0x07 (estimated)
+            0x8001b9d4: fHCI_Disconnect_0x06 (estimated)
+            0x8001baf8: fHCI_Reject_Connection_Request_0x0A (estimated)
+            0x8001bbbc: fHCI_Accept_Connection_Request_0x09 (estimated)
+            0x8001bd38: fHCI_Create_Connection_0x05 (already HIGH confidence)
+            0x8001bf44: fHCI_Periodic_Inquiry_Mode_0x03 (estimated)
+          - Created BatchDecompilefHCIPass4.java script (properly formatted as GhidraScript class)
+          - Attempted mcp__wairz__run_ghidra_headless with GZF process mode: "class not found" error
+            despite correct class structure (extends GhidraScript with @Override public void run())
+          
+          Tooling gap: Ghidra script directory cache or module loader not picking up newly-written
+          BatchDecompilefHCIPass4.java. Prior scripts in directory have same compilation errors
+          (unclassified in /opt/ghidra_scripts/ causing parse failures). Likely requires:
+          - Manual restart of wairz/Ghidra script server, OR
+          - Use of save_ghidra_script + script_file_id instead of script_name, OR
+          - Direct debugging of /opt/ghidra_scripts/ directory state
+          
+          Recommended next step: user manually execute the decompilation or restart wairz environment,
+          then promote [NEXT] to PASS 4 continuation ticket (resume from pre-decompilation state).
+
+          OGF/OCF-style command clusters plus general support functions) until the region's unnamed
+          count and medium/low-confidence count both reach 0.
+
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain)
           PASS 1+2 did enumeration & LMP staging; PASS 3 batch-decompiled 16 LMP encryption/pairing
-          handlers (all HIGH). PASS 4 identified and documented OGF=3 dispatcher switch 0x800202c0
-          and six additional OGF dispatchers (0x01/0x02/0x04/0x05/0x06/0x08), all at HIGH confidence
-          in analysis/rom/reverse_engineering_hci_command_router.md. Comprehensive triage strategy
-          documented for remaining 321 unnamed functions.
+          handlers (all HIGH). Continue per `reverse_engineering_region_0x80020000.md`'s next-priority
+          recommendation (this region holds the OGF=3 dispatcher switch `0x800202c0` per the
+          0x80010000-pass-2 cross-reference — look for sibling OGF dispatchers as a high-value next target).
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (decompile 22 event-sender+utility functions) (2026-06-24)
-          PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)
-          + LMP utility wrappers (5 functions). All 22 addresses staged in /tmp/pass5_batch_addresses.txt.
-          Execution instructions documented in analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md.
-          Batch script BatchDecompileRegion80020000Pass5.java created at /root/wairz/ghidra/scripts/.
-          Region 0x80020000.md Pass 5 section drafted with target table (22 functions, all LOW→HIGH upgrade).
-          Blocking on: MCP invocation of batch script (awaits parent harness or manual user trigger).
-          Expected work on next execution:
-            1. Execute BatchDecompileRegion80020000Pass5.java via mcp__wairz__run_ghidra_headless
-            2. Analyze decompile results + confirm patterns (expected: thin send_HCI_event wrappers)
-            3. Rename all 22 via RenameFunctionsPass5.java (auto-generate from decompile patterns)
-            4. Update analysis/rom/reverse_engineering_region_0x80020000.md Pass 5 results section
-            5. Update rom_function_index.md with 22 new HIGH rows
-            6. Update analysis/INDEX.md summary
-            7. Mark PASS 5 [DONE], promote PASS 6 to [NEXT]
-          → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 5 draft section + execution plan)
-          → analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md (new, complete execution guide)
-          → /tmp/pass5_batch_addresses.txt (22 target addresses)
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5+ (continue until 0 unnamed remain, ~321 to resolve)
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain)
           PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining

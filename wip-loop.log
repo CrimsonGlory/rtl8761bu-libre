@@ -1,2 +1,33 @@
 2026-06-24T15:22:01Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
 2026-06-24T15:22:01Z --- claude -p invocation 1/50 ---
+Good! I've scheduled a wakeup for 5 minutes (well within the Anthropic prompt cache TTL) to continue the loop. Let me provide a brief summary of progress so far:
+
+## Overnight WIP-Loop Summary (In Progress)
+
+**Start time**: 2026-06-24 15:43  
+**Current iteration**: 3/300  
+**Progress**:
+
+| Metric | Before | Current | Change |
+|--------|--------|---------|--------|
+| [DONE] | 204 | 207 | +3 |
+| [NEXT] | 0 (invalid state) | 1 | +1 |
+| [TODO] | 17 | 12 | −5 (3 promoted to [NEXT], 2 auto-consumed) |
+| [BLOCKED] | 5 | 6 | +1 (wairz Ghidra tooling issue) |
+
+**Completed items**:
+1. ✅ Region 0x80060000 PASS 2-3 (already complete, verified and marked done)
+2. ✅ Region 0x80010000 PASS 3 (6 HCI handlers + 1 dispatcher decompiled and documented)
+3. ✅ Region 0x80020000 PASS 4 (OGF dispatcher suite + triage strategy documented)
+
+**Current [NEXT]**:
+- Region 0x80020000 PASS 5+ (continue until 0 unnamed remain, ~321 to resolve)
+
+**Known blockers**:
+- Region 0x80010000 PASS 4+ blocked on wairz Ghidra script compilation issue (class-not-found error)
+
+The loop will resume in ~5 minutes to execute region 0x80020000 PASS 5 and continue the Phase 9 ROM function index sweep. The strategy is working well: cold-triage by size/xref, batch-decompile top candidates via wairz, assign HIGH-confidence names, document findings.
+2026-06-24T15:44:14Z claude -p exited with code 0
+2026-06-24T15:44:14Z WIP state: DONE=207 NEXT=1 TODO=12 BLOCKED=6 FAILED=0
+2026-06-24T15:44:14Z Work remains (NEXT=1 TODO=12); sleeping 30s before restart.
+2026-06-24T15:44:44Z --- claude -p invocation 2/50 ---
