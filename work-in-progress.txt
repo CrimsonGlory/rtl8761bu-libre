@@ -3341,19 +3341,19 @@ sweep beyond enumeration and is the most out-of-date):
 
 [TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
 
-[NEXT]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain) (2026-06-24)
-          PASS 6 "parked" this region after finishing the xrefs:2 tier (per its own pivot decision,
-          documented as superseded-work housekeeping in the now-closed stale PASS-3 ticket above).
-          Resume by re-deriving the next-largest untouched size/xref tier from
-          `reverse_engineering_region_0x80040000.md`'s tables — do not re-decompile anything already
-          marked high in that doc.
-          **Promoted to [NEXT]:** Region 0x80030000 PASS 7 remains [BLOCKED] due to MCP tool invocation
-          limitation (decompile script ready but cannot invoke mcp__wairz__run_ghidra_headless directly).
-          Region 0x80040000 PASS 7 is independent and can proceed in parallel.
+[DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (2026-06-24)
+          PASS 7 cold-triage: enumerated remaining 151-600B tier untouched candidates.
+          FINDING: All 151-600B tier functions have been either HIGH-renamed (Passes 2-6) or
+          already decompiled at MEDIUM/MEDIUM-HIGH. No untouched functions remain in this tier.
+          Next candidates: must check 1-150B tiers (206 functions per Pass 6's breakdown).
+          Per project policy (7 consecutive passes on this region with thin HIGH-yield),
+          and Pass 6's already-triggered pivot to 0x80070000, PASS 7 concludes that
+          0x80040000 remains parked. Remaining work (1-150B tiers, 206 functions) has
+          diminishing-returns profile (smaller code = less behavioral distinction, lower
+          HIGH-confidence yield expected). Recommend pivoting to fresher regions
+          (0x80050000 / 0x80070000) per standings work backlog.
 
-[TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 8+ (continue until 0 unnamed remain, ~301 to resolve)
-
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 11 (continue sweep, 345 unnamed remain)
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 11 (continue sweep, 345 unnamed remain)
           PASS 1-10 resolved the largest set of clusters of any region so far (eSCO/SCO, codec, LMP
           opcode handlers — see `reverse_engineering_region_0x80050000.md`'s pass log). Continue from
           Pass 10's own "Remaining scope" / cold-triage rank 51+ recommendation.
