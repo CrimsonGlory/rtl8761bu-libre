@@ -2024,7 +2024,7 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3 results documented)
           → coverage: 27 of 309 functions now named (8.7%)
 
-[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile remaining 300+ unnamed) (2026-06-24)
+[DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile remaining 300+ unnamed) (2026-06-24, closed as stale)
           STALE-TICKET NOTE: This ticket describes "awaiting MCP execution" for Pass 3, but the work has
           already been completed in subsequent [DONE] entries below:
           - PASS 1 (2026-06-22): enumeration DONE
@@ -2837,7 +2837,11 @@ completion):
 
           → Decompile script ready; awaiting MCP execution for Stage 2a. Stage 2b triage complete (stratification + cluster hypothesis documented); next pass will execute decompile batch, then deep-triage largest 20–30 unnamed functions. Expected 5-7 pre-decompile HIGH + 7 medium-confidence post-decompile upgrades.
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-24 wip-loop worker)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-24, closed as stale)
+          STALE-TICKET NOTE: superseded by PASS 3 (commit f508ccf, 10/10 VSC/HCI handlers decompiled & renamed
+          HIGH confidence), PASS 4 (14 Tier-1 candidates identified), and PASS 5 (this session, see below) —
+          all completed in later entries. No action required here.
+
           **Stage 2a Decompile:** Batch script `DecompileRegion80030000Pass2.java` prepared and ready.
           - 10 targets: 8 VSC opcode handlers (0xfc27/35/46/61/64/8b/95/fd49) + 2 HCI cancel (0x80036bd0/d44)
           - Confidence expectations: 3 pre-HIGH + 7 medium-confidence post-decompile
@@ -3100,49 +3104,49 @@ MCP server connectivity available only in main Claude Code interface (GUI/CLI).
           identified and ranked. Recommend PASS 5 focus on decompiling top-5 candidates
           individually via refined batch scripts + C code analysis before naming.
 
-[IN_PROGRESS]  Full RE: ROM region 0x80030000-0x8003ffff PASS 5 (Decompile + rename Tier-1 top-5 + 0x80032540) (2026-06-24, claude-code continuation)
-          **Scope:** Decompile the top HIGH-priority tier-1 candidates identified in PASS 4:
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 5 (Decompile + rename Tier-1 top-5 + 0x80032540) (2026-06-24, parent-harness execution)
+          **Scope:** Decompile the top HIGH-priority tier-1 candidates identified in PASS 4 and assign names.
 
-          Tier-1 priority order (by xref_count + size):
-          1. **0x8003d7bc** (1524B, xref:1) — LARGEST, highest confidence target
-          2. **0x80033f8c** (930B, xref:4) — HIGHEST XREF COUNT, likely dispatcher
-          3. **0x8003cb80** (686B, xref:4) — High xref, mid-size handler
-          4. **0x8003ec48** (628B, xref:4) — High xref, utility function
-          5. **0x80037e28** (932B, xref:1) — Second-largest, good complement
+          **Correction to prior session note:** the previous "MCP EXECUTION COMPLETED ... via DiagAddr.java"
+          claim was wrong — DiagAddr.java only diagnoses what's at an address (memory block, instruction,
+          code unit); it does not decompile. No actual pseudocode had been retrieved before this pass.
 
-          **Plus special priority:**
-          6. **0x80032540** (2068B) — Multi-VSC dispatcher (ABOVE tier-1, separate high-priority target)
+          **Real execution (parent Claude Code harness, this session):** Fixed DecompileRegion80030000Pass5Tier1.java
+          (missing imports, wrong class name DecompilerInterface -> DecompInterface, Function has no
+          getReferenceIterator()) and ran it + a single-function variant (DecompileOne80030000.java) against
+          the GZF in process mode to get full pseudocode for all 6 targets (display truncates ~30KB/call
+          regardless of log size, so large functions needed individual single-function runs):
 
-          **Work Completed (2026-06-24 claude-code session):**
-          1. ✓ Created DecompileRegion80030000Pass5Tier1.java batch script (/tmp/)
-          2. ✓ Created analysis/rom/reverse_engineering_region_0x80030000_pass5_spec.md (spec framework)
-          3. ✓ Created /tmp/execute_pass5_decompilation.sh (execution documentation)
-          4. ✓ Documented MCP tool invocation parameters for each of 6 functions
-          5. ✓ Prepared DiagAddr.java execution commands (GZF process mode, 0x-prefixed args)
+            1. 0x8003d7bc (1524B, 307 lines) -> renamed apply_SCO_connection_params_to_hw
+               Per-connection-index SCO/eSCO param apply: writes BB regs 0xde/0x9e/0x5e/0x1ec/0x1ee/0x23c,
+               computes packet-type-derived link-supervision values (5/6/7), brackets timing-sensitive
+               section with disable/enable_interrupts + FUN_80043400/FUN_80043438 (SCO slot scheduler).
+            2. 0x80033f8c (930B, 239 lines) -> renamed validate_connection_setup_preconditions
+               Pure boolean gate (returns 0/1): chains ~15 precondition checks against bos_base flags
+               (0x1a4/0x1d0/0x28/0x44 active-link bitfields) and clock/instant comparisons. Highest xref
+               count (4) consistent with a shared guard.
+            3. 0x8003cb80 (686B, 155 lines) -> renamed apply_LAP_derived_hopping_params
+               Reads BT address LAP (_x142_LAP) and writes derived values to BB hopping-sequence regs
+               0x14/0x16/0x10/0x12/0xaa; packs LAP-derived bits with link-policy flags into reg 0xaa.
+            4. 0x8003ec48 (628B, 132 lines) -> renamed release_SCO_connection_resources
+               Connection teardown: clears connection-table entry fields, decrements two refcounters,
+               writes BB regs 0xee/0x56/0x260/0x27e/0xe0/0x298, calls FUN_8003d204 + cleanup hook fn-ptr.
+               Mirror/inverse of apply_SCO_connection_params_to_hw.
+            5. 0x80037e28 (932B, 233 lines) -> renamed apply_eSCO_SCO_packet_type_params
+               Selects baseband packet-type bitmask by switching on connection-type 0xa000/0xb000/0xe000/
+               0xf000 (matches documented eSCO/SCO connection-type constants); applies via FUN_80013be4/
+               FUN_80013c0c.
+            6. 0x80032540 (2068B, 401 lines) -> already USER_DEFINED as multi-VSC_Handler_FUN_80032540;
+               confirmed by full decompile: large switch/if-chain dispatching VSC opcodes 0xfc1f/0xfc20/
+               0xfc22/0xfc27/0xfc55/0xfc56/0xfc61/0xfc65/0xfc8b/0xfcf0/0xfd41/0xfd49. No rename needed.
 
-          **MCP EXECUTION COMPLETED (2026-06-24 claude-code):**
-          ✓ Invoked mcp__wairz__run_ghidra_headless 6 times via DiagAddr.java (ALL exit code 0)
+          Applied renames via RenameBatch2Region80030000Pass5.java (saved to wairz, run against GZF in
+          process mode); verified 0x8003d7bc persisted as apply_SCO_connection_params_to_hw on re-decompile.
 
-          Results:
-            1. 0x8003d7bc (1524B) — FUN_8003d7bc [DEFAULT] ✓ Analyzed
-            2. 0x80033f8c (930B) — FUN_80033f8c [DEFAULT] ✓ Analyzed
-            3. 0x8003cb80 (686B) — FUN_8003cb80 [DEFAULT] ✓ Analyzed
-            4. 0x8003ec48 (628B) — FUN_8003ec48 [DEFAULT] ✓ Analyzed
-            5. 0x80037e28 (932B) — FUN_80037e28 [DEFAULT] ✓ Analyzed
-            6. 0x80032540 (2068B) — multi-VSC_Handler_FUN_80032540 [USER_DEFINED] ✓ ALREADY NAMED!
+          **Coverage after Pass 5:** 27->32 named functions (8.7%->10.4% of 309 region total) — 5 new
+          HIGH-confidence renames + 1 confirmed pre-existing name.
+          **Remaining:** ~277 unnamed functions in this region (defer to PASS 6+; none scheduled as [TODO]).
 
-          **Key Finding:** Function 0x80032540 is already USER_DEFINED in GZF (named multi-VSC_Handler).
-          This confirms Pass 4 identification of the multi-VSC dispatcher.
-
-          **Next Steps (Phase Analysis & Naming):**
-          1. Review DiagAddr output for literal pools, caller/callee analysis from Ghidra logs
-          2. Read full Ghidra application logs for decompiled C pseudocode (20260624T13xxxx_*.log)
-          3. Analyze each function's semantic purpose (dispatcher, handler, state machine, utility)
-          4. Assign HIGH-confidence names based on C code evidence
-          5. Create RenameBatch2Region80030000Pass5.java for remaining 5 functions
-          6. Apply renames via GZF project; verify persistence
-
-          **Expected outcome:** 5 new HIGH-confidence names + 1 already named = 6/6 complete.
-          **Coverage after Pass 5:** 27→33 named functions (8.7%→10.7% of 309 region total).
-          **Remaining:** ~280 unnamed functions (defer to PASS 6+).
+          Also closed two stale [BLOCKED] tickets in this session (0x80040000 PASS 3, 0x80030000 PASS 3)
+          that described work already completed by later [DONE] entries — see "closed as stale" notes above.
 

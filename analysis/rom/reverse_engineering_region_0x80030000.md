@@ -417,3 +417,34 @@ Expected output:
 - Coverage progress: ~6.5% → ~10–12% named functions (25–30 of 309)
 
 **Next action after Stage 3:** Self-chain to [TODO] for exhaustive unnamed triage (pass 3b/3c) or promote region [DONE] if coverage >90% (very unlikely at pass 3).
+
+## Pass 5: Tier-1 Function Decompilation Execution (2026-06-24)
+
+**Execution:** Full decompile review (via `mcp__wairz__decompile_function`/MCP wairz tooling against the GZF, `2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf`) of 6 tier-1 candidates identified in Pass 4's cold-triage of ROM region `0x80030000`-`0x8003ffff`. 5 functions renamed in the Ghidra GZF project based on decompile evidence; 1 (`0x80032540`) confirmed already correctly named from a prior pass, not renamed.
+
+**Results:**
+
+| Address | Size | Old Name | New Name | Confidence | Evidence |
+|---------|------|----------|----------|------------|----------|
+| `0x8003d7bc` | 1524 B | `FUN_8003d7bc` | **`apply_SCO_connection_params_to_hw`** | **HIGH** | Per-connection-index SCO/eSCO param apply: writes baseband regs `0xde`/`0x9e`/`0x5e`/`0x1ec`/`0x1ee`/`0x23c`; computes packet-type-derived link-supervision values (5/6/7 based on a role field); brackets a timing-sensitive section with disable/enable_interrupts plus calls to `FUN_80043400`/`FUN_80043438` (SCO slot scheduler) |
+| `0x80033f8c` | 930 B | `FUN_80033f8c` | **`validate_connection_setup_preconditions`** | **HIGH** | Pure boolean gate (returns 0 or 1): chains ~15 precondition checks against `bos_base` flags (offsets `0x1a4`/`0x1d0`/`0x28`/`0x44` — active-link bitfields) and clock/instant comparisons before allowing a new connection/role-switch to proceed. Highest xref count (4) in the Pass 4 tier-1 list, consistent with a shared guard function |
+| `0x8003cb80` | 686 B | `FUN_8003cb80` | **`apply_LAP_derived_hopping_params`** | **HIGH** | Reads the Bluetooth address LAP (Lower Address Part, via `_x142_LAP` struct field) and writes derived values into baseband hopping-sequence registers `0x14`/`0x16`/`0x10`/`0x12`/`0xaa`; packs LAP-derived bits together with link-policy flags into the register `0xaa` write |
+| `0x8003ec48` | 628 B | `FUN_8003ec48` | **`release_SCO_connection_resources`** | **HIGH** | Connection teardown counterpart to `apply_SCO_connection_params_to_hw`: clears connection-table entry fields, decrements two reference counters, writes baseband regs `0xee`/`0x56`/`0x260`/`0x27e`/`0xe0`/`0x298`, calls `FUN_8003d204` (cleanup) and an installed cleanup hook function pointer |
+| `0x80037e28` | 932 B | `FUN_80037e28` | **`apply_eSCO_SCO_packet_type_params`** | **HIGH** | Selects a baseband packet-type bitmask by switching on connection-type constants `0xa000`/`0xb000`/`0xe000`/`0xf000` (matching already-documented eSCO/SCO connection-type constants elsewhere in the codebase), then applies the result via `FUN_80013be4`/`FUN_80013c0c` |
+| `0x80032540` | 2068 B | `multi-VSC_Handler_FUN_80032540` | *(unchanged — already correct)* | **HIGH** | Full decompile (401 lines) confirms a large switch/if-chain dispatching VSC opcodes `0xfc1f`, `0xfc20`, `0xfc22`, `0xfc27`, `0xfc55`, `0xfc56`, `0xfc61`, `0xfc65`, `0xfc8b`, `0xfcf0`, `0xfd41`, `0xfd49` — confirms this is the master multi-opcode VSC dispatcher for this region (was already low-confidence-named correctly; upgraded to HIGH on full-decompile confirmation) |
+
+**Key findings:**
+
+1. **SCO/eSCO connection lifecycle pair confirmed:** `apply_SCO_connection_params_to_hw` (`0x8003d7bc`) and `release_SCO_connection_resources` (`0x8003ec48`) form a clear setup/teardown pair, both operating on the same baseband register cluster (`0xde`/`0x9e`/`0x5e` family for setup; `0xee`/`0x56` family for teardown) and both bracketing hardware writes with interrupt-disable/enable.
+2. **Shared precondition guard identified:** `validate_connection_setup_preconditions` (`0x80033f8c`) is the highest-xref-count (4) function in the Pass 4 tier-1 list — consistent with a shared gate called before multiple connection/role-switch entry points, not a single-purpose check.
+3. **BD_ADDR/LAP hopping link confirmed:** `apply_LAP_derived_hopping_params` (`0x8003cb80`) ties the Bluetooth address LAP directly into frequency-hopping register programming, closing a previously-unexplored link between address-derived state and baseband hopping config.
+4. **eSCO/SCO packet-type dispatch confirmed:** `apply_eSCO_SCO_packet_type_params` (`0x80037e28`)'s opcode set (`0xa000`/`0xb000`/`0xe000`/`0xf000`) matches connection-type constants already documented elsewhere (`conn_type_dispatch_and_esco.md`), confirming this region's packet-type handler is part of the same overall eSCO/SCO subsystem rather than an independent mechanism.
+5. **Multi-VSC dispatcher fully scoped:** `0x80032540`'s full decompile resolves the long-standing "may be a demultiplexer or alternate entry point" open question from Pass 1 — it is confirmed as a genuine secondary VSC dispatcher covering 12 distinct opcodes, complementary to the master dispatcher at `0x80030f1c`.
+
+**Coverage progress (after Pass 5):**
+
+- **Named functions:** 27 → **32** of 309 (8.7% → **10.4%**)
+- **HIGH-confidence:** 5 new renames this pass (all upgraded directly from `FUN_*` unnamed) + 1 existing low-confidence name upgraded to HIGH (`0x80032540`) on full-decompile confirmation
+- **Unnamed (`FUN_*`):** 282 → **277**
+
+**Next action:** Continue deep-triage at the next tier of largest unnamed functions (Pass 4's tier-2 candidates, 301-600B range) or pivot to cold-triage of the remaining 277 unnamed functions by xref-count ranking, per the region's standing size-tier framework.
