@@ -3353,12 +3353,26 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 11 (continue sweep, 345 unnamed remain)
-          PASS 1-10 resolved the largest set of clusters of any region so far (eSCO/SCO, codec, LMP
-          opcode handlers — see `reverse_engineering_region_0x80050000.md`'s pass log). Continue from
-          Pass 10's own "Remaining scope" / cold-triage rank 51+ recommendation.
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
+          PASS 1-9 resolved largest set of clusters (eSCO/SCO, codec, LMP opcode handlers).
+          PASS 10 scripts ready (ColdTriageRegion80050000Pass10.java + RenamePass10Region80050000.java)
+          but require MCP tool invocation (run_ghidra_headless with GZF process mode).
+          Blocker: MCP tools not directly invocable from bash context in supervisor /wip-iteration
+          session; tool schemas load but actual invocation requires harness tool-calling mechanism.
+          Next worker: invoke PASS 10 via:
+            mcp__wairz__run_ghidra_headless(
+              binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
+              use_saved_project=true,
+              script_name="ColdTriageRegion80050000Pass10",
+              timeout=300
+            )
+          Parse output for rank 51+ candidates; decompile top 5-10 via DecompileAddr.java or batch_decompile;
+          create RenamePass11Region80050000.java; update region doc + rom_function_index.md.
+          Estimated work: 30-45 min (similar to previous passes). Expected yield: 2-4 HIGH functions.
 
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~345 to resolve)
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~345 to resolve)
+          After PASS 10-11 complete, continue sweeping remaining unnamed functions in this region
+          using cold-triage + batch-decompile pattern established in passes 3-11.
 
 [TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
           PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
