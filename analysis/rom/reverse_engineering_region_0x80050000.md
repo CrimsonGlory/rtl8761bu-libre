@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80050000-0x8005ffff
 
-**Status**: PASS 8 COMPLETE (cold-triage rank 26+) — 2026-06-23
+**Status**: PASS 9 COMPLETE (cold-triage rank 26+ continuation) — 2026-06-23
 
 ## Overview
 
@@ -1205,3 +1205,90 @@ decompiled), or (b) apply the helper-confirmation technique to this pass's
 2 new MEDIUM-HIGH holdovers' callees (`FUN_8004fa64` for `0x80053710`;
 `0x80055c80`'s callees are all register-pointer writes with no further
 helper chain to confirm).
+
+## Pass 9 — Cold-triage rank 26+ continuation (2026-06-23)
+
+Continuation of the Pass 8 ticket: decompiled the 3 staged candidates
+(`0x8005b79c`, `0x8005a924`, `0x80057180`) via `DecompileAddr.java`
+single-address calls (GZF process mode).
+
+**`0x8005b79c`** (312B, 2 xrefs): checks an override hook and a per-slot
+active bit at `field453_0x1d2/field454_0x1d3` of the connection-record-array
+header; on the active path it clears the bit, calls a function pointer
+(passing the slot index) if no override blocks it, then resolves the
+0x1ac-strided connection record for the slot. It clears three duplicate-
+index "owner" bytes (`field461_0x1da`, `field465_0x1de`, an unnamed byte at
++0x1471) back to a sentinel `0xb` wherever they matched the freed slot
+index, calls the already-named `LMP__25B__most_common_for_VSCs1` on any
+non-`-1` function-pointer slots at `+0x64/+0x68/+0x6c`, calls `FUN_8005b6d4`,
+then `memset`s the bulk of the record (`+0x4` through `+0x1ab`, 0x1a8 bytes)
+to zero. It finishes by writing the **exact same allocator-time default
+constants** used by the already-HIGH-renamed `init_connection_record`
+(`0x8005b9d8`, Pass 3c): poll interval `3000` (`0xbb8`) at `+0x110`, and LST
+default `0xa0a` at both `+0x140` and `+0x144`. If the whole connection-
+record-array is now empty (the 16-bit active-bitmask at `+0x1d2/+0x1d3`
+reads zero), it also resets several global state bytes/pointers to their
+idle defaults. This is the **alloc/free pairing partner** of
+`init_connection_record`: same struct, same default-value constants,
+opposite direction (allocator populates non-zero defaults on acquire; this
+function zeroes the bulk of the struct and *restores* those same defaults
+on release) — the shared, very-specific constant pair (`0xbb8`/`0xa0a` at
+identical offsets) makes this an unambiguous **HIGH** confidence match.
+**RENAMED -> `release_connection_record`.**
+
+**`0x8005a924`** (312B, 1 xref): branches on connection-index range (`<8`
+vs `>=8`) to compute a timer/event handle via `FUN_80056608` or
+`FUN_80056660`, reads a 4-bit role/type field from the connection record at
+`+0x118`, sets a `0x4000`/`0x6000` flag bit accordingly (logging via
+`possible_logging_function__var_args` if the type field is inconsistent —
+neither 0 nor 1), then retries a commit operation (`FUN_80057094` or
+`FUN_800573d8` depending on index range) in a bounded loop with a retry-
+count vs `DAT_8005aa68` ceiling check (logging + escape on overflow via a
+final function-pointer call). Reads as a **timer/event-slot commit-with-
+retry function** for the connection's role-dependent flag, but the specific
+event/timer semantics (which subsystem's timer table) aren't independently
+confirmed — stays **MEDIUM**, not renamed.
+
+**`0x80057180`** (310B, 3 xrefs): a generic 3-way pool-table walker keyed
+by `param_1` (0, 1, or 2), each case selecting a different global table
+pointer/stride (`0xa0`-stride for case 0, `0xe0`-stride for case 1, a
+0x34-stride 0x122-entry table for case 2) and clearing 2-3 flag bits per
+entry while resetting linked global state words to zero; finishes by
+patching the tail-pointer bookkeeping of the selected table's free list.
+Reads as a **shared pool/free-list bulk-reset helper** used by (at least)
+three distinct resource pools, but no caller context or named-callee chain
+pins which specific resource type drives the call in this rank — stays
+**MEDIUM**, not renamed.
+
+### Rename applied
+
+| Address | Old Name | New Name | Rationale |
+|---------|----------|----------|-----------|
+| `0x8005b79c` | `FUN_8005b79c` | `release_connection_record` | Decompile shows a `memset`-and-restore-defaults operation on the 0x1ac connection record using the exact same default constants (`0xbb8` poll interval, `0xa0a` LST ×2) written at the identical struct offsets as the already-HIGH-renamed allocator `init_connection_record` (0x8005b9d8) — an unambiguous alloc/free pairing. |
+
+Applied via `RenamePass9Region80050000.java` (GZF process mode,
+`SourceType.USER_DEFINED`), verified via Ghidra headless run log ("RENAMED
+0x8005b79c: FUN_8005b79c -> release_connection_record", "RENAME COMPLETE").
+
+### Pass 9 summary
+
+- Decompiled the 3 candidates staged by Pass 8 (`0x8005b79c`, `0x8005a924`,
+  `0x80057180`). 1 new HIGH rename (`0x8005b79c` →
+  `release_connection_record`, confirmed via constant-pairing with the
+  already-named allocator), 2 new MEDIUM reads documented but not renamed
+  (`0x8005a924` timer/event-slot commit-with-retry, `0x80057180` generic
+  3-way pool free-list reset helper).
+- No independent confirming evidence surfaced for Pass 8's 2 MEDIUM-HIGH
+  holdovers (`0x80055c80`, `0x80053710`); left unrenamed per the ticket's
+  "only if no independent evidence turns up" condition — skipped the
+  optional helper-confirmation step since the HIGH hit on `0x8005b79c`
+  already satisfied "stop early if a clear HIGH-confidence answer emerges."
+- Region-wide unnamed count: 344 → 343.
+
+**Status**: PASS 9 COMPLETE. Yield (1 HIGH) continues this region's
+productive streak (Pass 4: 1, Pass 5: 1, Pass 6: 3, Pass 7: 1, Pass 8: 1,
+Pass 9: 1) — 9 consecutive passes, none with a 0-HIGH-yield pass since
+Pass 3c. Per the project's pivot policy (parking only after thin/0 yield),
+this region remains productive and is **not** parked for this iteration.
+~298 unnamed functions remain outside the already-triaged top-50 set (rank
+51+ of the cold-triage ranking established in Pass 8).
