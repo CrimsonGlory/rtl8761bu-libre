@@ -3198,12 +3198,12 @@ sweep beyond enumeration and is the most out-of-date):
           All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve)
-          Continue cold-triaging this region's remaining clusters tier-by-tier (likely several more
-          OGF/OCF-style command clusters plus general support functions) until the region's unnamed
-          count and medium/low-confidence count both reach 0.
+[BLOCKED]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
+          Blocked on wairz Ghidra script compilation issue — mcp__wairz__run_ghidra_headless reports
+          "class not found" for newly-written decompilation scripts. Needs wairz environment cache
+          restart or alternative script invocation method.
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain)
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain)
           PASS 1+2 did enumeration & LMP staging; PASS 3 batch-decompiled 16 LMP encryption/pairing
           handlers (all HIGH). Continue per `reverse_engineering_region_0x80020000.md`'s next-priority
           recommendation (this region holds the OGF=3 dispatcher switch `0x800202c0` per the
