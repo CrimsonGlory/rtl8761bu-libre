@@ -110,6 +110,18 @@ the `analysis/` root. Full index with one-line summaries:
 [`analysis/INDEX.md`](analysis/INDEX.md). Keep that index current, not this
 file — see the rule at the bottom of `INDEX.md`.
 
+**IMPORTANT — Documentation Always Comes After Work:** After completing any RE task
+(decompilation, analysis, fix), immediately update:
+1. **Phase-specific analysis docs** (e.g., `analysis/rom/reverse_engineering_region_0x80030000.md`)
+   — add findings in a timestamped Pass section
+2. **ROM function index** (`analysis/rom/rom_function_index.md`)
+   — update summary counts + add/update function entries with HIGH/MEDIUM/LOW confidence
+3. **Work-in-progress.txt** — mark task [DONE] + document findings
+
+Do not leave documentation as "step 1 and 2" for later — update docs immediately
+after executing analysis work, before committing. This keeps the authoritative
+analysis trail current and prevents stale TODOs.
+
 ---
 
 ## Firmware Format (raw `rtl8761bu_fw.bin`)

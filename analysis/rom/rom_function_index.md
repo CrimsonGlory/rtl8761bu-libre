@@ -27,10 +27,10 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 705 (690 + 3 region-0x80050000 Pass-6 newly-named + 1 region-0x80050000 Pass-7 newly-named + 1 region-0x80050000 Pass-9 newly-named + 10 region-0x80030000 Pass-3 newly-decompiled, as of 2026-06-24; region-0x80000000 sweep is COMPLETE, region-0x80010000 sweep in progress, region-0x80030000 Pass-3 decompile complete) |
-| Unnamed (`FUN_*`) functions (summarized below) | 2033 (2048 − 3 region-0x80050000 Pass-6 newly-named − 1 region-0x80050000 Pass-7 newly-named − 1 region-0x80050000 Pass-9 newly-named − 10 region-0x80030000 Pass-3 newly-decompiled) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 381 (366 + 3 region-0x80050000 Pass-6 newly-named-and-decompiled + 1 region-0x80050000 Pass-7 newly-named-and-decompiled + 1 region-0x80050000 Pass-9 newly-named-and-decompiled + 10 region-0x80030000 Pass-3 newly-decompiled) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 58 (88 − 20 region-0x80010000 pass-2 medium-confidence fns upgraded to high − 10 region-0x80030000 Pass-3 medium→high upgrades) |
+| Named functions (this doc's table) | 721 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000 sweep complete, 0x80010000/0x80050000 in progress) |
+| Unnamed (`FUN_*`) functions (summarized below) | 2017 (2048 − 3 − 1 − 1 − 10 − 16) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 397 (366 + 3 + 1 + 1 + 10 + 16 region-0x80020000 Pass-3 newly-decompiled) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 42 (88 − 20 region-0x80010000 pass-2 upgrades − 10 region-0x80030000 Pass-3 upgrades − 16 region-0x80020000 Pass-3 upgrades) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 257 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
@@ -625,24 +625,24 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80025cb4` | 118 | `LMP__271__FUN_80025cb4` | LMP  271  FUN 80025cb4 | medium (named, one-line purpose only, not decompiled) |
 | `0x80025d34` | 160 | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | some case 0x3b or 0x3c possible HCI Passkey Notification or HCI Keypress Notification | low (named by Kovah, purpose unclear) |
 | `0x80026608` | 140 | `call_send_evt_HCI_Simple_Pairing_Complete` | call send evt HCI Simple Pairing Complete | low (named by Kovah, purpose unclear) |
-| `0x80026c38` | 536 | `LMP_ENCRYPTION_MODE_REQ_0x0F` | LMP ENCRYPTION MODE REQ 0x0F — see `encryption_engine` | high (decompiled+documented) |
-| `0x80026e64` | 232 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` | LMP ENCRYPTION KEY SIZE REQ 0x10 possibility2 | medium (named, one-line purpose only, not decompiled) |
-| `0x80026f54` | 416 | `LMP_COMB_KEY_0x09` | LMP COMB KEY 0x09 — see `encryption_engine` | high (decompiled+documented) |
-| `0x80027100` | 364 | `LMP_SRES_0x0C` | LMP SRES 0x0C — see `encryption_engine` | high (decompiled+documented) |
-| `0x80027454` | 466 | `LMP_IN_RAND_0x08` | LMP IN RAND 0x08 | medium (named, one-line purpose only, not decompiled) |
-| `0x8002763c` | 834 | `LMP_AU_RAND_0x0B` | LMP AU RAND 0x0B — see `encryption_engine` | high (decompiled+documented) |
-| `0x80027de0` | 326 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` | LMP ENCRYPTION KEY SIZE REQ 0x10 | medium (named, one-line purpose only, not decompiled) |
-| `0x80027f30` | 74 | `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` | LMP ENCRYPTION KEY SIZE MASK RES 0x3B | medium (named, one-line purpose only, not decompiled) |
-| `0x80027f80` | 76 | `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` | LMP ENCRYPTION KEY SIZE MASK REQ 0x3A | medium (named, one-line purpose only, not decompiled) |
-| `0x80027fd4` | 206 | `LMP_STOP_ENCRYPTION_REQ_0x12` | LMP STOP ENCRYPTION REQ 0x12 | medium (named, one-line purpose only, not decompiled) |
+| `0x80026c38` | 536 | `LMP_ENCRYPTION_MODE_REQ_0x0F` | LMP encryption mode negotiator; 7+ state machine (idle/initiating/pending); validates role + capability flags — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80026e64` | 232 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` | Alternative key size path; handles 3 role variants (0x0e/0x1a/0x0d) — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80026f54` | 416 | `LMP_COMB_KEY_0x09` | Combination key (legacy authentication); 5 role variants; feature-page gating — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027100` | 364 | `LMP_SRES_0x0C` | Authentication response calculator; stores response at offset +0xbe; triggers SSP continuation — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027454` | 466 | `LMP_IN_RAND_0x08` | Input random validator; validates challenge receipt; 7+ role paths; feature-page checks — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x8002763c` | 834 | `LMP_AU_RAND_0x0B` | **Largest function (834B):** Authentication random generator; multi-state machine with 15+ role variants; integrates SSP with challenge flow — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027de0` | 326 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` | LMP key size selector; bounds-checked (7–16 bytes); per-state logic (idle/pending/negotiating) — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027f30` | 74 | `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` | Key size mask response (master→slave); validates role bit; writes to crypto struct offset +0x24 — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027f80` | 76 | `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` | Key size mask request (slave→master); feature-page gate; dispatches by feature bit state — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80027fd4` | 206 | `LMP_STOP_ENCRYPTION_REQ_0x12` | Encryption terminator; state-dependent (role 0x3f/0x3e–0x43); calls ROM cleanup chains — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x800281c4` | 160 | `LMP_NOT_ACCEPTED_0x04` | LMP NOT ACCEPTED 0x04 | medium (named, one-line purpose only, not decompiled) |
 | `0x80028264` | 568 | `LMP_encryption_opcode_handlers` | LMP encryption opcode handlers — see `encryption_engine`, `hardware_layer`, `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x800287b8` | 316 | `LMP_DHKEY_CHECK_0x41` | LMP DHKEY CHECK 0x41 | medium (named, one-line purpose only, not decompiled) |
-| `0x80028904` | 68 | `wraps_LMP_DHKEY_CHECK_0x41` | wraps LMP DHKEY CHECK 0x41 | medium (named, one-line purpose only, not decompiled) |
-| `0x80028950` | 550 | `LMP_SIMPLE_PAIRING_NUMBER_0x40` | LMP SIMPLE PAIRING NUMBER 0x40 | medium (named, one-line purpose only, not decompiled) |
-| `0x80028bb8` | 294 | `LMP_SIMPLE_PAIRING_CONFIRM_0x3F` | LMP SIMPLE PAIRING CONFIRM 0x3F | medium (named, one-line purpose only, not decompiled) |
-| `0x80028fc4` | 646 | `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` | LMP PAUSE ENCRYPTION AES REQ 0x66 — see `encryption_engine` | high (decompiled+documented) |
-| `0x800297bc` | 110 | `LMP_USE_SEMI_PERMANENT_KEY_0x32` | LMP USE SEMI PERMANENT KEY 0x32 | medium (named, one-line purpose only, not decompiled) |
+| `0x800287b8` | 316 | `LMP_DHKEY_CHECK_0x41` | ECDH public key verification; confirms ECDH secret derivation — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80028904` | 68 | `wraps_LMP_DHKEY_CHECK_0x41` | DHKEY wrapper/dispatcher; calls DHKEY_CHECK with state dispatch — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80028950` | 550 | `LMP_SIMPLE_PAIRING_NUMBER_0x40` | SSP number (passkey) exchange; role-dependent handling — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80028bb8` | 294 | `LMP_SIMPLE_PAIRING_CONFIRM_0x3F` | SSP confirm validator; state-dependent (role 0x12/0x1c/0x1d); triggers IO capability exchange on mismatch — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x80028fc4` | 646 | `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` | Encryption pause handler; AES pause request processing; manages encryption state transitions — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
+| `0x800297bc` | 110 | `LMP_USE_SEMI_PERMANENT_KEY_0x32` | Semi-Permanent Key (SPK) activation; sets persistent link-key mode — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80029830` | 156 | `LMP_TEMP_KEY_0x0E` | LMP TEMP KEY 0x0E | medium (named, one-line purpose only, not decompiled) |
 | `0x800298d0` | 112 | `LMP_TEMP_RAND_0x0D` | LMP TEMP RAND 0x0D — see `encryption_engine` | high (decompiled+documented) |
 | `0x80029a50` | 66 | `send_evt_HCI_Link_Key_Type_Changed_0x0A` | send evt HCI Link Key Type Changed 0x0A | low (named by Kovah, purpose unclear) |

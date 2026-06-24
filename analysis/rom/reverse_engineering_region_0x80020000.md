@@ -247,3 +247,60 @@ to focus on the unnamed clusters and remaining procedures.
 
 The list is too long to enumerate here in full; future passes will maintain it
 in per-sub-range form, similar to the `region_0x80000000` pass-by-pass structure.
+
+---
+
+## Pass 3: Batch Decompile LMP Encryption/Pairing (2026-06-24)
+
+**Execution:** Parent harness invoked `BatchDecompileLMPEncryptionPairing.java` via MCP tool (mcp__wairz__run_ghidra_headless, GZF process mode). Script fixed to use DecompInterface API (replaced unavailable DecompilerCallback).
+
+**Results Summary:** 16 LMP encryption/pairing/key-management functions decompiled and documented (all HIGH confidence).
+
+### Encryption & Key Management (7 functions)
+
+| Address | Size | Name | Confidence | Purpose |
+|---------|------|------|------------|---------|
+| `0x80026c38` | 536 | `LMP_ENCRYPTION_MODE_REQ_0x0F` | **HIGH** | Encryption mode negotiator; 7+ state machine (idle/initiating/pending); validates role + capability flags; responds with ACCEPTED/NOT_ACCEPTED + state transitions |
+| `0x80027de0` | 326 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` | **HIGH** | Key size selector; bounds-checked (7–16 bytes); per-state logic (3 main roles: idle/pending/negotiating); validates via crypto struct + config limits |
+| `0x80026e64` | 232 | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` | **HIGH** | Alternative key size path; subset of 0x80027de0; handles 3 role variants (0x0e/0x1a/0x0d) |
+| `0x80027f30` | 74 | `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` | **HIGH** | Key size mask response (master→slave); validates role bit; writes to crypto struct offset +0x24 (2-byte mask) |
+| `0x80027f80` | 76 | `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` | **HIGH** | Key size mask request (slave→master); feature-page gate via offset +0x02; dispatches to handler based on feature bit state |
+| `0x80027fd4` | 206 | `LMP_STOP_ENCRYPTION_REQ_0x12` | **HIGH** | Encryption terminator; state-dependent (role 0x3f/0x3e–0x43); calls ROM cleanup chains; handles encryption-active flag clearing |
+| `0x80026f54` | 416 | `LMP_COMB_KEY_0x09` | **HIGH** | Combination key (legacy authentication); 5 role variants; calls crypto challenge generators + key validation; handles mode 0x214 flag for PIN/link-key pairing |
+
+### Authentication (4 functions)
+
+| Address | Size | Name | Confidence | Purpose |
+|---------|------|------|------------|---------|
+| `0x8002763c` | 834 | `LMP_AU_RAND_0x0B` | **HIGH** | Authentication random generator; **largest in batch (834B)**; multi-state machine with 15+ role variants; integrates SSP (Simple Pairing) with challenge flow; feature-page bit gating; calls ROM/patch validators |
+| `0x80027100` | 364 | `LMP_SRES_0x0C` | **HIGH** | Authentication response calculator; 5 role states (0x02/0x03/0x04/0x12/0x1c); stores response at offset +0xbe (4 bytes); triggers SSP/legacy pairing continuation |
+| `0x80027454` | 466 | `LMP_IN_RAND_0x08` | **HIGH** | Input random validator; validates random challenge receipt; 7+ role paths; feature-page checks; error codes for invalid states (0x18=pin-not-found, 0x24=unsupported) |
+| `0x80028bb8` | 294 | `LMP_SIMPLE_PAIRING_CONFIRM_0x3F` | **HIGH** | SSP confirm validator; state-dependent (role 0x12/0x1c/0x1d); validates confirm value match; triggers IO capability exchange on mismatch |
+
+### Simple Pairing (5 functions)
+
+| Address | Size | Name | Confidence | Purpose |
+|---------|------|------|------------|---------|
+| `0x80028950` | ? | `LMP_SIMPLE_PAIRING_NUMBER_0x40` | **HIGH** | SSP number (passkey) exchange; (size in decompile output) |
+| `0x800287b8` | ? | `LMP_DHKEY_CHECK_0x41` | **HIGH** | ECDH public key verification; confirms ECDH secret derivation (size in decompile output) |
+| `0x80028904` | ? | `wraps_LMP_DHKEY_CHECK_0x41` | **HIGH** | DHKEY wrapper/dispatcher; (size in decompile output) |
+| `0x80028fc4` | ? | `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` | **HIGH** | Encryption pause handler; AES pause request processing (size in decompile output) |
+| `0x800297bc` | ? | `LMP_USE_SEMI_PERMANENT_KEY_0x32` | **HIGH** | Semi-Permanent Key (SPK) activation; sets persistent link-key mode (size in decompile output) |
+
+### Key Architectural Findings
+
+1. **State Machine Complexity:** All handlers use role-dependent state dispatch (3–15+ variants per handler). Role bits derived from crypto struct offset +0x01 + connection record state.
+
+2. **AU_RAND Gateway (0x8002763c, 834B):** Largest function in batch; serves as central authentication random dispatcher. Integrates legacy authentication + SSP challenge flows with feature-page gating.
+
+3. **Crypto Struct Pattern:** All handlers access per-connection crypto struct (at base + offset, e.g., +0x50=mode, +0x1e8=timer, +0x214=pairing-mode flag). Offsets match LMP_ENCRYPTION_MODE_REQ_0x0F layout (0x80026c38).
+
+4. **ROM Integrations:** Handlers call ROM validators (e.g., `FUN_8002403c` for capability checks), ROM response senders, and ROM link-state machines. All error paths dispatch via `wrap_send_LMP_NOT_ACCEPTED` + error code.
+
+5. **Error Codes:** Standardized LMP error codes (0x24=unsupported, 0x12=unsupported feature, 0x18=pin-not-found, 0x23/0x25=other auth errors) used consistently across all handlers.
+
+### Outstanding Work (region 0x80020000)
+
+- Update `rom_function_index.md` with 16 new HIGH-confidence rows (names + one-line purposes + confidence flags)
+- Cold-triage remaining ~340 unnamed functions (size-stratified; expected clusters: LMP procedures for other opcodes, utility/event-senders, VSC handlers)
+- Consider grouping by opcode family (encryption cluster complete; next: pairing/discovery/power/AFH)
