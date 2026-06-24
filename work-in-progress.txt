@@ -2882,3 +2882,36 @@ NOTES
           - Continue cold-triage rank 51+ within region 0x80050000, OR
           - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
           - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings
+
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24 — worker left ticket open)
+          Continuation of the productive region 0x80050000 per wip-loop rules.
+          Region status at end of PASS 9:
+            - 6/9 passes productive (1+ HIGH each: yields 1/1/3/1/1/1/0/1/1)
+            - 345 unnamed functions remain (down from 354 at start of Pass 3)
+            - Top-50 by xref/size exhausted in Passes 3-8
+            - Next target: rank 51+ candidates via ColdTriageRegion80050000Pass8.java ranking template
+
+          Status: STAGED FOR EXECUTION (all scripts prepared, ready for MCP invocation)
+          ✓ ColdTriageRegion80050000Pass10.java @ /root/wairz/ghidra/scripts/
+            (ranks all FUN_* functions in 0x80050000-0x8005ffff outside top-50, outputs top-30)
+          ✓ BatchDecompile80050000Pass10Top5.java @ /root/wairz/ghidra/scripts/
+            (template ready; fill addresses from triage output before execution)
+          ✓ RenamePass10Region80050000.java @ /root/wairz/ghidra/scripts/
+            (template ready; fill [address, name] pairs from decompilation review)
+          ✓ GZF verified present: /root/DarkFirmware_real_i/.../2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+
+          Execution plan (ready for MCP invocation):
+          1. Execute ColdTriageRegion80050000Pass10.java via mcp__wairz__run_ghidra_headless
+             (binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", script_name="ColdTriageRegion80050000Pass10.java",
+              use_saved_project=True, timeout=300)
+          2. Read output → identify top-5 ranked candidates by size/xref
+          3. Decompile each via single-address DecompileAddr.java calls (or create
+             BatchDecompile80050000Pass10Top5.java if log-truncation risk exists)
+          4. Evaluate each for HIGH-confidence bar (structural identity, caller cross-ref, or semantics)
+          5. Rename any HIGH-confidence candidates via RenamePass10Region80050000.java
+          6. Document findings in analysis/rom/reverse_engineering_region_0x80050000.md (Pass 10 section)
+          7. Update rom_function_index.md with any new HIGH rows
+          8. Update analysis/INDEX.md region status line
+
+          Expected yield (conservative): 1-2 HIGH renames (following 6-pass streak pattern)
+          Region remains active unless yield drops to 0 this pass.
