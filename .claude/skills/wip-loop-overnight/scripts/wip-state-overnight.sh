@@ -11,6 +11,7 @@ Usage: wip-state-overnight.sh count
        wip-state-overnight.sh snapshot <file>
        wip-state-overnight.sh delta <snapshot-file>
        wip-state-overnight.sh bisect-mode
+       wip-state-overnight.sh check-wairz-blockers
 
 Delegates count/snapshot/bisect-mode to wip-state.sh.
 delta differs from wip-state.sh delta:
@@ -19,6 +20,9 @@ delta differs from wip-state.sh delta:
   - FAILED_DELTA > 0 → stop (hard failure)
   - DONE_DELTA=0 and BLOCKED_DELTA=0 → STOP_REASON=needs_block (worker left [NEXT]
     open; run recovery to [BLOCKED] + promote first [TODO] → [NEXT])
+
+check-wairz-blockers: check wairz_requested_changes.txt for [TODO] items.
+  Exit 0 if clear, exit 1 if blocked. Print HAD_WAIRZ_BLOCKERS=yes/no.
 EOF
 }
 
@@ -31,6 +35,23 @@ cmd="${1:-}"
 case "$cmd" in
   count|snapshot|bisect-mode)
     exec "$WIP_STATE" "$@"
+    ;;
+  check-wairz-blockers)
+    # Check if wairz_requested_changes.txt has any [TODO] items
+    blockers_file="$ROOT/wairz_requested_changes.txt"
+    if [[ ! -f "$blockers_file" ]]; then
+      echo "HAD_WAIRZ_BLOCKERS=no"
+      exit 0
+    fi
+
+    if grep -q '^\[TODO\]' "$blockers_file"; then
+      echo "HAD_WAIRZ_BLOCKERS=yes"
+      grep '^\[TODO\]' "$blockers_file" | head -5
+      exit 1
+    else
+      echo "HAD_WAIRZ_BLOCKERS=no"
+      exit 0
+    fi
     ;;
   delta)
     [[ $# -eq 2 ]] || { usage; exit 2; }

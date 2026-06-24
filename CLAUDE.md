@@ -25,10 +25,32 @@ ROM-only findings live in `analysis/rom/`.
 All disassembly and decompilation is done through **wairz** (MCP server) using
 `mcp__wairz__run_ghidra_headless`.
 
+**CRITICAL — Worker MCP Access Requirement**: At the start of **every worker session**,
+**before reading any files or starting work**, verify MCP access is available:
+```bash
+mcp__wairz__run_ghidra_headless --help
+```
+If this fails or MCP tools are inaccessible, **EXIT IMMEDIATELY** with a message like:
+"MCP access unavailable — this worker cannot proceed. Supervisor must respawn with isolation: false."
+**Isolated workers are forbidden on this project.** Every worker must have full MCP access
+to invoke wairz tools. Do not attempt workarounds; exit cleanly so the supervisor can respawn.
+
+**SUPERVISOR NOTE — wip-loop-overnight invocation**: When invoking `/wip-loop-overnight`,
+ensure the skill itself runs with **no isolation**. Even though SKILL.md documents `isolation: false`
+for worker spawning, the supervisor must have MCP access to configure this. If workers report
+MCP unavailable, the supervisor likely has worktree isolation enabled — this is a configuration issue
+on the invocation side, not the worker's responsibility. Users: verify your Claude Code environment
+has MCP access before running overnight loops.
+
 **IMPORTANT — wairz modifications**: If any limitation in wairz blocks analysis
 (missing tool, unsupported mode, wrong behavior), do NOT try to work around it
 silently. Instead, tell the user explicitly what change is needed in wairz and
 they will implement it. Do not attempt to patch wairz yourself.
+
+**wairz limitation tracking**: Document any needed wairz fixes in `wairz_requested_changes.txt`
+with a `[TODO]` entry. Mark with `[DONE]` when the fix is confirmed to be in place.
+The `wip-loop-overnight` skill will check this file on startup and exit if there are
+any `[TODO]` items, preventing work from proceeding while blocking issues remain.
 
 ### Primary binary
 

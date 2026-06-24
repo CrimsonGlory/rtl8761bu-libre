@@ -91,6 +91,11 @@ Overnight wip-loop worker step.
 
 Repo: /root/rtl8761bu-libre — read CLAUDE.md; use wairz MCP for Ghidra RE.
 
+🔴 FIRST STEP (before anything else): Verify MCP access is available.
+   Run: mcp__wairz__run_ghidra_headless --help
+   If it fails → EXIT IMMEDIATELY with: "MCP access unavailable. Respawn with isolation: false."
+   Isolated workers are forbidden. Do not proceed without MCP access.
+
 Open work-in-progress.txt. Execute exactly ONE item — the current [NEXT] line.
 
 MANDATORY before you finish (no exceptions):
@@ -112,6 +117,11 @@ cannot access): still apply [BLOCKED] + promote — do not hand off with an open
 Overnight wip-loop worker step.
 
 Repo: /root/rtl8761bu-libre — read CLAUDE.md; use wairz MCP for Ghidra RE.
+
+🔴 FIRST STEP (before anything else): Verify MCP access is available.
+   Run: mcp__wairz__run_ghidra_headless --help
+   If it fails → EXIT IMMEDIATELY with: "MCP access unavailable. Respawn with isolation: false."
+   Isolated workers are forbidden. Do not proceed without MCP access.
 
 No [NEXT] is set. Rename the FIRST [TODO] to [NEXT], then execute it.
 
@@ -135,6 +145,12 @@ is Claude-Code-specific), then run the same flow as the default worker except:
 ```
 Overnight wip-loop recovery step.
 
+Repo: /root/rtl8761bu-libre
+
+🔴 FIRST STEP (before anything else): Verify MCP access is available.
+   Run: mcp__wairz__run_ghidra_headless --help
+   If it fails → EXIT IMMEDIATELY with: "MCP access unavailable. Respawn with isolation: false."
+
 The previous worker violated ticket closure: the active item is still [NEXT] in
 work-in-progress.txt.
 
@@ -144,9 +160,25 @@ Fix ONLY work-in-progress.txt:
 Do not do feature work.
 ```
 
+## Startup check: wairz blockers
+
+**BEFORE entering the supervisor loop**, check `wairz_requested_changes.txt` for any
+`[TODO]` items. If any exist, **STOP immediately** with message:
+
+```
+wairz_requested_changes.txt has [TODO] items. Cannot proceed until they are marked [DONE].
+```
+
+This prevents workers from proceeding when wairz limitations block analysis.
+
 ## Supervisor loop
 
 Repeat until stop:
+
+### 0. Check wairz blockers
+
+Before each iteration, verify `wairz_requested_changes.txt` has no `[TODO]` items.
+If any appear (between iterations), stop with the error above and wait for user fix.
 
 ### 1. Snapshot
 
@@ -163,6 +195,10 @@ Use the **Agent** tool with `subagent_type: general-purpose` and **`isolation: f
 to enable MCP access (workers need full environment to invoke wairz tools). Wait for
 completion before continuing (do not run the next iteration in parallel).
 
+**CRITICAL:** When spawning workers, YOU (the supervisor) must have MCP access. If the
+supervisor (running this skill) was invoked with worktree isolation, spawned workers will
+inherit that isolation and MCP will be blocked. Ensure this skill runs without isolation.
+
 Example:
 ```
 Agent({
@@ -172,6 +208,10 @@ Agent({
   prompt: "..."
 })
 ```
+
+**Troubleshooting:** If workers report "MCP access unavailable," the issue is that the
+supervisor (this loop) lacks MCP access due to isolation at invocation time — not a worker
+configuration problem. Verify the outer environment before running overnight loops.
 
 **Verify ticket closure:** after each worker, the active line must not still be
 `[NEXT]` unless `[DONE]` or `[BLOCKED]` rose. Open `[NEXT]` → `needs_block` → recovery.
