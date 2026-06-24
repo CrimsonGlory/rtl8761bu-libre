@@ -2766,37 +2766,27 @@ completion):
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
 [BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
-          BLOCKER: Agent context cannot invoke MCP tools (wairz/Ghidra).
-          Even with isolation: false enabled on workers, agents spawned by /wip-loop-overnight skill
-          do not have direct MCP invocation capability. Parent Claude Code harness (main /wip-loop session)
-          must invoke mcp__wairz__run_ghidra_headless directly.
+          **SCRIPT COMPILATION ERROR:** BatchDecompileLMPEncryptionPairing.java has Ghidra API issues
+          (DecompilerCallback import fails; may be version-incompatible or unavailable in current Ghidra).
 
-          PARENT HARNESS: Execute this invocation in the main Claude Code terminal:
-            mcp__wairz__run_ghidra_headless(
-              binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
-              script_name="BatchDecompileLMPEncryptionPairing.java",
-              use_saved_project=True,
-              timeout=600
-            )
+          Error on execution attempt:
+            - ERROR: The class could not be found: BatchDecompileLMPEncryptionPairing not found
+            - Cause: Compilation failed due to missing DecompilerCallback API
 
-          Script ready for execution:
-            - BatchDecompileLMPEncryptionPairing.java @ /root/wairz/ghidra/scripts/
-            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified)
-            - GZF binary confirmed at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/
-            - Script targets: 0x80026c38 (LMP_ENCRYPTION_MODE_REQ_0x0F), 0x80027de0 (LMP_KEY_SIZE_REQ),
-              0x80026e64 (LMP_KEY_SIZE_REQ_alt), 0x80027f30 (MASK_RES), 0x80027f80 (MASK_REQ),
-              0x80027fd4 (STOP_ENCRYPTION_REQ), 0x80026f54 (COMB_KEY), 0x8002763c (AU_RAND),
-              0x80027100 (SRES), 0x80027454 (IN_RAND), 0x80028bb8 (SSP_CONFIRM), 0x80028950 (SSP_NUMBER),
-              0x800287b8 (DHKEY_CHECK), 0x80028904 (wraps_DHKEY_CHECK), 0x80028fc4 (PAUSE_ENCRYPTION_AES),
-              0x800297bc (SEMI_PERMANENT_KEY)
+          **Workaround needed:** Either:
+            1. Fix the script to use compatible Ghidra API (check available decompiler interfaces)
+            2. Use an alternative script template (e.g., similar to DecompileRegion80030000Pass2.java, which works)
+            3. Manually decompile the 16 targets via Ghidra GUI + capture output
 
-          After parent executes: decompile results will appear in stdout. Worker should then:
-            1. Capture decompile output → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 3 section)
-            2. Execute RenameBatch script to apply high-confidence renames to GZF project
-            3. Run confidence-upgrade script to verify renames persisted
-            4. Promote next [TODO] to [NEXT]
+          **Staged targets (16 LMP encryption/pairing handlers):**
+            0x80026c38 (LMP_ENCRYPTION_MODE_REQ_0x0F), 0x80027de0 (LMP_KEY_SIZE_REQ),
+            0x80026e64 (LMP_KEY_SIZE_REQ_alt), 0x80027f30 (MASK_RES), 0x80027f80 (MASK_REQ),
+            0x80027fd4 (STOP_ENCRYPTION_REQ), 0x80026f54 (COMB_KEY), 0x8002763c (AU_RAND),
+            0x80027100 (SRES), 0x80027454 (IN_RAND), 0x80028bb8 (SSP_CONFIRM), 0x80028950 (SSP_NUMBER),
+            0x800287b8 (DHKEY_CHECK), 0x80028904 (wraps_DHKEY_CHECK), 0x80028fc4 (PAUSE_ENCRYPTION_AES),
+            0x800297bc (SEMI_PERMANENT_KEY)
 
-          Remaining work: confidence upgrades to high-confidence + cold-triage of remaining ~340 unnamed functions in region 0x80020000.
+          Remaining work: fix script + decompile 16 targets + update rom_function_index.md (confidence upgrades) + cold-triage ~340 unnamed functions.
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
           Confirmed count: 309 total functions (290 unnamed + 19 named).
