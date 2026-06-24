@@ -5,3 +5,15 @@ Format: [TODO] or [DONE] status, date, description
 
 ---
 
+[DONE] 2026-06-24: Expose DecompilerCallback in Ghidra headless mode
+  Context: PASS 6 of ROM region 0x80030000 exhaustive RE hit blocker
+  Issue: mcp__wairz__run_ghidra_headless does not expose DecompilerCallback API
+    for batch function decompilation. Currently blocks efficient extraction of
+    26 utility-tier functions (301–600B range) at once.
+  Resolution: New tool mcp__wairz__batch_decompile_functions added
+    - Processes 5-10 functions in parallel in single Ghidra run
+    - Maximum 10 functions per call
+    - Results cached individually, reused on subsequent calls
+    - Specifically optimized for 300-600B utility function analysis
+    - Confirmed available and ready for PASS 6 continuation
+

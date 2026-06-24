@@ -354,3 +354,30 @@ Mark: [BLOCKED] with date 2026-06-24 22:15 UTC, reason: MCP unavailable
 Next: Await supervisor respawn with MCP enabled
 
 Commit: 2facab7 "PASS 6: ROM region 0x80030000 utility tier — partial decompile"
+Perfect! Let me create a brief summary of the work completed:
+
+## Summary
+
+**WIP Iteration Complete — PASS 6 Partial Decompile**
+
+I executed the workaround documented in the PASS 6 blocker to decompile the top 6 utility-tier candidates individually using the MCP `mcp__wairz__decompile_function` tool. 
+
+**Results:**
+- ✓ **3/6 successful decompiles:**
+  1. **FUN_8003229c** (566B): ACL queue/buffer ring manager with circular indexing
+  2. **FUN_80035b4c** (352B): Parameter dispatch with ROM indirect function calls
+  3. **FUN_8003c7cc** (310B): Hardware register config + baseband initialization chain
+
+- ✗ **3/6 blocked:**
+  - FUN_80039f54 & FUN_80033794: Ghidra timeout (>580s each)
+  - FUN_8003d630: MCP wairz connection lost mid-decompile
+
+**Status:** [BLOCKED] PASS 6 — MCP unavailable. The work remains blocked on MCP reconnection. Awaiting supervisor respawn with MCP enabled to decompile the remaining 3 critical candidates and proceed to PASS 7+ for the remaining 20 utility-tier functions.
+
+**Commits:**
+- `2facab7` — PASS 6 utility tier partial decompile results documented
+- `363384f` — WIP loop log session summary
+2026-06-24T23:07:08Z claude -p exited with code 0
+2026-06-24T23:07:09Z WIP state: DONE=208 NEXT=0 TODO=11 BLOCKED=9 FAILED=0
+2026-06-24T23:07:09Z Work remains (NEXT=0 TODO=11); sleeping 30s before restart.
+2026-06-24T23:07:39Z --- claude -p invocation 2/50 ---

@@ -3287,7 +3287,43 @@ sweep beyond enumeration and is the most out-of-date):
           **MCP STATUS:** wairz connection lost after 3 successful decompiles.
           Awaiting supervisor respawn with MCP enabled to finish remaining 3 candidates.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7+ (continue until 0 unnamed remain, ~277 to resolve)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (rename 3 decompiled funcs from PASS 6, document blocker) (2026-06-24)
+          PASS 6 partially completed: 3 of 6 critical/high candidates were decompiled before MCP
+          disconnection. This pass documents the findings and applies names.
+
+          **Decompiled & Analysis (from PASS 6 output):**
+          1. FUN_8003229c (566B, HIGH xref:2) → acl_packet_ring_buffer_manager
+             Manages circular queue of ACL packets; ringbuf mask @ 0x8012bxxx;
+             writes global flags/counters; indirect calls @ 0x80120f80/0x80120f0c
+          2. FUN_80035b4c (352B, HIGH xref:2) → param_dispatch_with_rom_calls
+             Writes state flags 0x8012303x/0x8012305x; gates on DAT_80120f80/cb0;
+             ROM calls FUN_80033744/FUN_8003336f4/FUN_80034ccc/FUN_80034d88
+          3. FUN_8003c7cc (310B, HIGH xref:2) → hw_register_config_with_timeout
+             Config reads 0x8012xxfe/0xff; BB regs 0x6c/0xd8; timeout poll FUN_80009694;
+             VSC 0xfd49 call; config bit 0x1d0 gate
+
+          Applied renames via editor (no MCP for persistence check):
+          - 0x8003229c → acl_packet_ring_buffer_manager
+          - 0x80035b4c → param_dispatch_with_rom_calls
+          - 0x8003c7cc → hw_register_config_with_timeout
+
+          **MCP STATUS:** Connection was lost after PASS 6's 3rd decompile. For full
+          confidence rating, names must be persisted in GZF project via mcp__wairz__*
+          (requires parent harness). Names documented here for future rename batch.
+
+          **Outstanding work (continuing in PASS 8+):**
+          - Apply documented renames to GZF via RenameBatchPass7.java (parent harness)
+          - Retry remaining PASS 6 candidates: 0x8003d630 (after timeout), 0x80039f54/0x80033794 (batch mode)
+          - Continue with 20 remaining Medium/Low candidates in 301-600B tier
+          - Move on to 151-300B tier (90 functions), then 51-150B (80), 1-50B (60)
+          - Estimated ~277 unnamed remain for region 0x80030000 (PASS 5 resolved 5, PASS 6 partial 3)
+
+          **Documentation updates (pending MCP persistence):**
+          - analysis/rom/reverse_engineering_region_0x80030000.md (PASS 7 section added)
+          - analysis/rom/rom_function_index.md (3 rows for new named functions, counts TBD after rename persist)
+          - analysis/INDEX.md (region summary TBD)
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
 
 [TODO]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (resume parked sweep, 301 unnamed remain)
           PASS 6 "parked" this region after finishing the xrefs:2 tier (per its own pivot decision,

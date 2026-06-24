@@ -18,26 +18,14 @@ One iteration of work-in-progress.txt management.
 
 ## Startup check
 
-🔴 **First:** Verify MCP access — test both that MCP is available and that wairz is responsive.
-```bash
-if ! command -v mcp__wairz__run_ghidra_headless &>/dev/null; then
-  echo "❌ MCP tools not available. Ensure MCP is initialized in your Claude Code session."
-  exit 1
-fi
+🔴 **First:** Verify MCP access
+MCP tools (like `mcp__wairz__list_projects`) are Claude Code tools, not shell commands. Access is verified when the skill invokes its first MCP tool call. If that call fails, MCP is unavailable and the skill will exit with an error.
 
-mcp__wairz__run_ghidra_headless --help 2>&1 | head -5
-if [ $? -ne 0 ]; then
-  echo "❌ MCP access failed or wairz unavailable."
-  exit 1
-fi
-echo "✅ MCP access confirmed."
-```
-
-🔴 **Second:** Check wairz blockers.
+🔴 **Second:** Check wairz blockers
 ```bash
 .claude/skills/wip-iteration/scripts/check-blockers.sh
 ```
-If [TODO] items in `wairz_requested_changes.txt` → EXIT: "Wairz blockers present."
+If [TODO] items exist in `wairz_requested_changes.txt` → EXIT with error. Fix those blockers first before retrying the skill.
 
 ## Execution
 
