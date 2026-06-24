@@ -1682,8 +1682,8 @@ completion):
   - When you finish your turn without finishing the whole region: rewrite
     the ticket's address range to cover only the REMAINING unresolved
     sub-range (shrink it — don't just repeat the full range), file it as
-    [TODO] immediately after itself, and promote THAT continuation (not some
-    unrelated ticket) to [NEXT]. Only mark a region [DONE] once every
+    a new TODO item immediately after itself, and promote THAT continuation (not some
+    unrelated ticket) to NEXT. Only mark a region DONE once every
     function in its (possibly now-shrunk) range is high-confidence or has an
     explicit "not a real function" note.
   - Periodically (not necessarily every turn) re-run RomCoverageStats.java /
