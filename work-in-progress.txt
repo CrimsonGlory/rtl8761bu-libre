@@ -2765,16 +2765,13 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
-          Prior issue (2026-06-23): script compilation failed in MCP execution - missing GhidraScript imports.
-          Status update (2026-06-24): wairz MCP has been fixed; workers now use isolation: false for MCP access.
+[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
+          BLOCKER: Agent context cannot invoke MCP tools (wairz/Ghidra).
+          Even with isolation: false enabled on workers, agents spawned by /wip-loop-overnight skill
+          do not have direct MCP invocation capability. Parent Claude Code harness (main /wip-loop session)
+          must invoke mcp__wairz__run_ghidra_headless directly.
 
-          Script ready for execution:
-            - BatchDecompileLMPEncryptionPairing.java @ /root/wairz/ghidra/scripts/
-            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified)
-            - GZF binary confirmed at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/
-
-          Execution plan:
+          PARENT HARNESS: Execute this invocation in the main Claude Code terminal:
             mcp__wairz__run_ghidra_headless(
               binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
               script_name="BatchDecompileLMPEncryptionPairing.java",
@@ -2782,8 +2779,23 @@ completion):
               timeout=600
             )
 
-          BLOCKER: Cannot invoke mcp__wairz__run_ghidra_headless from worktree isolation.
-          Parent Claude Code harness must invoke this MCP tool. Mark [BLOCKED] per wip-loop rule.
+          Script ready for execution:
+            - BatchDecompileLMPEncryptionPairing.java @ /root/wairz/ghidra/scripts/
+            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified)
+            - GZF binary confirmed at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/
+            - Script targets: 0x80026c38 (LMP_ENCRYPTION_MODE_REQ_0x0F), 0x80027de0 (LMP_KEY_SIZE_REQ),
+              0x80026e64 (LMP_KEY_SIZE_REQ_alt), 0x80027f30 (MASK_RES), 0x80027f80 (MASK_REQ),
+              0x80027fd4 (STOP_ENCRYPTION_REQ), 0x80026f54 (COMB_KEY), 0x8002763c (AU_RAND),
+              0x80027100 (SRES), 0x80027454 (IN_RAND), 0x80028bb8 (SSP_CONFIRM), 0x80028950 (SSP_NUMBER),
+              0x800287b8 (DHKEY_CHECK), 0x80028904 (wraps_DHKEY_CHECK), 0x80028fc4 (PAUSE_ENCRYPTION_AES),
+              0x800297bc (SEMI_PERMANENT_KEY)
+
+          After parent executes: decompile results will appear in stdout. Worker should then:
+            1. Capture decompile output → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 3 section)
+            2. Execute RenameBatch script to apply high-confidence renames to GZF project
+            3. Run confidence-upgrade script to verify renames persisted
+            4. Promote next [TODO] to [NEXT]
+
           Remaining work: confidence upgrades to high-confidence + cold-triage of remaining ~340 unnamed functions in region 0x80020000.
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
@@ -2813,7 +2825,7 @@ completion):
 
           → Decompile script ready; awaiting MCP execution for Stage 2a. Stage 2b triage complete (stratification + cluster hypothesis documented); next pass will execute decompile batch, then deep-triage largest 20–30 unnamed functions. Expected 5-7 pre-decompile HIGH + 7 medium-confidence post-decompile upgrades.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-23 iteration 17)
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 3 (deep triage of largest unnamed) (2026-06-23 iteration 17)
           **Stage 2a Decompile:** Batch script `DecompileRegion80030000Pass2.java` prepared and ready.
           - 10 targets: 8 VSC opcode handlers (0xfc27/35/46/61/64/8b/95/fd49) + 2 HCI cancel (0x80036bd0/d44)
           - Confidence expectations: 3 pre-HIGH + 7 medium-confidence post-decompile
