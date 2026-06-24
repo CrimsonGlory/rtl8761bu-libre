@@ -67,7 +67,7 @@ for ((i = 1; i <= MAX_RESTARTS; i++)); do
     --model "$CLAUDE_MODEL" \
     --effort "$CLAUDE_EFFORT" \
     --output-format text \
-    --mcp-allow-unsafe-localhost true \
+    --mcp-config "$REPO_DIR/.mcp.json" \
     >> "$LOG_FILE" 2>&1
   exit_code=$?
 
