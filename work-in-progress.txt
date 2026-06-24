@@ -2024,9 +2024,10 @@ completion):
           → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 3 results documented)
           → coverage: 27 of 309 functions now named (8.7%)
 
-[BLOCKED]  Full RE: ROM region 0x80040000-0x8004ffff (307 unnamed + 12 thin-named fns) (2026-06-23, PASS 2 staged)
+[TODO]   Full RE: ROM region 0x80040000-0x8004ffff PASS 3 (cold-triage + batch decompile remaining 300+ unnamed) (2026-06-24)
           PASS 1 (2026-06-22, ENUMERATION — DONE): confirmed 319 total functions (307 unnamed + 12 thin-named).
-          PASS 2 (2026-06-23, BATCH DECOMPILE — STAGED, awaiting MCP execution):
+          PASS 2 (2026-06-23, BATCH DECOMPILE — DONE, 12/12 thin-named decompiled + renamed to HIGH)
+          PASS 3 (2026-06-24, COLD-TRIAGE READY — awaiting MCP execution now that wairz is fixed):
 
           Scripts prepared in /root/wairz/ghidra/scripts/:
             - ListRegion0x80040000.java: enumeration (confirm 319 baseline)
@@ -2778,15 +2779,16 @@ completion):
           Next: Pass 3 continuation (batch decompile + rename 15 LMP handlers; cold-triage remaining).
           Status per splitting rule: strategic progress on high-value target, region not finished.
 
-[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff (PASS 3 batch decompile + cold triage) (2026-06-23)
-          2026-06-23 script compilation failed in MCP execution - missing GhidraScript imports
-          Script prepared and staged:
-            - BatchDecompileLMPEncryptionPairing.java exists @ /root/wairz/ghidra/scripts/
-            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified present)
+[TODO]   Full RE: ROM region 0x80020000-0x8002ffff PASS 3 (batch decompile + cold triage) (2026-06-24)
+          Prior issue (2026-06-23): script compilation failed in MCP execution - missing GhidraScript imports.
+          Status update (2026-06-24): wairz MCP has been fixed; classpath issue resolved.
+
+          Script ready for execution:
+            - BatchDecompileLMPEncryptionPairing.java @ /root/wairz/ghidra/scripts/
+            - 16 LMP encryption/pairing/key-mgmt procedures staged (all addresses verified)
             - GZF binary confirmed at /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/
 
-          REQUIRED: wairz must provide GhidraScript base class imports / classpath fix before
-          this batch decompile can execute via MCP interface:
+          Execution plan:
             mcp__wairz__run_ghidra_headless(
               binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
               script_name="BatchDecompileLMPEncryptionPairing.java",
@@ -2794,8 +2796,7 @@ completion):
               timeout=600
             )
 
-          Blocked until wairz classpath issue resolved; cannot proceed with confidence upgrades
-          to high-confidence or cold-triage of remaining ~340 unnamed functions in region 0x80020000.
+          Remaining work: confidence upgrades to high-confidence + cold-triage of remaining ~340 unnamed functions in region 0x80020000.
 
 [DONE]  Enumerate ROM region 0x80030000-0x8003ffff pass 1 (2026-06-22)
           Confirmed count: 309 total functions (290 unnamed + 19 named).
@@ -2902,7 +2903,7 @@ NOTES
           - Pivot to region 0x80010000 / 0x80020000 / 0x80030000 if yield drops in next pass
           - Regions 0x80040000 (parked) and 0x80070000 (pivoted) remain archived with findings
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
+[TODO]   Full RE: ROM region 0x80050000-0x8005ffff PASS 10 (cold-triage rank 51+, continue productive streak) (2026-06-24)
           Continuation of the productive region 0x80050000 per wip-loop rules.
           Region status at end of PASS 9:
             - 6/9 passes productive (1+ HIGH each: yields 1/1/3/1/1/1/0/1/1)
@@ -2915,10 +2916,7 @@ NOTES
             (ranks all FUN_* functions in 0x80050000-0x8005ffff outside top-50, outputs top-30)
           ✓ GZF verified present: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
 
-          Blocked by: wip-loop worker cannot directly invoke mcp__wairz__run_ghidra_headless
-            (requires parent Claude Code harness). Requires supervisor/parent invocation.
-
-          Execution plan (for next supervised session):
+          Execution plan:
           1. Run ColdTriageRegion80050000Pass10.java via mcp__wairz__run_ghidra_headless
              (binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", script_name="ColdTriageRegion80050000Pass10.java",
               use_saved_project=True, timeout=300)
