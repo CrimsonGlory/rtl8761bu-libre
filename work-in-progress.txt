@@ -2899,10 +2899,10 @@ NOTES
             - Top-50 by xref/size exhausted in Passes 3-8
             - Next target: rank 51+ candidates via ColdTriageRegion80050000Pass10.java
 
-          Status: READY FOR EXECUTION
-          ✓ ColdTriageRegion80050000Pass10.java @ /root/wairz/ghidra/scripts/
+          Status: READY FOR EXECUTION (resources verified)
+          ✓ ColdTriageRegion80050000Pass10.java @ /root/wairz/ghidra/scripts/ (4828 B)
             (ranks all FUN_* functions in 0x80050000-0x8005ffff outside top-50, outputs top-30)
-          ✓ GZF verified present: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf
+          ✓ GZF verified present: /root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf (11 MB)
 
           Execution plan:
           1. Run ColdTriageRegion80050000Pass10.java via mcp__wairz__run_ghidra_headless
@@ -2914,9 +2914,10 @@ NOTES
           5. Rename via RenamePass10Region80050000.java and commit
           6. Update docs: reverse_engineering_region_0x80050000.md, rom_function_index.md, INDEX.md
 
-          BLOCKER: Cannot invoke mcp__wairz__run_ghidra_headless from worktree isolation.
-          Parent Claude Code harness must invoke this MCP tool. Mark [BLOCKED] per wip-loop rule.
+          BLOCKER (worktree isolation): mcp__wairz__run_ghidra_headless requires parent Claude Code harness
+          invocation. Agent workers (unattended wip-loop) cannot invoke MCP tools due to CLI sandboxing.
           Expected yield: 1-2 HIGH renames (per 6-pass productive streak pattern)
+          Recommendation: Parent harness supervisor should invoke this when next available.
 
 OVERNIGHT WIP-LOOP SESSION REPORT (2026-06-24, automated worker)
 =================================================================
