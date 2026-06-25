@@ -3478,32 +3478,46 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
-          PASS 1-9 resolved largest set of clusters (eSCO/SCO, codec, LMP opcode handlers).
-          PASS 10 scripts ready (ColdTriageRegion80050000Pass10.java + RenamePass10Region80050000.java)
-          but require MCP tool invocation (run_ghidra_headless with GZF process mode).
-          CORRECTION (2026-06-25, promoted from TODO during PASS 8 housekeeping): the original
-          "Blocker: MCP tools not directly invocable..." line below is the stale misconception
-          CLAUDE.md explicitly calls out as forbidden reasoning — mcp__wairz__* tools ARE directly
-          callable as normal tool calls in this harness (confirmed working throughout region
-          0x80030000 PASS 8 this same session, including individual mcp__wairz__decompile_function
-          calls after the batch tool proved flaky). Do not re-block on this; just call the tool.
-          Also worth checking, per this session's PASS 8 lesson: verify ColdTriageRegion80050000Pass10's
-          recorded candidate addresses still resolve to real function boundaries in the CURRENT GZF
-          state (via list_functions/decompile_function) before trusting them — a prior pass's
-          candidate list for region 0x80030000 turned out to be entirely stale/non-resolving.
-          Next worker: invoke PASS 10 via:
-            mcp__wairz__run_ghidra_headless(
-              binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
-              use_saved_project=true,
-              script_name="ColdTriageRegion80050000Pass10",
-              timeout=300
-            )
-          Parse output for rank 51+ candidates; decompile top 5-10 via DecompileAddr.java or batch_decompile;
-          create RenamePass11Region80050000.java; update region doc + rom_function_index.md.
-          Estimated work: 30-45 min (similar to previous passes). Expected yield: 2-4 HIGH functions.
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-25)
+          BLOCKED on a real, independently-confirmed wairz bug (NOT the "MCP tool not
+          callable" anti-pattern — that correction below was right, tools ARE callable and
+          were called directly this iteration). Before running Pass 10, re-verified Pass 9's
+          (and other regions') claimed renames against the live GZF via list_functions/
+          decompile_function: NONE resolved — 0x8005b79c, 0x8005b9d8, 0x800703f0, 0x80003d10
+          all still show their original FUN_*/Kovah-era names despite work-in-progress.txt
+          claiming HIGH-confidence renames were "Applied via RenamePassN....java (GZF process
+          mode), verified via Ghidra headless run log." Root-caused live: re-ran the real,
+          complete, on-disk script RenamePass9Region80050000.java via run_ghidra_headless
+          (use_saved_project=true) — it printed "RENAMED 0x8005b79c: FUN_8005b79c ->
+          release_connection_record", "RENAME COMPLETE", "Save succeeded for processed file"
+          — yet an immediate decompile_function("release_connection_record") still failed to
+          resolve, and decompile_function("FUN_8005b79c")/list_functions still showed the
+          original name. Also tried start_binary_analysis(force_reanalyze=true) (waited for
+          real completion, ~2 min) as a possible cache-refresh workaround — no change.
+          Conclusion: run_ghidra_headless GZF-process-mode renames do not persist to the
+          project state list_functions/decompile_function/etc. read from, and there is no
+          client-accessible fix. Filed wairz_requested_changes.txt [TODO] (full repro there).
+          Also found RenamePass10Region80050000.java was an empty unfilled stub — so even
+          discounting the persistence bug, "PASS 10 COMPLETE" (0x80050810 ->
+          esco_link_type_dispatcher) in this file's history was never actually applied either.
+          Updated docs to flag the issue: rom_function_index.md (top-of-file caveat,
+          project-wide), reverse_engineering_region_0x80050000.md (status banner + new
+          "Pass 10/11" section), analysis/INDEX.md (this region's line). Do NOT resume this
+          task until wairz_requested_changes.txt's [TODO] is marked [DONE] — and when it is,
+          re-verify a couple of OLDER claimed renames (not just new ones) before trusting the
+          historical rename catalog, since it's unknown how far back this bug goes.
+          The cold-triage script itself (ColdTriageRegion80050000Pass10.java) is unaffected
+          (it only reads/ranks, doesn't rename) — its rank 51+ candidate list is still valid
+          for whenever this resumes.
 
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
+          DO NOT START until wairz_requested_changes.txt's 2026-06-25 rename-persistence
+          [TODO] is marked [DONE] — this task is identically blocked (see PASS 10-11 entry
+          above: renames via run_ghidra_headless GZF process mode report success but never
+          become visible to list_functions/decompile_function, confirmed even after forced
+          re-analysis). Promoted here only per the skill's mechanical promotion step; the
+          unattended loop's check-blockers.sh will exit before this is reached anyway as
+          long as that wairz_requested_changes.txt entry stays [TODO].
           After PASS 10-11 complete, continue sweeping remaining unnamed functions in this region
           using cold-triage + batch-decompile pattern established in passes 3-11.
           BLOCKED (2026-06-24): This is a long-running multi-pass task (each pass yields 1-3 HIGH

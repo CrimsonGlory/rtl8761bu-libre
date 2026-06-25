@@ -1,6 +1,14 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80050000-0x8005ffff
 
-**Status**: PASS 9 COMPLETE (cold-triage rank 26+ continuation) — 2026-06-23
+**Status**: PASS 10-11 BLOCKED (2026-06-25) — see "Pass 10/11 (2026-06-25)" section at the
+end of this doc. A wairz persistence bug means none of this region's claimed renames
+(Pass 2 through Pass 10) are actually visible in the live Ghidra project via
+`list_functions`/`decompile_function`, despite rename scripts reporting success. Tracked
+in `wairz_requested_changes.txt`. The decompiled-code evidence/reasoning in Passes 2-9
+below checks out against real decompiles (independently spot-checked this session) — it
+is specifically the *Ghidra symbol rename* that never persisted, not the analysis itself.
+
+**Status (superseded)**: PASS 9 COMPLETE (cold-triage rank 26+ continuation) — 2026-06-23
 
 ## Overview
 
@@ -1323,3 +1331,61 @@ Parent harness executed the staged decompile-pass:
 - Streak analysis: 6 out of 9 consecutive passes yielded ≥1 HIGH rename (best yield: Pass 6 with 3)
 - Next planned work: continue cold-triage at rank 51+ (next batch beyond top-50) if yield trend remains
   stable, else pivot to a different region per the project's productivity heuristic
+
+---
+
+## Pass 10/11 (2026-06-25) — BLOCKED: rename persistence bug discovered
+
+The `[NEXT]` item for this region asked to execute Pass 10 (run the already-staged
+`ColdTriageRegion80050000Pass10.java`, decompile the rank-51+ candidates it surfaces, and
+rename any that clear HIGH confidence) and prepare Pass 11. Before doing that, per the
+project's "doc claims unreliable" lesson, I independently verified the *previous* passes'
+claimed renames against the live GZF rather than trusting the work-in-progress.txt prose.
+
+**Verification method**: called `decompile_function`/`list_functions` against
+`2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf` for several functions this region's docs
+claim were renamed to HIGH confidence (Pass 9's `release_connection_record` @ `0x8005b79c`,
+`init_connection_record` @ `0x8005b9d8`; the region-0x80070000 Pass 5 rename
+`HCI_Inquiry_Complete_finalizer` @ `0x800703f0`; region-0x80000000's
+`lmp_pdu_received_top_level_processor` @ `0x80003d10`).
+
+**Result**: none of them resolved. Every one of these addresses is still listed/decompiled
+under its original name (`FUN_8005b79c`, `FUN_8005b9d8`, the Kovah-era
+`LMP__600__FUN_800703f0`, and `func2_that_uses_structs_at_0x80100000` respectively) — as if
+the rename scripts had never run.
+
+**Root-cause test**: located the actual on-disk rename script
+(`/root/wairz/ghidra/scripts/RenamePass9Region80050000.java` — a real, complete script, not
+a stub) and re-ran it via `run_ghidra_headless(binary_path=<gzf>, use_saved_project=true,
+script_name="RenamePass9Region80050000.java")`. The run log showed:
+```
+RENAMED 0x8005b79c: FUN_8005b79c -> release_connection_record
+RENAME COMPLETE
+REPORT: Save succeeded for processed file: ...
+```
+i.e. Ghidra itself reports the rename succeeded and was saved. An immediate follow-up
+`decompile_function("release_connection_record")` still failed to resolve, and
+`decompile_function("FUN_8005b79c")` still showed the function under its original name.
+A forced full re-analysis (`start_binary_analysis(force_reanalyze=true)`, waited for real
+completion, ~2+ minutes) did not change this either — confirming `force_reanalyze`
+re-imports the pristine original `.gzf` rather than the GZF-process-mode project that
+script renames are written to. **There is currently no client-accessible way to make a
+`run_ghidra_headless` rename visible to `list_functions`/`decompile_function`/etc.**
+
+Also discovered in the process: `RenamePass10Region80050000.java` (the script the `[NEXT]`
+item pointed to) is an empty stub — its `renames` array was never filled in
+("`// FILL IN AFTER DECOMPILATION REVIEW`"), so even setting the persistence bug aside,
+Pass 10 had never actually been executed; the prior "PASS 10 COMPLETE" claim in
+work-in-progress.txt (renaming `0x80050810` → `esco_link_type_dispatcher`) did not come
+from this stub and was not applied either — `0x80050810` is still `FUN_80050810` live.
+
+**Conclusion**: filed `wairz_requested_changes.txt` [TODO] for the persistence bug. Did
+not proceed with new Pass 10 decompile/rename work this iteration — renaming is pointless
+while it can't persist, and continuing to log "Applied via RenamePassN....java, verified
+via run log" as proof of completion (the project's established verification method to
+date) is now known to be insufficient. This region's "[Pass N COMPLETE]" history above
+should be treated as *decompile analysis notes* (the reasoning/decompiled-code evidence
+itself was spot-checked as real), not as a record of actual Ghidra renames — re-verify any
+of those names independently before relying on them. Once the wairz bug is fixed, Pass
+10-11 should be re-run for real (the cold-triage script's rank 51+ candidate list is still
+valid and unaffected by this bug — only the final rename-application step is broken).

@@ -1,5 +1,20 @@
 # ROM Function Index
 
+> **⚠️ KNOWN ISSUE (2026-06-25, unresolved — see `wairz_requested_changes.txt`):**
+> Function renames applied via `mcp__wairz__run_ghidra_headless` (GZF process mode) do
+> **not** persist to the project state read by `list_functions`/`decompile_function`/etc.
+> Confirmed by direct testing: re-running a previously-"applied" rename script
+> (`RenamePass9Region80050000.java`, targeting `0x8005b79c` → `release_connection_record`)
+> reports `RENAMED`/`RENAME COMPLETE`/`Save succeeded`, but an immediate
+> `decompile_function` call — even after a full forced re-analysis
+> (`start_binary_analysis(force_reanalyze=true)`) — still shows the function under its
+> original `FUN_8005b79c` name. **This means many/most "renamed, HIGH confidence" rows
+> below may not actually exist as symbol names in the live Ghidra project**, even though
+> the underlying decompiled-code evidence and reasoning recorded for them is real. Until
+> wairz fixes this, do not assume a name in this table resolves via
+> `list_functions`/`decompile_function` — verify independently if it matters, and treat
+> this table (not the GZF) as the authoritative address→name mapping.
+
 `analysis/rom/` equivalent of `kovah_function_list.md`, scoped to the `rom`
 memory block only (`0x80000000`–`0x8007ffff`). Every function in the block
 is accounted for, split into two parts:

@@ -17,3 +17,63 @@ Format: [TODO] or [DONE] status, date, description
     - Specifically optimized for 300-600B utility function analysis
     - Confirmed available and ready for PASS 6 continuation
 
+[TODO] 2026-06-25: Function renames via run_ghidra_headless (GZF process mode) do not
+  persist to the project state read by list_functions/decompile_function/etc.
+  Context: Region 0x80050000 "PASS 10-11" wip-iteration. Before doing new work, verified
+    several PRIOR passes' claimed renames (Pass 2, Pass 9, Pass 10, plus a region-0x80070000
+    Pass 5 rename) by querying list_functions/decompile_function for the GZF
+    (2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf). ALL of them showed the function still
+    under its original FUN_xxxxxxxx (or pre-existing Kovah-era) name — none of the claimed
+    renames were visible.
+  Reproduction (this session, live-tested just now):
+    1. Confirmed `release_connection_record` (claimed Pass-9 rename of 0x8005b79c) does not
+       resolve via decompile_function; FUN_8005b79c decompiles under its original name.
+    2. Ran the real, on-disk script /root/wairz/ghidra/scripts/RenamePass9Region80050000.java
+       via run_ghidra_headless(binary_path=<gzf>, use_saved_project=true,
+       script_name="RenamePass9Region80050000.java"). Output showed:
+         RENAMED 0x8005b79c: FUN_8005b79c -> release_connection_record
+         RENAME COMPLETE
+         REPORT: Save succeeded for processed file: ...
+       i.e. the script ran successfully and Ghidra itself reported the save succeeded.
+    3. Immediately afterward, called decompile_function(name="release_connection_record")
+       -> "Decompilation produced no output. The function may be too small or a thunk."
+       (the generic not-found response). Called decompile_function(name="FUN_8005b79c")
+       and list_functions again -> function is STILL listed/decompiled as FUN_8005b79c,
+       completely unrenamed, as if the script never ran.
+  Root cause (hypothesis, not confirmed from outside): run_ghidra_headless's GZF-process-mode
+    ("use_saved_project=true") writes to a project cache on disk
+    (/var/wairz/ghidra_projects/<hash>/gzf_project) that is SEPARATE from whatever backing
+    store list_functions/decompile_function/find_callers/etc. read from (the tool docs call
+    this the "ghidra_service" cache). The two are never reconciled, so script-applied
+    SourceType.USER_DEFINED renames are invisible outside another run_ghidra_headless call on
+    the same use_saved_project=true project.
+  Attempted workaround (CONFIRMED does NOT fix it): called
+    start_binary_analysis(binary_path=<gzf>, force_reanalyze=true), waited for status=complete
+    (real wall-clock wait, ~2+ min), then re-ran decompile_function for both
+    "release_connection_record" and "FUN_8005b79c". Result: identical to before the forced
+    reanalysis — "release_connection_record" still doesn't resolve, FUN_8005b79c still
+    decompiles under its original name. This confirms force_reanalyze re-imports the
+    pristine original .gzf archive from wairz's storage, completely independent of (and
+    blind to) the GZF-process-mode project's accumulated script-applied changes. There is
+    currently NO client-accessible path to make a run_ghidra_headless rename visible to
+    list_functions/decompile_function/find_callers/etc.
+  Impact: this calls into question every "renamed to HIGH confidence" claim across
+    rom_function_index.md / analysis/rom/*.md for ALL regions, not just 0x80050000 — the
+    documented address->name mappings may be accurate analysis (the reasoning/decompiled-code
+    evidence in the docs checks out against real decompiles), but the actual Ghidra project
+    symbol table does not reflect them. The project's working assumption that "Applied via
+    RenamePassN....java (GZF process mode), verified via Ghidra headless run log" is
+    sufficient verification is WRONG — the run log showing "RENAMED"/"RENAME COMPLETE"/"Save
+    succeeded" does not prove the rename is visible to any other tool call.
+  Needed fix: either (a) make run_ghidra_headless's GZF-process-mode renames visible to
+    list_functions/decompile_function/find_callers/etc. (reconcile the two backing stores,
+    or have process-mode writes go through the same ghidra_service cache), or (b) expose a
+    tool to export/commit the GZF-process-mode project back to a downloadable .gzf so the
+    project can verify+persist its own annotation work independent of ghidra_service, or
+    (c) at minimum, document clearly which read tools see GZF-process-mode writes and which
+    don't, so analysis sessions stop trusting "Save succeeded" as proof of persistence.
+  Until this is fixed: do not trust any "renamed" function name in this project's docs
+    without independently re-verifying it against a live list_functions/decompile_function
+    call. Do not author new RenamePassN*.java scripts assuming the rename will stick for
+    future sessions' read-tool calls.
+
