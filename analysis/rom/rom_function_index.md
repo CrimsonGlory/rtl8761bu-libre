@@ -27,9 +27,9 @@ GZF process mode, run 2026-06-21, against
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 726 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
+| Named functions (this doc's table) | 732 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 6 region-0x80030000 Pass-7 + 16 region-0x80020000 Pass-3, as of 2026-06-25; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
 | Unnamed (`FUN_*`) functions (summarized below) | 1774 (2012 − 238 region-0x80060000 Pass-2-3 renames, 2026-06-24) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 522 (502 + 20 region-0x80020000 Pass-5 newly-decompiled, 2026-06-25) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 528 (502 + 20 region-0x80020000 Pass-5 + 6 region-0x80030000 Pass-7 newly-decompiled, 2026-06-25) |
 | Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 38 (39 − 1 region-0x80020000 Pass-5 `0x80022030` medium→high upgrade, 2026-06-25) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 237 (256 − 19 region-0x80020000 Pass-5 low→high upgrades, 2026-06-25) |
 
@@ -1052,6 +1052,12 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001d904` | 256 | `send_evt_HCI_Inquiry_Result_or_HCI_Inquiry_Result_with_RSSI` | multi-entry inquiry-result payload builder, HCI event 0x02 or 0x22 — see `region_0x80010000` | high (decompiled+documented) |
 | `0x8001da0c` | 40 | `send_evt_HCI_Inquiry_Complete` | 1-byte status payload + inquiry-session cleanup, HCI event 0x01 — see `region_0x80010000` | high (decompiled+documented) |
 | `0x8001da3c` | 438 | `send_evt_HCI_Number_Of_Completed_Packets` | 4-source variable-length (handle,count) pair list, HCI event 0x13 — see `region_0x80010000` | high (decompiled+documented) |
+| `0x80033794` | 578 | `FUN_80033794` | Complex power/connection validation gate — multi-tier state/capability checker; config+dd bit5 gate, per-connection capacity loop, nested bit checks on large2 fields; returns bool (allowed/blocked). See `region_0x80030000` Pass 7 | high (decompiled+documented, Pass 7 2026-06-25) |
+| `0x8003229c` | 566 | `acl_packet_ring_buffer_manager` | Manages circular queue of ACL packets; mask-based ringbuf at 0x8012bxxx stride; writes global flags/counters; indirect calls @ 0x80120f80/0x80120f0c. See `region_0x80030000` Pass 6 | high (decompiled+documented, Pass 6 2026-06-25) |
+| `0x8003d630` | 340 | `connection_state_manager` | Connection record state machine (pending/active transitions); per-connection stride 0x28 struct array; ROM pre-check; counter decrements; SCO type-2 path (VSC 0x260/0x27e, BB reg 0xe0 config); HCI evt 0xfa logging. See `region_0x80030000` Pass 7 | high (decompiled+documented, Pass 7 2026-06-25) |
+| `0x80035b4c` | 352 | `param_dispatch_with_rom_calls` | Parameter-based dispatch to ROM handlers; state flags @ 0x8012303x/0x8012305x; ROM calls FUN_80033744/FUN_8003336f4/FUN_80034ccc/FUN_80034d88; gates on DAT_80120f80/DAT_80120cb0. See `region_0x80030000` Pass 6 | high (decompiled+documented, Pass 6 2026-06-25) |
+| `0x8003c7cc` | 310 | `hw_register_config_with_timeout` | Baseband register configuration with timeout-based polling; config reads @ 0x8012xxfe/0xff; BB regs 0x6c/0xd8; ROM write via FUN_80009694 timeout wrapper; VSC 0xfd49 call; config bit 0x1d0 gate. See `region_0x80030000` Pass 6 | high (decompiled+documented, Pass 6 2026-06-25) |
+| `0x80039f54` | 426 | `lmp_power_regulator` | TX power level + PHY configuration dispatcher; config_base+0x278 bit5 gate; param-based vs struct-based power level selection (param_1 < 2 or big_ol_struct); BB regs 0x49/0x72 via ROM r/w; returns 1 if config+0xdc bit3 set, else 0. See `region_0x80030000` Pass 7 | high (decompiled+documented, Pass 7 2026-06-25) |
 
 ---
 

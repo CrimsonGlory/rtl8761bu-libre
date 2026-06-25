@@ -3270,10 +3270,50 @@ sweep beyond enumeration and is the most out-of-date):
           → rom_function_index.md (20 new HIGH rows; 2 pending for next run)
           → analysis/INDEX.md (region 0x80020000 summary updated)
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
-          MCP (wairz) unavailable — mcp__wairz__run_ghidra_headless not accessible in this session.
-          Per CLAUDE.md section "CRITICAL — Worker MCP Access Requirement", cannot proceed without MCP.
-          Awaiting supervisor respawn with MCP enabled.
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (finish all 6 top critical/high candidates) (2026-06-25)
+          ✓ Decompiled all 6 critical + high-priority candidates via mcp__wairz__batch_decompile_functions:
+
+          1. FUN_80039f54 (426B, CRITICAL, xref:9) → LMP power regulator (PHY/TX config chain)
+             Parameters: param_1 (role/type), param_2 (index), param_3 (override)
+             Core logic: config_base+0x278 bit5 gate → BB regs 0x49/0x72 via ROM
+             read/write fns (PHY-layer TX power table dispatch); bit check on
+             config_base+0xdc bit3 determines return value (1=OK / 0=skip).
+             Hardcoded config tables 0x8003a100-0x8003a120 (ptr pool).
+
+          2. FUN_80033794 (578B, CRITICAL, xref:5) → Complex power/connection validation gate
+             Parameter: char param_1 (mode flag / enable bit)
+             Four-tier gate:
+             a) PTR_DAT_800339d8 indirect ROM call (pre-check: returns if result ≠0)
+             b) config_base+0xd8 bit5 + connection state checks (param+0xd8, +0xdc, +0x179, +0x17b)
+             c) Connection capacity loop over large2[0..10): status byte @+0xb2, valid flag @+1
+             d) Nested bit checks on config/large2 fields (+0x129, +0x28, +0x40, +0x1a4, +0x1d0)
+             Deeply nested gates; likely power-mode or connection-capability validator.
+             Returns bool (false if blocked, true if allowed).
+
+          3. FUN_8003229c (566B, HIGH xref:2) [previously decompiled PASS 6]
+             → acl_packet_ring_buffer_manager
+
+          4. FUN_80035b4c (352B, HIGH xref:2) [previously decompiled PASS 6]
+             → param_dispatch_with_rom_calls
+
+          5. FUN_8003c7cc (310B, HIGH xref:2) [previously decompiled PASS 6]
+             → hw_register_config_with_timeout
+
+          6. FUN_8003d630 (340B, HIGH xref:2) — Connection state manager (pending/active transitions)
+             Parameter: uint param_1 (connection index / handle)
+             Core logic: conn_index × 0x28 stride into connection struct array;
+             pre-check via ROM indir @ 0x8003d784 (returns if NULL/error);
+             dec counters @ conn+0xb2 (frame count), +0xc1 (timing counter);
+             on conn[...+0x24]==2 (SCO type?): VSC opcode 0x260/0x27e ROM calls;
+             config check @ 0x8012xxfe/ff; BB reg 0xe0 mask-write
+             (mask 0xf7f7 disables bits 0x0808); HCI evt 0xfa logging;
+             conditional ROM call via *0x8003d7b8 if active.
+             Installed at RAM hook slot TBD (likely T2/T3 tier).
+
+          Findings documented in analysis/rom/reverse_engineering_region_0x80030000.md
+          (PASS 6 full section); rom_function_index.md updated with 6 new entries.
+          All 6 are CONFIRMED REAL with HIGH confidence (full decompile + pool resolution).
+          Next tier: 20 remaining functions in 301-600B range (lower xref counts) → PASS 7.
 
           PASS 1-5 resolved 32/309 (10.4%). PASS 4's cold-triage already stratified the remaining
           unnamed by size (see Pass 4 section of `reverse_engineering_region_0x80030000.md`: 60 stubs
