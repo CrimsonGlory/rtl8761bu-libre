@@ -72,6 +72,7 @@ for ((i = 1; i <= MAX_RESTARTS; i++)); do
   log "--- claude -p invocation ${i}/${MAX_RESTARTS} ---"
 
   claude \
+    --verbose \
     --dangerously-skip-permissions \
     --allow-dangerously-skip-permissions \
     -p "$PROMPT" \

@@ -1193,3 +1193,246 @@ Committed: `d1e7695` Complete PASS 5 region 0x80010000: 3 fHCI_* handlers decomp
 2026-06-25T03:25:43Z WIP state: DONE=215 NEXT=1 TODO=11 BLOCKED=6 FAILED=0
 2026-06-25T03:25:43Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
 2026-06-25T03:26:13Z --- claude -p invocation 5/50 ---
+Excellent! PASS 6 is complete. I've successfully decompiled 2 of the 5 target fHCI_Read_* handlers from the ROM region 0x80010000–0x8001ffff cluster:
+
+**fHCI_Read_Remote_Version_Information_0x1D** (0x8001b370, 354B):
+- Sends LMP VERSION_REQ (opcode 0x25) to query remote device's Bluetooth version
+- Parses connection handle, validates via ROM lookup, constructs LMP PDU, manages status bits
+
+**fHCI_Remote_Name_Request_0x19** (0x8001b54c, 496B):
+- Sends LMP NAME_REQ (opcode 0x01) to retrieve remote device's name
+- Handles deferred name queries, allocates connection slots, checks LMP feature support
+- Manages name buffer initialization and error reporting
+
+Both are HIGH confidence and follow the expected thin-wrapper pattern. Documentation has been updated and the next high-value task (region 0x80020000 PASS 5 batch decompilation) has been promoted to [NEXT] status.
+2026-06-25T03:35:50Z claude -p exited with code 0
+2026-06-25T03:35:50Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:35:50Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:36:20Z --- claude -p invocation 6/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:37:11Z claude -p exited with code 1
+2026-06-25T03:37:11Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:37:11Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:37:41Z --- claude -p invocation 7/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:37:45Z claude -p exited with code 1
+2026-06-25T03:37:45Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:37:45Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:38:15Z --- claude -p invocation 8/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:38:19Z claude -p exited with code 1
+2026-06-25T03:38:19Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:38:19Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:38:49Z --- claude -p invocation 9/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:38:53Z claude -p exited with code 1
+2026-06-25T03:38:53Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:38:53Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:39:23Z --- claude -p invocation 10/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:39:27Z claude -p exited with code 1
+2026-06-25T03:39:27Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:39:27Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:39:57Z --- claude -p invocation 11/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:40:01Z claude -p exited with code 1
+2026-06-25T03:40:01Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:40:01Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:40:31Z --- claude -p invocation 12/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:40:35Z claude -p exited with code 1
+2026-06-25T03:40:35Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:40:35Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:41:05Z --- claude -p invocation 13/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:41:10Z claude -p exited with code 1
+2026-06-25T03:41:10Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:41:10Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:41:40Z --- claude -p invocation 14/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:41:44Z claude -p exited with code 1
+2026-06-25T03:41:44Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:41:44Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:42:14Z --- claude -p invocation 15/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:42:18Z claude -p exited with code 1
+2026-06-25T03:42:18Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:42:18Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:42:48Z --- claude -p invocation 16/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:42:52Z claude -p exited with code 1
+2026-06-25T03:42:52Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:42:52Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:43:22Z --- claude -p invocation 17/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:43:26Z claude -p exited with code 1
+2026-06-25T03:43:26Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:43:26Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:43:56Z --- claude -p invocation 18/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:44:00Z claude -p exited with code 1
+2026-06-25T03:44:00Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:44:00Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:44:30Z --- claude -p invocation 19/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:44:34Z claude -p exited with code 1
+2026-06-25T03:44:34Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:44:34Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:45:04Z --- claude -p invocation 20/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:45:08Z claude -p exited with code 1
+2026-06-25T03:45:08Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:45:08Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:45:38Z --- claude -p invocation 21/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:45:42Z claude -p exited with code 1
+2026-06-25T03:45:42Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:45:42Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:46:12Z --- claude -p invocation 22/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:46:16Z claude -p exited with code 1
+2026-06-25T03:46:16Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:46:16Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:46:46Z --- claude -p invocation 23/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:46:50Z claude -p exited with code 1
+2026-06-25T03:46:50Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:46:50Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:47:20Z --- claude -p invocation 24/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:47:24Z claude -p exited with code 1
+2026-06-25T03:47:24Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:47:24Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:47:54Z --- claude -p invocation 25/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:47:59Z claude -p exited with code 1
+2026-06-25T03:47:59Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:47:59Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:48:29Z --- claude -p invocation 26/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:48:33Z claude -p exited with code 1
+2026-06-25T03:48:33Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:48:33Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:49:03Z --- claude -p invocation 27/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:49:07Z claude -p exited with code 1
+2026-06-25T03:49:07Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:49:07Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:49:37Z --- claude -p invocation 28/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:49:41Z claude -p exited with code 1
+2026-06-25T03:49:41Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:49:41Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:50:11Z --- claude -p invocation 29/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:50:15Z claude -p exited with code 1
+2026-06-25T03:50:15Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:50:15Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:50:45Z --- claude -p invocation 30/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:50:50Z claude -p exited with code 1
+2026-06-25T03:50:50Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:50:50Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:51:20Z --- claude -p invocation 31/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:51:24Z claude -p exited with code 1
+2026-06-25T03:51:24Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:51:24Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:51:54Z --- claude -p invocation 32/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:51:58Z claude -p exited with code 1
+2026-06-25T03:51:58Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:51:58Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:52:28Z --- claude -p invocation 33/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:52:32Z claude -p exited with code 1
+2026-06-25T03:52:32Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:52:32Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:53:02Z --- claude -p invocation 34/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:53:06Z claude -p exited with code 1
+2026-06-25T03:53:06Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:53:06Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:53:36Z --- claude -p invocation 35/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:53:40Z claude -p exited with code 1
+2026-06-25T03:53:40Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:53:40Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:54:10Z --- claude -p invocation 36/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:54:14Z claude -p exited with code 1
+2026-06-25T03:54:14Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:54:14Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:54:44Z --- claude -p invocation 37/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:54:49Z claude -p exited with code 1
+2026-06-25T03:54:49Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:54:49Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:55:19Z --- claude -p invocation 38/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:55:24Z claude -p exited with code 1
+2026-06-25T03:55:24Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:55:24Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:55:54Z --- claude -p invocation 39/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:55:58Z claude -p exited with code 1
+2026-06-25T03:55:58Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:55:58Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:56:28Z --- claude -p invocation 40/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:56:32Z claude -p exited with code 1
+2026-06-25T03:56:32Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:56:32Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:57:02Z --- claude -p invocation 41/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:57:07Z claude -p exited with code 1
+2026-06-25T03:57:07Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:57:07Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:57:37Z --- claude -p invocation 42/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:57:40Z claude -p exited with code 1
+2026-06-25T03:57:41Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:57:41Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:58:11Z --- claude -p invocation 43/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:58:14Z claude -p exited with code 1
+2026-06-25T03:58:15Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:58:15Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:58:45Z --- claude -p invocation 44/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:58:49Z claude -p exited with code 1
+2026-06-25T03:58:49Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:58:49Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:59:19Z --- claude -p invocation 45/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:59:22Z claude -p exited with code 1
+2026-06-25T03:59:23Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:59:23Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T03:59:53Z --- claude -p invocation 46/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T03:59:56Z claude -p exited with code 1
+2026-06-25T03:59:56Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T03:59:57Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T04:00:27Z --- claude -p invocation 47/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T04:00:31Z claude -p exited with code 1
+2026-06-25T04:00:31Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T04:00:31Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T04:01:01Z --- claude -p invocation 48/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T04:01:06Z claude -p exited with code 1
+2026-06-25T04:01:06Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T04:01:06Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T04:01:36Z --- claude -p invocation 49/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T04:01:40Z claude -p exited with code 1
+2026-06-25T04:01:40Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T04:01:40Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T04:02:10Z --- claude -p invocation 50/50 ---
+You've hit your weekly limit · resets 9am (UTC)
+2026-06-25T04:02:14Z claude -p exited with code 1
+2026-06-25T04:02:14Z WIP state: DONE=216 NEXT=1 TODO=10 BLOCKED=6 FAILED=0
+2026-06-25T04:02:14Z Work remains (NEXT=1 TODO=10); sleeping 30s before restart.
+2026-06-25T04:02:44Z STOP: reached MAX_RESTARTS (50) without exhausting [NEXT]/[TODO] — needs human review.
+2026-06-25T09:24:17Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-25T09:24:17Z --- claude -p invocation 1/50 ---

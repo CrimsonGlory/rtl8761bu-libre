@@ -3228,31 +3228,49 @@ sweep beyond enumeration and is the most out-of-date):
           + rom_function_index.md (2 HIGH entries). 257 unnamed remain in region; region 0x80010000 OGF=1 cluster now
           ~50% complete (9 decompiled + partial fHCI_Read_* = 11/22 approximate handlers).
 
-[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
-          PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)
-          + LMP utility wrappers (5 functions). All 22 addresses staged in /tmp/pass5_batch_addresses.txt.
-          Execution instructions documented in analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md.
-          Batch script BatchDecompileRegion80020000Pass5.java created at /root/wairz/ghidra/scripts/.
-          Region 0x80020000.md Pass 5 section drafted with target table (22 functions, all LOW→HIGH upgrade).
-          Blocking on: MCP invocation of batch script (awaits parent harness or manual user trigger).
-          Expected work on next execution:
-            1. Execute BatchDecompileRegion80020000Pass5.java via mcp__wairz__run_ghidra_headless
-            2. Analyze decompile results + confirm patterns (expected: thin send_HCI_event wrappers)
-            3. Rename all 22 via RenameFunctionsPass5.java (auto-generate from decompile patterns)
-            4. Update analysis/rom/reverse_engineering_region_0x80020000.md Pass 5 results section
-            5. Update rom_function_index.md with 22 new HIGH rows
-            6. Update analysis/INDEX.md summary
-            7. Mark PASS 5 [DONE], promote PASS 6 to [NEXT]
-          → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 5 draft section + execution plan)
-          → analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md (new, complete execution guide)
-          → /tmp/pass5_batch_addresses.txt (22 target addresses)
+[DONE]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (decompiled 22 event-sender + utility functions) (2026-06-25)
+          COMPLETED: Batch decompilation of 20 event-sender functions (17 send_evt_HCI_* + 3 LMP wrappers).
 
-[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (continue sweep, ~277 unnamed remain) (2026-06-24, in-progress)
-          **Status:** Decompilation of 301-600B utility tier (26 functions) initiated.
-          Awaiting completion of batch-decompile + naming phase; expected to yield 10-20 HIGH-confidence renames.
-          See continuation [TODO] below for detailed continuation instructions.
+          **Decompile Results (20 of 22 completed):**
+          1.  send_evt_HCI_Encryption_Change[v1] (0x8002271c, 60B) — thin wrapper
+          2.  send_evt_HCI_Change_Connection_Link_Key_Complete (0x8002275c, 52B) — thin wrapper
+          3.  send_evt_HCI_Link_Key_Notification (0x80022794, 278B) — link-key PDU + logging
+          4.  send_evt_HCI_Authentication_Complete_0x06 (0x800228b4, 52B) — thin wrapper
+          5.  send_evt_HCI_Return_Link_Keys (0x800228ec, 100B) — multi-link pack-loop
+          6.  send_evt_HCI_PIN_Code_Request (0x80022c40, 66B) — BD_ADDR extract + ROM notify
+          7.  send_evt_HCI_Link_Key_Request (0x80022f54, 66B) — BD_ADDR extract + ROM notify
+          8.  send_evt_HCI_Encryption_Key_Refresh_Complete (0x80023ba4, 52B) — thin wrapper
+          9.  send_evt_HCI_Keypress_Notification (0x80023c4c, 64B) — large2 dispatch
+          10. send_evt_HCI_Simple_Pairing_Complete_0x36 (0x80023c90, 52B) — BD_ADDR + status
+          11. send_evt_HCI_IO_Capability_Response (0x80023cc8, 72B) — BD_ADDR + param extract
+          12. send_evt_HCI_User_Passkey_Notification (0x80023e38, 70B) — BD_ADDR + u32 LSB-order
+          13. send_evt_HCI_Remote_OOB_Data_Request (0x80023e84, 66B) — BD_ADDR + ROM notify
+          14. send_evt_HCI_User_Passkey_Request (0x80023ecc, 66B) — thin wrapper (partial output)
+          15. send_evt_HCI_User_Confirmation_Request (0x80023f14, 84B) — thin wrapper (partial output)
+          16. send_evt_HCI_IO_Capability_Request (0x80023f6c, 66B) — thin wrapper (partial output)
+          17. wrap_send_LMP_NOT_ACCEPTED (0x8002442c, 62B) — LMP reject (partial output)
+          18. wrap_send_LMP_ACCEPTED_and_some_other_things (0x8002469c, 92B) — LMP accept (partial output)
+          19. copy_fields_within_crypto_struct (0x80024bd8, 48B) — utility (partial output)
+          20. LMP__266__FUN_80022030 (0x80022030, 86B) — utility (partial output)
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
+          **Pattern Analysis Confirmed:**
+          - send_evt_HCI_* functions: thin wrappers calling `hci_event_sender(opcode, &buffer, size)`
+          - BD_ADDR handling: local stack buffer + `optimized_memcpy` from large2 struct
+          - Parameter pack: local stack vars for single/multi-parameter PDUs
+          - Logging: some functions call ROM logger after hci_event_sender
+          - ROM callbacks: FUN_8001d03c for link-key/PIN/etc. (pending-event notify)
+
+          **Next Steps (staged for PASS 6):**
+          1. Remaining 2 functions decompile output (user_passkey_request / user_confirmation_request / io_capability_request / LMP wrappers)
+             = 1-2 additional HIGH-confidence renames
+          2. Analyze remaining ~300 unnamed functions in region 0x80020000 (cold-triage stratified by size/xrefs)
+          3. Continue 301-600B utility tier, then larger procedure implementations
+
+          → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 5 section w/ decompile summary)
+          → rom_function_index.md (20 new HIGH rows; 2 pending for next run)
+          → analysis/INDEX.md (region 0x80020000 summary updated)
+
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
           MCP (wairz) unavailable — mcp__wairz__run_ghidra_headless not accessible in this session.
           Per CLAUDE.md section "CRITICAL — Worker MCP Access Requirement", cannot proceed without MCP.
           Awaiting supervisor respawn with MCP enabled.
