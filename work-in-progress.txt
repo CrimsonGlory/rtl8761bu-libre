@@ -3432,20 +3432,20 @@ sweep beyond enumeration and is the most out-of-date):
           Remaining unnamed: ~184 (post-cold-triage). Next: PASS 11 tier-2 continuation.
           → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 10 + PASS 11 plan)
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~184 to resolve)
-          [2026-06-25] PASS 11 script created: /root/wairz/ghidra/scripts/ColdTriageRegion80070000Pass11.java
-          Stratified batch strategy: rank all remaining unnamed by tier (CRITICAL >600B,
-          COMPLEX 301-600B, HANDLER 151-300B, SIMPLE 51-150B, STUB <50B).
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11 CRITICAL tier batch 1 (6 functions decompiled, 4× HIGH + 2× MEDIUM) — 2026-06-25
+        [2026-06-25] Executed ColdTriageRegion80070000Pass11.java via MCP; 191 total unnamed enumerated.
+        CRITICAL tier (6 functions): 0x80072924, 0x80072bac (HIGH — AFH/LAP slot allocators), 0x8007814c,
+        0x80077bcc (MEDIUM — QoS/PSM negotiators), 0x80074940 (MEDIUM — feature selector), 0x800791d0
+        (MEDIUM — auth payload parser). Decompilation + confidence classification complete.
+        Next: COMPLEX tier batch (13 functions, 301-600B range); then HANDLER tier (33 functions, 151-300B).
+        → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 CRITICAL results documented)
 
-          NEXT: execute via Ghidra + MCP (GZF process mode):
-            1. Run: mcp__wairz__run_ghidra_headless(script_name="ColdTriageRegion80070000Pass11",
-               binary_path="/root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
-               use_saved_project=True)
-            2. Output: stratified list per tier (CRITICAL/COMPLEX/HANDLER first)
-            3. For each tier: batch-decompile via DecompileAddr.java, assess purpose, rename
-            4. Update rom_function_index.md + commit each tier when complete
-
-          Estimated effort: ~3-4 complete batches to exhaust top 3 tiers (~30+ functions per batch)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11 COMPLEX tier batch 2 (13 functions, 301-600B)
+        Prioritize high-xref-out targets: 0x80070084 (414B, 19 xref_out, already HIGH-renamed),
+        0x80070574 (582B, 17 xref_out, already HIGH-renamed), 0x80071138 (306B, 14 xref_out),
+        0x8007276c (424B, 3 xref_out). Execute batch-decompile via MCP (~10-12 min), assess
+        purpose per function, apply rename script, update rom_function_index.md, commit batch.
+        Estimated effort: ~3-4 more batches (COMPLEX + top HANDLER) to reach diminishing returns
 
 [TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally

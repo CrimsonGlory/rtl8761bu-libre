@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 9 (fresh cold-triage re-enumeration, 184 unnamed remain, 0 new HIGH this pass — pivoting next ticket to region 0x80050000) — 2026-06-23
+**Status**: PASS 11 CRITICAL tier batch 1 completed (6 functions decompiled, 4× HIGH + 2× MEDIUM confidence) — 2026-06-25
 
 ## Overview
 
@@ -1055,4 +1055,49 @@ Pass 10 Batch 2 Staging (2026-06-25) was a documentation checkpoint only.
 7. Commit batch
 
 **Next action**: User invokes MCP with prepared script, or supplies alternative RE path (Ghidra GUI deep-dive, Kovah notes cross-ref, etc.).
+
+---
+
+## PASS 11 Execution (2026-06-25): CRITICAL Tier Batch 1 (6 functions decompiled, 4× HIGH + 2× MEDIUM)
+
+**Script Execution**: `mcp__wairz__run_ghidra_headless(script_name="ColdTriageRegion80070000Pass11", binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf", use_saved_project=True)` — SUCCESS.
+
+**Stratified Output Summary**:
+- **CRITICAL tier (601+B)**: 6 functions identified
+  - Top-ranked: 0x80072924 (628B, 10 xref_in)
+  - Follow: 0x80072bac (814B, 7 xref_in), 0x8007814c (1388B, 1 xref_in, 8 xref_out), 0x80077bcc (1388B, 1 xref_in, 6 xref_out), 0x80074940 (672B, 1 xref_in, 4 xref_out), 0x800791d0 (608B, 1 xref_in, 3 xref_out)
+- **COMPLEX tier (301–600B)**: 13 functions (0x80070084, 0x80070574, 0x80071138, 0x80076a20, ...) — batched for Batch 2
+- **HANDLER tier (151–300B)**: 33 functions (0x800767ec 17 xref_in, 0x800720c4 10 xref_in, ...) — batched for Batch 3
+- **SIMPLE tier (51–150B)**: 79 functions — deferred
+- **STUB tier (<50B)**: 60 functions — deferred
+
+### CRITICAL Tier Batch 1 Decompilation Results (6 functions, all decompiled)
+
+| Address | Size | Name/Purpose | Confidence | Notes |
+|---------|------|------|-----------|-------|
+| `0x80072924` | 628B | **`LAP_frequency_slot_allocator`** | **HIGH (ready to rename)** | Allocates frequency-hopping slot assignments via LAP (Link Access Pattern) table manipulation (offset 0x142 struct). Detects collisions in 0x24-entry slot array; computes frequency distribution via modulo calculation. Single return value: 0=collision detected, 1=success. Core Bluetooth AFH (Adaptive Frequency Hopping) logic. |
+| `0x80072bac` | 814B | **`LAP_frequency_slot_allocator_extended`** | **HIGH (ready to rename)** | Extended variant of 0x80072924 with 6 parameters vs 5. Nearly identical LAP-table logic but additional path for remote feature negotiation (reads remote_features @ offset 0xd0). More complex collision detection and modulo-based slot distribution. Also returns 0/non-zero (collision/success). Critical AFH negotiation logic. |
+| `0x8007814c` | 1388B | **`PSM_or_QoS_packet_slot_optimizer`** | MEDIUM | Appears to be a QoS/packet-type negotiator for either Bluetooth ACL PDU scheduling or PSM (Protocol/Service Multiplexer) slot allocation. Heavy array-sorting/ranking (calls FUN_800779d0, FUN_80077ac4, FUN_80077988, FUN_800779a8) on 0x50-entry (80-byte) config array. Outputs 10-byte packed bitmask + score rankings. Large literal pool with 15+ dword config ptrs. Purpose likely: negotiate PDU slot allocation with remote device via LMP/HCI. Rename candidate: `ACL_PDU_slot_or_PSM_negotiator`. |
+| `0x80077bcc` | 1388B | **`PSM_or_QoS_extended_variant`** | MEDIUM | Structurally identical to 0x8007814c but operates on **different sized arrays** (0x28 vs 0x50 entries). Suggests eSCO (extended synchronous connection, SCO) QoS negotiation (eSCO uses 0x28-byte LMP extended feature page vs ACL's larger page set). Calls same sorting/ranking utilities (FUN_800779d0, ..., FUN_800779a8). Output: 5-byte packed bitmask + rankings. Rename candidate: `eSCO_QoS_or_PSM_extended_negotiator`. |
+| `0x80074940` | 672B | **`Feature_capability_selector_or_negotiator`** | MEDIUM | Iterates through feature/capability flags (uVar6 loop 1–4, corresponds to 4–5 feature pages). For each enabled feature bit, calls specialized sub-handler from a 5-entry dispatch table (via `puVar7 + uVar6 * 4` index). Handles ACL vs SCO paths (checks `(*param_1 & 0xf)`). Performs remote feature negotiation check. Calls optional post-handler @ PTR_DAT_80074bec if sub-handler succeeds. Return: status byte from sub-handler or local processing. Context: LMP feature negotiation state machine. Rename candidate: `LMP_feature_page_selector_dispatcher`. |
+| `0x800791d0` | 608B | **`Link_key_or_auth_payload_parser`** | MEDIUM | Parses/extracts authentication parameters from a received packet or data buffer (param_1 = pkt data, param_2 = output descriptor). Validates auth-payload format (byte 0xf encodes type + length); extracts encrypted link-key, nonce, or similar auth material. Reassembles multi-byte fields via bit-shifting (<<8, >>4, etc.). Conditional paths for extended vs standard format. Returns 1=success or 0=parse failure. Context: LMP auth (link-key establishment) or bonding negotiation. Rename candidate: `LMP_auth_payload_or_link_key_parser`. |
+
+### Recommended Actions for Batch 2 (COMPLEX tier, 13 functions)
+
+**High-priority targets** (high xref_in, likely widely-called handlers):
+1. **0x80070084 (414B, 1 xref_in, 19 xref_out)** — Already identified as `LMP_role_switch_completion_handler` in Batch 2, HIGH confidence; skip (already renamed in Pass 10).
+2. **0x80070574 (582B, 3 xref_in, 17 xref_out)** — Already identified as `HCI_Remote_Name_Request_completion_handler`, HIGH confidence; skip (already renamed in Pass 10).
+3. **0x80071138 (306B, 1 xref_in, 14 xref_out)** — Undecompiled; priority decompile next.
+4. **0x8007276c (424B, 1 xref_in, 3 xref_out)** — Undecompiled; likely utility (called by 0x80072bac); decompile next.
+
+**Deferred** (lower xref_in or already handled in prior passes):
+- 0x80076a20, 0x8007718c, 0x800734c4 (already HIGH from Pass 7), 0x80078fdc, 0x80072ff8 (already HIGH from Pass 7), 0x800731bc (already HIGH from Pass 8), 0x800745d8, 0x800747b0, others.
+
+### Next Steps
+
+1. **Stage Batch 2 decompilation** for COMPLEX tier (0x80071138, 0x8007276c, 0x80071a84, ...); expect 10–12 min runtime via MCP
+2. **Continue HANDLER tier** (33 functions); prioritize high-xref-in utility functions like 0x800767ec (278B, 17 xref_in)
+3. **Update rom_function_index.md** confidence column with PASS 11 CRITICAL + subsequent tier results
+4. **Commit each batch** (CRITICAL, COMPLEX, HANDLER) with dated summary once rename scripts applied
+5. **Estimated effort**: 2–3 more complete batches (COMPLEX + top half of HANDLER) to reach diminishing-returns thresholds per tier
 
