@@ -9,9 +9,9 @@ env:
   MCP_ALLOW_UNSAFE_LOCALHOST: "true"
 ---
 
-# WIP Iteration — Single Step
+# Work in progress
 
-One iteration of work-in-progress.txt management. **All work is done in the main supervisor context — NO WORKERS, NO AGENTS, NO SUBAGENTS.**
+Do NEXT item in work-in-progress.txt. **All work is done in the main supervisor context — NO WORKERS, NO AGENTS, NO SUBAGENTS.**
 
 This skill works fine via `claude -p` (non-interactive mode) as long as `.mcp.json` is loaded
 (pass `--mcp-config .mcp.json`) and wairz is not in `disabledMcpjsonServers`.

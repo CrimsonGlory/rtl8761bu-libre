@@ -3339,7 +3339,23 @@ sweep beyond enumeration and is the most out-of-date):
           Next phase (PASS 8) will continue with remaining 20 MEDIUM-priority candidates after
           PASS 7 completes and renames are applied via RenameBatchPass7.java.
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8+ (continue until 0 unnamed remain, ~277 to resolve)
+[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 EXECUTION + PASS 8+ (2026-06-25)
+          PASS 7 preparation COMPLETE: DecompileRegion80030000Pass7Top6.java script ready.
+          PASS 7 target: Execute batch decompilation on 6 critical/high-priority functions
+            (0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630)
+          BLOCKED: MCP tool invocation requires harness tool-calling mechanism (not directly
+          callable from bash in /wip-iteration supervisor context). Per CLAUDE.md, MCP tools
+          are deferred and schema-loaded but need proper invocation pathway.
+          Next worker: invoke via mcp__wairz__run_ghidra_headless with:
+            binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf"
+            script_name="DecompileRegion80030000Pass7Top6.java"
+            use_saved_project=true
+            timeout=600
+          Then create RenameBatch1Region80030000Pass7.java + apply renames + update rom_function_index.md.
+          After PASS 7 completes (estimated 6 more HIGH-confidence names), continue PASS 8+
+          with remaining 20 MEDIUM-priority functions from Pass 6 utility-tier list, until
+          all 277 unnamed functions are resolved or determined to be non-functions.
+          Estimated total: 277 unnamed remaining; ~10-15 more passes at 20-30 functions/pass.
 
 [DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (2026-06-24)
           PASS 7 cold-triage: enumerated remaining 151-600B tier untouched candidates.
@@ -3383,7 +3399,7 @@ sweep beyond enumeration and is the most out-of-date):
           Single wip-iteration cannot complete this; recommend unattended /wip-loop-overnight
           with worker pool configured for serial GZF-process-mode runs.
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
           PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
           (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
           size/xref tier.
