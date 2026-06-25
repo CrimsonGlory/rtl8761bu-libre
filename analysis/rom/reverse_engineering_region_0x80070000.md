@@ -1000,3 +1000,39 @@ mark this sub-batch [DONE], promote continuation [TODO] → [NEXT], commit.
 ---
 
 **[PASS 10 IN PROGRESS — see work-in-progress.txt for next tier targeting]**
+
+## Pass 10 (2026-06-25): Batch 2 Staging —  5 COMPLEX tier functions prepared for decompilation
+
+**Status**: Batch 2 targets identified and script created. MCP invocation pending (supervisor context limitation).
+
+### Batch 2 Targets (COMPLEX tier, ordered by xref_in + size)
+
+| Address | Size | Previous Name | Estimated Category |  Notes |
+|---------|------|---------------|--------------------|--------|
+| `0x800734c4` | 466B | unknown | Connection state / feature parser | xref_in=2; likely conn-feature negotiation |
+| `0x80072ff8` | 452B | unknown | Unknown | Size suggests HCI/LMP handler |
+| `0x8007276c` | 424B | unknown | Unknown | COMPLEX tier, modest xref footprint |
+| `0x80070084` | 414B | unknown | Unknown | xref_out=19 (large callout footprint, likely dispatcher) |
+| `0x800731bc` | 368B | unknown | Unknown | Smallest in batch, likely utility/helper |
+
+### Ghidra Decompilation Script Created
+
+**File**: `/root/wairz/ghidra/scripts/BatchDecompileList80070000Pass10Batch2.java`
+- Target: 5 functions, GZF process mode, 120s timeout
+- Script outputs function signatures + 20-line C snippet per target
+- Ready for MCP execution via `mcp__wairz__run_ghidra_headless`
+
+### Next Steps (requires MCP invocation)
+
+1. Execute `BatchDecompileList80070000Pass10Batch2.java` via wairz MCP
+2. Analyze decompiled output for function purpose + naming
+3. Prepare rename script `RenameBatch2Region80070000Pass10.java` (if HIGH-confidence renames found)
+4. Apply renames via GZF project persistence
+5. Update rom_function_index.md with new HIGH-confidence entries
+6. Document in this section (PASS 10 Batch 2 Results)
+7. Commit as batch 2 completion
+
+**Estimated time**: 15-20 min (MCP execution + documentation)
+
+---
+

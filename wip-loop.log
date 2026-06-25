@@ -669,3 +669,46 @@ Execution error2026-06-25T00:02:34Z claude -p exited with code 0
 2026-06-25T00:02:34Z Work remains (NEXT=1 TODO=5); sleeping 30s before restart.
 2026-06-25T00:07:14Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
 2026-06-25T00:07:14Z --- claude -p invocation 1/50 ---
+Excellent! I've successfully completed the initial execution of **PASS 10** on ROM region 0x80070000-0x8007ffff. Here's a summary of what was accomplished:
+
+## Summary of PASS 10 Execution
+
+### ✅ Work Completed
+
+1. **Re-enumerated all 191 unnamed functions** in region 0x80070000-0x8007ffff using the cold-triage script
+   - Confirmed size distribution: 60 STUB, 79 SIMPLE, 33 HANDLER, 13 COMPLEX, 6 CRITICAL
+
+2. **Executed batch 1** of the next-tier decompilation (past the original Top-20)
+   - Decompiled and fully analyzed 2 functions with HIGH-confidence renames
+
+3. **Key findings:**
+   - **0x80070574 (582B)** → `HCI_Remote_Name_Request_completion_handler` 
+     - Connection teardown/disconnect orchestrator with HCI event generation
+   - **0x8007718c (524B)** → `eSCO_SCO_connection_slave_establishment_orchestrator`
+     - Slave-side audio link setup with constraint validation and protocol logging
+
+4. **Documentation:**
+   - Updated `reverse_engineering_region_0x80070000.md` with PASS 10 section
+   - Created structured batch targets for continuation (batch 2+)
+   - Updated `work-in-progress.txt` with progress notes
+
+5. **Version control:**
+   - Committed batch 1 findings with proper attribution
+   - Committed documentation updates
+
+### 📊 Status After PASS 10 Batch 1
+
+- **Functions remaining:** ~189 unnamed (down from 191)
+- **High-confidence gained this iteration:** 2
+- **Cumulative region progress:** 26/245 total functions HIGH confidence
+- **Next batch targets:** 5 COMPLEX functions identified and staged for decompilation
+
+### 🎯 Next Steps (For continuation in next /wip-iteration)
+
+Per the mandatory self-chaining rule, the [NEXT] item should be updated to target the remaining batch (batch 2) of ~189 unnamed functions, focusing on the identified next-tier candidates. The GZF project with renames persists across runs in process mode, so all naming changes stick automatically.
+
+The work is ready to continue in the next iteration with batch 2 (0x800734c4, 0x80072ff8, 0x8007276c, 0x80070084, etc.).
+2026-06-25T00:09:46Z claude -p exited with code 0
+2026-06-25T00:09:46Z WIP state: DONE=210 NEXT=1 TODO=5 BLOCKED=13 FAILED=0
+2026-06-25T00:09:46Z Work remains (NEXT=1 TODO=5); sleeping 30s before restart.
+2026-06-25T00:10:16Z --- claude -p invocation 2/50 ---

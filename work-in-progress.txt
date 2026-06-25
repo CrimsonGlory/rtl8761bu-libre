@@ -3399,16 +3399,31 @@ sweep beyond enumeration and is the most out-of-date):
           Single wip-iteration cannot complete this; recommend unattended /wip-loop-overnight
           with worker pool configured for serial GZF-process-mode runs.
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (continue sweep, 191 unnamed remain)
+[BLOCKED]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (continue sweep, 189 unnamed remain)
           PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
           (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
           size/xref tier.
 
-          PASS 10 IN PROGRESS (2026-06-23): Decompiling next tier beyond Top-20. Batch 1 of 4
-          functions decompiled:
+          PASS 10 progress (2026-06-23–2026-06-25): Decompiling next tier beyond Top-20.
+
+          Batch 1 of 4 (2026-06-23): 2 functions decompiled:
           - 0x80070574 (582B, COMPLEX) → remote_name_request_connection_complete_handler — HIGH
           - 0x8007718c (524B, COMPLEX) → esco_sco_connection_establishment_slave_side_orchestrator — HIGH
-          Continuing with batch 2 (0x800734c4, 0x80072ff8, 0x8007276c, 0x80070084, 0x800731bc).
+
+          Batch 2 of 4 (2026-06-25): Script created, 5 targets staged for MCP execution:
+          - 0x800734c4 (466B) — connection feature-page parser cluster
+          - 0x80072ff8 (452B) — unknown
+          - 0x8007276c (424B) — unknown
+          - 0x80070084 (414B) — large callout footprint (xref_out=19)
+          - 0x800731bc (368B) — unknown
+
+          **Blocker**: MCP invocation from supervisor context (non-interactive /wip-iteration mode)
+          cannot establish bidirectional MCP stdio connection for long-running Ghidra process.
+          Script BatchDecompileList80070000Pass10Batch2.java created and ready in
+          /root/wairz/ghidra/scripts/. Execute via:
+            - User manual invocation (interactive Claude Code session with MCP enabled)
+            - OR: Next unattended /wip-loop-overnight iteration (will retry in fresh session)
+          Analysis doc updated with batch 2 staging (reverse_engineering_region_0x80070000.md).
 
 [TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~191 to resolve)
 
