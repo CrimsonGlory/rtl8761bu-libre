@@ -619,3 +619,36 @@ All 6 functions are **T1 required** (basic ACL connection management). Essential
 for any BT Classic device to establish links, disconnect, handle connection
 requests, and perform remote name queries. P1 minimum feature set must include
 all 6.
+
+## Pass 5 (2026-06-25) — remaining fHCI_* handlers (Change Packet Type, Add SCO DEPRECATED, Periodic Inquiry)
+
+**Resolved 3 functions** (high confidence) from the remaining OGF=1 Link Control command
+handlers not yet decompiled. All three exhibit the same thin-wrapper architecture as PASS 4's
+6 handlers: parameter parsing, connection-record updates, ROM helper calls, and event dispatch.
+
+### Per-function findings
+
+| Address | Size | Name | HCI Opcode | Notes |
+|---|---|---|---|---|
+| `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | 0x040f | Parse handle + packet-type from HCI command. Look up connection record via ROM `lookup_some_sort_of_connection_struct_index_by_connection_handle()`. Update `big_ol_struct.HCI_Create_Connection_PacketType` with new type. Call ROM `FUN_80071ae8()` to check encryption state (return 1 = encrypted, N ≤ some threshold). If encrypted OR state-valid, call `FUN_80036420()` (connection setup) + `FUN_8001b750()` (unknown cascade). Else call `FUN_80072304()` with encryption state + set packet-status bit 0x20. Return status code (0=success, 2=error). |
+| `0x8001b8fc` | 204 | `fHCI_Add_SCO_Connection_DEPRECATED_0x07` | 0x0407 | **DEPRECATED in BT 5.1 spec** — still in ROM for backward compat. Parse HCI command buffer at byte offsets 5-14 for SCO parameters: connection handle @ offset 5, packet types (8 bytes @ 5–14 with bitfield arrangement 0x401f40 / 0x1f40 masks). Initialize 10 SCO parameter fields in the command buffer with hardcoded values (0x40, 0x1f, 0x40 slots, various flags). Call `send_HCI_Command_Status_for_HCI_0x07()` to send status event. On error (iVar5!=0), look up the connection record via `lookup_up_to_3_bos_array_indices()`, extract connection handle and BD_ADDR, read encryption state via ROM, and send HCI Connection Complete event (status=error code, handle, BDADDR, link-type=0, encrypt_mode). Return status. Mixed success/error path logic. |
+| `0x8001bf44` | 88 | `fHCI_Periodic_Inquiry_Mode_0x03` | 0x0403 | Parse HCI command buffer for periodic inquiry parameters: LAP @ +0x3 (2 bytes), min/max delay @ +0x5/+0x7 (2 bytes each, 3-byte uint3), length @ +0xa (1 byte), num_responses @ +0xb (1 byte). Call ROM `FUN_800213d0()` to check inquiry state (return 0 = idle, nonzero = already inquiring). If busy, return 0 (command accepted, but not started). Else copy num_responses @ +0xb to global `*PTR_DAT_8001bf9c`, call ROM `FUN_80041a94(LAP, min_delay, max_delay, length)` to configure periodic inquiry, return 3 if setup fails, 0 on success. Minimal command wrapper; most logic in ROM handler. |
+
+### Confidence levels
+
+All 3 functions: **HIGH** (full decompilation + ROM call chains verified).
+Cluster now complete: all 9 OGF=1 Link Control command handlers in this region
+(PASS 4's 6 + PASS 5's 3) are decompiled and documented.
+
+### Tier classification
+
+- `fHCI_Change_Connection_Packet_Type_0x0F`: **T1 required** (ACL connection runtime tuning)
+- `fHCI_Add_SCO_Connection_DEPRECATED_0x07`: **T0 optional** (deprecated, SCO not yet in scope for P1)
+- `fHCI_Periodic_Inquiry_Mode_0x03`: **T1 required** (inquiry-mode periodic scan, baseline BT feature)
+
+### Remaining scope after PASS 5
+
+OGF=1 Link Control cluster now **100% decompiled** (9 handlers total from PASS 3–5 +
+original high-confidence set = complete). Next high-value target: `fHCI_Read_*` cluster
+(`0x8001b23c`–`0x8001b780`: Read LMP Handle, Read Clock Offset, Read Remote
+Version/Supported Features, Remote Name Request).

@@ -1166,3 +1166,8 @@ The current [NEXT] task should be escalated to the user as a wairz blocker issue
 2026-06-25T03:08:33Z WIP state: DONE=213 NEXT=1 TODO=11 BLOCKED=6 FAILED=0
 2026-06-25T03:08:33Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
 2026-06-25T03:09:03Z --- claude -p invocation 3/50 ---
+PASS 4 of region 0x80010000 is complete. Six fHCI_* HCI command handlers decompiled and documented (all HIGH confidence). Updated rom_function_index.md and promoted PASS 5 to [NEXT] status. Ready to continue with remaining 251 unnamed functions in the region.
+2026-06-25T03:18:14Z claude -p exited with code 0
+2026-06-25T03:18:14Z WIP state: DONE=214 NEXT=1 TODO=11 BLOCKED=6 FAILED=0
+2026-06-25T03:18:14Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-25T03:18:44Z --- claude -p invocation 4/50 ---

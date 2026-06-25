@@ -29,8 +29,8 @@ GZF process mode, run 2026-06-21, against
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
 | Named functions (this doc's table) | 726 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
 | Unnamed (`FUN_*`) functions (summarized below) | 1774 (2012 − 238 region-0x80060000 Pass-2-3 renames, 2026-06-24) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 499 (403 + 96 region-0x80060000 Pass-2-3 newly-decompiled) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 42 (88 − 20 region-0x80010000 pass-2 upgrades − 10 region-0x80030000 Pass-3 upgrades − 16 region-0x80020000 Pass-3 upgrades) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 502 (403 + 96 region-0x80060000 Pass-2-3 newly-decompiled + 3 region-0x80010000 PASS 5 newly-decompiled) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 39 (88 − 20 region-0x80010000 pass-2 upgrades − 10 region-0x80030000 Pass-3 upgrades − 16 region-0x80020000 Pass-3 upgrades − 3 region-0x80010000 PASS 5 upgrades) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 256 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high − 1 region-0x80030000 Pass-5 `0x80032540` low→high upgrade) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
@@ -510,13 +510,13 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | fHCI Read Remote Version Information 0x1D send LMP VERSION REQ 0x25 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b4e8` | 96 | `fHCI_Read_Remote_Supported_Features_0x1B` | fHCI Read Remote Supported Features 0x1B | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | fHCI Remote Name Request 0x19 — thin wrapper sends LMP NAME REQ 0x01 with error handling | high (decompiled+documented) |
-| `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | fHCI Change Connection Packet Type 0x0F | medium (named, one-line purpose only, not decompiled) |
-| `0x8001b8fc` | 204 | `fHCI_Add_SCO_Connection_DEPRECATED_0x07` | fHCI Add SCO Connection DEPRECATED 0x07 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | fHCI Change Connection Packet Type 0x0F — HCI command handler; updates connection record + calls ROM encryption/state checkers; (0x040f) | high (decompiled+documented, PASS 5) |
+| `0x8001b8fc` | 204 | `fHCI_Add_SCO_Connection_DEPRECATED_0x07` | fHCI Add SCO Connection DEPRECATED 0x07 — deprecated BT command handler; initializes SCO params + sends status/complete events (0x0407) | high (decompiled+documented, PASS 5) |
 | `0x8001b9d4` | 258 | `fHCI_Disconnect_0x06` | fHCI Disconnect 0x06 — thin wrapper sends LMP DETACH with error handling | high (decompiled+documented) |
 | `0x8001baf8` | 190 | `fHCI_Reject_Connection_Request_0x0A` | fHCI Reject Connection Request 0x0A — thin wrapper sends LMP NOT ACCEPTED 0x0d with error handling | high (decompiled+documented) |
 | `0x8001bbbc` | 360 | `fHCI_Accept_Connection_Request_0x09` | fHCI Accept Connection Request 0x09 — thin wrapper sends LMP ACCEPTED with error handling | high (decompiled+documented) |
 | `0x8001bd38` | 512 | `fHCI_Create_Connection_0x05` | fHCI Create Connection 0x05 — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x8001bf44` | 88 | `fHCI_Periodic_Inquiry_Mode_0x03` | fHCI Periodic Inquiry Mode 0x03 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001bf44` | 88 | `fHCI_Periodic_Inquiry_Mode_0x03` | fHCI Periodic Inquiry Mode 0x03 — thin wrapper; parses periodic inquiry params + delegates to ROM handler (0x0403) | high (decompiled+documented, PASS 5) |
 | `0x8001bfa0` | 50 | `fHCI_Inquiry_0x01` | fHCI Inquiry 0x01 — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001c324` | 252 | `set_check_for_1_to_1` | set check for 1 to 1 | low (named by Kovah, purpose unclear) |
 | `0x8001c438` | 76 | `OGC_3_default_func_4` | OGC 3 default func 4 | high (decompiled+documented — see `region_0x80010000`) |
