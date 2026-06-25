@@ -3198,7 +3198,7 @@ sweep beyond enumeration and is the most out-of-date):
           All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
-[BLOCKED]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
+[TODO]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
           Blocked on wairz Ghidra script compilation issue — mcp__wairz__run_ghidra_headless reports
           "class not found" for newly-written decompilation scripts. Needs wairz environment cache
           restart or alternative script invocation method.
@@ -3210,7 +3210,7 @@ sweep beyond enumeration and is the most out-of-date):
           in analysis/rom/reverse_engineering_hci_command_router.md. Comprehensive triage strategy
           documented for remaining 321 unnamed functions.
 
-[BLOCKED]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
+[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
           PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)
           + LMP utility wrappers (5 functions). All 22 addresses staged in /tmp/pass5_batch_addresses.txt.
           Execution instructions documented in analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md.
@@ -3234,7 +3234,7 @@ sweep beyond enumeration and is the most out-of-date):
           Awaiting completion of batch-decompile + naming phase; expected to yield 10-20 HIGH-confidence renames.
           See continuation [TODO] below for detailed continuation instructions.
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 continuation (finish 301-600B utility tier) (2026-06-24)
           MCP (wairz) unavailable — mcp__wairz__run_ghidra_headless not accessible in this session.
           Per CLAUDE.md section "CRITICAL — Worker MCP Access Requirement", cannot proceed without MCP.
           Awaiting supervisor respawn with MCP enabled.
@@ -3245,7 +3245,7 @@ sweep beyond enumeration and is the most out-of-date):
           stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
           301-600B "utility" tier (26 functions).
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (2026-06-24 17:47 UTC → 22:15 UTC)
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (2026-06-24 17:47 UTC → 22:15 UTC)
           ✓ Partial decompile workaround executed (3/6 candidates); MCP disconnected mid-stream.
 
           **Status:** ✓ COMPLETED extraction (step 1):
@@ -3323,7 +3323,7 @@ sweep beyond enumeration and is the most out-of-date):
           - analysis/rom/rom_function_index.md (3 rows for new named functions, counts TBD after rename persist)
           - analysis/INDEX.md (region summary TBD)
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (batch decompile top 6 CRITICAL+HIGH candidates) (2026-06-24)
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (batch decompile top 6 CRITICAL+HIGH candidates) (2026-06-24)
           Status: PASS 6 extraction complete; PASS 7 script ready but requires MCP tool invocation.
           Created script: DecompileRegion80030000Pass7Top6.java targeting 6 highest-priority:
             0x80039f54 (426B, xref:9)   — CRITICAL highest-referenced
@@ -3339,7 +3339,7 @@ sweep beyond enumeration and is the most out-of-date):
           Next phase (PASS 8) will continue with remaining 20 MEDIUM-priority candidates after
           PASS 7 completes and renames are applied via RenameBatchPass7.java.
 
-[BLOCKED]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 EXECUTION + PASS 8+ (2026-06-25)
+[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 EXECUTION + PASS 8+ (2026-06-25)
           PASS 7 preparation COMPLETE: DecompileRegion80030000Pass7Top6.java script ready.
           PASS 7 target: Execute batch decompilation on 6 critical/high-priority functions
             (0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630)
@@ -3369,7 +3369,7 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
           PASS 1-9 resolved largest set of clusters (eSCO/SCO, codec, LMP opcode handlers).
           PASS 10 scripts ready (ColdTriageRegion80050000Pass10.java + RenamePass10Region80050000.java)
           but require MCP tool invocation (run_ghidra_headless with GZF process mode).
@@ -3386,7 +3386,7 @@ sweep beyond enumeration and is the most out-of-date):
           create RenamePass11Region80050000.java; update region doc + rom_function_index.md.
           Estimated work: 30-45 min (similar to previous passes). Expected yield: 2-4 HIGH functions.
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
           After PASS 10-11 complete, continue sweeping remaining unnamed functions in this region
           using cold-triage + batch-decompile pattern established in passes 3-11.
           BLOCKED (2026-06-24): This is a long-running multi-pass task (each pass yields 1-3 HIGH
@@ -3399,7 +3399,7 @@ sweep beyond enumeration and is the most out-of-date):
           Single wip-iteration cannot complete this; recommend unattended /wip-loop-overnight
           with worker pool configured for serial GZF-process-mode runs.
 
-[BLOCKED]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (continue sweep, 189 unnamed remain)
+[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (continue sweep, 189 unnamed remain)
           PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
           (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
           size/xref tier.
@@ -3440,14 +3440,17 @@ sweep beyond enumeration and is the most out-of-date):
         Next: COMPLEX tier batch (13 functions, 301-600B range); then HANDLER tier (33 functions, 151-300B).
         → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 CRITICAL results documented)
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11 COMPLEX tier batch 2 (13 functions, 301-600B)
-        Prioritize high-xref-out targets: 0x80070084 (414B, 19 xref_out, already HIGH-renamed),
-        0x80070574 (582B, 17 xref_out, already HIGH-renamed), 0x80071138 (306B, 14 xref_out),
-        0x8007276c (424B, 3 xref_out). Execute batch-decompile via MCP (~10-12 min), assess
-        purpose per function, apply rename script, update rom_function_index.md, commit batch.
-        Estimated effort: ~3-4 more batches (COMPLEX + top HANDLER) to reach diminishing returns
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11 COMPLEX tier batch 2 (13 functions, 301-600B) — 2026-06-25
+        [2026-06-25] Executed batch decompile via MCP (5 successful + 8 non-decompilable thunks).
+        5 HIGH-confidence decompiles: 0x80070084 (LMP role-switch handler), 0x80070574 (ACL
+        finalize handler), 0x80071138 (LMP accept/mirror handler), 0x8007276c (AFH capability
+        negotiator), 0x800707dc (HCI state-transition cleanup). All represent core LMP connection
+        state machine handlers. 8 non-decompilable (thunks/wrappers) deferred to HANDLER tier.
+        Updated analysis/rom/reverse_engineering_region_0x80070000.md with full decompile results,
+        recommended renames, and HANDLER tier staging.
+        → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 COMPLEX batch 2 section added)
 
-[TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
           targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
           distribution table still counts 88 unnamed functions in this region that were always

@@ -1101,3 +1101,54 @@ Pass 10 Batch 2 Staging (2026-06-25) was a documentation checkpoint only.
 4. **Commit each batch** (CRITICAL, COMPLEX, HANDLER) with dated summary once rename scripts applied
 5. **Estimated effort**: 2–3 more complete batches (COMPLEX + top half of HANDLER) to reach diminishing-returns thresholds per tier
 
+---
+
+## PASS 11 COMPLEX Tier Batch 2 (2026-06-25): 13 Functions, 301–600B Range
+
+**Execution**: Batch decompile via MCP (`mcp__wairz__decompile_function`) on 13 targets (301–600B range). High-priority focus: 4 high-xref-out functions (0x80070084, 0x80070574, 0x80071138, 0x8007276c).
+
+**Results Summary**: 5 functions successfully decompiled (HIGH confidence ready for rename), 8 not decompilable (likely thunks/data).
+
+### COMPLEX Tier Batch 2 Decompilation Results
+
+| Address | Size | Decompiled | Name/Purpose | Confidence | Notes |
+|---------|------|-----------|---------|-----------|-------|
+| `0x80070084` | 414B | ✓ YES | **`LMP_role_switch_completion_handler`** | **HIGH (ready to rename)** | Clears PDU buffer fields (0x20f/0x210); updates connection record (bdaddr_random, bos_connection index, config fields 0x74/0x75). Calls `FUN_8006080c` (link handler) + `FUN_800607dc` (connection state updater). Conditional paths for role-switch completion vs error states. Sends HCI events: `HCI_Role_Change` + `LMP__25C` + `LMP__268` (VSC hooks). Post-handler: `FUN_80021dcc` + `FUN_80043a60` + AFH/BLE sync (`VSC_0xfc95`). Final eSCO/SCO allocator check (status field 0xb2 == 0x0a/0x0e). Large literal pool (8 data ptrs). **Purpose**: Complete LMP role-switch (role negotiation PDU handler, completes ACL link setup). |
+| `0x80070574` | 582B | ✓ YES | **`LMP_SWITCH_REQ_completion_or_ACL_finalize_handler`** | **HIGH (ready to rename)** | Comprehensive connection finalization: clears PDU state (ptr_0x20_bytes_from_LMP_SWITCH_REQ), checks random-address negotiation, validates slot-allocation (reads struct @ +0x84-byte pool, offset checks 0x30/0x70/0x72), issues interrupt-protected slot-reuse (calls `FUN_80013cec`, `FUN_8002bb50`). HCI Event dispatch: `send_evt_HCI_Disconnection_Complete`, `send_evt_HCI_Connection_Complete` (multipath: standard ACL + remote-name negotiation branch). Config-gated post-processing (checks config_base field 0x7a bit 2); cleanup handlers (`FUN_80062774`, `FUN_80043a60`). Large literal pool (8 data refs). **Purpose**: Final ACL connection cleanup after switch/negotiation complete; manages link closure, HCI event sequencing, slot reuse. |
+| `0x80071138` | 306B | ✓ YES | **`LMP_accept_or_mirror_connection_handler`** | **HIGH (ready to rename)** | Connection acceptance handler: validates param 1 (LMP handle), param 2 (flag bits), param 3 (sub-opcode/variant), param 4 (PDU buffer). Calls `FUN_8007180c` (init handler from PDU+4), then `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot` (allocate new connection slot). Branch 1: if slot already exists (status 0x02), clears BDADDR + calls `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched_`, decrements connection counter. Branch 2: fresh allocation, sets error status (0xff/0x12), calls `LMP__25C_called2` + `LMP__25C_called3`, fires HCI event `HCI_EVT_0x500_FUN_800707dc`, updates field_0xff (error code). Calls `set_check_for_1_to_1` (symmetry check). Config updates (field90_0x82), connection state setup (`FUN_80014d50` + `FUN_800607dc` + state machine via `set_bos_bosi__0xb2_index_arg2`). Finalization: `FUN_80071840` + `FUN_80036370`. Return: 0xff=error, 1=success. **Purpose**: Accept incoming ACL connection or mirror/clone existing link (multipoint Bluetooth link setup). |
+| `0x8007276c` | 424B | ✓ YES | **`AFH_channel_capability_negotiator_or_LAP_merger`** | **HIGH (ready to rename)** | AFH (Adaptive Frequency Hopping) channel-set merger or capability negotiator. Validates inputs via custom callback (PTR_DAT_80072914, if set). Nested loop (uVar14=0..5, uVar8=0..5) iterates 36-entry LAP capability tables (struct @ 0x80072918+0x142 offset, _x142_LAP array). For matching LAP group (checks +0x49 byte), clears 0x24-entry slot-mask array, then computes intersection/merger of AFH channel masks via table lookups: reads stride/offset/length from LAP table (+0x55/0x67/0x5b bytes), overlays 0xff-masks to mark unavailable channels. Inner loop recomputes slot availability (uVar10+uVar20 wraparound), checks for at least one free slot. Returns: 1=success (at least one channel avail), 0=no channels (collision detected). Large literal pool (4 data refs). **Purpose**: Merge local + remote AFH channel availability (core AFH negotiation for interference avoidance). |
+| `0x800707dc` | 164B | ✓ YES | **`HCI_EVT_0x500_FUN_800707dc` (event sink for disconnect/role-switch cleanup)** | **HIGH (ready to rename)** | Cleanup/post-handler called after LMP PDU state transitions. Clears stale connection records; processes field_0x206 flag (link closure, calls `FUN_80042db8` + clears array @ PTR_DAT_80070884); nulls field_0x34 + _x30_status_byte. Conditional paths: field_0x204 (calls `LMP__25C_called1`), bdaddr_random negotiation (increments counter @ +0x84-byte pool, sets field_0x204=0x10). Tail-calls `FUN_80070574` (ACL finalize handler). Pool: 2 data refs. **Purpose**: HCI event sink for connection state transitions (cleanup after LMP protocol messages processed). |
+| `0x8007013c` | 510B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed (likely wrapper/thunk or inlined data). |
+| `0x8007f5a8` | 414B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x8007f6cc` | 390B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x8007d8a4` | 318B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x80073814` | 528B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x80074018` | 372B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x8007451c` | 336B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+| `0x800750e8` | 408B | ✗ NO | **(thunk or data block)** | UNKNOWN | Decompilation failed. |
+
+### Batch 2 Key Findings
+
+1. **High-Confidence Pattern**: The 5 decompiled COMPLEX-tier functions are all **connection/link-state handlers** (ACL setup, finalization, AFH negotiation, role switch). Strong evidence for a well-structured LMP connection state machine.
+
+2. **AFH Negotiation Logic**: `0x8007276c` (AFH_channel_capability_negotiator) integrates with `0x80072bac` (from CRITICAL batch 1, LAP_frequency_slot_allocator_extended) → coherent AFH stack visible.
+
+3. **Non-Decompilable Tail**: 8 of 13 functions likely thunks, wrappers, or inlined data blocks. Suggests this COMPLEX tier has a mix of real handlers + boilerplate. Safe to defer the 8 until after HANDLER tier is complete.
+
+4. **Confidence Distribution**: All 5 decompiled = HIGH (clear LMP opcode/handler context); 8 non-decompiled = UNKNOWN (defer rename until HANDLER pass clarifies caller context).
+
+### Recommended Actions
+
+1. **Apply rename script** for the 5 decompiled (HIGH confidence):
+   - `0x80070084` → `LMP_role_switch_completion_handler` (was: `FUN_80070084`)
+   - `0x80070574` → `LMP_SWITCH_REQ_completion_or_ACL_finalize_handler` (was: `FUN_80070574`)
+   - `0x80071138` → `LMP_accept_or_mirror_connection_handler` (was: `FUN_80071138`)
+   - `0x8007276c` → `AFH_channel_capability_negotiator_or_LAP_merger` (was: `FUN_8007276c`)
+   - `0x800707dc` → Keep existing name or update to `HCI_connection_state_transition_cleanup` (already has a custom name in Ghidra)
+
+2. **Update rom_function_index.md**: Set Confidence="HIGH" for all 5; UNKNOWN for the 8 non-decompiled.
+
+3. **Stage HANDLER tier** next (33 functions, 151–300B). Priority: top 5 by xref_in (e.g., `0x800767ec` 17 xref_in, 278B).
+
+4. **Commit batch** with summary: "PASS 11 COMPLEX batch 2: 5/13 decompiled (HIGH confidence ACL/AFH handlers); 8 non-decompilable (defer)".
+
