@@ -88,14 +88,23 @@ analyze, document findings. For prep tasks: stage scripts, create analysis docs.
 5. **Promote:** If any [TODO] remains → rename first `[TODO]` → `[NEXT]`
 
 6. **Update the real analysis docs BEFORE committing — not just work-in-progress.txt.** Per
-   CLAUDE.md ("Documentation Always Comes After Work"), a `[DONE]` entry must name the specific
-   `analysis/rom/*.md` / `rom_function_index.md` / `analysis/INDEX.md` files it claims to update
-   — and those files must actually be edited in this same turn, not just described as updated.
-   **Before running `git commit`, run `git status` / `git diff --stat` and confirm every file
-   named in the [DONE] entry's summary actually appears as modified.** If a [DONE] entry says
-   "→ rom_function_index.md (N new HIGH rows)" but that file isn't in the diff, you have not
-   finished the iteration — go write it now. A commit message or work-in-progress.txt entry that
-   *claims* documentation was updated is not a substitute for actually updating it.
+   CLAUDE.md ("Documentation Always Comes After Work"), every RE iteration that decompiles or
+   renames anything must update **all four**, whether or not your commit message happens to
+   mention them:
+   - The phase-specific `analysis/rom/reverse_engineering_region_0x*.md` doc
+   - `analysis/rom/rom_function_index.md`
+   - **`analysis/INDEX.md`** — update that region's one-line summary to match what you just
+     wrote in the region doc (latest Pass, coverage counts, [NEXT] pointer). This one is easy to
+     silently skip because nothing forces you to *claim* it in the commit message the way the
+     other two get cited with `→ file.md` notes — that silence is exactly how it gets missed.
+   - `work-in-progress.txt`
+
+   **Before running `git commit`, run `git status` / `git diff --stat` and confirm all four
+   files above appear as modified** — not just the ones your own summary happened to claim.
+   If `analysis/INDEX.md` isn't in the diff, go update it now before committing. A commit
+   message or work-in-progress.txt entry that *claims* documentation was updated is not a
+   substitute for actually updating it, and an *absence* of a claim is not a license to skip
+   a file either.
 
 7. **Commit:** Stage files, create commit with summary of work done
 

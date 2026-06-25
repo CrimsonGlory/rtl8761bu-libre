@@ -151,14 +151,18 @@ the `analysis/` root. Full index with one-line summaries:
 file — see the rule at the bottom of `INDEX.md`.
 
 **IMPORTANT — Documentation Always Comes After Work:** After completing any RE task
-(decompilation, analysis, fix), immediately update:
+(decompilation, analysis, fix), immediately update **all four**:
 1. **Phase-specific analysis docs** (e.g., `analysis/rom/reverse_engineering_region_0x80030000.md`)
    — add findings in a timestamped Pass section
 2. **ROM function index** (`analysis/rom/rom_function_index.md`)
    — update summary counts + add/update function entries with HIGH/MEDIUM/LOW confidence
-3. **Work-in-progress.txt** — mark task [DONE] + document findings
+3. **`analysis/INDEX.md`** — update that region's one-line summary (coverage counts, latest
+   Pass, [NEXT] pointer) to match what you just wrote in doc #1. This file is the authoritative
+   per-region index and goes stale silently if skipped — there's no automated check that
+   catches a missing INDEX.md update the way there is for the other files.
+4. **Work-in-progress.txt** — mark task [DONE] + document findings
 
-Do not leave documentation as "step 1 and 2" for later — update docs immediately
+Do not leave documentation as "steps 1-2" for later — update all four immediately
 after executing analysis work, before committing. This keeps the authoritative
 analysis trail current and prevents stale TODOs.
 
