@@ -3404,6 +3404,12 @@ sweep beyond enumeration and is the most out-of-date):
           (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
           size/xref tier.
 
+          PASS 10 IN PROGRESS (2026-06-23): Decompiling next tier beyond Top-20. Batch 1 of 4
+          functions decompiled:
+          - 0x80070574 (582B, COMPLEX) → remote_name_request_connection_complete_handler — HIGH
+          - 0x8007718c (524B, COMPLEX) → esco_sco_connection_establishment_slave_side_orchestrator — HIGH
+          Continuing with batch 2 (0x800734c4, 0x80072ff8, 0x8007276c, 0x80070084, 0x800731bc).
+
 [TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~191 to resolve)
 
 [TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
