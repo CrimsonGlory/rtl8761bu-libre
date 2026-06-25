@@ -84,6 +84,11 @@ for ((i = 1; i <= MAX_RESTARTS; i++)); do
 
   log "claude -p exited with code ${exit_code}"
 
+  if [ "$exit_code" = "1" ]; then
+    log "STOP: claude -p exited with code 1 (session limit, authentication error, or fatal failure)."
+    exit 1
+  fi
+
   eval "$("$STATE_SCRIPT" count)"
 
   log "WIP state: DONE=${DONE:-?} NEXT=${NEXT:-?} TODO=${TODO:-?} BLOCKED=${BLOCKED:-?} FAILED=${FAILED:-?}"
