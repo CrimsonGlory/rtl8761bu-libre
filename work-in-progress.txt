@@ -3450,7 +3450,7 @@ sweep beyond enumeration and is the most out-of-date):
         recommended renames, and HANDLER tier staging.
         → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 COMPLEX batch 2 section added)
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
+[BLOCKED]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
           targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
           distribution table still counts 88 unnamed functions in this region that were always
@@ -3483,3 +3483,25 @@ sweep beyond enumeration and is the most out-of-date):
           `rom_function_index.md`'s Summary + intro text to state the sweep is complete, and update
           `analysis/INDEX.md` accordingly. Only after this should the umbrella goal above be considered done.
 
+
+EXECUTION NOTES FOR PHASE 9 CONTINUATION (2026-06-25):
+
+Region 0x80000000 status summary:
+- Gap-scope (220 targeted untouched stretches): COMPLETE (219 real functions + 1 non-function)
+- Out-of-gap-scope (88 remaining): to be triaged after gap is finished
+
+The 88 out-of-gap-scope functions require:
+1. Determining which 88 are actually unnamed (requires fresh ListRegion0x80000000.java run 
+   counting all functions vs. the gap-scope 220 to identify the excluded ranges)
+2. Cold-triaging them by size/xref/sector to pick the highest-value targets
+3. Batch-decompiling each tier
+4. Documenting findings in a new "Out-of-gap scope" section of reverse_engineering_region_0x80000000.md
+
+This task is [BLOCKED] awaiting:
+- PRIOR COMPLETION of the gap-scope sweep (DONE as of PASS 9)
+- A fresh authoritative count of all 0x80000000 functions vs. the 220 gap functions 
+  to determine the exact 88 addresses to process (requires new ListRegion0x80000000_AllFunctions.java)
+
+Current recommendation: defer this task until a future phase when the 0x80010000+ 
+regions' gap-sweeps have advanced, allowing for better prioritization of effort 
+across the entire ROM (2682 → goal 0 unnamed/medium/low).
