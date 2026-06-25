@@ -3425,7 +3425,7 @@ sweep beyond enumeration and is the most out-of-date):
             - OR: Next unattended /wip-loop-overnight iteration (will retry in fresh session)
           Analysis doc updated with batch 2 staging (reverse_engineering_region_0x80070000.md).
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~191 to resolve)
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~189 to resolve)
 
 [TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
