@@ -3321,7 +3321,14 @@ sweep beyond enumeration and is the most out-of-date):
           stratified list — next tier after the tier-1 (601+B) candidates PASS 5 just finished is the
           301-600B "utility" tier (26 functions).
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (2026-06-24 17:47 UTC → 22:15 UTC)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 6 (2026-06-24 17:47 UTC → 22:15 UTC)
+          STALE TODO CLOSED (2026-06-25): this entry's "remaining 3 candidates" blocker (FUN_8003d630,
+          FUN_80039f54, FUN_80033794) was fully resolved by the later PASS 7 entry below (all 6
+          confirmed HIGH with full pool resolution, persisted in rom_function_index.md under
+          "Pass 7 2026-06-25"). Left as [TODO] by mistake when PASS 7 actually completed the work;
+          closing out now during PASS 8 housekeeping rather than leaving it to mislead the next
+          "promote first TODO" step.
+
           ✓ Partial decompile workaround executed (3/6 candidates); MCP disconnected mid-stream.
 
           **Status:** ✓ COMPLETED extraction (step 1):
@@ -3399,7 +3406,15 @@ sweep beyond enumeration and is the most out-of-date):
           - analysis/rom/rom_function_index.md (3 rows for new named functions, counts TBD after rename persist)
           - analysis/INDEX.md (region summary TBD)
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (batch decompile top 6 CRITICAL+HIGH candidates) (2026-06-24)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 (batch decompile top 6 CRITICAL+HIGH candidates) (2026-06-24)
+          STALE TODO CLOSED (2026-06-25): superseded by the PASS 8 entry below, whose own text
+          confirms "PASS 6-7 COMPLETE: 6 critical/high candidates decompiled" — all 6 (FUN_80039f54,
+          FUN_80033794, FUN_8003229c, FUN_80035b4c, FUN_8003c7cc, FUN_8003d630) are persisted as HIGH
+          confidence in rom_function_index.md under "Pass 7 2026-06-25". This [TODO] (and the
+          GZF-process-mode invocation plan it describes) was never updated to [DONE] when the work
+          actually completed in a later session; closing it now rather than leaving stale work
+          sitting as the "first TODO" for the next wip-iteration to wrongly re-attempt.
+
           Status: PASS 6 extraction complete; PASS 7 script ready but requires MCP tool invocation.
           Created script: DecompileRegion80030000Pass7Top6.java targeting 6 highest-priority:
             0x80039f54 (426B, xref:9)   — CRITICAL highest-referenced
@@ -3415,22 +3430,41 @@ sweep beyond enumeration and is the most out-of-date):
           Next phase (PASS 8) will continue with remaining 20 MEDIUM-priority candidates after
           PASS 7 completes and renames are applied via RenameBatchPass7.java.
 
-[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8 (finish remaining 20 utility-tier candidates) (2026-06-25)
+[DONE]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8 (finish remaining 20 utility-tier candidates) (2026-06-25)
           PASS 6-7 COMPLETE: 6 critical/high candidates decompiled (FUN_80039f54, FUN_80033794,
           FUN_8003229c, FUN_80035b4c, FUN_8003c7cc, FUN_8003d630). Region coverage: 32→38 of 309
           functions (10.4%→12.3%). All 6 confirmed HIGH with full pool resolution.
 
-          PASS 8 target: Batch-decompile remaining 20 MEDIUM-priority candidates from 301-600B tier
-          (lower xref counts: 0x800323fc, 0x80033db0, 0x80034014, 0x80034144, 0x80034264,
-          0x80034840, 0x8003523c, 0x800366a0, 0x8003695c, 0x80036c9c, 0x80036f50, 0x800372fc,
-          0x8003764c, 0x80037a7c, 0x80037d54, 0x80038374, 0x80038950, 0x80038bcc, 0x80038efc, 0x80039218).
+          PASS 8 EXECUTED: The 20 addresses recorded above were STALE — they did not resolve to
+          current function boundaries (decompile_function/xrefs_to returned empty for all 20;
+          e.g. 0x800323fc is a mid-function offset inside the already-renamed FUN_8003229c, not
+          a separate function). Re-derived the correct 20 remaining 301-600B-tier FUN_* candidates
+          directly from mcp__wairz__list_functions (top-500-by-size fully covers this tier since
+          its cutoff is 248B): 0x800381fc(552) 0x8003e760(504) 0x8003894c(494) 0x800386d0(488)
+          0x8003a180(458) 0x80035454(456) 0x800364c8(408) 0x8003a38c(394) 0x8003a824(388)
+          0x8003e400(382) 0x80037460(372) 0x80034ec4(370) 0x8003c41c(368) 0x80032ec4(362)
+          0x80039de4(354) 0x80035cd4(342) 0x80038fcc(330) 0x8003e294(330) 0x8003c2b4(324)
+          0x8003fb5c(304).
 
-          Execution plan: Sort by size (largest first); batch decompile via
-          mcp__wairz__batch_decompile_functions (max 10/call). Expected yield: 3-7 HIGH names.
-          After PASS 8 completes, continue PASS 9+ with any remaining functions until all 309
-          are resolved or determined to be stubs/padding.
-          Estimated total: 271 unnamed remaining after PASS 7 reduction; ~15-20 more passes
-          at 20-30 functions/pass to complete region coverage.
+          Decompiled all 20 (batch tool flaky this run: 4/10 then 0/10 succeeded; fell back to
+          mcp__wairz__decompile_function per-function, 100% success on all 16 stragglers). All 20
+          renamed to HIGH confidence. Highlights: AFH channel-map pair
+          (AFH_channel_map_table_builder/0x800386d0 + AFH_channel_map_hw_register_programmer/
+          0x8003a824, 79-entry table matches BT's 79 RF channels), TX/RX hw-buffer-setup pair
+          (0x8003c41c/0x8003c2b4), BT DUT test-pattern generator
+          (test_pattern_buffer_fill_or_hw_mode_select/0x8003fb5c, exact match to standard
+          0x00/0xFF/0x55/0x0F test patterns), and confirmed callers for two previously-named
+          functions (param_dispatch_with_rom_calls/0x80035b4c via
+          power_level_smoothing_filter_feeding_param_dispatch/0x80035cd4; and
+          apply_LAP_derived_hopping_params/0x8003cb80 via
+          LMP_link_supervision_tick_scheduler/0x80037460).
+
+          Region coverage: 38→58 of 309 functions (12.3%→18.8%). 251 unnamed remain.
+          Documented in reverse_engineering_region_0x80030000.md Pass 8 section,
+          rom_function_index.md (20 new HIGH rows + summary counts), and INDEX.md.
+          No 301-600B-tier candidates remain in this region — PASS 9 must re-derive a fresh
+          candidate list from list_functions against current GZF state (lesson from this pass's
+          stale-address discovery) rather than trust any previously-recorded address list.
 
 [DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (2026-06-24)
           PASS 7 cold-triage: enumerated remaining 151-600B tier untouched candidates.
@@ -3444,12 +3478,20 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-24)
           PASS 1-9 resolved largest set of clusters (eSCO/SCO, codec, LMP opcode handlers).
           PASS 10 scripts ready (ColdTriageRegion80050000Pass10.java + RenamePass10Region80050000.java)
           but require MCP tool invocation (run_ghidra_headless with GZF process mode).
-          Blocker: MCP tools not directly invocable from bash context in supervisor /wip-iteration
-          session; tool schemas load but actual invocation requires harness tool-calling mechanism.
+          CORRECTION (2026-06-25, promoted from TODO during PASS 8 housekeeping): the original
+          "Blocker: MCP tools not directly invocable..." line below is the stale misconception
+          CLAUDE.md explicitly calls out as forbidden reasoning — mcp__wairz__* tools ARE directly
+          callable as normal tool calls in this harness (confirmed working throughout region
+          0x80030000 PASS 8 this same session, including individual mcp__wairz__decompile_function
+          calls after the batch tool proved flaky). Do not re-block on this; just call the tool.
+          Also worth checking, per this session's PASS 8 lesson: verify ColdTriageRegion80050000Pass10's
+          recorded candidate addresses still resolve to real function boundaries in the CURRENT GZF
+          state (via list_functions/decompile_function) before trusting them — a prior pass's
+          candidate list for region 0x80030000 turned out to be entirely stale/non-resolving.
           Next worker: invoke PASS 10 via:
             mcp__wairz__run_ghidra_headless(
               binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",

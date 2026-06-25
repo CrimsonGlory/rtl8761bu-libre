@@ -700,4 +700,285 @@ Remaining 20 candidates in 301–600B tier (xref=0–1):
 
 Sort by size (largest first) to target highest-complexity functions; batch decompile via `mcp__wairz__batch_decompile_functions` (max 10/call).
 
+---
+
+## Pass 8: 20 Remaining 301–600B-Tier Candidates Decompiled (2026-06-25 COMPLETED)
+
+**Stale-address correction:** The 20 addresses listed above in "Next Steps (Pass 8)"
+do **not** correspond to current function boundaries in the live GZF — `decompile_function`
+and `xrefs_to` returned empty/no-match results for all of them (e.g. `0x800323fc` resolves
+to a byte offset *inside* the already-renamed `FUN_8003229c`, not a separate function; others
+fall in address gaps with no defined function at all). These were most likely computed by an
+earlier cold-triage pass against a Ghidra snapshot that predates the Pass 6/7 renames, or by a
+script bug. Rather than guess, this pass re-derived the correct, current candidate set directly
+from `list_functions` (top-500-by-size, which fully covers the 301–600B tier since the cutoff of
+the returned set is 248B): every `FUN_*`-named (i.e. still-unnamed) function with address in
+`0x80030000`–`0x8003ffff` and size in [301,600] not already resolved by Pass 6/7. This produced
+exactly 20 candidates (matching the expected count, just at different addresses):
+
+```
+0x800381fc(552) 0x8003e760(504) 0x8003894c(494) 0x800386d0(488) 0x8003a180(458)
+0x80035454(456) 0x800364c8(408) 0x8003a38c(394) 0x8003a824(388) 0x8003e400(382)
+0x80037460(372) 0x80034ec4(370) 0x8003c41c(368) 0x80032ec4(362) 0x80039de4(354)
+0x80035cd4(342) 0x80038fcc(330) 0x8003e294(330) 0x8003c2b4(324) 0x8003fb5c(304)
+```
+
+**Execution:** All 20 decompiled (`mcp__wairz__batch_decompile_functions` succeeded for 4/10
+in the first batch and 0/10 in the second batch — the batch tool was flaky this run; the
+remaining 16 were decompiled individually via `mcp__wairz__decompile_function`, which worked
+reliably for every one). All 20 renamed to HIGH confidence.
+
+### Detailed Function Analyses
+
+#### 1. `lmp_event_counter_dual_rate_limited_retry` (0x800381fc, 552B)
+
+Per-connection event/ACK counter. Validates `param_1+0x30` matches the connection-array index
+for `param_3`, and that `(param_4&0xff)<<0xc` matches a stored 16-bit value at `param_1+0x28`
+(opcode/type gate). Increments an 8-bit counter at `param_1+0x32`. Classifies `param_4` against
+two bitmasks (`0x4410`, `0x8900`) to choose which of two per-connection sub-counters
+(`field_0xac`/`field_0xa6`) to bump. Two independent modulo-counter "every Nth event, set a
+retry-request bit" blocks follow, each gated by a different config condition (struct flag
+`byte_0x16f`/`field_0x171`, role-mismatch via `check_if_80122df0_is_non_zero_else_ret_0xff`,
+and config+0xdc bit4) — classic exponential/periodic retry-flag pattern matching the structure
+already seen in `FUN_80033794`/`acl_packet_ring_buffer_manager`.
+
+#### 2. `connection_teardown_finalize_and_reset` (0x8003e760, 504B)
+
+Operates on a stride-0x88 connection table (`PTR_DAT_8003e95c`) — the **same table** used by
+`ACL_fragment_dequeue_and_credit_consumer` (0x8003e400) and
+`piconet_slot_collision_avoidance_scheduler` (0x8003e294) below, identifying this as a shared
+per-connection-extended-state struct distinct from `big_ol_struct`. Looks up the connection via
+an overridable fptr or fallback `FUN_8006c81c`. If not already pending (`+0x1c`/`+0x1d`), marks
+pending/active and logs via `possible_logger_called_if_no_patch3`; for SCO-type connections
+(`*piVar11==5`) with sufficient buffered data, calls a hardware kick fptr. Final block: when a
+"flush" flag (`+0x85`) is set, zeroes out the connection's queue-pointer fields (`+0x70..0x82`)
+— the connection-teardown reset; otherwise, on a different condition, calls
+`FUN_8003e1d4`+`FUN_8002bb50`+optional `FUN_8003e648`+indirect fptr+log (link-supervision-loss
+path).
+
+#### 3. `slot_timing_delta_calc_and_log` (0x8003894c, 494B)
+
+Reads a tick/clock source via indirect fptr, then computes a slot-timing delta using a
+config-dependent shift amount: `field_0x1e<<1` or `<<2` (RX path, `param_1` high bit clear) vs.
+`field_0x1a<<1`/`<<2` (TX path). Stores the delta into a shared struct field (`+0x11c`),
+conditionally clears/sets a recalc-pending bit and calls `FUN_80043984` (RX path only). Both
+branches converge on an identical final block: gather four 16-bit values, BD_ADDR-ish fields
+from `big_ol_struct`, and log via `possible_logging_function__var_args` with branch-specific
+codes `0x2ef` (RX) / `0x29f` (TX).
+
+#### 4. `AFH_channel_map_table_builder` (0x800386d0, 488B)
+
+No parameters. Builds a **79-entry** (`0x4f` = 79 decimal) lookup table — the exact channel
+count of classic Bluetooth's 79 RF channels, strongly indicating this is the **AFH
+(Adaptive Frequency Hopping) channel-map builder**. Copies/duplicates 16-bit per-channel
+classification values from a circular source table (`PTR_PTR_800388c0`, stride 0x10) into a
+linear destination array (indices `(i+0x4c)*2+6`), with a duplicate-write path for one of two
+"bit4" modes. When two round-robin counters converge (`bVar2==bVar3`), computes each of the 79
+final entries as `(class_nibble*0x20 + config.field453_0x1d1*0x10 + signed_delta) * 8` and pushes
+the finished table to hardware via `FUN_800786dc`. Companion to
+`AFH_channel_map_hw_register_programmer` below.
+
+#### 5. `clock_trim_calibration_measure_apply` (0x8003a180, 458B)
+
+No parameters. Classic measure-average-correct-apply calibration loop: saves/sets registers
+0x5a, 0x45, 0x57 (enable a measurement mode via `PTR_DAT_8003a354(0,0x3000)`), then loops 16
+times reading status register 0x7f and accumulating a sum (with optional per-iteration debug
+log). Restores the three registers to their original/cleared state, computes a correction value
+`((sum>>6)+0x80)&0xff`, clamps it against two threshold fields, derives a final trim value
+`(0x1000 - (val&0x7f)) & 0x7f`, and applies it via `FUN_80038e24`. Matches the textbook shape of
+a crystal/clock-trim calibration routine.
+
+#### 6. `link_mode_change_state_machine` (0x80035454, 456B)
+
+`(byte link_type, uint, uint)`. The core link-mode/role-switch procedure dispatcher for this
+region's `FUN_80033a04`/`FUN_80033ae4`/`FUN_80033b14`/`FUN_80033c98`/`FUN_80035378`
+helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
+busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
+brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
+parameters via `FUN_80033c98`/`FUN_80035214`, and on failure cleans up via `FUN_80034d88`
+(already a known cleanup target — called from `lmp_power_regulator`'s sibling code paths).
+Optional override callback via `PTR_DAT_8003563c` can replace the return value.
+
+#### 7. `dual_slot_buffer_reassignment_on_role_switch` (0x800364c8, 408B)
+
+`(uint conn_handle, char notify_flag)`. Operates on a stride-0x84 per-role table tracking two
+buffer "slots" (offsets 0 and 0x40 within each entry), selected by bit 0 of a state byte.
+Swaps/clears one slot's buffer fields (`+0x31/+0x32/+0x40..0x43`) when the logical link's
+owning-role byte (`+0x34`) no longer matches the connection's current role, tracking a 3-state
+(0=idle/1=pending/2=done) transition. Notifies via `FUN_80017a04` when `notify_flag==1`,
+always logs the role byte on exit.
+
+#### 8. `int64_arith_op_and_signed_shift_right` (0x8003a38c, 394B)
+
+`(int* out[2], int* in[2], short b, char op, ushort shift)`. Generic MIPS16e 64-bit-emulation
+helper: selects add/sub/mul/div (`op` 0-3, default = passthrough) on a 32-bit value combined
+with a 64-bit (as two 32-bit halves) operand, then performs a variable-width signed
+right-shift of the 64-bit result via two calls to `FUN_80038c94` (sign-extend/shift) with manual
+sign-bit replication for shift amounts > 32. Division by zero traps via `trap(7)`. Purely a
+compiler-support arithmetic primitive — no protocol-specific meaning.
+
+#### 9. `AFH_channel_map_hw_register_programmer` (0x8003a824, 388B)
+
+`(byte* packed_classification, uint count, uint base_offset)`. Unpacks 2-bit-per-channel
+classification codes from a packed byte array using a 3-tap bit-shift table (`{7,11,15}`),
+deriving a 7-bit value (`local_14`) per channel. Computes register/channel indices in groups of
+5 (`channel%5`) with a final 2-iteration tail-case (channels ≥20), writes the value via
+`FUN_8003bd94` (BB-register write — name pattern shared with `hw_register_config_with_timeout`'s
+sibling calls), then performs a masked read-modify-write through an indirect register
+accessor pair (`PTR_DAT_8003a9a8`/`PTR_DAT_8003a9ac`). The 20-channel-group-of-5 +
+24-channel-tail iteration shape, paired with `AFH_channel_map_table_builder`'s 79-entry table in
+the same region, strongly confirms this is the hardware-register side of AFH channel-map
+programming.
+
+#### 10. `ACL_fragment_dequeue_and_credit_consumer` (0x8003e400, 382B)
+
+`(byte conn_idx, byte flag)`. Dequeues from a 12-entry (`%0xc`... actually wraps at `0xb`+1→0)
+ring buffer within the same stride-0x88 table as `connection_teardown_finalize_and_reset` and
+`piconet_slot_collision_avoidance_scheduler`. Consumes byte-credits from each ring entry's
+length field (`+3`) up to 4 times per call, advancing the ring index and incrementing/decrementing
+pending/completed counters (`+0x38`/`+0x3a`) when an entry is fully drained. Marks the final
+consumed entry's flag byte with `0x80` (last-fragment marker) and kicks further processing via
+`FUN_80014e40` when multiple entries were filled in non-flag mode. Classic ACL/SCO
+fragment-reassembly dequeue loop.
+
+#### 11. `LMP_link_supervision_tick_scheduler` (0x80037460, 372B)
+
+No parameters. Periodic tick dispatcher: resets a counter, calls `FUN_800117a4`, conditionally
+invokes the already-known `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` when AFH-related flags
+clear, calls `FUN_80037394`, and tracks elapsed time via a tick-source fptr accumulated into a
+running counter (`+0x114`). Conditionally calls `apply_LAP_derived_hopping_params`'s sibling
+`FUN_8003cb80` (note: `0x8003cb80` is *already* named/HIGH from Pass 5 as
+`apply_LAP_derived_hopping_params` — this confirms one of its callers). A 3-bit mode field
+(`+0x164>>7`) drives a small state machine: mode 1 dispatches to `FUN_8003c94c`/`FUN_8003ca28`
+depending on link-type; mode 0 or >5 clears the mode-active bit. Extensive debug log on exit
+covering all the timing deltas and mode bits when a debug flag is set.
+
+#### 12. `LMP_power_and_clk_adj_procedure_orchestrator` (0x80034ec4, 370B)
+
+No parameters. Directly gated by `config->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit1 — the
+**already-documented** config field name confirms this orchestrates LMP_POWER_CONTROL_REQ /
+LMP_CLK_ADJ procedure (re)triggering. Two parallel start/cancel blocks using the
+`FUN_80055ddc(1,...)`/`FUN_80055ddc(0,0)` and `FUN_80055e50(1,...)`/`FUN_80055e50(0,0)` pattern,
+each gated by a different per-connection capability bit (`field40_0x28`/`field68_0x44`) and a
+link-mode mask (`+0x164 & 0x7f80`). One branch additionally adjusts `field68_0x44`/`field69_0x45`
+power-control sub-bits based on a status-table check, calling either `FUN_80078fdc` or an
+indirect fptr depending on the result. An else-branch calls `FUN_8004f240` and conditionally an
+indirect handler — likely the symmetric "remote requested" half of the same procedure pair.
+
+#### 13. `per_connection_hw_buffer_setup_with_patch_hook` (0x8003c41c, 368B)
+
+`(uint conn_handle)`. Guarded on `conn_handle!=0`. Sets six fixed 1-byte enable flags, then
+**installs a function-pointer hook** into `DAT_8003c5a8` via bitwise-OR — the same hook-install
+idiom used for the documented `bos_base+0xd8`/`+0xe4` patch hooks in `CLAUDE.md`, just a
+different slot specific to this feature. Brackets a sequence of BB-register read-modify-writes
+(0x69/0x6a/0x6f, keyed by `conn_handle>>3` and a 16-bit size field) with VSC register 0x40
+enable(2)/disable(0), logs the final register values, then calls a small setup cluster
+(`FUN_8003b604(5)`, `FUN_8003b64c(7)`, `FUN_8003b698(1)`, `FUN_8003b6fc(1)`) and sets bit 0x8000
+of register 0x44. Counterpart of `hw_register_setup_with_patch_hook_variant2` below (different
+register set, same shape).
+
+#### 14. `config_triplet_hw_register_init_with_power_gate` (0x80032ec4, 362B)
+
+No parameters. For three adjacent 16-bit config fields (`0xcc/0xcd`, `0xce/0xcf`, `0xd0/0xd1`),
+substitutes a fixed default bit pattern into the corresponding hardware-shadow byte pair when
+the config value is zero. Writes all three (possibly-defaulted) values into BB registers
+0x11c/0x11e/0x120 via an indirect write fptr. Finally, when `config+0xd8` bit5 is **clear** —
+the same bit **confirmed** as the LMP-power-mode-enable flag by `FUN_80033794`
+(`Complex power/connection validation gate`) in Pass 7 — writes a fixed pattern to register
+0x21c. A small, self-contained hardware-init sibling of the documented `0x80109980` HW
+register-init function, scoped to just this config triplet.
+
+#### 15. `calibration_table_populate_via_lookup_fptr` (0x80039de4, 354B)
+
+`(char mode_flag)`. Loop of 8 iterations populating three parallel 8-entry tables
+(`+0x14..0x1b`, `+0x1c..0x23`, `+0x24..0x2b`) via 3 calls per iteration to a shared indirect
+lookup/transform fptr, with a clamped index correction when `byte[0x12] < 8`. After the loop, 9
+more single-value lookups populate `+0x2c..0x34`. Debug-logs the final 7 entries when a flag
+bit (`+0x36` bit1) is set. The specific physical quantity being tabulated (gain, timing, power)
+is not determinable from this function alone — it only orchestrates calls into an opaque
+indirect handler — so this is documented as the *table-builder*, not the *table's meaning*.
+
+#### 16. `power_level_smoothing_filter_feeding_param_dispatch` (0x80035cd4, 342B)
+
+`(ushort conn_idx)`. Early-returns on an invalid-slot guard (`byte_0xCC==-1`) and an optional
+override callback. Calls `validate_connection_setup_preconditions`'s sibling `FUN_80042a68` as a
+gate, then `acl_packet_ring_buffer_manager`'s sibling... actually calls
+`FUN_80033f8c` (`validate_connection_setup_preconditions`, already HIGH from Pass 5) — if it
+returns 0, falls back to a default value and returns. Otherwise computes a smoothed
+power/RSSI-like value from `field_0x38` plus an antenna-path correction term
+(`field_0x2a0`/`field_0x2a1`, selected by a 2-bit mode in a hardware-config byte), averaged
+against `field106_0x94`. If calibration-mode is active and the smoothed value exceeds a
+config-defined threshold (`field160_0xa8`/`field161_0xa9`) and `FUN_80035378(1)!=0xff` and a
+flag bit is set, calls **`param_dispatch_with_rom_calls`** (`0x80035b4c`, already HIGH from Pass
+6) with `(smoothed_value, threshold)` — resolving one of that function's two documented callers.
+
+#### 17. `packet_type_to_hw_code_translator_4link` (0x80038fcc, 330B)
+
+`(uint packed_value)`. Unpacks a 16-bit value into 4 nibble codes (one per link/slot 0-3).
+Enables register 0x10 bit 0x40, then for each link: clamps an invalid code value 7→6 (the
+classic "reserved" slot in a 0-6 BT packet-type enum), and programs registers 0x11/0x12 with
+the link index and a derived value `((code>>1&7)+(code&1))*0x2000`. Disables register 0x10
+bit 0x40, recomputes a second derived code per link (`5-(code&1)&7`), and packs all 4 into a
+single register write `(3,0x59,1,...)` at bit offsets 0/3/6/9. A per-link packet-type → hardware
+baseband-code translator.
+
+#### 18. `piconet_slot_collision_avoidance_scheduler` (0x8003e294, 330B)
+
+`(byte conn_a, byte flags, ushort divisor, uint requested_slot)`. Scans the same stride-0x88
+table as `connection_teardown_finalize_and_reset`/`ACL_fragment_dequeue_and_credit_consumer` for
+up to 3 entries, selecting the one of connection-type `0x101` with the highest "priority" field
+(`+0x30`). Computes a BD_ADDR-derived slot value (`FUN_80034a24`) for that conflicting
+connection (if found) and for the current connection, optionally masking with two fixed
+constants when a flag bit is set. Computes `requested_slot + (divisor - (current_slot %
+divisor))` with division-by-zero trapped, then if the result still collides with the priority
+connection's slot and the conflict wasn't itself the priority connection, rounds it up to the
+next multiple of `divisor` past the conflict using signed-division rounding. A genuine
+slot/clock-offset collision-avoidance scheduler for shared time-slot allocation.
+
+#### 19. `hw_register_setup_with_patch_hook_variant2` (0x8003c2b4, 324B)
+
+No parameters. Near-identical structure to `per_connection_hw_buffer_setup_with_patch_hook`
+(0x8003c41c) but configuring the **counterpart** register set: reads config fields
+`0x1da`/`0x1db`, conditionally (config field285 bit0 AND a derived flag bit5) installs a hook
+into `DAT_8003c410`, brackets register 0x6b/0x6e/0x6c/0x6d/0x68 read-modify-writes with VSC reg
+0x40 enable(2)/disable(0) (reg 0x6e gets a special value `0x81a` when a bit4 flag is set, and
+reg 0x6d gets one of two pointer constants based on the same bit), then calls
+`FUN_8003c19c(3,3,0,0xf)`. The pairing of register sets (0x69/0x6a/0x6f here vs.
+0x6b/0x6c/0x6d/0x6e/0x68 in `0x8003c41c`) strongly suggests these are TX-path/RX-path or
+primary/secondary counterparts of the same per-connection hardware setup.
+
+#### 20. `test_pattern_buffer_fill_or_hw_mode_select` (0x8003fb5c, 304B)
+
+`(uint conn_idx)`. Reads a 16-bit length field; returns immediately if zero. Sets a
+"transmitting" flag (`field311_0x279`). Branches on a global mode flag
+(`config[1].field7_0x7`): mode 0 selects a fill byte from `{0x00, 0xFF, 0x55, 0x0F}` —
+**the textbook all-zero / all-one / alternating-bit / alternating-nibble Bluetooth DUT/loopback
+test patterns** — and either `memset`s the buffer with it, or (sub-mode 4) performs a
+bit-rotated merge writing a repeating pattern at an arbitrary bit offset (PRBS-style payload).
+Mode 1 instead writes an equivalent hardware-native mode select code (`sub_mode<<9 | 0x147`)
+into a register, for hardware that generates the test pattern itself rather than needing a
+software-filled buffer. The exact match to BT's standard DUT test-pattern byte values is the
+strongest single signal in this pass.
+
+### Region 0x80030000 Status After Pass 8
+
+20/20 remaining 301–600B-tier candidates resolved, all HIGH confidence. Region coverage:
+38→58 of ~309 functions (12.3%→18.8%). Two cross-pass connections confirmed this pass:
+`param_dispatch_with_rom_calls` (0x80035b4c, Pass 6) now has its power-smoothing producer
+identified (`power_level_smoothing_filter_feeding_param_dispatch`), and
+`apply_LAP_derived_hopping_params` (0x8003cb80, Pass 5) now has a confirmed caller
+(`LMP_link_supervision_tick_scheduler`). Three new functional clusters emerged: an AFH
+channel-map pair (table-builder + hw-register-programmer), a hw-buffer-setup pair (TX/RX
+counterparts at 0x8003c41c/0x8003c2b4), and a shared stride-0x88 connection-extended-state
+table referenced by three siblings (0x8003e760/0x8003e400/0x8003e294).
+
+### Next Steps (Pass 9)
+
+No more 301–600B-tier candidates remain unresolved in this region. Remaining work is the
+601B+ tier (already mostly covered by Pass 3/5/7's targeted picks) and the sub-301B tier
+(not yet enumerated — likely 200+ functions given the region's ~309 total and ~58 now named).
+A future pass should re-derive a fresh candidate list directly from `list_functions`/
+`list_imports` against the *current* GZF state (per this pass's stale-address lesson above)
+rather than trusting any previously-recorded address list without verification.
+
 **Status:** PASS 7 COMPLETE. 6/6 candidates decompiled with HIGH confidence. All pools resolved. ROM integration points identified. Ready for PASS 8: remaining 20 candidates (lower xref tier).
