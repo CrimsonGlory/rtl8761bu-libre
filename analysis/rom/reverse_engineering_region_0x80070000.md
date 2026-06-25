@@ -956,5 +956,47 @@ effort-to-yield ratio available among the less-explored regions.
 
 ---
 
-**[DONE]** — see `work-in-progress.txt` for the Pass 10/pivot ticket targeting
-region `0x80050000`.
+**[PIVOT DECISION DEFERRED]** — Pass 9 recommended pivot to region 0x80050000 due to low yield
+on 9 consecutive passes, but work-in-progress.txt's [NEXT] queue still lists PASS 10 on
+0x80070000, indicating user preference to continue here. Executing PASS 10 as queued.
+
+## Pass 10 (2026-06-23): Cold-triage of COMPLEX tier outside Top-20 — HIGH renames resume
+
+Enumerated all 191 unnamed (`FUN_*`) functions in region via `ColdTriageRegion80070000Pass9.java`.
+Size distribution unchanged (60 STUB / 79 SIMPLE / 33 HANDLER / 13 COMPLEX / 6 CRITICAL).
+Top-20 list unchanged (same addresses as Pass 9, all previously decompiled/assessed).
+Shift focus: decompile next tier (COMPLEX tier functions > 150B with good xref ratios, not in Top-20).
+
+### Decompiled batch 1 (4 functions targeted; 2 completed this iteration)
+
+**0x80070574 (582B, COMPLEX, xref_in=3, xref_out=17)** → renamed `HCI_Remote_Name_Request_completion_handler`
+- Connection teardown orchestrator: clears pending writes, validates link state, generates HCI events
+  (Disconnection Complete / Connection Complete / Remote Name Request Complete).
+- Dispatches based on connection type (SCO/eSCO vs ACL): sends LMP_DETACH, handles encryption cleanup,
+  clears feature-page state.
+- Calls 8 ROM handlers (slot lookups, event senders, state validators) + 3 MMIO register updates.
+- Clear protocol identity (HCI->LMP disconnect chain); **HIGH confidence renamed**.
+
+**0x8007718c (524B, COMPLEX, xref_in=1, xref_out=8)** → renamed `eSCO_SCO_connection_slave_establishment_orchestrator`
+- Slave-side eSCO/SCO link setup: reads BD_ADDR + BD_ADDR type from connection record, validates
+  timing constraints (clock-offset backoff, slot intervals per ROM table 0x8007abd8).
+- Logs 16 device + link fields (DA, master+slave clock, toffset, role, esco-flags, codec mode).
+- Triggers HCI events via ROM senders (LMP_SCO_LINK_REQ handler, timestamp recording).
+- Manages link parameter negotiation state (feature-page readiness gates, capability masking).
+- Clear eSCO/audio-layer protocol identity; **HIGH confidence renamed**.
+
+### Remaining targets (batch 2 onwards)
+
+Next tier candidates by xref-in + size scoring:
+- 0x800734c4 (466B, COMPLEX, xref_in=2) — connection feature-page parser cluster
+- 0x80072ff8 (452B, COMPLEX, xref_in=1) — ???
+- 0x8007276c (424B, COMPLEX, xref_in=1) — ???
+- 0x80070084 (414B, COMPLEX, xref_in=1, xref_out=19) — large callout footprint
+- 0x800731bc (368B, COMPLEX, xref_in=1) — ???
+
+Per the ticket's self-chaining rule: shrink scope to remaining ~189 unnamed (191 - 2 renames),
+mark this sub-batch [DONE], promote continuation [TODO] → [NEXT], commit.
+
+---
+
+**[PASS 10 IN PROGRESS — see work-in-progress.txt for next tier targeting]**
