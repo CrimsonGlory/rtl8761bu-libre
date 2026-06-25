@@ -3415,23 +3415,22 @@ sweep beyond enumeration and is the most out-of-date):
           Next phase (PASS 8) will continue with remaining 20 MEDIUM-priority candidates after
           PASS 7 completes and renames are applied via RenameBatchPass7.java.
 
-[TODO]  Full RE: ROM region 0x80030000-0x8003ffff PASS 7 EXECUTION + PASS 8+ (2026-06-25)
-          PASS 7 preparation COMPLETE: DecompileRegion80030000Pass7Top6.java script ready.
-          PASS 7 target: Execute batch decompilation on 6 critical/high-priority functions
-            (0x80039f54, 0x80033794, 0x8003229c, 0x80035b4c, 0x8003c7cc, 0x8003d630)
-          BLOCKED: MCP tool invocation requires harness tool-calling mechanism (not directly
-          callable from bash in /wip-iteration supervisor context). Per CLAUDE.md, MCP tools
-          are deferred and schema-loaded but need proper invocation pathway.
-          Next worker: invoke via mcp__wairz__run_ghidra_headless with:
-            binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf"
-            script_name="DecompileRegion80030000Pass7Top6.java"
-            use_saved_project=true
-            timeout=600
-          Then create RenameBatch1Region80030000Pass7.java + apply renames + update rom_function_index.md.
-          After PASS 7 completes (estimated 6 more HIGH-confidence names), continue PASS 8+
-          with remaining 20 MEDIUM-priority functions from Pass 6 utility-tier list, until
-          all 277 unnamed functions are resolved or determined to be non-functions.
-          Estimated total: 277 unnamed remaining; ~10-15 more passes at 20-30 functions/pass.
+[NEXT]  Full RE: ROM region 0x80030000-0x8003ffff PASS 8 (finish remaining 20 utility-tier candidates) (2026-06-25)
+          PASS 6-7 COMPLETE: 6 critical/high candidates decompiled (FUN_80039f54, FUN_80033794,
+          FUN_8003229c, FUN_80035b4c, FUN_8003c7cc, FUN_8003d630). Region coverage: 32→38 of 309
+          functions (10.4%→12.3%). All 6 confirmed HIGH with full pool resolution.
+
+          PASS 8 target: Batch-decompile remaining 20 MEDIUM-priority candidates from 301-600B tier
+          (lower xref counts: 0x800323fc, 0x80033db0, 0x80034014, 0x80034144, 0x80034264,
+          0x80034840, 0x8003523c, 0x800366a0, 0x8003695c, 0x80036c9c, 0x80036f50, 0x800372fc,
+          0x8003764c, 0x80037a7c, 0x80037d54, 0x80038374, 0x80038950, 0x80038bcc, 0x80038efc, 0x80039218).
+
+          Execution plan: Sort by size (largest first); batch decompile via
+          mcp__wairz__batch_decompile_functions (max 10/call). Expected yield: 3-7 HIGH names.
+          After PASS 8 completes, continue PASS 9+ with any remaining functions until all 309
+          are resolved or determined to be stubs/padding.
+          Estimated total: 271 unnamed remaining after PASS 7 reduction; ~15-20 more passes
+          at 20-30 functions/pass to complete region coverage.
 
 [DONE]  Full RE: ROM region 0x80040000-0x8004ffff PASS 7 (2026-06-24)
           PASS 7 cold-triage: enumerated remaining 151-600B tier untouched candidates.
