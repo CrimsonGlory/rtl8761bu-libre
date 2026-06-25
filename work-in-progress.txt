@@ -3433,6 +3433,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 10 + PASS 11 plan)
 
 [NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~184 to resolve)
+          [2026-06-25] PASS 11 script created: /root/wairz/ghidra/scripts/ColdTriageRegion80070000Pass11.java
+          Stratified batch strategy: rank all remaining unnamed by tier (CRITICAL >600B,
+          COMPLEX 301-600B, HANDLER 151-300B, SIMPLE 51-150B, STUB <50B).
+
+          NEXT: execute via Ghidra + MCP (GZF process mode):
+            1. Run: mcp__wairz__run_ghidra_headless(script_name="ColdTriageRegion80070000Pass11",
+               binary_path="/root/DarkFirmware_real_i/00_Ghidra-analyzed_files/2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
+               use_saved_project=True)
+            2. Output: stratified list per tier (CRITICAL/COMPLEX/HANDLER first)
+            3. For each tier: batch-decompile via DecompileAddr.java, assess purpose, rename
+            4. Update rom_function_index.md + commit each tier when complete
+
+          Estimated effort: ~3-4 complete batches to exhaust top 3 tiers (~30+ functions per batch)
 
 [TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally

@@ -847,3 +847,8 @@ The work is properly staged and documented. The next iteration can either manual
 2026-06-25T00:15:10Z WIP state: DONE=210 NEXT=1 TODO=4 BLOCKED=14 FAILED=0
 2026-06-25T00:15:10Z Work remains (NEXT=1 TODO=4); sleeping 30s before restart.
 2026-06-25T00:15:40Z --- claude -p invocation 3/50 ---
+Execution error2026-06-25T00:19:18Z claude -p exited with code 0
+2026-06-25T00:19:18Z WIP state: DONE=211 NEXT=1 TODO=4 BLOCKED=14 FAILED=0
+2026-06-25T00:19:18Z Work remains (NEXT=1 TODO=4); sleeping 30s before restart.
+2026-06-25T00:19:22Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
+2026-06-25T00:19:22Z --- claude -p invocation 1/50 ---
