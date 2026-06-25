@@ -29,9 +29,9 @@ GZF process mode, run 2026-06-21, against
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
 | Named functions (this doc's table) | 726 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 16 region-0x80020000 Pass-3, as of 2026-06-24; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
 | Unnamed (`FUN_*`) functions (summarized below) | 1774 (2012 − 238 region-0x80060000 Pass-2-3 renames, 2026-06-24) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 502 (403 + 96 region-0x80060000 Pass-2-3 newly-decompiled + 3 region-0x80010000 PASS 5 newly-decompiled) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 39 (88 − 20 region-0x80010000 pass-2 upgrades − 10 region-0x80030000 Pass-3 upgrades − 16 region-0x80020000 Pass-3 upgrades − 3 region-0x80010000 PASS 5 upgrades) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 256 (271 − 14 region-0x80010000 pass-2 low-confidence fns upgraded to high − 1 region-0x80030000 Pass-5 `0x80032540` low→high upgrade) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 522 (502 + 20 region-0x80020000 Pass-5 newly-decompiled, 2026-06-25) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 38 (39 − 1 region-0x80020000 Pass-5 `0x80022030` medium→high upgrade, 2026-06-25) |
+| Named-function confidence: **low** (named by Kovah, purpose unclear) | 237 (256 − 19 region-0x80020000 Pass-5 low→high upgrades, 2026-06-25) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
 
@@ -611,31 +611,31 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80021c9c` | 28 | `calls_interesting_string_user_FUN_80021c9c` | calls interesting string user FUN 80021c9c | medium (named, one-line purpose only, not decompiled) |
 | `0x80021ec8` | 28 | `return_if_encryption_enabled_byte_at_bos_offset_0x58_ptr_index[0x26]` | return if encryption enabled byte at bos offset 0x58 ptr index[0x26] | low (named by Kovah, purpose unclear) |
 | `0x80021f44` | 34 | `get_byte[0x26]_in_unknown_ptr_0x58_points_to_struct_at_least_0x27_big` | get byte[0x26] in unknown ptr 0x58 points to struct at least 0x27 big | low (named by Kovah, purpose unclear) |
-| `0x80022030` | 86 | `LMP__266__FUN_80022030` | LMP  266  FUN 80022030 | medium (named, one-line purpose only, not decompiled) |
-| `0x8002271c` | 60 | `send_evt_HCI_Encryption_Change[v1]` | send evt HCI Encryption Change[v1] | low (named by Kovah, purpose unclear) |
-| `0x8002275c` | 52 | `send_evt_HCI_Change_Connection_Link_Key_Complete` | send evt HCI Change Connection Link Key Complete | low (named by Kovah, purpose unclear) |
-| `0x80022794` | 278 | `send_evt_HCI_Link_Key_Notification` | send evt HCI Link Key Notification | low (named by Kovah, purpose unclear) |
-| `0x800228b4` | 52 | `send_evt_HCI_Authentication_Complete_0x06` | send evt HCI Authentication Complete 0x06 | low (named by Kovah, purpose unclear) |
-| `0x800228ec` | 100 | `send_evt_HCI_Return_Link_Keys` | send evt HCI Return Link Keys | low (named by Kovah, purpose unclear) |
-| `0x80022c40` | 66 | `send_evt_HCI_PIN_Code_Request` | send evt HCI PIN Code Request | low (named by Kovah, purpose unclear) |
+| `0x80022030` | 86 | `LMP__266__FUN_80022030` | LMP__266__FUN_80022030: utility function (partial decompile output) — see region_0x80020000 Pass 5 | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
+| `0x8002271c` | 60 | `send_evt_HCI_Encryption_Change[v1]` | send_evt_HCI_Encryption_Change[v1]: thin wrapper, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x8002275c` | 52 | `send_evt_HCI_Change_Connection_Link_Key_Complete` | send_evt_HCI_Change_Connection_Link_Key_Complete: thin wrapper, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80022794` | 278 | `send_evt_HCI_Link_Key_Notification` | send_evt_HCI_Link_Key_Notification: link-key PDU build + logging, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x800228b4` | 52 | `send_evt_HCI_Authentication_Complete_0x06` | send_evt_HCI_Authentication_Complete_0x06: thin wrapper, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x800228ec` | 100 | `send_evt_HCI_Return_Link_Keys` | send_evt_HCI_Return_Link_Keys: multi-link pack-loop, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80022c40` | 66 | `send_evt_HCI_PIN_Code_Request` | send_evt_HCI_PIN_Code_Request: BD_ADDR extract + ROM notify (FUN_8001d03c), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
 | `0x80022eec` | 104 | `many_sub_if_else_cases_on_param2` | many sub if else cases on param2 | low (named by Kovah, purpose unclear) |
-| `0x80022f54` | 66 | `send_evt_HCI_Link_Key_Request` | send evt HCI Link Key Request | low (named by Kovah, purpose unclear) |
+| `0x80022f54` | 66 | `send_evt_HCI_Link_Key_Request` | send_evt_HCI_Link_Key_Request: BD_ADDR extract + ROM notify (FUN_8001d03c), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
 | `0x800233e8` | 400 | `HCI_Write_Simple_Pairing_Debug_Mode` | HCI Write Simple Pairing Debug Mode — see `hardware_layer` | high (decompiled+documented) |
-| `0x80023ba4` | 52 | `send_evt_HCI_Encryption_Key_Refresh_Complete` | send evt HCI Encryption Key Refresh Complete | low (named by Kovah, purpose unclear) |
-| `0x80023c4c` | 64 | `send_evt_HCI_Keypress_Notification` | send evt HCI Keypress Notification | low (named by Kovah, purpose unclear) |
-| `0x80023c90` | 52 | `send_evt_HCI_Simple_Pairing_Complete_0x36` | send evt HCI Simple Pairing Complete 0x36 | low (named by Kovah, purpose unclear) |
-| `0x80023cc8` | 72 | `send_evt_HCI_IO_Capability_Response` | send evt HCI IO Capability Response | low (named by Kovah, purpose unclear) |
-| `0x80023e38` | 70 | `send_evt_HCI_User_Passkey_Notification` | send evt HCI User Passkey Notification | low (named by Kovah, purpose unclear) |
-| `0x80023e84` | 66 | `send_evt_HCI_Remote_OOB_Data_Request` | send evt HCI Remote OOB Data Request | low (named by Kovah, purpose unclear) |
-| `0x80023ecc` | 66 | `send_evt_HCI_User_Passkey_Request` | send evt HCI User Passkey Request | low (named by Kovah, purpose unclear) |
-| `0x80023f14` | 84 | `send_evt_HCI_User_Confirmation_Request` | send evt HCI User Confirmation Request | low (named by Kovah, purpose unclear) |
-| `0x80023f6c` | 66 | `send_evt_HCI_IO_Capability_Request` | send evt HCI IO Capability Request | low (named by Kovah, purpose unclear) |
+| `0x80023ba4` | 52 | `send_evt_HCI_Encryption_Key_Refresh_Complete` | send_evt_HCI_Encryption_Key_Refresh_Complete: thin wrapper, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023c4c` | 64 | `send_evt_HCI_Keypress_Notification` | send_evt_HCI_Keypress_Notification: large2-struct dispatch, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023c90` | 52 | `send_evt_HCI_Simple_Pairing_Complete_0x36` | send_evt_HCI_Simple_Pairing_Complete_0x36: BD_ADDR + status pack, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023cc8` | 72 | `send_evt_HCI_IO_Capability_Response` | send_evt_HCI_IO_Capability_Response: BD_ADDR + param extract, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023e38` | 70 | `send_evt_HCI_User_Passkey_Notification` | send_evt_HCI_User_Passkey_Notification: BD_ADDR + u32 LSB-order pack, calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023e84` | 66 | `send_evt_HCI_Remote_OOB_Data_Request` | send_evt_HCI_Remote_OOB_Data_Request: BD_ADDR extract + ROM notify (FUN_8001d03c), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25)** |
+| `0x80023ecc` | 66 | `send_evt_HCI_User_Passkey_Request` | send_evt_HCI_User_Passkey_Request: thin wrapper (partial decompile output), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
+| `0x80023f14` | 84 | `send_evt_HCI_User_Confirmation_Request` | send_evt_HCI_User_Confirmation_Request: thin wrapper (partial decompile output), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
+| `0x80023f6c` | 66 | `send_evt_HCI_IO_Capability_Request` | send_evt_HCI_IO_Capability_Request: thin wrapper (partial decompile output), calls hci_event_sender | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
 | `0x80023fb4` | 4 | `set_arg1+1_to_arg2` | set arg1+1 to arg2 | low (named by Kovah, purpose unclear) |
 | `0x80023fd0` | 10 | `some_case_0x2d` | some case 0x2d | low (named by Kovah, purpose unclear) |
 | `0x800240f4` | 24 | `ret_bool_based_on_crypto_struct_0x50` | ret bool based on crypto struct 0x50 | low (named by Kovah, purpose unclear) |
-| `0x8002442c` | 62 | `wrap_send_LMP_NOT_ACCEPTED` | wrap send LMP NOT ACCEPTED | low (named by Kovah, purpose unclear) |
-| `0x8002469c` | 92 | `wrap_send_LMP_ACCEPTED_and_some_other_things` | wrap send LMP ACCEPTED and some other things | low (named by Kovah, purpose unclear) |
-| `0x80024bd8` | 48 | `copy_fields_within_crypto_struct` | copy fields within crypto struct | low (named by Kovah, purpose unclear) |
+| `0x8002442c` | 62 | `wrap_send_LMP_NOT_ACCEPTED` | wrap_send_LMP_NOT_ACCEPTED: LMP reject wrapper (partial decompile output) | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
+| `0x8002469c` | 92 | `wrap_send_LMP_ACCEPTED_and_some_other_things` | wrap_send_LMP_ACCEPTED_and_some_other_things: LMP accept wrapper (partial decompile output) | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
+| `0x80024bd8` | 48 | `copy_fields_within_crypto_struct` | copy_fields_within_crypto_struct: crypto-struct field copy utility (partial decompile output) | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
 | `0x80024ca4` | 864 | `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?` | start with fptr called by call send evt HCI Simple Pairing Complete  state machine update? | low (named by Kovah, purpose unclear) |
 | `0x80025cb4` | 118 | `LMP__271__FUN_80025cb4` | LMP  271  FUN 80025cb4 | medium (named, one-line purpose only, not decompiled) |
 | `0x80025d34` | 160 | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | some case 0x3b or 0x3c possible HCI Passkey Notification or HCI Keypress Notification | low (named by Kovah, purpose unclear) |

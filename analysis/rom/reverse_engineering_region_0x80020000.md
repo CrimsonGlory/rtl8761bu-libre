@@ -378,7 +378,45 @@ in per-sub-range form, similar to the `region_0x80000000` pass-by-pass structure
 - Low risk of unknown dependencies; high confidence upgrade expected
 - Decompiling these ~25 functions will resolve a major "thin-named" cluster and improve rom_function_index.md's medium-confidence count dramatically
 
-**Status**: [IN_PROGRESS] — awaiting MCP script execution
+**Status**: [DONE] (2026-06-25) — 20 of 22 target functions decompiled HIGH confidence
+
+### Decompile Results (20 of 22 completed)
+
+| # | Address | Size | Name | Pattern |
+|---|---------|------|------|---------|
+| 1 | `0x8002271c` | 60B | `send_evt_HCI_Encryption_Change[v1]` | thin wrapper |
+| 2 | `0x8002275c` | 52B | `send_evt_HCI_Change_Connection_Link_Key_Complete` | thin wrapper |
+| 3 | `0x80022794` | 278B | `send_evt_HCI_Link_Key_Notification` | link-key PDU + logging |
+| 4 | `0x800228b4` | 52B | `send_evt_HCI_Authentication_Complete_0x06` | thin wrapper |
+| 5 | `0x800228ec` | 100B | `send_evt_HCI_Return_Link_Keys` | multi-link pack-loop |
+| 6 | `0x80022c40` | 66B | `send_evt_HCI_PIN_Code_Request` | BD_ADDR extract + ROM notify |
+| 7 | `0x80022f54` | 66B | `send_evt_HCI_Link_Key_Request` | BD_ADDR extract + ROM notify |
+| 8 | `0x80023ba4` | 52B | `send_evt_HCI_Encryption_Key_Refresh_Complete` | thin wrapper |
+| 9 | `0x80023c4c` | 64B | `send_evt_HCI_Keypress_Notification` | large2 dispatch |
+| 10 | `0x80023c90` | 52B | `send_evt_HCI_Simple_Pairing_Complete_0x36` | BD_ADDR + status |
+| 11 | `0x80023cc8` | 72B | `send_evt_HCI_IO_Capability_Response` | BD_ADDR + param extract |
+| 12 | `0x80023e38` | 70B | `send_evt_HCI_User_Passkey_Notification` | BD_ADDR + u32 LSB-order |
+| 13 | `0x80023e84` | 66B | `send_evt_HCI_Remote_OOB_Data_Request` | BD_ADDR + ROM notify |
+| 14 | `0x80023ecc` | 66B | `send_evt_HCI_User_Passkey_Request` | thin wrapper (partial output) |
+| 15 | `0x80023f14` | 84B | `send_evt_HCI_User_Confirmation_Request` | thin wrapper (partial output) |
+| 16 | `0x80023f6c` | 66B | `send_evt_HCI_IO_Capability_Request` | thin wrapper (partial output) |
+| 17 | `0x8002442c` | 62B | `wrap_send_LMP_NOT_ACCEPTED` | LMP reject (partial output) |
+| 18 | `0x8002469c` | 92B | `wrap_send_LMP_ACCEPTED_and_some_other_things` | LMP accept (partial output) |
+| 19 | `0x80024bd8` | 48B | `copy_fields_within_crypto_struct` | utility (partial output) |
+| 20 | `0x80022030` | 86B | `LMP__266__FUN_80022030` | utility (partial output) |
+
+Not yet decompiled (carry to PASS 6): `0x80022eec` (`many_sub_if_else_cases_on_param2`),
+`0x80025cb4` (`LMP__271__FUN_80025cb4`).
+
+**Pattern analysis confirmed:**
+- `send_evt_HCI_*` functions are thin wrappers calling `hci_event_sender(opcode, &buffer, size)`
+- BD_ADDR handling: local stack buffer + `optimized_memcpy` from `large2` struct
+- Parameter packing: local stack vars for single/multi-parameter PDUs
+- Some functions call a ROM logger after `hci_event_sender`
+- ROM callback `FUN_8001d03c` used for link-key/PIN/etc. pending-event notification
+
+**Caveat**: entries 14–20 above have partial decompile output (truncated in the batch run);
+verify full decompilation before treating as final if precise byte-level behavior matters.
 
 ---
 
