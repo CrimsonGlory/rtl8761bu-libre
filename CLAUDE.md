@@ -25,6 +25,17 @@ ROM-only findings live in `analysis/rom/`.
 All disassembly and decompilation is done through **wairz** (MCP server) using
 `mcp__wairz__run_ghidra_headless`.
 
+**Batch decompilation — use `mcp__wairz__batch_decompile_functions`, do NOT write custom
+Ghidra scripts for it.** Ghidra's headless analyzer does not expose `DecompilerCallback` or
+related decompiler-internals classes — any custom `.java` script that imports them fails with
+`java.lang.ClassNotFoundException: DecompilerCallback not found by bundle` (or similar "method
+not in headless API" errors). This was hit and fixed on 2026-06-24 (see
+`wairz_requested_changes.txt`) by adding `mcp__wairz__batch_decompile_functions`, which
+decompiles 5-10 functions per call without needing a custom script. **Always call that tool
+directly for batch work** (300–600B utility-tier sweeps, etc.) instead of writing a new
+`BatchDecompile*.java` script — writing a new script for this is the old, already-fixed
+workaround and will just reproduce the ClassNotFoundException.
+
 **CRITICAL — MCP tools must be called as tool calls, never reimplemented manually.**
 `run-wip-loop-unattended.sh` sets `ENABLE_TOOL_SEARCH=false`, so `mcp__wairz__*` tools are
 pre-loaded and directly callable from turn 1 — just call `mcp__wairz__run_ghidra_headless(...)`

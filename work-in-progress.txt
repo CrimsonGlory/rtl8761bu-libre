@@ -3199,9 +3199,11 @@ sweep beyond enumeration and is the most out-of-date):
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
 [NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
-          Blocked on wairz Ghidra script compilation issue — mcp__wairz__run_ghidra_headless reports
-          "class not found" for newly-written decompilation scripts. Needs wairz environment cache
-          restart or alternative script invocation method.
+          NOT actually blocked: the "class not found" / DecompilerCallback error only happens
+          when writing a custom batch-decompile .java script (unsupported in Ghidra headless
+          mode). That was already fixed 2026-06-24 — see wairz_requested_changes.txt [DONE] —
+          by adding mcp__wairz__batch_decompile_functions (5-10 functions/call, no script
+          needed). Call that tool directly for this PASS; do not write a new BatchDecompile*.java.
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain) (2026-06-24)
           PASS 1+2 did enumeration & LMP staging; PASS 3 batch-decompiled 16 LMP encryption/pairing

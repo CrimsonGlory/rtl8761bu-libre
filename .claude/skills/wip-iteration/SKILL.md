@@ -64,6 +64,14 @@ you skipped loading it. That is the only legitimate basis for an MCP-unavailable
 ```
 If [TODO] items exist in `wairz_requested_changes.txt` → EXIT with error. Fix those blockers first before retrying the skill.
 
+**[DONE] entries in `wairz_requested_changes.txt` describe fixes that already shipped — read
+them before blocking.** If the [NEXT] item's blocker description matches a `[DONE]` entry's
+"Issue:" text (e.g. "class not found"/`DecompilerCallback` errors when writing a custom batch
+Ghidra script), use the fix in that entry's "Resolution:" line instead of re-blocking. For batch
+decompilation specifically: call `mcp__wairz__batch_decompile_functions` directly (5-10
+functions/call) — **never write a new `BatchDecompile*.java` script**, that path is unsupported
+in Ghidra headless mode and will always reproduce the already-fixed ClassNotFoundException.
+
 ## Execution
 
 1. **Read work-in-progress.txt** — find current [NEXT] item
