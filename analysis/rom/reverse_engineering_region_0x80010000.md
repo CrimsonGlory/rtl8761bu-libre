@@ -572,3 +572,50 @@ A future pass should re-run the authoritative listing scripts fresh rather
 than trust this doc's hand-derived tallies, per the now twice-repeated
 lesson from `region_0x80000000.md`'s pass-4/7 tally-reconciliation
 episodes.
+
+## Pass 4 (2026-06-25) — the `fHCI_*` HCI-command-handler cluster
+
+**Resolved 6 functions** (high confidence) from the HCI Link Control (OGF=1)
+command-handler family. All are thin wrappers that parse HCI command parameters,
+validate state via ROM calls, and dispatch via LMP or connection-record updates.
+
+### Architecture confirmed
+
+Every handler in this cluster:
+1. Parses/validates HCI command parameters (BD_ADDR, connection handle, role bits)
+2. Checks current connection state via ROM helpers (page state, ACL slot availability)
+3. Updates connection-record fields with the HCI-provided parameters
+4. Calls ROM `send_LMP_pkt()` to initiate the requested operation
+5. Sends HCI Command Status or Command Complete response event
+
+Key ROM functions leveraged by this cluster:
+- `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot()`: connection slot lookup
+- `return_big_ol_array_offset()`: allocate new connection slot
+- `send_LMP_pkt()`: send LMP PDU
+- `send_evt_HCI_Command_Status()` / `send_evt_HCI_Connection_Complete()`: event senders
+- `FUN_80036420()`, `possible_LMP_DETACH()`, `LMP_0x18_LMP_UNSNIFF_REQ()`: connection lifecycle
+- Various state validators and feature checkers
+
+### Per-function findings
+
+| Address | Size | Name | HCI Opcode | Notes |
+|---|---|---|---|---|
+| `0x8001bd38` | 512 | `fHCI_Create_Connection_0x05` | 0x0405 | Full connection handshake; parses BD_ADDR, packet type, page scan reps, clock offset, role-switch; calls ROM `FUN_80036420()` + `send_LMP_pkt()` |
+| `0x8001b9d4` | 258 | `fHCI_Disconnect_0x06` | 0x0406 | Validates connection handle via ROM lookup; checks encryption/park/sniff states; calls `possible_LMP_DETACH()` or `LMP_0x18_LMP_UNSNIFF_REQ()` per state |
+| `0x8001bbbc` | 360 | `fHCI_Accept_Connection_Request_0x09` | 0x0409 | Deferred connection acceptance; builds LMP-LMP accept params; calls ROM to populate connection record; handles role negotiation |
+| `0x8001baf8` | 190 | `fHCI_Reject_Connection_Request_0x0A` | 0x040a | Rejects pending connection; sends LMP NOT_ACCEPTED with error code; calls `send_LMP_NOT_ACCEPTED()` |
+| `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | 0x0419 | Deferred remote-name request; checks LMP feature bit 0x20; allocates connection slot if needed; sends LMP NAME_REQ opcode 0x01 |
+| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | 0x043f | Page-search variant with reduced-window heuristic; sets field185 flag to 2 (vs 1 for normal page); clock offset handling identical to Create_Connection |
+
+### Confidence levels
+
+All 6 functions: **HIGH** (full decompilation + call chain to ROM verified).
+Remaining thin-named OGF=1 handlers in this region are likely similar; cluster
+architecture is solid and generalizable to other HCI command families.
+
+### Tier classification
+
+All 6 functions are **T1 required** (basic ACL connection management). Essential
+for any BT Classic device to establish links, disconnect, handle connection
+requests, and perform remote name queries. P1 minimum feature set must include
+all 6.

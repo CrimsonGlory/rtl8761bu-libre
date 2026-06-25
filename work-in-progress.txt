@@ -3198,12 +3198,13 @@ sweep beyond enumeration and is the most out-of-date):
           All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
-          NOT actually blocked: the "class not found" / DecompilerCallback error only happens
-          when writing a custom batch-decompile .java script (unsupported in Ghidra headless
-          mode). That was already fixed 2026-06-24 — see wairz_requested_changes.txt [DONE] —
-          by adding mcp__wairz__batch_decompile_functions (5-10 functions/call, no script
-          needed). Call that tool directly for this PASS; do not write a new BatchDecompile*.java.
+[DONE]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4 (fHCI_* HCI command handler cluster, 6 functions) (2026-06-25)
+          Decompiled fHCI_Create_Connection_0x05, fHCI_Disconnect_0x06, fHCI_Accept_Connection_Request_0x09,
+          fHCI_Reject_Connection_Request_0x0A, fHCI_Remote_Name_Request_0x19, fHCI_Truncated_Page_0x3F.
+          All 6 are thin wrappers following common pattern (parameter parse → validation → state update → ROM helper calls →
+          event send). All HIGH confidence (full decompilation). Updated analysis/rom/reverse_engineering_region_0x80010000.md
+          Pass 4 section with architecture confirmation + per-function findings table + tier classification.
+          Updated rom_function_index.md with 5 high-confidence upgrades. 257 unnamed remain in region.
 
 [DONE]  Full RE: ROM region 0x80020000-0x8002ffff PASS 4 (continue sweep, 321 unnamed remain) (2026-06-24)
           PASS 1+2 did enumeration & LMP staging; PASS 3 batch-decompiled 16 LMP encryption/pairing
@@ -3211,6 +3212,11 @@ sweep beyond enumeration and is the most out-of-date):
           and six additional OGF dispatchers (0x01/0x02/0x04/0x05/0x06/0x08), all at HIGH confidence
           in analysis/rom/reverse_engineering_hci_command_router.md. Comprehensive triage strategy
           documented for remaining 321 unnamed functions.
+
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 5+ (continue until 0 unnamed remain, ~251 to resolve) (2026-06-25)
+          PASS 4 decompiled 6 fHCI_* handlers from the OGF=1 Link Control cluster. Remaining high-value targets:
+          (1) complete the OGF=1 cluster (~6 more fHCI_* handlers to PASS 4's pattern), (2) OGF=3 additional OCF handlers,
+          (3) remaining 240+ unnamed. Strategy: continue with individual decompilation (batch_decompile_functions hits target qty).
 
 [TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
           PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)

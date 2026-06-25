@@ -509,12 +509,12 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001b2c0` | 170 | `fHCI_Read_Clock_Offset_0x1F` | fHCI Read Clock Offset 0x1F | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | fHCI Read Remote Version Information 0x1D send LMP VERSION REQ 0x25 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b4e8` | 96 | `fHCI_Read_Remote_Supported_Features_0x1B` | fHCI Read Remote Supported Features 0x1B | medium (named, one-line purpose only, not decompiled) |
-| `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | fHCI Remote Name Request 0x19 send LMP NAME REQ 0x01 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | fHCI Remote Name Request 0x19 — thin wrapper sends LMP NAME REQ 0x01 with error handling | high (decompiled+documented) |
 | `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | fHCI Change Connection Packet Type 0x0F | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b8fc` | 204 | `fHCI_Add_SCO_Connection_DEPRECATED_0x07` | fHCI Add SCO Connection DEPRECATED 0x07 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001b9d4` | 258 | `fHCI_Disconnect_0x06` | fHCI Disconnect 0x06 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001baf8` | 190 | `fHCI_Reject_Connection_Request_0x0A` | fHCI Reject Connection Request 0x0A | medium (named, one-line purpose only, not decompiled) |
-| `0x8001bbbc` | 360 | `fHCI_Accept_Connection_Request_0x09` | fHCI Accept Connection Request 0x09 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b9d4` | 258 | `fHCI_Disconnect_0x06` | fHCI Disconnect 0x06 — thin wrapper sends LMP DETACH with error handling | high (decompiled+documented) |
+| `0x8001baf8` | 190 | `fHCI_Reject_Connection_Request_0x0A` | fHCI Reject Connection Request 0x0A — thin wrapper sends LMP NOT ACCEPTED 0x0d with error handling | high (decompiled+documented) |
+| `0x8001bbbc` | 360 | `fHCI_Accept_Connection_Request_0x09` | fHCI Accept Connection Request 0x09 — thin wrapper sends LMP ACCEPTED with error handling | high (decompiled+documented) |
 | `0x8001bd38` | 512 | `fHCI_Create_Connection_0x05` | fHCI Create Connection 0x05 — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001bf44` | 88 | `fHCI_Periodic_Inquiry_Mode_0x03` | fHCI Periodic Inquiry Mode 0x03 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001bfa0` | 50 | `fHCI_Inquiry_0x01` | fHCI Inquiry 0x01 — see `lc_lmp_state_machine` | high (decompiled+documented) |
@@ -525,7 +525,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | HCI OGF1 OCF0x42 | low (named by Kovah, purpose unclear) |
 | `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | HCI OGF1 OCF0x41 | low (named by Kovah, purpose unclear) |
 | `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | fHCI Truncated Page Cancel 0x40 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | fHCI Truncated Page 0x3F | medium (named, one-line purpose only, not decompiled) |
+| `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | fHCI Truncated Page 0x3F — thin wrapper sends LMP with error handling | high (decompiled+documented) |
 | `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | call to HCI opcodes OGF=1 0x3F-to-0x44 | low (named by Kovah, purpose unclear) |
 | `0x8001ca94` | 60 | `send_evt_HCI_Inquiry_Response_Notification` | send evt HCI Inquiry Response Notification | low (named by Kovah, purpose unclear) |
 | `0x8001cad4` | 36 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Channel_Map_Change` | send evt HCI Connectionless Peripheral Broadcast Channel Map Change | low (named by Kovah, purpose unclear) |
