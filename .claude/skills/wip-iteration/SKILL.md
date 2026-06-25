@@ -29,20 +29,29 @@ The reason: Worker spawning introduces isolation, which blocks MCP access. The s
 
 ## Startup check
 
-🔴 **First:** Load wairz MCP tool schemas — they are deferred, not pre-loaded
-`mcp__wairz__*` tools do **not** appear as directly callable at session start. Calling one
-directly without loading it first fails and looks like "MCP unavailable" — it is not; the
-schema just hasn't been fetched. Call `ToolSearch` first:
+🔴 **First, mandatory, before reading work-in-progress.txt:** call the `ToolSearch` tool.
+Do not skip this. Do not just reason about it or cite CLAUDE.md — actually invoke the tool:
 
 ```
 ToolSearch({ query: "select:mcp__wairz__run_ghidra_headless,mcp__wairz__list_projects", max_results: 5 })
 ```
 
-If this returns the tool schemas, MCP is available — proceed normally using the now-loaded
-`mcp__wairz__*` tools. Only conclude MCP is genuinely unavailable if `ToolSearch` itself errors
-or returns zero matches for `mcp__wairz__*`. If that happens → EXIT IMMEDIATELY with "MCP access
-unavailable — cannot proceed." Do not attempt workarounds, and do not blame worker isolation
-without first confirming `ToolSearch` was tried.
+`mcp__wairz__*` tools are deferred and not callable until this runs. This is a normal,
+expected, one-line fix — **not a blocker, not a finding, not something to document**.
+
+**It is FORBIDDEN to mark the [NEXT] item `[BLOCKED]` for any of these reasons:**
+- "MCP tools are deferred / require ToolSearch / not directly callable"
+- "wairz tool not found" without having called `ToolSearch` first in *this* turn
+- "harness tool-calling mechanism" or any rephrasing of the above
+
+If you find yourself about to write a blocked-reason that describes *the deferred-tool
+mechanism itself* rather than a real external constraint (hardware, user input, credentials),
+stop — call `ToolSearch` and continue the actual RE work instead. Recognizing the mechanism
+is not a stopping condition; it is the first tool call of the iteration.
+
+Only treat MCP as genuinely unavailable if `ToolSearch` itself errors, or the loaded
+`mcp__wairz__*` tools then fail when actually invoked with real arguments. That — not the
+deferred-loading step — is the only legitimate basis for an MCP-unavailable `[BLOCKED]`.
 
 🔴 **Second:** Check wairz blockers
 ```bash
