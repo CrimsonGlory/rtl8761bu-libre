@@ -3198,7 +3198,7 @@ sweep beyond enumeration and is the most out-of-date):
           All decompiled, named, and documented in analysis/rom/reverse_engineering_region_0x80010000.md
           Pass 3 section. Region scope: 408 functions total (15 already-high-confidence elsewhere,
           32 resolved pass 1, 38 pass 2, 6 pass 3 = 76 total resolved). Remaining: 332 functions
-[TODO]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
+[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 4+ (continue until 0 unnamed remain, ~257 to resolve) (2026-06-24)
           Blocked on wairz Ghidra script compilation issue — mcp__wairz__run_ghidra_headless reports
           "class not found" for newly-written decompilation scripts. Needs wairz environment cache
           restart or alternative script invocation method.

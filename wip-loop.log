@@ -1104,3 +1104,31 @@ You've hit your session limit · resets 2:50am (UTC)
 2026-06-25T00:58:46Z STOP: reached MAX_RESTARTS (50) without exhausting [NEXT]/[TODO] — needs human review.
 2026-06-25T02:50:26Z === run-wip-loop-unattended.sh starting (model=claude-haiku-4-5 effort=high) ===
 2026-06-25T02:50:26Z --- claude -p invocation 1/50 ---
+Perfect! The iteration is complete. Let me provide a summary:
+
+## Summary
+
+I've successfully completed the **PASS 11 COMPLEX tier batch 2** work-in-progress item:
+
+### Work Done
+- **Executed batch decompile** of 13 ROM functions in 0x80070000-0x8007ffff region (301–600B size range)
+- **5 functions successfully decompiled** (HIGH confidence):
+  1. **0x80070084** – LMP role-switch completion handler (414B)
+  2. **0x80070574** – LMP SWITCH_REQ/ACL finalize handler (582B) 
+  3. **0x80071138** – LMP accept/mirror connection handler (306B)
+  4. **0x8007276c** – AFH channel capability negotiator (424B)
+  5. **0x800707dc** – HCI connection state-transition cleanup (164B)
+  
+- **8 functions not decompilable** (likely thunks/wrappers) – deferred to HANDLER tier
+- **Updated analysis documentation** with full decompilation results, recommended renames, and HANDLER tier staging
+- **Committed batch** to git with detailed summary
+
+### Key Findings
+All 5 successfully decompiled functions are **core LMP connection state machine handlers**, indicating a well-structured Bluetooth protocol stack. The AFH negotiation logic integrates coherently with earlier CRITICAL batch findings (LAP slot allocators).
+
+### Next Item
+Promoted **0x80000000-0x8000ffff out-of-gap-scope sweep** (88 remaining functions) to [NEXT]. This covers functions previously excluded from the gap-scope analysis that still need comprehensive documentation.
+2026-06-25T03:06:13Z claude -p exited with code 0
+2026-06-25T03:06:13Z WIP state: DONE=213 NEXT=1 TODO=12 BLOCKED=5 FAILED=0
+2026-06-25T03:06:13Z Work remains (NEXT=1 TODO=12); sleeping 30s before restart.
+2026-06-25T03:06:43Z --- claude -p invocation 2/50 ---
