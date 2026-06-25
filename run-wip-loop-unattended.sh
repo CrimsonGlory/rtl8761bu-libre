@@ -29,6 +29,15 @@ set -uo pipefail
 IS_SANDBOX=1
 export IS_SANDBOX=1
 
+# Disable deferred ToolSearch loading: in print mode, models sometimes call
+# ToolSearch successfully but then fail to actually invoke the now-loaded
+# mcp__wairz__* tool (inventing broken manual workarounds, e.g. hand-rolled
+# JSON-RPC over `docker exec`, instead of just calling the tool). Pre-loading
+# all tool schemas upfront removes the ToolSearch round-trip and this failure
+# mode entirely — mcp__wairz__* tools are then directly callable from turn 1.
+ENABLE_TOOL_SEARCH=false
+export ENABLE_TOOL_SEARCH=false
+
 # --- Tunables: change these if you want a different model/effort/cadence ---
 CLAUDE_MODEL="claude-haiku-4-5"
 CLAUDE_EFFORT="high"          # low | medium | high | xhigh | max

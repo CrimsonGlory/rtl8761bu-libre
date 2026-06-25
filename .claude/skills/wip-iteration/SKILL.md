@@ -29,29 +29,34 @@ The reason: Worker spawning introduces isolation, which blocks MCP access. The s
 
 ## Startup check
 
-🔴 **First, mandatory, before reading work-in-progress.txt:** call the `ToolSearch` tool.
-Do not skip this. Do not just reason about it or cite CLAUDE.md — actually invoke the tool:
+🔴 **First:** `mcp__wairz__*` tools should be directly callable as normal tool calls — the
+unattended runner sets `ENABLE_TOOL_SEARCH=false` precisely so these tools are pre-loaded and
+callable from turn 1, with no `ToolSearch` round-trip needed. **Just call them directly**,
+e.g. `mcp__wairz__list_projects()` or `mcp__wairz__run_ghidra_headless(...)` — the same way you'd
+call `Read` or `Bash`.
 
+If a direct call to an `mcp__wairz__*` tool fails as "unknown tool" (only possible if running
+interactively without `ENABLE_TOOL_SEARCH=false`), call `ToolSearch` once to load it, then
+retry the real call:
 ```
 ToolSearch({ query: "select:mcp__wairz__run_ghidra_headless,mcp__wairz__list_projects", max_results: 5 })
 ```
 
-`mcp__wairz__*` tools are deferred and not callable until this runs. This is a normal,
-expected, one-line fix — **not a blocker, not a finding, not something to document**.
-
 **It is FORBIDDEN to mark the [NEXT] item `[BLOCKED]` for any of these reasons:**
 - "MCP tools are deferred / require ToolSearch / not directly callable"
-- "wairz tool not found" without having called `ToolSearch` first in *this* turn
-- "harness tool-calling mechanism" or any rephrasing of the above
+- "harness tool-calling mechanism" prevents invocation, or any rephrasing of the above
+- Manually scripting JSON-RPC / `docker exec` / subprocess plumbing to talk to wairz instead of
+  just calling the `mcp__wairz__*` tool as a normal tool call — **never do this**, it is always
+  wrong; the tool call interface handles the transport, you never touch stdio/docker yourself
 
-If you find yourself about to write a blocked-reason that describes *the deferred-tool
-mechanism itself* rather than a real external constraint (hardware, user input, credentials),
-stop — call `ToolSearch` and continue the actual RE work instead. Recognizing the mechanism
-is not a stopping condition; it is the first tool call of the iteration.
+If you find yourself about to write a blocked-reason that describes *the tool-calling mechanism
+itself* rather than a real external constraint (hardware, user input, credentials), stop — just
+call the tool directly (ToolSearch first only if the direct call errors) and continue the actual
+RE work instead.
 
-Only treat MCP as genuinely unavailable if `ToolSearch` itself errors, or the loaded
-`mcp__wairz__*` tools then fail when actually invoked with real arguments. That — not the
-deferred-loading step — is the only legitimate basis for an MCP-unavailable `[BLOCKED]`.
+Only treat MCP as genuinely unavailable if a direct `mcp__wairz__*` call (after `ToolSearch` if
+needed) errors with a real backend failure — not a "not found"/"not callable" error, which means
+you skipped loading it. That is the only legitimate basis for an MCP-unavailable `[BLOCKED]`.
 
 🔴 **Second:** Check wairz blockers
 ```bash

@@ -25,21 +25,20 @@ ROM-only findings live in `analysis/rom/`.
 All disassembly and decompilation is done through **wairz** (MCP server) using
 `mcp__wairz__run_ghidra_headless`.
 
-**CRITICAL — MCP tools are deferred, not pre-loaded.** wairz tools (`mcp__wairz__*`) do not
-appear as directly callable tools at session start — they are deferred behind the `ToolSearch`
-tool. Calling `mcp__wairz__run_ghidra_headless` (or any `mcp__wairz__*` tool) directly, without
-loading it first, fails — and superficially looks like "MCP is unavailable," but it is not;
-the tool schema just hasn't been fetched yet.
+**CRITICAL — MCP tools must be called as tool calls, never reimplemented manually.**
+`run-wip-loop-unattended.sh` sets `ENABLE_TOOL_SEARCH=false`, so `mcp__wairz__*` tools are
+pre-loaded and directly callable from turn 1 — just call `mcp__wairz__run_ghidra_headless(...)`
+like any other tool (Read, Bash, etc.). Do not write Python/bash that manually does JSON-RPC
+or `docker exec` against the wairz container — that is never correct; the tool-calling
+interface (this harness) owns the transport, and hand-rolling it will hang or fail in ways
+that look like "MCP unavailable" but are actually self-inflicted.
 
-**At the start of every session, before doing any RE work:**
-```
-ToolSearch({ query: "select:mcp__wairz__run_ghidra_headless,mcp__wairz__list_projects", max_results: 5 })
-```
-This loads the real schemas so the tools become callable. Only treat MCP as genuinely
-unavailable if `ToolSearch` itself errors or returns no matches for `mcp__wairz__*` queries —
-not if a direct, unloaded tool call fails with "not found"/"unknown tool". Do **not** exit or
-ask to "respawn with isolation: false" based on a direct-call failure alone; call `ToolSearch`
-first and retry.
+If running interactively without `ENABLE_TOOL_SEARCH=false` and a direct `mcp__wairz__*` call
+errors as "unknown tool," call `ToolSearch({ query: "select:mcp__wairz__<name>" })` once to load
+its schema, then retry the real call. Only conclude MCP is genuinely unavailable if that real
+call (after loading, if needed) errors with an actual backend failure — never because a manual
+subprocess/stdio workaround didn't pan out. Do **not** exit or ask to "respawn with isolation:
+false" based on a direct-call or manual-workaround failure alone.
 
 **SUPERVISOR NOTE — Unattended loops must stay in supervisor context**: For overnight unattended
 work, use `./run-wip-loop-unattended.sh` (shell-level loop at supervisor scope) rather than
