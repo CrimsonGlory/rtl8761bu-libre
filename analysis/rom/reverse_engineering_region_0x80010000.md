@@ -652,3 +652,36 @@ OGF=1 Link Control cluster now **100% decompiled** (9 handlers total from PASS 3
 original high-confidence set = complete). Next high-value target: `fHCI_Read_*` cluster
 (`0x8001b23c`–`0x8001b780`: Read LMP Handle, Read Clock Offset, Read Remote
 Version/Supported Features, Remote Name Request).
+
+## Pass 6 (2026-06-25) — `fHCI_Read_*` cluster (Read Remote Version, Remote Name Request)
+
+**Resolved 2 of 5 target functions** (high confidence) from the OGF=1 Link Control command
+handlers specializing in remote-device information queries. Both exhibit the thin-wrapper
+architecture: parameter parsing → connection-record lookup → LMP PDU construction + send →
+event dispatch on error. The cluster addresses 0x8001b23c–0x8001b780 contain additional
+unnamed utility functions and helper dispatchers; full cluster enumeration deferred to
+subsequent pass.
+
+### Per-function findings
+
+| Address | Size | Name | HCI Opcode | LMP Opcode | Notes |
+|---|---|---|---|---|---|
+| `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | 0x041d | 0x25 | Parses HCI command buffer for connection handle. Calls ROM `lookup_up_to_3_bos_array_indices_by_connection_handle()` to validate & fetch bos-array index. On success: constructs LMP VERSION_REQ PDU (opcode 0x25), calls `send_LMP_pkt()` with 3-byte opcode sequence + LMP metadata, updates status bits via `get_status_bits_by_LMP_Opcode(0x25, ...)`. On error: calls `send_evt_HCI_Command_Status()` with error code. Manages connection record timer state. |
+| `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | 0x0419 | 0x01 | Deferred remote-name request (name cached in connection record until query completes). Parses HCI command for BD_ADDR, page-scan repetition mode, clock offset. Checks LMP feature bit 0x20 (Remote Name Req support). Branches on feature-available vs. pending-request state. If feature available: locates or allocates new connection slot, stores BD_ADDR/clock-offset/PSRM parameters, initializes name-buffer to zeros, sends LMP NAME_REQ opcode 0x01 (1-byte opcode, 3-byte LMP header) via `send_LMP_pkt()`, sets 0x40 bit in outstanding-LMP-packets status bitmask, sends HCI Command Status event (0x419). Error codes: 0x09 (Connection Limit), 0x0C (Command Disallowed—already pending), 0x0D (Reserved Resources), 0x12 (Invalid HCI Parameters). |
+
+### Confidence levels
+
+Both functions: **HIGH** (full decompilation + ROM call chains + LMP PDU construction verified).
+
+### Tier classification
+
+- `fHCI_Read_Remote_Version_Information_0x1D`: **T1 required** (baseline BT version discovery)
+- `fHCI_Remote_Name_Request_0x19`: **T1 required** (baseline BT device naming)
+
+### Remaining scope after PASS 6
+
+`fHCI_Read_*` cluster is **partial** (2 of 5 target handlers resolved). Three additional read-info
+handlers remain in the address range (`fHCI_Read_LMP_Handle_0x14`, `fHCI_Read_Clock_Offset_0x15`,
+`fHCI_Read_Remote_Supported_Features_0x1B`), plus ~6 unnamed utility functions and dispatch
+helpers also within the range. Next pass: continue cluster or move to next high-value target
+(321 unnamed remaining in region 0x80020000 flagged as OGF/OCF handler territory).

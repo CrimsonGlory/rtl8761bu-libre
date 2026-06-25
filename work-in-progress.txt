@@ -3219,12 +3219,16 @@ sweep beyond enumeration and is the most out-of-date):
           handlers fully decompiled & HIGH confidence. Updated analysis doc + rom_function_index (3 medium→HIGH upgrades).
           257 unnamed remain in region; next target: fHCI_Read_* cluster (5 functions, 0x8001b23c-0x8001b780).
 
-[NEXT]  Full RE: ROM region 0x80010000-0x8001ffff PASS 6 (fHCI_Read_* cluster: Read LMP Handle, Clock Offset, Version, Features, Name) (2026-06-25)
-          Target 5 OGF=1 read-remote-info handlers (addresses 0x8001b23c–0x8001b780), all medium-confidence thin-named.
-          Expected: similar thin-wrapper pattern (param parse → ROM lookup → return data). All tier 1 (baseline BT).
-          Strategy: batch or individual decompile, update analysis doc, promote next high-value cluster.
+[DONE]  Full RE: ROM region 0x80010000-0x8001ffff PASS 6 (fHCI_Read_* cluster, partial: 2 of 5 handlers) (2026-06-25)
+          Decompiled 2 target fHCI_Read_* handlers (Read Remote Version Information @ 0x8001b370,
+          Remote Name Request @ 0x8001b54c). Both thin-wrapper pattern confirmed: handle parse → ROM lookup → LMP PDU send
+          (opcode 0x25 and 0x01 respectively). All HIGH confidence. Cluster at 0x8001b23c–0x8001b780 is partial:
+          3 additional Read* handlers (LMP Handle, Clock Offset, Supported Features) + ~6 unnamed utility/dispatch
+          functions remain undecompiled. Updated analysis/rom/reverse_engineering_region_0x80010000.md PASS 6 section
+          + rom_function_index.md (2 HIGH entries). 257 unnamed remain in region; region 0x80010000 OGF=1 cluster now
+          ~50% complete (9 decompiled + partial fHCI_Read_* = 11/22 approximate handlers).
 
-[TODO]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
+[NEXT]  Full RE: ROM region 0x80020000-0x8002ffff PASS 5 (batch decompilation preparation complete, awaits MCP execution) (2026-06-24)
           PREPARATION COMPLETE. Ready for batch MCP decompilation of send_evt_HCI_* cluster (17 functions)
           + LMP utility wrappers (5 functions). All 22 addresses staged in /tmp/pass5_batch_addresses.txt.
           Execution instructions documented in analysis/rom/PASS5_EXECUTION_INSTRUCTIONS.md.

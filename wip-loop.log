@@ -1171,3 +1171,25 @@ PASS 4 of region 0x80010000 is complete. Six fHCI_* HCI command handlers decompi
 2026-06-25T03:18:14Z WIP state: DONE=214 NEXT=1 TODO=11 BLOCKED=6 FAILED=0
 2026-06-25T03:18:14Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
 2026-06-25T03:18:44Z --- claude -p invocation 4/50 ---
+Perfect! The work is complete:
+
+## Summary
+
+I've successfully completed **PASS 5 for ROM region 0x80010000**, decompiling 3 additional HCI command handlers from the OGF=1 Link Control cluster:
+
+1. **fHCI_Change_Connection_Packet_Type_0x0F** (0x8001b84c, 170B) — Updates connection record packet type, checks encryption state via ROM, calls setup/cascade functions
+2. **fHCI_Add_SCO_Connection_DEPRECATED_0x07** (0x8001b8fc, 204B) — Deprecated BT command; initializes SCO parameters, sends status/complete events  
+3. **fHCI_Periodic_Inquiry_Mode_0x03** (0x8001bf44, 88B) — Thin wrapper; parses periodic inquiry params, delegates to ROM handler
+
+All three are now **HIGH confidence** (decompiled + documented). The OGF=1 Link Control cluster is now 100% decompiled (9 handlers total from PASS 3–5). 
+
+Updated documentation:
+- `analysis/rom/reverse_engineering_region_0x80010000.md` — Added PASS 5 section with per-function findings
+- `analysis/rom/rom_function_index.md` — Upgraded 3 entries from medium→HIGH confidence; adjusted summary counts
+- `work-in-progress.txt` — Marked PASS 5 [DONE], promoted PASS 6 [NEXT] (fHCI_Read_* cluster: 5 functions)
+
+Committed: `d1e7695` Complete PASS 5 region 0x80010000: 3 fHCI_* handlers decompiled + documented (HIGH confidence)
+2026-06-25T03:25:43Z claude -p exited with code 0
+2026-06-25T03:25:43Z WIP state: DONE=215 NEXT=1 TODO=11 BLOCKED=6 FAILED=0
+2026-06-25T03:25:43Z Work remains (NEXT=1 TODO=11); sleeping 30s before restart.
+2026-06-25T03:26:13Z --- claude -p invocation 5/50 ---

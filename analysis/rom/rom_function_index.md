@@ -507,7 +507,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001af9c` | 114 | `LMP_0x18_LMP_UNSNIFF_REQ` | LMP 0x18 LMP UNSNIFF REQ — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001b23c` | 122 | `fHCI_Read_LMP_Handle_0x20` | fHCI Read LMP Handle 0x20 | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b2c0` | 170 | `fHCI_Read_Clock_Offset_0x1F` | fHCI Read Clock Offset 0x1F | medium (named, one-line purpose only, not decompiled) |
-| `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | fHCI Read Remote Version Information 0x1D send LMP VERSION REQ 0x25 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | HCI Read Remote Version Information command handler; initiates LMP VERSION_REQ PDU (opcode 0x25) via ROM connection-record lookup. See `region_0x80010000`, PASS 6 | high (decompiled+documented) |
 | `0x8001b4e8` | 96 | `fHCI_Read_Remote_Supported_Features_0x1B` | fHCI Read Remote Supported Features 0x1B | medium (named, one-line purpose only, not decompiled) |
 | `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | fHCI Remote Name Request 0x19 — thin wrapper sends LMP NAME REQ 0x01 with error handling | high (decompiled+documented) |
 | `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | fHCI Change Connection Packet Type 0x0F — HCI command handler; updates connection record + calls ROM encryption/state checkers; (0x040f) | high (decompiled+documented, PASS 5) |
