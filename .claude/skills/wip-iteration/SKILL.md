@@ -87,6 +87,16 @@ analyze, document findings. For prep tasks: stage scripts, create analysis docs.
 
 5. **Promote:** If any [TODO] remains → rename first `[TODO]` → `[NEXT]`
 
-6. **Commit:** Stage files, create commit with summary of work done
+6. **Update the real analysis docs BEFORE committing — not just work-in-progress.txt.** Per
+   CLAUDE.md ("Documentation Always Comes After Work"), a `[DONE]` entry must name the specific
+   `analysis/rom/*.md` / `rom_function_index.md` / `analysis/INDEX.md` files it claims to update
+   — and those files must actually be edited in this same turn, not just described as updated.
+   **Before running `git commit`, run `git status` / `git diff --stat` and confirm every file
+   named in the [DONE] entry's summary actually appears as modified.** If a [DONE] entry says
+   "→ rom_function_index.md (N new HIGH rows)" but that file isn't in the diff, you have not
+   finished the iteration — go write it now. A commit message or work-in-progress.txt entry that
+   *claims* documentation was updated is not a substitute for actually updating it.
+
+7. **Commit:** Stage files, create commit with summary of work done
 
 **DO NOT leave [NEXT] as [NEXT] when exiting.** Rename to [DONE] or [BLOCKED].
