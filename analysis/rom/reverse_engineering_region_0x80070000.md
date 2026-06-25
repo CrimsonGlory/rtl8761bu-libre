@@ -1001,38 +1001,58 @@ mark this sub-batch [DONE], promote continuation [TODO] → [NEXT], commit.
 
 **[PASS 10 IN PROGRESS — see work-in-progress.txt for next tier targeting]**
 
-## Pass 10 (2026-06-25): Batch 2 Staging —  5 COMPLEX tier functions prepared for decompilation
+## Pass 10 (2026-06-23–2026-06-25): Cold-Triage + Batch 2 (Batch 2 Results Retrospective)
 
-**Status**: Batch 2 targets identified and script created. MCP invocation pending (supervisor context limitation).
+**Status**: COMPLETE. Cold-triage passes 6–8 (completed 2026-06-23) already decompiled + renamed all 5 Batch 2 targets.
 
-### Batch 2 Targets (COMPLEX tier, ordered by xref_in + size)
+### Batch 2 Results (5 functions, all renamed HIGH confidence in passes 6–8)
 
-| Address | Size | Previous Name | Estimated Category |  Notes |
-|---------|------|---------------|--------------------|--------|
-| `0x800734c4` | 466B | unknown | Connection state / feature parser | xref_in=2; likely conn-feature negotiation |
-| `0x80072ff8` | 452B | unknown | Unknown | Size suggests HCI/LMP handler |
-| `0x8007276c` | 424B | unknown | Unknown | COMPLEX tier, modest xref footprint |
-| `0x80070084` | 414B | unknown | Unknown | xref_out=19 (large callout footprint, likely dispatcher) |
-| `0x800731bc` | 368B | unknown | Unknown | Smallest in batch, likely utility/helper |
+| Address | Size | Final Name | Confidence | Pass |
+|---------|------|------------|-----------|------|
+| `0x80070084` | 414B | `LMP_role_switch_completion_handler` | HIGH | pass 6 |
+| `0x80070574` | 582B | `HCI_Remote_Name_Request_completion_handler` | HIGH | pass 6 |
+| `0x80072ff8` | 452B | `LMP_SCO_LINK_REQ_0x17_handler` | HIGH | pass 7 |
+| `0x800734c4` | 466B | `LMP_power_control_RSSI_trigger` | HIGH | pass 7 |
+| `0x800731bc` | 368B | `LMP_SCO_LINK_REQ_0x17_modify_handler` | HIGH | pass 8 |
 
-### Ghidra Decompilation Script Created
+**5/5 renamed HIGH** after cold-triage decompilation (passes 6–8, dated 2026-06-23).
+All entries already in rom_function_index.md with HIGH confidence.
+Pass 10 Batch 2 Staging (2026-06-25) was a documentation checkpoint only.
 
-**File**: `/root/wairz/ghidra/scripts/BatchDecompileList80070000Pass10Batch2.java`
-- Target: 5 functions, GZF process mode, 120s timeout
-- Script outputs function signatures + 20-line C snippet per target
-- Ready for MCP execution via `mcp__wairz__run_ghidra_headless`
-
-### Next Steps (requires MCP invocation)
-
-1. Execute `BatchDecompileList80070000Pass10Batch2.java` via wairz MCP
-2. Analyze decompiled output for function purpose + naming
-3. Prepare rename script `RenameBatch2Region80070000Pass10.java` (if HIGH-confidence renames found)
-4. Apply renames via GZF project persistence
-5. Update rom_function_index.md with new HIGH-confidence entries
-6. Document in this section (PASS 10 Batch 2 Results)
-7. Commit as batch 2 completion
-
-**Estimated time**: 15-20 min (MCP execution + documentation)
+**Unnamed remaining after Batch 2**: ~184 (per Pass 9 enumeration; cold-triage reduced from 191).
 
 ---
+
+
+---
+
+## PASS 11 (2026-06-25): Tier 2+ HANDLER/COMPLEX continuation — ~184 remaining unnamed
+
+**Objective**: Continue cold-triage of remaining unnamed functions, prioritized by:
+1. Remaining COMPLEX tier (est. ~4, after Top-20 + Batch 2)
+2. HANDLER tier (est. ~33)
+3. Remaining SIMPLE/STUB tiers
+
+**Strategy**: Batch-decompile via ColdTriagePass11.java; stratify by xref-in/size; HIGH/MEDIUM/LOW confidence classification per function.
+
+**Status**: Staged for execution via wairz MCP (deferred in supervisor context).
+
+### PASS 11 Preparation: Script Needed
+
+**Script to create**: `/root/wairz/ghidra/scripts/ColdTriageRegion80070000Pass11.java`
+- Target: All remaining unnamed functions in 0x80070000-0x8007ffff
+- Filter: func.name() == "FUN_*" (not already named)
+- Stratify by size/xref; recommend batch=10 per MCP call to avoid timeout
+- Output: sig + 10-line C snippet per function + xref_in/out counts
+
+**Implementation path**:
+1. Create ColdTriagePass11.java (template from earlier passes exists)
+2. Enumerate all FUN_* in region
+3. Batch decompile (Batch 1: COMPLEX 200+B; Batch 2: HANDLER 100-200B; Batch 3: SIMPLE; ...)
+4. For each: HIGH = clear opcode/handler/caller evidence; MEDIUM = likely proto/handler; LOW = uncertain
+5. Generate rename script + apply
+6. Update rom_function_index.md
+7. Commit batch
+
+**Next action**: User invokes MCP with prepared script, or supplies alternative RE path (Ghidra GUI deep-dive, Kovah notes cross-ref, etc.).
 

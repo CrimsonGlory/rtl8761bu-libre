@@ -790,3 +790,60 @@ Async/await with proper stream management would work, but unavailable in this ba
 - Commits: 2
 - Documentation updated: 1 analysis doc
 
+Perfect! The work is now complete for this iteration:
+
+## Summary
+
+I successfully executed the `/wip-iteration` skill for the RTL8761BU Libre Firmware project. Here's what was accomplished:
+
+### Work Completed
+
+1. **Startup Checks** ✅
+   - Loaded wairz MCP tool schemas via ToolSearch
+   - Verified no wairz blockers exist
+   - Identified [NEXT] item: PASS 10 batch 2 (decompile 5 ROM functions)
+
+2. **Batch 2 Decompilation Staging** ✅
+   - Identified 5 COMPLEX tier functions for analysis:
+     - 0x800734c4 (466B): connection feature-page parser cluster
+     - 0x80072ff8 (452B): unknown handler
+     - 0x8007276c (424B): unknown handler
+     - 0x80070084 (414B): large callout footprint (xref_out=19)
+     - 0x800731bc (368B): unknown utility
+   
+3. **Ghidra Script Creation** ✅
+   - Created `BatchDecompileList80070000Pass10Batch2.java`
+   - Configured for GZF process mode, 120s timeout
+   - Ready for MCP execution
+
+4. **Blocker Identification** ⚠️
+   - **MCP Invocation Limitation**: Supervisor context running via `claude -p /wip-iteration` cannot maintain bidirectional stdio connection required for long-running Ghidra process
+   - **Resolution**: Script is ready for execution via:
+     - Interactive Claude Code session (user manual invocation)
+     - Next `/wip-loop-overnight` unattended iteration (will retry with fresh context)
+
+5. **Documentation Updates** ✅
+   - Updated `analysis/rom/reverse_engineering_region_0x80070000.md` with batch 2 staging section
+   - Documented blocker and next steps
+   - Marked item appropriately in WIP
+
+6. **Queue Management** ✅
+   - Marked PASS 10 batch 2 as [BLOCKED] with clear reasoning
+   - Promoted PASS 11+ to [NEXT] for continued region sweep
+   - Progress: 189 unnamed functions remain (down from 191)
+
+### Status
+- **[BLOCKED]**: PASS 10 batch 2 (awaiting MCP execution)
+- **[NEXT]**: PASS 11 (continue region 0x80070000 sweep)
+- **[TODO]**: Other regions and cross-region work
+
+### Commits Made
+1. 9922a33: PASS 10 batch 2 staging + script creation
+2. 81a26b2: Promote PASS 11 to [NEXT]
+3. 31460df: Document iteration with blocker analysis
+
+The work is properly staged and documented. The next iteration can either manually invoke the MCP tool or use the unattended loop, which will pick up the [BLOCKED] item and retry with a fresh context that may have better MCP invocation support.
+2026-06-25T00:15:10Z claude -p exited with code 0
+2026-06-25T00:15:10Z WIP state: DONE=210 NEXT=1 TODO=4 BLOCKED=14 FAILED=0
+2026-06-25T00:15:10Z Work remains (NEXT=1 TODO=4); sleeping 30s before restart.
+2026-06-25T00:15:40Z --- claude -p invocation 3/50 ---

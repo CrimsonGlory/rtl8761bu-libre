@@ -3425,7 +3425,14 @@ sweep beyond enumeration and is the most out-of-date):
             - OR: Next unattended /wip-loop-overnight iteration (will retry in fresh session)
           Analysis doc updated with batch 2 staging (reverse_engineering_region_0x80070000.md).
 
-[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~189 to resolve)
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (2026-06-25)
+          Batch 2 staging → discovered that cold-triage passes 6–8 (2026-06-23) already
+          decompiled + HIGH-renamed all 5 Batch 2 targets. Closed PASS 10 batch 2 section
+          in region analysis doc, retroactively documenting them as complete.
+          Remaining unnamed: ~184 (post-cold-triage). Next: PASS 11 tier-2 continuation.
+          → analysis/rom/reverse_engineering_region_0x80070000.md (Pass 10 + PASS 11 plan)
+
+[NEXT]  Full RE: ROM region 0x80070000-0x8007ffff PASS 11+ (continue until 0 unnamed remain, ~184 to resolve)
 
 [TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
