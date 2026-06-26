@@ -756,3 +756,27 @@ confirmed accurate against the decompile, with one correction found.
 documented) but flagged with a pending name correction
 (`initialize_0x40_sized_struct`) that cannot be applied until the rename-persistence
 bug is fixed. 0 medium-confidence functions remain in this region.
+
+## Cross-region low→high confidence upgrade pass, batch (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all low-confidence
+named functions to high" ticket. A fresh `grep "low (named by Kovah"
+rom_function_index.md` (the prior batch's "111 remain" Summary-table figure
+was itself stale — see that doc's drift note) found exactly **67** live rows
+project-wide; **7** of them are in this region. All 7 decompiled individually
+via `decompile_function`.
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x8001e748` | 20B | `OGC_3_OCF_3c` | OGF=3/OCF=0x3c HCI command handler: validates a parameter byte `< 3` (3-valued enum), stores it to the connection-status struct at `+0x16c`, returns HCI status 0 or 0x12 (Invalid HCI Command Parameters). Standard "Write `<enum setting>`" command shape; sibling of the already-HIGH `OGC_3_OCF_16`/`OGC_3_OCF_18` immediately preceding it in the table. Confirmed, no rename needed — the existing name already correctly identifies the opcode group/OCF and the decompile reveals nothing more specific without an external OCF→command-name lookup. |
+| `0x8001e760` | 28B | `OGC_3_OCF_3e` | OGF=3/OCF=0x3e: same validate-and-store shape (byte `< 2`, store to `+0x16b`), plus a special case when the value is `0`: also clears `+0x174` and zeroes an output byte through `*param_2` (a "reset associated state when disabling" branch). Confirmed, no rename needed. |
+| `0x8001f9cc` | 320B | `fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` | **Confirmed exact match** to the Bluetooth SSP command `HCI_Remote_OOB_Extended_Data_Request_Reply` (opcode `0x0445`, verified against the wrapper's own opcode check below). Byte-swaps and verifies two 16-byte OOB confirmation/randomizer pairs via `FUN_800262b8` — the second pair only when the connection's extended/P-256 OOB flag (`+0x214`) is set — writes per-pair verification results to `+0x1e6`/`+0x1e7`, then dispatches `LMP_ACCEPTED`/`LMP_NOT_ACCEPTED` or `HCI_Simple_Pairing_Complete` based on the outcome. Directly relevant to BT Secure Simple Pairing. No rename needed. |
+| `0x8001fb10` | 60B | `wrap_fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` | Confirmed opcode-dispatch wrapper for the function above: checks the HCI opcode `== 0x445` exactly (`0x445 = OGF 1 << 10 \| OCF 0x45`, matching both functions' names precisely), calls it, and emits HCI Command Status on non-success. Returns 1 (pass to next handler in chain) on opcode mismatch. No rename needed. |
+| `0x8001fb4c` | 34B | `send_evt_HCI_Authenticated_Payload_Timeout_Expired` | Confirmed exact match: packs a 16-bit connection handle little-endian and sends HCI event code `0x57`, the spec opcode for this exact event name. No rename needed. |
+| `0x8001fce0` | 62B | `HCI_EVT_0x1fc_FUN_8001fce0` | **Not a single event sender** — the `FUN_` suffix already flagged Kovah's own uncertainty, and the decompile confirms why: this is an allowlist *dispatch gate* that routes a curated, non-contiguous set of byte values `{0x16, 0x17, 0x31, 0x33, 0x34, 0x35, 0x3b}` to the shared handler `many_sub_if_else_cases_on_param2`, explicitly rejecting `0x32` and everything else. Recommended rename: `ocf_allowlist_dispatch_to_shared_handler` (not applied — blocked on the open rename-persistence bug). Upgraded to HIGH: the dispatch logic itself is now fully decompiled and documented even though the single underlying Bluetooth-spec rationale for that specific 7-value set isn't pinned down. |
+| `0x8001fef8` | 216B | `HCI_EVT_0x1f6_FUN_8001fef8` | **Not a single event sender** either — confirmed to be a 17-slot ring-buffer cursor-drain dispatcher gated by a per-connection state field (`+0x169` ∈ `{0,2}` vs `{1,3}`), branching on `param_1==5` to call one of two helper pairs and decrementing a pending-count field at `+0x110`. Same idiom family as the "ring-buffer event-drain loop" cluster already documented in `region_0x80000000` Pass 8. Recommended rename: `conn_state_gated_ring_drain_dispatch` (not applied — rename-persistence bug). |
+
+**Confidence**: all 7 upgraded **low → HIGH** in `rom_function_index.md`. Two
+(`0x8001fce0`, `0x8001fef8`) carry recommended renames (not applied, rename
+bug); the other 5 confirmed accurate as-is. 0 low-confidence functions remain
+in this region.

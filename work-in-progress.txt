@@ -3617,6 +3617,27 @@ sweep beyond enumeration and is the most out-of-date):
           rather than just "not yet written up" — expect some renames, not just confidence-flag bumps.
           Re-derive the current list from the table (filter Confidence column == "low") at ticket start.
 
+          **Batch 1 (2026-06-26)**: re-derived the live list via fresh `grep "low (named by Kovah"
+          rom_function_index.md`: 116 actual rows (not the stale 256/237 figures above). Decompiled
+          and confirmed the 5 rows in region 0x80000000 (override+fallback wrapper idiom siblings of
+          the already-HIGH 0x80009990 cluster). 111 remained, queued by region: 51 in 0x80010000,
+          25 in 0x80020000, 6 in 0x80030000, 29 in 0x80070000. → analysis/rom/reverse_engineering_region_0x80000000.md
+
+          **Batch 2 (2026-06-26, continuation)**: batch 1's "111 remain" figure was itself stale — a
+          fresh re-grep at this batch's start found only **67** real rows project-wide (7 in
+          0x80010000, 25 in 0x80020000, 6 in 0x80030000, 29 in 0x80070000; the discrepancy vs. batch
+          1's "51 in 0x80010000" suggests batch 1's per-region breakdown was a miscounted estimate,
+          not a second source of drift — the live table is authoritative). Decompiled and confirmed
+          all 7 in region 0x80010000 and all 6 in region 0x80030000 (13 total) via `decompile_function`
+          one at a time. Headline find: `references_patch_download_mem4` (0x800302ac, region 0x80030000)
+          is a second, project-relevant VSC patch-fragment-download handler, sibling to the
+          already-documented `VSC_0xfc20__download_patch__FUN_8002fee0`. Two functions in region
+          0x80010000 turned out to NOT be single event senders despite their `HCI_EVT_0x*` names
+          (`0x8001fce0` is an OCF-allowlist dispatch gate, `0x8001fef8` is a ring-buffer drain
+          dispatcher) — both flagged with recommended renames, not applied (rename-persistence bug
+          still open). 54 low-confidence rows remain: 25 in region 0x80020000, 29 in region 0x80070000.
+          → analysis/rom/reverse_engineering_region_0x80010000.md, reverse_engineering_region_0x80030000.md
+
 [TODO]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md
           Re-run `RomNamedFuncAddrs.java` + `ExtractAnnotations.java` + `ListAllFunctions.java` (see this
           doc's "How to re-run" section) plus a fresh `RomCoverageStats.java` pass, regenerate the Summary

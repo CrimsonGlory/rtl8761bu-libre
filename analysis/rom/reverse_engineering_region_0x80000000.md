@@ -1041,3 +1041,35 @@ new `wairz_requested_changes.txt` entry for this).
 **Confidence**: all 6 upgraded **medium → HIGH** in `rom_function_index.md`. No
 Ghidra renames needed (names already correct) — this section is the
 decompile-evidence write-up the confidence upgrade is based on.
+
+## Cross-region low→high confidence upgrade pass, batch 1 of N (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all low-confidence
+named functions to high" ticket. Re-derived the live low-confidence list via a
+fresh `grep "low (named by Kovah" rom_function_index.md`: **116** actual rows
+project-wide, not the stale 256/237 figures carried in the ticket title /
+Summary table (see that doc's Summary section for the full drift note). This
+batch covers the 5 rows in region `0x80000000`-`0x8000ffff`; the rest are
+queued by region (51 in `0x80010000`, 25 in `0x80020000`, 6 in `0x80030000`,
+29 in `0x80070000`).
+
+All 5 decompiled individually via `decompile_function` (no rename applied to
+Ghidra — blocked on the open rename-persistence bug; any naming correction is
+recorded here as a recommendation only).
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x80009414` | 24B | `called_by_function_that_uses_Logger_string_1` | Thin 2-call glue wrapper: tail-calls `FUN_80013540(param_2,param_3)` then `wrap_set_two_global_ptrs()` unconditionally. Name describes caller context, not own behavior, but decompile doesn't contradict it. Confirmed, no rename needed. |
+| `0x800098d8` | 88B | `possible_logger_called_if_no_patch3` | Same override+fallback wrapper idiom as the `0x80009990`-`0x80009b78` cluster documented above: optional hook `PTR_patchable_fptr1_80009930`; fallback tail-calls `possible_logger_called_if_no_patch4_recursive_to_possible_logger`, status `5` on `-1` else `0`. Confirms the idiom; "logger" semantics are an inference from caller context (not verifiable from this decompile alone) but not contradicted. |
+| `0x80009b8c` | 84B | `wraps_uninteresting_if_0x80100000!=0_which_its_not_in_my_tests` | Override+fallback wrapper, interrupt-guarded fallback: optional hook `PTR_DAT_80009be0`; fallback disables/enables interrupts around `uninteresting_if_0x80100000__0_which_its_not_in_my_tests(param_1,param_2)`, maps `-1` to status `5`. Name accurately describes the behavior; confirmed. |
+| `0x80009be4` | 88B | `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2?` | Override+fallback wrapper, interrupt-guarded: optional hook `PTR_fptr_called_in_call_fptr_if_set_with_2_args_80009c3c` (2 args + status out); fallback calls `func4_that_uses_structs_at_0x80100000(param_1)` and writes the result through `*param_2`. The "?"-qualified "possibly allocates buf at arg2" guess is confirmed accurate — the callee's return value is written to `*param_2`. |
+| `0x80009cc0` | 106B | `reg_multiple_dptrs?_FUN_80009cc0` | Same override+fallback wrapper idiom, **not** "multiple dptrs": optional hook `PTR_DAT_80009d2c` (6 args incl. 2 outputs); fallback calls `func8_that_uses_structs_at_0x80100000(param_3 rounded to dword, param_2, param_4&0xff, param_5)` and writes the single result through `*param_1`. Only one output pointer is ever written — the "multiple dptrs" framing is not supported by the decompile. **Recommended rename**: `override_fallback_wrapper_for_func8_struct_lookup` (not applied — rename-persistence bug). |
+
+**Confidence**: all 5 upgraded **low → HIGH** in `rom_function_index.md`. All
+share the same override+fallback wrapper idiom already established for the
+adjacent `0x80009990`-`0x80009b78` cluster (medium→high pass above), just
+feeding a different parallel set of fallback implementations
+(`possible_logger_called_if_no_patch4_recursive_to_possible_logger`,
+`uninteresting_if_0x80100000...`, `func4_that_uses_structs_at_0x80100000`,
+`func8_that_uses_structs_at_0x80100000`). One naming correction recommended
+(`0x80009cc0`), not applied pending the rename-persistence fix.

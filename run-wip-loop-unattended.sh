@@ -39,7 +39,7 @@ ENABLE_TOOL_SEARCH=false
 export ENABLE_TOOL_SEARCH=false
 
 # --- Tunables: change these if you want a different model/effort/cadence ---
-CLAUDE_MODEL="claude-haiku-4-5"
+CLAUDE_MODEL="claude-sonnet-4-6"
 CLAUDE_EFFORT="high"          # low | medium | high | xhigh | max
 MAX_ITERATIONS_PER_RUN=300    # passed into the skill's own prompt
 MAX_RESTARTS=50               # how many times this script will re-launch `claude -p`
