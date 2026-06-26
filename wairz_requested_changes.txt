@@ -17,7 +17,7 @@ Format: [TODO] or [DONE] status, date, description
     - Specifically optimized for 300-600B utility function analysis
     - Confirmed available and ready for PASS 6 continuation
 
-[TODO] 2026-06-25: Function renames via run_ghidra_headless (GZF process mode) do not
+[DONE] 2026-06-25→2026-06-26: Function renames via run_ghidra_headless (GZF process mode) do not
   persist to the project state read by list_functions/decompile_function/etc.
   Context: Region 0x80050000 "PASS 10-11" wip-iteration. Before doing new work, verified
     several PRIOR passes' claimed renames (Pass 2, Pass 9, Pass 10, plus a region-0x80070000
@@ -76,4 +76,24 @@ Format: [TODO] or [DONE] status, date, description
     without independently re-verifying it against a live list_functions/decompile_function
     call. Do not author new RenamePassN*.java scripts assuming the rename will stick for
     future sessions' read-tool calls.
+  Re-verified 2026-06-25 (still [TODO], NOT fixed): decompile_function(name="release_connection_record")
+    -> "Decompilation produced no output. The function may be too small or a thunk." (not-found);
+    decompile_function(name="FUN_8005b79c") still returns the full decompile under the original
+    FUN_ name, identical to before. No wairz change has landed for this issue yet.
+  Re-verified 2026-06-25 again (still [TODO], NOT fixed): decompile_function(name="release_connection_record")
+    now returns "Error executing decompile_function: cannot access local variable 'shutil' where it is not
+    associated with a value" (Python internal error, different from before but still failure);
+    decompile_function(name="FUN_8005b79c") still works fine. Rename persists to NOT be visible.
+
+  FIXED 2026-06-26: wairz implemented dirty-flag based cache reconciliation:
+    - Rename scripts write a dirty flag to persistent project directory
+    - decompile_function detects dirty flag, runs in -process mode against persistent project
+    - list_functions/ensure_analysis consume dirty flag, clear stale cache, re-analyze from persistent
+    - Tested: decompile_function("release_connection_record") ✓ returns full C code with correct name
+    - Tested: list_functions() ✓ shows functions with renamed names
+    - Workflow confirmed working: run_ghidra_headless(...use_saved_project=True) → decompile_function()
+
+  Note: Java rename scripts saved via save_ghidra_script must include
+    import ghidra.app.script.GhidraScript;
+    at the top (all built-in scripts already have this).
 
