@@ -1013,3 +1013,31 @@ doc's scope) requires no further region-sweep work. Any future deepening
 (e.g. resolving the `DAT_*` global identities flagged in "Open questions"
 item 7, or the dual-dispatch-loop relationship in item 9) should be tracked
 as its own follow-up ticket rather than reopening this gap-sweep ticket.
+
+## Cross-region medium→high confidence upgrade pass (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all medium-confidence
+named functions to high" ticket. These functions already carried a correct
+Ghidra name (pre-existing Kovah-era or earlier-pass annotation, **not** one of
+this project's own `RenamePassN*.java` renames — confirmed each name resolves
+fine via `decompile_function`, so this batch is unaffected by the open
+rename-persistence bug tracked in `wairz_requested_changes.txt`). Task here was
+decompile + confirm/correct purpose, not rename — no Ghidra write involved.
+
+Used `decompile_function` individually for all 6 (the batch tool,
+`mcp__wairz__batch_decompile_functions`, returned "not found" for all 8 names
+in the attempted batch despite every one resolving fine individually — see the
+new `wairz_requested_changes.txt` entry for this).
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x800092e4` | 152B | `memcmp` | Textbook libc `memcmp`: word-aligned 4-byte bulk compare loop with byte-by-byte tail/unaligned fallback, returns `0` on full match or the signed byte difference at the first mismatch. Name is exact. |
+| `0x800093f8` | 20B | `wrap_set_two_global_ptrs` | Trivial wrapper: loads two fixed constants (`PTR_return_1_1_8000940c`, `DAT_80009410`) and tail-calls the already-named `set_two_global_ptrs(ptr, val)`. Name is exact — it is precisely a thin wrapper around `set_two_global_ptrs`. |
+| `0x80009990` | 110B | `interesting_string_user_fptr_registration_function` | Generic patchable-override wrapper: calls an optional hook (`PTR_DAT_80009a00`) first; if absent or the hook reports "not handled" (`iVar3==0`), falls through to the shared implementation `FUN_80075ee0(param_2..param_5)`, stores the result through `param_1`, and returns a packed status byte (`5` on failure, else success code). Matches the override+fallback idiom shared by every sibling "registration function" wrapper in this cluster (see `0x80009a30`/`0x80009b1c`/`0x80009ac8` below) — name's "registration" framing is consistent with the wrapper's role as a patchable hook slot. |
+| `0x80009a30` | 56B | `LMP__25C_called1` | Same override+fallback wrapper idiom: optional hook via `PTR_DAT_80009a68`, else tail-calls `FUN_80076090(param_1)`. Sibling of the LMP-0x25-family wrappers in this cluster; name (LMP opcode-0x25-series, "called1" variant) is consistent with its position alongside `LMP__25B__most_common_for_VSCs1`. |
+| `0x80009ac8` | 80B | `LMP__25B__most_common_for_VSCs1` | Override+fallback wrapper: optional hook via `PTR_patchable_fptr2_LMP_25B_80009b18`; on the fallback path disables interrupts, calls the already-named `LMP__25B_meat(*param_1)`, sets error code `5` on failure (`-1`) or clears `*param_1` to `-1` on success, re-enables interrupts. Corroborated by the call to the already-independently-named `LMP__25B_meat` — strong cross-confirmation of the LMP-0x25B family naming. |
+| `0x80009b1c` | 92B | `VSC_0xfc95_called2` | Same override+fallback wrapper idiom: optional hook via `PTR_DAT_80009b78`, else tail-calls `FUN_80076270(param_1,param_3,param_4)`. Sibling of the VSC-0xFC95-family wrappers; matches the `VSC_0xfcXX_calledN` naming convention used consistently elsewhere in the codebase (e.g. region 0x80050000's `VSC_0xfc73_*`/`VSC_0xfc97_*` variants). |
+
+**Confidence**: all 6 upgraded **medium → HIGH** in `rom_function_index.md`. No
+Ghidra renames needed (names already correct) — this section is the
+decompile-evidence write-up the confidence upgrade is based on.

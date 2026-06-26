@@ -685,3 +685,22 @@ handlers remain in the address range (`fHCI_Read_LMP_Handle_0x14`, `fHCI_Read_Cl
 `fHCI_Read_Remote_Supported_Features_0x1B`), plus ~6 unnamed utility functions and dispatch
 helpers also within the range. Next pass: continue cluster or move to next high-value target
 (321 unnamed remaining in region 0x80020000 flagged as OGF/OCF handler territory).
+
+## Cross-region medium→high confidence upgrade pass (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all medium-confidence
+named functions to high" ticket. The 4 functions below (the `LMP_CH__0x3ee__*`
+cluster plus `VSC_0xfc11_2_FUN_800120ac`) already carried correct pre-existing
+names; each resolves fine via `decompile_function`, confirming this batch is
+unaffected by the open rename-persistence bug (`wairz_requested_changes.txt`).
+Decompile-only — no Ghidra rename involved.
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x80011d9c` | 100B | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | Optional no-arg override hook (`PTR_DAT_80011e00`) called first if present. Fallback path reads a baseband HW register via the ROM register-read helper `FUN_8001136c(0)` (the same fn documented project-wide at `0x8001136c`), and depending on a config flag byte either writes back a masked/OR'd value via the ROM register-write helper `FUN_8001139c`, or ANDs a separate global word with a mask. A baseband-register-programming branch of the `LMP_CH` 0x3ee channel dispatcher — name accurately describes its position (case 2, "else" sub-branch 2). |
+| `0x80011e10` | 418B | `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10` | Reads 7 baseband HW registers via `FUN_8001136c(0/1/2/4/8/3/5)`, branches on a mode/config flag bit, applies one of two distinct sets of bit-mask constants to all 7 values depending on the branch, then writes all 7 back via `FUN_8001139c`. This is the same "init/reprogram N baseband registers" idiom documented elsewhere in the codebase (e.g. RAM `0x80109980`'s 7-register HW init), confirming this is the real HW-reprogram routine that case 2's "else" branch performs. Name (case2/else/1) matches its role precisely. |
+| `0x80011fc0` | 214B | `LMP_CH__0x3ee__case1_if_FUN_80011fc0` | Optional override hook (buffer-out variant) first; fallback reads 2 HW registers via `FUN_8001136c(0)`/`FUN_8001136c(0x11)`, extracts a 2-bit field, and either returns early (field==0, or a feature-bit check fails) or — when a specific config flag bit (`0x8`) is set — logs via `possible_logging_function__var_args`, sets a flag, and **tail-calls `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10()`** directly. This direct call from case1 into case2's "else 1" branch is strong internal cross-confirmation of the case1/case2 naming relationship between these two functions. |
+| `0x800120ac` | 50B | `VSC_0xfc11_2_FUN_800120ac` | Optional 1-arg override hook (`PTR_DAT_800120e0`); fallback disables interrupts, ANDs a global state word with a mask, performs a self-assignment no-op on a second global (likely a future-extension placeholder), then re-enables interrupts. Matches the project-wide `VSC_0xfcXX_N` naming convention for a VSC opcode 0xFC11 handler, variant 2. |
+
+**Confidence**: all 4 upgraded **medium → HIGH** in `rom_function_index.md`. No
+Ghidra renames needed (names already correct).

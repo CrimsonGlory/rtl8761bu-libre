@@ -17,8 +17,9 @@ Format: [TODO] or [DONE] status, date, description
     - Specifically optimized for 300-600B utility function analysis
     - Confirmed available and ready for PASS 6 continuation
 
-[DONE] 2026-06-25→2026-06-26: Function renames via run_ghidra_headless (GZF process mode) do not
-  persist to the project state read by list_functions/decompile_function/etc.
+[TODO] 2026-06-25→2026-06-26 (RE-OPENED 2026-06-26, see below): Function renames via
+  run_ghidra_headless (GZF process mode) do not persist to the project state read by
+  list_functions/decompile_function/etc.
   Context: Region 0x80050000 "PASS 10-11" wip-iteration. Before doing new work, verified
     several PRIOR passes' claimed renames (Pass 2, Pass 9, Pass 10, plus a region-0x80070000
     Pass 5 rename) by querying list_functions/decompile_function for the GZF
@@ -85,7 +86,8 @@ Format: [TODO] or [DONE] status, date, description
     associated with a value" (Python internal error, different from before but still failure);
     decompile_function(name="FUN_8005b79c") still works fine. Rename persists to NOT be visible.
 
-  FIXED 2026-06-26: wairz implemented dirty-flag based cache reconciliation:
+  CLAIMED FIXED 2026-06-26 (wairz's note, NOT independently reproduced — see RE-OPENED below):
+    wairz reported implementing dirty-flag based cache reconciliation:
     - Rename scripts write a dirty flag to persistent project directory
     - decompile_function detects dirty flag, runs in -process mode against persistent project
     - list_functions/ensure_analysis consume dirty flag, clear stale cache, re-analyze from persistent
@@ -93,7 +95,75 @@ Format: [TODO] or [DONE] status, date, description
     - Tested: list_functions() ✓ shows functions with renamed names
     - Workflow confirmed working: run_ghidra_headless(...use_saved_project=True) → decompile_function()
 
+  RE-OPENED 2026-06-26 (next wip-iteration, fresh session, same project/GZF): before resuming
+  PASS 12+ on region 0x80050000 per that task's own "DO NOT START until this is marked [DONE]"
+  guard, independently re-verified the FIXED claim above using OLDER renames (not just the one
+  wairz's own test used), per this entry's own prior instruction to do so. Result: the claim
+  does NOT hold up.
+    1. list_functions(binary_path=<gzf>, limit=500) — dumped all 500 functions and grepped for
+       every address with a claimed HIGH-confidence rename across both regions checked. EVERY
+       ONE still shows its original FUN_xxxxxxxx name, not the renamed one:
+         8005b79c  FUN_8005b79c       (claimed: release_connection_record, Pass 9)
+         8005b9d8  FUN_8005b9d8       (claimed: init_connection_record, Pass 3c)
+         80059454  FUN_80059454       (claimed: lmp_packet_completion_event_drain_dispatch, Pass 4)
+         800538b4  FUN_800538b4       (claimed: sched_event_sorted_insert_with_overlap_pushback, Pass 5)
+         80070574  FUN_80070574       (claimed: remote_name_request_connection_complete_handler, region 0x80070000 Pass 10)
+         8007718c  FUN_8007718c       (claimed: esco_sco_connection_establishment_slave_side_orchestrator, region 0x80070000 Pass 10)
+         80072924  FUN_80072924       (claimed: AFH/LAP slot allocator name, region 0x80070000 Pass 11 CRITICAL)
+         80072bac  FUN_80072bac       (claimed: AFH/LAP slot allocator name, region 0x80070000 Pass 11 CRITICAL)
+       i.e. "Tested: list_functions() ✓ shows functions with renamed names" in the FIXED note
+       above does NOT reproduce — 0/8 spot-checked renames show up, across both regions.
+    2. decompile_function() was then tried directly by new name for the same 8 addresses (plus
+       send_evt_LE_Meta_Subevent / 0x800525d8, Pass 2, and HCI_Inquiry_Complete_finalizer /
+       0x800703f0, region 0x80070000 Pass 5). Result: 9 of 10 returned the generic not-found
+       response ("Decompilation produced no output. The function may be too small or a
+       thunk."). The SOLE exception was `release_connection_record` — the literal name wairz's
+       own test used — which returned a full, correct decompile (verified the C body matches
+       `FUN_8005b79c`'s decompile exactly, confirming it's the same function, not a coincidence).
+    3. To rule out "decompile_function ignores the name parameter entirely" as the explanation
+       for that one success: called decompile_function with a never-assigned garbage name
+       ("this_name_was_never_assigned_xyz123") — correctly returned not-found, so the tool IS
+       doing real name resolution, not blindly returning whatever's cached.
+    4. find_callers(function_name="release_connection_record") returned "No callers found...
+       (also checked aliases)" — consistent with the real project's symbol table still using
+       the old name (no error, just zero matches, because that symbol doesn't exist under the
+       new name in whatever store find_callers reads).
+  Conclusion: at most ONE specific (name, address) pair — the literal one wairz tested when
+  writing the FIXED note — resolves via decompile_function, and even that does not show up in
+  list_functions or find_callers. Every other historical rename across both regions tested
+  remains completely inaccessible under its new name, exactly as before the claimed fix. This
+  looks like a residual cache/test artifact from wairz's own verification, not a general fix.
+  Do NOT trust the "FIXED 2026-06-26" note above. PASS 12+ (region 0x80050000) and any other
+  task gated on this entry must stay [BLOCKED] until this is re-tested and list_functions
+  itself (not just decompile_function on one cherry-picked name) shows renamed names for a
+  *fresh* rename applied in a *new* session — that is the bar that would actually unblock
+  rename-dependent work going forward.
+
   Note: Java rename scripts saved via save_ghidra_script must include
     import ghidra.app.script.GhidraScript;
     at the top (all built-in scripts already have this).
+
+[TODO] 2026-06-26: mcp__wairz__batch_decompile_functions returns "not found" for names that
+  resolve fine individually via mcp__wairz__decompile_function
+  Context: cross-region medium-confidence-upgrade pass on region 0x80000000/0x80010000. Per
+    CLAUDE.md's instruction to use batch_decompile_functions for batch work (not custom
+    scripts), called it with 8 function names straight from rom_function_index.md's
+    medium-confidence table (e.g. "memcmp", "VSC_0xfc95_called2", "LMP__25C_called1" —
+    all pre-existing GZF names, not project-applied renames).
+  Result: batch_decompile_functions(binary_path=<gzf>, function_names=[...8 names...])
+    returned "(not found or decompilation failed)" for all 8 — "Summary: 0/8 functions
+    decompiled successfully."
+  Immediately afterward, called mcp__wairz__decompile_function individually for each of
+    the same 8 names (same binary_path, same names, no changes in between) — all 8
+    resolved correctly with full, correct decompiled C output.
+  Impact: batch_decompile_functions is currently unreliable for cross-region/mixed-source
+    name batches (possibly works fine for names from a single recent Ghidra analysis run
+    but fails to look up names from a different/older cache context — untested hypothesis).
+    Worked around this session by falling back to decompile_function called once per
+    function instead of batching — functionally fine, just slower (no single-call
+    efficiency gain, defeating the tool's purpose).
+  Needed fix: investigate why batch_decompile_functions's lookup fails for names that
+    decompile_function resolves without issue, against the identical binary_path. Until
+    fixed, do not assume "not found" from batch_decompile_functions means the function
+    doesn't exist or isn't named — verify with decompile_function before concluding that.
 

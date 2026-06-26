@@ -3510,51 +3510,39 @@ sweep beyond enumeration and is the most out-of-date):
           (it only reads/ranks, doesn't rename) — its rank 51+ candidate list is still valid
           for whenever this resumes.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve)
-          DO NOT START until wairz_requested_changes.txt's 2026-06-25 rename-persistence
-          [TODO] is marked [DONE] — this task is identically blocked (see PASS 10-11 entry
-          above: renames via run_ghidra_headless GZF process mode report success but never
-          become visible to list_functions/decompile_function, confirmed even after forced
-          re-analysis). Promoted here only per the skill's mechanical promotion step; the
-          unattended loop's check-blockers.sh will exit before this is reached anyway as
-          long as that wairz_requested_changes.txt entry stays [TODO].
-          After PASS 10-11 complete, continue sweeping remaining unnamed functions in this region
-          using cold-triage + batch-decompile pattern established in passes 3-11.
-          BLOCKED (2026-06-24): This is a long-running multi-pass task (each pass yields 1-3 HIGH
-          renames from ~300+ unnamed candidates). PASS 12 setup requires iterative:
-          1. ColdTriageRegion80050000Pass12.java to rank-order remaining candidates by xref/size
-          2. BatchDecompile* to run 5-10 candidates through mcp__wairz__run_ghidra_headless
-          3. RenamePass12* to apply confirmed HIGH-confidence renames via GZF project persistence
-          4. Update region doc + rom_function_index.md with new confidence flags
-          5. Repeat loop for PASS 13+ until 0 unnamed remain.
-          Single wip-iteration cannot complete this; recommend unattended /wip-loop-overnight
-          with worker pool configured for serial GZF-process-mode runs.
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve) (2026-06-26)
+          wairz_requested_changes.txt's rename-persistence entry was briefly marked [DONE]/
+          "FIXED 2026-06-26" between iterations, which would have cleared this task's guard.
+          Before starting PASS 12, independently re-verified that FIXED claim (per this task's
+          own "re-verify a couple of OLDER claimed renames... since it's unknown how far back
+          this bug goes" instruction) using list_functions(limit=500) plus decompile_function
+          on 10 historical renames spanning BOTH region 0x80050000 (Pass 2/3c/4/5/9) and region
+          0x80070000 (Pass 5/10/11). Result: the claim does NOT hold up. list_functions shows
+          0/8 spot-checked addresses under their renamed name (all still FUN_xxxxxxxx);
+          decompile_function resolves only the single literal name wairz's own test used
+          (release_connection_record) and fails not-found for every other rename tested,
+          including older ones in the SAME region/session. A garbage-name control call confirms
+          decompile_function does real name lookup (not blind cache return), so that one hit is
+          most likely a residual artifact of wairz's own test, not a working general fix.
+          Re-opened wairz_requested_changes.txt's entry back to [TODO] with full repro (see
+          "RE-OPENED 2026-06-26" section there). This task — and PASS 12+ generally — must stay
+          BLOCKED until list_functions itself shows a *fresh* rename (applied in a new session)
+          under its new name, not just decompile_function accepting one cherry-picked name.
+          The cold-triage rank 51+ candidate list from Pass 10 is still valid and unaffected
+          whenever this resumes (it only reads/ranks, doesn't rename).
 
-[TODO]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (continue sweep, 189 unnamed remain)
-          PASS 1-9 resolved clusters via cold-triage of the Top-20 + quantizer-pair cross-confirmation
-          (see `reverse_engineering_region_0x80070000.md`). Continue past the Top-20 into the next
-          size/xref tier.
-
-          PASS 10 progress (2026-06-23–2026-06-25): Decompiling next tier beyond Top-20.
-
-          Batch 1 of 4 (2026-06-23): 2 functions decompiled:
-          - 0x80070574 (582B, COMPLEX) → remote_name_request_connection_complete_handler — HIGH
-          - 0x8007718c (524B, COMPLEX) → esco_sco_connection_establishment_slave_side_orchestrator — HIGH
-
-          Batch 2 of 4 (2026-06-25): Script created, 5 targets staged for MCP execution:
-          - 0x800734c4 (466B) — connection feature-page parser cluster
-          - 0x80072ff8 (452B) — unknown
-          - 0x8007276c (424B) — unknown
-          - 0x80070084 (414B) — large callout footprint (xref_out=19)
-          - 0x800731bc (368B) — unknown
-
-          **Blocker**: MCP invocation from supervisor context (non-interactive /wip-iteration mode)
-          cannot establish bidirectional MCP stdio connection for long-running Ghidra process.
-          Script BatchDecompileList80070000Pass10Batch2.java created and ready in
-          /root/wairz/ghidra/scripts/. Execute via:
-            - User manual invocation (interactive Claude Code session with MCP enabled)
-            - OR: Next unattended /wip-loop-overnight iteration (will retry in fresh session)
-          Analysis doc updated with batch 2 staging (reverse_engineering_region_0x80070000.md).
+[DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (2026-06-26 doc-hygiene close)
+          This [TODO] was stale: its own Batch 2 staging (5 targets) was already fully closed
+          by the "[DONE] PASS 10 (2026-06-25)" entry immediately below it, and superseded again
+          by PASS 11's CRITICAL + COMPLEX batch entries further below. Left as [TODO] text by a
+          missed cleanup step rather than representing live remaining work. No action needed;
+          converting to [DONE] here purely to stop future iterations re-discovering it as
+          actionable. NOTE (2026-06-26): the claimed HIGH renames cited in the PASS 10/11
+          entries below (e.g. 0x80070574, 0x8007718c, 0x80072924, 0x80072bac) were spot-checked
+          this session against list_functions and decompile_function and do NOT resolve under
+          their new names — same root-cause rename-persistence bug as region 0x80050000's PASS
+          10-11 finding, now confirmed to also affect this region. See
+          wairz_requested_changes.txt's "RE-OPENED 2026-06-26" section.
 
 [DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 (2026-06-25)
           Batch 2 staging → discovered that cold-triage passes 6–8 (2026-06-23) already
@@ -3590,13 +3578,32 @@ sweep beyond enumeration and is the most out-of-date):
           same pattern; document as a new section in `reverse_engineering_region_0x80000000.md` rather
           than reopening the already-closed gap-sweep ticket.
 
-[TODO]  Cross-region: upgrade all medium-confidence named functions to high (42 functions, per Summary table)
+[NEXT]  Cross-region: upgrade all medium-confidence named functions to high (28 functions remain, 49 found at ticket start, 10 done 2026-06-26)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
           or a root-level cross-cutting doc) but no dedicated decompile + write-up. Batch-decompile each
           (group by region to reuse GZF process-mode loads), confirm or correct the existing name/purpose
           against the actual C, and add/extend the relevant `analysis/rom/*.md` doc. Re-derive the
           current list via `rom_function_index.md`'s named-function table (filter Confidence column ==
           "medium") rather than trusting the count above, since per-pass edits may have shifted it.
+
+          **Progress 2026-06-26**: promoted from [TODO] this iteration (the prior [NEXT], region
+          0x80050000 PASS 12+, had to be re-blocked — wairz's rename-persistence "FIXED" claim did
+          not hold up on re-test; see wairz_requested_changes.txt "RE-OPENED 2026-06-26"). This
+          ticket is genuinely unblocked: these functions already carry correct names from
+          pre-existing GZF annotations (not our own RenamePassN* output), confirmed by spot-checking
+          that `decompile_function` resolves them — and the task only requires a markdown
+          confidence-flag edit, no new Ghidra rename. Re-derived the live list via
+          `grep "medium (named" rom_function_index.md`: 49 functions found (table's stale header
+          count said 42). Decompiled the first 10 (regions 0x80000000 and 0x80010000) via
+          `decompile_function` (note: `mcp__wairz__batch_decompile_functions` returned "not found"
+          for all 8 names tried in one batch call despite each resolving individually — new
+          wairz_requested_changes.txt [TODO] filed, worked around by calling decompile_function
+          once per function). All 10 confirmed their existing name accurately describes the
+          decompiled code; upgraded medium→high in rom_function_index.md (558 high / 28 medium now)
+          with full evidence in `reverse_engineering_region_0x80000000.md` and
+          `reverse_engineering_region_0x80010000.md`'s new "Cross-region medium→high confidence
+          upgrade pass (2026-06-26)" sections. 28 medium-confidence functions remain (next: re-derive
+          list again at ticket start per the table's own column, don't reuse this session's stale 49).
 
 [TODO]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
           Same process as the medium-confidence ticket, for the larger low-confidence set (`unknown_*`,

@@ -1,19 +1,29 @@
 # ROM Function Index
 
-> **⚠️ KNOWN ISSUE (2026-06-25, unresolved — see `wairz_requested_changes.txt`):**
-> Function renames applied via `mcp__wairz__run_ghidra_headless` (GZF process mode) do
-> **not** persist to the project state read by `list_functions`/`decompile_function`/etc.
-> Confirmed by direct testing: re-running a previously-"applied" rename script
-> (`RenamePass9Region80050000.java`, targeting `0x8005b79c` → `release_connection_record`)
-> reports `RENAMED`/`RENAME COMPLETE`/`Save succeeded`, but an immediate
-> `decompile_function` call — even after a full forced re-analysis
-> (`start_binary_analysis(force_reanalyze=true)`) — still shows the function under its
-> original `FUN_8005b79c` name. **This means many/most "renamed, HIGH confidence" rows
-> below may not actually exist as symbol names in the live Ghidra project**, even though
-> the underlying decompiled-code evidence and reasoning recorded for them is real. Until
-> wairz fixes this, do not assume a name in this table resolves via
-> `list_functions`/`decompile_function` — verify independently if it matters, and treat
-> this table (not the GZF) as the authoritative address→name mapping.
+> **⚠️ KNOWN ISSUE (2026-06-25, STILL unresolved as of 2026-06-26 re-test — see
+> `wairz_requested_changes.txt`):** Function renames applied via
+> `mcp__wairz__run_ghidra_headless` (GZF process mode) do **not** persist to the project
+> state read by `list_functions`/`decompile_function`/etc. Confirmed by direct testing:
+> re-running a previously-"applied" rename script (`RenamePass9Region80050000.java`,
+> targeting `0x8005b79c` → `release_connection_record`) reports
+> `RENAMED`/`RENAME COMPLETE`/`Save succeeded`, but an immediate `decompile_function` call
+> — even after a full forced re-analysis (`start_binary_analysis(force_reanalyze=true)`) —
+> still shows the function under its original `FUN_8005b79c` name. wairz briefly marked
+> this **[DONE]/"FIXED 2026-06-26"** (claiming a dirty-flag cache-reconciliation fix), but
+> independent re-testing the same day — across 10 historical renames spanning both region
+> 0x80050000 and region 0x80070000 — found `list_functions` still shows 0/8 spot-checked
+> addresses under their new name, and `decompile_function` resolves only the single
+> literal name wairz's own test used, not any other rename. **The fix claim did not hold
+> up; treat this issue as still open.** See `wairz_requested_changes.txt`'s "RE-OPENED
+> 2026-06-26" section for full repro. **This means many/most "renamed, HIGH confidence"
+> rows below may not actually exist as symbol names in the live Ghidra project**, even
+> though the underlying decompiled-code evidence and reasoning recorded for them is real.
+> Do not assume a name in this table resolves via `list_functions`/`decompile_function` —
+> verify independently if it matters, and treat this table (not the GZF) as the
+> authoritative address→name mapping. (Functions whose name was confirmed via
+> `decompile_function` *before* any rename script ran — i.e. pre-existing Kovah-era or
+> earlier-session names, never our own `RenamePassN*` output — are unaffected; e.g. the
+> 2026-06-26 medium→high upgrade pass below.)
 
 `analysis/rom/` equivalent of `kovah_function_list.md`, scoped to the `rom`
 memory block only (`0x80000000`–`0x8007ffff`). Every function in the block
@@ -44,8 +54,8 @@ GZF process mode, run 2026-06-21, against
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
 | Named functions (this doc's table) | 752 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 6 region-0x80030000 Pass-7 + 20 region-0x80030000 Pass-8 + 16 region-0x80020000 Pass-3, as of 2026-06-25; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
 | Unnamed (`FUN_*`) functions (summarized below) | 1754 (2012 − 238 region-0x80060000 Pass-2-3 renames − 20 region-0x80030000 Pass-8 renames, 2026-06-25) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 548 (502 + 20 region-0x80020000 Pass-5 + 6 region-0x80030000 Pass-7 + 20 region-0x80030000 Pass-8 newly-decompiled, 2026-06-25) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 38 (39 − 1 region-0x80020000 Pass-5 `0x80022030` medium→high upgrade, 2026-06-25) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 558 (548 + 10 cross-region medium→high upgrade pass, 2026-06-26) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 28 (38 − 10 cross-region medium→high upgrade pass: `memcmp`, `wrap_set_two_global_ptrs`, `interesting_string_user_fptr_registration_function`, `LMP__25C_called1`, `LMP__25B__most_common_for_VSCs1`, `VSC_0xfc95_called2` in region 0x80000000; `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c`, `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10`, `LMP_CH__0x3ee__case1_if_FUN_80011fc0`, `VSC_0xfc11_2_FUN_800120ac` in region 0x80010000, 2026-06-26) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 237 (256 − 19 region-0x80020000 Pass-5 low→high upgrades, 2026-06-25) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
@@ -315,15 +325,15 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80009104` | 28 | `disable_interrupts_(clear_LSBit_of_CP0_Status_Register)` | disable interrupts (clear LSBit of CP0 Status Register) — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80009120` | 16 | `enable_interrupts_(set_CP0_Status_to_arg)` | enable interrupts (set CP0 Status to arg) — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80009148` | 4 | `VSC_0xfc11_3_in_while_loop_FUN_80009148` | VSC 0xfc11 3 in while loop FUN 80009148 — see `interrupt_vectors` | high (decompiled+documented) |
-| `0x800092e4` | 152 | `memcmp` | memcmp | medium (named, one-line purpose only, not decompiled) |
-| `0x800093f8` | 20 | `wrap_set_two_global_ptrs` | wrap set two global ptrs | medium (named, one-line purpose only, not decompiled) |
+| `0x800092e4` | 152 | `memcmp` | memcmp — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x800093f8` | 20 | `wrap_set_two_global_ptrs` | wrap set two global ptrs — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80009414` | 24 | `called_by_function_that_uses_Logger_string_1` | called by function that uses Logger string 1 | low (named by Kovah, purpose unclear) |
 | `0x800098d8` | 88 | `possible_logger_called_if_no_patch3` | possible logger called if no patch3 | low (named by Kovah, purpose unclear) |
-| `0x80009990` | 110 | `interesting_string_user_fptr_registration_function` | interesting string user fptr registration function | medium (named, one-line purpose only, not decompiled) |
-| `0x80009a30` | 56 | `LMP__25C_called1` | LMP  25C called1 | medium (named, one-line purpose only, not decompiled) |
+| `0x80009990` | 110 | `interesting_string_user_fptr_registration_function` | interesting string user fptr registration function — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80009a30` | 56 | `LMP__25C_called1` | LMP  25C called1 — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80009a6c` | 88 | `LMP__268__most_common_for_VSCs2_checks_fptr_patch` | LMP  268  most common for VSCs2 checks fptr patch — see `conn_record_subsystem`, `vsc_dispatcher` | high (decompiled+documented) |
-| `0x80009ac8` | 80 | `LMP__25B__most_common_for_VSCs1` | LMP  25B  most common for VSCs1 | medium (named, one-line purpose only, not decompiled) |
-| `0x80009b1c` | 92 | `VSC_0xfc95_called2` | VSC 0xfc95 called2 | medium (named, one-line purpose only, not decompiled) |
+| `0x80009ac8` | 80 | `LMP__25B__most_common_for_VSCs1` | LMP  25B  most common for VSCs1 — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80009b1c` | 92 | `VSC_0xfc95_called2` | VSC 0xfc95 called2 — see `region_0x80000000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80009b8c` | 84 | `wraps_uninteresting_if_0x80100000!=0_which_its_not_in_my_tests` | wraps uninteresting if 0x80100000!=0 which its not in my tests | low (named by Kovah, purpose unclear) |
 | `0x80009be4` | 88 | `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2?` | call fptr if set with 2 args possibly allocates buf at arg2? | low (named by Kovah, purpose unclear) |
 | `0x80009cc0` | 106 | `reg_multiple_dptrs?_FUN_80009cc0` | reg multiple dptrs? FUN 80009cc0 | low (named by Kovah, purpose unclear) |
@@ -469,10 +479,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8000e470` | 68 | `build_and_send_default_status_report` | generic default-status-report builder/sender — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800109ac` | 916 | `calls_to_0x8010a001_as_fptr_to_install_patches` | calls to 0x8010a001 as fptr to install patches — see `boot_reset_sequence`, `interrupt_vectors`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x80011a18` | 30 | `called_if_config[0xf2]&4` | called if config[0xf2]&4 | low (named by Kovah, purpose unclear) |
-| `0x80011d9c` | 100 | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | LMP CH  0x3ee  case2 else 2 FUN 80011d9c | medium (named, one-line purpose only, not decompiled) |
-| `0x80011e10` | 418 | `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10` | LMP CH  0x3ee  case2 else 1 FUN 80011fc0FUN 80011e10 | medium (named, one-line purpose only, not decompiled) |
-| `0x80011fc0` | 214 | `LMP_CH__0x3ee__case1_if_FUN_80011fc0` | LMP CH  0x3ee  case1 if FUN 80011fc0 | medium (named, one-line purpose only, not decompiled) |
-| `0x800120ac` | 50 | `VSC_0xfc11_2_FUN_800120ac` | VSC 0xfc11 2 FUN 800120ac | medium (named, one-line purpose only, not decompiled) |
+| `0x80011d9c` | 100 | `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` | LMP CH  0x3ee  case2 else 2 FUN 80011d9c — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80011e10` | 418 | `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10` | LMP CH  0x3ee  case2 else 1 FUN 80011fc0FUN 80011e10 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80011fc0` | 214 | `LMP_CH__0x3ee__case1_if_FUN_80011fc0` | LMP CH  0x3ee  case1 if FUN 80011fc0 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x800120ac` | 50 | `VSC_0xfc11_2_FUN_800120ac` | VSC 0xfc11 2 FUN 800120ac — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80012658` | 406 | `unknown_referencing_default_name_6` | unknown referencing default name 6 | low (named by Kovah, purpose unclear) |
 | `0x80012c18` | 164 | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 1 FUN 80012c18 | medium (named, one-line purpose only, not decompiled) |
 | `0x80012e04` | 52 | `called_if_config[1]&4` | called if config[1]&4 | low (named by Kovah, purpose unclear) |
