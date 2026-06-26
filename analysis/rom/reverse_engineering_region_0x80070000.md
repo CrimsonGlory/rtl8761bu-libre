@@ -1152,3 +1152,49 @@ Pass 10 Batch 2 Staging (2026-06-25) was a documentation checkpoint only.
 
 4. **Commit batch** with summary: "PASS 11 COMPLEX batch 2: 5/13 decompiled (HIGH confidence ACL/AFH handlers); 8 non-decompilable (defer)".
 
+## Cross-region low→high confidence upgrade pass (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all low-confidence
+named functions to high" ticket, batch 3 (continuation of batches 1–2 covering
+regions 0x80000000/0x80010000/0x80030000; this region's 29 rows were the only
+ones left after batch 2). All 29 are real, distinct functions — every
+pre-existing Kovah-derived name was confirmed accurate against the decompile;
+no renames needed, no phantom/duplicate rows found (contrast with region
+0x80020000's batch, which had one).
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x80070ba4` | 92B | `LMP__25C__FUN_80070ba4` | Per-connection event-0x25C cleanup: conditionally fires `LMP__25C_called1`, then unconditionally `LMP__25C_called2`/`_called3`, resets two status fields, and tail-calls `HCI_EVT_0x500_FUN_800707dc`. |
+| `0x80071370` | 82B | `LMP__47F__FUN_80071370` | EIR-data-pointer dispatch: branches on whether `ptr_to_EIR_data` is a sentinel `&UNK_2`/`&UNK_3`, optionally logs, then calls `FUN_8007127c` and a final notify callback. |
+| `0x80071620` | 20B | `called_at_end_of_crypto_state_machine_update` | One-line tail-call to `called_by_called_at_end_of_crypto_state_machine_update`. |
+| `0x80071b50` | 44B | `LMP__264__FUN_80071b50` | Config-flag-driven timer-default setter: writes `10000` or `3000` to a global depending on two config-struct bits. |
+| `0x80071b84` | 26B | `set_bos[bosi].0xb2_index=arg2` | Confirmed thin setter: `bos[idx]._xb2_byte_minus_4... = param_2`. |
+| `0x80071ba4` | 26B | `check_if_80122df0_is_non-zero_else_ret_0xff` | Confirmed: returns byte `[2]` of the struct at `ptr_to_80122df0` if byte `[0]` is non-zero, else a derived `0xff`/`0x00` sign-extension trick on byte `[1]`. |
+| `0x80072404` | 54B | `send_LMP_NOT_ACCEPTED` | Confirmed: builds the 4-byte LMP_NOT_ACCEPTED PDU (opcode 4) and calls `send_LMP_pkt`. |
+| `0x8007243c` | 56B | `send_LMP_ACCEPTED` | Confirmed: builds the 3-byte LMP_ACCEPTED PDU (opcode 3) and calls `send_LMP_pkt`. |
+| `0x80072648` | 70B | `LMP_unknown_else` | Sweeps all 10 connection slots, invoking `FUN_8007259c`+`FUN_80036420` for any slot in status byte `0x03` — a catch-all/default-case cleanup pass, consistent with the name. |
+| `0x80074d84` | 14B | `set_two_global_ptrs` | Confirmed: stores `param_1`/`param_2` into two named globals and returns a label pointer. |
+| `0x80074dfc` | 42B | `called_by_unknown_fptr_indexA_2` | Calls a registered predicate fptr; on failure falls back to `FUN_80074dd4`, on success forwards to a second fptr with a 16-bit arg. |
+| `0x80074e38` | 50B | `possible_logger_called_if_no_patch2` | Confirmed: conditional (`+0xd8 < +0xd4`) call into `possible_logger_called_if_no_patch3` with tag `900`. |
+| `0x80074e84` | 38B | `called_by_unknown_fptr_indexA_1` | Confirmed: config-flag-gated call to `FUN_8003229c`. |
+| `0x80074eb4` | 42B | `unknown_fptr_indexA` | Confirmed dispatcher: routes to `called_by_unknown_fptr_indexA_1` (tag 900) or `_2` (tag 0x385) by a 16-bit field. |
+| `0x80074ee0` | 64B | `function_that_uses_Logger_string` | Confirmed: calls two `Logger`-init helpers, then (conditionally) registers the `"tLogger"` log-tag string via `interesting_string_user_fptr_registration_function` — the `Logger string` is this literal tag. |
+| `0x80074f38` | 94B | `possible_logger_called_if_no_patch1` | Confirmed: multi-condition gate (patch-absent flag + config bit + helper call + fptr check) culminating in a call to `possible_logger_called_if_no_patch2`. |
+| `0x80075650` | 102B | `func4_that_uses_structs_at_0x80100000` | Pool-slot "close" op: looks up a slot descriptor, calls `FUN_80075b88` to flush, decrements a refcount byte, or logs on failure — part of a small fixed-size (12-slot) resource-pool family (func1–func8) backed by `0x80100000`-resident structs. |
+| `0x800756c0` | 62B | `func5_that_uses_structs_at_0x80100000` | Pool-slot "reset" op: validates + flushes (`FUN_80075b50`) then zeroes a 6-word descriptor. Sibling of func4 above. |
+| `0x80075704` | 34B | `func6_that_uses_structs_at_0x80100000` | Pool-wide bulk clear: `memset`s a fixed 0x120-byte region plus a trailing word. Sibling of func4/func5. |
+| `0x8007572c` | 106B | `func7_that_uses_structs_at_0x80100000` | Pool-slot "init/zero-fill" op: computes an alignment-rounded size and `memset`s the slot's backing buffer before calling `FUN_80075c00`. Sibling of func4–func6. |
+| `0x8007579c` | 188B | `func8_that_uses_structs_at_0x80100000` | Pool-slot "allocate" op: scans the 12-slot table for a free entry, reserves it (`FUN_80075c2c`), computes the aligned buffer size, calls `func1_that_uses_structs_at_0x80100000` to get backing storage, and returns the slot index. Completes the func1–func8 alloc/use/free family. |
+| `0x80075e34` | 106B | `possible_logger_called_if_no_patch4_recursive_to_possible_logger` | Confirmed: bounded (`<0xb`) MMIO-send attempt via `memcpy_to_MMIO_for_sending_packets_`; on failure (and tag != 900) logs via `possible_logging_function__var_args`. Not actually recursive in this decompile — the name's "recursive to possible_logger" likely refers to the call chain through the logging helper family, not direct self-recursion. |
+| `0x800761f4` | 116B | `LMP__25B_meat` | Confirmed: per-index (0–0x3f) state dispatch — status `0x02` triggers an extra `FUN_80076090` call, any non-zero status calls `FUN_800761b4`, zero status logs an out-of-range/invalid-state warning with different log codes above/below index 0x40. |
+| `0x8007666c` | 22B | `unknown_fptr_index1` | Confirmed thin dispatcher: if `param_1[4] == 200`, forwards `param_1[0]` to `called_by_unknown_fptr_index1_big_do_while_true`. |
+| `0x80076bd8` | 48B | `swap_byte_order` | Confirmed: classic in-place byte-reversal loop (two-pointer swap, `n/2` iterations). |
+| `0x80077620` | 22B | `call2funcs` | Confirmed: calls exactly `FUN_80077130()` then `FUN_80077508()`, no arguments, no return value used. |
+| `0x80078e68` | 72B | `VSC_0xfc7a_FUN_80078e68` | VSC 0xFC7A handler: validates a (min,max) channel/length pair (`4 <= max <= min`, `min < 0x4001`) from the payload, writes both into a config struct, and fires a callback through `PTR_DAT_80078eb4`; returns `0x12` (invalid params) otherwise. |
+| `0x8007943c` | 36B | `send_evt_INVALID_opcode_0xFF` | Confirmed: thin HCI-event-0xFF wrapper, fixed sub-code `0x2f` plus two caller-supplied bytes. |
+| `0x800798b0` | 122B | `call_to_HCI_Disconnect_on_error` | Confirmed: on a specific sub-state (`param_1[1]==1`), calls the multi-VSC handler, logs, and — if a status byte is clear — escalates through `HCI_Disconnect_on_error()` itself, computing a context-dependent timeout (100 vs 0x5dc ms) passed to `FUN_80073b08`. The name describes the escalation path, not a 1:1 call wrapper. |
+
+**Confidence**: all 29 rows upgraded **low → HIGH** in `rom_function_index.md`.
+No Ghidra renames needed (all pre-existing names already accurate). 0
+low-confidence functions remain in this region.
+

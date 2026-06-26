@@ -3610,7 +3610,7 @@ sweep beyond enumeration and is the most out-of-date):
           Summary updated (596 high / 0 medium / 237 low), `analysis/INDEX.md` updated for both regions.
           **0 medium-confidence named functions remain anywhere in the `rom` block — ticket fully closed.**
 
-[NEXT]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
+[DONE]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
           Same process as the medium-confidence ticket, for the larger low-confidence set (`unknown_*`,
           `possible_*`, trailing-`?` names, or no doc cross-reference at all). These are likely to need
           more decompile effort per function since the existing name often signals genuine uncertainty
@@ -3638,7 +3638,32 @@ sweep beyond enumeration and is the most out-of-date):
           still open). 54 low-confidence rows remain: 25 in region 0x80020000, 29 in region 0x80070000.
           → analysis/rom/reverse_engineering_region_0x80010000.md, reverse_engineering_region_0x80030000.md
 
-[TODO]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md
+          **Batch 3 (2026-06-26, continuation, COMPLETE)**: re-derived the live list via fresh
+          `grep "low (named by Kovah" rom_function_index.md`: confirmed 54 rows (25 in region
+          0x80020000, 29 in region 0x80070000), matching batch 2's carried figure exactly — no further
+          drift this time. Decompiled all 25 + all 29 individually via `decompile_function`
+          (`batch_decompile_functions` tried twice on fresh 10-function groups, 1/10 and 0/10 success
+          rates — still unreliable for this cache state, same open wairz issue as prior batches;
+          worked around by calling `decompile_function` once per function throughout). All 53 real
+          functions confirmed: pre-existing Kovah-derived names hold up against the decompile in every
+          case, 0 renames needed. **Data-integrity finding**: row 25/25 in region 0x80020000
+          (`0x8002edb8`, claimed `send_evt_HCI_Number_Of_Completed_Packets`, size 44) is a **phantom
+          duplicate** — that address is not a real function (lands 4 bytes past the tiny thunk
+          `FUN_8002ed9c`, inside literal-pool space; `decompile_function`/`disassemble_function` both
+          confirm no function starts there). The real `send_evt_HCI_Number_Of_Completed_Packets` is a
+          genuine 438-byte function at `0x8001da3c` in region 0x80010000, already upgraded to HIGH in
+          the prior medium→high pass (`git show 271f25e`) — that commit fixed the legitimate copy but
+          left this erroneous duplicate row behind under the wrong region. Row deleted from
+          `rom_function_index.md` (not upgraded) rather than carried forward as a "function" to
+          decompile. Notable confirmed functions: `thing_that_uses_SHA_and_BLAKE` (0x8002c338) is a
+          from-scratch SHA-256/SHACAL2-style compression function; `VSC_0xfc93_FUN_8002fae0` and
+          `VSC_0xfd40_FUN_8002fd3c` are siblings of the already-documented VSC 0xFC20 patch-download
+          handler; region 0x80070000 turned up a 5-member `0x80100000`-resident resource-pool family
+          (`func4`–`func8_that_uses_structs_at_0x80100000`: close/reset/bulk-clear/init/allocate ops).
+          **0 low-confidence named functions remain anywhere in the `rom` block — ticket fully closed.**
+          → analysis/rom/reverse_engineering_region_0x80020000.md, reverse_engineering_region_0x80070000.md
+
+[NEXT]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md
           Re-run `RomNamedFuncAddrs.java` + `ExtractAnnotations.java` + `ListAllFunctions.java` (see this
           doc's "How to re-run" section) plus a fresh `RomCoverageStats.java` pass, regenerate the Summary
           table and the per-region distribution table from scratch (not incremental deltas, to resolve

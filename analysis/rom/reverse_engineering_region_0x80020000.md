@@ -455,3 +455,73 @@ Ghidra renames needed (names already correct). 0 medium-confidence functions
 remain in this region — and project-wide, this closes out the
 "cross-region medium→high" ticket entirely (0 medium-confidence named functions
 remain anywhere in the `rom` block).
+
+## Cross-region low→high confidence upgrade pass (2026-06-26)
+
+Part of the `work-in-progress.txt` "Cross-region: upgrade all low-confidence
+named functions to high" ticket, batch 3 (continuation of batches 1–2 covering
+regions 0x80000000/0x80010000/0x80030000). This region had 25 low-confidence
+rows in the table at batch start; 24 are real distinct functions (all
+confirmed via `decompile_function`, no renames needed — Kovah's descriptive
+names all hold up against the decompile). The 25th row is a **data-integrity
+bug in the table**, documented below.
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x800211b4` | 28B | `copy_bytes_in_LSB_order` | Byte-by-byte LSB-first copy loop from a packed word into a buffer. |
+| `0x800211f4` | 72B | `HCI_EVT_0x452_if_arg<0x41_copy_8_bytes` | Bitmask test against an 8-byte bitfield at `PTR_DAT_8002123c`; returns 0 only if the bit for `param_1` (0–0x40) is clear. |
+| `0x80021ba0` | 208B | `calls_reg_multiple_dptrs__FUN_80021ba0` | Chained init: registers up to 10 data-pointer descriptors via `reg_multiple_dptrs__FUN_80009cc0`, short-circuiting on first failure. |
+| `0x80021ec8` | 28B | `return_if_encryption_enabled_byte_at_bos_offset_0x58_ptr_index[0x26]` | Thin accessor: returns byte `[0x26]` of the crypto sub-struct at `bos[idx]._x58`. |
+| `0x80021f44` | 34B | `get_byte[0x26]_in_unknown_ptr_0x58_points_to_struct_at_least_0x27_big` | Same field as above, returned as a bool (`!= 0`) instead of the raw byte. |
+| `0x80022eec` | 104B | `many_sub_if_else_cases_on_param2` | Dispatch table over 6 discrete `param_2` opcode values (0x16,0x17,0x31,0x33,0x34,0x35), each calling a distinct sub-handler. |
+| `0x80023fb4` | 4B | `set_arg1+1_to_arg2` | One-instruction store: `*(param_1+1) = param_2`. |
+| `0x80023fd0` | 10B | `some_case_0x2d` | Stores a 4-byte value at `+0x1e8` and zeroes a byte via an output pointer — a `case 0x2d` arm extracted as its own thunk. |
+| `0x800240f4` | 24B | `ret_bool_based_on_crypto_struct_0x50` | XOR of two boolean flags (`param_1+0xd0 == 0` and `param_2+0x50 != 1`). |
+| `0x80024ca4` | 864B | `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?` | Large per-connection state-machine update: optional registered callback first, then a ~20-case switch over the crypto-struct's state byte driving link-key-type transitions, SSP/auth event sends, and detach paths. Confirms the name (it is the post-SSP-complete state-machine update, structurally identical in role to a `?`-flagged guess). |
+| `0x80025d34` | 160B | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | Computes an HMAC-style check value via `FUN_8002c6c8` (BLAKE2/SHACAL2-based) over a16-byte buffer assembled from connection state + a config BD_ADDR, then `memcmp`s against the caller-supplied value — this is a DHKey/passkey *verification* check, consistent with both candidate event names (used during numeric-comparison or passkey confirmation). |
+| `0x80026608` | 140B | `call_send_evt_HCI_Simple_Pairing_Complete` | Confirmed: sends `send_evt_HCI_Simple_Pairing_Complete_0x36`, then either advances the state machine inline or (if `param_2` indicates a failure path) defers to `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_` above. |
+| `0x80029a50` | 66B | `send_evt_HCI_Link_Key_Type_Changed_0x0A` | Thin wrapper: packs connection handle + 2 status bytes, sends HCI event 0x0A. |
+| `0x80029a98` | 200B | `wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` | State machine over a 3-state counter at a fixed global struct (`+0x48`), driving combination/temporary/semi-permanent link-key transitions and re-invoking the event sender above. |
+| `0x80029c5c` | 120B | `calls_send_evt_HCI_Link_Key_Type_Changed_0x0A_and_possible_LMP_DETACH` | Branches on `bdaddr_random_`: either sends the link-key-type-changed event directly, or updates retry counters and may call `possible_LMP_DETACH` before re-dispatching to the wrapper above. |
+| `0x8002a334` | 156B | `HCI_EVT_0x1fd_FUN_8002a334` | Ring-buffer drain loop: pops queued buffers (4-bit index/count fields in a fixed-size descriptor table) and forwards each via `FUN_8002ed9c`, advancing a 2-slot round-robin cursor (`%2` via `puVar3[0xcd]`). |
+| `0x8002c338` | 602B | `thing_that_uses_SHA_and_BLAKE` | Confirmed: a from-scratch SHA-256/SHACAL2-style compression-function implementation (BLAKE2 IV constants + SHACAL2 round constants table, full message-schedule + 64-round compression loop, big-endian digest output). |
+| `0x8002c59c` | 144B | `reverse_path_to_thing_that_uses_SHA_and_BLAKE__1` | Assembles a message block from 4 input buffers (two N-word values + two 16-byte values) and calls `thing_that_uses_SHA_and_BLAKE`, extracting a little-endian 32-bit digest prefix — a P-192/256-style key-derivation helper. |
+| `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `FUN_8002dda4` (point-on-curve check) and on success runs the full DHKey derivation (`FUN_8002eb94`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `FUN_8002eb94`. |
+| `0x8002eae0` | 168B | `LMP__26E__FUN_8002eae0` | Per-connection cleanup/retry-countdown loop keyed by event `0x26e`; decrements per-slot countdown fields and calls `FUN_8002db50`/`FUN_8002dffc` as needed, logging via `possible_logger_called_if_no_patch3` on the final iteration. |
+| `0x8002f518` | 962B | `assoc_w_tHCI_TD_FUN_8002f518` | Confirmed: large opcode-dispatch handler for the `tHCI_TD` (HCI test-data / transport-data) log-tagged subsystem — branches on a 16-bit sub-opcode (0x190–0x4ed range) into encryption-mode toggles, SCO/eSCO config validation, link-key/baseband event triggers, and a final `UNRECOVERED_JUMPTABLE` indirect dispatch Ghidra couldn't resolve statically. |
+| `0x8002fae0` | 84B | `VSC_0xfc93_FUN_8002fae0` | VSC 0xFC93 handler: on subcommand byte `0x09`, copies 6 packed fields from the VSC payload into 6 separate config globals (frequency/channel-map-style fields); returns `0x12` (invalid-params) otherwise. |
+| `0x8002fd3c` | 328B | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xFD40 handler: a sequence of baseband-register read-modify-write calls through a single `PTR_DAT_8002fe84` register-access function pointer, configuring per-channel-index registers from VSC payload fields (frequency/role/clock-class bits). |
+| `0x8002fea0` | 58B | `wrapper_multi-VSC_Handler_FUN_8002fea0` | Confirmed thin wrapper: calls `multi_VSC_Handler_FUN_80032540` and logs (tag `0x452`) on non-zero (error) return. |
+
+### Data-integrity finding: phantom duplicate row at `0x8002edb8`
+
+The table's 25th low-confidence row in this region read:
+
+```
+| `0x8002edb8` | 44 | `send_evt_HCI_Number_Of_Completed_Packets` | send evt HCI Number Of Completed Packets | low (named by Kovah, purpose unclear) |
+```
+
+This address/name/size combination does **not** correspond to a real function.
+`decompile_function("FUN_8002edb8")` returns no body ("may be too small or a
+thunk") and `disassemble_function` reports the address as not a function
+entry. The real `send_evt_HCI_Number_Of_Completed_Packets` is a genuine
+438-byte function at `0x8001da3c` in **region 0x80010000** — already present
+in the table as a separate, correct row, and already upgraded to high
+confidence by the prior cross-region *medium→high* pass (see
+`git show 271f25e` — that commit reconciled "a duplicate high-confidence row
+found later in this table" for the legitimate `0x8001da3c` entry, but left
+this erroneous `0x8002edb8` copy of the same name/row behind under the wrong
+region).
+
+`0x8002edb8` itself sits 4 bytes past the end of the tiny real thunk
+`FUN_8002ed9c` (`0x8002ed9c`–`0x8002edb4`, 24 bytes, a single-call wrapper
+around a function-pointer dispatch) — i.e. it lands in PC-relative literal-pool
+space, not a function start. This row should be **deleted** from the table
+(not decompiled/upgraded) and the region's low-confidence/total-function
+counts adjusted down by one to reflect that it was never a real distinct
+function. See `rom_function_index.md` update in this pass.
+
+**Confidence**: 24 of 25 rows upgraded **low → HIGH** (all pre-existing names
+confirmed accurate, no Ghidra renames needed). 1 of 25 rows removed as a
+phantom duplicate (data-integrity fix, not a confidence upgrade). 0
+low-confidence functions remain in this region.
