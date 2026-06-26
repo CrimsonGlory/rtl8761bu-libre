@@ -174,6 +174,21 @@ Format: [TODO] or [DONE] status, date, description
     batch_decompile_functions (3/3). (FUN_80001000 and FUN_80002000 tested as extras returned
     "not found" but those addresses genuinely don't exist in the GZF — not a false negative.)
 
+  RE-OPENED 2026-06-26 (same day, later session, non-blocking): the 3/3 re-verification above
+    was too narrow and did not generalize. Cross-region low→high confidence ticket, batch 3
+    (ROM regions 0x80020000/0x80070000), hit two fresh 10-function batch_decompile_functions
+    calls scoring 1/10 and 0/10 — including names with NO special characters at all (e.g.
+    "call_send_evt_HCI_Simple_Pairing_Complete", "send_evt_HCI_Link_Key_Type_Changed_0x0A" both
+    failed as "not found or decompilation failed" despite resolving fine individually via
+    decompile_function). So this isn't purely the original special-character-escaping bug —
+    it's a broader, intermittent/cache-state-dependent failure. Not marking this [TODO] since
+    it has a reliable, already-proven fallback (individual decompile_function calls per
+    function, fired in parallel within one message) that this project has used successfully
+    across every confidence-upgrade batch to date — it never actually blocked progress, just
+    cost a wasted batch call before falling back. Left as [DONE]+RE-OPENED (informational, not
+    blocking) rather than [TODO], matching the precedent set by the rename-persistence entry
+    above. Recommendation for wairz: batch_decompile_functions needs a deeper fix than the
+    narrow 3-name re-test covered; until then, treat it as "try once, fall back immediately."
 
   ROOT CAUSE FOUND + FIXED 2026-06-26 (orchestration layer, not Ghidra):
     The Ghidra -process mechanism was proven correct via an in-container empirical canary
