@@ -704,3 +704,55 @@ Decompile-only — no Ghidra rename involved.
 
 **Confidence**: all 4 upgraded **medium → HIGH** in `rom_function_index.md`. No
 Ghidra renames needed (names already correct).
+
+## Cross-region medium→high confidence upgrade pass — continuation (2026-06-26)
+
+Continuation of the same ticket (`work-in-progress.txt`). The prior batch's "28
+medium remain" count was stale — a fresh `grep "medium (named" rom_function_index.md`
+at the start of this iteration found 38 actual remaining rows project-wide, 31 of
+them in this region (0x80012c18-0x8001e72c). All 31 decompiled via
+`mcp__wairz__decompile_function` (one at a time — `batch_decompile_functions`
+returned false "not found" for cross-region/older-cache names again, same
+unresolved issue filed in `wairz_requested_changes.txt`). All pre-existing names
+confirmed accurate against the decompile, with one correction found.
+
+| Address | Size | Name | Confirmed purpose |
+|---------|------|------|--------------------|
+| `0x80012c18` | 164B | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 handler: calls a validator fptr first; on failure/absence, disables IRQs to clear HW register bits 0xfc00 (mask `0xffff03ff`), re-enables IRQs, calls `FUN_80012af8`, then conditionally sends multi-VSC event 0x6e via the shared `ptr_ptr_call_to_multi_VSC...` fptr. |
+| `0x80013074` | 144B | `VSC_0xfc39_2_FUN_80013074` | VSC 0xfc39 part 2: 4-mode dispatcher (param 0-3) each masking/setting different HW register bits, then calling delay/log helper `FUN_80012e80(0, mode_code, 10)`. |
+| `0x8001343c` | 40B | `second_set_func_in_set_two_global_ptrs` | Getter pairing with a (separately-named) "first" func: checks `config_struct+0xd8` flag bit 0x40 and a sentinel byte, returns whether a global toggle value == 0. |
+| `0x80013474` | 4B | `return_1` | Trivial: `return 1`. |
+| `0x800138cc` | 680B | `unknown_fptr_index0` | Multi-case dispatcher, switches on `*(short*)(param+8) - 100` across ~16 subcases (100-117). Most delegate to other ROM functions (`FUN_8000f4a0`, `FUN_80013840`, `FUN_80072020`, `FUN_8007718c`, etc); the fallthrough/default case performs connection-record/slot scheduling bookkeeping over 0x84-byte array entries — same struct-shape family as `release_connection_record`'s connection records. Name ("fptr index 0") indicates it's entry 0 of a function-pointer dispatch table; purpose confirmed as a substantial command dispatcher, not renamed further since the existing name already correctly flags it as a table entry. |
+| `0x80014054` | 62B | `VSC_0xfcc0_FUN_80014054` | VSC 0xfcc0 handler: toggles HW register bit 0x200 via an fptr call (sub-opcode 0x16), calls cleanup `FUN_80013ee8` on the disable path. |
+| `0x800148f0` | 54B | `VSC_0xfcc2_FUN_800148f0` | VSC 0xfcc2 handler: resolves an index via `FUN_80042a68`, computes a table offset `(idx-1)*0xc+0xb`, returns the looked-up value via `FUN_80013e2c`. |
+| `0x8001574c` | 100B | `send_evt_invalid_0xFF` | Sends HCI vendor-specific event 0xFF, subcode 0x28, conditionally on a global flag byte; logs unconditionally via `possible_logging_function__var_args`. |
+| `0x800157b8` | 234B | `calls_send_evt_invalid_0xFF_0_or_1` | 0/1 link-state transition tracker with a threshold-counted timer-supervision pattern (`(byte)tbl[10]<<1 <= *counter`); calls `send_evt_invalid_0xFF(0)` or `(1)` on state transitions. |
+| `0x80016780` | 74B | `wrap_look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` | Thin wrapper: copies a 6-byte BD_ADDR from `param+3`, calls the (already-named) `look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot`, maps the result to status codes 0xb/0xd/computed. |
+| `0x80018c14` | 4B | `ret_wrapper` | Trivial: `return 0`. |
+| `0x80018e58` | 220B | `send_HCI_Command_Status_for_HCI_0x0A` | BOS-slot lookup by BD_ADDR; validates subcode range 0xd-0xf; sends `send_evt_HCI_Command_Status`, then dispatches by connection status (0x11/0x15/0xd) to `FUN_8006c9e8`/`FUN_8006b4a0`. |
+| `0x80019594` | 370B | `send_HCI_Command_Status_for_HCI_0x09` | Same BOS-lookup + Command-Status pattern as the 0x0A handler, with SSP/encryption-aware status branching (checks crypto-struct offset 0x214) before dispatching to `FUN_80019050`/`FUN_80019504`. |
+| `0x80019830` | 638B | `send_HCI_Command_Status_for_HCI_0x07` | Most complex of the three Command-Status handlers: two-path connection-handle resolution, feature-page gating (`uVar8 & 0x3f8`/`& 7` mask check), dispatches to `FUN_80019774`/`FUN_800191a8`. |
+| `0x80019e4c` | 60B | `send_evt_HCI_Read_Remote_Extended_Features_Complete` | Thin PDU-pack wrapper; sends HCI event 0x23 — matches the spec opcode for this event name exactly. |
+| `0x80019e88` | 124B | `send_evt_HCI_Synchronous_Connection_Changed` | Sends HCI event 0x2d (matches spec opcode); a BD_ADDR-random check swaps which interval field maps to Tx vs Rx. |
+| `0x80019f0c` | 232B | `send_evt_HCI_Synchronous_Connection_Complete` | Sends HCI event 0x2c (matches spec opcode); `param_3`-keyed branch (0 vs 2) selects the SCO-record vs eSCO-record field source. |
+| `0x8001b23c` | 122B | `fHCI_Read_LMP_Handle_0x20` | HCI_Read_LMP_Handle (OCF 0x20): resolves the connection's LMP handle byte via `called_by_fHCI_Read_LMP_Handle_3`, replies with `called_by_fHCI_Read_LMP_Handle_send_evt_HCI_Command_Complete`. |
+| `0x8001b2c0` | 170B | `fHCI_Read_Clock_Offset_0x1F` | HCI_Read_Clock_Offset (OCF 0x1F): BD_ADDR-random branch either sends an LMP clock-offset-request PDU via `send_LMP_pkt` or replies immediately with the cached offset via `send_evt_HCI_Read_Clock_Offset_Complete`. |
+| `0x8001b4e8` | 96B | `fHCI_Read_Remote_Supported_Features_0x1B` | HCI_Read_Remote_Supported_Features (OCF 0x1B): triggers `send_LMP_FEATURES_REQ_or_RES` with LMP opcode 0x27 (LMP_features_req), marks outstanding-LMP-PDU status bits. |
+| `0x8001c788` | 38B | `fHCI_Truncated_Page_Cancel_0x40` | Thin wrapper: copies BD_ADDR, calls the shared `fHCI__Create_Connection_0x08__or__Remote_Name_Request_0x1A__Cancel` helper with mode=2 to select the Truncated-Page-Cancel behavior. |
+| `0x8001cd74` | 586B | `initialize_0x28_sized_struct` | **Name correction recommended**: the function sets bytes 0x00-0x14 of its struct argument to 0xff, then 0x15-0x3f to 0 — i.e. it zero/0xff-initializes a full **0x40-byte** region (64 bytes), not 0x28 (40 bytes) as the name claims. Remaining logic config-flag-gates bit masks through offset 0x27. Recommended rename: `initialize_0x40_sized_struct`. Rename itself is blocked on the open rename-persistence bug (`wairz_requested_changes.txt`) — documenting the correction here and in `rom_function_index.md` as the durable record until a rename can actually persist. |
+| `0x8001d1bc` | 24B | `send_evt_HCI_Hardware_Error` | Thin wrapper; sends HCI event 0x10 — matches spec opcode. |
+| `0x8001d1f8` | 74B | `send_evt_HCI_Connection_Complete` | Thin wrapper; sends HCI event 0x03 — matches spec opcode — with BD_ADDR + link type. |
+| `0x8001d424` | 76B | `called_by_fHCI_Read_LMP_Handle_send_evt_HCI_Command_Complete` | Sends HCI event 0xe (Command_Complete, matches spec opcode), packing status + connection handle + LMP-handle byte. |
+| `0x8001d5b4` | 68B | `send_evt_0x14_HCI_Mode_Change` | Thin wrapper; sends HCI event 0x14 — matches spec opcode/name — with a connection-handle table lookup. |
+| `0x8001d5fc` | 460B | `send_evt_HCI_Disconnection_Complete` | Sends HCI event 5 (matches spec opcode). **Notable**: this decompile resolved its callee as `release_connection_record` (not `FUN_8005b79c`) — the one specific rename that `wairz_requested_changes.txt` documents as persisting (it's the literal name wairz's own fix-verification test used). Consistent with, not contradicting, the open rename-persistence bug. |
+| `0x8001d804` | 64B | `send_evt_HCI_Connection_Request` | Thin wrapper; sends HCI event 0x04 — matches spec opcode — with BD_ADDR + class-of-device + link type. |
+| `0x8001da0c` | 40B | `send_evt_HCI_Inquiry_Complete` | Thin wrapper; clears a 0x40-byte scratch buffer then sends HCI event 0x01 — matches spec opcode. |
+| `0x8001e6fc` | 44B | `OGC_3_OCF_16` | OGF=3/OCF=0x16 (Write_Voice_Setting-style); validates param range, writes a scaled field to a status struct at offset +0x14. |
+| `0x8001e72c` | 22B | `OGC_3_OCF_18` | OGF=3/OCF=0x18; validates nonzero param, writes directly to status struct offset +0x16. |
+
+**Confidence**: 30 of the 31 above upgraded **medium → HIGH** in
+`rom_function_index.md` with names confirmed unchanged. `initialize_0x28_sized_struct`
+(`0x8001cd74`) is also upgraded to HIGH (purpose is now fully understood and
+documented) but flagged with a pending name correction
+(`initialize_0x40_sized_struct`) that cannot be applied until the rename-persistence
+bug is fixed. 0 medium-confidence functions remain in this region.

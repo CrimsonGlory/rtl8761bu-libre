@@ -3578,34 +3578,39 @@ sweep beyond enumeration and is the most out-of-date):
           same pattern; document as a new section in `reverse_engineering_region_0x80000000.md` rather
           than reopening the already-closed gap-sweep ticket.
 
-[NEXT]  Cross-region: upgrade all medium-confidence named functions to high (28 functions remain, 49 found at ticket start, 10 done 2026-06-26)
+[DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
           or a root-level cross-cutting doc) but no dedicated decompile + write-up. Batch-decompile each
           (group by region to reuse GZF process-mode loads), confirm or correct the existing name/purpose
-          against the actual C, and add/extend the relevant `analysis/rom/*.md` doc. Re-derive the
-          current list via `rom_function_index.md`'s named-function table (filter Confidence column ==
-          "medium") rather than trusting the count above, since per-pass edits may have shifted it.
+          against the actual C, and add/extend the relevant `analysis/rom/*.md` doc.
 
-          **Progress 2026-06-26**: promoted from [TODO] this iteration (the prior [NEXT], region
-          0x80050000 PASS 12+, had to be re-blocked — wairz's rename-persistence "FIXED" claim did
-          not hold up on re-test; see wairz_requested_changes.txt "RE-OPENED 2026-06-26"). This
-          ticket is genuinely unblocked: these functions already carry correct names from
-          pre-existing GZF annotations (not our own RenamePassN* output), confirmed by spot-checking
-          that `decompile_function` resolves them — and the task only requires a markdown
-          confidence-flag edit, no new Ghidra rename. Re-derived the live list via
-          `grep "medium (named" rom_function_index.md`: 49 functions found (table's stale header
-          count said 42). Decompiled the first 10 (regions 0x80000000 and 0x80010000) via
-          `decompile_function` (note: `mcp__wairz__batch_decompile_functions` returned "not found"
-          for all 8 names tried in one batch call despite each resolving individually — new
-          wairz_requested_changes.txt [TODO] filed, worked around by calling decompile_function
-          once per function). All 10 confirmed their existing name accurately describes the
-          decompiled code; upgraded medium→high in rom_function_index.md (558 high / 28 medium now)
-          with full evidence in `reverse_engineering_region_0x80000000.md` and
-          `reverse_engineering_region_0x80010000.md`'s new "Cross-region medium→high confidence
-          upgrade pass (2026-06-26)" sections. 28 medium-confidence functions remain (next: re-derive
-          list again at ticket start per the table's own column, don't reuse this session's stale 49).
+          **Progress 2026-06-26 (first batch)**: promoted from [TODO] this iteration (the prior [NEXT],
+          region 0x80050000 PASS 12+, had to be re-blocked — wairz's rename-persistence "FIXED" claim
+          did not hold up on re-test; see wairz_requested_changes.txt "RE-OPENED 2026-06-26"). Re-derived
+          the live list via `grep "medium (named" rom_function_index.md`: 49 functions found. Decompiled
+          the first 10 (regions 0x80000000 and 0x80010000) via `decompile_function` (note:
+          `mcp__wairz__batch_decompile_functions` returned "not found" for all 8 names tried in one
+          batch call despite each resolving individually — new wairz_requested_changes.txt [TODO]
+          filed, worked around by calling decompile_function once per function). All 10 confirmed
+          accurate; upgraded medium→high.
 
-[TODO]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
+          **Continuation 2026-06-26 (same day, COMPLETE)**: the "28 remain" figure from the first batch
+          was stale/miscounted — a fresh `grep "medium (named" rom_function_index.md` at continuation
+          start found 38 actual remaining rows project-wide (31 in region 0x80010000, 7 in region
+          0x80020000), not 28. Decompiled all 38 individually via `decompile_function`
+          (`batch_decompile_functions` still unreliable for cross-region/older-cache names, same
+          unresolved wairz issue). All 38 pre-existing names confirmed accurate against the decompile,
+          with **one correction found**: `initialize_0x28_sized_struct` (`0x8001cd74`) actually
+          initializes a 0x40-byte region (64 bytes), not 0x28 (40 bytes) — recommended rename
+          `initialize_0x40_sized_struct` documented but not applied (blocked on the open
+          rename-persistence bug). Also notable: `VSC_0xfc20__download_patch__FUN_8002fee0`
+          (`0x8002fee0`) is the core VSC 0xFC20 patch-fragment-download handler — directly relevant to
+          the project's primary goal. Full write-ups in `reverse_engineering_region_0x80010000.md`'s
+          and `reverse_engineering_region_0x80020000.md`'s "2026-06-26" sections, `rom_function_index.md`
+          Summary updated (596 high / 0 medium / 237 low), `analysis/INDEX.md` updated for both regions.
+          **0 medium-confidence named functions remain anywhere in the `rom` block — ticket fully closed.**
+
+[NEXT]  Cross-region: upgrade all low-confidence named functions to high (256 functions, per Summary table)
           Same process as the medium-confidence ticket, for the larger low-confidence set (`unknown_*`,
           `possible_*`, trailing-`?` names, or no doc cross-reference at all). These are likely to need
           more decompile effort per function since the existing name often signals genuine uncertainty

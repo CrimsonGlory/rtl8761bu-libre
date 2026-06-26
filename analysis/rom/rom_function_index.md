@@ -54,8 +54,8 @@ GZF process mode, run 2026-06-21, against
 | Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
 | Named functions (this doc's table) | 752 (690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 6 region-0x80030000 Pass-7 + 20 region-0x80030000 Pass-8 + 16 region-0x80020000 Pass-3, as of 2026-06-25; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
 | Unnamed (`FUN_*`) functions (summarized below) | 1754 (2012 − 238 region-0x80060000 Pass-2-3 renames − 20 region-0x80030000 Pass-8 renames, 2026-06-25) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 558 (548 + 10 cross-region medium→high upgrade pass, 2026-06-26) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 28 (38 − 10 cross-region medium→high upgrade pass: `memcmp`, `wrap_set_two_global_ptrs`, `interesting_string_user_fptr_registration_function`, `LMP__25C_called1`, `LMP__25B__most_common_for_VSCs1`, `VSC_0xfc95_called2` in region 0x80000000; `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c`, `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10`, `LMP_CH__0x3ee__case1_if_FUN_80011fc0`, `VSC_0xfc11_2_FUN_800120ac` in region 0x80010000, 2026-06-26) |
+| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 596 (558 + 38 cross-region medium→high upgrade pass continuation, 2026-06-26 — see note below) |
+| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 0 (all resolved 2026-06-26: 10 in this pass's first batch + 38 in the continuation batch documented this iteration. Note: the "28 remain" figure recorded after the first batch was stale/miscounted — a fresh `grep "medium (named" rom_function_index.md` at continuation start found 38 actual remaining rows, not 28; all 38 decompiled + confirmed this iteration (31 in region 0x80010000, 7 in region 0x80020000), full list in `region_0x80010000.md`/`region_0x80020000.md`'s "2026-06-26 continuation" sections) |
 | Named-function confidence: **low** (named by Kovah, purpose unclear) | 237 (256 − 19 region-0x80020000 Pass-5 low→high upgrades, 2026-06-25) |
 
 **Known pre-existing tally drift (carried, not introduced this pass)**: high+medium+low = 361+68+257 = 686, one more than the 685 named-functions total. The same +1 drift already existed at the pass-1 baseline (323+88+271=682 vs 681 named) — this pass's edits are arithmetically consistent deltas on top of that baseline, not a new miscount. Flagging per the doc's standing practice rather than silently correcting an unverified pre-existing baseline; a future pass should audit the full named-function table's confidence column against a fresh count to locate the single double-counted or missing row.
@@ -484,27 +484,27 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80011fc0` | 214 | `LMP_CH__0x3ee__case1_if_FUN_80011fc0` | LMP CH  0x3ee  case1 if FUN 80011fc0 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x800120ac` | 50 | `VSC_0xfc11_2_FUN_800120ac` | VSC 0xfc11 2 FUN 800120ac — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80012658` | 406 | `unknown_referencing_default_name_6` | unknown referencing default name 6 | low (named by Kovah, purpose unclear) |
-| `0x80012c18` | 164 | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 1 FUN 80012c18 | medium (named, one-line purpose only, not decompiled) |
+| `0x80012c18` | 164 | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 handler: dispatches to validator fptr, then disables IRQs to clear HW reg bits 0xfc00, conditionally sends multi-VSC event 0x6e — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80012e04` | 52 | `called_if_config[1]&4` | called if config[1]&4 | low (named by Kovah, purpose unclear) |
-| `0x80013074` | 144 | `VSC_0xfc39_2_FUN_80013074` | VSC 0xfc39 2 FUN 80013074 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001343c` | 40 | `second_set_func_in_set_two_global_ptrs` | second set func in set two global ptrs | medium (named, one-line purpose only, not decompiled) |
-| `0x80013474` | 4 | `return_1` | return 1 | medium (named, one-line purpose only, not decompiled) |
+| `0x80013074` | 144 | `VSC_0xfc39_2_FUN_80013074` | VSC 0xfc39 part 2: 4-mode HW register mask/set selector (param 0-3), each mode calls delay/log fn `FUN_80012e80` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x8001343c` | 40 | `second_set_func_in_set_two_global_ptrs` | Getter: checks config_struct flag 0x40 + a sentinel byte, returns whether a global toggled value == 0 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80013474` | 4 | `return_1` | Trivial constant-return stub: `return 1` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001347c` | 162 | `unknown_referencing_default_name_7` | unknown referencing default name 7 | low (named by Kovah, purpose unclear) |
-| `0x800138cc` | 680 | `unknown_fptr_index0` | unknown fptr index0 | medium (named, one-line purpose only, not decompiled) |
-| `0x80014054` | 62 | `VSC_0xfcc0_FUN_80014054` | VSC 0xfcc0 FUN 80014054 | medium (named, one-line purpose only, not decompiled) |
+| `0x800138cc` | 680 | `unknown_fptr_index0` | Multi-case command dispatcher (switch on `*(short*)(param+8)-100`, ~16 subcases 100-117); most cases delegate to other ROM fns; fallthrough/default case does connection-record/slot scheduling bookkeeping (0x84-byte array entries, matches patterns near `release_connection_record`) — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80014054` | 62 | `VSC_0xfcc0_FUN_80014054` | VSC 0xfcc0 handler: toggles HW reg bit 0x200 via fptr call (opcode 0x16), calls cleanup `FUN_80013ee8` on disable path — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80014180` | 58 | `called_on_every_HCI_CMD_via_fptr` | called on every HCI CMD via fptr — see `usb_transport_hci_driver` | high (decompiled+documented) |
-| `0x800148f0` | 54 | `VSC_0xfcc2_FUN_800148f0` | VSC 0xfcc2 FUN 800148f0 | medium (named, one-line purpose only, not decompiled) |
+| `0x800148f0` | 54 | `VSC_0xfcc2_FUN_800148f0` | VSC 0xfcc2 handler: looks up index via `FUN_80042a68`, computes table offset (idx-1)*0xc+0xb, returns value via `FUN_80013e2c` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80014a44` | 224 | `sometimes_called_with_0_3_0` | sometimes called with 0 3 0 | low (named by Kovah, purpose unclear) |
 | `0x80014cf4` | 76 | `call_to_multi_VSC_e.g._0xfcc4_unknown` | call to multi VSC e.g. 0xfcc4 unknown | low (named by Kovah, purpose unclear) |
-| `0x8001574c` | 100 | `send_evt_invalid_0xFF` | send evt invalid 0xFF | medium (named, one-line purpose only, not decompiled) |
-| `0x800157b8` | 234 | `calls_send_evt_invalid_0xFF_0_or_1` | calls send evt invalid 0xFF 0 or 1 | medium (named, one-line purpose only, not decompiled) |
-| `0x80016780` | 74 | `wrap_look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` | wrap look for non matching bdaddr bos index i.e. free connection slot | medium (named, one-line purpose only, not decompiled) |
+| `0x8001574c` | 100 | `send_evt_invalid_0xFF` | Sends HCI vendor event 0xFF subcode 0x28 conditionally on a global flag; logs either way via `possible_logging_function__var_args` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x800157b8` | 234 | `calls_send_evt_invalid_0xFF_0_or_1` | 0/1 link-state transition tracker with a threshold-counted timer-supervision pattern; calls `send_evt_invalid_0xFF(0)` or `(1)` depending on state — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80016780` | 74 | `wrap_look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` | Confirmed thin wrapper: copies BD_ADDR from param+3, calls `look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot`, maps result to status codes 0xb/0xd/computed — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001728c` | 38 | `wraps_calls_to_VSC_0xfcc0_then_calls_fptr` | wraps calls to VSC 0xfcc0 then calls fptr | low (named by Kovah, purpose unclear) |
-| `0x80018c14` | 4 | `ret_wrapper` | ret wrapper | medium (named, one-line purpose only, not decompiled) |
+| `0x80018c14` | 4 | `ret_wrapper` | Trivial constant-return stub: `return 0` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80018d44` | 132 | `HCI_Setup_Synchronous_Connection_LMP_Feature_Checker` | HCI Setup Synchronous Connection LMP Feature Checker | low (named by Kovah, purpose unclear) |
-| `0x80018e58` | 220 | `send_HCI_Command_Status_for_HCI_0x0A` | send HCI Command Status for HCI 0x0A | medium (named, one-line purpose only, not decompiled) |
-| `0x80019594` | 370 | `send_HCI_Command_Status_for_HCI_0x09` | send HCI Command Status for HCI 0x09 | medium (named, one-line purpose only, not decompiled) |
-| `0x80019830` | 638 | `send_HCI_Command_Status_for_HCI_0x07` | send HCI Command Status for HCI 0x07 | medium (named, one-line purpose only, not decompiled) |
+| `0x80018e58` | 220 | `send_HCI_Command_Status_for_HCI_0x0A` | Confirmed: looks up BOS slot, validates subcode range 0xd-0xf, sends HCI_Command_Status then dispatches to `FUN_8006c9e8`/`FUN_8006b4a0` by connection status — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80019594` | 370 | `send_HCI_Command_Status_for_HCI_0x09` | Confirmed: same BOS-lookup + HCI_Command_Status pattern as the 0x0A handler, with SSP/encryption-aware status branching (offset 0x214 check) before dispatching to `FUN_80019050`/`FUN_80019504` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80019830` | 638 | `send_HCI_Command_Status_for_HCI_0x07` | Confirmed: most complex of the three Command-Status handlers; resolves connection handle via two lookup paths, feature-page gating (offset 0x3f8/7 mask), dispatches to `FUN_80019774`/`FUN_800191a8` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80019ad0` | 172 | `OGC_3_OCF_3f` | OGC 3 OCF 3f | high (decompiled+documented — see `region_0x80010000`) |
 | `0x80019b88` | 32 | `OGC_3_OCF_49` | OGC 3 OCF 49 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x80019bac` | 32 | `OGC_3_OCF_45` | OGC 3 OCF 45 | high (decompiled+documented — see `region_0x80010000`) |
@@ -512,9 +512,9 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80019bf4` | 116 | `OGC_3_default_func_0_OCF_0x3F_and_above` | OGC 3 default func 0 OCF 0x3F and above | high (decompiled+documented — see `region_0x80010000`) |
 | `0x80019c88` | 104 | `deal_with_OGF_3_OCF_0x3f-0x49` | deal with OGF 3 OCF 0x3f-0x49 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x80019d80` | 202 | `fHCI_Setup_Synchronous_Connection?` | fHCI Setup Synchronous Connection? | low (named by Kovah, purpose unclear) |
-| `0x80019e4c` | 60 | `send_evt_HCI_Read_Remote_Extended_Features_Complete` | send evt HCI Read Remote Extended Features Complete | medium (named, one-line purpose only, not decompiled) |
-| `0x80019e88` | 124 | `send_evt_HCI_Synchronous_Connection_Changed` | send evt HCI Synchronous Connection Changed | medium (named, one-line purpose only, not decompiled) |
-| `0x80019f0c` | 232 | `send_evt_HCI_Synchronous_Connection_Complete` | send evt HCI Synchronous Connection Complete | medium (named, one-line purpose only, not decompiled) |
+| `0x80019e4c` | 60 | `send_evt_HCI_Read_Remote_Extended_Features_Complete` | Confirmed: thin PDU-pack wrapper, sends HCI event 0x23 (matches spec opcode) via `hci_event_sender` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80019e88` | 124 | `send_evt_HCI_Synchronous_Connection_Changed` | Confirmed: sends HCI event 0x2d (matches spec opcode); BD_ADDR-random check swaps Tx/Rx interval fields — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80019f0c` | 232 | `send_evt_HCI_Synchronous_Connection_Complete` | Confirmed: sends HCI event 0x2c (matches spec opcode); param_3-keyed branch (0/2) picks SCO vs eSCO field source struct — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001a0f8` | 44 | `calls_to_VSC_0xfcc0` | calls to VSC 0xfcc0 | low (named by Kovah, purpose unclear) |
 | `0x8001a128` | 86 | `OGC_3_OCF_62_vendor_ext_set_conn_flag_via_FUN_80017930` | renamed from `FUN_8001a128`; OCF number not fully opcode-confirmed this pass (flagged) — see `region_0x80010000` | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001a294` | 174 | `OGC_3_OCF_0x52_HCI_Write_Extended_Inquiry_Response_fills_0x300_then_calls_to_VSC_0xfcc0` | OGC 3 OCF 0x52 HCI Write Extended Inquiry Response fills 0x300 then calls to VSC 0xfcc0 | high (decompiled+documented — see `region_0x80010000`) |
@@ -530,10 +530,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001a9b8` | 52 | `bit_test_[bit_index_at_offset_0x16f]_within_[short_at_offset_0x24]` | bit test [bit index at offset 0x16f] within [short at offset 0x24] | low (named by Kovah, purpose unclear) |
 | `0x8001aa3c` | 254 | `LMP_QUALITY_OF_SERVICE_REQ_0x2A` | LMP QUALITY OF SERVICE REQ 0x2A — see `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x8001af9c` | 114 | `LMP_0x18_LMP_UNSNIFF_REQ` | LMP 0x18 LMP UNSNIFF REQ — see `lc_lmp_state_machine` | high (decompiled+documented) |
-| `0x8001b23c` | 122 | `fHCI_Read_LMP_Handle_0x20` | fHCI Read LMP Handle 0x20 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001b2c0` | 170 | `fHCI_Read_Clock_Offset_0x1F` | fHCI Read Clock Offset 0x1F | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b23c` | 122 | `fHCI_Read_LMP_Handle_0x20` | Confirmed: HCI_Read_LMP_Handle (OCF 0x20) handler; resolves connection handle via `called_by_fHCI_Read_LMP_Handle_3`, sends Command_Complete with LMP handle byte — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x8001b2c0` | 170 | `fHCI_Read_Clock_Offset_0x1F` | Confirmed: HCI_Read_Clock_Offset (OCF 0x1F); BD_ADDR-random branch either sends `send_LMP_pkt` (LMP_clkoffset_req) or directly replies with cached offset via `send_evt_HCI_Read_Clock_Offset_Complete` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001b370` | 354 | `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25` | HCI Read Remote Version Information command handler; initiates LMP VERSION_REQ PDU (opcode 0x25) via ROM connection-record lookup. See `region_0x80010000`, PASS 6 | high (decompiled+documented) |
-| `0x8001b4e8` | 96 | `fHCI_Read_Remote_Supported_Features_0x1B` | fHCI Read Remote Supported Features 0x1B | medium (named, one-line purpose only, not decompiled) |
+| `0x8001b4e8` | 96 | `fHCI_Read_Remote_Supported_Features_0x1B` | Confirmed: HCI_Read_Remote_Supported_Features (OCF 0x1B); triggers `send_LMP_FEATURES_REQ_or_RES` (LMP opcode 0x27) and marks outstanding-LMP-PDU status bits — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001b54c` | 496 | `fHCI_Remote_Name_Request_0x19_send_LMP_NAME_REQ_0x01` | fHCI Remote Name Request 0x19 — thin wrapper sends LMP NAME REQ 0x01 with error handling | high (decompiled+documented) |
 | `0x8001b84c` | 170 | `fHCI_Change_Connection_Packet_Type_0x0F` | fHCI Change Connection Packet Type 0x0F — HCI command handler; updates connection record + calls ROM encryption/state checkers; (0x040f) | high (decompiled+documented, PASS 5) |
 | `0x8001b8fc` | 204 | `fHCI_Add_SCO_Connection_DEPRECATED_0x07` | fHCI Add SCO Connection DEPRECATED 0x07 — deprecated BT command handler; initializes SCO params + sends status/complete events (0x0407) | high (decompiled+documented, PASS 5) |
@@ -549,7 +549,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001c550` | 32 | `HCI_OGF1_OCF0x43` | HCI OGF1 OCF0x43 | low (named by Kovah, purpose unclear) |
 | `0x8001c574` | 304 | `HCI_OGF1_OCF0x42` | HCI OGF1 OCF0x42 | low (named by Kovah, purpose unclear) |
 | `0x8001c6b8` | 204 | `HCI_OGF1_OCF0x41` | HCI OGF1 OCF0x41 | low (named by Kovah, purpose unclear) |
-| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | fHCI Truncated Page Cancel 0x40 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001c788` | 38 | `fHCI_Truncated_Page_Cancel_0x40` | Confirmed thin wrapper: copies BD_ADDR, calls shared `fHCI__Create_Connection_0x08__or__Remote_Name_Request_0x1A__Cancel` with mode=2 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001c7b4` | 382 | `fHCI_Truncated_Page_0x3F` | fHCI Truncated Page 0x3F — thin wrapper sends LMP with error handling | high (decompiled+documented) |
 | `0x8001c940` | 132 | `call_to_HCI_opcodes_OGF=1_0x3F-to-0x44` | call to HCI opcodes OGF=1 0x3F-to-0x44 | low (named by Kovah, purpose unclear) |
 | `0x8001ca94` | 60 | `send_evt_HCI_Inquiry_Response_Notification` | send evt HCI Inquiry Response Notification | low (named by Kovah, purpose unclear) |
@@ -561,28 +561,28 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001cbcc` | 52 | `send_evt_HCI_Truncated_Page_Complete` | send evt HCI Truncated Page Complete | low (named by Kovah, purpose unclear) |
 | `0x8001cc04` | 110 | `send_evt_HCI_Synchronization_Train_Received` | send evt HCI Synchronization Train Received | low (named by Kovah, purpose unclear) |
 | `0x8001cc80` | 226 | `send_evt_HCI_Connectionless_Peripheral_Broadcast_Receive` | send evt HCI Connectionless Peripheral Broadcast Receive | low (named by Kovah, purpose unclear) |
-| `0x8001cd74` | 586 | `initialize_0x28_sized_struct` | initialize 0x28 sized struct | medium (named, one-line purpose only, not decompiled) |
+| `0x8001cd74` | 586 | `initialize_0x28_sized_struct` | **NAME CORRECTION NEEDED**: decompile shows it sets bytes 0x00-0x14 to 0xff then 0x15-0x3f to 0 (i.e. initializes a full **0x40**-byte region, not 0x28), then config-flag-gated masks through offset 0x27 — recommend rename to `initialize_0x40_sized_struct`; rename blocked on wairz rename-persistence bug, see `wairz_requested_changes.txt` — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented, name correction pending) |
 | `0x8001d070` | 310 | `hci_event_sender` | hci event sender — see `hci_command_router`, `usb_transport_hci_driver`, `vsc_dispatcher` | high (decompiled+documented) |
-| `0x8001d1bc` | 24 | `send_evt_HCI_Hardware_Error` | send evt HCI Hardware Error | medium (named, one-line purpose only, not decompiled) |
+| `0x8001d1bc` | 24 | `send_evt_HCI_Hardware_Error` | Confirmed: thin wrapper, sends HCI event 0x10 (matches spec opcode) — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001d1d4` | 34 | `send_evt_HCI_Flush_Occurred` | send evt HCI Flush Occurred | low (named by Kovah, purpose unclear) |
-| `0x8001d1f8` | 74 | `send_evt_HCI_Connection_Complete` | send evt HCI Connection Complete | medium (named, one-line purpose only, not decompiled) |
+| `0x8001d1f8` | 74 | `send_evt_HCI_Connection_Complete` | Confirmed: thin wrapper, sends HCI event 0x03 (matches spec opcode) with BD_ADDR + link type — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001d244` | 58 | `send_evt_HCI_Loopback_Command` | send evt HCI Loopback Command | low (named by Kovah, purpose unclear) |
 | `0x8001d280` | 130 | `send_evt_0x21_HCI_Flow_Specification_Complete` | send evt 0x21 HCI Flow Specification Complete | low (named by Kovah, purpose unclear) |
 | `0x8001d308` | 122 | `send_evt_0x0D_HCI_QoS_Setup_Complete` | send evt 0x0D HCI QoS Setup Complete | low (named by Kovah, purpose unclear) |
 | `0x8001d388` | 70 | `send_evt_HCI_Role_Change` | send evt HCI Role Change | low (named by Kovah, purpose unclear) |
 | `0x8001d3d4` | 36 | `send_evt_HCI_Max_Slots_Change` | send evt HCI Max Slots Change | low (named by Kovah, purpose unclear) |
 | `0x8001d3f8` | 44 | `send_event_HCI_Connection_Packet_Type_Changed` | send event HCI Connection Packet Type Changed | low (named by Kovah, purpose unclear) |
-| `0x8001d424` | 76 | `called_by_fHCI_Read_LMP_Handle_send_evt_HCI_Command_Complete` | called by fHCI Read LMP Handle send evt HCI Command Complete | medium (named, one-line purpose only, not decompiled) |
+| `0x8001d424` | 76 | `called_by_fHCI_Read_LMP_Handle_send_evt_HCI_Command_Complete` | Confirmed: sends HCI event 0xe (Command_Complete, matches spec opcode), packs status+handle+LMP-handle byte — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001d474` | 44 | `send_evt_HCI_Read_Clock_Offset_Complete` | send evt HCI Read Clock Offset Complete | low (named by Kovah, purpose unclear) |
 | `0x8001d4a0` | 134 | `send_evt_HCI_Read_Remote_Version_Information_Complete` | send evt HCI Read Remote Version Information Complete — see `lmp_version_conn_setup` | high (decompiled+documented) |
 | `0x8001d534` | 48 | `send_evt_HCI_Read_Remote_Supported_Features_Complete` | send evt HCI Read Remote Supported Features Complete | low (named by Kovah, purpose unclear) |
 | `0x8001d564` | 74 | `send_evt_HCI_Remote_Name_Request_Complete` | send evt HCI Remote Name Request Complete | low (named by Kovah, purpose unclear) |
-| `0x8001d5b4` | 68 | `send_evt_0x14_HCI_Mode_Change` | send evt 0x14 HCI Mode Change | medium (named, one-line purpose only, not decompiled) |
-| `0x8001d5fc` | 460 | `send_evt_HCI_Disconnection_Complete` | send evt HCI Disconnection Complete | medium (named, one-line purpose only, not decompiled) |
-| `0x8001d804` | 64 | `send_evt_HCI_Connection_Request` | send evt HCI Connection Request | medium (named, one-line purpose only, not decompiled) |
+| `0x8001d5b4` | 68 | `send_evt_0x14_HCI_Mode_Change` | Confirmed: thin wrapper, sends HCI event 0x14 (matches spec opcode/name) with connection-handle lookup — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x8001d5fc` | 460 | `send_evt_HCI_Disconnection_Complete` | Confirmed: sends HCI event 5 (matches spec opcode); calls `release_connection_record` directly (this callee resolved under its renamed symbol in the decompile — consistent with `wairz_requested_changes.txt`'s note that this one specific rename persists) — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x8001d804` | 64 | `send_evt_HCI_Connection_Request` | Confirmed: thin wrapper, sends HCI event 0x04 (matches spec opcode) with BD_ADDR + class-of-device + link type — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001d844` | 178 | `send_evt_HCI_Connection_Complete` | send evt HCI Connection Complete | low (named by Kovah, purpose unclear) |
 | `0x8001d904` | 256 | `send_evt_HCI_Inquiry_Result_or_HCI_Inquiry_Result_with_RSSI` | send evt HCI Inquiry Result or HCI Inquiry Result with RSSI | low (named by Kovah, purpose unclear) |
-| `0x8001da0c` | 40 | `send_evt_HCI_Inquiry_Complete` | send evt HCI Inquiry Complete | medium (named, one-line purpose only, not decompiled) |
+| `0x8001da0c` | 40 | `send_evt_HCI_Inquiry_Complete` | Confirmed: thin wrapper, clears a 0x40-byte scratch buffer then sends HCI event 0x01 (matches spec opcode) — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001da3c` | 438 | `send_evt_HCI_Number_Of_Completed_Packets` | send evt HCI Number Of Completed Packets | low (named by Kovah, purpose unclear) |
 | `0x8001dc10` | 2454 | `OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` | OGC 3 OCF TONS deal with return status referencing default name 10 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001e5d8` | 52 | `send_evt_HCI_Command_Status` | send evt HCI Command Status | high (decompiled+documented — see `region_0x80010000`) |
@@ -592,8 +592,8 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8001e68c` | 20 | `OGC_3_OCF_2f` | OGC 3 OCF 2f | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001e6a4` | 20 | `OGC_3_OCF_31` | OGC 3 OCF 31 | high (decompiled+documented — see `region_0x80010000`) |
 | `0x8001e6bc` | 56 | `OGC_3_OCF_13_referencing_default_name` | OGC 3 OCF 13 referencing default name | high (decompiled+documented — see `region_0x80010000`) |
-| `0x8001e6fc` | 44 | `OGC_3_OCF_16` | OGC 3 OCF 16 | medium (named, one-line purpose only, not decompiled) |
-| `0x8001e72c` | 22 | `OGC_3_OCF_18` | OGC 3 OCF 18 | medium (named, one-line purpose only, not decompiled) |
+| `0x8001e6fc` | 44 | `OGC_3_OCF_16` | Confirmed: OGF=3/OCF=0x16 (Write_Voice_Setting-style); validates param range, computes scaled field write to status struct +0x14 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x8001e72c` | 22 | `OGC_3_OCF_18` | Confirmed: OGF=3/OCF=0x18; validates nonzero param, writes directly to status struct +0x16 — see `region_0x80010000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8001e748` | 20 | `OGC_3_OCF_3c` | OGC 3 OCF 3c | low (named by Kovah, purpose unclear) |
 | `0x8001e760` | 28 | `OGC_3_OCF_3e` | OGC 3 OCF 3e | low (named by Kovah, purpose unclear) |
 | `0x8001e780` | 4 | `HCI_Read_Loopback_Mode` | HCI Read Loopback Mode — see `hci_command_router` | high (decompiled+documented) |
@@ -630,10 +630,10 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80020ee0` | 672 | `assoc_w_tHCI_CMD` | assoc w tHCI CMD — see `hci_command_router`, `usb_transport_hci_driver` | high (decompiled+documented) |
 | `0x800211b4` | 28 | `copy_bytes_in_LSB_order` | copy bytes in LSB order | low (named by Kovah, purpose unclear) |
 | `0x800211f4` | 72 | `HCI_EVT_0x452_if_arg<0x41_copy_8_bytes` | HCI EVT 0x452 if arg<0x41 copy 8 bytes | low (named by Kovah, purpose unclear) |
-| `0x80021924` | 76 | `initialize_some_global_struct_FUN_80021924` | initialize some global struct FUN 80021924 | medium (named, one-line purpose only, not decompiled) |
-| `0x80021ab0` | 154 | `interesting_string_user_FUN_80021ab0` | interesting string user FUN 80021ab0 | medium (named, one-line purpose only, not decompiled) |
+| `0x80021924` | 76 | `initialize_some_global_struct_FUN_80021924` | Confirmed: copies constant DAT values into two 8-word (32-byte) global struct arrays — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80021ab0` | 154 | `interesting_string_user_FUN_80021ab0` | Confirmed + enriched: registers 7 debug-log category tags via `interesting_string_user_fptr_registration_function` — reveals log subsystem names: tHCI_TD, tHCI_CMD, tHCI_EVT, tLMP, tLC_TX, tLC_RX, tLMP_CH — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80021ba0` | 208 | `calls_reg_multiple_dptrs?_FUN_80021ba0` | calls reg multiple dptrs? FUN 80021ba0 | low (named by Kovah, purpose unclear) |
-| `0x80021c9c` | 28 | `calls_interesting_string_user_FUN_80021c9c` | calls interesting string user FUN 80021c9c | medium (named, one-line purpose only, not decompiled) |
+| `0x80021c9c` | 28 | `calls_interesting_string_user_FUN_80021c9c` | Confirmed: master init wrapper calling `calls_reg_multiple_dptrs__FUN_80021ba0`, `interesting_string_user_FUN_80021ab0`, `initialize_some_global_struct_FUN_80021924` in sequence — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80021ec8` | 28 | `return_if_encryption_enabled_byte_at_bos_offset_0x58_ptr_index[0x26]` | return if encryption enabled byte at bos offset 0x58 ptr index[0x26] | low (named by Kovah, purpose unclear) |
 | `0x80021f44` | 34 | `get_byte[0x26]_in_unknown_ptr_0x58_points_to_struct_at_least_0x27_big` | get byte[0x26] in unknown ptr 0x58 points to struct at least 0x27 big | low (named by Kovah, purpose unclear) |
 | `0x80022030` | 86 | `LMP__266__FUN_80022030` | LMP__266__FUN_80022030: utility function (partial decompile output) — see region_0x80020000 Pass 5 | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
@@ -662,7 +662,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8002469c` | 92 | `wrap_send_LMP_ACCEPTED_and_some_other_things` | wrap_send_LMP_ACCEPTED_and_some_other_things: LMP accept wrapper (partial decompile output) | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
 | `0x80024bd8` | 48 | `copy_fields_within_crypto_struct` | copy_fields_within_crypto_struct: crypto-struct field copy utility (partial decompile output) | **high (decompiled+documented, Pass 5 2026-06-25, partial output)** |
 | `0x80024ca4` | 864 | `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?` | start with fptr called by call send evt HCI Simple Pairing Complete  state machine update? | low (named by Kovah, purpose unclear) |
-| `0x80025cb4` | 118 | `LMP__271__FUN_80025cb4` | LMP  271  FUN 80025cb4 | medium (named, one-line purpose only, not decompiled) |
+| `0x80025cb4` | 118 | `LMP__271__FUN_80025cb4` | Confirmed: keyed by literal `0x271` passed to `possible_logger_called_if_no_patch3`; checks a crypto-struct flag, dispatches to `FUN_80025a60` or sets status 0x3a/0x3c via `set_arg1_1_to_arg2` — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80025d34` | 160 | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | some case 0x3b or 0x3c possible HCI Passkey Notification or HCI Keypress Notification | low (named by Kovah, purpose unclear) |
 | `0x80026608` | 140 | `call_send_evt_HCI_Simple_Pairing_Complete` | call send evt HCI Simple Pairing Complete | low (named by Kovah, purpose unclear) |
 | `0x80026c38` | 536 | `LMP_ENCRYPTION_MODE_REQ_0x0F` | LMP encryption mode negotiator; 7+ state machine (idle/initiating/pending); validates role + capability flags — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
@@ -675,7 +675,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80027f30` | 74 | `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` | Key size mask response (master→slave); validates role bit; writes to crypto struct offset +0x24 — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80027f80` | 76 | `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` | Key size mask request (slave→master); feature-page gate; dispatches by feature bit state — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80027fd4` | 206 | `LMP_STOP_ENCRYPTION_REQ_0x12` | Encryption terminator; state-dependent (role 0x3f/0x3e–0x43); calls ROM cleanup chains — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
-| `0x800281c4` | 160 | `LMP_NOT_ACCEPTED_0x04` | LMP NOT ACCEPTED 0x04 | medium (named, one-line purpose only, not decompiled) |
+| `0x800281c4` | 160 | `LMP_NOT_ACCEPTED_0x04` | Confirmed: LMP_not_accepted (opcode 4) handler; dispatches by the rejected-opcode byte (param+5) to 11 distinct per-opcode error handlers (0x8,0x9,0xb-0xd,0xf,0x10,0x32,0x3f,0x40,0x41) — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80028264` | 568 | `LMP_encryption_opcode_handlers` | LMP encryption opcode handlers — see `encryption_engine`, `hardware_layer`, `lc_lmp_state_machine` | high (decompiled+documented) |
 | `0x800287b8` | 316 | `LMP_DHKEY_CHECK_0x41` | ECDH public key verification; confirms ECDH secret derivation — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80028904` | 68 | `wraps_LMP_DHKEY_CHECK_0x41` | DHKEY wrapper/dispatcher; calls DHKEY_CHECK with state dispatch — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
@@ -683,7 +683,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80028bb8` | 294 | `LMP_SIMPLE_PAIRING_CONFIRM_0x3F` | SSP confirm validator; state-dependent (role 0x12/0x1c/0x1d); triggers IO capability exchange on mismatch — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80028fc4` | 646 | `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` | Encryption pause handler; AES pause request processing; manages encryption state transitions — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x800297bc` | 110 | `LMP_USE_SEMI_PERMANENT_KEY_0x32` | Semi-Permanent Key (SPK) activation; sets persistent link-key mode — see `region_0x80020000` Pass 3 | **high (decompiled+documented, Pass 3 2026-06-24)** |
-| `0x80029830` | 156 | `LMP_TEMP_KEY_0x0E` | LMP TEMP KEY 0x0E | medium (named, one-line purpose only, not decompiled) |
+| `0x80029830` | 156 | `LMP_TEMP_KEY_0x0E` | Confirmed: LMP_temp_key (opcode 0xe) legacy auth handler; XORs 16-byte key buffer via `FUN_8002cf24`+`FUN_80025634`, else replies `wrap_send_LMP_NOT_ACCEPTED` — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x800298d0` | 112 | `LMP_TEMP_RAND_0x0D` | LMP TEMP RAND 0x0D — see `encryption_engine` | high (decompiled+documented) |
 | `0x80029a50` | 66 | `send_evt_HCI_Link_Key_Type_Changed_0x0A` | send evt HCI Link Key Type Changed 0x0A | low (named by Kovah, purpose unclear) |
 | `0x80029a98` | 200 | `wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` | wraps send evt HCI Link Key Type Changed 0x0A | low (named by Kovah, purpose unclear) |
@@ -698,7 +698,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8002fae0` | 84 | `VSC_0xfc93_FUN_8002fae0` | VSC 0xfc93 FUN 8002fae0 | low (named by Kovah, purpose unclear) |
 | `0x8002fd3c` | 328 | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xfd40 FUN 8002fd3c | low (named by Kovah, purpose unclear) |
 | `0x8002fea0` | 58 | `wrapper_multi-VSC_Handler_FUN_8002fea0` | wrapper multi-VSC Handler FUN 8002fea0 | low (named by Kovah, purpose unclear) |
-| `0x8002fee0` | 186 | `VSC_0xfc20__download_patch__FUN_8002fee0` | VSC 0xfc20  download patch  FUN 8002fee0 | medium (named, one-line purpose only, not decompiled) |
+| `0x8002fee0` | 186 | `VSC_0xfc20__download_patch__FUN_8002fee0` | **PROJECT-RELEVANT**: confirmed core of the VSC 0xFC20 patch-download mechanism — copies fragments into the download buffer (default 0x8010a000), and on the final fragment (high bit of the fragment-count byte set) sets completion flags + jumps to installed patch code (Ghidra shows this as a "do-nothing infinite loop" — actually an unresolved computed jump). Directly relevant to the project's primary goal (replacing this firmware blob) — see `region_0x80020000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x8003003c` | 116 | `VSC_0xfc46_remote_query` | VSC 0xfc46 remote feature/version query handler — stores query results to capability struct | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x800300c4` | 102 | `VSC_0xfc95_feature_toggle` | VSC 0xfc95 feature enable/disable controller; toggles 11-bit feature flags; calls LMP_25B/268 gateways | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x800302ac` | 272 | `references_patch_download_mem4` | references patch download memory region | low (named by Kovah, purpose unclear) |
