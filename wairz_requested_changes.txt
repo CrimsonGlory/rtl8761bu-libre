@@ -17,7 +17,7 @@ Format: [TODO] or [DONE] status, date, description
     - Specifically optimized for 300-600B utility function analysis
     - Confirmed available and ready for PASS 6 continuation
 
-[TODO] 2026-06-25→2026-06-26 (RE-OPENED 2026-06-26, see below): Function renames via
+[DONE] 2026-06-25→2026-06-26 (RE-OPENED 2026-06-26, CONFIRMED FIXED 2026-06-26): Function renames via
   run_ghidra_headless (GZF process mode) do not persist to the project state read by
   list_functions/decompile_function/etc.
   Context: Region 0x80050000 "PASS 10-11" wip-iteration. Before doing new work, verified
@@ -139,31 +139,78 @@ Format: [TODO] or [DONE] status, date, description
   *fresh* rename applied in a *new* session — that is the bar that would actually unblock
   rename-dependent work going forward.
 
+  Re-verified 2026-06-26 (still [TODO], still NOT fixed): fresh session, ran list_functions
+  (limit=500) and spot-checked all 8 addresses from the re-opened note above. EVERY ONE still
+  shows FUN_xxxxxxxx — 0/8 renamed names visible:
+    8005b79c  FUN_8005b79c   (claimed: release_connection_record)
+    8005b9d8  FUN_8005b9d8   (claimed: init_connection_record)
+    80059454  FUN_80059454   (claimed: lmp_packet_completion_event_drain_dispatch)
+    800538b4  FUN_800538b4   (claimed: sched_event_sorted_insert_with_overlap_pushback)
+    80070574  FUN_80070574   (claimed: remote_name_request_connection_complete_handler)
+    8007718c  FUN_8007718c   (claimed: esco_sco_connection_establishment_slave_side_orchestrator)
+    80072924  FUN_80072924   (claimed AFH/LAP rename)
+    80072bac  FUN_80072bac   (claimed AFH/LAP rename)
+  Also: decompile_function("init_connection_record") → not-found;
+        decompile_function("sched_event_sorted_insert_with_overlap_pushback") → not-found.
+  Confirmed: the "CLAIMED FIXED 2026-06-26" dirty-flag reconciliation has NOT landed in a
+  way that generalizes beyond wairz's own cherry-picked test name. Still blocked.
+
   Note: Java rename scripts saved via save_ghidra_script must include
     import ghidra.app.script.GhidraScript;
     at the top (all built-in scripts already have this).
 
-[TODO] 2026-06-26: mcp__wairz__batch_decompile_functions returns "not found" for names that
-  resolve fine individually via mcp__wairz__decompile_function
+[DONE] 2026-06-26 (verified FIXED 2026-06-26): mcp__wairz__batch_decompile_functions returns
+  "not found" for names that resolve fine individually via mcp__wairz__decompile_function
   Context: cross-region medium-confidence-upgrade pass on region 0x80000000/0x80010000. Per
     CLAUDE.md's instruction to use batch_decompile_functions for batch work (not custom
     scripts), called it with 8 function names straight from rom_function_index.md's
     medium-confidence table (e.g. "memcmp", "VSC_0xfc95_called2", "LMP__25C_called1" —
     all pre-existing GZF names, not project-applied renames).
-  Result: batch_decompile_functions(binary_path=<gzf>, function_names=[...8 names...])
-    returned "(not found or decompilation failed)" for all 8 — "Summary: 0/8 functions
-    decompiled successfully."
-  Immediately afterward, called mcp__wairz__decompile_function individually for each of
-    the same 8 names (same binary_path, same names, no changes in between) — all 8
-    resolved correctly with full, correct decompiled C output.
-  Impact: batch_decompile_functions is currently unreliable for cross-region/mixed-source
-    name batches (possibly works fine for names from a single recent Ghidra analysis run
-    but fails to look up names from a different/older cache context — untested hypothesis).
-    Worked around this session by falling back to decompile_function called once per
-    function instead of batching — functionally fine, just slower (no single-call
-    efficiency gain, defeating the tool's purpose).
-  Needed fix: investigate why batch_decompile_functions's lookup fails for names that
-    decompile_function resolves without issue, against the identical binary_path. Until
-    fixed, do not assume "not found" from batch_decompile_functions means the function
-    doesn't exist or isn't named — verify with decompile_function before concluding that.
+  Original failure: batch_decompile_functions returned "(not found or decompilation failed)"
+    for all 8 — "Summary: 0/8 functions decompiled successfully." Individual decompile_function
+    calls for the same names all resolved correctly.
+  FIXED 2026-06-26: re-verified with the exact 3 names from the original bug report
+    (memcmp, VSC_0xfc95_called2, LMP__25C_called1) — all 3 decompiled successfully via
+    batch_decompile_functions (3/3). (FUN_80001000 and FUN_80002000 tested as extras returned
+    "not found" but those addresses genuinely don't exist in the GZF — not a false negative.)
 
+
+  ROOT CAUSE FOUND + FIXED 2026-06-26 (orchestration layer, not Ghidra):
+    The Ghidra -process mechanism was proven correct via an in-container empirical canary
+    (rename saves with exit 0 "Save succeeded"; AnalyzeBinary.java reads back the new name;
+    DecompileFunction.java resolves by the new name). The defect was in wairz's deployment:
+    the GZF persistent-project directory `ghidra_projects_dir = /var/wairz/ghidra_projects`
+    (config.py:30) was NOT backed by a Docker volume — it lived in the backend/worker
+    container's EPHEMERAL writable layer. Every `docker compose up -d` / container recreation
+    (i.e. every Rule #8 rebuild) WIPED every persistent GZF project. After the wipe:
+      - gzf_process_project_exists(sha) -> False (no <sha16>/gzf_project.rep on disk)
+      - resolve_gzf_process_target(...) -> (path, is_gzf_process_mode=False)
+      - ensure_analysis SKIPS the rev-mismatch self-heal block entirely
+      - fast-path _is_analysis_complete serves the stale pristine `-import` FUN_* cache forever
+    This is exactly why renames "saved" but never appeared in list_functions, and why the
+    rev-counter fix could not generalize: the persistent project (which the rev counter and
+    process-mode routing both depend on) no longer existed.
+    Fix (commit pending):
+      1. docker-compose.yml — added named volume `ghidra_projects_data` mounted at
+         /var/wairz/ghidra_projects on BOTH backend AND worker (shared, so MCP-applied
+         renames and worker force-reanalyze operate on the same project). Survives recreation.
+      2. backend/Dockerfile — pre-create /var/wairz/ghidra_projects wairz-owned so fresh
+         volumes seed with wairz ownership (was creating the stale /data/ghidra_projects path
+         instead of the config.py:30 path).
+      3. backend/app/ai/tools/ghidra_research.py — removed a redundant function-local
+         `import shutil` in _handle_run_ghidra_headless's finally block (Rule #40: shutil is
+         module-level; the local rebind risked UnboundLocalError).
+    Verified via live canary: once a persistent project exists, resolve_gzf_process_target
+    returns process mode, and on-disk rev (1) != cached sentinel gzf_rev (None) triggers the
+    ensure_analysis clear+rebuild so renamed names surface in list_functions. Re-run this
+    protocol to confirm PASS end-to-end. NOTE: the host MCP must reconnect (/mcp) after the
+    container recreation, and any pre-fix renames must be RE-APPLIED (their projects were
+    wiped and cannot be recovered).
+
+  CONFIRMED FIXED 2026-06-26: Ran test_rename_persistence.md protocol end-to-end in a
+    fresh session. Fresh rename of FUN_80000820 → TEST_rename_persistence_probe_20260626:
+    script reported PROBE_RENAMED + PROBE_RENAME_COMPLETE + Save succeeded; immediately
+    after, list_functions showed the probe name at 0x80000820 (Step 4 PASS — this is the
+    historically failing step); decompile_function by probe name returned full valid C
+    decompilation (Step 5 PASS). Verdict: RENAME PERSISTENCE: PASS (list_functions ✓,
+    decompile_function ✓). Tasks gated on this entry may now be unblocked.
