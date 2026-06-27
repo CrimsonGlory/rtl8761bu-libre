@@ -3477,3 +3477,50 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 366 total / **~219 named** (was ~218) / **~147 unnamed** (was ~148). 31 renames staged total (Pass 35: 20, Pass 36: 10, Pass 37: 1), all pending MCP execution.
 
 **Next**: Pass 38 — apply all 31 staged renames via `run_ghidra_headless` (MCP required), fresh re-rank remaining ~147 unnamed, continue next xrefs≥2 tier.
+
+## Pass 38 — xref-chain from program_esco_sco_hw_link_params_and_log (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Identified 3 new functions via caller-context chain from the HIGH-named `program_esco_sco_hw_link_params_and_log`.
+
+### Analyzed functions (3 total)
+
+**0x800549fc** (270B) → `program_esco_sco_hw_link_params_inner` [HIGH]
+- Called directly by `program_esco_sco_hw_link_params_and_log` (HIGH, 0x80054b14)
+- Calls optional fn-ptr hook first; if no hook: type-dispatches via `param_1+8 & 7`
+  - Type 2: logs message at level 2 (nothing else)
+  - Type 0: checks `param_1+0x20 & 0x10` (mode flag), then computes HV-adjusted slot offsets
+    - Reads `param_1+9` (packet count), `param_1+0xb` (flags), `param_1+0x4c` (base offset)
+    - bit0 of flags: if packet count≥7, subtracts 6, adds 6 to base offset (HV1 adjustment)
+    - bit1 of flags: similar additional +6 adjustment (HV2 on top of HV1)
+    - Calls `write_esco_packet_types_to_hw_channel_slots` (FUN_80053cec, staged HIGH in Pass 35)
+  - Calls `compute_sco_esco_timing_offsets_for_both_records` (FUN_800546e4) for parent context
+- HIGH: named parent caller anchors purpose; calls staged HIGH callee
+
+**0x800546e4** (776B) → `compute_sco_esco_timing_offsets_for_both_records` [MEDIUM-HIGH]
+- Reads parent connection sub-record at `param_1+0x24`; applies HV-type slot adjustments
+- Fields: `sub_record+0x18` (base timing offset), `sub_record+9` (packet count byte), `sub_record+0xb` (HV flags)
+- For each of parent and self: computes offset starting at `base_timing + 2`; adds 6 per HV flag bit set
+- Also reads `param_1+0x11` (additional packet count from sub-record)
+- Second half (truncated): checks `param_1+8 & 0x18 != 0x10` for eSCO vs SCO path
+- Caller: `program_esco_sco_hw_link_params_inner` (FUN_800549fc)
+- MEDIUM-HIGH: clear structural role computing slot offsets, but no opcode literal anchor
+
+**FUN_8004ed04** (120B) → `check_esco_link_timing_conflict_with_active` [MEDIUM-HIGH, region 0x80040000]
+- Checks `record+8 & 0x12 != 0` (bit1 or bit4: eSCO mode bits)
+- Gets current "active eSCO link" reference via `PTR_DAT_8004ed7c[4]`
+- For SCO-bit-clear active link: `(record+0xc - active+0xc) & mask != 0` → conflict flag
+- For SCO-bit-set active link: modular comparison including `active+0x1e` interval and active+0xc
+- Sets `*param_2 = 1` if timing conflict detected
+- Calls `*PTR_DAT_8004ed8c()` at end (commit/flush)
+- Caller: `alloc_and_init_esco_sco_negotiation_subrecord` (FUN_80051368, HIGH from Pass 37)
+- MEDIUM-HIGH: clear timing-conflict checker, but no opcode literal
+
+### Rename script
+
+`RenamePass38Region80050000.java` written to `/root/wairz/ghidra/scripts/` — 1 entry. Pending MCP execution.
+
+### Coverage after Pass 38
+
+366 total / **~220 named** (was ~219) / **~146 unnamed** (was ~147). 32 renames staged total pending MCP.
+
+**Next**: Pass 39 — apply all 32 staged renames, re-rank, continue analysis.

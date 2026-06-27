@@ -4178,11 +4178,31 @@ sweep beyond enumeration and is the most out-of-date):
           rom_function_index.md +1 HIGH entry (total named 986).
           analysis/INDEX.md → region 0x80050000 updated.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 38 (apply all 31 staged renames + re-rank)
-          Apply RenamePass35/36/37Region80050000.java via run_ghidra_headless (MCP required).
-          After rename application: fresh re-rank of ~147 remaining unnamed functions.
-          Continue cold-triage of next xrefs≥2 tier (functions not yet visited).
-          Target: FUN_80057ce8 (1314B, MEDIUM-HIGH — needs opcode anchor to reach HIGH).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 38 (2026-06-27)
+          Decompiled 3 functions via REST bridge (FUN_800546e4, FUN_800549fc, FUN_8004ed04)
+          via xref-chain from program_esco_sco_hw_link_params_and_log (HIGH anchor).
+          1 HIGH rename staged in RenamePass38Region80050000.java:
+            0x800549fc → program_esco_sco_hw_link_params_inner (270B, HIGH)
+              Called directly by program_esco_sco_hw_link_params_and_log (HIGH).
+              Type-dispatches eSCO/SCO HW programming by param_1+8 & 7;
+              type 0: computes HV1/HV2/HV3 slot adjustments (+6 per bit0/bit1),
+              calls write_esco_packet_types_to_hw_channel_slots.
+          2 MEDIUM-HIGH documented:
+            0x800546e4 (776B): compute_sco_esco_timing_offsets_for_both_records
+              Reads parent sub-record at param_1+0x24, computes HV-adjusted slot
+              offsets for both parent and self records. Called by FUN_800549fc.
+            0x8004ed04 (120B): check_esco_link_timing_conflict_with_active (0x80040000)
+              Checks new record's slot timing vs active eSCO link's timing (modular).
+              Called by alloc_and_init_esco_sco_negotiation_subrecord.
+          32 renames staged total (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1).
+          analysis/rom/reverse_engineering_region_0x80050000.md → Pass 38 section added.
+          rom_function_index.md +1 entry (total staged 986+1=987).
+          analysis/INDEX.md → region 0x80050000 updated.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 39 (apply all 32 staged renames + more)
+          Apply RenamePass35-38Region80050000.java via run_ghidra_headless (MCP required).
+          Fresh re-rank of remaining ~146 unnamed.
+          Next batch: target FUN_800546e4 callee chain and the MEDIUM-HIGH holdovers.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
