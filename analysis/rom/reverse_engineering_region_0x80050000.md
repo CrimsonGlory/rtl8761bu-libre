@@ -2699,3 +2699,33 @@ only covered to rank 110). Also `FUN_80054b14` (1650B, rank 67) and `FUN_8005aba
 (664B, rank 70) remain as large MEDIUM-HIGH holdovers worth revisiting now that
 `write_sco_link_slot_params_type_d` and the channel-reg family are named.
 
+## Pass 26 — ranks 111-120 cold-triage, 6 HIGH renames (2026-06-27)
+
+**Context**: Pass 25 left 284 unnamed (366 total, 82 named). Pass 26 ran a fresh
+cold-triage (`ColdTriageRegion80050000Pass26.java`) confirming 366 total / 82 named
+/ 284 unnamed, then decompiled ranks 111-120 (10 functions, 22-950B, xrefs=2-4).
+
+**6 new names applied** via `RenamePass26Region80050000.java` (renamed=6
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x800510dc` | 30B | `atomic_increment_dword_at_ptr_plus0x28` | Disables IRQs via `disable_interrupts__clear_LSBit_of_CP0_Status_Register_`, increments dword at `*(ptr+0x28)`, re-enables. Standard interrupt-protected atomic counter-increment. HIGH: two named interrupt control callees. |
+| `0x8005164c` | 30B | `send_LMP_25B_if_both_flags_clear` | Checks two state flags (`puVar1[4]` via `PTR_PTR_80051670`); only if both are `'\0'` calls `LMP__25B__most_common_for_VSCs1(puVar1)`. Guard gate before LMP PDU send. HIGH: calls named `LMP__25B__most_common_for_VSCs1`. |
+| `0x800562ac` | 30B | `write_hw_reg_bits15_14_A` | Writes `param_1 << 14` into bits 15:14 of HW reg A (`DAT_800562cc`), preserving bits 13:0 via mask `0x3fff`. Minimal bit-field write. HIGH: self-contained mechanism. |
+| `0x800562d0` | 30B | `write_hw_reg_bits15_14_B` | Structural twin of `write_hw_reg_bits15_14_A` using HW reg B (`DAT_800562f0`). HIGH: structural. |
+| `0x8005615c` | 22B | `write_connection_struct_fields_1c_1e_20_to_hw_regs` | Copies 3 16-bit fields from the 0x1ac connection struct (`field28_0x1c`, `field30_0x1e`, `field32_0x20`) to 3 MMIO registers. HIGH: self-contained struct→HW write, clear mechanism. |
+| `0x800555bc` | 950B | `LE_connection_channel_update_timing_handler` | Large LE connection timing + channel-update handler: resolves parent context via `resolve_parent_context_by_role`, dispatches LE channel selection events via `le_channel_selection_algorithm_periodic_timing_check` + `sched_event_sorted_insert_with_overlap_pushback`, calls `le_channel_selection_algorithm_event_dispatch(0x43, ...)` on SCO/eSCO path, flushes deferred work via `retry_list_service_and_stall_watchdog(0)`. HIGH: 5 named callees. |
+
+**4 remaining MEDIUM/MEDIUM-HIGH from this pass's batch (not renamed)**:
+- `0x80056320` (38B): conditional bit-field write using XOR-mask pattern; register identity unknown → MEDIUM
+- `0x800598ec` (32B): extracts bits 11:2 from a register, subtracts 0x270 if > 0x270 (timing wraparound); no named callee → MEDIUM-HIGH
+- `0x800512f8` (24B): thin wrapper calling unnamed `FUN_800512a4(0, param_1>>8)`; no named callee → MEDIUM
+- `0x800546e4` (776B): complex eSCO slot programming; calls unnamed `FUN_8002b270`, `FUN_8002b28c`; no domain-pinning named callee → MEDIUM-HIGH
+
+**Region-wide unnamed count**: **366 total, 278 unnamed (down from 284), 88 named
+(up from 82)** — 6 new renames applied via `RenamePass26Region80050000.java`.
+
+**Next**: Pass 27 should continue cold-triage from rank 121+. Consider re-examining
+`FUN_80054b14` (1650B) and `FUN_8005aba8` (664B) which are large MEDIUM-HIGH holdovers.
+

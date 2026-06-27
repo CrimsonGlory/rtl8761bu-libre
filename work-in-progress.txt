@@ -4004,11 +4004,25 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+4 entries, count updated to 848)
           → analysis/INDEX.md (region 0x80050000 updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 26 (rank 111+ cold-triage)
-          Continue from where Pass 25 left off. The Pass 24 cold-triage only showed ranks 1-110;
-          run a fresh cold-triage to expose ranks 111+. Also re-examine large MEDIUM-HIGH holdovers:
-          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70) — their unnamed callees
-          may now be resolvable after Pass 24-25 renames. 284 unnamed remain.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 26 (rank 111+ cold-triage) (2026-06-27)
+          ColdTriageRegion80050000Pass26.java confirmed 366 total / 82 named / 284 unnamed.
+          Decompiled ranks 111-120 (10 functions, 22-950B). 6 HIGH renames applied via
+          RenamePass26Region80050000.java (renamed=6 alreadyOk=0 missing=0 failed=0):
+          0x800510dc → atomic_increment_dword_at_ptr_plus0x28
+          0x8005164c → send_LMP_25B_if_both_flags_clear
+          0x800562ac → write_hw_reg_bits15_14_A
+          0x800562d0 → write_hw_reg_bits15_14_B
+          0x8005615c → write_connection_struct_fields_1c_1e_20_to_hw_regs
+          0x800555bc → LE_connection_channel_update_timing_handler
+          Region-wide: 366 total, 278 unnamed (was 284), 88 named (was 82).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 26 section)
+          → analysis/rom/rom_function_index.md (+6 entries, count updated to 854)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 27)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 27 (rank 121+ cold-triage)
+          Continue from where Pass 26 left off (ranks 111-120 now done). Run a fresh cold-triage
+          to expose ranks 121+. Also re-examine large MEDIUM-HIGH holdovers:
+          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 278 unnamed remain.
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
