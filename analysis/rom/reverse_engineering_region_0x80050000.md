@@ -2118,3 +2118,171 @@ tags `{0,1,3,7,0x14,0x15,0x16,0x17,0x18}` — decompiling the allocator itself
 rather than its callers might reveal a tag-indexed type/size table that
 finally pins the record kind, which Pass 19 flagged but didn't attempt).
 
+## Pass 21 — `FUN_8005d438` resolved (no tag table) + free-list alloc/release pair, 3 HIGH renames (2026-06-27)
+
+Re-ran `ColdTriageRegion80050000Pass19.java` fresh: confirmed unchanged from
+Pass 20's close — **366 total, 321 unnamed, 45 named**. Rank 60-69 of the
+fresh list matched the plan exactly (`0x800519d8`, `0x80051980`,
+`0x8005db04`, `0x80056554`, `0x800511dc`, `0x8005d1a4`, `0x8005fe90`,
+`0x80059f14`, `0x8005ca00`, `0x8005dd70`). Decompiled all 10 via
+`batch_decompile_functions` (10/10 success), plus the planned dedicated look
+at `FUN_8005d438` itself, plus 2 supporting callees surfaced while reading
+the batch (`FUN_80050104` — called directly by `FUN_800511dc`; `FUN_8005dd24`
+— called by `FUN_8005dd70`) and 1 caller-context decompile
+(`FUN_80051368` — the sole caller of `FUN_800511dc`, found via
+`find_callers`). 14 functions touched in total.
+
+### `FUN_8005d438` resolved — no tag-indexed type/size table exists
+
+Pass 19/20 repeatedly flagged "decompile `FUN_8005d438` itself" as an open
+lead (its callers pass 9 distinct tags with no contiguous pattern). Decompiling
+it directly closes the question for good:
+
+```c
+undefined4 FUN_8005d438(undefined1 param_1,undefined4 *param_2)
+{
+  puVar1 = (undefined4 *)PTR_DAT_8005d488;
+  iVar3 = call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_(*puVar1,local_18);
+  if (iVar3 == 0) {
+    *local_18[0] = param_1;                  // tag byte stored INTO the record at offset 0
+    *(undefined4 *)(local_18[0] + 0x18) = 0;  // zero a fixed field
+    *param_2 = local_18[0];                   // return the pointer via out-param
+    uVar4 = 0;                                 // success
+  } else {
+    /* log (category 0xcc, code 0x75f/0xc8b) */
+    uVar4 = 0xff;                              // failure sentinel — matches every caller's `!= 0xff` check
+  }
+  return uVar4;
+}
+```
+
+It delegates to the already-named `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`
+(a generic pool/buffer-allocation helper characterized in an earlier pass),
+stores the caller-supplied **tag** as a plain discriminator byte at offset 0
+of the freshly allocated record — **not** as an index into any
+type/size table — zeroes one fixed field (`+0x18`), and returns the new
+pointer through the out-param with a 0/0xFF status. There is no switch, no
+table lookup, no size variation by tag: every record this function hands out
+is the same fixed shape from the same underlying pool. This is a
+self-contained, fully understood algorithm — same evidentiary bar as
+`binary_search_sorted_table_by_8byte_key` (Pass 20) — so it qualifies for a
+HIGH rename despite having no domain/opcode anchor of its own.
+
+**Renamed → `alloc_tagged_record_via_pool`** (HIGH).
+
+`find_callers` resolved only 3 of `alloc_tagged_record_via_pool`'s many
+callers (`FUN_8005efe8`, `FUN_8005f260`, `FUN_8005f428` — none reviewed yet,
+left for a future pass) — the same MIPS16e static-xref-miss gap noted
+throughout this region; the other 8+ known callers (this pass's own
+`FUN_8005db04`/`FUN_8005dd24` plus Pass 19/20's callers) were all found by
+reading decompiled C, not by `find_callers`.
+
+### `FUN_80050104` / `FUN_800511dc` — a second, independent free-list alloc/release pair
+
+Decompiling `FUN_800511dc` (rank 64) revealed it calls a previously
+unreviewed function, `FUN_80050104`, immediately after allocating — both
+turned out to be a **second, self-contained kind-tagged free-list
+mechanism**, structurally similar to `alloc_tagged_record_via_pool` but
+backed by an entirely different pool (`PTR_PTR_80051228`, region
+`0x80051xxx` — distinct from both `alloc_tagged_record_via_pool`'s pool and
+Pass 7/20's `conn_slot_alloc_type01/02` pool at `PTR_PTR_80058a2c`/`a30`):
+
+- **`FUN_800511dc`** pops the head off its free list, zeroes 2 fields, writes
+  the caller's `param_1` as a **kind byte** at offset 8, sets a "used" flag
+  at offset 0x10, then immediately calls `FUN_80050104(record)` before
+  returning the new record.
+- **`FUN_80050104`** reads that same kind byte (bits `0x1`/`0x4`/`0x8`/`0x20`)
+  to pick a tail size (`0xc`/`0xe`/`8`/`0x18`/`0x48` bytes), and if a
+  sub-record pointer is already linked at offset `+0x14` (stale data from
+  the record's previous use cycle), pushes it onto a **third** free list
+  (`PTR_PTR_80050160`) before `memset`-zeroing the kind-sized tail region
+  starting at `+0x14`.
+
+Both are self-contained, fully-understood mechanisms (same "no domain pin
+needed" bar as `alloc_tagged_record_via_pool` and
+`binary_search_sorted_table_by_8byte_key`).
+
+**Renamed → `release_kind_sized_subrecord`** (`0x80050104`, HIGH) and
+**`alloc_kind_record_and_clear_tail`** (`0x800511dc`, HIGH).
+
+`find_callers` found only 1 caller of `alloc_kind_record_and_clear_tail`
+(`FUN_80051368`) and — tellingly — **0** callers of
+`release_kind_sized_subrecord`, even though `alloc_kind_record_and_clear_tail`
+calls it directly in the decompiled C. Another confirmed instance of the
+static-xref-miss gap, this time missing a call that's right there in the
+same function's body.
+
+`FUN_80051368` (426B, the sole caller) was decompiled for context: it builds
+a link-parameter record from a parsed byte stream, computing a
+microseconds-to-slots conversion that reuses the project's established
+**625µs Bluetooth slot-duration literal** (`/0x271`, cf. Pass 16's
+`FUN_80053710`) with a guard-time correction (`(total - total/divisor)`,
+divisor 1000 or 10000 by a header flag bit), then calls
+`alloc_kind_record_and_clear_tail` with one of 4 literal kind values (`0x26`,
+`0x30`, `6`, `0xa`) selected by flag bits, populates several fields from the
+parsed stream, and finalizes via `FUN_8004ed04` (refcount-style commit) or
+releases via `refcount_decrement_and_free` on failure. This pins the new
+pair's record kind to an LMP/HCI link-parameter negotiation context (timing
+math strongly resembles a SNIFF/HOLD/PAGE-type interval-with-guard-time
+computation) but doesn't itself carry an opcode literal — left unnamed,
+flagged for a future pass.
+
+### `alloc_tagged_record_via_pool` caller-family extensions — stay MEDIUM-HIGH
+
+| Address | Read | Confidence |
+|---------|------|------------|
+| `0x8005db04` | Calls `alloc_tagged_record_via_pool(0x11, ...)`, stores 2 bytes (`param_1`/`param_2`) into the new record, logs (category `0xcc`), returns the pointer. Same shape as Pass 20's `0x8005d8ac`/`0x8005d834`. | MEDIUM-HIGH |
+| `0x8005dd24` | Calls `alloc_tagged_record_via_pool(0xd, ...)`, stores 1 byte, logs (category `0xcc`), returns the pointer. Same shape. | MEDIUM-HIGH |
+| `0x8005dd70` | 2-way dispatcher: if bit 2 of `param_1+0x34` is clear, calls `FUN_8005dd24(param_3)`; else calls `FUN_8005db04(param_2)`. Ties the two tag-allocators together but doesn't itself pin a domain. | MEDIUM-HIGH |
+
+Extends `alloc_tagged_record_via_pool`'s known tag set from
+`{0,1,3,7,0x14,0x15,0x16,0x17,0x18}` (9 tags) to
+`{0,1,3,7,0xd,0x11,0x14,0x15,0x16,0x17,0x18}` (11 tags) — still
+non-contiguous. Consistent with this pass's finding that there's no
+tag-indexed table, a clean enum likely isn't recoverable from the tag values
+alone; the family's individual callers will have to be domain-pinned one at
+a time (as Pass 20 did for `0x8005d924`'s validators) rather than via a
+shared lookup table.
+
+### Pending-procedure family extensions — stay MEDIUM-HIGH
+
+| Address | Read | Confidence |
+|---------|------|------------|
+| `0x8005fe90` | Sets a 4-bit field at `+0x114` (`5` or `1`, by a capability bit at `+3`). Then: if both pending masks (`+0x7c`, `+0x78`) are clear, commits immediately via `FUN_8005faec(param_1, 1)` (Pass 17's "strongest COMMIT candidate"); else defers by setting bit 2 of `+0x90` for later retry. | MEDIUM-HIGH |
+| `0x8005ca00` | Deferred-write counterpart: only when a pending mask (`+0x7c`/`+0x78`) IS set, stages a `(bit-index=param_2, bit-value=param_3>>1)` pair into a 32-bit "pending value" bitmap pair at `+0x84`(set-bit)/`+0x88`(value-bit) — otherwise no-op. | MEDIUM-HIGH |
+
+Both extend the well-established eSCO/SCO pending-procedure family (Passes
+14/15/17/19/20) and are fully understood structurally, but stay below HIGH
+because their terminal call target (`FUN_8005faec`) is itself still
+unnamed — same bar Pass 20 applied (HIGH requires either a self-contained
+algorithm or a terminal call to an *already-named* function).
+
+### Other 5 candidates — stay below HIGH
+
+| Address | Read | Confidence |
+|---------|------|------------|
+| `0x800519d8` | Decodes the already-pinned power-state bits 13:14 of a 16-bit field (`(param_1&0xffff)>>0xd&3`, cf. Pass 15's `commit_link_power_state_bits_to_hw_register_with_retry`). When state ∈ {1,2} and a capability flag (`PTR_PTR_80051a30[8]` bit 3) is set, calls `FUN_80051980()`, then an indirect getter (`*PTR_DAT_80051a34`), and logs the result (category `0xd2`). | MEDIUM-HIGH — ties to already-pinned bits, but the log payload's purpose isn't named |
+| `0x80051980` | Called unconditionally first by `0x800519d8`. 2-flag deferred-service dispatcher: clears bit 2 of a status byte (`+6`) firing `FUN_80051260`+`FUN_800510dc`; clears bit 3 firing `FUN_8005122c`; always tail-calls `FUN_80051940`. | MEDIUM-HIGH — clear "service 2 pending flags" shape, domain of either flag not pinned |
+| `0x80056554` | Disables IRQs, calls `FUN_80055fc4(param_1,0)`, re-enables, then reads a table+index struct (`PTR_PTR_800565a8`) and conditionally calls `FUN_800560dc(table_value)`. Generic index-into-table dispatch. | MEDIUM-HIGH — clear dispatch shape, table identity not pinned |
+| `0x8005d1a4` | Queue/accumulate write into the "0x1ac struct array" (`PTR_base_of_0x1ac_struct_array_0xA_large2_8005d1f0`) at index 10, offsets `0xdc` (counter/first-value), `0xe0` (last-pointer-or-value, reused as a chain pointer once the counter is nonzero), `0xe4` (running accumulator incremented by a count byte). New structural detail on the established 0x1ac struct's tail layout. | MEDIUM-HIGH — clear queue/accumulate shape, which feature owns array-index 10 not pinned |
+| `0x80059f14` | Validates a 4-value enum (`param_1` ∈ {0,1,2,3}) and remaps to `{1,2,3,3}`, logging an error (category `0xce`) for any other value. Same evidentiary class as Pass 20's `0x80057370`. | MEDIUM — clear validate+remap+log shape, the 4-value enum's identity not pinned |
+
+**Region-wide unnamed count**: **366 total, 318 unnamed (down from 321), 48
+named (up from 45)** — confirmed via a fresh `CountUnnamedRegion80050000.java`
+re-run. 3 new HIGH renames applied via `RenamePass21Region80050000.java`
+(`renamed=3 alreadyOk=0 missing=0 failed=0`), independently re-verified via a
+fresh `decompile_function` round-trip on all 3 new names.
+
+**Next**: Pass 22 should pick up rank ~91+ of a fresh cold-triage list — note
+rank 79-90 of this pass's list already contains much larger functions
+(`0x80054b14` 1650B, `0x80057ce8` 1314B, `0x80057a00` 706B, `0x8005aba8`
+664B, `0x80058740` 534B, `0x800577ec` 516B, `0x8005840c` 506B, `0x8005dd9c`
+494B — all xrefs:2) than this region's recent passes have been seeing,
+worth prioritizing. Also worth a look: `alloc_tagged_record_via_pool`'s 3
+newly-found callers (`0x8005efe8`, `0x8005f260`, `0x8005f428`, via
+`find_callers`, not yet reviewed) would add 3 more known tags; and
+`FUN_8005faec` itself (Pass 17's still-unnamed "strongest COMMIT candidate",
+now load-bearing for 2 more callers this pass) is a good target to finally
+name, which would immediately promote this pass's `0x8005fe90`/`0x8005ca00`
+to HIGH.
+
