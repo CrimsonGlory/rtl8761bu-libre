@@ -3604,15 +3604,42 @@ sweep beyond enumeration and is the most out-of-date):
              analysis/INDEX.md (region line updated). rom_function_index.md not touched (no
              new named functions this pass, consistent with prior 0-HIGH-yield passes).
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 19 — continue live-FUN_* ranking from rank ~42+ (325 unnamed remain) (2026-06-27)
-          3 consecutive 0-HIGH passes (16-18). Threshold is ~8-9. Continue from rank ~42+
-          (the cold-triage Pass18 script ColdTriageRegion80050000Pass18.java exists but the
-          headless run against the raw binary returns 0 functions — use batch_decompile_functions
-          directly with addresses from WIP history + live xref ranking). Priority targets:
-          (a) Consider naming FUN_8005d438 (the tag-keyed allocator called by 7+ pass functions
-          including 0x8005e7fc/0x8005d7bc/0x8005d744/0x8005d66c/0x8005f260/0x8005efe8 —
-          one confirmed tag value matched to a BT constant would promote all 7 to HIGH);
-          (b) Continue cold-triage ranks 42-51 from the live list.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 20 — continue live-FUN_* ranking from rank ~52+ (325 unnamed remain) (2026-06-27)
+          4 consecutive 0-HIGH passes (16-19). Threshold is ~8-9, past halfway. Continue from
+          rank ~52+ of the fresh ColdTriageRegion80050000Pass15.java list (re-run fresh each
+          pass; for ranks beyond 40 use the new ColdTriageRegion80050000Pass19.java variant,
+          which prints rank 41-90). Next candidates: 0x80051b54, 0x80058974, 0x800553dc,
+          0x80050610, 0x8005323c, 0x80050d14, 0x8005a228, 0x80057370, 0x8005cd6c, 0x80050104.
+          Priority target: decompile 0x8005d924's side-1/side-2 validators FUN_8005d8ac/
+          FUN_8005d834 (Pass 19 finding: 0x8005d924 is the SET/INITIATE half of the
+          pending-procedure family) — naming either could pin the family's feature domain and
+          retroactively promote clear_pending_procedure_bit_and_finalize_if_idle's siblings,
+          0x8005e01c, 0x8005faec, the tag-0x16/17/18 triplet, and 0x8005d924 itself.
+          FUN_8005d438 anchor lead is now closed (inconclusive, see Pass 19 doc) — do not
+          re-attempt without new evidence.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 19 — FUN_8005d438 anchor check (inconclusive) + rank ~41-51 continuation, 0 HIGH yield (4th consecutive) (2026-06-27)
+          Re-ran ColdTriageRegion80050000Pass15.java fresh: confirmed unchanged from PASS 18's
+          close (366 total, 325 unnamed, 41 named). Wrote ColdTriageRegion80050000Pass19.java
+          (rank 41-90 variant) to get past the prior top-40 window. find_callers on
+          FUN_8005d438 only resolved 3/7 known callers (same indirect-call static-xref-miss
+          gap as FUN_8005a048); full known tag set {0,1,3,7,0x16,0x17,0x18} across all 7 has
+          no identifiable BT-spec correlation — anchor lead closed as inconclusive.
+          Decompiled 10 via batch_decompile_functions (10/10 success): rank 41-45/48-49/51
+          (0x80051c24, 0x80059fd0, 0x80055a34, 0x80056260, 0x8005c930, 0x8005ae58,
+          0x8005174c, 0x8005d924) plus 2 referenced-but-unreviewed callees (0x80057180
+          tail-called by Pass 16's 0x800572d8; 0x80053a2c called by Pass 17's 0x80053cec).
+          0 cleared HIGH. Best finds: 0x8005d924 is the missing SET/INITIATE half of the
+          pending-procedure family (sets pending-mask bit 0x80, reuses
+          assign_pointer_to_0x1AC_offset_0x134, fires reason-code 8 matching Pass 17's
+          0x80055c68); 0x80057180 is a generalized 3-way queue-flush dispatcher, 2nd
+          confirmation that FUN_80057094's index param is a general register address (not
+          just a connection index); 0x80053a2c is the 3-slot zero-init routine corroborating
+          Pass 17's crypto-slot-loader hypothesis for 0x80053cec.
+          0 renames applied. 4th consecutive 0-HIGH pass (16, 17, 18, 19). 325 unnamed, 41 named.
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 19 section added),
+             analysis/INDEX.md (region line updated). rom_function_index.md not touched (no
+             new named functions this pass, consistent with prior 0-HIGH-yield passes).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 17 — rank ~22-31 + named-sibling-clearing callees, 0 HIGH yield (2nd consecutive) (2026-06-27)
           Re-ran ColdTriageRegion80050000Pass15.java fresh: confirmed unchanged from PASS 16's

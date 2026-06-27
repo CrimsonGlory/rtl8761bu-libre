@@ -1982,3 +1982,71 @@ Alternately, consider naming `FUN_8005d438` first (the allocator called by
 identified across 7+ passes and is mechanically fully understood; if a tag
 value matches an LMP opcode or HCI parameter constant, it could clear HIGH.
 
+## Pass 19 — `FUN_8005d438` anchor check (inconclusive) + rank ~41-51 continuation, 0 HIGH yield (4th consecutive) (2026-06-27)
+
+Re-ran `ColdTriageRegion80050000Pass15.java` fresh: confirmed unchanged from
+Pass 18's close — **366 total, 325 unnamed, 41 named**. Wrote a rank-41-90
+variant (`ColdTriageRegion80050000Pass19.java`, same live-`FUN_*`
+re-enumeration, just prints ranks 41-90 instead of capping at the top-40) to
+get past the prior top-40 window, which Pass 18 exhausted.
+
+**`FUN_8005d438` anchor check**: ran `find_callers` directly — only resolved
+3 of the 7 known callers (`FUN_8005efe8`, `FUN_8005f260`, `FUN_8005f428`),
+confirming the same static-xref-miss-on-MIPS16e-indirect-calls limitation
+noted in Pass 18's `FUN_8005a048` writeup. The full known tag set across all
+7 confirmed callers (Passes 7/13/17/18) is now **`{0, 1, 3, 7, 0x16, 0x17,
+0x18}`** — not a contiguous run, no obvious match to an LMP opcode range, an
+HCI event/status code, or any other named BT-spec constant table this
+project has anchored elsewhere. Inconclusive; `FUN_8005d438` stays
+unrenamed. Logged here so a future pass doesn't re-attempt the same `find_callers`
+call expecting a different result — the gap is the indirect-call static-xref
+limitation, not a missing search.
+
+**Cold-triage continuation**: decompiled 10 via `batch_decompile_functions`
+(10/10 success) — rank 41-45 + 48-49 + 51 of the fresh list, plus 2 callees
+referenced-but-not-yet-decompiled from prior passes' bodies (`0x80057180`,
+tail-called by Pass 16's `0x800572d8`; `0x80053a2c`, called by Pass 17's
+`0x80053cec`):
+
+`0x80051c24`, `0x80059fd0`, `0x80055a34`, `0x80056260`, `0x8005c930`,
+`0x8005ae58`, `0x8005174c`, `0x8005d924`, `0x80057180`, `0x80053a2c`.
+
+### 0 cleared the HIGH bar — all 10 stay LOW/MEDIUM/MEDIUM-HIGH
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x80051c24` | 54B | Reads 2 status bits from `PTR_PTR_80051c5c[8]` (bit 0→base value 5, bit 1→XOR-toggle that value to its complement-and-2), then tail-calls `FUN_80056320(7, computed)`. Thin reason-code-mapping wrapper. | LOW — too generic/short to pin without surveying `FUN_80056320`'s reason-code `7` domain |
+| `0x80059fd0` | 54B | Validate-and-map predicate: `param_1` must be `{0,1,2}` else logs (category `0xce`, code `0xf53`/`0xd54`) and returns 0; valid inputs remap `1→1`, `0→0`, `2→2` (effectively identity over the 3 values, with the log-on-invalid side effect being the real content). | MEDIUM — clear validate shape, domain not identified |
+| `0x80055a34` | 46B | Packs a 5-bit field (`param_1&0x1f`, shifted `<<3`) and a 3-bit field (`param_2&7`) into the low byte of a 16-bit hw register at `DAT_80055a64`, preserving the upper byte. Generic bitfield-pack accessor. | MEDIUM — clear pack shape, register identity not pinned |
+| `0x80056260` | 44B | Sets/clears bit `0x8000` of the 16-bit register at `DAT_8005628c` based on `param_1` truthiness — simplest member yet of the "toggle status-bit by truthiness" accessor family confirmed across Passes 16-18 (`0x80055e50`/`0x80055ddc`/`0x800562f4`/`0x80055ec8`), this one has no secondary field write. | MEDIUM — same family, bit identity not pinned |
+| `0x8005c930` | 22B | Tiny remap table: `param_1` in `{1,2,3}` → `param_1+7` (i.e. `{8,9,10}`); anything else → `0xf` (15). Reads as an error/state-code translation table, too thin to pin a domain. | LOW — too generic/short to pin |
+| `0x8005ae58` | 284B | **Cross-connection minimum-value aggregator**: tracks a running minimum 32-bit value (`field479-482_0x1ec-0x1ef`) across up to 11 (`0xb`) connection slots gated by a bitmask (`param`-less, reads global `DAT_8005af74`). For slot 0 (the `iVar11==0` special case) reads a 16-bit field directly if a validity bit is set; for other "first" entries (`iVar11` from `FUN_8004e9a8` applied to an isolate-lowest-set-bit expression — a count-trailing-zeros-shaped helper) reads a per-slot table entry at `+0x26` offset by a computed index. Then loops slots 0-10, for each active bit comparing/replacing the running minimum against that slot's own `+0x22`-offset 16-bit field, with an extra validity-reconciliation check at the top of the loop. Finishes by conditionally logging the full negotiated minimum + validity state when a configured "logging level" field (`field455_0x1d4`) crosses a threshold. Reads as "compute the minimum of some per-connection timing/interval field across all 11 active link slots" — a fleet-wide scheduling aggregator (plausibly informing a shared sniff/poll/page-scan interval), but neither the `+0x22`/`+0x26` field's specific identity nor the slot-validity bitmask's source is pinned. | MEDIUM-HIGH — unambiguous cross-slot-minimum aggregator shape, no opcode/named-sibling anchor for the specific timing field |
+| `0x8005174c` | 224B | **Work-queue dispatcher**: cleans up 2 pending lists — removes type-`5` entries from one (unlinking + freeing via a callback through the entry's own stored fn-ptr) unconditionally, and (when `param_1==0`) removes type-`6` entries from a second list via `FUN_8004ee94`, deciding between 2 alternate head-pointers (`PTR_DAT_80051834`/`PTR_DAT_80051838`) based on 2 status bits. After cleanup, checks the second list's *new* head: if empty or its flag bit `0x4` is clear, calls `FUN_8005122c(1)` and returns 0 (queue empty/inactive); otherwise sets a dispatch-active flag bit and fires the head entry via an indirect call, returning 1. When `param_1==0`, also finishes with a flag-bit handoff (`PTR_PTR_80051840[4]`→`PTR_PTR_8005182c[6]`) plus 2 more calls (`FUN_800515c8`, `FUN_8005164c`). Reads as "service the next pending work item from 2 linked queues, doing type-5/type-6 garbage collection first" — a generic deferred-work dispatcher, domain (which subsystem's work items) not identified. | MEDIUM-HIGH — clear queue-service-and-GC dispatcher shape, no opcode/named-sibling anchor for the work-item domain |
+| `0x8005d924` | ~194B | **Pending-procedure SET/INITIATE function** — the missing entry point for the validate→commit-or-reject pending-procedure family (`clear_pending_procedure_bit_and_finalize_if_idle` Pass 15, `0x8005e01c` reject-path Pass 15, `0x8005faec` commit/advance Pass 17, the tag-0x16/17/18 triplet Pass 18). Given a connection record and `param_2` ∈ `{1,2}` (side selector, same semantics as the other family members' side parameter), calls a side-specific validator (`FUN_8005d8ac` for side 1, `FUN_8005d834` for side 2); on success sets bit `0x80` in the corresponding pending mask (`+0x78` or `+0x7c` — the *same* two masks the rest of the family operates on), writes a state nibble into `+0x10e` (`3` for side 1, `0x40` for side 2), commits via the already-named `assign_pointer_to_0x1AC_offset_0x134`, clears bit 4 of `+0x90`, and fires the family's generic event callback with reason code **`8`** — matching Pass 17's `0x80055c68` "fire callback, constant arg 8" finding (different callback slot, same reason-code value, reinforcing `8` as a stable cross-family event-reason constant). Also handles an unrelated-looking field swap at the top (`+0x10a/+0x10c`→`+0xf0/+0xf8` when nonzero) that looks like committing a previously-staged "requested" value pair into the "current" value pair. | MEDIUM-HIGH — strongest structural fit yet for the pending-procedure family's missing SET/INITIATE half (3 already-named anchors: the masks, `assign_pointer_to_0x1AC_offset_0x134`, and the reason-code-8 precedent), but the specific procedure type/feature still isn't pinned by an opcode literal |
+| `0x80057180` | 310B | **Generalized multi-queue flush dispatcher** for 3 queue types (`param_1` ∈ `{0,1,2}`), each with its own base/stride/table pointer. For `param_1<2` (types 0/1, stride 8, bases `0xa0`/`0xe0`): walks a cyclic free/pending queue clearing 3 status bits per entry (`&0xfd`, `&0xfb`, `&0x7f`) and committing **2 writes per entry through `FUN_80057094`** — the already-identified (Pass 15) 20-entry-bank WRITE half of the open hw-link-context register cluster, using register-index values up to `0xff`-ish (well past the 0-7 connection-index range, corroborating Pass 16's `0x800572d8` finding that this index is a general register address). For `param_1==2` (stride `0x34`, base `0x122`): clears 3 *different* status bits and zeroes 4 separate fixed global slots (`DAT_800572c8/cc/d0/d4`) instead of touching the hw-link-context register at all. Confirms Pass 16's `0x800572d8`'s `FUN_80057180(1)` tail-call as one specific instance of this more general 3-way dispatcher. | MEDIUM-HIGH — strengthens the open hw-link-context cluster lead with a 2nd confirmed non-connection-index use of `FUN_80057094`'s index parameter, but the 3 queue-table identities (what type-0/1/2 represent) aren't pinned |
+| `0x80053a2c` | ~140B | **3-slot crypto-material zero-initializer** — the missing init routine for Pass 17's `0x80053cec` ("write+trigger+readback, crypto-engine-call-shaped" acquire→program-3-slots→release function). Outer loop over exactly 3 slots (`uVar6` 0-2) calling `FUN_8002b270(slot)` (the same per-slot base-pointer getter `0x80053cec` uses); inner loop over a per-slot sub-record count (`PTR_DAT_80053aa0[slot]`) calling `FUN_8002b28c(slot, sub)` (the same per-slot sub-pointer getter `0x80053cec` uses for its 2 parameter pairs); innermost loop zeroes a variable-length word buffer per `(slot, sub)` (count from `PTR_DAT_80053a9c[sub]`), then clears a flag bit (`&0x7f`) on the sub-record. This is unambiguously the "clear all 3 slots before programming fresh key/IV material" half of the acquire→program→release crypto-slot-loader hypothesis Pass 17 raised — strong corroboration, but (same as `0x80053cec` itself) the actual cryptographic operation/parameter semantics aren't pinned by any literal. | MEDIUM-HIGH — same evidentiary class as `0x80053cec`; corroborates rather than newly proves the crypto-slot-loader hypothesis |
+
+**Region-wide unnamed count**: unchanged — **366 total, 325 unnamed, 41 named**
+(0 renames applied; 4th consecutive 0-HIGH pass: Passes 16, 17, 18, 19).
+
+**4-consecutive-0-HIGH note**: per Pass 9's precedent in
+`reverse_engineering_region_0x80070000.md`, the pivot threshold is ~8-9
+consecutive 0-2-HIGH passes. At 4, still below threshold but past the
+halfway point. The `FUN_8005d438` anchor lead is now closed out as
+inconclusive (full 7-value tag set `{0,1,3,7,0x16,0x17,0x18}` has no
+identifiable BT-spec correlation) — future passes shouldn't re-attempt it
+without new evidence (e.g. decompiling `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`
+itself for a tag-indexed size/type table that might reveal the record kind).
+
+**Next**: Pass 20 should continue cold-triage from rank ~52+ of the fresh
+list (`0x80051b54`, `0x80058974`, `0x800553dc`, `0x80050610`, `0x8005323c`,
+`0x80050d14`, `0x8005a228`, `0x80057370`, `0x8005cd6c`, `0x80050104`, ...).
+Also worth following up: (a) `0x8005d924`'s side-1/side-2 validators
+`FUN_8005d8ac`/`FUN_8005d834` are good next decompile targets — naming
+either could pin the specific pending-procedure's feature domain and
+retroactively promote several family members (`clear_pending_procedure_bit_and_finalize_if_idle`'s
+siblings, `0x8005e01c`, `0x8005faec`, the tag-0x16/17/18 triplet, and this
+pass's `0x8005d924` itself) via the named-sibling rule; (b) if 4-5 more
+passes land at 0 HIGH, this region approaches the project's established
+pivot-to-another-region threshold.
+
