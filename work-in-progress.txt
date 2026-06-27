@@ -3580,25 +3580,39 @@ sweep beyond enumeration and is the most out-of-date):
              (Renames Applied table), analysis/rom/rom_function_index.md (16 new HIGH rows +
              Summary bump), analysis/INDEX.md (region line updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 18 — continue live-FUN_* ranking from rank ~32 (325 unnamed remain) (2026-06-27)
-          PASS 17 (below, [DONE]) continued from rank ~22 and decompiled 16 (rank 22-31 batch
-          + 6 PASS-16-flagged named-sibling-clearing callees). 0 HIGH yield (2nd consecutive,
-          after PASS 16). Continue from rank ~32 of a fresh ColdTriageRegion80050000Pass15.java
-          run (0x8005f614, 0x80055ec8, 0x8005d154, 0x800505c4, 0x80059a1c, ...). Also worth
-          trying: (a) decompile more of FUN_8005a048's other callers beyond
-          0x800532ac/0x80053688/0x8005a680 already covered, to pin the table/feature domain it
-          indexes into — would retroactively promote >=5 functions across Passes 16-17 to HIGH
-          via the named-sibling rule (0x8004fa64's type-dispatch getter + the
-          FUN_8005a048/0x80059a60 encode/decode pair are both mechanically fully understood but
-          semantically unpinned); (b) FUN_8005faec's 3 still-unnamed "doer" callees
-          (FUN_8005d7bc/FUN_8005d744/FUN_8005d66c) — the last gap connecting the
-          validate-then-commit/reject pending-procedure family
-          (clear_pending_procedure_bit_and_finalize_if_idle, 0x8005e01c, 0x8005faec — all keyed
-          by the same +0x78/+0x7c pending masks). Continue until 0 unnamed remain in the
-          region, or until a run of ~8-9 consecutive 0-2-HIGH-yield passes triggers the
-          project's established pivot-to-another-region policy (see Pass 9's precedent in
-          reverse_engineering_region_0x80070000.md). 2 consecutive 0-HIGH passes (16, 17) so
-          far — approaching that threshold if 1-2 more land at 0.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 18 — rank ~32-36 + 3 faec callees + FUN_8005a048 callers, 0 HIGH yield (3rd consecutive) (2026-06-27)
+          10 functions decompiled (10/10 success) in 3 groups:
+          Group A (rank ~32-36): 0x8005f614 (deferred-path dispatch cb, pending-proc family),
+            0x80055ec8 (4th toggle-accessor, bit 11), 0x8005d154 (interrupt-protected linked-
+            list drain, conn-record slot 10), 0x800505c4 (2nd free-list allocator, 0xfc pool),
+            0x80059a1c (override-hook validation predicate)
+          Group B (priority callees of 0x8005faec): 0x8005d7bc / 0x8005d744 / 0x8005d66c —
+            confirmed structural triplet with consecutive tags (0x16/0x17/0x18), all calling
+            FUN_8005d438; copy fields +0x11a/0x11b (or +0x11e/0x11f/0x120) from conn record
+            into allocated record + log (category 0xcc). Completes the pending-procedure COMMIT
+            family characterization.
+          Group C (FUN_8005a048 callers via find_callers = 2 total):
+            0x80054b14 (large SCO/eSCO baseband register programmer, 0x80050000 region);
+            0x800483c0 (cross-region 0x80040000: baseband link setup + HCI_event_sender(0x0e)
+            with 4-byte payload including connection handle and status).
+          FUN_8005a048 domain: confirmed as SCO/eSCO packet-type-to-µs interval lookup across
+            5 call sites (all use result in / 0x271 slot conversion); arg(mode 0-2, flag 0-1,
+            value, 0) maps to a packet-type + parameters → interval in µs. Still MEDIUM-HIGH:
+            no BT-spec table anchor or opcode literal.
+          0 renames applied. 3rd consecutive 0-HIGH pass (16, 17, 18). 325 unnamed, 41 named.
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 18 section added),
+             analysis/INDEX.md (region line updated). rom_function_index.md not touched (no
+             new named functions this pass, consistent with prior 0-HIGH-yield passes).
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 19 — continue live-FUN_* ranking from rank ~42+ (325 unnamed remain) (2026-06-27)
+          3 consecutive 0-HIGH passes (16-18). Threshold is ~8-9. Continue from rank ~42+
+          (the cold-triage Pass18 script ColdTriageRegion80050000Pass18.java exists but the
+          headless run against the raw binary returns 0 functions — use batch_decompile_functions
+          directly with addresses from WIP history + live xref ranking). Priority targets:
+          (a) Consider naming FUN_8005d438 (the tag-keyed allocator called by 7+ pass functions
+          including 0x8005e7fc/0x8005d7bc/0x8005d744/0x8005d66c/0x8005f260/0x8005efe8 —
+          one confirmed tag value matched to a BT constant would promote all 7 to HIGH);
+          (b) Continue cold-triage ranks 42-51 from the live list.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 17 — rank ~22-31 + named-sibling-clearing callees, 0 HIGH yield (2nd consecutive) (2026-06-27)
           Re-ran ColdTriageRegion80050000Pass15.java fresh: confirmed unchanged from PASS 16's

@@ -1922,3 +1922,63 @@ validate→commit/reject pending-procedure family (`clear_pending_procedure_bit_
 region is approaching the project's established pivot-to-another-region
 threshold (Pass 9's precedent in `reverse_engineering_region_0x80070000.md`).
 
+## Pass 18 — rank ~32-36 + priority callees of 0x8005faec + FUN_8005a048 callers, 0 HIGH yield (2026-06-27)
+
+Re-used rankings from Pass 17's `ColdTriageRegion80050000Pass15.java` baseline
+(confirmed **366 total, 325 unnamed, 41 named** — unchanged). Decompiled 10
+functions across three groups via `batch_decompile_functions` (10/10 success):
+
+**Group A** — rank ~32-36 of cold-triage list: `0x8005f614`, `0x80055ec8`,
+`0x8005d154`, `0x800505c4`, `0x80059a1c`.
+
+**Group B** — the 3 still-unnamed "doer" callees of `0x8005faec` that were
+the last gap in the pending-procedure COMMIT family: `0x8005d7bc`, `0x8005d744`,
+`0x8005d66c`.
+
+**Group C** — all callers of `FUN_8005a048` (2 total, found via `find_callers`):
+`0x80054b14` (in-region), `0x800483c0` (cross-region, 0x80040000).
+
+### 0 cleared the HIGH bar — all 10 stay LOW/MEDIUM/MEDIUM-HIGH
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x8005f614` | ~130B | Per-connection-index state handler: `iVar1 = (param_1&0xff)*0x1ac` indexes the connection record. If `(rec[+0x90] & 4) == 0`, clears the low nibble of `field269_0x114` (the 4-bit sub-state field); then if `((rec[+0x7c] \| rec[+0x78]) & 0x400) != 0` calls an indirect function pointer `PTR_DAT_8005f698`; then if `(rec[+0x60] & 8) != 0` calls `FUN_8004ad0c(idx, param_2)` and clears that bit. The `+0x78/+0x7c` pending-mask `0x400` check directly links this to `0x8005faec` (Pass 17: "state 3 … logs+schedules through `FUN_8005d66c` + `FUN_8005f614`"), confirming it is the **deferred-path dispatch callback** — called by `0x8005faec`'s state-3 branch to clear the sub-state nibble and conditionally fire the pending-bit dispatch callback. | MEDIUM-HIGH — part of the pending-procedure family, role confirmed as deferred-path callback; no opcode anchor to name without overclaiming |
+| `0x80055ec8` | 104B | 4th confirmed member of the **"toggle status-bit by truthiness" accessor family** (Pass 16: `0x80055e50`=bit 10, `0x80055ddc`=bit 1; Pass 17: `0x800562f4`=bit 7 global). Same branchless `-(param_1&0xff)>>0x1f * -0x800` sign-extend idiom: sets/clears bit 11 (`0x800`) of the 16-bit status word at `DAT_80055f2c`; if param_1 truthy, also writes `param_2`'s low 16 bits to `DAT_80055f30` and bits 16:17 of `param_2` into bits 8:9 of the status word. | MEDIUM — 4th member of the same toggle+conditional-2-field-write accessor family; bit 11 identity still unpinned |
+| `0x8005d154` | ~100B | **Interrupt-protected drain of a linked list** anchored at connection record slot 10 (index hardcoded). In a critical section (`disable_interrupts`…`enable_interrupts`), atomically detaches the list at `rec[10][+0xdc–+0xdf]` and zeroes fields `+0xdc`–`+0xe4` (9 bytes). Then walks the detached list following `*(node+0x18)` (next-pointer), calling `wraps_uninteresting_if_0x80100000__0` on each node. Connection index 10 (beyond the 0-7 active link range) is likely a special broadcast/system-event slot; `+0xdc–+0xe3` is a 32-bit pointer split across 4 bytes (consistent with the pack-by-sb pattern elsewhere), so this drains a deferred callback/event queue for that slot. | MEDIUM-HIGH — clear interrupt-protected linked-list-drain pattern, but the purpose of index-10's `+0xdc` queue and the specific event type aren't pinned |
+| `0x800505c4` | ~90B | **Second free-list allocator**, sibling of Pass 17's `FUN_800504e8`: pops the head of the free list at `PTR_PTR_80050608`; on exhaustion calls `FUN_800504b4` (the fire-once diagnostic-dump guard) and returns 0; on success: `*head = *record` (pop), `memset(record, 0, 0xfc)` (zero 252 bytes), returns record pointer. Record size `0xfc=252` vs Pass 17's `0x54=84` — these are two distinct memory pools sharing the same `FUN_800504b4` exhaustion handler. Neither pool size matches the `0x1ac` connection-record stride. | MEDIUM-HIGH — unambiguous free-list-pop-and-zero mechanism, same evidentiary class as `FUN_800504e8`; the record type consuming this pool isn't pinned |
+| `0x80059a1c` | ~80B | **Validation predicate with override hook**: if a function pointer at `PTR_DAT_80059a5c` is non-null, calls it with a local 12-byte buffer, param_1, param_2 and uses its return (0=valid, 1=invalid). On null pointer or return 0, falls through to hardcoded rule: `(param_1 & 7) == 0` (low 3 bits of param_1 must be zero) OR `(param_2 & 7) != 0` (low 3 bits of param_2 nonzero). The `& 7` alignment checks suggest these parameters encode a 3-bit-aligned field (possibly eSCO/SCO timing granularity). | MEDIUM — clean override-hook-then-fallback-predicate; the specific validity domain (frequency alignment? slot alignment?) is not pinned |
+| `0x8005d7bc` | ~130B | **Tag-0x16 record allocator and populator**: calls `FUN_8005d438(0x16, local_10)` to allocate a tag-`0x16` record; if successful, copies `rec[+0x11a]` and `rec[+0x11b]` (bytes 282-283 of the connection record) into the allocated record at offsets `+1`/`+2`, gets a timestamp via `PTR_DAT_8005d82c`, logs `(category=0xcc, code=0x8cc)`, and returns the record pointer. First of a confirmed structural **triplet** with `0x8005d744` (tag `0x17`) and `0x8005d66c` (tag `0x18`) — all called by `0x8005faec`'s sub-state dispatcher (states 1/5 → this function, state 7 → `0x8005d744`, state 3 → `0x8005d66c`). | MEDIUM-HIGH — clear allocate-and-populate shape; the tag-0x16 record's consuming subsystem and the specific meaning of `+0x11a`/`+0x11b` aren't pinned; `FUN_8005d438` itself is still unnamed |
+| `0x8005d744` | ~130B | **Tag-0x17 record allocator and populator**: exact structural twin of `0x8005d7bc` (tag `0x17`, logging code `0x12e3`/`0x1259`), same `+0x11a`/`+0x11b` fields copied. | MEDIUM-HIGH — same evidentiary class as `0x8005d7bc`; triplet confirmed |
+| `0x8005d66c` | ~170B | **Tag-0x18 record allocator and populator** (more complex variant): calls `FUN_8005d438(0x18, local_20)`; if `param_2 == '\0'`, computes a timing value: reads a multiplier from `PTR_DAT_8005d734` (or uses `rec[1]._x26_entry_valid * *PTR_DAT_8005d738 * rec->field455_0x1d4` if `rec[1]._x26_entry_valid != 0`), adds to `rec[1].field40_0x28`, and stores as `rec[+0x120]`; copies fields `+0x11e`/`+0x11f` and the computed 16-bit `+0x120` value (4 bytes total) into the allocated record; logs `(category=0xcc, code=0x1318/0x1257)`. The additional `+0x120` timing field and multiplication step distinguish this from the `+0x11a/0x11b`-only tag-0x16/0x17 siblings. | MEDIUM-HIGH — third member of the triplet; the extra timing computation (`field40_0x28` + multiplied `_x26_entry_valid`) doesn't pin the semantic domain without naming the `_x26` field |
+| `0x80054b14` | ~500B | **Large SCO/eSCO baseband register programmer**: resolves parent connection via `resolve_parent_context_by_role(param_1)`, derives mode flags from `(*(byte*)(parent+8) & 7) == 0` (connection-type selector) and `(*(byte*)(parent+0x20) & 0x10)`. For the "type-0 no-parent-extended" path, computes `FUN_8005a048(*(byte*)(parent+8)>>5, *(byte*)(parent+10)&1, *(char*)(parent+9)+1, 0)` + configured padding then divides by `0x271` (625µs slot conversion — same formula as `0x80053710`/`0x800532ac`). Programs 10+ hardware registers at `DAT_80055194`–`DAT_800551ec`; calls `FUN_80055ddc(1, *(uint*)(param_1+0xc))` (the bit-1 toggle accessor), `FUN_8005693c`, `FUN_800563a8`, `FUN_8002b894`. Logs full negotiated parameters on success. Matches the established baseband-link-establishment-commit pattern (`0x800590b0`, Pass 16). **Cross-region significance**: this is the 0x80050000 counterpart that programs a different register bank from `0x800590b0` (which programs the `DAT_80059410` bank). | MEDIUM-HIGH — clear baseband-link-programmer shape; matches the established pattern; `FUN_8005a048` still unnamed so its contribution isn't pinned; no opcode literal |
+| `0x800483c0` | ~350B | **Baseband link setup + HCI event sender** (0x80040000 region, confirmed FUN_8005a048 caller): takes 5 params: `param_1` (16-bit handle/channel), `param_2` (0–0x27, 6-bit), `param_3` (byte), `param_4` (0-7, 3-bit), `param_5` (packet-mode 1-4). Validates bounds (`0x27 < param_2` or `7 < param_4` → error path), programs connection record slot 10's fields `+0xf4`–`+0x106` with the input params, sets `DAT_80048734` bit `0x2000`. Dispatches on `param_5`: mode 1→`uVar14=0`, mode 2→`uVar14=1/flag=1`, mode 3→`uVar14=2`, mode 4→`uVar14=2/flag=1`. Calls `FUN_8005a048(uVar14, flag, param_3, 0)` → `uVar12`; then computes slot count `(uVar12 + 0x369) / 0x271` and writes it to hardware register `DAT_80048744`. Ends with `hci_event_sender(0x0e, &{handle_byte, param1_lo, param1_hi, status}, 4)`. **This call confirms `FUN_8005a048`'s role**: it converts a `(mode, flag, param3)` packet-type descriptor to a microsecond timing interval for slot-count calculation — used for both `param_5`=1/2 (SCO-like) and `param_5`=3/4 (eSCO-like) modes. The `0x0e` HCI event with a 4-byte payload including a handle and status is consistent with SCO/eSCO link-setup completion signaling. | MEDIUM-HIGH (cross-region, 0x80040000) — establishes `FUN_8005a048` is a packet-type-to-µs lookup, but the specific packet-type encoding isn't pinned to a Bluetooth spec table |
+
+**`FUN_8005a048` domain update** (affects Passes 16–18 retroactively):
+`find_callers` returned only 2 callers (`FUN_80054b14`, `FUN_800483c0`), both now
+decompiled. Combined with the 3 callers from Passes 16-17 (`FUN_800532ac`,
+`FUN_80053688`, `FUN_8005a680` — `find_callers` may have missed these due to static
+xref limitations for MIPS16e indirect calls), the picture is now:
+- `FUN_8005a048(mode∈{0,1,2}, flag∈{0,1}, value, 0)` → **timing interval in µs**
+- Used in 5 confirmed call sites, all computing slot counts via `/ 0x271 (625µs)`
+- `mode` maps to SCO/eSCO packet-type variants (modes 1-4 from the HCI programming function)
+- `value` is a connection record field (typically 8-bit, incremented by 1 before passing)
+- Still MEDIUM-HIGH: the exact BT-spec table and how `(mode, flag, value)` maps to a specific eSCO/SCO packet size or interval class isn't pinned by any literal constant or opcode
+
+**Region-wide unnamed count**: unchanged — **366 total, 325 unnamed, 41 named**
+(0 renames applied; 3rd consecutive 0-HIGH pass: Passes 16, 17, 18).
+
+**3-consecutive-0-HIGH note**: Per Pass 9's precedent in
+`reverse_engineering_region_0x80070000.md`, the pivot threshold is ~8-9
+consecutive 0-2-HIGH passes. At 3, we are approaching but not at the threshold.
+Remaining high-leverage opportunities: (a) name `FUN_8005d438` (the tag-keyed
+allocator called by all 7 tag siblings including Passes 13/16/17/18) — naming it
+would retroactively promote all its callers via the named-sibling rule; (b) name
+`FUN_8005a048` — would promote 5+ functions; both require an additional
+anchor (opcode literal, or a named caller that reveals the domain).
+
+**Next**: Pass 19 should continue from rank ~42+ of the cold-triage list.
+Alternately, consider naming `FUN_8005d438` first (the allocator called by
+`0x8005e7fc`/`0x8005d7bc`/`0x8005d744`/`0x8005d66c`/etc.) — it's been
+identified across 7+ passes and is mechanically fully understood; if a tag
+value matches an LMP opcode or HCI parameter constant, it could clear HIGH.
+
