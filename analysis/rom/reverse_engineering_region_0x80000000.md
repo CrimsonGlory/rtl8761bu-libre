@@ -1109,3 +1109,45 @@ All renames applied to live Ghidra via `RenamePass1Region80000000.java` (`ok=16 
 
 **Unnamed count**: was 101 at sweep start, now **88** (13 named in this batch; the 3
 cross-region 0x80070000 names don't count against this region's budget).
+
+## Out-of-gap-scope sweep — batch 2 (2026-06-27)
+
+Continued from batch 1 above. Re-enumerated the 88 remaining unnamed functions via
+`ListUnnamedRegion0x80000000.java` (confirmed 88), then `batch_decompile_functions` on
+the next tier: 10 medium-sized new functions + 4 from the batch 1 analysis carried
+forward (HCI queue drain family + pool mode switch).
+
+**23 new names applied** in this region (plus 2 cross-region 0x80070000 callees named).
+All renames applied via `RenamePass2Region80000000.java` (ok=25, fail=0).
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80009680` | 20B | `spin_delay_10x_iterations` | `for(i=0; i<param*10; i++)` — bare spin-wait loop, 10× multiplier. |
+| `0x80009694` | 22B | `spin_delay_10000x_iterations` | Same pattern, 10000× multiplier — longer busy-wait. |
+| `0x80009748` | 6B | `read_byte_counter_1` | Trivial byte reader: returns `*PTR_DAT_80009750`. |
+| `0x80009754` | 6B | `read_byte_counter_2` | Trivial byte reader: returns `*PTR_DAT_8000975c`. |
+| `0x80009760` | 14B | `byte_add_to_counter_no_irq` | `*counter += param_1` — no interrupt protection (contrast: `atomic_byte_add_to_cnt`). |
+| `0x80009774` | 28B | `atomic_byte_write_zero_cnt1` | Interrupt-safe: zeros `*PTR_DAT_80009790`. |
+| `0x800096d4` | 108B | `set_channel_bdaddr_scramble_fields` | Override+fallback: fallback calls `clear_bits_in_global_0xfc39_helper`, `scrambled_bdaddr_field_writer_pair1/2` to write 2–3 scrambled BD address fields by bit-shift. Named callees confirm identity. |
+| `0x800097c8` | 32B | `atomic_saturating_byte_decrement_by1_cnt1` | Interrupt-safe saturating decrement by 1 of `*PTR_DAT_800097e8`. |
+| `0x800097ec` | 36B | `atomic_byte_add_to_cnt` | Interrupt-safe: `*counter += param_1`. |
+| `0x80009814` | 28B | `atomic_byte_write_zero_cnt2` | Interrupt-safe: zeros `*PTR_DAT_80009830`. |
+| `0x80009834` | 32B | `atomic_saturating_byte_decrement_by1_cnt2` | Interrupt-safe saturating decrement by 1 of `*PTR_DAT_80009854`. |
+| `0x80009858` | 30B | `atomic_byte_increment_cnt` | Interrupt-safe: `++(*counter)`. |
+| `0x80009934` | 28B | `stub_return_status_ok` | Calls `stub_return_zero()`, maps result 0→0 (always returns 0 = OK). Effective stub. |
+| `0x80009a04` | 38B | `call_fptr_if_set_wraps_check_slot_state_eq2` | Override+fallback: optional hook; fallback = `check_slot_state_is_2(param_1)`; maps -1→5. |
+| `0x80009b7c` | 16B | `wrap_struct_field_accessor_0x80100000` | Single-call wrapper: calls `struct_field_accessor_0x80100000()`. |
+| `0x80009dac` | 70B | `write_hw_register_bit8_validated` | Validates param <= 1; writes `(param & 1) << 8` into bit 8 of a hardware register field. |
+| `0x80009dfc` | 232B | `configure_hw_register_fields_by_mode` | 4-param hw config: mode (0/1/2) + flag + two field values; programs bit-fields in two hardware config registers (`DAT_80009ee8`/`DAT_80009eec`); last step picks a 3-value table (1/3/7) for a separate mode field. |
+| `0x80009f00` | 92B | `set_hw_feature_bit8_and_companion_flag` | Param 1: sets bit 8 + companion flag byte to 1; param 2: clears bit 8 + flag to 0; else: logs warning. |
+| `0x80009fd8` | 128B | `drain_hci_cmd_queue_12slots_code3` | Calls `called_at_end_of_every_HCI_CMD_via_fptr(i, 3)` for i=0..11; returns count. |
+| `0x8000a074` | 146B | `drain_hci_cmd_queue_6slots_code2` | Calls `called_at_end_of_every_HCI_CMD_via_fptr(i, 2)` for 6 slots; maps -1→5. |
+| `0x8000a130` | 120B | `drain_hci_cmd_queue_8slots_code1` | Calls `called_at_end_of_every_HCI_CMD_via_fptr(i, 1)` for 8 slots. |
+| `0x8000a1c0` | 204B | `drain_hci_cmd_queue_32slots_return1` | Calls `called_at_end_of_every_HCI_CMD_via_fptr` for 32 slots; returns 1. |
+| `0x8000a310` | 350B | `pool_subsystem_mode_switch_with_drain` | Multi-case mode switch (1/2/default): enables/disables hw feature bits, calls `call_fptr_if_set_wraps_pool_slot_init_and_zero` 3×, calls `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_` for draining. |
+
+**Cross-region callees named opportunistically** (in 0x80070000):
+`stub_return_zero` (`0x80075ca4`), `check_slot_state_is_2` (`0x80076050`).
+
+**Unnamed count**: was 88 at batch 2 start, now **65** (23 named; 2 cross-region 0x80070000
+don't count against this region's budget).

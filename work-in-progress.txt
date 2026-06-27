@@ -3939,11 +3939,30 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+16 entries, count updated to 806)
           → analysis/INDEX.md (region updated, [NEXT] pointer set)
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 2 (88 remaining)
-          Continue the out-of-gap-scope sweep from batch 1 above. Decompile the next tier of unnamed
-          functions (by size/xref priority) and apply renames following the same pattern as batch 1.
-          Document findings in a new "batch 2" subsection of the "Out-of-gap-scope sweep" section
-          in `reverse_engineering_region_0x80000000.md`.
+[DONE]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 2 (2026-06-27)
+          Continued from batch 1 (88 → 65 remaining). Re-enumerated 88 remaining, decompiled
+          next tier (10 new + HCI queue drain family carried forward from batch 1).
+          23 new names in this region: `spin_delay_10x_iterations`, `spin_delay_10000x_iterations`,
+          `read_byte_counter_1`, `read_byte_counter_2`, `byte_add_to_counter_no_irq`,
+          `atomic_byte_write_zero_cnt1/cnt2`, `set_channel_bdaddr_scramble_fields`,
+          `atomic_saturating_byte_decrement_by1_cnt1/cnt2`, `atomic_byte_add_to_cnt`,
+          `atomic_byte_increment_cnt`, `stub_return_status_ok`,
+          `call_fptr_if_set_wraps_check_slot_state_eq2`, `wrap_struct_field_accessor_0x80100000`,
+          `write_hw_register_bit8_validated`, `configure_hw_register_fields_by_mode`,
+          `set_hw_feature_bit8_and_companion_flag`, `drain_hci_cmd_queue_12slots_code3`,
+          `drain_hci_cmd_queue_6slots_code2`, `drain_hci_cmd_queue_8slots_code1`,
+          `drain_hci_cmd_queue_32slots_return1`, `pool_subsystem_mode_switch_with_drain`.
+          Plus 2 cross-region: `stub_return_zero` (0x80075ca4), `check_slot_state_is_2` (0x80076050).
+          All via `RenamePass2Region80000000.java` (ok=25 fail=0). Total named: 831 (was 806).
+          **65 of 88 unnamed remain** in this region.
+          → analysis/rom/reverse_engineering_region_0x80000000.md (batch 2 section)
+          → analysis/rom/rom_function_index.md (+25 entries, count updated to 831)
+          → analysis/INDEX.md (region updated, [NEXT] pointer set)
+
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 3 (65 remaining)
+          Continue the out-of-gap-scope sweep from batch 2 above. Re-enumerate remaining 65
+          unnamed, decompile the next tier by size/xref priority, and apply renames.
+          Document findings in a new "batch 3" subsection in `reverse_engineering_region_0x80000000.md`.
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
