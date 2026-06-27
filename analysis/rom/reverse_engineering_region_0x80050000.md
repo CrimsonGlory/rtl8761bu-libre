@@ -2667,3 +2667,35 @@ consider re-examining the high-rank MEDIUM-HIGH holdovers (`0x80054b14`,
 `0x80057ce8`, `0x80077a00`, `0x8005aba8`, `0x8005dd9c`) whose unnamed callees
 may now be named from recent passes.
 
+## Pass 25 — ranks 106-110 + MEDIUM-HIGH holdover re-examination, 4 HIGH renames (2026-06-27)
+
+**Context**: Pass 24 left 288 unnamed (366 total, 78 named). Pass 25 decompiled
+10 candidates: ranks 106-110 from the Pass 24 cold-triage plus 3 high-priority
+MEDIUM-HIGH holdovers (`0x80057a00`, `0x8005dd9c`, `0x8005be1c`).
+
+**4 new names applied** via `RenamePass25Region80050000.java` (renamed=4
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80057a00` | 706B | `write_sco_link_slot_params_type_d` | Promoted from MEDIUM-HIGH holdover (Pass 23). Reads type-fields from `field279_0x11e`/`field280_0x11f`, maps 3-bit packet-type bitmask → 4-way mode code, programs link register via `write_indexed_link_register_with_slot_check`, then calls `write_link_type_hw_register_cmd(0xd, uVar10)`. Type-d sibling of `write_sco_link_slot_params_type_b` and `write_sco_link_slot_params_type_c`. HIGH: named callee `write_link_type_hw_register_cmd(0xd)`. |
+| `0x8005dd9c` | 494B | `check_pending_features_and_alloc_mismatch_record` | Promoted from MEDIUM-HIGH holdover (Pass 23). Iterates set bits in `+0x78|+0x7c` pending bitmap, checks each against a feature-compatibility table, on mismatch calls `dispatch_alloc_tag_d_or_11_by_record_flag(param_1, param_2, 0x2a or 0x23)` + `assign_pointer_to_0x1AC_offset_0x134`; secondary path calls `alloc_tag_record_copy_payload_and_enqueue`. HIGH: 3 named callees (all Pass 22-23). |
+| `0x8005be1c` | 68B | `enqueue_to_per_slot_ring_buffer` | Ring-buffer enqueue: given slot index into `PTR_PTR_8005be60`, checks fill < capacity, writes `param_2` (tag) + `param_3` (value) at write-index position, advances write index modulo capacity, increments fill count. Returns 1 on success, 0 if full. HIGH: self-contained ring-buffer mechanism (explicit capacity check, modular index wrap). |
+| `0x800566b8` | 64B | `read_link_register_0xe_top_nibble_by_slot` | For slot < 8: calls `FUN_80056608(slot*0x14 + 0xe)` (eSCO bank stride 0x14); for slot ≥ 8: calls `read_indexed_link_register((slot-8)*0x1e + 0xe)` (SCO bank stride 0x1e); extracts top nibble `>> 28`. HIGH: calls named `read_indexed_link_register` with explicit offset formula. |
+
+**6 remaining MEDIUM/MEDIUM-HIGH from this pass's batch (not renamed)**:
+- `0x8005220c` (72B): zero-initializes a state block + allocates kind-9 sub-record with defaults; no named domain anchor → MEDIUM-HIGH
+- `0x80051a3c` (68B): sets capability bits then dispatches to `FUN_80051588` or `FUN_80051980`; no named callees → MEDIUM
+- `0x80059684` (66B): computes offset using same base constants as `FUN_8005a048` (0x3c/0x70/0x20e/0x3d0); no named callees → MEDIUM-HIGH
+- `0x8005a228` (98B): selects between caller-provided or stored defaults for 2 out-params; MEDIUM
+- `0x8005cd6c` (96B): packs 2 fields and calls `possible_logger_called_if_no_patch3` with code `0x26f`; MEDIUM
+- `0x80051980` (84B): processes deferred state bits 2+3 via dispatchers; no named callees → MEDIUM
+
+**Region-wide unnamed count**: **366 total, 284 unnamed (down from 288), 82 named
+(up from 78)** — 4 new renames applied.
+
+**Next**: Pass 26 should continue cold-triage from rank 111+ (Pass 24 cold-triage
+only covered to rank 110). Also `FUN_80054b14` (1650B, rank 67) and `FUN_8005aba8`
+(664B, rank 70) remain as large MEDIUM-HIGH holdovers worth revisiting now that
+`write_sco_link_slot_params_type_d` and the channel-reg family are named.
+
