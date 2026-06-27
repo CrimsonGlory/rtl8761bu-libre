@@ -1714,3 +1714,104 @@ fresh cold-triage re-enumeration (e.g. a new `ColdTriageRegion80050000Pass15.jav
 ranking the remaining 327 unnamed functions by xref count / size) to
 identify the next batch of candidates, since no pre-staged list remains.
 
+---
+
+## Pass 15 — fresh cold-triage re-enumeration, 2 HIGH renames + a major
+structural lead on a 4-function hardware-table accessor cluster (2026-06-27)
+
+**Methodology change**: rather than hand-maintaining an exclusion list of
+every address reviewed across Passes 1-14 (increasingly error-prone — see
+Pass 11 batch 2's discovery of an undocumented-but-already-applied rename),
+`ColdTriageRegion80050000Pass15.java` simply re-enumerates every function
+in the region still named `FUN_*` live against the GZF and ranks by xref
+count then size. This is now safe to rely on: rename persistence was
+independently re-verified earlier this session (fresh `decompile_function`
+round-trip on both Pass 14 HIGH renames, names held). Confirmed region-wide:
+**366 total, 327 unnamed, 39 named** before this pass (matches Pass 14's
+closing count exactly — no drift).
+
+Decompiled the top 10 by xref count (skipping `0x800573d8`/`0x80057094`,
+already reviewed MEDIUM-HIGH in Pass 11 with no new value from a bare
+re-decompile): `0x80056660` (33 xrefs), `0x8005d438` (26), `0x80056608`
+(22), `0x8005d364` (16), `0x80057008` (16), `0x800564bc` (15), `0x8005a048`
+(12), `0x8005aa70` (12), `0x80055c80` (11), `0x8005e01c` (11) — all 10/10
+via `batch_decompile_functions`.
+
+### 2 cleared the HIGH bar
+
+| Address | Size | Old name | New name | Evidence |
+|---------|------|----------|----------|----------|
+| `0x8005d364` | 196B | `FUN_8005d364` | `clear_pending_procedure_bit_and_finalize_if_idle` | Clears a caller-specified bit from whichever of two 32-bit "outstanding procedure" bitmaps (`+0x78`/`+0x7c`) holds it — `param_3` explicitly selects a side (1 or 2) or auto-detects (0) by testing which mask currently has the bit set, logging a mismatch warning if neither does. After clearing, if **both** masks are now empty (ignoring the reserved low 2 bits), it calls the already-Kovah-named `LMP__25B__most_common_for_VSCs1` (send the generic 25-byte "most common" LMP PDU used for VSCs) — i.e. "no procedures left outstanding, finalize." Confirmed via 2 caller contexts (`FUN_8005eb6c`'s role-switch-completion path, `FUN_8005f69c`'s parameter-negotiation path): both feed this function through the exact same branchless `((-(mask & bit)) >> 31) + 2` side-autodetect idiom seen standalone in `FUN_8005eb6c`'s own dispatch, confirming `param_3`'s 1-vs-2 selector semantics independently of this function's own body. Already-named-callee anchor (same precedent class as Pass 12's LMP-event-sender-anchored renames) clears HIGH. |
+| `0x8005a924` | 312B | `FUN_8005a924` | `commit_link_power_state_bits_to_hw_register_with_retry` | Takes a connection index, reads back the current 16-bit hardware link-context word for that connection (selecting one of two index-range-split hardware banks — index `<8` via `FUN_80056608`/`FUN_80057094`, index `>=8` via `FUN_80056660`/`FUN_800573d8`, see cluster note below), then commits a 2-bit power-state encoding into bits 13:14 of that word based on the connection record's requested-mode nibble at `+0x118`: mode 0 → clear both bits then set bit 14 only (`0x4000`), mode 1 → OR in both bits (`0x6000`), any other mode value → log and abort with no write. These exact bit values (`0x2000`/`0x4000`/`0x6000`) were independently established as a 2-bit "current low-power mode" (hold/sniff/park-style) encoding by Pass 14's `0x8005bf4c` finding, confirming the semantic here. Writes back through the same indexed hw-table write functions with a retry loop (checks a global error flag after each write, retries while under a configured retry-count threshold) and escalates to a function-pointer callback (passing the connection record pointer — a disconnect/error-teardown call by shape) on either persistent write failure or an invalid mode value. The independently-confirmed bit-encoding anchor plus the unambiguous commit-with-retry-and-escalate structure clears HIGH. |
+
+### Major structural lead (not yet renamed): the 4-function hw link-context table cluster
+
+Decompiling `0x8005a924` above also resolved a long-standing ambiguity from
+Pass 11: `0x800573d8`/`0x80057094` (kept MEDIUM-HIGH in Pass 11 as "indexed
+hw-table write with slot-collision guard, specific table/peripheral
+unidentified") and this pass's `0x80056660`/`0x80056608` (their READ-side
+counterparts — confirmed by matching status-poll-bit pairing: `0x800573d8`
+polls done-bit `0x20` and writes a 30-entry-bank-checked value,
+`0x80056660` polls the *same* `0x20` bit and reads back; `0x80057094`/
+`0x80056608` are the matching `0x10`-bit / 20-entry-bank pair) are now
+confirmed to be **two index-range banks of a single per-connection hardware
+"link-context" register file**, not two separate peripherals:
+
+- `commit_link_power_state_bits_to_hw_register_with_retry` (`0x8005a924`)
+  proves index `<8` always routes to the 20-entry bank
+  (`FUN_80056608`/`FUN_80057094`) and index `>=8` always routes to the
+  30-entry bank (`FUN_80056660`/`FUN_800573d8`), with the *same* per-index
+  byte offset formula continuing across the split point (index 8 maps to
+  offset 14 in the 30-entry bank, matching index 0's offset 14 in the
+  20-entry bank) — i.e. one logical table, physically banked by index
+  range, almost certainly because indices `<8` (BT Classic ACL/SCO,
+  smaller per-connection hardware footprint) need less per-slot state than
+  indices `>=8` (LE connections, more per-slot state: access address,
+  CRC init, channel map, hop increment, etc. are all link-layer-managed in
+  hardware for LE).
+- `send_evt_Meta_subevent_0x01_or_0x0a_HCI_LE_Connection_Complete_or_HCI_LE_Enhanced_Connection_Complete`
+  reads back the *same* register (via `0x80056660`/`0x80056608`, selected
+  by an "extended/coded-PHY" flag bit rather than the index-range split
+  used elsewhere) and caches the 32-bit result into the connection record
+  at `+0xc`, immediately before logging it alongside the negotiated
+  connection-interval/window fields — confirming this register is read on
+  the LE connection-establishment hot path, not just the power-mode path.
+
+**Why this stays MEDIUM-HIGH, not HIGH, for the 4 raw accessors themselves**:
+bits 13:14 of the word are now pinned (power-state encoding, confirmed
+above), but the *rest* of the 16-bit (or 32-bit, in the LE-event read path)
+value is shared by at least two unrelated consumers (the power-mode commit
+path and the LE-connection-complete cache field) and its other bits aren't
+pinned to a single semantic. Renaming the bare accessors `read_*`/`write_*`
+without a unifying field name would either overclaim (picking one
+consumer's interpretation) or underclaim (a generic "hw register
+accessor" name loses the now-confirmed banking/indexing evidence). Recorded
+here in full so a future pass can finish the job — likely by checking what
+else reads/writes connection-record offset `+0xc` and offset `+0x118` to
+see if the non-power-mode bits resolve to a single field.
+
+**Region-wide unnamed count**: fresh `CountUnnamedRegion80050000.java` scan
+confirms **366 total, 325 unnamed, 41 named** (down from 327 unnamed / 39
+named before this pass's 2 renames).
+
+**Next**: Pass 16 should (a) try to close out the 4-function hw
+link-context cluster per the lead above, and (b) continue ranking the
+remaining 325 unnamed functions by `ColdTriageRegion80050000Pass15.java`'s
+live-`FUN_*` approach (rank 11+ from this pass's top-40 list: `0x80057008`,
+`0x800564bc`, `0x8005a048`, `0x8005aa70`, `0x80055c80`, `0x8005e01c` are
+already decompiled this pass and stayed MEDIUM/MEDIUM-HIGH — see below —
+so the next batch starts at rank ~11 of the fresh list, e.g. `0x80055dc4`,
+`0x80055e50`, `0x8005a384`, `0x80058680`).
+
+### 6 decompiled, stayed MEDIUM/MEDIUM-HIGH
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x8005d438` | 80B | Calls the generic allocator helper `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`; on success, stamps a type-tag byte (`param_1`) at offset 0, zeroes a 4-byte field at offset `0x18`, and hands the new record back via the output param; on failure logs and returns `0xff`. Reads as a generic "allocate + init a typed sub-record" wrapper, called from 3 already-decompiled-but-still-unnamed Pass 13 functions (`0x8005efe8`, `0x8005f260`, `0x8005f428`). | MEDIUM-HIGH — clear allocate-and-tag shape, but the record type/offset-`0x18` field semantics aren't pinned |
+| `0x80057008` | 126B | Validates a byte-range input (`<0xe`, 14 values), stores it to a global state slot, special-cases a warning when the flag-gated check fails for values outside `{5,6}`, and returns status `0`/`4`/`5` with a special case for input value `1` checking bit 8 of the stored slot. Reads as "validate and commit a 14-value state enum, returning a status/error code." | MEDIUM — clear validate-and-commit shape but the specific enum domain isn't identified |
+| `0x800564bc` | 74B | Gated on config field `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 2` (a single bit that enables **both** the LMP power-control and clock-adjustment features) and a nonzero input, writes a 4-bit nibble into a hardware register (preserving the upper 12 bits). Called from 8 already-named top-level dispatchers spanning disconnect, role-switch, LMP-PDU-receipt, and page-response/AFH-counter paths — disparate enough that a periodic clock-adjustment update reads more plausible than a power-control-PDU-specific one, but the shared gate bit doesn't let either be ruled out. | MEDIUM-HIGH — feature domain is pinned (power-control/clk-adj config gate), exact field (power step vs clk-adj period) is not |
+| `0x8005a048` | 134B | Pure address/offset calculator: given a type selector (0/1/2/other), a subtype byte, an index, and a variant flag, computes `base + index<<shift` with type-and-variant-selected base constants (`0x2c`/`0x3c`/`0x50`/`0x70`/`0x1ce`/`0x20e`/`0x2d0`/`0x3d0`) and shift amounts (2/3/4/6). Classic "compute scaled table-entry address" helper. | MEDIUM — clear computed-offset shape, the specific table/type mapping is unidentified |
+| `0x8005aa70` | 54B | Gated on a validity bit at `+3`, sets a byte field at `+8` to the input, then calls a function pointer with the value at `+2` — generic "conditionally update a field and notify via callback." | MEDIUM — too generic/short to pin without more caller context |
+| `0x80055c80` | 290B | Packs several connection-record status bits (fields `0x44`-`0x48`) into 2 hardware registers plus conditional flag bits in a 3rd register based on threshold checks, toggles a 4th register's bit 3 based on `param_1`, then dispatches via function pointer with constant `6`. Reads as "commit negotiated RF/link-quality parameters into baseband control registers," matching the project's established baseband-register-programming pattern (cf. `0x80109980` in CLAUDE.md). | MEDIUM-HIGH — clear baseband-register-commit shape, specific register/feature unconfirmed |
+| `0x8005e01c` | 144B | Looks up a sub-record via `FUN_8005dd70`, assigns it through the already-named `assign_pointer_to_0x1AC_offset_0x134`, computes an error/status code (table lookup or 2 hardcoded special cases for type `0xd`/`0x11`) into a `+0x8c` field, then — when either pending-procedure bitmask (`+0x78`/`+0x7c`, the same masks `clear_pending_procedure_bit_and_finalize_if_idle` operates on) is nonzero — sets the corresponding bit in two more bitmasks at `+0x84`/`+0x88`. This is the rejection/error-path helper called by `0x8005ff54` (per Pass 14's description: `FUN_8005e01c(rec, 0x15, 0x1e, 1)`), i.e. the reject counterpart to the validate-then-commit family's HIGH-confidence members. | MEDIUM-HIGH — clear "set per-feature error code + mark rejected in result bitmask" shape, but the `+0x84`/`+0x88`/`+0x8c` field identities aren't pinned |
+
