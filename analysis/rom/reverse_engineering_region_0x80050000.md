@@ -2886,3 +2886,61 @@ long-standing Pass-4 MEDIUM-HIGH holdovers (`FUN_80054b14`, `FUN_8005aba8`) are 
 **Next**: Pass 32 should continue cold-triage from rank 176+ (sizes now in the 50B-and-under
 range; the remaining 234 unnamed are increasingly thin/structural — expect lower per-pass
 yield as the easy structural-match candidates are exhausted).
+
+## Pass 32 — ranks 176-195 cold-triage + Ghidra-mis-disassembly cluster identified, 10 HIGH renames (2026-06-27)
+
+**Context**: Pass 31 left 234 unnamed (366 total, 132 named). `ColdTriageRegion80050000Pass32.java`
+confirmed those totals and ranked 176-220 (sizes now down to 22B-1B for ranks 176-189, then a
+discontinuity to 692B-54B with `xrefs=0` starting at rank 190 — see "Ghidra mis-disassembly
+cluster" below). Decompiled all 14 candidates at ranks 176-189 via `batch_decompile_functions`,
+then followed up with caller-context decompiles (`conn_packet_type_apply_and_codec_table_sync`,
+`FUN_8004a318`, `FUN_80052c64`, `FUN_800515e0`) and `xrefs_to` checks to resolve ambiguous
+single-caller functions before naming.
+
+**10 new names applied** via `RenamePass32Region80050000.java` (renamed=10 alreadyOk=0
+missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005c948` | 22B | `map_codec_type_byte_to_table_row_index` | Maps byte values 8/9/10 → 1/2/3 (`param-7`), else returns sentinel `0xff`. Single caller `conn_packet_type_apply_and_codec_table_sync` uses the result as a row index (stride 7) into a codec-config table (`PTR_DAT_80006380`) to copy 5 HW link-param bytes; out-of-range input short-circuits the lookup. HIGH: confirmed via full caller decompile. |
+| `0x80052c64` | 692B | `lmp_esco_sco_negotiation_packet_handler` | Rank 190 (`xrefs=0` — reached only via an indirect/table call, not a static `CALL`). Validates incoming packet length against a computed header size, decodes BD-addr/role via `conn_param_commit_bdaddr_and_role` + `conn_param_revalidate_if_dirty`, stages params via `esco_sco_param_negotiate_and_stage`, manages a pending-negotiation refcounted object (`pending_negotiation_hash_pop_by_distance`, `refcount_increment_atomic`/`refcount_decrement_and_free`), dispatches per-link-type via a 16-entry function-pointer table (`PTR_DAT_80052f28`), and logs via `esco_sco_negotiation_diagnostic_logger` / `conn_negotiation_finalize_gate_dispatch`. HIGH: 8 named callees — the master per-packet eSCO/SCO negotiation processor. |
+| `0x80059de4` | 4B (stale; decompiles to a full function) | `apply_iir_filter_to_rssi_and_store` | Reads RSSI via named `return_RSSI_value`; if the stored value at struct-array index `0x44` field `+0x160/0x161` is the sentinel `0x7fff` (uninitialized), stores `rssi*16` directly; otherwise computes a weighted IIR average using a coefficient from a function-pointer call (`PTR_DAT_80059e60(0x50,1)`) and stores the blended result. HIGH: named RSSI callee + unambiguous IIR-filter arithmetic. Note: the cold-triage script's recorded body size (4B) is stale relative to the decompiler's actual function bounds — same data/code boundary drift seen elsewhere in this region; reconciling Ghidra's function-body metadata is out of scope for this pass. |
+| `0x800515e0` | 60B | `reset_procedure_state_with_3000ms_timeout` | If a not-yet-invalidated dword field is `!= -1`, calls named `LMP__25B__most_common_for_VSCs1()`; `memset`s a 0x2c-byte state block, sets sub-state to `4`, sets a timeout dword to `3000`, and re-links 3 sub-buffer pointers to fixed addresses. Generic "abort pending + reset with timeout" procedure-state reset. HIGH: named callee + unambiguous reset/init pattern; confirmed as the callee of `invalidate_field_and_reset_procedure_state` below. |
+| `0x80051630` | 22B | `invalidate_field_and_reset_procedure_state` | Rank 176. Sets a dword field to `0xffffffff` (sentinel "invalidated") then calls `reset_procedure_state_with_3000ms_timeout()`. HIGH: named callee. |
+| `0x800518c0` | 22B | `invalidate_field_and_reset_crypto_via_LMP_25B` | Rank 177. Sets a dword field (`+4` of a fixed struct ptr) to `0xffffffff`, then calls named `send_LMP_25B_and_reset_crypto_key_state()`. Structural sibling of `invalidate_field_and_reset_procedure_state` (same invalidate-then-reset shape, different target). HIGH: named callee. |
+| `0x800515c8` | 18B | `send_LMP_25B_for_fixed_default_record` | Rank 179. Thin wrapper: calls named `LMP__25B__most_common_for_VSCs1()` with a fixed (non-parameter) pointer constant — always triggers the LMP send for one specific default record. HIGH: named callee, single-statement body. |
+| `0x80056290` | 18B | `wrapping_subtract_with_fixed_modulus_and_mask` | Rank 180. `param_1 - param_2`, wrapping by adding a fixed modulus constant (`DAT_800562a4`) when `param_1 < param_2`, then masking the result with a second fixed constant (`DAT_800562a8`). Structurally the same wraparound-subtract idiom as the already-named generic `wrapping_subtract_masked_by_shift` (`0x8003d018`, region `0x80000000`) but a distinct instance with its own data-driven modulus/mask rather than a shift parameter — not a duplicate of that function. HIGH: unambiguous arithmetic idiom matching an established named pattern. |
+| `0x80055c54` | 14B | `get_completion_status_byte_for_index` | Rank 181. Returns `table[param_1 & 0xff]` from a fixed byte table (`PTR_DAT_80055c64`). Single caller is the named `lmp_packet_completion_event_drain_dispatch`, reached via `COMPUTED_CALL` (function-pointer dispatch table entry) — confirms this is one of several completion-status lookup handlers. HIGH: named single caller + clear table-lookup mechanism. |
+| `0x800598c8` | 12B | `is_index_value_below_2` | Rank 182. `return param_1 < 2`. Single caller `FUN_8004a318` (an HCI Command Status (event `0xe`) handler, not yet named) uses the result to gate a PHY/codec table lookup (`FUN_8005c80c`/`FUN_8005c86c`, both still unnamed). Named conservatively for its literal structural role since the caller's exact field semantics aren't pinned down yet — flagged MEDIUM-HIGH-leaning-HIGH rather than a confident domain-specific name. HIGH (structural): single unambiguous comparison, no plausible alternate purpose. |
+
+**Ghidra mis-disassembly cluster identified (NOT renamed — these are not real functions)**:
+Ranks 183/185-189 in this window (`0x80059de4`'s neighbors aside) turned out to include 5
+addresses that decompile to `/* WARNING: Control flow encountered bad instruction data */` /
+`halt_baddata()` stubs with body size 1B: `0x8005d548`, `0x8005dd04`, `0x8005e3a8`,
+`0x8005e71c`, `0x8005f880`. These are Ghidra auto-analysis false positives — single bytes of
+data (most likely literal-pool padding or table bytes adjacent to real functions) that the
+MIPS16e forced-disassembly pass (`DM_RealtekMIPS16eForceDisassembly.py`) misidentified as
+1-byte function entries. A sixth address, `0x80052f18` (rank 184, reported size 2B), is a
+related but distinct artifact: its own decompile shows implausible code reading an
+uninitialized register (`unaff_s0`), but the real story is the `/* WARNING: Globals starting
+with '_' overlap smaller symbols at the same address */` note on its caller
+(`lmp_esco_sco_negotiation_packet_handler`) — Ghidra has a *data* global overlapping this
+"function" address, and the caller actually dereferences it as `*_FUN_80052f18` (a constant
+byte/short used in a header-length computation), not as a function call. **None of these 6
+addresses should be treated as real functions or renamed** — they are recorded here so future
+passes don't re-spend triage effort on them. They do not count against the "remaining unnamed"
+total in any meaningful sense (renaming is not applicable), but they do remain in Ghidra's
+function manager as `FUN_*` entries and so still show up in cold-triage candidate listings.
+
+**Region-wide unnamed count**: **366 total, 224 unnamed (down from 234), 142 named
+(up from 132)** — 10 new renames applied via `RenamePass32Region80050000.java`. 6 additional
+addresses identified as Ghidra mis-disassembly artifacts (not functions) and excluded from
+future rename targeting.
+
+**Next**: Pass 33 should continue cold-triage from rank ~196+ (post-artifact-cluster), and
+should explicitly exclude `0x8005d548`/`0x8005dd04`/`0x8005e3a8`/`0x8005e71c`/`0x8005f880`/
+`0x80052f18` from candidate lists. Two still-unnamed functions surfaced as context in this
+pass and worth prioritizing next: `FUN_8005c80c`/`FUN_8005c86c` (PHY/codec selection helpers
+called from the HCI Command Status path in `FUN_8004a318`) and `FUN_8004a318` itself (HCI
+event `0xe` / Command Status handler, 296B, currently unnamed despite being well-understood
+structurally from this pass's analysis).

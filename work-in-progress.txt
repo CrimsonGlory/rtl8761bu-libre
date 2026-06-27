@@ -4020,11 +4020,44 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries, count updated to 861)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 28)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage)
-          Continue from where Pass 31 left off (ranks 161-175 now done, plus both long-standing
-          Pass-4 holdovers 0x80054b14/0x8005aba8 closed). Run a fresh cold-triage to expose
-          ranks 176+. Function sizes are now ≤50B at this point in the sweep — expect lower
-          per-pass yield as easy structural-match candidates are exhausted. 234 unnamed remain.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 33 (rank ~196+ cold-triage)
+          Continue from where Pass 32 left off. Exclude the 6 confirmed Ghidra
+          mis-disassembly artifacts (0x8005d548/0x8005dd04/0x8005e3a8/0x8005e71c/
+          0x8005f880/0x80052f18 — all halt_baddata()/data-overlap stubs, not real
+          functions) from candidate lists. Also consider naming FUN_8004a318 (HCI
+          Command-Status handler, 296B) and its callees FUN_8005c80c/FUN_8005c86c,
+          surfaced as caller-context in Pass 32 but not yet named. 224 unnamed remain.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
+          ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
+          ranked 176-220 (sizes 22B down to 1B, then a discontinuity to 692B-54B with xrefs=0
+          starting at rank 190). Decompiled the 14 candidates at ranks 176-189 via
+          batch_decompile_functions, then followed up with caller-context decompiles
+          (conn_packet_type_apply_and_codec_table_sync, FUN_8004a318, FUN_80052c64,
+          FUN_800515e0) and xrefs_to checks to resolve single-caller ambiguity. 10 HIGH
+          renames applied via RenamePass32Region80050000.java (renamed=10 alreadyOk=0
+          missing=0 failed=0):
+          0x8005c948 → map_codec_type_byte_to_table_row_index
+          0x80052c64 → lmp_esco_sco_negotiation_packet_handler (692B master per-packet
+            eSCO/SCO negotiation processor, 8 named callees, xrefs=0/indirect-only)
+          0x80059de4 → apply_iir_filter_to_rssi_and_store
+          0x800515e0 → reset_procedure_state_with_3000ms_timeout
+          0x80051630 → invalidate_field_and_reset_procedure_state
+          0x800518c0 → invalidate_field_and_reset_crypto_via_LMP_25B
+          0x800515c8 → send_LMP_25B_for_fixed_default_record
+          0x80056290 → wrapping_subtract_with_fixed_modulus_and_mask
+          0x80055c54 → get_completion_status_byte_for_index
+          0x800598c8 → is_index_value_below_2
+          Also identified 6 Ghidra mis-disassembly artifacts, NOT renamed (not real
+          functions — halt_baddata()/"bad instruction data" stubs or a data-global
+          overlapping a function address): 0x8005d548, 0x8005dd04, 0x8005e3a8,
+          0x8005e71c, 0x8005f880, 0x80052f18. Documented in region doc + index so
+          future passes don't re-spend triage effort on them.
+          Region-wide: 366 total, 224 unnamed (was 234), 142 named (was 132).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 32 section)
+          → analysis/rom/rom_function_index.md (+10 entries, count updated to 908,
+            mis-disassembly cluster documented)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 33)
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 31 (rank 161+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass31.java confirmed 366 total / 118 named / 248 unnamed,
