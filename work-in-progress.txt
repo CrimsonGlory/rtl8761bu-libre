@@ -4071,23 +4071,67 @@ sweep beyond enumeration and is the most out-of-date):
           -> analysis/rom/rom_function_index.md (+26 entries, count updated to 934)
           -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 34)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 34 (fresh rank-1 re-rank, pivot from
-          exhausted xrefs=0 tail to the never-visited xrefs>=1 backlog)
-          Do NOT continue any "196+"-style cold-triage window -- Pass 33 confirmed that
-          tier is now empty. Instead do a fresh full rank-1 re-rank (xrefs DESC, size DESC)
-          of region 0x80050000-0x8005ffff and prioritize, in order:
-          1. 0x8005af8c (1796B, rank 14, 7 xrefs) -- largest unnamed function in the region.
-             A feature/capability-permission checker (param_1 categories 1/2/4, sub-index
-             param_2, checks global capability bitmasks gated by per-conn state fields).
-             Partially understood from Pass 33's context-decompile; needs full analysis.
-          2. 0x8005e01c (144B, rank 7, 11 xrefs) -- the error/log dispatcher (tag-based)
-             already used as a callee-reference in Pass 33's check_active_flag_and_substate1_
-             then_assign_0x134 writeup; likely a sink for many other gate functions.
-          3. Remaining rank 1-13/15-20 candidates by xref count (ranks 1,2,3,4,5,6,8,9,10,
-             11,12,13,15,16,17,18,19,20 -- see Pass 33 doc's printed table for addresses).
-          4. FUN_8005f8a0 (188B) -- the "apply negotiated link param by code" dispatcher
-             used by Pass 33's log_then_apply_link_param_with_default_fallback / _using_
-             default_field siblings; good secondary target once callers are clearer.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 34 (fresh rank-1 re-rank, pivot from
+          exhausted xrefs=0 tail to the never-visited xrefs>=1 backlog) (2026-06-27)
+          CheckTopRanksRegion80050000.java confirmed 366 total / 167 named / 199 unnamed
+          (matching Pass 33's end state) and reproduced the rank 1-20 diagnostic table.
+          Batch-decompiled all 20 rank-1-20 candidates (2 batches of 10 via
+          batch_decompile_functions) plus a dedicated single decompile_function call for
+          the 1796B priority target 0x8005af8c. 21 HIGH renames applied via
+          RenamePass34Region80050000.java (renamed=21 alreadyOk=0 missing=0 failed=0):
+          0x80056608 -> read_indexed_esco_link_register
+          0x80057008 -> set_link_state_with_validation
+          0x800564bc -> set_clk_adj_register_low_nibble_if_enabled
+          0x8005a048 -> compute_indexed_table_addr_by_category_and_bank
+          0x8005aa70 -> set_record_field_and_invoke_callback_if_active
+          0x80055c80 -> program_hw_link_calib_fields_and_commit_mode_6
+          0x8005e01c -> report_procedure_outcome_and_update_param_type_bitmask
+          0x80055dc4 -> invoke_link_commit_callback_mode_7
+          0x80055e50 -> enable_calib_register_pair_and_return_prev_bit10
+          0x8005a384 -> negotiate_link_interval_from_range_pairs_and_apply
+          0x80058680 -> find_link_record_by_bdaddr_and_flag
+          0x800572d8 -> flush_pending_hw_writes_or_dispatch_mode1
+          0x80055ddc -> enable_calib_register_pair_and_return_prev_bit1
+          0x8005af8c -> check_feature_permission_by_category_and_index (priority target #1,
+            largest unnamed fn in region, confirms Pass 33's hypothesis exactly)
+          0x800590b0 -> program_link_mode_registers_and_commit
+          0x80053710 -> propagate_timing_offset_to_peer_record_by_type
+          0x800512a4 -> send_one_time_event_0x71_if_not_sent
+          0x80055c68 -> invoke_link_commit_callback_mode_8
+          0x800599f8 -> validate_value_pair_within_threshold_range
+          0x80054144 -> build_param_response_buffer_by_bitmask
+          0x8005f8a0 -> apply_negotiated_link_param_by_code (priority target #3)
+          Priority target #2 (0x8005e01c) resolved: NOT a logger as Pass 33 guessed from
+          caller context alone -- it's a record-alloc + type-code-stamp + bitmask-update
+          action (allocs via dispatch_alloc_tag_d_or_11_by_record_flag, reuses the inline
+          type-code logic from compute_link_param_type_code_for_index against an independent
+          table, updates +0x84/+0x88 bitmask).
+          Region-wide: 366 total, 178 unnamed (was 199), 188 named (was 167).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 34 section)
+          -> analysis/rom/rom_function_index.md (+21 entries, count updated to 955)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 35)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 35 (continue rank-1 re-rank,
+          prioritize caller-contextualized callees surfaced by Pass 34)
+          Pass 34 resolved all of ranks 1-20 (post-Pass-33 ordering); a fresh re-rank now
+          shows 366 total / 188 named / 178 unnamed with a new top tier (ranks 1-18 have
+          xrefs=4-5, ranks 19+ drop to xrefs=3). Several of Pass 34's own callees now sit
+          near the top of this new ranking -- prioritize these first since they already
+          have caller context from Pass 34's writeups:
+          1. FUN_80053cec (290B, rank 20, 3 xrefs) -- the status/abort-check callee of
+             program_link_mode_registers_and_commit (aborts the rest of that function if
+             this returns 5).
+          2. FUN_80057180 (310B, rank 19, 3 xrefs) -- the param_1==1 redirect target of
+             flush_pending_hw_writes_or_dispatch_mode1.
+          3. FUN_8005a680 (140B, rank 8, 4 xrefs) and FUN_8005c930 (22B, rank 18, 4 xrefs)
+             -- both callees of program_link_mode_registers_and_commit.
+          4. FUN_8005f614 (124B, rank 9, 4 xrefs) -- the code-0xb delegate of
+             apply_negotiated_link_param_by_code (that function returns early after
+             calling this one, skipping its own final dispatch).
+          5. Remaining rank 1-7/10-17 candidates by xref count (0x800504e8, 0x8005cdd4,
+             0x800504b4, 0x800562f4, 0x80056f00, 0x80055ac0, 0x800508f8, 0x80055ec8,
+             0x8005d154, 0x800505c4, 0x80059a1c, 0x80051c24, 0x80059fd0, 0x80055a34,
+             0x80056260 -- see Pass 34 doc's printed table for full address list).
           Continue excluding all 8 confirmed mis-disassembly artifacts (0x8005d548/
           0x8005dd04/0x8005e3a8/0x8005e71c/0x8005f880/0x80052f18/0x80052f1a/0x80059cde).
 
