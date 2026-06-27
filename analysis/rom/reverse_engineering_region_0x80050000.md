@@ -3354,3 +3354,66 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 - Defer to dedicated Pass 37 session with full decompile view.
 
 **HIGH renames ready** (3 of 5 analyzed): `write_esco_slot_count_high_byte`, `unpack_pointer_offsets_from_packed_bitfield`, `send_event_0x71_with_high_byte_extracted` — to be bundled with Pass 36's main rename run.
+
+## Pass 36 — main batch (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Pass 35 staged 20 renames; Pass 36 pre-analysis added 3 more. This session decompiled 7 additional unnamed functions, bringing total Pass 36 renames to 10. All staged in `RenamePass36Region80050000.java`. MCP (`run_ghidra_headless`) required for application.
+
+### New renames (10 total in Pass 36)
+
+**0x80051d54** (386B) → `program_hw_registers_for_esco_sco_connection` [HIGH]
+- Central eSCO/SCO HW programming function; most complex decompiled in this region
+- Calls `validate_link_type_0_1_2`, `write_link_capability_flags_to_hw_reg_7`, `set_codec_active_and_store_params`
+- Writes packet-type field to HW channel register; triggers `atomic_increment_hw_event_counter`
+- Dispatches to `write_esco_packet_types_to_hw_channel_slots`, `flush_hw_pending_slots_by_connection_type`
+- Callers: `dispatch_hw_channel_programming_for_conn_type` (via COMPUTED_CALL), `program_hw_channel_and_slot_params`
+
+**0x80056364** (20B) → `set_hw_control_flag_bit0` [HIGH]
+- Sets/clears bit 0 of ushort at `DAT_8005637c` based on bool param_1
+- Direct callee of `program_hw_registers_for_esco_sco_connection`
+
+**0x8005ae58** (284B) → `init_esco_sco_negotiation_state_and_scan_active_conns` [HIGH]
+- Scans active connection records, resets negotiation state fields; called at start of eSCO/SCO setup
+- Uses `param_1+0x18/0x1a` timing fields; walks connection table with loop
+- Callers: `HCI_Setup_Synchronous_Connection_handler`, `conn_packet_type_apply_and_codec_table_sync`
+
+**0x80059de8** (114B) → `update_rssi_iir_filtered_for_connection` [HIGH]
+- IIR low-pass filter: `filtered = (filtered * 7 + raw_rssi) >> 3`; stores in connection record field[0x2c]
+- Saturates to signed byte range; unconditional path for first sample (no initial filter state)
+- Callers: `FUN_8004eea8`, LMP power-control path
+
+**0x80053604** (122B) → `compute_slot_aligned_timing_offset_from_category_bank` [HIGH]
+- Reads slot-budget table entry via `compute_indexed_table_addr_by_category_and_bank` for (type, bank, adj, mode=0)
+- If field[0x2a] bit0 clear: adds global offset `*puVar2` to iVar3; else: rounds up to next 0x271-multiple (BT 625µs boundary)
+- Stores result bits[9:5] in conn_record[0x1e]; returns aligned slot offset
+- Caller: `build_param_response_buffer_by_bitmask`
+
+**0x80052160** (80B) → `dispatch_hw_channel_programming_for_conn_type` [HIGH]
+- Dispatches HW channel programming by connection type bits in `param_1[8]`:
+  - bit2=0, bit3=0: no-op
+  - bit2=0, bit3=1, bit0=0: `program_hw_channel_b_and_slot_params_A()`
+  - bit2=0, bit3=1, bit0=1: `program_hw_registers_for_esco_sco_connection()`
+  - bit2=1, bit0=0: `program_hw_channel_c_and_slot_params_B()`
+  - bit2=1, bit0=1: `program_hw_channel_and_slot_params()`
+- Calls `atomic_increment_hw_event_counter()` unconditionally after dispatch
+- Callers: `FUN_8004ef08`, `LMP_power_and_clk_adj_procedure_orchestrator` (both via COMPUTED_CALL)
+
+**0x80051100** (30B) → `atomic_increment_hw_event_counter` [HIGH]
+- IRQ-safe: disables interrupts, increments 32-bit counter at `PTR_DAT_80051120[0x24]`, re-enables
+- Called unconditionally by `dispatch_hw_channel_programming_for_conn_type`
+
+### Rename script
+
+`RenamePass36Region80050000.java` written to `/root/wairz/ghidra/scripts/` — 10 entries (3 from pre-analysis + 7 from main batch). Pending MCP execution via `run_ghidra_headless`.
+
+### Deferred large targets
+
+**FUN_80057ce8** (1314B): Largest remaining unnamed. Calls `poll_stable_hw_register_pair_for_channel`, multiple `read_indexed_link_register`. Too large for single-call REST decompile; defer to Pass 37 with MCP available.
+
+**FUN_80051368** (426B): Complex eSCO/SCO negotiation record allocator. Reads `param_1+8` connection type byte; does `alloc_kind_record_and_clear_tail(uVar6)` where kind ∈ {0x26/0x30/6/10}. Deferred to Pass 37.
+
+### Coverage after Pass 36
+
+366 total / **218 named** (was 208) / **~148 unnamed** (was ~158). 30 renames pending script execution (Pass 35: 20, Pass 36: 10).
+
+**Next**: Pass 37 — apply both rename scripts via MCP, re-rank remaining ~148 unnamed, dedicated decompile of FUN_80057ce8 and FUN_80051368.
