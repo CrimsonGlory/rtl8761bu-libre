@@ -1073,3 +1073,39 @@ feeding a different parallel set of fallback implementations
 `uninteresting_if_0x80100000...`, `func4_that_uses_structs_at_0x80100000`,
 `func8_that_uses_structs_at_0x80100000`). One naming correction recommended
 (`0x80009cc0`), not applied pending the rename-persistence fix.
+
+## Out-of-gap-scope sweep — batch 1 (2026-06-27)
+
+Targeted the 101 remaining unnamed functions in the full `0x80000000–0x8000ffff` range
+(including interrupt-vector region and functions previously documented in sibling docs
+`reverse_engineering_boot_reset_sequence.md` / `reverse_engineering_interrupt_vectors.md`).
+The triage ran the full region via `ListUnnamedRegion0x80000000.java`, then
+`batch_decompile_functions` on the top-10 by size + key callees identified during
+analysis.
+
+**13 new names applied** to previously-unnamed `FUN_*` in this region (plus 3 cross-region
+callees in 0x80070000 named opportunistically — see their entries in `rom_function_index.md`).
+All renames applied to live Ghidra via `RenamePass1Region80000000.java` (`ok=16 fail=0`).
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80000000` | ~464B | `exception_handler_save_regs_and_dispatch` | MIPS general exception handler entry — saves all GPRs to RAM frame (`0x80120b44`), checks Cause register (bit [6:2]), calls `isr_bottom_half_status_dispatcher()`, restores EPC and returns. |
+| `0x80009014` | 36B | `set_status_reg_clear_exl_set_ie` | `setCopReg(Status, Status & 0xfffffffd \| 1)` — clears EXL (bit 1), sets IE (bit 0). |
+| `0x80009038` | 40B | `set_status_reg_clear_exl_enable_im3` | `setCopReg(Status, Status & 0xffff03fd \| 0x800)` — clears most interrupt masks + EXL, enables IM3 (bit 11) only. |
+| `0x800090b8` | 22B | `enable_all_interrupts_clear_exl` | `setCopReg(Status, Status & 0xfffffffd \| 0xff00)` — clears EXL, enables all 8 hardware interrupt lines. |
+| `0x800090dc` | 24B | `disable_interrupts_return_status` | `setCopReg(Status, Status & 0xfffffffe)`, returns old Status — standard MIPS disable-interrupts, pair with `enable_interrupts_(set_CP0_Status_to_arg)`. |
+| `0x8000937c` | 84B | `count_leading_zeros_32` | Divide-and-conquer CLZ — 32 → 16 → 8 → 4 → 2 → 1 shifts, accumulates zero count, returns result. |
+| `0x80009794` | 46B | `atomic_saturating_byte_decrement` | Interrupt-safe: `if (*byte < param) *byte = 0; else *byte -= param` — floor at zero. |
+| `0x8000942c` | 532B | `init_baseband_hw_from_config_struct` | Reads clock mode from hardware status register (top 2 bits), programs mode bits; then reads baud-config + timing fields from config struct (offsets `0xc`–`0x1da`), writes to 8 MMIO hardware registers (`PTR_baud_config_magic_value_115200` + 7 adjacent); calls `baseband_feature_pool_init_and_reset`. |
+| `0x8000987c` | 88B | `call_fptr_if_set_wraps_packet_send_5args` | Override+fallback: optional 5-arg hook at `PTR_DAT_800098bc`; fallback = `send_packet_via_mmio_slot_table(p1,p2,p3,p4)`; maps -1 → status 5, else 0. |
+| `0x80009950` | 60B | `call_fptr_if_set_wraps_packet_slot_flush_check` | Override+fallback: optional hook at `PTR_DAT_8000998c`; fallback = `flush_check_packet_slot(slot_idx)`; maps -1 → status 5. |
+| `0x80009c40` | 60B | `call_fptr_if_set_wraps_pool_slot_reset` | Override+fallback: optional hook at `PTR_DAT_80009c7c`; fallback = `func5_that_uses_structs_at_0x80100000(param_1)` (pool-slot reset). |
+| `0x80009c80` | 60B | `call_fptr_if_set_wraps_pool_slot_init_and_zero` | Override+fallback: optional hook at `PTR_DAT_80009cbc`; fallback = `func7_that_uses_structs_at_0x80100000(*param_1)` (pool-slot init/zero-fill). |
+| `0x8000a2ac` | 78B | `drain_all_hci_cmd_completion_slots_once` | Interrupt-safe guard: if flag==0, calls `called_at_end_of_every_HCI_CMD_via_fptr(i, 3)` for i=0..11 (12 slots), then sets flag; programs hardware flag bits. |
+
+**Cross-region callees named opportunistically** (in 0x80070000; see index entries there):
+`send_packet_via_mmio_slot_table` (`0x80075db8`), `flush_check_packet_slot` (`0x80075eb0`),
+`clear_packet_slot_descriptor_fields` (`0x80075890`).
+
+**Unnamed count**: was 101 at sweep start, now **88** (13 named in this batch; the 3
+cross-region 0x80070000 names don't count against this region's budget).

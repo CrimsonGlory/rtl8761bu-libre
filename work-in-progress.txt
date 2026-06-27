@@ -3921,14 +3921,29 @@ sweep beyond enumeration and is the most out-of-date):
         recommended renames, and HANDLER tier staging.
         → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 COMPLEX batch 2 section added)
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
-          This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
-          targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
-          distribution table still counts 88 unnamed functions in this region that were always
-          *outside* that gap scope (e.g. the excluded interrupt-vector sub-range). Since the goal is
-          now literally every function in the block, triage and resolve these 88 too, following the
-          same pattern; document as a new section in `reverse_engineering_region_0x80000000.md` rather
-          than reopening the already-closed gap-sweep ticket.
+[DONE]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 1 (2026-06-27)
+          101 unnamed functions enumerated (ListUnnamedRegion0x80000000.java). Top-10 by size +
+          callees decompiled (batch_decompile_functions). 13 new names applied in this region:
+          `exception_handler_save_regs_and_dispatch`, `set_status_reg_clear_exl_set_ie`,
+          `set_status_reg_clear_exl_enable_im3`, `enable_all_interrupts_clear_exl`,
+          `disable_interrupts_return_status`, `count_leading_zeros_32`,
+          `atomic_saturating_byte_decrement`, `init_baseband_hw_from_config_struct`,
+          `call_fptr_if_set_wraps_packet_send_5args`, `call_fptr_if_set_wraps_packet_slot_flush_check`,
+          `call_fptr_if_set_wraps_pool_slot_reset`, `call_fptr_if_set_wraps_pool_slot_init_and_zero`,
+          `drain_all_hci_cmd_completion_slots_once`. Plus 3 cross-region 0x80070000 callees named:
+          `send_packet_via_mmio_slot_table`, `flush_check_packet_slot`,
+          `clear_packet_slot_descriptor_fields`. All 16 renames applied via
+          `RenamePass1Region80000000.java` (ok=16 fail=0). Total now 806 named (was 790).
+          **88 of 101 unnamed remain** in this region.
+          → analysis/rom/reverse_engineering_region_0x80000000.md (out-of-gap-scope batch 1 section)
+          → analysis/rom/rom_function_index.md (+16 entries, count updated to 806)
+          → analysis/INDEX.md (region updated, [NEXT] pointer set)
+
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 2 (88 remaining)
+          Continue the out-of-gap-scope sweep from batch 1 above. Decompile the next tier of unnamed
+          functions (by size/xref priority) and apply renames following the same pattern as batch 1.
+          Document findings in a new "batch 2" subsection of the "Out-of-gap-scope sweep" section
+          in `reverse_engineering_region_0x80000000.md`.
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`
