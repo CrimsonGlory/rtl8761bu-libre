@@ -1,12 +1,16 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80050000-0x8005ffff
 
-**Status**: PASS 10-11 BLOCKED (2026-06-25) — see "Pass 10/11 (2026-06-25)" section at the
-end of this doc. A wairz persistence bug means none of this region's claimed renames
-(Pass 2 through Pass 10) are actually visible in the live Ghidra project via
-`list_functions`/`decompile_function`, despite rename scripts reporting success. Tracked
-in `wairz_requested_changes.txt`. The decompiled-code evidence/reasoning in Passes 2-9
-below checks out against real decompiles (independently spot-checked this session) — it
-is specifically the *Ghidra symbol rename* that never persisted, not the analysis itself.
+**Status**: PASS 10 COMPLETE FOR REAL (2026-06-27) — see "Pass 10 (2026-06-27, real
+execution)" section near the end of this doc. The wairz rename-persistence bug that
+blocked this region since 2026-06-25 is now confirmed fixed and durable (Docker volume
+fix; ~290 historical Phase 9 renames project-wide already re-applied via
+`ReapplyPhase9Renames.java`, see `wairz_requested_changes.txt` and
+`rom_function_index.md`'s top banner). This region's own previously-blocked rename — the
+connection-type dispatch hook `FUN_80050810` + its 4 type handlers + the eSCO
+packet-type validator `FUN_80044730` — has now been applied for real via
+`RenameConnTypeDispatchCluster.java` and independently re-verified live
+(`decompile_function` on all 6 new names resolves correctly in a fresh call). Pass 9's
+and earlier passes' renames were already covered by the project-wide reapplication.
 
 **Status (superseded)**: PASS 9 COMPLETE (cold-triage rank 26+ continuation) — 2026-06-23
 
@@ -1389,3 +1393,124 @@ itself was spot-checked as real), not as a record of actual Ghidra renames — r
 of those names independently before relying on them. Once the wairz bug is fixed, Pass
 10-11 should be re-run for real (the cold-triage script's rank 51+ candidate list is still
 valid and unaffected by this bug — only the final rename-application step is broken).
+
+---
+
+## Pass 10 (2026-06-27, real execution)
+
+The wairz rename-persistence bug is now confirmed fixed and durable project-wide (Docker
+volume mount + ownership fix; verified via a live rename canary and a full project-wide
+reapplication of ~290 historical Phase 9 renames — see `wairz_requested_changes.txt` and
+`rom_function_index.md`'s top banner). Before doing any new work, independently
+re-verified two of this region's own renames from the reapplication pass via fresh
+`decompile_function` calls: `release_connection_record` (`0x8005b79c`) and
+`init_connection_record` (`0x8005b9d8`) both resolved correctly with their documented
+decompiled bodies — confirming the fix holds for this region specifically, not just the
+project's reapplication-script aggregate count.
+
+**This region's own Pass-10 target was never actually renamed** — the 2026-06-24 "PASS 10
+COMPLETE" claim (`0x80050810` → `esco_link_type_dispatcher`) was traced (2026-06-25) to an
+empty, never-filled `RenamePass10Region80050000.java` stub, so nothing had been applied
+even before the persistence bug blocked it. Re-verified live this pass:
+`decompile_function("FUN_80050810")` still resolved under its original name, confirming
+the gap.
+
+**Re-decompiled and cross-checked against the existing, more thorough
+`reverse_engineering_conn_type_dispatch_and_esco.md` analysis** (written 2026-06-21, never
+applied as Ghidra renames) rather than trusting the thinner 2026-06-24 "esco_link_type_dispatcher"
+naming verbatim. All 6 functions in that doc's cluster were independently re-decompiled
+fresh this pass and matched the doc's pseudocode exactly (field offsets, branch structure,
+callee list) — confirming the existing analysis is accurate and current:
+
+| Address | Size | Old name | New name | Role |
+|---------|------|----------|----------|------|
+| `0x80050810` | 218B | `FUN_80050810` | `conn_type_dispatch_hook` | `bos_base+0xe0` connection-type dispatch hook; routes to 4 handlers by 3-bit type field in `field_0x8`, computes a post-dispatch checksum into `field_0x9` |
+| `0x800506ac` | 354B | `FUN_800506ac` | `conn_type0_multilink_setup_handler` | Type-0 handler: multi-link/linked-sub-record connection setup (the elaborate combined-eSCO-leg case) |
+| `0x8004e670` | 130B | `FUN_8004e670` | `conn_type1_inherit_from_parent_handler` | Type-1 handler: inherits state from parent link |
+| `0x8004e6f4` | 118B | `FUN_8004e6f4` | `conn_type2_inherit_from_parent_handler` | Type-2 handler: inherits state from parent link, with a fast-path for an already-combined parent sub-state |
+| `0x8004e76c` | 72B | `FUN_8004e76c` | `conn_type3_inherit_from_parent_handler` | Type-3 handler: simplest variant of the parent-inheritance pattern |
+| `0x80044730` | 102B | `FUN_80044730` | `esco_packet_type_validate_and_set_air_mode` | eSCO packet-type validation against a 14-entry table + air-mode lookup, feeding the codec config pipeline |
+
+Note `0x80044730`/`0x8004e670`/`0x8004e6f4`/`0x8004e76c` are address-range-wise in region
+`0x80040000`-`0x8004ffff`, not `0x80050000`-`0x8005ffff` — but they're documented and
+renamed together here (and counted as one PASS 10 batch) because they're one cohesive,
+already-jointly-documented functional cluster (`reverse_engineering_conn_type_dispatch_and_esco.md`)
+centered on the `0x80050810` dispatch hook that's the actual Pass-10 target for this
+region. `rom_function_index.md`'s per-address rows are filed under each function's real
+address-range bucket regardless.
+
+**Names chosen over the stale 2026-06-24 claim**: `conn_type_dispatch_hook` (not
+`esco_link_type_dispatcher`) because the dispatch field is a general connection-type
+selector used by ACL/SCO/eSCO/multi-link setups alike (per the existing doc's title and
+`CLAUDE.md`'s own "type-dispatch hook" terminology for the `bos_base+0xe0` slot) — eSCO is
+only one of several connection types routed through it, and the dedicated eSCO
+packet-type table lookup is the separate, correctly-named `esco_packet_type_validate_and_set_air_mode`
+(`0x80044730`).
+
+**Applied via** `RenameConnTypeDispatchCluster.java` (`run_ghidra_headless`,
+`use_saved_project=true`, invoked via `script_file_id` since `save_ghidra_script` output is
+not directly visible to `script_name` — must pass the returned file's UUID as
+`script_file_id` instead). Script's own per-address check: `renamed=6 alreadyOk=0
+missing=0 failed=0`. Independently re-verified in a separate `decompile_function` round
+trip for all 6 new names — all resolve and decompile correctly, and
+`conn_type_dispatch_hook`'s own decompile shows its callees already resolved under their
+new names too (`conn_type1_inherit_from_parent_handler` etc.), confirming the rename
+propagated through Ghidra's own analysis, not just the symbol table.
+
+**Region-wide unnamed count**: 343 → 341 (the 2 in-region addresses, `0x80050810` and
+`0x800506ac`; the other 4 renamed functions belong to region `0x80040000`'s count, not
+this region's).
+
+**Pass 11 status**: the cold-triage rank 51+ candidate list (`ColdTriageRegion80050000Pass10.java`,
+30 candidates ranked 51-80) is unaffected by any of this and still valid for the next
+session that picks up fresh decompile/rename work in this region beyond the
+already-documented cluster above.
+
+---
+
+## Pass 11 (2026-06-27, rank 51-80 first batch — 0 HIGH yield)
+
+Re-ran `ColdTriageRegion80050000Pass10.java` fresh (script still on disk, runs fine
+despite the directory-wide javac noise from ~15 unrelated broken legacy scripts — known,
+pre-existing tooling debt, not a new blocker). Confirmed: 294 unnamed outside the
+already-triaged top-50, 30 ranked candidates (rank 51-80, 290B down to 208B). Full list
+recorded for the next continuation:
+
+```
+#51  0x80053cec (290B) xrefs:3   #61  0x8005bf4c (252B) xrefs:0   #71  0x8005c4c0 (226B) xrefs:1
+#52  0x8005ae58 (284B) xrefs:3   #62  0x80056f00 (248B) xrefs:4   #72  0x8005174c (224B) xrefs:3
+#53  0x800530a0 (284B) xrefs:1   #63  0x80059734 (248B) xrefs:1   #73  0x80051c60 (224B) xrefs:1
+#54  0x8005a7ec (284B) xrefs:1   #64  0x80054044 (242B) xrefs:2   #74  0x80051f14 (224B) xrefs:1
+#55  0x8005ca30 (278B) xrefs:0   #65  0x80059cec (242B) xrefs:0   #75  0x80050ff8 (222B) xrefs:2
+#56  0x8005a0d4 (272B) xrefs:1   #66  0x80053514 (232B) xrefs:1   #76  0x80059910 (222B) xrefs:1
+#57  0x80055480 (270B) xrefs:2   #67  0x8005aaac (232B) xrefs:1   #77  0x8005ff54 (218B) xrefs:0
+#58  0x8005f260 (262B) xrefs:1   #68  0x80053ebc (228B) xrefs:2   #78  0x800573d8 (212B) xrefs:20
+#59  0x8005c100 (260B) xrefs:1   #69  0x8005c720 (228B) xrefs:1   #79  0x8005e648 (210B) xrefs:0
+#60  0x8005efe8 (256B) xrefs:2   #70  0x8005e2c4 (228B) xrefs:0   #80  0x80057094 (208B) xrefs:18
+```
+
+Per established methodology, decompiled the top 6 by xref count (via
+`batch_decompile_functions`, 6/6 success — confirms the wairz batch-decompile fix from
+2026-06-27 holds for this region too): `0x800573d8` (20 xrefs), `0x80057094` (18 xrefs),
+`0x80056f00` (4 xrefs), `0x80053cec`/`0x8005ae58`/`0x8005174c` (3 xrefs each).
+
+**Results — 0 HIGH, all stay MEDIUM/MEDIUM-HIGH:**
+
+| Address | Size | Xrefs | Read | Confidence |
+|---------|------|-------|------|------------|
+| `0x800573d8` | 212B | 20 | Disable-interrupts → write 32-bit value (split into 2×16-bit halves) to one register pair → write a 10-bit index OR'd with a go-bit (`0x8000`) to a control register → poll a status register for a done-bit (`0x20`) → check a slot-occupancy bitmap for collision (divisor `0x1e`=30) → log+set-error-flag on collision, else success → re-enable interrupts | MEDIUM-HIGH — clear "indexed hw-table write with slot-collision guard" shape, but the specific table/peripheral is unidentified |
+| `0x80057094` | 208B | 18 | **Exact structural sibling of `0x800573d8`** — identical disable/write/poll/collision-check/log/enable shape, different constants (status done-bit `0x10`, divisor `0x14`=20, direct range check `<0xa0` instead of a bitmask-derived check) | MEDIUM-HIGH — same caveat; the divisor difference (30 vs 20) suggests two distinct fixed-size hardware tables, not two halves of one |
+| `0x80056f00` | 248B | 4 | Writes two 8-entry 16-bit arrays (`param_1`, `param_2`) into two fixed hardware tables, sets a go-bit, polls a done-bit, reads 8 entries back from the *second* table into `param_3`, then logs `param_1`+`param_2` together and `param_3` separately | MEDIUM-HIGH — "write A+B, trigger, read back from B" with paired before/after logging strongly resembles a hardware crypto-engine invocation (8×16-bit = 128 bits matches SAFER+'s block/key size, used by BT classic pairing E1/E21/E22/E3), but unconfirmed without tracing callers |
+| `0x80053cec` | 290B | 3 | Type-gated (`param_1` 1-3) per-slot table programming: acquires a context via `FUN_8002b9a4`, loops 3 slots writing two value/index pairs (`param_2`/`param_3`, `param_4`/`param_5`) into per-slot records (`FUN_8002b270`/`FUN_8002b28c`), sets a valid-bit, releases the context via `FUN_8002b65c` | MEDIUM — clear 3-slot table-write shape but depends on 4 other unnamed helpers; purpose underdetermined |
+| `0x8005ae58` | 284B | 3 | No params. Operates on the already-named connection-record array (`PTR_base_of_0x1ac_struct_array_0xA_large2_*`): resets a 32-bit "current minimum" sentinel field (`field479-482_0x1ec-0x1ef`), then iterates all 11 connection-record slots (active-bitmask-gated) computing and tracking the minimum of a 16-bit per-connection value, logging a function-pointer-call result alongside it | MEDIUM-HIGH — same struct-touching pattern family as `afh_report_worst_channel`, but finds a *minimum*, not a *worst*; semantic identity of the tracked value unconfirmed |
+| `0x8005174c` | 224B | 3 | Walks 2 linked lists unlinking nodes by tag (`tag==5` unconditionally, `tag==6` only when `param_1==0`, calling `FUN_8004ee94` per match), then branches on a list-head/flags check to either finalize (`FUN_8005122c`) or invoke a function pointer + 2 more cleanup helpers (`FUN_800515c8`/`FUN_8005164c`) | MEDIUM-HIGH — linked-list cleanup/cancel-by-tag dispatcher, likely timer/event-queue-adjacent (same family as `sched_event_sorted_insert_with_overlap_pushback` from Pass 5) but exact event-tag semantics unconfirmed |
+
+**0 HIGH renames this pass** — none of the 6 reach this project's established HIGH bar
+(no opcode/event literal, no exact-match already-named sibling, no unambiguous single
+semantic). Per the project's pivot policy ("park only after thin/0-HIGH yield"), this is
+a single 0-HIGH pass, not yet a trend — recommend one more rank-51+ batch (ranks 57, 59,
+64, 68, 72 next by remaining xref count) before considering a pivot. Remaining
+**24 of the 30** rank-51-80 candidates are still undecompiled.
+
+**Region-wide unnamed count**: unchanged at 341 (no renames applied this pass).
+

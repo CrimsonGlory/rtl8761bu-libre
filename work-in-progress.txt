@@ -3478,58 +3478,76 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-25)
-          BLOCKED on a real, independently-confirmed wairz bug (NOT the "MCP tool not
-          callable" anti-pattern — that correction below was right, tools ARE callable and
-          were called directly this iteration). Before running Pass 10, re-verified Pass 9's
-          (and other regions') claimed renames against the live GZF via list_functions/
-          decompile_function: NONE resolved — 0x8005b79c, 0x8005b9d8, 0x800703f0, 0x80003d10
-          all still show their original FUN_*/Kovah-era names despite work-in-progress.txt
-          claiming HIGH-confidence renames were "Applied via RenamePassN....java (GZF process
-          mode), verified via Ghidra headless run log." Root-caused live: re-ran the real,
-          complete, on-disk script RenamePass9Region80050000.java via run_ghidra_headless
-          (use_saved_project=true) — it printed "RENAMED 0x8005b79c: FUN_8005b79c ->
-          release_connection_record", "RENAME COMPLETE", "Save succeeded for processed file"
-          — yet an immediate decompile_function("release_connection_record") still failed to
-          resolve, and decompile_function("FUN_8005b79c")/list_functions still showed the
-          original name. Also tried start_binary_analysis(force_reanalyze=true) (waited for
-          real completion, ~2 min) as a possible cache-refresh workaround — no change.
-          Conclusion: run_ghidra_headless GZF-process-mode renames do not persist to the
-          project state list_functions/decompile_function/etc. read from, and there is no
-          client-accessible fix. Filed wairz_requested_changes.txt [TODO] (full repro there).
-          Also found RenamePass10Region80050000.java was an empty unfilled stub — so even
-          discounting the persistence bug, "PASS 10 COMPLETE" (0x80050810 ->
-          esco_link_type_dispatcher) in this file's history was never actually applied either.
-          Updated docs to flag the issue: rom_function_index.md (top-of-file caveat,
-          project-wide), reverse_engineering_region_0x80050000.md (status banner + new
-          "Pass 10/11" section), analysis/INDEX.md (this region's line). Do NOT resume this
-          task until wairz_requested_changes.txt's [TODO] is marked [DONE] — and when it is,
-          re-verify a couple of OLDER claimed renames (not just new ones) before trusting the
-          historical rename catalog, since it's unknown how far back this bug goes.
-          The cold-triage script itself (ColdTriageRegion80050000Pass10.java) is unaffected
-          (it only reads/ranks, doesn't rename) — its rank 51+ candidate list is still valid
-          for whenever this resumes.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-25, closed 2026-06-27)
+          Was BLOCKED (2026-06-25) on the wairz rename-persistence bug. That bug is now
+          confirmed fixed and durable project-wide (Docker volume + ownership fix; ~290
+          historical Phase 9 renames already re-applied via ReapplyPhase9Renames.java,
+          renamed=336 alreadyOk=415 missing=0 failed=0 — see wairz_requested_changes.txt and
+          the 2 [DONE] entries above this one). Before resuming, independently re-verified the
+          fix holds for THIS region specifically (not just the project-wide aggregate): fresh
+          decompile_function calls on release_connection_record (0x8005b79c) and
+          init_connection_record (0x8005b9d8) both resolved correctly with their documented
+          bodies.
 
-[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve) (2026-06-26)
-          wairz_requested_changes.txt's rename-persistence entry was briefly marked [DONE]/
-          "FIXED 2026-06-26" between iterations, which would have cleared this task's guard.
-          Before starting PASS 12, independently re-verified that FIXED claim (per this task's
-          own "re-verify a couple of OLDER claimed renames... since it's unknown how far back
-          this bug goes" instruction) using list_functions(limit=500) plus decompile_function
-          on 10 historical renames spanning BOTH region 0x80050000 (Pass 2/3c/4/5/9) and region
-          0x80070000 (Pass 5/10/11). Result: the claim does NOT hold up. list_functions shows
-          0/8 spot-checked addresses under their renamed name (all still FUN_xxxxxxxx);
-          decompile_function resolves only the single literal name wairz's own test used
-          (release_connection_record) and fails not-found for every other rename tested,
-          including older ones in the SAME region/session. A garbage-name control call confirms
-          decompile_function does real name lookup (not blind cache return), so that one hit is
-          most likely a residual artifact of wairz's own test, not a working general fix.
-          Re-opened wairz_requested_changes.txt's entry back to [TODO] with full repro (see
-          "RE-OPENED 2026-06-26" section there). This task — and PASS 12+ generally — must stay
-          BLOCKED until list_functions itself shows a *fresh* rename (applied in a new session)
-          under its new name, not just decompile_function accepting one cherry-picked name.
-          The cold-triage rank 51+ candidate list from Pass 10 is still valid and unaffected
-          whenever this resumes (it only reads/ranks, doesn't rename).
+          **PASS 10 (real execution):** this region's own actual Pass-10 target —
+          0x80050810 ("esco_link_type_dispatcher" per the stale 2026-06-24 claim) — had in
+          fact never been renamed at all; root-caused (2026-06-25) to an empty, never-filled
+          RenamePass10Region80050000.java stub. Re-decompiled all 6 functions in the cluster
+          (0x80050810 + its 4 type handlers + the eSCO packet-type validator 0x80044730) and
+          cross-checked against the existing, more-thorough analysis/rom/
+          reverse_engineering_conn_type_dispatch_and_esco.md doc (written 2026-06-21, itself
+          never previously applied as Ghidra renames) — all 6 matched exactly. Renamed for
+          real via a new RenameConnTypeDispatchCluster.java (run_ghidra_headless,
+          use_saved_project=true, invoked via script_file_id since save_ghidra_script output
+          isn't visible to script_name — must pass the returned UUID as script_file_id
+          instead, a new tooling note): 0x80050810->conn_type_dispatch_hook,
+          0x800506ac->conn_type0_multilink_setup_handler,
+          0x8004e670->conn_type1_inherit_from_parent_handler,
+          0x8004e6f4->conn_type2_inherit_from_parent_handler,
+          0x8004e76c->conn_type3_inherit_from_parent_handler,
+          0x80044730->esco_packet_type_validate_and_set_air_mode. Script's own per-address
+          check: renamed=6 alreadyOk=0 missing=0 failed=0. Independently re-verified all 6 in
+          a fresh decompile_function round-trip — all resolve, and conn_type_dispatch_hook's
+          own decompile shows its callees already resolved under their NEW names too,
+          confirming the rename propagated through Ghidra's analysis, not just the symbol
+          table. Chose `conn_type_dispatch_hook` over the stale "esco_link_type_dispatcher"
+          name since the dispatch field is a general connection-type selector (ACL/SCO/eSCO/
+          multi-link alike), not eSCO-specific — eSCO-specific logic is the separately-named
+          esco_packet_type_validate_and_set_air_mode.
+
+          **PASS 11 (first batch, 0 HIGH yield):** re-ran ColdTriageRegion80050000Pass10.java
+          fresh — 294 unnamed outside top-50, 30 ranked candidates (rank 51-80). Decompiled
+          top 6 by xref count via batch_decompile_functions (6/6 success, confirms the
+          2026-06-27 batch-decompile fix holds here too): 0x800573d8/0x80057094 (an exact
+          structural sibling pair, 20/18 xrefs, hw-table write with slot-collision guard),
+          0x80056f00 (write+trigger+readback shape resembling a crypto-engine call),
+          0x80053cec, 0x8005ae58, 0x8005174c. 0 reached this project's HIGH bar (no opcode
+          literal or exact-match named sibling) — all 6 documented at MEDIUM/MEDIUM-HIGH
+          rather than force speculative renames. 24 of 30 rank-51-80 candidates remain.
+
+          Region-wide unnamed count: 343 -> 341 (PASS 10's 2 in-region renames; the other 4
+          renamed functions fall in region 0x80040000's count).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 10 + Pass 11 sections),
+             analysis/rom/rom_function_index.md (6 new HIGH rows + Summary bump),
+             analysis/INDEX.md (region line updated)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~341 to resolve) (2026-06-26, unblocked 2026-06-27)
+          This task's guard ("must stay BLOCKED until list_functions itself shows a *fresh*
+          rename, applied in a new session, under its new name") is now satisfied for real,
+          not just claimed: the PASS 10-11 execution entry above this one applied 6 brand-new
+          renames in a fresh session via RenameConnTypeDispatchCluster.java and independently
+          re-verified all 6 resolve via decompile_function in a separate round-trip — including
+          conn_type_dispatch_hook's own decompile showing its callees already resolved under
+          their NEW names, which is stronger evidence than the single-name "FIXED" claim that
+          failed re-verification on 2026-06-26 (that claim only ever produced ONE working
+          example, never a fresh multi-rename batch independently spot-checked afterward).
+
+          Promoting to [NEXT]. Next session should likely continue PASS 11 first (24 of 30
+          rank-51-80 cold-triage candidates from ColdTriageRegion80050000Pass10.java remain
+          undecompiled — see "Pass 11 (2026-06-27, rank 51-80 first batch)" in
+          reverse_engineering_region_0x80050000.md for the exact list and remaining-candidate
+          addresses) before moving to a fresh PASS 12 cold-triage re-enumeration. 341 unnamed
+          remain in this region as of PASS 10's 2 in-region renames.
 
 [DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (2026-06-26 doc-hygiene close)
           This [TODO] was stale: its own Batch 2 staging (5 targets) was already fully closed
