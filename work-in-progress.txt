@@ -3959,10 +3959,26 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+25 entries, count updated to 831)
           → analysis/INDEX.md (region updated, [NEXT] pointer set)
 
-[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 3 (65 remaining)
-          Continue the out-of-gap-scope sweep from batch 2 above. Re-enumerate remaining 65
-          unnamed, decompile the next tier by size/xref priority, and apply renames.
-          Document findings in a new "batch 3" subsection in `reverse_engineering_region_0x80000000.md`.
+[DONE]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep — batch 3 (2026-06-27)
+          Final substantive batch. 3 new names: `disable_interrupts_return_status_v2` (0x800090fe),
+          `dispatch_hci_cmd_completion_from_queue_n_times` (0x80009d30), `read_hw_register_bit8`
+          (0x80009d9c). Applied via `RenamePass3Region80000000.java` (ok=3 fail=0).
+          Total named: 834 (was 831).
+          Remaining 62 assessed as irreducible:
+          - ~15 decompile to halt_baddata() — instruction data misidentified as code
+          - ~40 are 1-2B entries (single bytes in MIPS16e interrupt stub region)
+          - 3-4 are empty `return;` stubs (alignment/padding)
+          - 5 are known non-functions (boot preamble data bytes, 0x8000046c pad)
+          Out-of-gap-scope sweep COMPLETE. Total: 39 new names (36 in-region + 3 cross-region).
+          → analysis/rom/reverse_engineering_region_0x80000000.md (batch 3 section)
+          → analysis/rom/rom_function_index.md (+3 entries, count updated to 834)
+          → analysis/INDEX.md (region closed)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 24 (cold-triage continuation)
+          Continue the 0x80050000 region sweep from where Pass 23 left off (as noted in INDEX.md).
+          Run a fresh cold-triage of the rank-91+ unnamed functions to identify the next batch
+          of high-value targets. Decompile, analyze, rename, and document per the standard pattern.
+          298 unnamed remain at last count (before Pass 23 removed 12).
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`

@@ -1151,3 +1151,33 @@ All renames applied via `RenamePass2Region80000000.java` (ok=25, fail=0).
 
 **Unnamed count**: was 88 at batch 2 start, now **65** (23 named; 2 cross-region 0x80070000
 don't count against this region's budget).
+
+## Out-of-gap-scope sweep — batch 3 (2026-06-27)
+
+Completed the sweep of all substantive unnamed functions. Re-enumerated the 65 remaining,
+decompiled all entries with size ≥ 6B that hadn't been analyzed yet.
+
+**3 new names applied** via `RenamePass3Region80000000.java` (ok=3 fail=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x800090fe` | 6B | `disable_interrupts_return_status_v2` | `Status & 0xfffffffe`, returns old Status — compact duplicate of `disable_interrupts_return_status` at `0x800090dc`; used in a different call context. |
+| `0x80009d30` | 82B | `dispatch_hci_cmd_completion_from_queue_n_times` | Extracts count from bits [20:16] of param_1; loops count times; each iteration indexes a 16-entry function-pointer table by `*counter & 0xf` and calls it with code 3 (normal) or code 3/entry/size (extended). |
+| `0x80009d9c` | 12B | `read_hw_register_bit8` | Returns `(*DAT_80009da8 >> 8) & 1` — reads bit 8 of a hardware register, pairs with `write_hw_register_bit8_validated`. |
+
+**Remaining 62 functions are irreducible by standard decompile-and-name analysis:**
+- ~15 entries (`0x80009060`, `0x80009082`, `0x80009088`, `0x8000914c`, `0x80009154`, etc.) decompile
+  to `halt_baddata()` — Ghidra misidentified instruction data as code.
+- ~40 entries (1–2B: `0x80009220`–`0x800092c8` cluster + scattered 2B entries) are individual
+  bytes/halfwords misidentified as functions; they are MIPS16e handler stub bytes in the interrupt
+  trampoline region (`reverse_engineering_interrupt_vectors.md` covers `0x80009000`–`0x80009260`).
+- 3 entries (`0x80000078`, `0x800092c8`, `0x800092dc`, `0x80009d98`) decompile as empty `return;`
+  stubs — probably alignment padding or empty ISR slots.
+- `0x800000be`–`0x800000c1` (4×1B) — data bytes in the boot preamble exception vector area.
+- `0x8000046c` (20B) — previously classified as non-function (padding artifact).
+
+**Out-of-gap-scope sweep conclusion**: 101 → 65 → 62 (39 named in 3 batches + 3 cross-region).
+The 62 remaining entries are not nameable functions — they are either bad data, 1-byte padding
+entries, or empty stubs. This sweep is complete for all substantive analysis purposes.
+
+**Total region 0x80000000 out-of-gap-scope: 39 new names (36 in this region + 3 cross-region).**
