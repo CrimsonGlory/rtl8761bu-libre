@@ -2050,3 +2050,71 @@ pass's `0x8005d924` itself) via the named-sibling rule; (b) if 4-5 more
 passes land at 0 HIGH, this region approaches the project's established
 pivot-to-another-region threshold.
 
+## Pass 20 — priority validators + rank ~52-62 continuation, 4 HIGH renames (breaks the streak) (2026-06-27)
+
+Re-ran `ColdTriageRegion80050000Pass19.java` fresh: confirmed unchanged from
+Pass 19's close — **366 total, 325 unnamed, 41 named**. Decompiled 10 via
+`batch_decompile_functions` (10/10 success): the priority pair
+(`0x8005d8ac`, `0x8005d834` — `0x8005d924`'s side-1/side-2 validators) plus
+rank 52-61 of the fresh list (`0x80051b54`, `0x80058974`, `0x800553dc`,
+`0x80050610`, `0x8005323c`, `0x80050d14`, `0x8005a228`, `0x80057370`).
+
+### Priority targets: `0x8005d8ac` / `0x8005d834` — pending-procedure domain pinned to eSCO/SCO
+
+Both are near-identical: each calls `FUN_8005d438` with a distinct tag
+(`0x14` for `0x8005d8ac`, `0x15` for `0x8005d834`), and on success copies 4
+fields — offsets `+0xf0`, `+0xf4`, `+0xf8`, `+0xfc` (2 bytes each) — from the
+connection record (`param_1`) into the newly tag-allocated 8-byte record,
+then logs (category `0xcc`) and returns the new pointer. **This pins
+`0x8005d924`'s domain**: those exact offsets overlap the SCO/eSCO
+link-setup parameter block that Pass 18's `0x800483c0` programs (`+0xf4`
+onward) — meaning `0x8005d924`'s SET/INITIATE call (validate side 1 via
+`0x8005d8ac`, side 2 via `0x8005d834`, then commit) is staging a snapshot of
+the negotiated SCO/eSCO link parameters into a side-specific allocated
+record before committing the pending procedure. The two validators
+themselves stay MEDIUM-HIGH (no opcode literal, and `FUN_8005d438` itself is
+still unnamed), but they substantively answer Pass 19's open question about
+which feature the family's "pending procedure" represents. `FUN_8005d438`'s
+known tag set grows from `{0,1,3,7,0x16,0x17,0x18}` to
+`{0,1,3,7,0x14,0x15,0x16,0x17,0x18}` — still not contiguous, anchor lead
+stays closed per Pass 19.
+
+### 4 cleared HIGH — breaks the 4-consecutive-0-HIGH streak (Passes 16-19)
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x800553dc` → `le_channel_selection_algorithm_periodic_timing_check` | 152B | Per-connection periodic timing check. Tries an optional function-pointer hook first (`PTR_DAT_80055474`); if absent/unhandled, computes a wraparound clock delta (`*(param_1+0xc) - param_2`, masked) against a re-arm threshold — if small or flag-matched, re-arms 2 units ahead via `FUN_8004fbc0` and conditionally commits slot timing via `FUN_80053710` (gated on 2 mode bits). Independently checks a 16-bit `+0x22` interval field: once `wrapping_subtract_masked_by_shift`'s elapsed-time result reaches `(interval * 0x50) / 5` (= interval × 16), calls the already-named `le_channel_selection_algorithm_event_dispatch(0x3c, param_1, 0)` — the exact same dispatcher Pass 8 named for sending the HCI LE Channel Selection Algorithm meta-subevent. `find_callers` resolved 2 real callers: the already-named `retry_list_service_and_stall_watchdog` and `FUN_800555bc`, confirming this runs as part of the per-connection periodic retry/watchdog service loop — corroborating rather than contradicting the channel-selection-algorithm-refresh-timer interpretation. | **HIGH** — unambiguous terminal call to an already-named, single-purpose dispatcher, gated by a self-consistent elapsed-time computation, confirmed running inside the already-named per-connection watchdog service loop |
+| `0x80050d14` → `binary_search_sorted_table_by_8byte_key` | 104B | Textbook binary search: `param_1[0]`=table base (array of 4-byte record pointers), `param_1[2]`=element count; compares an 8-byte key at each candidate's `+8` offset via `memcmp(elem+8, param_2, 8)`; returns 1 + match index via `*param_3` on hit, 0 + insertion point on miss. Self-contained, unambiguous algorithm — no domain pin needed, same evidentiary class as the already-HIGH `optimized_memcpy`/`wrapping_subtract_masked_by_shift` generic-utility renames. `find_callers` found no static caller (likely reached via an indirect call/table, the same MIPS16e static-xref gap noted throughout this region). | **HIGH** — textbook algorithm, self-contained structural evidence (same bar as the project's other generic-utility renames) |
+| `0x80058974` → `conn_slot_alloc_type01_and_store_bdaddr` | 184B | Pops the head of a 32-entry circular free list (one of 2 pools selected by `param_1`∈{0,1} via `PTR_PTR_80058a2c`/`PTR_PTR_80058a30`), zeroes the claimed 8-byte record, re-links the free-list head/tail pointers, sets 2 status bits (`param_1`-derived role bit, `param_2` flag bit), and `memcpy`s a 6-byte BD_ADDR (`param_3`) into the new record. **This exact function was already fully characterized in Pass 7** as one of `conn_slot_alloc_and_commit_dispatch`'s (`0x80058bb8`, HIGH) two type-specific callees — Pass 7 only renamed the caller, leaving this callee as `FUN_80058974`. Independently re-decompiled this pass with identical results, confirming Pass 7's characterization was correct; renaming now closes that gap. | **HIGH** — already proven self-contained circular free-list allocator in Pass 7 (caller-confirming evidence); simply never renamed until now |
+| `0x80058a5c` → `conn_slot_alloc_type2_and_store_bdaddr_and_keys` | 340B | Sibling type-2 callee of `conn_slot_alloc_and_commit_dispatch`, operating on the slot-10 global struct's `+0x14c` sub-table (stride `0x34`, also previously characterized but unrenamed in Pass 7): pops a free record, `memcpy`s a 6-byte BD_ADDR (`param_2`) **plus two 16-byte fields** (`param_3`/`param_4` — sized exactly like a BLE LTK/IRK pair), then computes 2 "key present" bits (`+0x26` bits 3/4) by `memcmp`-against-all-zero on each 16-byte field. Confirms and extends the function index's pre-existing "BD_ADDR plus type-specific key material" description for this allocator (written before either callee was itself decompiled). | **HIGH** — same evidentiary class as `0x80058974` (Pass-7-characterized, never renamed); the 16-byte-field + zero-check shape additionally pins this specific variant as a bonded-device key-material record (LTK/IRK-shaped), not just a generic BD_ADDR slot |
+
+### Other 6 candidates — stay below HIGH
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x80051b54` | 188B | Large per-context start/stop controller gated on a busy-flag bit (`piVar1+6` bit 0): when clear, dispatches on `param_1==1` (start: calls `FUN_8004edc4`, copies a 16-bit field `+0x1a`→`+0x1c`, fires an indirect callback via `PTR_DAT_80051c14`, and on a 2nd condition stages a value into `piVar1[5]` and calls `FUN_800518dc`/`FUN_8005152c`; finishes by calling `FUN_80051908`, computing a 16-bit product `byte[9] * short[+0x18]` into a status field, setting a "started" flag, then `FUN_80051aa0`) vs else (stop: calls `FUN_8004f160`, restores `+0xc` from `piVar1[5]`, the same `+0x1a→+0x1c` copy + indirect callback, then `FUN_8005152c`); both paths converge on an optional 2nd indirect callback (gated on `PTR_DAT_80051c18+4==0`) and a final reset-3-fields-then-`FUN_8005634c` tail. When the busy flag is set, instead just stages `param_1&3` into a separate 2-bit field for later. Reads as a generic "start/stop a deferred session, or queue the request if busy" controller; no opcode/domain anchor. | MEDIUM-HIGH — clear start/stop/queue-if-busy state-machine shape, domain (which "session") not pinned |
+| `0x80058974` (see HIGH table above) | | | |
+| `0x800553dc` (see HIGH table above) | | | |
+| `0x80050610` | 144B | **Connection-type record allocator+linker**: allocates a `0x54`-byte record via Pass 17's `FUN_800504e8(1)` (the `param_1==1` arg skips that function's optional default-init path) plus an `0xfc`-byte record via Pass 18's `FUN_800505c4()`, links the `0xfc` record into the `0x54` record's `+0x14` field and a vtable pointer (`PTR_DAT_800506a0`) into `+0x18`, links the `0x54` record itself into the caller's connection record at `+0x50` (the same "type record" slot referenced throughout this region's link-context cluster), programs several default bits (including bits derived from the caller's `+0x1d` field), and finally dispatches the new record through the already-named `conn_type_dispatch_hook` (`0x80050810`, Pass 10). **Resolves part of Pass 17/18's open question**: both free-list pools' "consumed record type stays unidentified" — this is a confirmed consumer, and the consumed records feed directly into the connection-type dispatch infrastructure. Still MEDIUM-HIGH: which of `conn_type_dispatch_hook`'s 4 type handlers ultimately consumes this specific record isn't pinned by a literal. | MEDIUM-HIGH — ties together 2 previously-orphaned free-list allocators and the already-named type-dispatch hook; allocator mechanism and linkage are fully clear, but the specific connection-type isn't pinned |
+| `0x8005323c` | 106B | Computes a modular sum: gated by `FUN_8004fcb8()`, calls the already-characterized `FUN_8005a048(mode, flag, value+1, 0)` (packet-type-to-µs lookup, Pass 16-18) to get a base interval, then sums that interval once per set bit (0-2) of `param_1+0x11`, plus an addend per iteration from `*PTR_DAT_800532a8` — finally wraps the result modulo the same `*PTR_DAT_800532a8` value. Same eSCO/SCO timing-negotiation family as `FUN_8005a048`/`0x80053710`/`0x800532ac`; the modular-sum shape is new but the family's BT-spec table still isn't anchored. | MEDIUM-HIGH — same well-understood eSCO/SCO timing family, no opcode anchor |
+| `0x8005a228` | ~50B | Generic "use override-or-default byte, write into 2 output params, log" helper: 2 independent override checks (`param_4` bits 0/1) each select either a literal default (`param_5`/`param_6`) or a fixed override constant (`PTR_DAT_8005a28c`/`PTR_DAT_8005a290`), writes the result through `*param_2`/`*param_3`, then logs all 6 inputs (category `0xce`). Too generic to pin a domain (note: the log call's 3rd format-string arg duplicates `*param_2` instead of `*param_3` — likely a pre-existing firmware bug/non-bug quirk in the log call, not a decompiler artifact, since both reads use the same pointer `param_2`). | LOW-MEDIUM — clear override-or-default+log shape, far too generic to pin a domain |
+| `0x80057370` | 96B | Validates `param_1`∈{11,12,13} (masked to a byte, range-checked via `(param_1-0xb)&0xff < 3`); on success, packs `param_1` plus a 2-bit field from `param_2` into a 16-bit register at `DAT_800573d4` and logs success (category `0xcd`, code `0x154`); on failure, logs an error (code `0x14f`/`0xc86`) and returns status `5`. The 3-value enum `{11,12,13}` doesn't match any BT-spec table this project has anchored elsewhere (HCI status codes, LMP opcodes, page-scan-type values all use different ranges). | MEDIUM — clear validate+pack+log shape, the 3-value enum's identity isn't pinned |
+
+**Region-wide unnamed count**: **366 total, 321 unnamed (down from 325), 45
+named (up from 41)** — confirmed via a fresh `CountUnnamedRegion80050000.java`
+re-run. 4 new HIGH renames applied via `RenamePass20Region80050000.java`
+(`renamed=4 alreadyOk=0 missing=0 failed=0`), independently re-verified via a
+fresh `decompile_function` round-trip on all 4 new names.
+
+**Streak broken**: Passes 16-19 went 4 consecutive passes with 0 HIGH
+renames; Pass 20 yields 4 — well clear of the project's ~8-9-consecutive-0-HIGH
+pivot threshold, so this region remains active for further cold-triage.
+
+**Next**: Pass 21 should continue cold-triage from rank ~63+ of the fresh
+list (`0x800519d8`, `0x80051980`, `0x8005db04`, `0x80056554`, `0x800511dc`,
+`0x8005d1a4`, `0x8005fe90`, `0x80059f14`, `0x8005ca00`, `0x8005dd70`, ...).
+Also worth a dedicated look: `FUN_8005d438` itself (now called with 9 known
+tags `{0,1,3,7,0x14,0x15,0x16,0x17,0x18}` — decompiling the allocator itself
+rather than its callers might reveal a tag-indexed type/size table that
+finally pins the record kind, which Pass 19 flagged but didn't attempt).
+
