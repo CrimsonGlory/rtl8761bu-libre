@@ -2818,3 +2818,33 @@ alreadyOk=0 missing=0 failed=0):
 
 **Next**: Pass 30 should continue cold-triage from rank 151+. Also `FUN_80054b14`
 (1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
+
+## Pass 30 — ranks 151-160 cold-triage, 9 HIGH renames (2026-06-27)
+
+**Context**: Pass 29 left 257 unnamed (366 total, 109 named). Pass 30 used the
+existing Pass 29 cold-triage list (ranks 151-160 already shown) and decompiled 10 functions
+(102-112B, all xrefs=1).
+
+**9 new names applied** via `RenamePass30Region80050000.java` (renamed=9
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005e728` | 112B | `alloc_and_copy_event_record_tag_0x8` | Structural twin of `alloc_and_copy_event_record_tag_0xe`: calls `alloc_tagged_record_via_pool(0x8, ...)`, zeros 8 bytes, copies 8 bytes via `optimized_memcpy`. HIGH: 2 named callees. |
+| `0x80055fc4` | 110B | `dequeue_from_per_slot_ring_buffer` | Dequeue complement of `enqueue_to_per_slot_ring_buffer` (`0x8005be1c`): reads from ring buffer at `PTR_PTR_80056034[param_2*8]`, returns 4-byte item, advances read-index mod capacity, decrements fill count, clears bit in `PTR_DAT_80056038[param_2*4]` if valid item. HIGH: named `optimized_memmove` + structural complement. |
+| `0x8005d744` | 108B | `alloc_and_pack_esco_event_record_tag_0x17` | Calls `alloc_tagged_record_via_pool(0x17, ...)`, reads `PTR_base_of_0x1ac_struct_array_0xA_large2[param_1].field_0x11a/0x11b` into the record. HIGH: named struct + named callee. |
+| `0x8005d7bc` | 108B | `alloc_and_pack_esco_event_record_tag_0x16` | Structural twin of above with tag `0x16`; same field accesses and record packing. HIGH: named callees + structural twin. |
+| `0x80052344` | 106B | `init_0xfc_record_pool_and_send_LMP_25B` | Calls `FUN_8004e220`, then builds linked list of `n` × `0xfc`-byte records (count from `config+0x1e0/0x1e1`); calls `send_LMP_25B_and_reset_crypto_key_state` + 4 unnamed sub-inits. HIGH: named `send_LMP_25B_and_reset_crypto_key_state`. |
+| `0x80052508` | 106B | `alloc_and_link_0xfc_record_pool` | Calls `func1_structs_at_0x80100000(n * 0xfc, 0)` for pool allocation, then builds same linked list from config count. HIGH: named `func1_structs_at_0x80100000`. |
+| `0x80052f8c` | 104B | `drain_pending_list_and_free_with_hci_evt_pack` | Walks pending linked list at `+0x18`, unlinks each node; for type `0x26` items calls `hci_evt_pack_conn_field_into_buf`; for type `0x30` sets `+6 = 2`; calls `refcount_decrement_and_free`. HIGH: 2 named callees. |
+| `0x80053034` | 102B | `maybe_commit_afh_quality_poll_to_parent_if_below_threshold` | Calls `resolve_parent_context_by_role()`, checks multipath flag `+0x20 & 0x10` or `param_1+0xb & 1`; if `+0x2b & 0x80 == 0`: calls `afh_channel_quality_poll_commit()`; if result < threshold, stores in bits 5:2 of `+0x1f`, sets `+0x2b & 0x80`. HIGH: 2 named callees. |
+| `0x8005e8a0` | 102B | `validate_connection_field_5bit_and_assign_0x134_on_mismatch` | Reads `*(PTR_DAT_8005e908 + param_2*2) >> 5 & 0x1f` (5-bit connection field); if `param_3 != field`, calls `FUN_8005e7fc(param_2)` and `assign_pointer_to_0x1AC_offset_0x134`. HIGH: named `assign_pointer_to_0x1AC_offset_0x134`. |
+
+**1 remaining MEDIUM-HIGH from this pass's batch (not renamed)**:
+- `0x800531d4` (102B): uses slot constant `0x271` + unnamed `FUN_8004fa64` + `FUN_8005a048` → MEDIUM-HIGH
+
+**Region-wide unnamed count**: **366 total, 248 unnamed (down from 257), 118 named
+(up from 109)** — 9 new renames applied via `RenamePass30Region80050000.java`.
+
+**Next**: Pass 31 should continue cold-triage from rank 161+. Also `FUN_80054b14`
+(1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.

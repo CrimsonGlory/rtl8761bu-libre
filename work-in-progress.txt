@@ -4020,10 +4020,26 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries, count updated to 861)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 28)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 30 (rank 151+ cold-triage)
-          Continue from where Pass 29 left off (ranks 141-150 now done). Run a fresh cold-triage
-          to expose ranks 151+. Also re-examine large MEDIUM-HIGH holdovers:
-          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 257 unnamed remain.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 31 (rank 161+ cold-triage)
+          Continue from where Pass 30 left off (ranks 151-160 now done). Run a fresh cold-triage
+          to expose ranks 161+. Also re-examine large MEDIUM-HIGH holdovers:
+          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 248 unnamed remain.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 30 (rank 151+ cold-triage) 2026-06-27
+          9 HIGH renames via RenamePass30Region80050000.java (renamed=9 alreadyOk=0 missing=0 failed=0):
+          0x8005e728 → alloc_and_copy_event_record_tag_0x8
+          0x80055fc4 → dequeue_from_per_slot_ring_buffer
+          0x8005d744 → alloc_and_pack_esco_event_record_tag_0x17
+          0x8005d7bc → alloc_and_pack_esco_event_record_tag_0x16
+          0x80052344 → init_0xfc_record_pool_and_send_LMP_25B
+          0x80052508 → alloc_and_link_0xfc_record_pool
+          0x80052f8c → drain_pending_list_and_free_with_hci_evt_pack
+          0x80053034 → maybe_commit_afh_quality_poll_to_parent_if_below_threshold
+          0x8005e8a0 → validate_connection_field_5bit_and_assign_0x134_on_mismatch
+          Region-wide: 366 total, 248 unnamed (was 257), 118 named (was 109).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 30 section)
+          → analysis/rom/rom_function_index.md (+9 entries, count updated to 884)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 31)
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 29 (rank 141+ cold-triage) 2026-06-27
           8 HIGH renames via RenamePass29Region80050000.java (renamed=8 alreadyOk=0 missing=0 failed=0):
