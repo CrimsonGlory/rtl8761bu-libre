@@ -3321,3 +3321,36 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 366 total / **208 named** (was 188) / **158 unnamed** (was 178). Estimated 20 renames pending script execution.
 
 **Next**: Pass 36 should continue with the remaining ~158 unnamed functions. After the Pass 35 renames are applied via MCP, re-rank to find the next top-xref tier.
+
+## Pass 36 — pre-analysis (2026-06-27, BLOCKED on rename-apply step)
+
+**Prerequisite unblocked**: `RenamePass35Region80050000.java` staged and ready at `/root/wairz/ghidra/scripts/`. Must run via `run_ghidra_headless` (requires MCP — wairz REST bridge blocks this as a write-capable tool). Run via `claude -p` with `--mcp-config .mcp.json` to unblock.
+
+**Pre-analysis — 4 additional unnamed functions decompiled** before the re-rank step:
+
+**FUN_80056204** (18B) → `write_esco_slot_count_high_byte`
+- Sets high byte of ushort at `DAT_80056218` to param_1 (short)
+- Callers: `negotiate_esco_sco_timing_and_commit_by_mode`, `sco_esco_slot_timing_offset_calc_variant1`, `sco_esco_slot_timing_offset_calc_variant2`
+
+**FUN_800500b4** (74B) → `unpack_pointer_offsets_from_packed_bitfield`
+- Reads `*(byte*)(param_1+2) & 0x3f` as a base pointer, `param_1[3]` as a 7-bit bitfield
+- For each of 7 bits: if set, assigns next address from indexed table (`PTR_DAT_80050100`) to output array slot; if clear, writes 0
+- Caller: `lmp_esco_sco_negotiation_packet_handler`
+
+**FUN_800512f8** (24B) → `send_event_0x71_with_high_byte_extracted`
+- Wrapper: calls `send_one_time_event_0x71_if_not_sent(0, (param_1 & 0xffff) >> 8)`
+- Caller: `conn_status_word_state_machine_dispatcher`
+
+**FUN_80051368** (426B) → (MEDIUM-HIGH, defer — complex negotiation record allocator)
+- Reads connection type byte at `param_1+8` (0x30/bit0x11/6); sets local context from `param_1[0x18]`
+- Reads timing from `param_4+0x10`: computes `uVar5 = interval_factor * packed_timing`, then `local_18 = (uVar5 - uVar2) / 0x271` (0x271 = BT 625µs slot unit)
+- Allocates record via `alloc_kind_record_and_clear_tail(uVar6)` where kind ∈ {0x26/0x30/6/10}
+- COMPUTED_CALL from `lmp_esco_sco_negotiation_packet_handler`. Complex; defer naming to follow-up pass.
+
+**FUN_80057ce8** (1314B — largest remaining unnamed in region) → (MEDIUM-HIGH, defer — too large for single-call decompile)
+- Large timing/slot-register programming function called via COMPUTED_CALL chain
+- Reads 6+ `read_indexed_link_register` values, calls `poll_stable_hw_register_pair_for_channel`
+- Involves `_x1F4_struct` connection records, `disable_interrupts`/`enable_interrupts`
+- Defer to dedicated Pass 37 session with full decompile view.
+
+**HIGH renames ready** (3 of 5 analyzed): `write_esco_slot_count_high_byte`, `unpack_pointer_offsets_from_packed_bitfield`, `send_event_0x71_with_high_byte_extracted` — to be bundled with Pass 36's main rename run.

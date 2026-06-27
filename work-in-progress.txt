@@ -4131,13 +4131,26 @@ sweep beyond enumeration and is the most out-of-date):
           Region-wide: 366 total / 208 named (was 188) / 158 unnamed (was 178).
           → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 35 section), rom_function_index.md, analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 36 (apply Pass 35 renames + fresh re-rank of remaining ~158 unnamed)
-          PREREQUISITE: run RenamePass35Region80050000.java via run_ghidra_headless (requires
-          MCP tools -- use claude -p context with .mcp.json loaded, not Cursor agent mode).
-          After renames applied: re-rank to find new top xrefs tier among the ~158 remaining
-          unnamed functions. Expect ~20-30 more candidates in the next tier.
-          Continue excluding all 8 confirmed mis-disassembly artifacts (0x8005d548/
-          0x8005dd04/0x8005e3a8/0x8005e71c/0x8005f880/0x80052f18/0x80052f1a/0x80059cde).
+[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 36 (apply Pass 35 renames + re-rank remaining ~158 unnamed) (2026-06-27)
+          BLOCKER: wairz REST bridge explicitly blocks run_ghidra_headless (server-side write-capable
+          restriction, not a harness mechanism issue). Must execute RenamePass35Region80050000.java
+          via claude -p with --mcp-config .mcp.json to unblock.
+          Pre-analysis of 4 additional functions complete (see region doc Pass 36 section):
+          - FUN_80056204 (18B) → write_esco_slot_count_high_byte [HIGH]
+          - FUN_800500b4 (74B) → unpack_pointer_offsets_from_packed_bitfield [HIGH]
+          - FUN_800512f8 (24B) → send_event_0x71_with_high_byte_extracted [HIGH]
+          - FUN_80051368 (426B) → complex negotiation record allocator [MEDIUM-HIGH, defer]
+          - FUN_80057ce8 (1314B largest unnamed) → large timing/HW register function [defer]
+          After renames applied: re-rank among ~158 remaining unnamed, expect ~20-30 next-tier candidates.
+          Continue excluding all 8 confirmed mis-disassembly artifacts.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 36 continued (after applying renames via MCP)
+          Run RenamePass35Region80050000.java via run_ghidra_headless (requires claude -p
+          with --mcp-config .mcp.json). Then bundle the 3 HIGH renames from pre-analysis:
+          write_esco_slot_count_high_byte (0x80056204), unpack_pointer_offsets_from_packed_bitfield
+          (0x800500b4), send_event_0x71_with_high_byte_extracted (0x800512f8).
+          Fresh re-rank of remaining ~158 unnamed to find next top-xref tier.
+          Large target FUN_80057ce8 (1314B) to get dedicated decompile in this or next pass.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
