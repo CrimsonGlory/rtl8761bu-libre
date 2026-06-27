@@ -190,6 +190,28 @@ Format: [TODO] or [DONE] status, date, description
     above. Recommendation for wairz: batch_decompile_functions needs a deeper fix than the
     narrow 3-name re-test covered; until then, treat it as "try once, fall back immediately."
 
+  CONFIRMED FIXED 2026-06-27 (parser root cause, per fix_batch_decompile.md): the broader
+    intermittent batch failure was a Ghidra-log-wrapping parse bug in
+    backend/app/services/ghidra_service.py. Ghidra 12.x headless wraps every println()
+    CALL as `INFO  DecompileFunction.java> <content> (GhidraScript)`. _parse_batch_decompile_output
+    used line.startswith("===DECOMPILE_START===") which NEVER matched the wrapped marker
+    lines -> in_decompile never set -> 0/N every time (the 1/N case was an already-cached
+    individual result served before the broken batch ran). Verified against the actual cached
+    Ghidra stdout (analysis_cache ghidra_log:DecompileFunction.java).
+    Important correction to the diagnosis in fix_batch_decompile.md: the wrapping is per
+    println() CALL, not per physical line — a multi-line println(code) emits a prefix-only
+    first line, BARE code lines (no prefix/suffix), and a lone ` (GhidraScript)` suffix line.
+    The doc's single full-line regex would have left the bare code + lone-suffix lines dirty.
+    Fix: added _GHIDRA_LOG_PREFIX_RE + _GHIDRA_LOG_SUFFIX_RE + _strip_ghidra_log_line() which
+    strips prefix and suffix INDEPENDENTLY per line (handles all 4 line shapes), applied in
+    _parse_batch_decompile_output (before the startswith checks) AND _parse_decompile_output
+    (the individual path was ALSO corrupting cached output with `(GhidraScript) INFO...` noise —
+    confirmed: 3/202 decompile cache entries were corrupt; cleared those 3). Tests:
+    TestStripGhidraLogLine + TestParseBatchDecompileOutput (clean + real-wrapped-single +
+    real-wrapped-10) + an individual-path strip test in test_ghidra_service.py — 54/54 pass.
+    Live canary: real cached log now parses to clean C in both batch and individual paths.
+    No Java changes needed (the Step-5 name-key-mismatch was not the cause).
+
   ROOT CAUSE FOUND + FIXED 2026-06-26 (orchestration layer, not Ghidra):
     The Ghidra -process mechanism was proven correct via an in-container empirical canary
     (rename saves with exit 0 "Save succeeded"; AnalyzeBinary.java reads back the new name;

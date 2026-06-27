@@ -108,6 +108,7 @@ broken on 2026-06-21):**
 | `DiagHookTable.java` | Diagnoses hook table area 0x801212d0-0x80121320: symbols, raw bytes, code units, xrefs |
 | `RomCoverageStats.java` | Computes ROM byte coverage: disassembled/defined vs undefined bytes, named vs anonymous functions |
 | `RomNamedFuncAddrs.java` | Lists addresses of all user-named functions within the rom block only |
+| `RomRegionBreakdown.java` | Per-0x10000-region total/named/unnamed function counts within the rom block (saved via `save_ghidra_script`; run via `script_file_id`, **not** `script_name` — see `rom_function_index.md`'s "Tool notes") |
 
 **Keep this table current**: any time a new Ghidra script is added to
 `/root/wairz/ghidra/scripts/` (via `mcp__wairz__save_ghidra_script` or written

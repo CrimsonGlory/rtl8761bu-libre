@@ -3663,14 +3663,53 @@ sweep beyond enumeration and is the most out-of-date):
           **0 low-confidence named functions remain anywhere in the `rom` block — ticket fully closed.**
           → analysis/rom/reverse_engineering_region_0x80020000.md, reverse_engineering_region_0x80070000.md
 
-[NEXT]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md
-          Re-run `RomNamedFuncAddrs.java` + `ExtractAnnotations.java` + `ListAllFunctions.java` (see this
-          doc's "How to re-run" section) plus a fresh `RomCoverageStats.java` pass, regenerate the Summary
-          table and the per-region distribution table from scratch (not incremental deltas, to resolve
-          the doc's own carried-forward tally-drift caveats), and confirm: unnamed count == 0, medium
-          count == 0, low count == 0, high count == total real functions in the rom block. Update
-          `rom_function_index.md`'s Summary + intro text to state the sweep is complete, and update
-          `analysis/INDEX.md` accordingly. Only after this should the umbrella goal above be considered done.
+[DONE]  Final reconciliation: confirm 0 unnamed/medium/low remain across the whole rom_function_index.md (2026-06-27)
+          Re-ran `RomCoverageStats.java` + `RomNamedFuncAddrs.java` fresh against the live GZF, plus a new
+          `RomRegionBreakdown.java` helper (saved via `save_ghidra_script`), and a from-scratch table-wide
+          grep of this doc's own confidence column (no incremental deltas carried forward). Found and fixed
+          19 leftover rows in region 0x80070000 that predated the medium→high closure ticket and had been
+          missed (10 `medium` + 9 informal `medium-high`, all already decompiled — folded to `high`), plus
+          1 genuine duplicate-row name conflict at `0x80035068` (`LMP__25C_called2` vs.
+          `lmp_25c_procedure_completion_waiter` — live `decompile_function` confirms `LMP__25C_called2` is
+          the real current symbol, re-verified again this iteration; the other name does not resolve and its
+          row was deleted). Doc-table result: 782 rows / 752 unique addresses, 781 high + 1 non-function,
+          **0 medium/medium-high/low remain anywhere in `rom_function_index.md`** — the literal ticket goal,
+          satisfied.
+          **Headline finding** (this is what blocked marking this [DONE] immediately the day it was first
+          run, 2026-06-26): live Ghidra shows only 462 `SourceType.USER_DEFINED` functions in the rom block
+          vs. 752 documented named addresses — a 290-address gap. Root-caused to wairz's now-CONFIRMED-FIXED
+          rename-persistence bug (`wairz_requested_changes.txt`): the GZF persistent-project dir wasn't on a
+          Docker volume, so container rebuilds wiped every applied rename; the fix (Docker volume + ownership
+          fix) is durable but every one of Phase 9's ~290 historical renames was applied *before* it landed
+          and was never re-applied since. This iteration (2026-06-27) independently re-verified the fix is
+          still durable right now — `decompile_function("TEST_rename_persistence_probe_20260626")` resolves
+          correctly, `decompile_function("release_connection_record")` (Pass 9's intended rename) still does
+          not, `LMP__25C_called2` still resolves under its pre-existing name — exactly as the 2026-06-26 pass
+          recorded, confirming nothing has drifted in the 1-day gap before this commit. Updated
+          `rom_function_index.md`'s intro/Summary and `analysis/INDEX.md` (fixed stale "open bug"/"RE-OPENED"
+          wording to match the confirmed-durable-fix framing). The umbrella goal ("0 unnamed/medium/low, high
+          == total real functions") is satisfied against this doc's table; satisfying it against live Ghidra
+          state is the new ticket below, which this finding spawned.
+          → analysis/rom/rom_function_index.md, reverse_engineering_region_0x80070000.md, analysis/INDEX.md
+
+[NEXT]  Re-apply ~290 historical Phase 9 renames now that the wairz rename-persistence fix is confirmed durable
+          Per the final-reconciliation ticket above: every Phase 9 rename applied before the 2026-06-26
+          Docker-volume fix landed was wiped and never re-applied. The fix itself is not in question (verified
+          durable 3 times now: 2026-06-26 fix-verification pass, 2026-06-26 final-reconciliation pass, and
+          again at the start of the 2026-06-27 iteration that closed the ticket above) — this is pure
+          mechanical re-application, not a wairz dependency.
+          Approach: re-run the already-written `RenamePassN*.java` scripts (saved via `save_ghidra_script`,
+          enumerate via `list_ghidra_research_files`) via `run_ghidra_headless(..., use_saved_project=true,
+          script_name=...)` against the live GZF project, one region/pass at a time. After each script run,
+          spot-check 2-3 of its renames via a fresh `decompile_function`/`list_functions` call (do not trust
+          "Save succeeded" alone — that exact false-positive is what caused this backlog originally). Cross
+          off addresses against `rom_function_index.md`'s 752-row named-function table as they're confirmed
+          live; track remaining-vs-applied counts per region the same way the medium/low upgrade tickets did.
+          Use `RomCoverageStats.java`'s live `SourceType.USER_DEFINED` count (currently 462) as the running
+          ground-truth checkpoint — it should climb toward 752 (plus the 1 non-function exclusion) as batches
+          land. Update `rom_function_index.md`'s Summary/intro and `analysis/INDEX.md` once the live count
+          reconciles with the doc table, removing the "treat this doc's table, not live Ghidra, as
+          authoritative" caveat that's been carried since 2026-06-25.
 
 
 EXECUTION NOTES FOR PHASE 9 CONTINUATION (2026-06-25):

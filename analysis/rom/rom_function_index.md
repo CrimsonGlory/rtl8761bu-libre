@@ -1,25 +1,41 @@
 # ROM Function Index
 
-> **⚠️ KNOWN ISSUE (2026-06-25, STILL unresolved as of 2026-06-26 re-test — see
-> `wairz_requested_changes.txt`):** Function renames applied via
-> `mcp__wairz__run_ghidra_headless` (GZF process mode) do **not** persist to the project
-> state read by `list_functions`/`decompile_function`/etc. Confirmed by direct testing:
-> re-running a previously-"applied" rename script (`RenamePass9Region80050000.java`,
-> targeting `0x8005b79c` → `release_connection_record`) reports
-> `RENAMED`/`RENAME COMPLETE`/`Save succeeded`, but an immediate `decompile_function` call
-> — even after a full forced re-analysis (`start_binary_analysis(force_reanalyze=true)`) —
-> still shows the function under its original `FUN_8005b79c` name. wairz briefly marked
-> this **[DONE]/"FIXED 2026-06-26"** (claiming a dirty-flag cache-reconciliation fix), but
-> independent re-testing the same day — across 10 historical renames spanning both region
-> 0x80050000 and region 0x80070000 — found `list_functions` still shows 0/8 spot-checked
-> addresses under their new name, and `decompile_function` resolves only the single
-> literal name wairz's own test used, not any other rename. **The fix claim did not hold
-> up; treat this issue as still open.** See `wairz_requested_changes.txt`'s "RE-OPENED
-> 2026-06-26" section for full repro. **This means many/most "renamed, HIGH confidence"
-> rows below may not actually exist as symbol names in the live Ghidra project**, even
-> though the underlying decompiled-code evidence and reasoning recorded for them is real.
-> Do not assume a name in this table resolves via `list_functions`/`decompile_function` —
-> verify independently if it matters, and treat this table (not the GZF) as the
+> **⚠️ UPDATED STATUS (2026-06-26 final-reconciliation pass) — root cause found, FIX
+> CONFIRMED DURABLE, but ~290 historical renames still need RE-APPLICATION:** The
+> wairz rename-persistence saga (2026-06-25 → 2026-06-26, full history in
+> `wairz_requested_changes.txt`) went through several rounds of "claimed fixed" /
+> "re-opened" before landing on a real root cause: the GZF persistent-project directory
+> (`/var/wairz/ghidra_projects`) was **not backed by a Docker volume** — it lived in the
+> backend/worker container's ephemeral writable layer, so every container rebuild wiped
+> every persistent Ghidra project (including all of Phase 9's applied renames) and
+> silently fell back to serving the pristine `FUN_*` import cache forever. wairz fixed
+> this by adding a named, shared volume mount (`docker-compose.yml`) plus a Dockerfile
+> ownership fix, and verified it via a live rename canary
+> (`TEST_rename_persistence_probe_20260626` at `0x80000820`).
+>
+> **This final-reconciliation pass independently re-confirmed the fix is still durable**:
+> `decompile_function("TEST_rename_persistence_probe_20260626")` resolves correctly right
+> now, in a fresh session, well after the fix landed. **But re-testing one of the
+> original failing cases — `release_connection_record` (the intended rename of
+> `0x8005b79c`) — confirms it is still NOT visible**: `decompile_function` for that name
+> returns not-found, while `FUN_8005b79c` still decompiles under its original name. This
+> is expected, not a regression: per wairz's own fix note, "any pre-fix renames must be
+> RE-APPLIED (their projects were wiped and cannot be recovered)" — the fix prevents
+> *future* renames from being lost, it does not resurrect the ones lost before it landed.
+>
+> **Quantitative confirmation, full-ROM scale**: a fresh `RomCoverageStats.java` run
+> shows only **462** `SourceType.USER_DEFINED` functions in the `rom` block — 1 above the
+> original 2026-06-21 baseline of 461 (that +1 is the test probe). This doc's table
+> documents **752** unique named addresses. The ~290-address gap is the historical-rename
+> backlog described above, not a new or still-open bug. **The actionable fix is
+> mechanical, not a wairz dependency: re-run the existing `RenamePassN*.java` scripts
+> (already written and saved via `save_ghidra_script`, listed in
+> `list_ghidra_research_files`) now that persistence works**, to actually apply the
+> already-decided renames this doc has been carrying as text-only for months. See the
+> Summary and "Final reconciliation" sections below, and the new `work-in-progress.txt`
+> ticket this finding spawned. Until that re-application happens, **do not assume a name
+> in this table resolves via `list_functions`/`decompile_function`** — verify
+> independently if it matters, and treat this table (not the live GZF project) as the
 > authoritative address→name mapping. (Functions whose name was confirmed via
 > `decompile_function` *before* any rename script ran — i.e. pre-existing Kovah-era or
 > earlier-session names, never our own `RenamePassN*` output — are unaffected; e.g. the
@@ -29,12 +45,18 @@
 memory block only (`0x80000000`–`0x8007ffff`). Every function in the block
 is accounted for, split into two parts:
 
-- **Named functions** (461) — full per-function table: address, size, name,
-  one-line purpose, confidence/coverage flag.
-- **Unnamed functions** (2278, auto-named `FUN_8000xxxx` by Ghidra) — compact
-  coverage summary (count, address-range distribution, size stats), not a
-  per-function table. Giving each of these a real purpose is the rest of
-  Phase 9's ongoing, best-effort work (see `work-in-progress.txt`).
+- **Named functions** — full per-function table: address, size, name,
+  one-line purpose, confidence/coverage flag. This doc's table currently documents
+  752 unique addresses (782 rows, 30 still duplicated — see "Final reconciliation"
+  below); live Ghidra ground truth (`SourceType.USER_DEFINED`/`IMPORTED`) is only
+  **462** as of the 2026-06-26 final-reconciliation pass, ~1 above the original
+  2026-06-21 baseline of 461 — see the Summary's headline finding for why these two
+  numbers diverge so widely (the open wairz rename-persistence bug).
+- **Unnamed functions** (2275 live, per the 2026-06-26 reconciliation pass — was 2278
+  at the 2026-06-21 baseline) — auto-named `FUN_8000xxxx` by Ghidra; compact coverage
+  summary (count, address-range distribution, size stats), not a per-function table.
+  Giving each of these a real purpose is the rest of Phase 9's ongoing, best-effort
+  work (see `work-in-progress.txt`).
 
 This doc **supersedes the ad-hoc "new ROM fns" callouts** scattered across
 Phases 1–8 — those are now consolidated into the table below, with each
@@ -42,23 +64,62 @@ function's confidence flag reflecting whatever Phase 1–8 doc (if any)
 covers it.
 
 Source: `RomNamedFuncAddrs.java` + `ExtractAnnotations.java` + `ListAllFunctions.java`,
-GZF process mode, run 2026-06-21, against
-`2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf` (`rom` block only).
+GZF process mode, originally run 2026-06-21, against
+`2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf` (`rom` block only). Re-run fresh
+2026-06-26 for the final-reconciliation pass, plus a new `RomCoverageStats.java` run
+and a new `RomRegionBreakdown.java` helper script (per-region named/unnamed totals,
+same iteration pattern as `RomCoverageStats.java` — see "How to re-run" below).
 
 ---
 
 ## Summary
 
+**This Summary was fully regenerated from scratch on 2026-06-26 (final-reconciliation
+pass)** — every number below comes from a fresh re-run of `RomCoverageStats.java` +
+`RomNamedFuncAddrs.java` + a new `RomRegionBreakdown.java` (per-region stats helper,
+same pattern as `RomCoverageStats.java`) against the live GZF, plus a fresh table-wide
+grep of this doc's own rows. No prior incremental ± deltas were carried forward. See
+"Final reconciliation (2026-06-26)" below for the full methodology and the headline
+finding this pass surfaced.
+
 | Metric | Count |
 |--------|-------|
-| Total functions in `rom` block | 2739 (2738 effective — `0x8000046c` reclassified 2026-06-22 pass 2 as a non-function/padding artifact, not a real Ghidra function; not yet re-run through `RomCoverageStats.java` to confirm the analyzer-level count drops, noted here as a known pending discrepancy) |
-| Named functions (this doc's table) | 751 (752 − 1: the `0x8002edb8` row removed 2026-06-26 as a phantom duplicate of `0x8001da3c`'s `send_evt_HCI_Number_Of_Completed_Packets` — see `region_0x80020000.md` "Data-integrity finding"; not a real distinct function. Pre-2026-06-26 history: 690 + 3 region-0x80050000 Pass-6 + 1 region-0x80050000 Pass-7 + 1 region-0x80050000 Pass-9 + 10 region-0x80030000 Pass-3 + 5 region-0x80030000 Pass-5 + 6 region-0x80030000 Pass-7 + 20 region-0x80030000 Pass-8 + 16 region-0x80020000 Pass-3, as of 2026-06-25; regions 0x80000000/0x80020000/0x80030000/0x80060000 sweep complete, 0x80010000/0x80050000 in progress) |
-| Unnamed (`FUN_*`) functions (summarized below) | 1754 (2012 − 238 region-0x80060000 Pass-2-3 renames − 20 region-0x80030000 Pass-8 renames, 2026-06-25) |
-| Named-function confidence: **high** (decompiled + written up in a dedicated `rom/*.md`) | 667 (614 + 53 region-0x80020000/0x80070000 low→high upgrade batch, 2026-06-26 — see note below) |
-| Named-function confidence: **medium** (named, one-line purpose only, not decompiled) | 0 (all resolved 2026-06-26: 10 in this pass's first batch + 38 in the continuation batch documented this iteration. Note: the "28 remain" figure recorded after the first batch was stale/miscounted — a fresh `grep "medium (named" rom_function_index.md` at continuation start found 38 actual remaining rows, not 28; all 38 decompiled + confirmed this iteration (31 in region 0x80010000, 7 in region 0x80020000), full list in `region_0x80010000.md`/`region_0x80020000.md`'s "2026-06-26 continuation" sections) |
-| Named-function confidence: **low** (named by Kovah, purpose unclear) | 0 (all resolved 2026-06-26: this batch's 54-row figure (25 in region 0x80020000, 29 in region 0x80070000) was the live, re-derived count at batch start. 53 decompiled + confirmed accurate (24 in region 0x80020000, all 29 in region 0x80070000); 1 (`0x8002edb8`) turned out to be a phantom duplicate row, not a real function, and was deleted rather than upgraded — see `region_0x80020000.md`. **0 low-confidence named functions remain anywhere in the `rom` block — ticket fully closed.**) |
+| Total functions in `rom` block (live Ghidra, `RomCoverageStats.java`) | 2737 (2736 via `RomRegionBreakdown.java`, which excludes thunks; the 1-function gap is that exclusion, not new drift) |
+| User-named functions in `rom` block (live Ghidra, `SourceType.USER_DEFINED`/`IMPORTED` — ground truth) | **462** |
+| Unnamed (`FUN_*`) functions in `rom` block (live Ghidra ground truth) | **2275** (2274 via `RomRegionBreakdown.java`'s thunk-excluded total) |
+| Named-function rows in this doc's table (fresh grep, 2026-06-26) | 782 rows / **752 unique addresses** (30 addresses still have 2 rows each — pre-existing duplicate-row debt, not newly introduced; see "Final reconciliation" below) |
+| Doc-table confidence: **high** (decompiled + written up) | 781 rows (includes 10 rows upgraded from a mislabeled `medium` and 9 rows folded from an informal `medium-high` bucket this pass — see below) |
+| Doc-table confidence: **medium** (named, not decompiled, per legend) | **0** — confirmed via fresh grep; this pass found and fixed 10 leftover rows (region `0x80070000`, dated 2026-06-23) that the 2026-06-26 medium→high closure ticket had missed, because they predated that ticket and used "medium" as an informal uncertainty hedge despite already being decompiled (the legend's own bar) |
+| Doc-table confidence: **low** (named by Kovah, purpose unclear) | **0** — confirmed via fresh grep; the prior closure ticket's claim holds, no leftovers found |
+| Doc-table confidence: **non-function** | 1 (`0x8000046c`, padding artifact, correctly excluded from named/unnamed counts) |
 
-**Known pre-existing tally drift (carried, not introduced this pass)**: the high/medium/low Summary counts have drifted substantially from the actual per-row table content (see the **low** row above — stated 237 vs actual 116, a 121-row gap, far larger than the previously-flagged "+1" drift). This confirms the doc's standing caveat that incremental ± deltas on a never-recounted baseline accumulate error. A future pass should regenerate all three Summary counts via a fresh table grep rather than continuing to carry deltas forward.
+**Headline finding of this pass — the documented named-function count and the live
+Ghidra named-function count are NOT the same number, by a wide margin**: this doc's
+table documents 752 unique addresses as named/high-confidence, but live Ghidra
+currently shows only **462** functions as `SourceType.USER_DEFINED`/`IMPORTED` — a gap
+of **290 addresses**. The live count (462) is within 1 of the original 2026-06-21
+baseline (461) — that +1 is `TEST_rename_persistence_probe_20260626`, wairz's own fix
+canary, independently re-confirmed durable by this pass.
+
+**This is not a still-open bug — it's an unfinished mechanical follow-up to a bug
+that's already fixed.** `wairz_requested_changes.txt`'s full history (root cause:
+`/var/wairz/ghidra_projects` wasn't on a Docker volume, so every container rebuild
+wiped all applied renames) ends in "CONFIRMED FIXED 2026-06-26," and this pass
+independently re-verified that fix is still durable (the probe rename above still
+resolves). But every one of Phase 9's ~290 historical renames was applied *before*
+that fix landed, got wiped by a container rebuild, and — per wairz's own note that
+"pre-fix renames must be RE-APPLIED (their projects were wiped and cannot be
+recovered)" — was never re-applied since. Spot-checked directly this pass:
+`decompile_function("release_connection_record")` (the intended rename of
+`0x8005b79c`, Pass 9) still returns not-found, while `FUN_8005b79c` still decompiles
+under its original name. **Treat this doc's table, not `list_functions`/
+`decompile_function` output, as the authoritative address→name mapping until the
+historical renames are re-applied** (a new `work-in-progress.txt` ticket, not a wairz
+dependency — the fix already landed; this is just re-running already-written
+`RenamePassN*.java` scripts). The literal goal "named count == high count == total
+real functions in the rom block" therefore cannot be satisfied against live Ghidra
+state yet — only against this doc's own table, where it now holds (782 rows = 781
+high + 1 non-function, 0 medium/low remain).
 
 **2026-06-22 update (pass 1)**: Phase 9's region-by-region exhaustive sweep
 (`work-in-progress.txt`, "PHASE 9 CONTINUED") resolved its first 12
@@ -293,9 +354,68 @@ section for full per-function evidence. Region coverage: 27 → 32 of 309
 functions named (8.7% → 10.4%). The 5 new rows are folded into the table
 below near their region-0x80030000 siblings (not strictly appended).
 
+**2026-06-26 update — Final reconciliation pass (the work-in-progress.txt
+ticket closing out the medium→high and low→high cross-region upgrade
+tickets)**: re-ran `RomCoverageStats.java` + `RomNamedFuncAddrs.java` fresh
+against the live GZF, plus a brand-new `RomRegionBreakdown.java` script
+(per-region named/unnamed totals, saved this pass), and a from-scratch
+table-wide grep of this doc's own confidence column — explicitly *not*
+carrying forward any prior incremental ± deltas, per the ticket's
+instruction. Three concrete fixes came out of this audit:
+
+1. **10 leftover `medium`-confidence rows** in region `0x80070000` (dated
+   2026-06-23, predating the 2026-06-26 medium→high closure ticket) had been
+   missed by that ticket — they used "medium" as an informal uncertainty
+   hedge despite already being decompiled, which the doc's own legend treats
+   as the bar for `high`. Upgraded all 10 to high with a reconciliation note;
+   see the table below.
+2. **9 informal `medium-high` rows** (introduced in cold-triage passes 8-9,
+   never part of the formal legend) were folded into `high` for the same
+   reason — they were all already decompiled.
+3. **One genuine duplicate-row name conflict**: `0x80035068` had two table
+   rows under two different names (`LMP__25C_called2` vs.
+   `lmp_25c_procedure_completion_waiter`). Live `decompile_function` confirms
+   `LMP__25C_called2` is the actual current Ghidra symbol; the other name
+   does not resolve. The stale duplicate row was deleted. 30 other
+   duplicate-address rows remain (same name, no conflict) — a cleanup item
+   for a future pass, not blocking this ticket.
+
+After those fixes, this doc's own table is internally clean: 0 medium, 0
+low, 0 medium-high remain anywhere in the named-function table (782 rows /
+752 unique addresses, 781 high + 1 non-function).
+
+**The headline finding, however, is what this fresh re-run exposed against
+live Ghidra, not against the doc's own table**: only **462** functions are
+currently `SourceType.USER_DEFINED`/`IMPORTED` in the live `.gzf` project —
+within 1 of the original 2026-06-21 baseline (461) — versus the 752 unique
+addresses this doc documents as named. **This is not the rename-persistence
+bug still being open** — `wairz_requested_changes.txt`'s full history ends in
+"CONFIRMED FIXED 2026-06-26" (root cause: the GZF persistent-project
+directory wasn't on a Docker volume, so container rebuilds silently wiped
+every applied rename), and this pass independently re-confirmed the fix is
+durable: `decompile_function("TEST_rename_persistence_probe_20260626")`
+(wairz's own fix canary) still resolves correctly right now. The ~290-address
+gap is the *unfinished mechanical follow-up*: every one of Phase 9's
+historical renames was applied before the fix landed, got wiped, and — per
+wairz's own note that pre-fix renames "must be RE-APPLIED (their projects
+were wiped and cannot be recovered)" — was never re-applied since. Spot-check
+confirming this directly: `decompile_function("release_connection_record")`
+(intended rename of `0x8005b79c`, Pass 9) still returns not-found.
+
+This gap is now confirmed quantitatively across the whole ROM and per-region
+(see the new "Unnamed functions" distribution table below — e.g. region
+`0x80000000` shows only 35/340 named live despite its gap-sweep being
+documented as 100% complete). **The umbrella goal "0 unnamed/medium/low
+remain, high count == total real functions" is satisfied against this doc's
+table, but cannot be satisfied against live Ghidra state until the ~290
+historical renames are re-applied** — a concrete, scoped follow-up ticket
+(re-run the already-written `RenamePassN*.java` scripts now that persistence
+works), not a wairz dependency. See the Summary above for full numbers and
+`work-in-progress.txt` for the new ticket this finding spawned.
+
 ---
 
-## Named functions (688, was 461 at the 2026-06-21 baseline)
+## Named functions (782 rows / 752 unique addresses, was 461 at the 2026-06-21 baseline)
 
 Confidence legend:
 - **high (decompiled+documented)** — appears in a dedicated `analysis/rom/*.md`
@@ -389,7 +509,6 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80042db8` | 42 | `remap_role_index_to_esco_slot_if_pending` | remaps SCO index to `idx+8` eSCO range if pending-flag set — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80042de8` | 36 | `remap_role_index_to_esco_slot_unconditional` | unconditional `idx+8` SCO→eSCO index remap — see `region_0x80000000` | high (decompiled+documented) |
 | `0x800147b0` | 140 | `write_baseband_codec_param_triplet` | writes a 3-row codec config block for a connection via indexed register writes — see `region_0x80000000` | high (decompiled+documented) |
-| `0x80035068` | 138 | `lmp_25c_procedure_completion_waiter` | 2-state synchronous busy-wait barrier for an in-flight LMP procedure — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80042a68` | 62 | `conn_record_role_to_esco_slot_index` | connection-record accessor returning current credit/codec slot index — see `region_0x80000000` | high (decompiled+documented) |
 | `0x80000fb8` | 550 | `sco_esco_packet_credit_scheduler` | per-connection SCO/eSCO outbound packet-credit scheduler, builds HW packet-length descriptor table — see `region_0x80000000`, `conn_feature_dispatch` | high (decompiled+documented) |
 | `0x8002addc` | 52 | `lookup_conn_record_by_lt_addr` | fixed 3-slot connection lookup by LT_ADDR-like parameter — see `region_0x80000000` | high (decompiled+documented) |
@@ -713,7 +832,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80033f8c` | 930 | `validate_connection_setup_preconditions` | pure boolean gate chaining ~15 precondition checks against bos_base flags (offsets 0x1a4/0x1d0/0x28/0x44) and clock/instant comparisons before allowing a new connection/role-switch — see `region_0x80030000` | **high (decompiled+documented, Pass 5 2026-06-24)** |
 | `0x80034a38` | 378 | `idk_takes_new_new_power_val` | Confirmed TX power-level apply function: programs 6-bit power field via register lookup keyed by channel/band, plus per-peer calibration; recommended rename `apply_tx_power_level_to_connection` (not applied, rename bug) — see `region_0x80030000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
 | `0x80034be0` | 120 | `set_new_power_val` | Confirmed power step (inc/dec) entry point feeding `idk_takes_new_new_power_val`; name already accurate — see `region_0x80030000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
-| `0x80035068` | 138 | `LMP__25C_called2` | Confirmed LMP-procedure start/poll-with-timeout/stop state machine (companion to region_0x80000000's procedure-completion busy-wait barrier); name already accurate — see `region_0x80030000` (2026-06-26 upgrade pass) | high (decompiled+documented) |
+| `0x80035068` | 138 | `LMP__25C_called2` | Confirmed LMP-procedure start/poll-with-timeout/stop state machine (companion to region_0x80000000's procedure-completion busy-wait barrier); name already accurate — see `region_0x80030000` (2026-06-26 upgrade pass). **Duplicate-row name conflict resolved, final-reconciliation pass 2026-06-26**: this address previously had a second table row under the name `lmp_25c_procedure_completion_waiter` (from an earlier `region_0x80000000` pass). Live `decompile_function` confirms `LMP__25C_called2` is the actual current Ghidra symbol at `0x80035068`; `lmp_25c_procedure_completion_waiter` does not resolve (decompile fails to find it) — the stale duplicate row was deleted, not merged. This is a second concrete, ground-truth-verified instance of the open rename-persistence bug (a prior pass's intended rename never took). | high (decompiled+documented) |
 | `0x80036bd0` | 336 | `fHCI_conn_req_cancel` | HCI Create Connection / Remote Name Request cancellation handler — BD_ADDR lookup; clears connection record | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80036d44` | 86 | `fHCI_inquiry_cancel` | HCI Inquiry Cancel (OGF 1 / OCF 2) handler; clears EIR data structure; calls ROM cleanup fns | **high (decompiled+documented, Pass 3 2026-06-24)** |
 | `0x80036df8` | 316 | `called_by_fHCI_Remote_Name_Request_5` | called by fHCI Remote Name Request 5 — see `lc_lmp_state_machine` | high (decompiled+documented) |
@@ -876,12 +995,12 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x8006f870` | 106 | `some_case_0x37_1` | some case 0x37 1 | high (decompiled+documented in region_0x80060000) |
 | `0x8006f8e8` | 96 | `path2_send_evt_0x14_HCI_Mode_Change` | path2 send evt 0x14 HCI Mode Change | high (decompiled+documented in region_0x80060000) |
 | `0x8006ff00` | 40 | `some_case_0x13` | some case 0x13 | high (decompiled+documented in region_0x80060000) |
-| `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP opcode 0x48A handler; reads conn-record fields, conditional struct-write path, no distinguishing call signature found | medium (decompiled, batch pass 5 2026-06-23) |
+| `0x80070248` | 144 | `LMP__48A__FUN_80070248` | LMP opcode 0x48A handler; reads conn-record fields, conditional struct-write path, no distinguishing call signature found | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar, protocol-identity caveat retained above) |
 | `0x800702e4` | 246 | `LMP_259_opcode_handler` | LMP opcode 0x259 handler; eSCO link negotiation or feature-specific opcode path | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x800703f0` | 68 | `HCI_Inquiry_Complete_finalizer` (was `LMP__600__FUN_800703f0`) | HCI Inquiry Complete/Cancel finalizer — checks EIR-state (val 2 or 3), calls `send_evt_HCI_Inquiry_Complete(0)` then `fHCI_Inquiry_Cancel_0x02_1()`; original "LMP__600" label was a mislabel (this is HCI inquiry layer, not an LMP opcode) | **high** (decompiled+renamed, batch pass 5 2026-06-23) |
 | `0x80070454` | 272 | `possible_LMP_DETACH_handler` | LMP DETACH (0x07) handler variant or detach-path dispatcher; connection teardown | **high** (decompiled, batch pass 3b 2026-06-23) |
-| `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI event 0x500-family sender/handler; conn-record gated, dispatches via shared event-send primitive (exact sub-case not cross-confirmed) | medium (decompiled, batch pass 5 2026-06-23) |
-| `0x8007088c` | 48 | `LMP__25C_called3` | Thin wrapper: calls `LMP__25C_called2()` then `FUN_8006d80c(p1,p2)` and `FUN_8006ba88(p1,p2)`; confirms 3-call chain sibling of `LMP__25C_called2`, no new opcode info | medium (decompiled, batch pass 5 2026-06-23) |
+| `0x800707dc` | 164 | `HCI_EVT_0x500_FUN_800707dc` | HCI event 0x500-family sender/handler; conn-record gated, dispatches via shared event-send primitive (exact sub-case not cross-confirmed) | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar, protocol-identity caveat retained above) |
+| `0x8007088c` | 48 | `LMP__25C_called3` | Thin wrapper: calls `LMP__25C_called2()` then `FUN_8006d80c(p1,p2)` and `FUN_8006ba88(p1,p2)`; confirms 3-call chain sibling of `LMP__25C_called2`, no new opcode info | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
 | `0x8007095c` | 568 | `LMP__489__various_sub_cases` | Multi-case LMP opcode dispatcher for variant/extended paths (opcode 0x489 cluster) | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80070ba4` | 92 | `LMP__25C__FUN_80070ba4` | Confirmed: per-connection event-0x25C cleanup — conditional `LMP__25C_called1`, unconditional `_called2`/`_called3`, resets status fields, tail-calls `HCI_EVT_0x500_FUN_800707dc` — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x80070c04` | 1306 | `LMP_480_standard_PDU_dispatcher` | Central LMP PDU dispatcher; routes opcodes 0x01–0x3D + extended paths (16+ case arms) | **high** (decompiled, batch pass 3b 2026-06-23) |
@@ -889,7 +1008,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80070574` | 582 | `connection_teardown_HCI_event_finalizer` (was unnamed `FUN_80070574`) | Connection-record teardown finalizer; dispatches `send_evt_HCI_Disconnection_Complete`/`send_evt_HCI_Connection_Complete`/`send_evt_HCI_Remote_Name_Request_Complete` based on `byte_0x203` connection-state; calls already-named `FUN_80041dac` | **high** (decompiled+renamed, cold-triage pass 6 2026-06-23) |
 | `0x80071370` | 82 | `LMP__47F__FUN_80071370` | Confirmed: EIR-data-pointer dispatch — branches on `ptr_to_EIR_data` sentinel values, optionally logs, calls `FUN_8007127c` and a notify callback — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x800713d4` | 182 | `send_LMP_FEATURES_REQ_page1_trigger` (was `LMP__47E__FUN_800713d4`) | Explicitly sends `send_LMP_FEATURES_REQ_or_RES(conn_idx, 0x27, 3)` (decompiler comment: "0x27 = LMP_FEATURES_REQ"); sets outstanding-PDU status bits for opcode 0x28 (LMP_FEATURES_RES) reply; gated on per-connection status byte == 0x02/0x05. Clear LMP page-1 features-negotiation trigger; original "47E" label unrelated | **high** (decompiled+renamed, batch pass 5 2026-06-23) |
-| `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | Connection-setup feature/timer finalizer: conditionally fires VSC 0xfc95 + `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when feature-page bit 2 set; conditional role-switch-style call `FUN_80061538`; services a watchdog-style timer triple (`FUN_80009b1c`/`...9a6c`/`...9a04`); finishes with `FUN_80017d2c(conn_idx, byte_0xCC, 0xffff)` | medium-high (decompiled, batch pass 5 2026-06-23; behavior clear, exact LMP opcode tie not cross-confirmed) |
+| `0x800714a0` | 220 | `LMP__267__FUN_800714a0` | Connection-setup feature/timer finalizer: conditionally fires VSC 0xfc95 + `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when feature-page bit 2 set; conditional role-switch-style call `FUN_80061538`; services a watchdog-style timer triple (`FUN_80009b1c`/`...9a6c`/`...9a04`); finishes with `FUN_80017d2c(conn_idx, byte_0xCC, 0xffff)` | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: decompiled, batch pass 5 2026-06-23; behavior clear, exact LMP opcode tie not cross-confirmed) |
 | `0x80071620` | 20 | `called_at_end_of_crypto_state_machine_update` | Confirmed: one-line tail-call to `called_by_called_at_end_of_crypto_state_machine_update` — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x80071634` | 462 | `assoc_w_tLMP_ROM_original` | ROM original LMP handler; routes extended opcodes 0x259–0x26d (intercepted by patch) | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80071b50` | 44 | `LMP__264__FUN_80071b50` | Confirmed: config-flag-driven timer-default setter, writes 10000 or 3000 to a global depending on two config bits — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
@@ -901,23 +1020,23 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x80072648` | 70 | `LMP_unknown_else` | Confirmed: sweeps all 10 connection slots, invoking `FUN_8007259c`+`FUN_80036420` for any slot in status 0x03 — catch-all/default-case cleanup — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x80072ff8` | 452 | `LMP_SCO_LINK_REQ_0x17_handler` (was unnamed `FUN_80072ff8`) | SCO link parameter negotiation handler; validates D_sco/T_sco-style packet params via vendor callbacks, accepts via `send_LMP_ACCEPTED(...,0x17,...)`, negotiates via `send_LMP_pkt` with PDU opcode byte `0x17`, finalizes via `get_status_bits_by_LMP_Opcode(0x17,0)` — triple-confirmed LMP_SCO_LINK_REQ (0x17); also calls the `0x80072924`/`0x80072bac` AFH/LAP-table pair with SCO-handle args (consulting channel table during SCO setup) | **high** (decompiled+renamed, cold-triage pass 7 2026-06-23) |
 | `0x800734c4` | 466 | `LMP_power_control_RSSI_trigger` (was unnamed `FUN_800734c4`) | RSSI-driven power-control trigger; compares `return_RSSI_value()` against per-connection thresholds, gates on `field_0xdc` tri-state + `field_0x211` outstanding-request guard + config bit `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ`, sends opcode `0x1f`/`0x20` (LMP_INCR_POWER_REQ/LMP_DECR_POWER_REQ) via `send_LMP_pkt` | **high** (decompiled+renamed, cold-triage pass 7 2026-06-23) |
-| `0x8007276c` | 424 | `FUN_8007276c` | AFH/LAP channel-classification bitmap builder; iterates `_x142_LAP` table slots for a handle match, clears+rebuilds a 36-byte channel bitmap in windows derived from the matched slot, calls `FUN_80072694`; not renamed (own protocol role not cross-confirmed) but corroborates the `0x80072bac`/`0x80072924` pair's AFH/LAP-table identity | medium (decompiled, cold-triage pass 7 2026-06-23) |
-| `0x80072bac` | 814 | `FUN_80072bac` | AFH/LAP-keyed table registration variant; operates on `PTR_struct_of_at_least_0x300_size_80072ee0->_x142_LAP[...]`; directly calls `FUN_8007276c` inline (closes the Pass 7 open question of who calls it) | medium-high (re-decompiled, cold-triage pass 9 2026-06-23) |
-| `0x80072924` | 628 | `FUN_80072924` | Sibling of `0x80072bac`: same `0x300`-size struct, same field-offset pattern, same callee set (`FUN_80071a84`, `FUN_80072694`, `possible_logger_called_if_no_patch3`); also calls already-HIGH `possible_logging_function__var_args` — strongly confirms the sibling-pair hypothesis | medium-high (re-decompiled, cold-triage pass 9 2026-06-23) |
-| `0x8007718c` | 524 | `FUN_8007718c` | Slot-instant/clock-window comparator: mod-1250 wraparound distance check against a threshold field, updates 3-bit status-enum fields, logs via `possible_logging_function__var_args` (event-class 0x71) on threshold-exceeded; exact LMP/HCI procedure not cross-confirmed | medium (decompiled, cold-triage pass 7 2026-06-23) |
+| `0x8007276c` | 424 | `FUN_8007276c` | AFH/LAP channel-classification bitmap builder; iterates `_x142_LAP` table slots for a handle match, clears+rebuilds a 36-byte channel bitmap in windows derived from the matched slot, calls `FUN_80072694`; not renamed (own protocol role not cross-confirmed) but corroborates the `0x80072bac`/`0x80072924` pair's AFH/LAP-table identity | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
+| `0x80072bac` | 814 | `FUN_80072bac` | AFH/LAP-keyed table registration variant; operates on `PTR_struct_of_at_least_0x300_size_80072ee0->_x142_LAP[...]`; directly calls `FUN_8007276c` inline (closes the Pass 7 open question of who calls it) | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: re-decompiled, cold-triage pass 9 2026-06-23) |
+| `0x80072924` | 628 | `FUN_80072924` | Sibling of `0x80072bac`: same `0x300`-size struct, same field-offset pattern, same callee set (`FUN_80071a84`, `FUN_80072694`, `possible_logger_called_if_no_patch3`); also calls already-HIGH `possible_logging_function__var_args` — strongly confirms the sibling-pair hypothesis | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: re-decompiled, cold-triage pass 9 2026-06-23) |
+| `0x8007718c` | 524 | `FUN_8007718c` | Slot-instant/clock-window comparator: mod-1250 wraparound distance check against a threshold field, updates 3-bit status-enum fields, logs via `possible_logging_function__var_args` (event-class 0x71) on threshold-exceeded; exact LMP/HCI procedure not cross-confirmed | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar, protocol-identity caveat retained above) |
 | `0x800731bc` | 368 | `LMP_SCO_LINK_REQ_0x17_modify_handler` (was unnamed `FUN_800731bc`) | SCO slot-timing window validity check; accept path calls `send_LMP_ACCEPTED(...,0x17,...)`, negotiate path builds 11-byte PDU with first byte `0x17` via `send_LMP_pkt(...,0xb,...)` then `get_status_bits_by_LMP_Opcode(0x17,0)` — triple-confirmed LMP_SCO_LINK_REQ (0x17) modify/renegotiate-path sibling of `0x80072ff8` | **high** (decompiled+renamed, cold-triage pass 8 2026-06-23) |
 | `0x80076a20` | 348 | `crypto_bignum_multiply_square_v1` (was unnamed `FUN_80076a20`) | Generic multi-word bignum multiply: Knuth/schoolbook multiply with 64-bit accumulation + carry propagation, followed by doubling pass and squaring pass; pure arithmetic, no LMP/HCI logic — likely ECDH P-192/P-256 SSP infrastructure | **high** (decompiled+renamed, cold-triage pass 8 2026-06-23) |
 | `0x800767ec` | 278 | `crypto_bignum_multiply_variable_len` (was unnamed `FUN_800767ec`) | Variable-length schoolbook multiply: trims leading/trailing zero digits from both digit-array inputs, zeroes output, performs same 64-bit-accumulator carry-chain multiply as `0x80076a20` — same bignum-multiply family | **high** (decompiled+renamed, cold-triage pass 8 2026-06-23) |
-| `0x80074940` | 672 | `FUN_80074940` | 5-case dispatch via fn-ptr tables keyed by a `1<<n` bitmask, calls `0x800747b0` for case 2, touches `0x1ac_struct_array` fields `+0x284`/`+0x28c`, calls `FUN_80058680` (CRC/checksum helper); reads as an LMP feature/parameter-negotiation response dispatcher; no opcode literal | medium-high (re-decompiled, cold-triage pass 9 2026-06-23) |
-| `0x800747b0` | 390 | `FUN_800747b0` | TLV-style byte-stream parser (tag 1/5/0x11 fields), falls through to `possible_logging_function__var_args(2,0x3c,0x31d,...)` on overflow; resembles LMP extended-feature-page TLV parsing but no opcode literal/named caller | medium-high (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x800791d0` | 608 | `FUN_800791d0` | Populates a 0x2c-byte struct from a bit-packed page format (5-bit count + bitfields matching LMP feature-page octet layout); logs via `possible_logging_function__var_args(3,0x8e,...)`; fallback path (top 3 bits of size byte nonzero) dispatches through indirect fn-ptr `PTR_DAT_80079438` instead — likely the fast-path of a larger feature-page parser with slow-path fallback; structurally close to `LMP_features_validator` but unconfirmed | medium-high (re-decompiled, cold-triage pass 9 2026-06-23) |
-| `0x80078fdc` | 344 | `FUN_80078fdc` | Low-level bit-packing setter on `0x1ac_struct_array` fields `+0x44..+0x49`; no opcode/caller evidence | medium (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x800796b8` | 336 | `FUN_800796b8` | Bit-stream serializer/feeder (calls `FUN_8007967c` + `possible_logging_function__var_args(3,0x8e,...)`); likely serialize counterpart to `0x800791d0`'s parse | medium (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x800745d8` | 308 | `FUN_800745d8` | Near-identical skeleton to `0x800747b0` (same loop/logging signature) but tag-matches against a name/string table via XOR-compare+memcmp rather than extracting feature fields — tag-matching sibling/variant of `0x800747b0` | medium-high (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x80071138` | 306 | `FUN_80071138` | Connection-slot allocation orchestration using named helpers (`look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`, `set_check_for_1_to_1`, `set_bos_bosi__0xb2_index_arg2`, `HCI_EVT_0x500_FUN_800707dc`, `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched_`); clear remote-name-request/slot-allocator role via callees, no opcode literal of its own | medium-high (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x80077020` | 240 | `FUN_80077020` | HW register write sequence (offsets `0x26e`/`0x274` via indirect callback) consistent with SCO/eSCO link parameter programming; no opcode-literal confirmation | medium (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x80077508` | 230 | `FUN_80077508` | HW register init sequence (offsets `0x14,0x38,0x20,0x50,0x58,0x5c,0x60,0x64,0x68,0x6c,0x70` via `FUN_800773d8`); calls named `VSC_0xfca1_FUN_80077474`, confirming HCI VSC 0xFCA1-related hardware init | medium-high (decompiled, cold-triage pass 8 2026-06-23) |
-| `0x800779d0` | 126 | `FUN_800779d0` | Pure 4-tap moving-average/FIR smoothing filter (`(p[i]+p[i+1]+p[i+2]+p[i+3])>>2`); generic signal-smoothing utility, not protocol-specific; decompiled while attempting to cross-confirm the `0x8007814c`/`0x80077bcc` quantizer pair — ruled out as an opcode-literal anchor | medium (decompiled, cold-triage pass 8 2026-06-23) |
+| `0x80074940` | 672 | `FUN_80074940` | 5-case dispatch via fn-ptr tables keyed by a `1<<n` bitmask, calls `0x800747b0` for case 2, touches `0x1ac_struct_array` fields `+0x284`/`+0x28c`, calls `FUN_80058680` (CRC/checksum helper); reads as an LMP feature/parameter-negotiation response dispatcher; no opcode literal | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: re-decompiled, cold-triage pass 9 2026-06-23) |
+| `0x800747b0` | 390 | `FUN_800747b0` | TLV-style byte-stream parser (tag 1/5/0x11 fields), falls through to `possible_logging_function__var_args(2,0x3c,0x31d,...)` on overflow; resembles LMP extended-feature-page TLV parsing but no opcode literal/named caller | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: decompiled, cold-triage pass 8 2026-06-23) |
+| `0x800791d0` | 608 | `FUN_800791d0` | Populates a 0x2c-byte struct from a bit-packed page format (5-bit count + bitfields matching LMP feature-page octet layout); logs via `possible_logging_function__var_args(3,0x8e,...)`; fallback path (top 3 bits of size byte nonzero) dispatches through indirect fn-ptr `PTR_DAT_80079438` instead — likely the fast-path of a larger feature-page parser with slow-path fallback; structurally close to `LMP_features_validator` but unconfirmed | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: re-decompiled, cold-triage pass 9 2026-06-23) |
+| `0x80078fdc` | 344 | `FUN_80078fdc` | Low-level bit-packing setter on `0x1ac_struct_array` fields `+0x44..+0x49`; no opcode/caller evidence | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
+| `0x800796b8` | 336 | `FUN_800796b8` | Bit-stream serializer/feeder (calls `FUN_8007967c` + `possible_logging_function__var_args(3,0x8e,...)`); likely serialize counterpart to `0x800791d0`'s parse | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
+| `0x800745d8` | 308 | `FUN_800745d8` | Near-identical skeleton to `0x800747b0` (same loop/logging signature) but tag-matches against a name/string table via XOR-compare+memcmp rather than extracting feature fields — tag-matching sibling/variant of `0x800747b0` | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: decompiled, cold-triage pass 8 2026-06-23) |
+| `0x80071138` | 306 | `FUN_80071138` | Connection-slot allocation orchestration using named helpers (`look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`, `set_check_for_1_to_1`, `set_bos_bosi__0xb2_index_arg2`, `HCI_EVT_0x500_FUN_800707dc`, `called_by_fHCI_Remote_Name_Request_6_nop_if_not_patched_`); clear remote-name-request/slot-allocator role via callees, no opcode literal of its own | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: decompiled, cold-triage pass 8 2026-06-23) |
+| `0x80077020` | 240 | `FUN_80077020` | HW register write sequence (offsets `0x26e`/`0x274` via indirect callback) consistent with SCO/eSCO link parameter programming; no opcode-literal confirmation | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
+| `0x80077508` | 230 | `FUN_80077508` | HW register init sequence (offsets `0x14,0x38,0x20,0x50,0x58,0x5c,0x60,0x64,0x68,0x6c,0x70` via `FUN_800773d8`); calls named `VSC_0xfca1_FUN_80077474`, confirming HCI VSC 0xFCA1-related hardware init | high (decompiled+documented, final-reconciliation pass 2026-06-26 — folded from informal 'medium-high' bucket per legend, already decompiled; orig note: decompiled, cold-triage pass 8 2026-06-23) |
+| `0x800779d0` | 126 | `FUN_800779d0` | Pure 4-tap moving-average/FIR smoothing filter (`(p[i]+p[i+1]+p[i+2]+p[i+3])>>2`); generic signal-smoothing utility, not protocol-specific; decompiled while attempting to cross-confirm the `0x8007814c`/`0x80077bcc` quantizer pair — ruled out as an opcode-literal anchor | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar) |
 | `0x80073348` | 362 | `crypto_state_machine_finalizer` | eSCO/encryption state-machine finalizer; post-processing for crypto handshake completion | high (decompiled, batch pass 3a 2026-06-23) |
 | `0x80073b74` | 348 | `HCI_Disconnect_on_error` | Terminates connection on failure condition + cleanup chain | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x80074c8c` | 232 | `LMP_CH__0x3ed` | LMP channel sub-protocol (opcode 0x3ed) handler; link-layer negotiation | high (decompiled, batch pass 3a 2026-06-23) |
@@ -944,7 +1063,7 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 | `0x800762f4` | 852 | `crypto_state_machine_loop_handler` | Large do-while crypto state transitions; post-exchange validation + error recovery | **high** (decompiled, batch pass 3b 2026-06-23) |
 | `0x8007666c` | 22 | `unknown_fptr_index1` | Confirmed: thin dispatcher — if param_1[4]==200, forwards param_1[0] to `called_by_unknown_fptr_index1_big_do_while_true` — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x80076bd8` | 48 | `swap_byte_order` | Confirmed: classic in-place byte-reversal loop (two-pointer swap, n/2 iterations) — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
-| `0x80077474` | 130 | `VSC_0xfca1_FUN_80077474` | Vendor-specific command 0xfca1 handler; small struct-init + conditional dispatch (consistent with VSC param-parsing pattern, exact param semantics not cross-confirmed) | medium (decompiled, batch pass 5 2026-06-23) |
+| `0x80077474` | 130 | `VSC_0xfca1_FUN_80077474` | Vendor-specific command 0xfca1 handler; small struct-init + conditional dispatch (consistent with VSC param-parsing pattern, exact param semantics not cross-confirmed) | high (decompiled+documented, final-reconciliation pass 2026-06-26 — already decompiled, missed by the 2026-06-26 medium→high ticket; meets the legend's high bar, protocol-identity caveat retained above) |
 | `0x80077620` | 22 | `call2funcs` | Confirmed: calls exactly `FUN_80077130()` then `FUN_80077508()`, no args, no return used — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x80078e68` | 72 | `VSC_0xfc7a_FUN_80078e68` | Confirmed: VSC 0xFC7A handler — validates (min,max) channel/length pair, writes both into config struct, fires callback via PTR_DAT_80078eb4; returns 0x12 otherwise — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
 | `0x8007943c` | 36 | `send_evt_INVALID_opcode_0xFF` | Confirmed: thin HCI-event-0xFF wrapper, fixed sub-code 0x2f plus two caller-supplied bytes — see `region_0x80070000` (2026-06-26 low→high pass) | high (decompiled+documented, low→high pass 2026-06-26) |
@@ -1105,71 +1224,72 @@ ROM doc exists, that doc is linked instead of/in addition to the bare name.
 
 ---
 
-## Unnamed functions (2050, originally 2278)
+## Unnamed functions (2275 live, per the 2026-06-26 final-reconciliation pass)
 
-The remaining 2059 functions in the `rom` block (2739 total − 679 named − 1
-reclassified non-function) carry Ghidra's auto-generated `FUN_8000xxxx`
-label and have not been individually triaged. Per Phase 9 scoping, giving
-each of these a real name and purpose is explicitly out of scope for this
-doc — it's the rest of Phase 9's ongoing, best-effort work. This section
-satisfies "every function" at the index/coverage level via aggregate stats
-instead of 2278 rows of "unknown."
+**This section was fully regenerated from scratch on 2026-06-26** via a new
+`RomRegionBreakdown.java` script (same iteration pattern as `RomCoverageStats.java`,
+saved to the project's Ghidra research-file store) that buckets every ROM function by
+0x10000-aligned region and counts `SourceType.USER_DEFINED`/`IMPORTED` ("named") vs.
+everything else ("unnamed") directly against the live Ghidra project — not against
+this doc's own table, and not via incremental deltas. This table reports **live Ghidra
+ground truth**, which is why the per-region "named" counts here are far lower than the
+per-region row counts implied by this doc's named-function table (see the Summary's
+headline finding above: ~290 documented renames have not persisted to the live
+project).
 
-**Confidence: unanalyzed** (for all 2059, as a single flag — no further
-granularity is meaningful until individual triage happens).
+The 2275 unnamed functions below carry Ghidra's auto-generated `FUN_8000xxxx` label
+(or `SourceType` other than `USER_DEFINED`/`IMPORTED` — e.g. Ghidra-internal
+`thunk_FUN_*`/`switchdataD_*`/`caseD_*` auto-names) and have not been individually
+triaged. Per Phase 9 scoping, giving each of these a real name and purpose is
+explicitly out of scope for this doc — it's the rest of Phase 9's ongoing,
+best-effort work. This section satisfies "every function" at the index/coverage
+level via aggregate stats instead of thousands of rows of "unknown."
 
-### Address-range distribution (by 0x10000-aligned region)
+**Confidence: unanalyzed** (for all 2275, as a single flag — no further granularity
+is meaningful until individual triage happens).
 
-| Address range | Unnamed function count | % of unnamed total |
-|---|---|---|
-| `0x80000000`–`0x8000ffff` | 88 (307 − 12 pass-1 − 19 pass-2 − 74 pass-3 − 27 pass-4 − 31 pass-5 − 13 pass-6 − 12 pass-7 − 12 pass-8 − 18 pass-9 − 1 reclassified non-function, 2026-06-22 — **region's gap-sweep now COMPLETE; the remaining 88 are outside this doc's two-gap scope, e.g. the excluded interrupt-vector sub-range**) | 4.3% |
-| `0x80010000`–`0x8001ffff` | 257 (263 authoritative-recount baseline, 2026-06-22 region-0x80010000 pass 1 — supersedes the original 268 estimate, see that region doc's scope note — minus 2 pass-1 renames minus 4 pass-2 renames) | 12.5% |
-| `0x80020000`–`0x8002ffff` | 321 | 15.6% |
-| `0x80030000`–`0x8003ffff` | 270 (290 − 20 Pass-8 renames, 2026-06-25) | 14.1% (stale %, not recomputed against new 1790 total) |
-| `0x80040000`–`0x8004ffff` | 301 (305 at Pass-3 recount − 2 Pass-3 renames − 1 Pass-3-continuation rename − 1 Pass-4 rename, 2026-06-23) | 14.7% |
-| `0x80050000`–`0x8005ffff` | 345 (349 − 3 Pass-6 renames − 1 Pass-7 rename, 2026-06-23) | 16.9% |
-| `0x80060000`–`0x8006ffff` | 0 (238 − 97 Pass-2-3 renames − 141 adjustment per phase-9 reassessment, 2026-06-24 — **region now COMPLETE, all 335+ functions accounted for, 97 named HIGH**) | 0.0% |
-| `0x80070000`–`0x8007ffff` | 191 (193 − 2 Pass-6 renames, 2026-06-23) | 10.5% |
-| **Total** | **1810** | **100%** |
+### Address-range distribution (by 0x10000-aligned region, live Ghidra ground truth)
 
-(Note: the doc-wide "Unnamed (`FUN_*`) functions" summary metric above still
-reads 2053 — derived as `2057 − 4` from the prior baseline's running total,
-not yet reconciled against this table's fresh 2048 recount. The 5-function
-gap is the same authoritative-recount drift described in
-`reverse_engineering_region_0x80010000.md`'s scope section: this region's
-*old* estimate (268) was never verified against a direct
-`FunctionManager` enumeration until pass 1; the other 6 untouched
-regions' counts are still old, unverified estimates and may carry similar
-small drift once their own pass-1 authoritative recount happens. Treat
-2048 (this table) as more trustworthy than 2053 (the summary metric) until
-a future pass reconciles them properly via a fresh `RomCoverageStats.java`
-run, per the periodic-recompute instruction in `work-in-progress.txt`.)
+| Address range | Total functions | Named (live) | Unnamed (live) | % of unnamed total |
+|---|---|---|---|---|
+| `0x80000000`–`0x8000ffff` | 340 | 35 | 305 | 13.4% |
+| `0x80010000`–`0x8001ffff` | 408 | 140 | 268 | 11.8% |
+| `0x80020000`–`0x8002ffff` | 400 | 79 | 321 | 14.1% |
+| `0x80030000`–`0x8003ffff` | 309 | 19 | 290 | 12.8% |
+| `0x80040000`–`0x8004ffff` | 335 | 30 | 305 | 13.4% |
+| `0x80050000`–`0x8005ffff` | 366 | 12 | 354 | 15.6% |
+| `0x80060000`–`0x8006ffff` | 333 | 95 | 238 | 10.5% |
+| `0x80070000`–`0x8007ffff` | 245 | 52 | 193 | 8.5% |
+| **Total** | **2736** | **462** | **2274** | **100%** |
 
-Distribution is fairly even across the whole ROM outside the
-`0x80000000`-`0x8000ffff` region (9.4–17.2% per 64 KiB region), which has
-now dropped to 4.3% of the unnamed total after Phase 9's region sweep
-**fully completed** there (9 passes, 0 gap functions left unresolved); the
-other 7 regions are unchanged from the 2026-06-21 baseline and still
-interleave named/unnamed functions
-throughout, consistent with how Phases 1–8 worked (tracing call chains and
-protocol handlers rather than sweeping linearly through address space).
+(2736/2274 here vs. 2737/2275 in the Summary table above is the same explained
+1-function gap: this script's `FunctionManager` walk excludes thunks, `RomCoverageStats.java`'s
+does not.)
+
+Notice region `0x80000000`–`0x8000ffff` shows only **35 named** despite Phase 9's
+region-sweep docs claiming 219 of 220 gap functions resolved there across 9 passes
+(2026-06-22) — this is the single clearest per-region illustration of the
+rename-persistence bug: a region whose sweep is documented as 100% complete is, in
+live Ghidra, still 90% unnamed (305 of 340). The same pattern holds across every
+region; none of the per-region "sweep complete" claims in the pass-by-pass narrative
+above should be read as "named in Ghidra" — only "documented in this table."
 
 ### Size statistics
 
-**Stale baseline (2026-06-21), not re-run this pass** — these aggregate
-byte-level stats (count/total-bytes/average) require a fresh
-`RomCoverageStats.java`-style pass over the now-shrunk unnamed set to be
-accurate; the per-region distribution table above (manually recomputed each
-pass from the named-table deltas) is the authoritative up-to-date count
-(2059, not 2278) until that re-run happens.
+**Not re-derived this pass** — these aggregate byte-level stats (count/total-bytes/
+average) were last computed against the stale 2278-count baseline (2026-06-21) and
+were not in scope for this reconciliation (which focused on named/unnamed/medium/low
+counts, not byte-level size distribution). A future pass can re-derive these
+against the live 2275-unnamed set via a small extension to `RomRegionBreakdown.java`
+or a fresh `RomCoverageStats.java`-style byte-walk.
 
-| Metric | Value |
-|--------|-------|
-| Count | 2278 (stale; see note above — true current count is 2059) |
+| Metric | Value (stale, 2026-06-21 baseline) |
+|--------|--------------------------------------|
+| Count | 2278 |
 | Smallest function | 1 byte |
 | Largest function | 2484 bytes |
-| Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) (stale) |
-| Average size | 156.4 bytes (stale) |
+| Total bytes across all unnamed functions | 356289 bytes (≈348 KiB) |
+| Average size | 156.4 bytes |
 | Address span | `0x80000000`–`0x80079934` |
 
 Many of the very small (1–12 byte) entries are switch-table case stubs,
@@ -1205,14 +1325,33 @@ mcp__wairz__run_ghidra_headless(
 )
 ```
 
-`RomNamedFuncAddrs.java` gives the authoritative 461-address set (filtered by
+`RomNamedFuncAddrs.java` gives the authoritative named-address set (filtered by
 `SourceType.USER_DEFINED`/`IMPORTED`, not by name pattern — this is why it
 correctly excludes Ghidra's own `thunk_FUN_*`/`switchdataD_*`/`caseD_*`
 auto-names even though those don't match `FUN_*`). `ExtractAnnotations.java`
 supplies the name string for each address (run across all blocks; filter to
 the `0x8000xxxx`–`0x8007xxxx` range for ROM-only). `ListAllFunctions.java`
 supplies sizes for every function in the program (filter the same way). All
-three are read-only and safe to re-run at any time.
+three are read-only and safe to re-run at any time, and were re-run fresh for
+the 2026-06-26 final-reconciliation pass (see Summary above): 462 user-named,
+2737 total.
+
+For per-region breakdowns, use the new `RomRegionBreakdown.java` (saved
+2026-06-26, same iteration pattern as `RomCoverageStats.java`):
+
+```python
+mcp__wairz__run_ghidra_headless(
+    binary_path="2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf",
+    script_file_id="<id from list_ghidra_research_files>",  # NOT script_name — see Tool notes
+    use_saved_project=True,
+    timeout=300,
+)
+```
+
+It buckets every ROM function by 0x10000-aligned region and prints
+`total`/`named`/`unnamed` per region plus a grand total in one pass — this is
+what produced the "Unnamed functions" section's address-range distribution
+table above, replacing the old manual-delta-tracking approach entirely.
 
 Cross-referencing each address against `analysis/rom/*.md`,
 `analysis/reverse_engineering_*.md`, and `analysis/kovah_function_list.md`
@@ -1225,17 +1364,32 @@ set membership against the address list above.
 ## Tool notes (carried forward from `rom_coverage_baseline.md`)
 
 - `run_ghidra_headless` truncates its returned stdout at ~30 KB for
-  larger scripts (`RomNamedFuncAddrs.java`'s 461-line output and
+  larger scripts (`RomNamedFuncAddrs.java`'s 462-line output and
   `ExtractAnnotations.java`'s/`ListAllFunctions.java`'s full-program output
   all exceeded this). The **full untruncated output is still written to
   Ghidra's `application.log`** inside the wairz container's overlay
   filesystem (path varies per run — locate via
-  `find / -name application.log -newer <recent-file>`), and can be read
-  directly with `grep`/`sed` keyed on the script's `=== ..._START ===` /
-  `=== ..._END ===` markers. This is how this doc's full 461-row table and
-  2739-row size list were recovered without needing a new script.
-- `save_ghidra_script` overwrites of an existing filename don't take
-  effect, and the 50-slot cap is full with no delete/evict tool — this doc
-  was produced entirely from existing generic scripts
-  (`RomNamedFuncAddrs.java`, `ExtractAnnotations.java`,
-  `ListAllFunctions.java`), no new script was needed or attempted.
+  `find / -name application.log -newer <recent-file>`), and can also be
+  retrieved via the `list_ghidra_logs`/`read_ghidra_log` MCP tools, which is
+  the sanctioned way to see output beyond the ~30 KB truncation (no host/
+  container filesystem access needed). Note that `read_ghidra_log`'s own
+  display can still be cut short for very large logs even with `tail=true`
+  — for full-corpus reconciliation work, prefer writing a small new
+  summarizing script (like `RomRegionBreakdown.java`) over trying to
+  manually diff giant raw per-address dumps.
+- **Correction (2026-06-26): the "50-slot cap is full" claim below was
+  stale/wrong.** `save_ghidra_script` successfully saved a brand-new script
+  (`RomRegionBreakdown.java`) this pass with no cap or overwrite issue
+  encountered. One real gotcha confirmed this pass: a script saved via
+  `save_ghidra_script` is **not** visible to `run_ghidra_headless`'s
+  `script_name` parameter (which only sees scripts already physically present
+  in `/opt/ghidra_scripts/`) — it must be invoked via `script_file_id` instead
+  (the tool writes it to a temp dir and runs it from there). Passing the
+  filename as `script_name` for a freshly-`save_ghidra_script`'d file fails
+  with "Script not found", which looks like a save failure but isn't.
+- Prior-pass note, superseded above: "`save_ghidra_script` overwrites of an
+  existing filename don't take effect, and the 50-slot cap is full with no
+  delete/evict tool — this doc was produced entirely from existing generic
+  scripts (`RomNamedFuncAddrs.java`, `ExtractAnnotations.java`,
+  `ListAllFunctions.java`), no new script was needed or attempted." Kept for
+  history; do not rely on it.

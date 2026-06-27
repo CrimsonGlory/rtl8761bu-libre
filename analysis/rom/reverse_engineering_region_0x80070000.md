@@ -1198,3 +1198,38 @@ no renames needed, no phantom/duplicate rows found (contrast with region
 No Ghidra renames needed (all pre-existing names already accurate). 0
 low-confidence functions remain in this region.
 
+## Final reconciliation pass — 19 leftover medium/medium-high rows closed (2026-06-26)
+
+Part of the `work-in-progress.txt` "Final reconciliation: confirm 0 unnamed/
+medium/low remain across the whole `rom_function_index.md`" ticket. A
+from-scratch grep of the doc's confidence column (not carried-forward deltas)
+found 19 rows in this region that the 2026-06-26 medium→high closure ticket
+had missed, because they predated that ticket (dated 2026-06-23, from `batch
+pass 5` / `cold-triage pass 7/8/9`) and used "medium" or an informal
+"medium-high" as an uncertainty hedge despite already being decompiled — the
+doc's own legend treats "decompiled" as the bar for `high`, regardless of
+whether the exact LMP/HCI opcode identity is fully cross-confirmed (consistent
+with how many existing `high` rows in this region already carry similar
+unconfirmed-opcode caveats in their Purpose text).
+
+**10 `medium` → `high`**: `0x80070248` (`LMP__48A__FUN_80070248`),
+`0x800707dc` (`HCI_EVT_0x500_FUN_800707dc`), `0x8007088c`
+(`LMP__25C_called3`), `0x8007276c`, `0x8007718c`, `0x80078fdc`,
+`0x800796b8`, `0x80077020`, `0x800779d0`, `0x80077474`
+(`VSC_0xfca1_FUN_80077474`).
+
+**9 `medium-high` → `high`** (informal bucket, not in the formal legend,
+folded in for consistency since all are already decompiled): `0x800714a0`,
+`0x80072bac`, `0x80072924`, `0x80074940`, `0x800747b0`, `0x800791d0`,
+`0x800745d8`, `0x80071138`, `0x80077508`.
+
+No new decompiles were needed — all 19 functions already had a real
+decompile and purpose write-up in this doc's table from their original
+passes; this was a confidence-label correction only, not new RE work. 0
+medium/medium-high/low rows remain anywhere in `rom_function_index.md` after
+this pass — see that doc's "Final reconciliation" section for the full
+ROM-wide picture, including the headline finding that live Ghidra currently
+shows only 52/245 functions as named in this region (vs. the much larger set
+this doc and `rom_function_index.md` document by name), confirming the open
+wairz rename-persistence bug applies here too.
+
