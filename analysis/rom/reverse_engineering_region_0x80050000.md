@@ -2848,3 +2848,41 @@ alreadyOk=0 missing=0 failed=0):
 
 **Next**: Pass 31 should continue cold-triage from rank 161+. Also `FUN_80054b14`
 (1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
+
+## Pass 31 — ranks 161-175 cold-triage + 2 holdover closures, 14 HIGH renames (2026-06-27)
+
+**Context**: Pass 30 left 248 unnamed (366 total, 118 named). `ColdTriageRegion80050000Pass31.java`
+confirmed those totals and ranked 161-200 (sizes now down to 66B-1B — function sizes have
+dropped well below 100B by this point in the sweep). Decompiled the top 15 (ranks 161-175,
+66B-52B) via `batch_decompile_functions`, plus the two long-standing Pass-4 MEDIUM-HIGH
+holdovers `FUN_80054b14` (1650B) and `FUN_8005aba8` (664B) explicitly called out in the
+[NEXT] item, plus 2 supporting callees (`FUN_80050d7c`, `FUN_80050994`) whose decompiles
+turned out to independently clear the HIGH bar.
+
+**14 new names applied** via `RenamePass31Region80050000.java` (renamed=14
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80050d7c` | 32B | `lookup_record_ptr_by_key_via_bsearch` | Calls `binary_search_sorted_table_by_8byte_key`, dereferences `*param_1 + index*4` on hit. HIGH: named bsearch callee. |
+| `0x80050da4` | 66B | `lookup_record_by_key_and_promote_to_list_head` | Rank 161. Calls `lookup_record_ptr_by_key_via_bsearch`; unlinks the found node from a doubly-linked list (prev/next at offsets 0/4) and reinserts it at the same list's head — classic MRU "touch and promote" pattern, unambiguous from the pointer math alone. HIGH: named callee + self-evident structural pattern. |
+| `0x80050994` | 16B | `conn_type_checked_hw_hook_dispatch` | Calls `conn_type_dispatch_hook()` then `FUN_8004f824(param_1)` — a thin wrapper around the documented ROM hw-write hook dispatcher `0x8004f824` (CLAUDE.md key-address table). HIGH: named callee + documented dispatcher target. |
+| `0x800509b0` | 58B | `dispatch_hw_hook_for_main_and_substates` | Rank 169. Calls `conn_type_dispatch_hook()`; if clear, dispatches `conn_type_checked_hw_hook_dispatch` for the main handle (`param_1+0x50`) plus its `+0x24`/`+0x20` sub-handles. HIGH: 2 named callees. |
+| `0x800524b8` | 66B | `alloc_0x54_record_pool_and_ptr_table` | Rank 162. Reads config `field468_0x1e0&0x1f` as count `n`; allocates `n*0x54` struct pool + `n*4` pointer table via `func1_structs_at_0x80100000`; calls `FUN_8004e220`. Structural twin of Pass 30's `init_0xfc_record_pool_and_send_LMP_25B`/`alloc_and_link_0xfc_record_pool` (same config field, same allocator). HIGH: structural match to named pool-init family. |
+| `0x80052580` | 52B | `init_record_pools_and_related_substates` | Rank 175. Dispatcher: `alloc_0x54_record_pool_and_ptr_table()` + `alloc_and_link_0xfc_record_pool()` + 5 unnamed sub-inits. HIGH: 2 named pool-allocator callees. |
+| `0x8005da64` | 60B | `alloc_event_record_and_log_tag_0x13` | Calls `alloc_tagged_record_via_pool(0x13,...)`, logs on success via `possible_logging_function__var_args`, returns record. 1 of 4 structural twins (tags 0x13/0x12/0xa/0x5). HIGH: named allocator callee. |
+| `0x8005dac4` | 60B | `alloc_event_record_and_log_tag_0x12` | Structural twin, tag `0x12`. HIGH: named allocator callee. |
+| `0x8005e4d4` | 58B | `alloc_event_record_and_log_tag_0xa` | Rank 170. Structural twin (void-arg), tag `0xa`. HIGH: named allocator callee. |
+| `0x8005ed88` | 58B | `alloc_event_record_and_log_tag_0x5` | Rank 172. Structural twin (void-arg), tag `5`. HIGH: named allocator callee. |
+| `0x8005e910` | 58B | `check_link_flag_bit6_and_assign_0x134` | Rank 171. Tests bit6 of `PTR_DAT_8005e94c[(param_2&0xff)*2+1]`; if clear, calls `FUN_8005e7fc()` + `assign_pointer_to_0x1AC_offset_0x134`. Structural sibling of Pass 30's `validate_connection_field_5bit_and_assign_0x134_on_mismatch` (same 2 callees, different gate). HIGH: named callee + structural sibling. |
+| `0x80051940` | 54B | `send_lmp25c_and_clear_pending_flag_if_idle` | Rank 173. If link-ID `+0x1c != -1`: calls `LMP__25C_called1(id,0)`; if pending-flag bit `+6&0x10` set and `LMP__25B__most_common_for_VSCs1()` reports idle, clears the pending flag. HIGH: 2 named LMP-PDU callees. |
+| `0x80054b14` | 1650B | `program_esco_sco_hw_link_params_and_log` | **Pass-4 holdover, closed.** Master eSCO/SCO link-param commit: role context via `resolve_parent_context_by_role`, eSCO-vs-SCO branch, programs HW channel regs via `write_hw_channel_reg_pair_a` (×2), dispatches AFH assessment via `dispatch_afhca_by_role_index`, logs full state. Also independently confirmed as a callee of `region_0x80030000`'s `LMP_power_and_clk_adj_procedure_orchestrator` (`0x80034ec4`, Pass 8). HIGH: 3+ named callees. |
+| `0x8005aba8` | 664B | `negotiate_esco_sco_timing_and_commit_by_mode` | **Pass-4 holdover, closed.** eSCO/SCO timing negotiation: offset/phase via `compute_esco_timing_offset_and_dispatch` + `compute_and_store_esco_phase_offset_from_link_regs`, derives a timing-window distance from the `0x1ac` struct array, validates/commits via `esco_sco_param_validate_and_commit`. HIGH: 3 named callees. |
+
+**Region-wide unnamed count**: **366 total, 234 unnamed (down from 248), 132 named
+(up from 118)** — 14 new renames applied via `RenamePass31Region80050000.java`. Both
+long-standing Pass-4 MEDIUM-HIGH holdovers (`FUN_80054b14`, `FUN_8005aba8`) are now closed.
+
+**Next**: Pass 32 should continue cold-triage from rank 176+ (sizes now in the 50B-and-under
+range; the remaining 234 unnamed are increasingly thin/structural — expect lower per-pass
+yield as the easy structural-match candidates are exhausted).
