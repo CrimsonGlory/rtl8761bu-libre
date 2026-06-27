@@ -2788,3 +2788,33 @@ alreadyOk=0 missing=0 failed=0):
 
 **Next**: Pass 29 should continue cold-triage from rank 141+. Also `FUN_80054b14`
 (1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
+
+## Pass 29 — ranks 141-150 cold-triage, 8 HIGH renames (2026-06-27)
+
+**Context**: Pass 28 left 265 unnamed (366 total, 101 named). Pass 29 used the
+`ColdTriageRegion80050000Pass29.java` script (ranks 141-150) and decompiled 10 functions
+(106-126B, all xrefs=1).
+
+**8 new names applied** via `RenamePass29Region80050000.java` (renamed=8
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80053824` | 126B | `compute_and_maybe_commit_slot_offset_from_parent` | Calls `resolve_parent_context_by_role()`, reads `iVar4+0x26` (ushort) + `iVar4+0xc` (int) + 2, ANDs with mask; conditionally stores result at `param_1+0xc` and calls `FUN_80053710`. HIGH: named `resolve_parent_context_by_role`. |
+| `0x8005ce0c` | 118B | `advance_esco_state_0x77_to_4_if_config_e4` | Checks `+0x77 == 2`, advances to 4, clears bit 7 of field+2, calls `possible_logger_called_if_no_patch3`; reads `config_base+0xe4` 4-byte bitmask, calls `FUN_80017634` if bit set. HIGH: named logger callee + named config struct. |
+| `0x8005df9c` | 118B | `validate_feature_bitmap_and_dispatch_to_0x134` | Checks `PTR_DAT_8005e014[param_2*2+1]` bitmap vs mode bits; if bit not set: calls `dispatch_alloc_tag_d_or_11_by_record_flag(param_1, param_2, 0x24)` then `assign_pointer_to_0x1AC_offset_0x134(result, field)`. HIGH: 2 named callees. |
+| `0x80056184` | 116B | `set_hw_ctrl_bits_and_update_conn10_0x154` | Writes bits 15/11/10/9 of MMIO register `DAT_800561f8`; also updates `conn_table[10].field_0x154 & 0xfe | bit0(param_1)`. HIGH: named `PTR_base_of_0x1ac_struct_array_0xA_large2` struct. |
+| `0x800574ec` | 116B | `toggle_link_register_bit1_for_slot` | For slot < 8: reads eSCO link register at `slot*0x14+0xf` via `FUN_80056608`; for slot ≥ 8: reads SCO register via `read_indexed_link_register`; toggles bit 1 on/off per `param_2`; writes back with retry loop via `write_indexed_link_register_b_with_slot_check`/`write_indexed_link_register_with_slot_check`. HIGH: 3 named callees. |
+| `0x8005d834` | 116B | `alloc_and_pack_esco_event_record_tag_0x15` | Calls `alloc_tagged_record_via_pool(0x15, ...)`, reads fields at `+0xf0/0xf4/0xf8/0xfc` as 4 ushorts, packs them byte-by-byte into slots `+1..+8` of the allocated record. HIGH: named `alloc_tagged_record_via_pool`. |
+| `0x8005d8ac` | 116B | `alloc_and_pack_esco_event_record_tag_0x14` | Structural twin of above with tag `0x14`; same field accesses `+0xf0/0xf4/0xf8/0xfc` and same byte-packing pattern. HIGH: named callee + structural twin. |
+| `0x8005d9ec` | 112B | `alloc_and_copy_event_record_tag_0xe` | Calls `alloc_tagged_record_via_pool(0xe, ...)`, zeros 8 bytes via `memset`, then copies 8 bytes from config data via `optimized_memcpy`. HIGH: 2 named callees. |
+
+**2 remaining MEDIUM-HIGH from this pass's batch (not renamed)**:
+- `0x80053604` (122B): uses slot constant `0x271` + named `PTR_base_of_0x1ac_struct_array_0xA_large2`, but calls unnamed `FUN_8005a048` → MEDIUM-HIGH
+- `0x80050f7c` (120B): connection type validator (rejects types 3/5/8+), calls unnamed `FUN_80050da4`/`FUN_80050ef8` → MEDIUM-HIGH
+
+**Region-wide unnamed count**: **366 total, 257 unnamed (down from 265), 109 named
+(up from 101)** — 8 new renames applied via `RenamePass29Region80050000.java`.
+
+**Next**: Pass 30 should continue cold-triage from rank 151+. Also `FUN_80054b14`
+(1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.

@@ -4020,10 +4020,25 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries, count updated to 861)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 28)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 29 (rank 141+ cold-triage)
-          Continue from where Pass 28 left off (ranks 131-140 now done). Run a fresh cold-triage
-          to expose ranks 141+. Also re-examine large MEDIUM-HIGH holdovers:
-          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 265 unnamed remain.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 30 (rank 151+ cold-triage)
+          Continue from where Pass 29 left off (ranks 141-150 now done). Run a fresh cold-triage
+          to expose ranks 151+. Also re-examine large MEDIUM-HIGH holdovers:
+          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 257 unnamed remain.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 29 (rank 141+ cold-triage) 2026-06-27
+          8 HIGH renames via RenamePass29Region80050000.java (renamed=8 alreadyOk=0 missing=0 failed=0):
+          0x80053824 → compute_and_maybe_commit_slot_offset_from_parent
+          0x8005ce0c → advance_esco_state_0x77_to_4_if_config_e4
+          0x8005df9c → validate_feature_bitmap_and_dispatch_to_0x134
+          0x80056184 → set_hw_ctrl_bits_and_update_conn10_0x154
+          0x800574ec → toggle_link_register_bit1_for_slot
+          0x8005d834 → alloc_and_pack_esco_event_record_tag_0x15
+          0x8005d8ac → alloc_and_pack_esco_event_record_tag_0x14
+          0x8005d9ec → alloc_and_copy_event_record_tag_0xe
+          Region-wide: 366 total, 257 unnamed (was 265), 109 named (was 101).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 29 section)
+          → analysis/rom/rom_function_index.md (+8 entries, count updated to 875)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 30)
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 28 (rank 131+ cold-triage) 2026-06-27
           6 HIGH renames via RenamePass28Region80050000.java (renamed=6 alreadyOk=0 missing=0 failed=0):
