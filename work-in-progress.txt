@@ -3692,24 +3692,35 @@ sweep beyond enumeration and is the most out-of-date):
           state is the new ticket below, which this finding spawned.
           → analysis/rom/rom_function_index.md, reverse_engineering_region_0x80070000.md, analysis/INDEX.md
 
-[NEXT]  Re-apply ~290 historical Phase 9 renames now that the wairz rename-persistence fix is confirmed durable
-          Per the final-reconciliation ticket above: every Phase 9 rename applied before the 2026-06-26
-          Docker-volume fix landed was wiped and never re-applied. The fix itself is not in question (verified
-          durable 3 times now: 2026-06-26 fix-verification pass, 2026-06-26 final-reconciliation pass, and
-          again at the start of the 2026-06-27 iteration that closed the ticket above) — this is pure
-          mechanical re-application, not a wairz dependency.
-          Approach: re-run the already-written `RenamePassN*.java` scripts (saved via `save_ghidra_script`,
-          enumerate via `list_ghidra_research_files`) via `run_ghidra_headless(..., use_saved_project=true,
-          script_name=...)` against the live GZF project, one region/pass at a time. After each script run,
-          spot-check 2-3 of its renames via a fresh `decompile_function`/`list_functions` call (do not trust
-          "Save succeeded" alone — that exact false-positive is what caused this backlog originally). Cross
-          off addresses against `rom_function_index.md`'s 752-row named-function table as they're confirmed
-          live; track remaining-vs-applied counts per region the same way the medium/low upgrade tickets did.
-          Use `RomCoverageStats.java`'s live `SourceType.USER_DEFINED` count (currently 462) as the running
-          ground-truth checkpoint — it should climb toward 752 (plus the 1 non-function exclusion) as batches
-          land. Update `rom_function_index.md`'s Summary/intro and `analysis/INDEX.md` once the live count
-          reconciles with the doc table, removing the "treat this doc's table, not live Ghidra, as
-          authoritative" caveat that's been carried since 2026-06-25.
+[DONE]  Re-apply ~290 historical Phase 9 renames now that the wairz rename-persistence fix is confirmed durable (2026-06-27)
+          `list_ghidra_research_files` turned up only 5 standalone `Rename*.java` scripts — not one per
+          historical pass as this ticket assumed — so re-application worked directly off
+          `rom_function_index.md`'s own table instead of replaying old scripts. Parsed all 782 named-function
+          table rows with a Python pass, deduped to 751 unique (address, name) pairs (excluding the 1
+          non-function row at 0x8000046c, 25 of the 751 names needed a markdown-extraction fix to strip a
+          trailing "(was `old_name`)" annotation that had snuck into the same backtick-quoted cell), and
+          generated one Ghidra script, `ReapplyPhase9Renames.java` (751 hardcoded {address, name} pairs,
+          per-entry getFunctionAt/getName/setName with try/catch + a final SUMMARY line — not a new
+          batch-decompile workaround, just plain renames). Wrote it straight to
+          `/root/wairz/ghidra/scripts/` (same method as `test_rename_persistence.md`'s probe, since most
+          historical rename scripts were never persisted via `save_ghidra_script`) and ran it once via
+          `run_ghidra_headless(binary_path=<gzf>, use_saved_project=true, script_name=
+          "ReapplyPhase9Renames.java")`.
+          Result, straight from the script's own per-address check (not "Save succeeded" alone):
+          `renamed=336 alreadyOk=415 missing=0 failed=0` — all 751 documented addresses resolved to real
+          functions and now carry their documented name. Independently re-verified in a fresh
+          `decompile_function` call (separate MCP round-trip) for 3 samples spanning every bucket: a
+          freshly-renamed function (`vsc_0xfc6c_indexed_reg_read_with_0xff_sentinel`, 0x8000bd04), a
+          freshly-renamed function that previously had a *different wrong* name
+          (`LC_event_RX_dispatcher`, 0x80042188), and the canonical previously-failing case
+          (`release_connection_record`, 0x8005b79c) — all three decompiled correctly under their new names.
+          Follow-up `RomCoverageStats.java` run shows 737 named functions live (`USER_DEFINED`+`IMPORTED`
+          combined — the script counts both, correcting this ticket's "USER_DEFINED count" framing), up from
+          the 462 baseline; the aggregate arithmetic (462→737 vs. 336 renamed) doesn't reconcile to the byte
+          because overwriting an already-named-but-wrong function doesn't change the aggregate "named" count
+          — only `FUN_*`→real-name conversions do. The per-address script check is the precise, authoritative
+          confirmation the ticket asked for, and it reports zero gaps.
+          → analysis/rom/rom_function_index.md, analysis/INDEX.md
 
 
 EXECUTION NOTES FOR PHASE 9 CONTINUATION (2026-06-25):

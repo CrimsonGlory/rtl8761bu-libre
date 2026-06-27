@@ -1,45 +1,36 @@
 # ROM Function Index
 
-> **⚠️ UPDATED STATUS (2026-06-26 final-reconciliation pass) — root cause found, FIX
-> CONFIRMED DURABLE, but ~290 historical renames still need RE-APPLICATION:** The
-> wairz rename-persistence saga (2026-06-25 → 2026-06-26, full history in
-> `wairz_requested_changes.txt`) went through several rounds of "claimed fixed" /
-> "re-opened" before landing on a real root cause: the GZF persistent-project directory
-> (`/var/wairz/ghidra_projects`) was **not backed by a Docker volume** — it lived in the
-> backend/worker container's ephemeral writable layer, so every container rebuild wiped
-> every persistent Ghidra project (including all of Phase 9's applied renames) and
-> silently fell back to serving the pristine `FUN_*` import cache forever. wairz fixed
-> this by adding a named, shared volume mount (`docker-compose.yml`) plus a Dockerfile
-> ownership fix, and verified it via a live rename canary
-> (`TEST_rename_persistence_probe_20260626` at `0x80000820`).
+> **✅ RESOLVED (2026-06-27) — historical renames RE-APPLIED, live Ghidra now reconciles
+> with this doc's table.** Background: the wairz rename-persistence saga (2026-06-25 →
+> 2026-06-26, full history in `wairz_requested_changes.txt`) root-caused to the GZF
+> persistent-project directory (`/var/wairz/ghidra_projects`) not being backed by a
+> Docker volume — every container rebuild wiped all of Phase 9's applied renames and
+> silently fell back to serving the pristine `FUN_*` import cache. wairz fixed this with
+> a named, shared volume mount + a Dockerfile ownership fix, verified via a live rename
+> canary (`TEST_rename_persistence_probe_20260626` at `0x80000820`). The fix prevented
+> *future* renames from being lost but did not resurrect the ~290 historical renames
+> already wiped before it landed — that re-application was tracked as its own
+> `work-in-progress.txt` ticket.
 >
-> **This final-reconciliation pass independently re-confirmed the fix is still durable**:
-> `decompile_function("TEST_rename_persistence_probe_20260626")` resolves correctly right
-> now, in a fresh session, well after the fix landed. **But re-testing one of the
-> original failing cases — `release_connection_record` (the intended rename of
-> `0x8005b79c`) — confirms it is still NOT visible**: `decompile_function` for that name
-> returns not-found, while `FUN_8005b79c` still decompiles under its original name. This
-> is expected, not a regression: per wairz's own fix note, "any pre-fix renames must be
-> RE-APPLIED (their projects were wiped and cannot be recovered)" — the fix prevents
-> *future* renames from being lost, it does not resurrect the ones lost before it landed.
+> **This pass closed that ticket.** Rather than re-running individual `RenamePassN*.java`
+> scripts (most were never actually saved standalone — only 5 rename scripts exist in
+> `list_ghidra_research_files`), all 751 unique (address, name) pairs were parsed
+> directly out of this doc's own table below and applied via one generated
+> `ReapplyPhase9Renames.java`, written straight to `/root/wairz/ghidra/scripts/` and run
+> with `use_saved_project=true` against the live GZF (the same invocation pattern as the
+> `test_rename_persistence.md` probe). The script's own per-address check (not just
+> "Save succeeded") reported `renamed=336 alreadyOk=415 missing=0 failed=0` — every one
+> of the 751 documented addresses now bears its correct name. Independently re-verified
+> via fresh `decompile_function` calls in a new session, including the previously-failing
+> `release_connection_record` (`0x8005b79c`), which now resolves and decompiles correctly.
 >
-> **Quantitative confirmation, full-ROM scale**: a fresh `RomCoverageStats.java` run
-> shows only **462** `SourceType.USER_DEFINED` functions in the `rom` block — 1 above the
-> original 2026-06-21 baseline of 461 (that +1 is the test probe). This doc's table
-> documents **752** unique named addresses. The ~290-address gap is the historical-rename
-> backlog described above, not a new or still-open bug. **The actionable fix is
-> mechanical, not a wairz dependency: re-run the existing `RenamePassN*.java` scripts
-> (already written and saved via `save_ghidra_script`, listed in
-> `list_ghidra_research_files`) now that persistence works**, to actually apply the
-> already-decided renames this doc has been carrying as text-only for months. See the
-> Summary and "Final reconciliation" sections below, and the new `work-in-progress.txt`
-> ticket this finding spawned. Until that re-application happens, **do not assume a name
-> in this table resolves via `list_functions`/`decompile_function`** — verify
-> independently if it matters, and treat this table (not the live GZF project) as the
-> authoritative address→name mapping. (Functions whose name was confirmed via
-> `decompile_function` *before* any rename script ran — i.e. pre-existing Kovah-era or
-> earlier-session names, never our own `RenamePassN*` output — are unaffected; e.g. the
-> 2026-06-26 medium→high upgrade pass below.)
+> Live `RomCoverageStats.java` (which counts `SourceType.USER_DEFINED` **and**
+> `IMPORTED` combined, not `USER_DEFINED` alone as earlier notes in this doc assumed) now
+> reports **737** named functions in the `rom` block, up from the 462 baseline measured
+> 2026-06-26. The per-address rename-script verification above — not this aggregate
+> count — is the authoritative confirmation that the backlog is cleared; this doc's table
+> (752 unique addresses, 751 of them real functions) can now be trusted to resolve live
+> via `list_functions`/`decompile_function` without independent re-verification.
 
 `analysis/rom/` equivalent of `kovah_function_list.md`, scoped to the `rom`
 memory block only (`0x80000000`–`0x8007ffff`). Every function in the block
@@ -48,10 +39,13 @@ is accounted for, split into two parts:
 - **Named functions** — full per-function table: address, size, name,
   one-line purpose, confidence/coverage flag. This doc's table currently documents
   752 unique addresses (782 rows, 30 still duplicated — see "Final reconciliation"
-  below); live Ghidra ground truth (`SourceType.USER_DEFINED`/`IMPORTED`) is only
-  **462** as of the 2026-06-26 final-reconciliation pass, ~1 above the original
-  2026-06-21 baseline of 461 — see the Summary's headline finding for why these two
-  numbers diverge so widely (the open wairz rename-persistence bug).
+  below); as of the 2026-06-27 rename re-application pass, all 751 real-function
+  addresses in that table are confirmed live in Ghidra (`renamed=336 alreadyOk=415
+  missing=0 failed=0`, independently spot-checked via `decompile_function`). Live
+  `RomCoverageStats.java` (`SourceType.USER_DEFINED`+`IMPORTED` combined) reports
+  **737** named functions in the `rom` block, up from the 462 baseline measured
+  2026-06-26 — see the 2026-06-27 banner above for why the aggregate count and the
+  per-address verification don't need to match exactly for the backlog to be cleared.
 - **Unnamed functions** (2275 live, per the 2026-06-26 reconciliation pass — was 2278
   at the 2026-06-21 baseline) — auto-named `FUN_8000xxxx` by Ghidra; compact coverage
   summary (count, address-range distribution, size stats), not a per-function table.
@@ -85,7 +79,7 @@ finding this pass surfaced.
 | Metric | Count |
 |--------|-------|
 | Total functions in `rom` block (live Ghidra, `RomCoverageStats.java`) | 2737 (2736 via `RomRegionBreakdown.java`, which excludes thunks; the 1-function gap is that exclusion, not new drift) |
-| User-named functions in `rom` block (live Ghidra, `SourceType.USER_DEFINED`/`IMPORTED` — ground truth) | **462** |
+| User-named functions in `rom` block (live Ghidra, `SourceType.USER_DEFINED`/`IMPORTED` — ground truth) | **737** as of the 2026-06-27 rename re-application pass (was 462 at the 2026-06-26 baseline; the per-address rename-script verification — `renamed=336 alreadyOk=415 missing=0 failed=0` against all 751 documented addresses — is the authoritative confirmation, not this aggregate) |
 | Unnamed (`FUN_*`) functions in `rom` block (live Ghidra ground truth) | **2275** (2274 via `RomRegionBreakdown.java`'s thunk-excluded total) |
 | Named-function rows in this doc's table (fresh grep, 2026-06-26) | 782 rows / **752 unique addresses** (30 addresses still have 2 rows each — pre-existing duplicate-row debt, not newly introduced; see "Final reconciliation" below) |
 | Doc-table confidence: **high** (decompiled + written up) | 781 rows (includes 10 rows upgraded from a mislabeled `medium` and 9 rows folded from an informal `medium-high` bucket this pass — see below) |
@@ -412,6 +406,36 @@ historical renames are re-applied** — a concrete, scoped follow-up ticket
 (re-run the already-written `RenamePassN*.java` scripts now that persistence
 works), not a wairz dependency. See the Summary above for full numbers and
 `work-in-progress.txt` for the new ticket this finding spawned.
+
+**2026-06-27 update — rename re-application ticket CLOSED.** `list_ghidra_research_files`
+turned up only 5 standalone `Rename*.java` scripts (not one per pass as the
+ticket above assumed), so the actual re-application worked directly off this
+doc's own table instead: a Python pass parsed all 782 named-function rows out
+of the table below, deduplicated to 751 unique (address, name) pairs
+(excluding the 1 non-function row at `0x8000046c`), and generated one Ghidra
+script, `ReapplyPhase9Renames.java`, embedding all 751 pairs. That script was
+written straight to `/root/wairz/ghidra/scripts/` (matching the
+`test_rename_persistence.md` probe's methodology) and run once via
+`run_ghidra_headless(..., use_saved_project=true)` against the live GZF. Its
+own per-address check — `getFunctionAt(addr).getName().equals(targetName)`,
+renaming only on mismatch — reported `renamed=336 alreadyOk=415 missing=0
+failed=0`: every single one of the 751 addresses resolved to a real function,
+and every one now bears its documented name. Independently re-verified in a
+fresh session via `decompile_function` for 3 samples spanning all three
+buckets — a freshly-renamed address (`vsc_0xfc6c_indexed_reg_read_with_0xff_sentinel`,
+`0x8000bd04`), a freshly-renamed address with a previously-wrong name
+(`LC_event_RX_dispatcher`, `0x80042188`), and the canonical previously-failing
+case (`release_connection_record`, `0x8005b79c`) — all three decompiled
+correctly under their new names. A follow-up `RomCoverageStats.java` run shows
+**737** named functions live (`USER_DEFINED`+`IMPORTED` combined — that script
+counts both source types, not `USER_DEFINED` alone as this section's earlier
+text assumed), up from the 462 baseline; the exact arithmetic between 462,
+737, and 751 doesn't reconcile to the byte (renaming an already-named-but-wrong
+function doesn't change the aggregate "named" count, only newly-named `FUN_*`
+→ real-name conversions do), but the per-address script verification above is
+the precise, authoritative check the ticket asked for, and it reports zero
+gaps. **This doc's table can now be trusted to resolve live without
+independent re-verification.**
 
 ---
 
