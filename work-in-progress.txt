@@ -3580,20 +3580,43 @@ sweep beyond enumeration and is the most out-of-date):
              (Renames Applied table), analysis/rom/rom_function_index.md (16 new HIGH rows +
              Summary bump), analysis/INDEX.md (region line updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 14+ (continue until 0 unnamed remain, 329 to resolve) (2026-06-27)
-          Continue the rank-51-80 cold-triage list from ColdTriageRegion80050000Pass10.java —
-          remaining undecompiled candidates: 0x8005ae58, 0x80059734, 0x8005ca30, 0x8005bf4c,
-          0x8005c4c0, 0x80051c60, 0x80051f14, 0x80059910, 0x8005ff54, 0x8005e648 (the
-          0x800573d8/0x80057094 pair from Pass 11 and the 6 Pass-13 functions are already
-          decompiled; 0x80053cec/0x8005ae58/0x8005174c/0x80056f00 from Pass 11's first batch
-          are documented MEDIUM/MEDIUM-HIGH). After exhausting that list, run a fresh
-          cold-triage re-enumeration (the region's true baseline is now confirmed 329 unnamed,
-          not the stale 341/343 figures in older doc sections) to get a clean rank list for
-          continued sweeping. Before trusting any OTHER region's "already renamed" claims at
-          face value, consider applying this session's lesson (check
-          list_ghidra_research_files for staged-but-unreported rename scripts before assuming
-          a FUN_ lookup failure means "still unnamed") — it may surface similar
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 15 — fresh cold-triage re-enumeration (327 unnamed remain) (2026-06-27)
+          PASS 14 (below, [DONE]) exhausted the full rank-51-80 cold-triage list staged back
+          in Pass 11 — there is no pre-staged candidate list left. Write a new
+          ColdTriageRegion80050000Pass15.java (same pattern as Pass 5/8/10's scripts: in-script
+          ReferenceManager xref count + size ranking, excluding all addresses already reviewed
+          across Passes 1-14) against the live GZF to produce a fresh ranked list of the
+          remaining 327 unnamed functions, then batch-decompile the top candidates. Continue
+          until 0 unnamed remain in the region, or until a run of ~8-9 consecutive 0-2-HIGH-yield
+          passes triggers the project's established pivot-to-another-region policy (see Pass 9's
+          precedent in reverse_engineering_region_0x80070000.md). Before trusting any OTHER
+          region's "already renamed" claims at face value, consider applying this session's
+          lesson (check list_ghidra_research_files for staged-but-unreported rename scripts
+          before assuming a FUN_ lookup failure means "still unnamed") — it may surface similar
           already-done-but-undocumented work elsewhere.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 14 — rank-51-80 list exhausted, 2 HIGH renames (2026-06-27)
+          Decompiled the final 10 rank-51-80 cold-triage candidates (0x8005ae58, 0x80059734,
+          0x8005ca30, 0x8005bf4c, 0x8005c4c0, 0x80051c60, 0x80051f14, 0x80059910, 0x8005ff54,
+          0x8005e648) in one batch_decompile_functions call (10/10 success), exhausting the
+          full rank-51-80 list staged in Pass 11. 2 cleared HIGH: 0x8005c4c0 ->
+          find_duplicate_bdaddr_and_disconnect (1-byte addr-type + 6-byte BD_ADDR memcmp
+          duplicate-connection detector with disconnect callback) and 0x80059910 ->
+          esco_sco_param_validate_and_commit (eSCO/SCO parameter validator returning literal
+          HCI status codes 0x12 "Invalid HCI Command Parameters" / 0xc "Command Disallowed").
+          Applied via RenamePass14Region80050000.java (renamed=2 alreadyOk=0 missing=0
+          failed=0), independently re-verified via a fresh decompile_function round-trip on
+          both new names. The other 8 stay MEDIUM/MEDIUM-HIGH (clear structural families: a
+          min-scan scheduler helper, a sync-word/access-code bit-transition qualifier, 2
+          negotiation-commit siblings matching the existing eSCO/SCO cluster shape, a
+          hold/sniff/park-style 2-bit link-mode dispatcher, an exact twin pair differing only
+          by a trailing dispatch constant 0/6, and a commit-step sibling of this pass's HIGH
+          rename — none pin an unambiguous semantic without an opcode/event literal). Fresh
+          CountUnnamedRegion80050000.java scan confirms region-wide: 366 total, 327 unnamed
+          (down from 329), 39 named (up from 37).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 14 section),
+             analysis/rom/rom_function_index.md (2 new HIGH rows + Summary bump to 761
+             named/2251 unnamed project-wide), analysis/INDEX.md (region line updated)
 
 [DONE]  Full RE: ROM region 0x80070000-0x8007ffff PASS 10 batch 2 (2026-06-26 doc-hygiene close)
           This [TODO] was stale: its own Batch 2 staging (5 targets) was already fully closed

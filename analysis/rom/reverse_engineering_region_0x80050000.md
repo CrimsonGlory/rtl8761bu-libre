@@ -1664,3 +1664,53 @@ recommend continuing the remaining rank-51-80 candidates
 **Region-wide unnamed count**: unchanged at 329 (no renames applied this
 pass — all 5 reads stay MEDIUM/MEDIUM-HIGH).
 
+---
+
+## Pass 14 — rank 51-80 final continuation, 2 HIGH renames (2026-06-27)
+
+Decompiled the remaining 10 rank-51-80 cold-triage candidates in one
+`batch_decompile_functions` call (10/10 success): `0x8005ae58`,
+`0x80059734`, `0x8005ca30`, `0x8005bf4c`, `0x8005c4c0`, `0x80051c60`,
+`0x80051f14`, `0x80059910`, `0x8005ff54`, `0x8005e648`. This exhausts the
+full rank-51-80 cold-triage list staged back in Pass 11.
+
+**2 cleared the HIGH bar:**
+
+| Address | Size | Old name | New name | Evidence |
+|---------|------|----------|----------|----------|
+| `0x8005c4c0` | 226B | `FUN_8005c4c0` | `find_duplicate_bdaddr_and_disconnect` | Iterates up to 11 active connection records (skipping the caller's own index, gated on the active bitmap `field453/454_0x1d2-0x1d3` and a per-record "connected" bit), and for each candidate compares a 1-byte address-type field at offset `0x2d` plus a 6-byte field at `0x2e..0x33` via `memcmp` against the caller's own record — the classic 1-byte-type + 6-byte-BD_ADDR layout used throughout this firmware's connection records. On a match it logs the collision via `possible_logger_called_if_no_patch3`, sets bit 2 of the duplicate's status byte (offset+6), and invokes a function-pointer callback with `(record_ptr, 4)` — a disconnect-style teardown call with reason code 4. Self-contained structural evidence (exact BD_ADDR-shaped 7-byte comparison + duplicate-handling pattern) clears the HIGH bar without needing an external caller/opcode reference. |
+| `0x80059910` | 222B | `FUN_80059910` | `esco_sco_param_validate_and_commit` | Takes a connection index plus 4 negotiated eSCO/SCO parameters (a byte, a `undefined2`, and 3 `ushort`s) and validates them against a per-connection record gated by a global enable flag (`field451_0x1d0 & 1`) and a per-record feature bit (`field3_0x3 & 4`). Range/bandwidth checks (`param_5<500`, `param_6` window check, a `(param_6<<3)/(param_6+1)` bandwidth-vs-latency divide) return real Bluetooth HCI status codes on failure: **`0x12`** ("Invalid HCI Command Parameters") for out-of-range values, **`0xc`** ("Command Disallowed") when the feature is disabled or the link is already established. On success it commits all 4 parameters into the per-link sub-record (offsets `0x94`-`0xa9`) plus 3 derived retransmission-window fields (`(param_4-1)*2`, written 3×) and sets the established flag (bit0 at `+0x8f`). The literal HCI status codes pinned to a textbook validate-then-commit shape clear the HIGH bar — same precedent as Pass 7/8's opcode-literal-anchored renames. |
+
+**8 stay MEDIUM/MEDIUM-HIGH** (same bar as Pass 11/13 — clear structural
+shape, but no opcode/event literal or exact-match named sibling to pin an
+unambiguous semantic):
+
+| Address | Size | Read | Confidence |
+|---------|------|------|------------|
+| `0x8005ae58` | 396B | Iterates the same `_x1F4_struct` per-connection array (bitmask-selected, up to 11 entries) computing a running minimum of a 32-bit "current best" field cached in a header struct preceding the array (`field479-482_0x1ec-0x1ef`), with a special-case branch when index 0 differs (checks `field407_0x1a4 & 1` and a different ushort source). Finishes with a conditional diagnostic log when a counter field exceeds a threshold. Reads as a "recompute scheduling priority / earliest-deadline across active connections" helper, structurally similar to a min-heap-by-field scan. | MEDIUM-HIGH — clear scan-for-minimum shape over the established per-connection array, but the specific field/scheduling semantic isn't pinned to a named constant |
+| `0x80059734` | ~360B | Takes a single byte flag and performs a 31-bit transition-counting / run-length-counting walk over an XOR-diffed 32-bit value (built from two cached ushort halves), tracking max consecutive-same-bit run (cap 6), total transition count (cap 0x18=24), and (when the flag is set) a windowed "good bit" counter — closely matches the shape of a Bluetooth access-code/sync-word qualification check (autocorrelation-style bit-transition/run-length validity test). Returns 0 on disqualification, the XOR'd value on qualification. | MEDIUM-HIGH — recognizable bit-transition/run-length qualification algorithm shape, but not confirmed against a specific named Bluetooth sync-word/access-code spec reference |
+| `0x8005ca30` | 196B | Compares an incoming 16-bit field (`param_1+6`) against a cached "previous" value in the per-connection sub-record (`field40_0x28`); on change, sets a dirty bit (`field120_0x7c |= 2`), caches a 5-byte tail from the input buffer into a side table indexed by a 2-bit field, calls a committed function pointer with `(conn_idx, new_value)`, and logs. On no-change/reject, calls a different function pointer and logs a rejection. Same `_x1F4_struct` field range (`field40_0x28`/`field163_0xaa`) as Pass 13's `0x8005a0d4` — part of the same negotiation-commit family. | MEDIUM-HIGH — clear "commit-if-changed, notify, else reject" pattern matching the established eSCO/SCO negotiation cluster's shape, exact negotiated quantity not pinned |
+| `0x8005bf4c` | ~280B | Calls the already-named `validate_connection_setup_preconditions`, then branches on a 2-bit link-mode field (`& 0x6000`, values `0x2000`/`0x4000`/`0x6000` — consistent with a 2-bit "current low-power mode" encoding at bits 13:14) to set a combined status-flag byte, with one branch additionally dispatching via the already-named `param_dispatch_with_rom_calls`. Falls through to a final dispatch on `FUN_80033794`/`FUN_80035768` or `FUN_80034ccc` depending on another flag. Reads as a hold/sniff/park-style link-mode transition dispatcher. | MEDIUM-HIGH — reuses 2 already-named helpers and a clear 2-bit-mode-dispatch shape, but which mode maps to which constant isn't confirmed |
+| `0x80051c60` / `0x80051f14` | 222B / 220B | Exact structural twins (only the specific paired-callee functions and one trailing dispatch constant differ — `0` vs `6`): each calls a "begin/end" pair (`FUN_80055ec8`/`FUN_80055e50`), a parameter-setter pair (`FUN_80056460`/`FUN_80056404`), a shared helper (`FUN_80051c24`), a conditional pair (`FUN_80056364`/`FUN_8005634c`), writes a packed bitfield into a cached ushort, a shared pair of calls (`FUN_8004eb18`/`FUN_8004ea2c`, `FUN_800562f4`), a shared lookup (`FUN_80059fd0`), a final pair (`FUN_800562ac`/`FUN_800562d0`), conditional logging, then a function-pointer dispatch with constant `0` vs `6` and a matching close-out call. Reads as the same PDU/event handler instantiated for two distinct connection types or channels (similar duality to Pass 11's `0x800573d8`/`0x80057094` 30-vs-20-divisor pair). | MEDIUM-HIGH — unambiguous "twin family" with paired callees throughout, but the A/B discriminator (type 0 vs 6) isn't pinned to a named connection-type/channel constant |
+| `0x80059910`'s sibling-shaped neighbor `0x8005ff54` | 200B | Gated on a per-link "established" bit (`puVar9+0x78 & 0x80`); if unset, allocates via `FUN_8005db04(0x15, 0x24)` and assigns the result into the connection sub-record, logging. If set, reads 2 ushort pairs from the input buffer, validates each pair via the already-existing helper `FUN_800599f8`, and on success commits both pairs into the sub-record (`+0xf2/+0xf6/+0xfa/+0xfe`) and calls `FUN_8005fedc(rec, 5)`; on failure calls an error-path helper `FUN_8005e01c(rec, 0x15, 0x1e, 1)` (note constant `0x15`=21 reused from the allocator call above). Same validate-then-commit family as `esco_sco_param_validate_and_commit` above, but the negotiated quantity and the `0x15`/`0x1e` constants aren't pinned to named opcodes. | MEDIUM-HIGH — same validate-then-commit family as this pass's HIGH rename, but lacks the literal HCI-status-code anchor that cleared the sibling |
+| `0x8005e648` | ~200B | Copies an 8-byte parameter block via the already-named `optimized_memcpy` into the sub-record at offset `0x34`, derives 2 status bits from the copied byte gated by a global feature flag (`field451_0x1d0 & 0x20`), conditionally triggers `FUN_800577c0`, sets a "dirty" bit (`+0x7c |= 0x10`), commits via a function-pointer call `(conn_idx, 5)` and `FUN_8005e514`/`assign_pointer_to_0x1AC_offset_0x134` (both already-named), then propagates a "pending" bit into two related cache fields (`+0x84`/`+0x88`) when either of two 32-bit fields is nonzero. Reads as the "commit negotiated parameters" step of the same eSCO/SCO cluster. | MEDIUM-HIGH — reuses 3 already-named helpers and matches the cluster's commit-step shape, but the specific 8-byte parameter block's meaning isn't pinned |
+
+**This exhausts the full rank-51-80 cold-triage list** staged in Pass 11
+(all 30 candidates now reviewed: `0x800573d8`/`0x80057094` HIGH in Pass 11,
+`0x80056f00`/`0x80053cec`/`0x8005174c` MEDIUM-HIGH in Pass 11,
+6 already-renamed (discovered) in Pass 11 batch 2, `0x8005efe8`/`0x8005f260`/
+`0x8005a7ec`/`0x8005a0d4`/`0x8005c100` MEDIUM/MEDIUM-HIGH in Pass 13, and
+this pass's 10). 2 new HIGH renames this pass, applied via
+`RenamePass14Region80050000.java` (`renamed=2 alreadyOk=0 missing=0
+failed=0`, independently re-verified via a fresh `decompile_function`
+round-trip on both new names).
+
+**Region-wide unnamed count**: fresh `CountUnnamedRegion80050000.java` scan
+confirms **366 total functions in `0x80050000`-`0x8005ffff`, 327 unnamed,
+39 named** (down from 329 unnamed / 37 named before this pass's 2 renames).
+
+**Next**: the rank-51-80 cold-triage list is now fully exhausted. Run a
+fresh cold-triage re-enumeration (e.g. a new `ColdTriageRegion80050000Pass15.java`
+ranking the remaining 327 unnamed functions by xref count / size) to
+identify the next batch of candidates, since no pre-staged list remains.
+
