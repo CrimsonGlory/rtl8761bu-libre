@@ -3675,19 +3675,62 @@ sweep beyond enumeration and is the most out-of-date):
              analysis/rom/rom_function_index.md (3 new HIGH rows + Summary bump to 770
              named/2242 unnamed project-wide), analysis/INDEX.md (region line updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 22 — continue live-FUN_* ranking from rank ~91+ (318 unnamed remain) (2026-06-27)
-          Pass 21 broke FUN_8005d438's anchor lead wide open (no tag table — conclusively
-          resolved) and yielded 3 HIGH renames. Continue from rank ~91+ of a fresh
-          ColdTriageRegion80050000Pass19.java re-run (or a new rank-91+ variant if needed —
-          the script currently caps at rank 90). Rank 79-90 of Pass 21's list already showed
-          much larger functions (0x80054b14 1650B, 0x80057ce8 1314B, 0x80057a00 706B,
-          0x8005aba8 664B, 0x80058740 534B, 0x800577ec 516B, 0x8005840c 506B, 0x8005dd9c
-          494B, all xrefs:2) than recent passes have been seeing — worth prioritizing.
-          Also worth a look: name FUN_8005faec itself (Pass 17's still-unnamed "strongest
-          COMMIT candidate" for the pending-procedure family — naming it would immediately
-          promote Pass 21's 0x8005fe90/0x8005ca00 to HIGH), and review
-          alloc_tagged_record_via_pool's 3 newly-found-but-unreviewed callers (0x8005efe8,
-          0x8005f260, 0x8005f428, found via find_callers) for more known tags.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 23 — continue rank 76-90 leftovers (10 functions, MEDIUM/MEDIUM-HIGH) + alloc_tagged_record_via_pool tags 0x23/0x2a follow-up (2026-06-27)
+          Pass 22 resolved FUN_8005faec (pending-procedure advance/commit state machine),
+          named the alloc_tagged_record_via_pool tag-0/1/3/0x18 "snapshot builder" family, and
+          named the indexed-link-register read/write pair — 8 HIGH renames, best yield since
+          Pass 12. 310 unnamed remain. Continue with the 10 rank-76-90 leftovers still
+          MEDIUM/MEDIUM-HIGH (0x80054b14, 0x80057ce8, 0x80057a00, 0x8005aba8, 0x80058740,
+          0x800577ec, 0x8005840c, 0x8005dd9c, 0x80058254, 0x8005c640, 0x80051678, 0x8005f8a0
+          — see Pass 22 section table in reverse_engineering_region_0x80050000.md for full
+          per-function notes). 0x80054b14 and 0x8005aba8 have the strongest partial anchors —
+          worth a 2nd look once their still-unnamed callees (FUN_8005693c, 0x8005aaac,
+          0x8005a7ec) get reviewed. Also worth following up FUN_8005dd70's newly-confirmed
+          tags 0x23/0x2a on alloc_tagged_record_via_pool via its caller 0x8005dd9c (would be
+          the 13th/14th known tags). The genuine rank-91+ tail is now mostly small leaf
+          functions (22B-162B) and is lower priority than these leftovers.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 22 — rank 76-90 large-function sweep + FUN_8005faec resolved, 8 HIGH renames (best yield since Pass 12) (2026-06-27)
+          Re-ran ColdTriageRegion80050000Pass19.java fresh: confirmed unchanged from Pass 21's
+          close (366 total, 318 unnamed, 48 named). Rather than jump straight to the literal
+          rank-91+ continuation, verified rank 76-90 of the live list were still unreviewed and
+          much larger/more-promising (1650B/1314B/706B+) than rank 91+ (a steep drop to
+          22B-162B leaves) — prioritized those plus the 2 explicitly-flagged follow-ups.
+
+          Decompiled 19 functions via batch_decompile_functions across 3 batches (19/19
+          success): 13 rank-76-90 leftovers, FUN_8005faec itself, alloc_tagged_record_via_pool's
+          2 remaining unreviewed callers (0x8005f260/0x8005f428), 0x8005aba8's 2 sibling helpers
+          (0x8005aaac/0x8005a7ec), plus FUN_80056660/FUN_800573d8 (pervasive-but-unnamed
+          register pair referenced by 6+ of this batch).
+
+          Resolved Pass 17's "strongest COMMIT candidate" hypothesis: FUN_8005faec is the
+          central advance/commit state machine for the eSCO/SCO pending-procedure family
+          (4-bit state field at +0x114, states 1/3/4/5/7), terminating via the already-named
+          assign_pointer_to_0x1AC_offset_0x134 — same call Pass 21's 0x8005d924 makes. This
+          promoted Pass 21's 0x8005fe90 (direct caller of FUN_8005faec) from MEDIUM-HIGH to
+          HIGH. Also found alloc_tagged_record_via_pool's tag-0/1/0x18 callers
+          (0x8005d66c/0x8005f260/0x8005f428) are an exact-structural "snapshot builder" trio,
+          plus a 4th tag-3 sibling (0x8005efe8, copies key-material-shaped fields, no timing
+          calc). FUN_80056660/FUN_800573d8 decompile to a textbook indexed-register-bank
+          read/write pair, banked 30 (0x1e) registers per connection slot, with slot-ownership
+          validation on write.
+
+          8 cleared HIGH, renamed via RenamePass22Region80050000.java (renamed=8 alreadyOk=0
+          missing=0 failed=0, independently re-verified via fresh decompile_function round-trip
+          on all 8, internal call sites resolve correctly): 0x8005faec ->
+          pending_procedure_advance_and_commit, 0x8005fe90 -> initiate_pending_procedure_or_defer,
+          0x8005d66c -> alloc_tag18_record_and_snapshot_timing, 0x8005f260 ->
+          alloc_tag1_record_and_snapshot_timing, 0x8005f428 -> alloc_tag0_record_and_snapshot_timing,
+          0x8005efe8 -> alloc_tag3_record_and_copy_link_fields, 0x80056660 ->
+          read_indexed_link_register, 0x800573d8 -> write_indexed_link_register_with_slot_check.
+
+          The other 11 functions reviewed (10 rank-76-90 leftovers + 0x8005ca00, which doesn't
+          call FUN_8005faec directly so stays unpromoted) remain MEDIUM/MEDIUM-HIGH.
+
+          Region-wide: 366 total, 310 unnamed (down from 318), 56 named (up from 48).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 22 section added),
+             analysis/rom/rom_function_index.md (8 new HIGH rows + Summary bump to 778
+             named/2234 unnamed project-wide), analysis/INDEX.md (region line updated)
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 19 — FUN_8005d438 anchor check (inconclusive) + rank ~41-51 continuation, 0 HIGH yield (4th consecutive) (2026-06-27)
           Re-ran ColdTriageRegion80050000Pass15.java fresh: confirmed unchanged from PASS 18's

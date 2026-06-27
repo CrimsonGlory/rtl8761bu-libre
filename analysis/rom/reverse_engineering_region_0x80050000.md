@@ -2286,3 +2286,180 @@ now load-bearing for 2 more callers this pass) is a good target to finally
 name, which would immediately promote this pass's `0x8005fe90`/`0x8005ca00`
 to HIGH.
 
+## PASS 22 (2026-06-27)
+
+Re-ran `ColdTriageRegion80050000Pass19.java` fresh: confirmed unchanged from
+Pass 21's close (366 total, 318 unnamed, 48 named). Rather than jump straight
+to rank 91+ as the prior pass's `[NEXT]` literally said, first verified the
+prior pass's own flag that ranks 76-90 of the *live* list (not yet exhausted
+by any pass) contain much larger, more promising functions than rank 91+
+(which turned out to be a steep drop to 22B-162B leaf functions) — confirmed
+via a fresh rank 41-90 re-run, then prioritized ranks 76-90 plus the two
+explicitly-flagged follow-ups (`FUN_8005faec` itself, and
+`alloc_tagged_record_via_pool`'s 3 unreviewed `find_callers` hits) over the
+literal rank-91+ continuation.
+
+Decompiled 19 functions across 3 batches via `batch_decompile_functions`
+(19/19 success): the 13 unreviewed rank 76-90 large functions
+(`0x80054b14`, `0x80057ce8`, `0x80057a00`, `0x8005aba8`, `0x80058740`,
+`0x800577ec`, `0x8005840c`, `0x8005dd9c`, `0x80058254`, `0x8005efe8`,
+`0x8005c640`, `0x80051678`, `0x8005d66c`, `0x8005f8a0` — `0x80051368` was
+skipped, already reviewed in Pass 21), plus `FUN_8005faec` itself,
+`alloc_tagged_record_via_pool`'s other 2 unreviewed callers (`0x8005f260`,
+`0x8005f428`), and `0x8005aba8`'s two sibling helpers (`0x8005aaac`,
+`0x8005a7ec`). Also individually decompiled `FUN_80056660`/`FUN_800573d8`
+(the read/write register-access pair noted as unnamed-but-pervasively-used
+across nearly every function in this batch) to check whether they were
+already named elsewhere — confirmed still `FUN_*` and not in
+`rom_function_index.md`.
+
+### `FUN_8005faec` resolved — Pass 17's "strongest COMMIT candidate" confirmed
+
+Decompiling `FUN_8005faec` directly confirms the hypothesis flagged back in
+Pass 17 (and load-bearing for Pass 21's two pending-procedure MEDIUM-HIGH
+finds): it is the central **advance/commit state machine** for the eSCO/SCO
+pending-procedure family established across Passes 14/15/17/19/20/21. It
+reads a 4-bit state field at `+0x114` (values observed: 1, 3, 4, 5, 7) and
+advances it on each call:
+
+- **State 3** (the "set up, awaiting trigger" state): checks a table lookup
+  keyed by a 2-bit role/context field; if the table value is `0xb`,
+  transitions to state 4 and either commits immediately (calling
+  `alloc_tag18_record_and_snapshot_timing(slot, 1)` plus a follow-up
+  `FUN_8005f614` call) when a guard field is zero, or stages a deferred
+  commit (`alloc_tag18_record_and_snapshot_timing(slot, 0)` plus 2 indirect
+  callback dispatches) otherwise. If the table value isn't `0xb`, it's a
+  no-op (state unchanged, no commit).
+- **States 1/5**: call `FUN_8005d7bc(slot)`, increment the state nibble.
+- **State 7**: call `FUN_8005d744(slot)`, increment the state nibble
+  (masked to `0xf`).
+- All paths funnel through 2 indirect "finalize" callbacks
+  (`PTR_DAT_8005fd00`/`PTR_DAT_8005fd08`) and terminate by writing the
+  procedure's result pointer via the already-named
+  `assign_pointer_to_0x1AC_offset_0x134` — the exact same terminal call
+  Pass 21's `0x8005d924` (the SET/INITIATE half) makes.
+
+This is a self-contained, fully-understood state machine with a terminal
+call to an already-named function — clears the same HIGH bar Pass 20/21
+established. **Renamed → `pending_procedure_advance_and_commit`** (HIGH).
+
+This immediately promotes Pass 21's `0x8005fe90` (which calls
+`FUN_8005faec(param_1, 1)` directly when both pending masks are clear) from
+MEDIUM-HIGH to HIGH, since its terminal call target is now named.
+**Renamed → `initiate_pending_procedure_or_defer`** (HIGH). Pass 21's other
+holdover, `0x8005ca00` (the deferred-write counterpart), does **not** call
+`FUN_8005faec` directly per its own decompile — it stages a bitmap pair with
+no named-function call — so it stays MEDIUM-HIGH, unrenamed (no new evidence
+this pass).
+
+### `alloc_tagged_record_via_pool`'s tag-0/1/0x18 family — a parallel "snapshot builder" trio
+
+`FUN_8005d66c` (the function `pending_procedure_advance_and_commit` calls
+directly at its state-3→4 transition) decompiles to: allocate via
+`alloc_tagged_record_via_pool(0x18, ...)`, optionally compute a timing
+snapshot value (by a `param_2` flag — either a table-constant multiply or a
+direct pass-through), store it at struct offset `+0x120`, copy 2 existing
+status bytes into the new record, log, and return the record pointer. This
+is a self-contained, well-understood mechanism (alloc-and-populate, same
+evidentiary bar as `alloc_tag_record_via_pool` itself) **and** is now
+confirmed as a direct callee of the newly-named
+`pending_procedure_advance_and_commit`. **Renamed →
+`alloc_tag18_record_and_snapshot_timing`** (HIGH).
+
+The other 2 of `alloc_tagged_record_via_pool`'s 3 `find_callers`-located
+callers turn out to be exact structural twins, just with different tags and
+struct offsets:
+
+- `FUN_8005f260` — tag `1`, snapshot stored at `+0xaa`. **Renamed →
+  `alloc_tag1_record_and_snapshot_timing`** (HIGH).
+- `FUN_8005f428` — tag `0`, snapshot stored at `+0xa4`, and copies more
+  existing fields (`+0x98`/`+0x9a`/`+0x9c`/`+0x22`/`+0x24`/`+0x2a`) than its
+  siblings. **Renamed → `alloc_tag0_record_and_snapshot_timing`** (HIGH).
+
+A 4th sibling, `FUN_8005efe8` (rank 86, also flagged as one of
+`alloc_tagged_record_via_pool`'s unreviewed callers), shares the same
+"alloc-tag-then-populate" shape but with tag `3` and **no** timing
+computation — it just copies 20 bytes of existing fields (`+0xac`/`+0xb4`/
+`+0xc6`/`+0xd6`, key-material-shaped, recalling Pass 20's LTK/IRK-shaped
+fields) via `optimized_memcpy`. **Renamed →
+`alloc_tag3_record_and_copy_link_fields`** (HIGH).
+
+This extends `alloc_tagged_record_via_pool`'s known tag set from 11 values
+to 12 (`0` and `1` were already known from Passes 20/21's caller-family
+extensions on *other* callers; this pass adds the dedicated snapshot-builder
+identity to those tags plus confirms tag `3`/`0x18`). The tag set remains
+non-contiguous — no clean enum recoverable from tags alone, consistent with
+every prior pass's finding on this family.
+
+### `FUN_80056660`/`FUN_800573d8` — the per-connection-slot indexed register bank read/write pair
+
+These two functions are referenced (unnamed) by at least 6 of this pass's
+batch (`FUN_80057ce8`, `FUN_80057a00`, `FUN_8005840c`, `FUN_80058254`, plus
+indirectly through callers reviewed in earlier passes) yet were never
+named, despite Pass 15 already characterizing `0x800573d8`/`0x80057094` as
+"a single per-connection hw link-context register, physically banked by
+connection-index range." Decompiling both directly:
+
+- **`FUN_80056660(index)`**: disables IRQs, writes a 10-bit `index` to one
+  MMIO register, polls a second MMIO register for a ready bit (`0x20`),
+  reads a 32-bit value split across 2 data registers, re-enables IRQs,
+  returns the value. Textbook indexed-register-bank read.
+- **`FUN_800573d8(index, value)`**: disables IRQs, writes the 32-bit
+  `value` to 2 data registers, writes the 10-bit `index | 0x8000`
+  (write-strobe bit) to the index register, polls the same ready bit, then
+  performs a **slot-ownership validation**: reads back the index register,
+  checks a "valid" bit (`0x4000`) and a 4-bit "owning slot" field
+  (bits 10:13, expected `>= 8`), derives the connection slot from `index`
+  itself (`index / 0x1e`), and confirms the two agree (plus a bitmap
+  membership check) before treating the write as successful — logging
+  (category `0xcd`) and returning error code `3` on a mismatch.
+
+Every caller in this batch (and in prior passes, e.g. `0x800590b0`'s gating
+function) addresses these as `connection_slot * 0x1e + register_offset`,
+confirming a hardware register bank with 30 (`0x1e`) registers allocated per
+connection slot — matching the SCO/eSCO link-parameter offsets (`+0x17`
+through `+0x1b`) seen throughout `FUN_8005840c`/`FUN_80058254`/
+`FUN_80057a00`/`FUN_80057ce8` this pass. Self-contained, fully-understood
+hardware-access primitives — same evidentiary bar as the ROM-level HW
+register read/write pair documented in `CLAUDE.md` (`0x8001136c`/
+`0x8001139c`). **Renamed → `read_indexed_link_register`** (`0x80056660`,
+HIGH) and **`write_indexed_link_register_with_slot_check`** (`0x800573d8`,
+HIGH).
+
+### Other large rank-76-90 functions reviewed — stay below HIGH
+
+| Address | Read | Confidence |
+|---------|------|------------|
+| `0x80054b14` (1650B) | Large register-programming function: resolves a "parent context" via the already-named `resolve_parent_context_by_role`, computes timing via the already-characterized `FUN_8005a048`/`FUN_8005a680` (÷`0x271`, the established 625µs-slot conversion), then writes ~15 raw hardware-register pointers (`DAT_800551xx`) plus calls `read_indexed_link_register`-family functions and `FUN_8005693c`. Almost certainly the SCO/eSCO link-format-and-timing hardware commit, but too many still-unnamed callees to pin a single anchor. | MEDIUM-HIGH |
+| `0x80057ce8` (1314B) | Dense fixed-point arithmetic with explicit `trap(7)` divide-by-zero guards, reads/writes the indexed link register repeatedly; computes a periodic retransmission/AFH-style scheduling window. No anchor. | MEDIUM |
+| `0x80057a00` (706B) | Role/feature determination from struct fields, calls the still-unnamed `FUN_80057370(0xd, idx)` (Pass 20's validate+remap+log function) and the indexed link-register pair. Generic validate+commit shape. | MEDIUM-HIGH |
+| `0x8005aba8` (664B) | Calls the already-named `esco_sco_param_validate_and_commit` conditionally, after computing a recompute-needed decision from a config-blob feature bit (`0x4000`) and a cached "currently active" link check. Strong eSCO/SCO anchor but substantial untranslated decision logic (feature bit's purpose, "active link" cache semantics). Its 2 sibling helpers `0x8005aaac`/`0x8005a7ec` (also decompiled this pass) compute a phase/timing value from a baseband-register-derived count modulo a window size — same MEDIUM-HIGH tier, no clean single anchor. | MEDIUM-HIGH |
+| `0x80058740` (534B) | 3-mode (0/1/2) record-finder/promoter across 3 distinct fixed-size tables, matching by a 6-byte key (`optimized_memcpy`'d from input) against 3 fields — cache-lookaside-shaped, possibly a key-cache (BD_ADDR or LTK fragment). No anchor. | MEDIUM |
+| `0x800577ec` (516B) | Symmetric dual-mode (`param_1` 0/1) loop writing 2+4 16-bit fields via the still-unnamed `FUN_800574c8`/`FUN_8005734c` siblings, with a retry-until-flag-clear loop. Generic batch hardware-field writer. | MEDIUM |
+| `0x8005840c` (506B) | Per-connection-slot 3-state dispatcher (not-allocated/allocated-active/allocated-passive) gating indexed-link-register writes vs. a save/restore-and-fire-callback path; calls the still-unnamed `FUN_80057370(0xb, slot)`. Same shape family as `0x80058254`/`0x80057a00`. | MEDIUM-HIGH |
+| `0x8005dd9c` (494B) | Complex tag/bitmask validator (param_2 < 0x1c) that calls `FUN_8005dd70`→`alloc_tagged_record_via_pool` (tags `0x23`/`0x2a`) on certain mismatch conditions, else falls through to a separate 2-branch gate calling the still-unnamed `FUN_8005d490`. Extends the established tag-allocator caller family further but no clean overall anchor. | MEDIUM-HIGH |
+| `0x80058254` (400B) | Exact structural twin of `0x8005840c` (3-state dispatcher, indexed-link-register writes, calls `FUN_80057370(0xc, slot)`) operating on a different struct array/table (`PTR_DAT_800583f0`, 7-byte stride). | MEDIUM-HIGH |
+| `0x8005c640` (206B) | Drains a per-slot linked queue, type-dispatching each entry (type 0: calls the Pass-21-characterized `FUN_8005d1a4` "queue/accumulate at array-index-10" plus `FUN_8005cf6c`; type 1: calls `FUN_8004b064` with a different record shape). Confirms `FUN_8005d1a4`'s caller context further but the queue's overall purpose isn't pinned. | MEDIUM-HIGH |
+| `0x80051678` (194B) | Pure linked-list cleanup: removes nodes tagged `'\t'`/`'\n'` from 2 separate lists, conditionally fires a callback, tail-calls `FUN_8005164c`. Generic teardown helper, no domain anchor. | MEDIUM |
+| `0x8005f8a0` (188B) | Per-feature-index (`param_2`) bit/shift configuration dispatcher with special-cased actions: case 8 calls `FUN_8005f614`, case 10 calls the already-named `send_evt_Meta_subevent_0x17`. Touches a named HCI-event sender but the "feature index" domain itself isn't identified. | MEDIUM-HIGH |
+
+**Region-wide unnamed count**: **366 total, 310 unnamed (down from 318), 56
+named (up from 48)** — confirmed via a fresh `CountUnnamedRegion80050000.java`
+re-run. 8 new HIGH renames applied via `RenamePass22Region80050000.java`
+(`renamed=8 alreadyOk=0 missing=0 failed=0`), independently re-verified via a
+fresh `decompile_function` round-trip on all 8 new names (internal call
+sites also resolved correctly to the new names, e.g.
+`pending_procedure_advance_and_commit` now shows a call to
+`alloc_tag18_record_and_snapshot_timing` by name).
+
+**Next**: Pass 23 should continue with the rank-76-90 leftovers not yet
+renamed (10 functions, listed above, all MEDIUM/MEDIUM-HIGH) — `0x80054b14`
+and `0x8005aba8` have the strongest partial anchors and are worth a 2nd look
+once their still-unnamed callees (`FUN_8005693c`, `0x8005aaac`/`0x8005a7ec`)
+get reviewed. The genuine rank-91+ tail (now starting fresh after this
+pass's renames shift ranks down) is mostly small leaf functions (22B-162B)
+and is lower priority than the rank-76-90 leftovers. Also worth following up
+`FUN_8005dd70`'s newly-confirmed tags `0x23`/`0x2a` on
+`alloc_tagged_record_via_pool` (13th/14th known tags) via its caller
+`0x8005dd9c`.
+
