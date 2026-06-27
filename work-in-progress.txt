@@ -3974,11 +3974,31 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+3 entries, count updated to 834)
           → analysis/INDEX.md (region closed)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 24 (cold-triage continuation)
-          Continue the 0x80050000 region sweep from where Pass 23 left off (as noted in INDEX.md).
-          Run a fresh cold-triage of the rank-91+ unnamed functions to identify the next batch
-          of high-value targets. Decompile, analyze, rename, and document per the standard pattern.
-          298 unnamed remain at last count (before Pass 23 removed 12).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 24 (cold-triage continuation) (2026-06-27)
+          Rank 91-105 cold-triage of region 0x80050000. 15 functions decompiled, 10 HIGH renames:
+          - commit_pending_proc_bit0x1000_if_cap_not_set (0x8005d5f4)
+          - complete_LE_DLE_pending_proc_and_send_data_length_change_evt (0x8005fedc)
+          - dispatch_and_commit_pending_proc_bit0x10_reason5 (0x8005e7a0)
+          - write_hw_channel_reg_pair_a (0x800563a8)
+          - write_hw_channel_reg_pair_b (0x80056460)
+          - write_hw_channel_reg_pair_c (0x80056404)
+          - conditional_dispatch_LE_channel_selection_algorithm (0x80055320)
+          - send_LMP_268_with_slot_timing_adjustment (0x8005152c)
+          - remove_entry_from_sorted_8byte_key_table (0x80050df0)
+          - send_LMP_25B_and_reset_crypto_key_state (0x80051844)
+          Applied via RenamePass24Region80050000.java (renamed=10 alreadyOk=0 missing=0 failed=0).
+          Total named: 844 (was 834). Region 0x80050000: 78 named, 288 unnamed.
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 24 section)
+          → analysis/rom/rom_function_index.md (+10 entries, count updated to 844)
+          → analysis/INDEX.md (region 0x80050000 updated)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 25 (rank 106+ cold-triage)
+          Continue the 0x80050000 region sweep from where Pass 24 left off.
+          Run a fresh cold-triage of ranks 106+ unnamed functions. Also re-examine
+          prior MEDIUM-HIGH holdovers whose callees may now be named from the 10
+          newly-named functions in Pass 24 (e.g. callees of `write_hw_channel_reg_pair_a/b/c`,
+          `conditional_dispatch_LE_channel_selection_algorithm`, `complete_LE_DLE_pending_proc`).
+          288 unnamed remain.
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`

@@ -2629,3 +2629,41 @@ anchors from the newly-named functions (e.g. callees of
 `write_sco_link_slot_params_type_b`, `dispatch_afhca_by_role_index`,
 `alloc_tag_record_copy_payload_and_enqueue`, etc.).
 
+## Pass 24 — rank 91-105 cold-triage, 10 HIGH renames (2026-06-27)
+
+**Context**: Pass 23 left 298 unnamed (366 total, 68 named). Pass 24 ran a fresh
+cold-triage (`ColdTriageRegion80050000Pass24.java`) which confirmed 366 total / 68
+named / 298 unnamed, then decompiled ranks 91-105 (15 functions, all 72-114B with
+xrefs=2).
+
+**10 new names applied** via `RenamePass24Region80050000.java` (renamed=10
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005d5f4` | 114B | `commit_pending_proc_bit0x1000_if_cap_not_set` | Checks `+0x123` bit 2; if clear: calls `assign_pointer_to_0x1AC_offset_0x134`, sets `+0x78 \|= 0x1000`, clears `+0x90` deferred bit, fires callback reason `0xd`. If set: clears `+0x14c` flag. Pending-procedure commit family member (HIGH: two named anchor calls). |
+| `0x8005fedc` | 110B | `complete_LE_DLE_pending_proc_and_send_data_length_change_evt` | Gated on `+0x78\|+0x7c` bit 0x80; `param_2 ∈ {5,6}` selects TX/RX side (clears low/high nibble of `+0x10e`); calls `send_evt_Meta_subevent_0x07` (LE Data Length Change event) when ready. HIGH: named callee identifies LE DLE event. |
+| `0x8005e7a0` | 86B | `dispatch_and_commit_pending_proc_bit0x10_reason5` | Dispatches by `+3` bit 2 to `FUN_8005d9ec` or `FUN_8005e728`; commits via `assign_pointer_to_0x1AC_offset_0x134`; sets `+0x78 \|= 0x10`, clears `+0x8f` bit 3, fires reason-5 callback. HIGH: named pending-proc commit function. |
+| `0x800563a8` | 84B | `write_hw_channel_reg_pair_a` | Validates `param_2 < 0x28` (39 BT channels), packs bits 14:8 of HW reg from `DAT_800563fc/80056400`, sets bit 1 enable. First of 3 structural twins forming a channel-reg-write family. HIGH: channel-index validation + BT-range bound. |
+| `0x80056460` | 84B | `write_hw_channel_reg_pair_b` | Structural twin of `write_hw_channel_reg_pair_a` using `DAT_800564b4/800564b8`; bit 3 enable. HIGH. |
+| `0x80056404` | 82B | `write_hw_channel_reg_pair_c` | Structural variant: packs low-6 bits (not middle) of HW reg; bit 2 enable; `DAT_80056458/8005645c`. HIGH. |
+| `0x80055320` | 80B | `conditional_dispatch_LE_channel_selection_algorithm` | Override+fallback gate (`PTR_DAT_80055370` optional override, `FUN_8004fcb8` gating); on true path: clears `+0x1d` bit 2, calls `le_channel_selection_algorithm_event_dispatch(0x44, param_1, 0)`. HIGH: calls named `le_channel_selection_algorithm_event_dispatch`. |
+| `0x8005152c` | 76B | `send_LMP_268_with_slot_timing_adjustment` | Validates ID field not `-1`; calls a clock getter; computes `(field - clock/2) & mask`; converts with `* 0x271 / 1000` (625µs slot); calls `LMP__268__most_common_for_VSCs2_checks_fptr_patch` with adjusted offset. HIGH: named LMP callee + slot timing literal. |
+| `0x80050df0` | 72B | `remove_entry_from_sorted_8byte_key_table` | Calls `binary_search_sorted_table_by_8byte_key`; if found: shifts remaining entries left; decrements table count. HIGH: named callee identifies table type. |
+| `0x80051844` | 90B | `send_LMP_25B_and_reset_crypto_key_state` | If ID != `-1`: calls `LMP__25B__most_common_for_VSCs1`; sets link-key length from `config.field272+4`; zeros 6 struct slots + memsets 3×64B buffers (crypto material reset). HIGH: named LMP callee. |
+
+**5 remaining MEDIUM/MEDIUM-HIGH (not renamed)**:
+- `0x80051ae0` (94B): capability-check + copy `+0x1c=+0x1a` + multi-callback; no named anchor → MEDIUM-HIGH
+- `0x800521b0` (88B): alloc-kind-9 record + lowest-set-bit encoding into field 9 + store to `+0x5e` → MEDIUM
+- `0x80052260` (88B): structural twin of `0x800521b0`, kind-5 record, stores to `+0x24` → MEDIUM
+- `0x800565ac` (86B): interrupt-safe ring-queue search/remove by byte match → MEDIUM-HIGH
+- `0x80052160` (80B): 4-way dispatch by `byte+8` bits 2+0 to 4 unnamed callees → MEDIUM
+
+**Region-wide unnamed count**: **366 total, 288 unnamed (down from 298), 78 named
+(up from 68)** — 10 new renames applied via `RenamePass24Region80050000.java`.
+
+**Next**: Pass 25 should continue with ranks 106+ of a fresh cold-triage. Also
+consider re-examining the high-rank MEDIUM-HIGH holdovers (`0x80054b14`,
+`0x80057ce8`, `0x80077a00`, `0x8005aba8`, `0x8005dd9c`) whose unnamed callees
+may now be named from recent passes.
+
