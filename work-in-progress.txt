@@ -4020,10 +4020,23 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries, count updated to 861)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 28)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 28 (rank 131+ cold-triage)
-          Continue from where Pass 27 left off (ranks 121-130 now done). Run a fresh cold-triage
-          to expose ranks 131+. Also re-examine large MEDIUM-HIGH holdovers:
-          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 271 unnamed remain.
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 29 (rank 141+ cold-triage)
+          Continue from where Pass 28 left off (ranks 131-140 now done). Run a fresh cold-triage
+          to expose ranks 141+. Also re-examine large MEDIUM-HIGH holdovers:
+          `0x80054b14` (1650B, rank 67) and `0x8005aba8` (664B, rank 70). 265 unnamed remain.
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 28 (rank 131+ cold-triage) 2026-06-27
+          6 HIGH renames via RenamePass28Region80050000.java (renamed=6 alreadyOk=0 missing=0 failed=0):
+          0x8005aaac → compute_esco_timing_offset_and_dispatch
+          0x80051c60 → program_hw_channel_b_and_slot_params_A
+          0x80051f14 → program_hw_channel_c_and_slot_params_B
+          0x80056734 → read_esco_sco_slot_timing_offset_atomic
+          0x8005a714 → scan_active_slots_and_extract_timing_ranges
+          0x8005b6d4 → release_esco_sco_connection_and_clear_state
+          Region-wide: 366 total, 265 unnamed (was 271), 101 named (was 95).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 28 section)
+          → analysis/rom/rom_function_index.md (+6 entries, count updated to 867)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 29)
 
 [DONE]  Cross-region: upgrade all medium-confidence named functions to high (2026-06-26, COMPLETE)
           These already have a real Ghidra name and a one-line purpose (from `kovah_function_list.md`

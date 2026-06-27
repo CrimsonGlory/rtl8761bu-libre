@@ -2758,3 +2758,33 @@ alreadyOk=0 missing=0 failed=0):
 
 **Next**: Pass 28 should continue cold-triage from rank 131+. Also `FUN_80054b14`
 (1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
+
+## Pass 28 — ranks 131-140 cold-triage, 6 HIGH renames (2026-06-27)
+
+**Context**: Pass 27 left 271 unnamed (366 total, 95 named). Pass 28 used the existing
+Pass 27 cold-triage list (ranks 131-140 already shown) and decompiled 10 functions
+(186-232B, xrefs=1).
+
+**6 new names applied** via `RenamePass28Region80050000.java` (renamed=6
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005aaac` | 232B | `compute_esco_timing_offset_and_dispatch` | SCO: reads `read_indexed_link_register((param_1-8)*0x1e + 1)`, eSCO: reads `FUN_80056608(param_1*0x14 + 1)`; computes modular slot offset `% (reg<<1)` then rounds to even; dispatches result to `FUN_80072924`. HIGH: named `read_indexed_link_register`. |
+| `0x80051c60` | 224B | `program_hw_channel_b_and_slot_params_A` | Calls `write_hw_channel_reg_pair_b(1, *(param_1+0x1c) & 0x3f)` + `write_hw_reg_bits15_14_A(uVar5)`; structural twin of `program_hw_channel_and_slot_params` using pair-b + bits-A registers. HIGH: two named callees (Pass 24/26). |
+| `0x80051f14` | 224B | `program_hw_channel_c_and_slot_params_B` | Calls `write_hw_channel_reg_pair_c(1, *(param_1+0x1c) & 0x3f)` + `write_hw_reg_bits15_14_B(uVar5)`; structural twin using pair-c + bits-B with actual values. HIGH: two named callees. |
+| `0x80056734` | 208B | `read_esco_sco_slot_timing_offset_atomic` | Atomic (interrupt-disabled) read of slot timing offset: eSCO path calls `FUN_80056608((param_1*5+1)*4)`; SCO path calls `read_indexed_link_register` twice at offsets `0x16` and `4`; computes adjusted offset. HIGH: calls named `read_indexed_link_register` + named interrupt disable/enable. |
+| `0x8005a714` | 198B | `scan_active_slots_and_extract_timing_ranges` | Iterates all 11 connection slots; for each active slot reads HW register via `read_indexed_link_register` (SCO) or `FUN_80056608` (eSCO); if register `& 0xf == 3`: stores connection timing fields `+0x14/0x18` and updates 3 min/max output parameters. HIGH: named `read_indexed_link_register`. |
+| `0x8005b6d4` | 190B | `release_esco_sco_connection_and_clear_state` | Calls `FUN_8005c720` (ring-buffer reset); eSCO path: interrupt-safe zero of 9 state bytes (`fields_0xdc-0xe4`) via named interrupt disable/enable; checks 3 pending deferred state flags and processes them. HIGH: 2 named interrupt control callees. |
+
+**4 remaining MEDIUM/MEDIUM-HIGH from this pass's batch (not renamed)**:
+- `0x8005c720` (228B): ring-buffer iteration dispatcher to unnamed callees → MEDIUM-HIGH
+- `0x80055b78` (208B): HW register → struct field decoder; no named callee → MEDIUM-HIGH
+- `0x80053440` (206B): timing computation using `0x271` + unnamed callees → MEDIUM-HIGH
+- `0x8005ce94` (198B): pending-procedure opcode dispatch to unnamed callees → MEDIUM-HIGH
+
+**Region-wide unnamed count**: **366 total, 265 unnamed (down from 271), 101 named
+(up from 95)** — 6 new renames applied via `RenamePass28Region80050000.java`.
+
+**Next**: Pass 29 should continue cold-triage from rank 141+. Also `FUN_80054b14`
+(1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
