@@ -305,3 +305,35 @@ commits them into the connection record (`FUN_80050b2c`), optionally
 re-validates (`FUN_80050ff8`) and finalizes (`FUN_80052c1c`), with diagnostic
 logging throughout (`FUN_8004f374`). All ROM-only; no libre firmware
 reimplementation required for this layer.
+
+---
+
+## Renames Applied (region `0x80050000` Pass 12, 2026-06-27)
+
+This doc's analysis above (2026-06-21, Phase 9 consolidation) was never
+actually applied as Ghidra renames — confirmed by a fresh `decompile_function`
+round trip on 2026-06-27 (region `0x80050000` Pass 12) showing all 10
+functions still resolving under their `FUN_*` names, with decompiled bodies
+matching this doc's prose exactly (including `FUN_80050ff8`'s 12-bit channel
+merge/compare logic, which this doc only summarized in prose and the fresh
+decompile confirmed in full). Applied via `RenameEscoNegotiationCluster.java`
+(`run_ghidra_headless`, `use_saved_project=true`, `script_file_id`).
+Script's own per-address check: `renamed=10 alreadyOk=0 missing=0 failed=0`.
+Independently re-verified in a separate `batch_decompile_functions` round
+trip for 5 of the 10 — all resolve correctly under their new names.
+
+| # | Old Name | New Name |
+|---|----------|----------|
+| 1 | `FUN_80056988` | `esco_sco_param_negotiate_and_stage` |
+| 2 | `FUN_8004f25c` | `pending_negotiation_hash_pop_by_distance` |
+| 3 | `FUN_800511b8` | `refcount_increment_atomic` |
+| 4 | `FUN_80050b2c` | `conn_param_commit_bdaddr_and_role` |
+| 5 | `FUN_80050ff8` | `conn_param_revalidate_if_dirty` |
+| 6 | `FUN_8004f374` | `esco_sco_negotiation_diagnostic_logger` |
+| 7 | `FUN_80052c1c` | `conn_negotiation_finalize_gate_dispatch` |
+| 8 | `FUN_8004e808` | `free_list_lifo_push` |
+| 9 | `FUN_80051124` | `refcount_decrement_and_free` |
+| 10 | `FUN_8004e2d0` | `conn_record_get_4byte_field_by_handle` |
+
+See `reverse_engineering_region_0x80050000.md` "Pass 12" for the full
+per-function rationale and region-wide unnamed-count impact.

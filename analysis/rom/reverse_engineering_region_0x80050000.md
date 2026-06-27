@@ -1514,3 +1514,153 @@ a single 0-HIGH pass, not yet a trend — recommend one more rank-51+ batch (ran
 
 **Region-wide unnamed count**: unchanged at 341 (no renames applied this pass).
 
+---
+
+## Pass 11 batch 2 (discovered+documented 2026-06-27 — work was already applied, undocumented)
+
+While starting the recommended Pass 11 continuation (decompiling the next
+batch of rank-51-80 candidates by remaining xref count: `0x80055480`,
+`0x8005efe8`, `0x80054044`, `0x80053ebc`, `0x80050ff8`, `0x800530a0`), 4 of
+the 6 (`0x80055480`, `0x80054044`, `0x80053ebc`, `0x800530a0`) failed via
+both `batch_decompile_functions` and a single `decompile_function` call with
+"the function may be too small or a thunk" — but `disassemble_function`
+*also* failed to find them, which is not the thunk signature. Investigating
+further found a staged-but-apparently-never-reported rename script,
+`RenamePass11Batch2Region80050000.java`, already present in
+`list_ghidra_research_files`, targeting exactly these 4 addresses plus 2
+more (`0x80053fb0`, `0x8004f998`) with specific, sensible names. Running
+`DecompileAddr.java` (GZF process mode) against `0x80055480` confirmed the
+rename had **already been applied live** — the function decompiled cleanly
+under the name `retry_list_service_and_stall_watchdog`, not `FUN_80055480`.
+The earlier `batch_decompile_functions`/`decompile_function` failures were
+simply name lookups against a name (`FUN_80055480`) that no longer existed,
+not real decompile failures.
+
+This means an earlier session did the real analysis work and applied the
+renames correctly, but the session ended (or was lost) before the doc
+section, `rom_function_index.md` rows, `INDEX.md` line, or
+`work-in-progress.txt` entry were ever written — the inverse of the
+project's earlier rename-*persistence* bug: this time the renames are real
+and durable, only the paper trail was missing. All 6 are independently
+re-verified this pass via fresh `decompile_function`/`batch_decompile_functions`
+calls under their live names, confirming both that the renames persist and
+that each name accurately describes the decompiled body:
+
+| Address | Size | Name (already live) | Role |
+|---------|------|----------------------|------|
+| `0x80055480` | 270B | `retry_list_service_and_stall_watchdog` | Walks a retry/pending-event list comparing each entry's clock-delta against a wraparound-masked timeout; on expiry, unlinks the entry, resolves its parent context (`resolve_parent_context_by_role`), re-decides its scheduling via `FUN_800553dc`/`sched_event_sorted_insert_with_overlap_pushback` (an already-named Pass 5 function), and logs on failure. When `param_1` (a "stall/watchdog" boolean) is set and the list is empty, additionally checks a second clock-delta against a 1000-tick threshold and triggers a separate notify path (`FUN_800512a4(5,0)`) — the watchdog/stall-detection half of the same retry-queue service loop |
+| `0x80053ebc` | 228B | `clock_delta_to_slot_interval_count` | Computes a clock delta against a per-role base time (parent vs child selected by the 3-bit role field at `+0x8`), scales by the standard Bluetooth 625µs slot constant (`0x271`, the same constant already confirmed for `0x80053710`'s slot-time commit in Pass 8), and divides by a clamped interval-count register (upper-bounded at 300, default `0x1e`=30) to produce a slot-interval count; `trap(7)` on divide-by-zero |
+| `0x80053fb0` | 138B | `clock_delta_to_slot_interval_count_parent_ctx` | Parent-context sibling of `clock_delta_to_slot_interval_count`: resolves the base clock via the explicit parent-link pointer (`+0x1c`) plus an extra `FUN_80053688` step instead of the role-field branch, then applies the identical `0x271`-scaled clamped-divide |
+| `0x8004f998` | 60B | `resolve_parent_context_by_role` | Generic "resolve effective context" helper used by several functions in this cluster: if the connection's 3-bit role field (`+0x8 & 7`) is set and `<4`, returns the parent link's context pointer (`+0x1c`) instead of its own; else logs on an out-of-range role value and returns itself unchanged |
+| `0x800530a0` | 284B | `dispatch_meta_subevent_0x13_with_addr_resolve` | Checks an override hook, resolves a connection-record pointer via `FUN_8004e2d0` (now `conn_record_get_4byte_field_by_handle`, see Pass 12 below), optionally substitutes a per-link sub-record's address fields for the BD_ADDR-shaped buffer (gated by negotiated feature/role bits), and — when a feature flag is set — calls the already-Kovah-named `send_evt_Meta_subevent_0x13`; finishes with a detailed status log regardless of path |
+| `0x80054044` | 242B | `assemble_role_bitmask_param_fields` | Iterates a 5-bit role/parameter bitmask; for bit index 4, calls `clock_delta_to_slot_interval_count` (or the `_parent_ctx` variant for role value 2) and packs the resulting slot-interval byte, a 5-bit field, and a "clamped to max" flag bit into a parameter sub-block; advances the sub-block cursor by a per-bit-index table step for every set bit |
+
+**Names retained as-is** — independently re-verified accurate, no changes
+needed from the staged script's choices.
+
+**Region-wide unnamed count**: 341 → 336 (5 of these 6 are in-region:
+`0x80055480`, `0x80053ebc`, `0x80053fb0`, `0x800530a0`, `0x80054044`;
+`0x8004f998` belongs to region `0x80040000`'s count).
+
+---
+
+## Pass 12 — eSCO/SCO connection feature/parameter negotiation cluster rename (2026-06-27)
+
+`analysis/rom/reverse_engineering_conn_feature_dispatch.md` fully analyzed a
+10-function cluster (the `FUN_80052c64` family — eSCO/SCO connection
+feature/parameter negotiation) back on 2026-06-21 (Phase 9 consolidation),
+with detailed per-function behavior, caller lists, and an inferred
+architecture — but, like Pass 11 batch 2 above, the analysis was never
+actually applied as Ghidra renames (no rename script, no "Renames Applied"
+table in that doc). Re-decompiled all 10 fresh this pass via
+`batch_decompile_functions` and confirmed every one still matched the
+2026-06-21 prose exactly (variable layout, branch structure, callee list),
+including `FUN_80050ff8`'s three-way 12-bit-channel-field merge logic which
+the original doc only summarized as "merge/compare a channel field similarly
+to FUN_80050b2c above" — the fresh decompile shows that logic explicitly and
+it matches.
+
+Applied via `RenameEscoNegotiationCluster.java` (`run_ghidra_headless`,
+`use_saved_project=true`, `script_file_id`). Script's own per-address check:
+`renamed=10 alreadyOk=0 missing=0 failed=0`. Independently re-verified in a
+separate `batch_decompile_functions` round trip for 5 of the 10 (the larger,
+more distinctive ones) — all resolve and decompile correctly under their new
+names.
+
+| Address | Size | Old name | New name | Role |
+|---------|------|----------|----------|------|
+| `0x80056988` | 738B | `FUN_80056988` | `esco_sco_param_negotiate_and_stage` | Validates an incoming eSCO/SCO LMP PDU's opcode/flags against negotiated feature state, then stages 3×16-bit TX or RX parameter sets (selected by opcode `{1,3,5}` vs other) into the per-connection sub-record at `+0x28..+0x2c`/`+0x2e..+0x32` |
+| `0x8004f25c` | 186B | `FUN_8004f25c` | `pending_negotiation_hash_pop_by_distance` | Generic 2-bucket hash-table lookup-and-remove keyed by signed-distance comparison (not exact equality) plus an optional 12-bit secondary-field match; unlinks and returns the matching node — a pending-negotiation-record pool pop |
+| `0x800511b8` | 36B | `FUN_800511b8` | `refcount_increment_atomic` | Atomic (interrupt-disabled) refcount increment at `obj+0x10`; pairs with `refcount_decrement_and_free` below |
+| `0x80050b2c` | 470B | `FUN_80050b2c` | `conn_param_commit_bdaddr_and_role` | Commits a negotiated BD_ADDR and role/codec selector byte into the connection record, with consistency checking against any previously-committed value and mismatch logging; also negotiates/validates a 12-bit "channel" field with first-set-vs-mismatch logging |
+| `0x80050ff8` | 222B | `FUN_80050ff8` | `conn_param_revalidate_if_dirty` | Guarded re-validation entry point: short-circuits on global feature-disabled or per-connection "no-renegotiate" flags, else merges/compares the 12-bit channel field and re-runs validation (`conn_record_get_4byte_field_by_handle`'s sibling `FUN_8004f328`), marking the sub-record dirty for re-sync on mismatch |
+| `0x8004f374` | 368B | `FUN_8004f374` | `esco_sco_negotiation_diagnostic_logger` | Pure diagnostic logger (no state mutation) dumping packet-type/window/offset fields for up to 4 related sub-records plus a trailing variable-length region — debug-only trace for the negotiation path above |
+| `0x80052c1c` | 72B | `FUN_80052c1c` | `conn_negotiation_finalize_gate_dispatch` | Thin gate-and-dispatch wrapper: only proceeds if the connection state's first field is clear ("not already finalized"), then applies parameters and triggers a follow-up notification via two further functions |
+| `0x8004e808` | 14B | `FUN_8004e808` | `free_list_lifo_push` | Trivial singly-linked-list LIFO push onto a global free-list head — the pool-return counterpart consumed by this cluster's allocators |
+| `0x80051124` | 66B | `FUN_80051124` | `refcount_decrement_and_free` | Atomic refcount decrement at `+0x10`; when it reaches zero, returns both the object and an optional linked sub-object (`+0x14`) to their respective free lists |
+| `0x8004e2d0` | 30B | `FUN_8004e2d0` | `conn_record_get_4byte_field_by_handle` | Generic "look up a 4-byte field for this connection handle" accessor on top of a hash helper (`FUN_8004e190`); widely reused outside this cluster too (LMP VSC hook entry point, VSC dispatcher, multiple LE connection-complete event senders) |
+
+4 of the 10 (`0x8004f25c`, `0x8004f374`, `0x8004e808`, `0x8004e2d0`) are
+address-range-wise in region `0x80040000`, not `0x80050000` — renamed and
+documented together here (as one cohesive cluster centered on this region's
+own `0x80052c64` dispatcher) per the same cross-region convention established
+in Pass 10. `rom_function_index.md`'s per-address rows are filed under each
+function's real address-range bucket regardless.
+
+**Region-wide unnamed count**: re-ran a fresh `FunctionManager` scan
+(`CountUnnamedRegion80050000.java`) rather than hand-computing a delta from
+the (now-confirmed-stale) 336 figure above, since Pass 11 batch 2's renames
+turned out to have been applied in an undocumented prior session and the
+true baseline going into this pass was already lower than any prior doc
+entry assumed. **Fresh ground truth: 366 total functions in
+`0x80050000`-`0x8005ffff`, 329 unnamed, 37 named** (up from the in-region
+named count implied by the stale baseline). This number supersedes all
+prior "341"/"336" figures in this doc, which should be treated as
+historical/uncorrected from here forward.
+
+**Status**: PASS 12 COMPLETE. 16 functions newly confirmed-named this
+session across both discoveries (6 Pass-11-batch-2 + 10 Pass-12), 11 of them
+in-region. Next continuation: resume the Pass 11 rank-51-80 cold-triage list
+proper (`0x8005ae58`, `0x800530a0`✅done, `0x80059734`, `0x8005ca30`,
+`0x8005a0d4`✅decompiled-this-session-MEDIUM-HIGH-not-renamed,
+`0x8005f260`✅decompiled-this-session-MEDIUM-HIGH-not-renamed,
+`0x8005c100`✅decompiled-this-session-MEDIUM-HIGH-not-renamed,
+`0x8005a7ec`✅decompiled-this-session-MEDIUM-HIGH-not-renamed — see "Pass 13"
+below) or run a fresh cold-triage re-enumeration now that the region's true
+unnamed count is confirmed at 329.
+
+---
+
+## Pass 13 — rank 51-80 continuation, replacement batch (2026-06-27, 0 HIGH yield)
+
+Continuing Pass 11's plan, decompiled the next batch from the rank-51-80
+list by remaining xref count. The first 6 picked
+(`0x80055480`/`0x8005efe8`/`0x80054044`/`0x80053ebc`/`0x80050ff8`/`0x800530a0`)
+turned out to already be resolved (4 via the Pass 11 batch 2 discovery above,
+`0x80050ff8` via the Pass 12 cluster, `0x8005efe8` decompiled cleanly and is
+analyzed below), so 4 replacement candidates were pulled in from the
+remaining queue: `0x8005a7ec`, `0x8005a0d4`, `0x8005f260`, `0x8005c100`.
+
+| Address | Size | Xrefs | Read | Confidence |
+|---------|------|-------|------|------------|
+| `0x8005efe8` | 256B | 2 | Bound-checked (`<0xb`) per-connection report builder: allocates a tagged buffer via the shared `FUN_8005d438(tag=3, ...)` allocator, copies an 8-byte field + 2 bytes + another 8-byte field + 4-byte field (23 bytes total) from the connection record into it, then logs the full assembled buffer. Confirmed sibling of the already-documented (Pass 7) per-state-key event/report-builder family dispatched via `FUN_8005d438` — this pass found two more siblings, `0x8005f260` (tag=1) and `0x8005f428` (tag=0, 348B, not itself in the rank-51-80 list but decompiled to confirm the family), extending the known tag set from `{0x16,0x17,0x18}` (Pass 7) to `{0,1,3,0x16,0x17,0x18}` | MEDIUM-HIGH — family shape confirmed (shared allocator-by-tag + per-connection-record report assembly + `possible_logging_function__var_args` finish), consistent with Pass 7's explicit precedent that this family does **not** clear the HIGH bar because the tag constants aren't pinned to named event/state semantics |
+| `0x8005f260` | 262B | 1 | Exact structural sibling of `0x8005efe8` (tag=1 instead of 3): same `<0xb` bound check, same `FUN_8005d438` allocator call, computes a value from `field40_0x28`/`_x26_entry_valid` combined with two `PTR_DAT` scale constants and an optional function-pointer "round" callback, stores it back into `field163_0xaa`, then builds and logs a smaller report buffer | MEDIUM-HIGH — same family, same caveat as above |
+| `0x8005a7ec` | 284B | 1 | Computes a connection-index-and-flag-selected divisor (`0x1e`=30 or `0x14`=20 — the same two divisors already flagged in Pass 11's `0x800573d8`/`0x80057094` as "two distinct fixed-size hardware tables") via `FUN_80056660`/`FUN_80056608`, takes a modulo of a per-connection field by it (`trap(7)` on zero), and — when the boolean flag is set — adds a config-derived offset before storing the result into `field78_0x4e`; also mirror-updates a second "active/current" struct's cached copy when its index matches | MEDIUM-HIGH — clear scheduling/index-computation shape (consistent with the `0x800573d8`/`0x80057094` 30-vs-20-divisor hardware-table family), but the specific semantic of `field78_0x4e` and the divisor choice isn't pinned to a named constant |
+| `0x8005a0d4` | 272B | 1 | Combines two per-connection-record byte pairs via bitwise AND, switch-maps each through a small lookup-table set (cases 3/7, 5, 6 use distinct tables; 0/1/2/4 pass through), writes the two results back only where they differ from cached "previous" values (XOR-compare gated), updates a 16-bit field as `field40_0x28[other_param] + 10`, and finishes by invoking a global completion-callback function pointer | MEDIUM-HIGH — clear "negotiate two values through lookup tables, notify on settle" pattern, structurally adjacent to the eSCO/SCO negotiation cluster's field range (`field275-284_0x11a-0x123`) from Pass 12, but the specific negotiated quantity isn't confirmed |
+| `0x8005c100` | 260B | 1 | Gated on a link-type-valid sentinel (`!=0xf`), reads two table-indexed baseline values (by link-type and by a second index), computes a clock-difference via `wrapping_subtract_masked_by_shift(..., 10)` (10-bit slot-window mask) against each, and — when within a "<6 slots elapsed" window and a per-type-and-index state/flag check — either invokes a registered callback or falls back to setting a state flag and calling the already-decompiled `FUN_80055a34` (a small bit-packed status-register setter) | MEDIUM — clock-window/threshold-expiry checker shape is clear, but neither the table semantics nor `FUN_80055a34`'s exact downstream effect are confirmed enough to name precisely |
+
+**0 HIGH renames this pass** — all 5 newly-reviewed functions stay
+MEDIUM/MEDIUM-HIGH per the same bar as Pass 11 (no opcode/event literal, no
+exact-match named sibling, no unambiguous single semantic). Per the
+project's pivot policy, this is one 0-HIGH-rename pass on top of Pass 11's
+prior 0-HIGH pass for the *rank-51-80 cold-triage list specifically*
+(distinct from the session's 2 other HIGH-yielding discoveries above) —
+recommend continuing the remaining rank-51-80 candidates
+(`0x8005ae58`, `0x800530a0` done, `0x80059734`, `0x8005ca30`, `0x8005bf4c`,
+`0x8005efe8` done, `0x8005c4c0`, `0x80051c60`, `0x80051f14`, `0x80059910`,
+`0x8005ff54`, `0x8005e648`, `0x800573d8`/`0x80057094` already done in Pass
+11) before considering a pivot for this specific cold-triage list.
+
+**Region-wide unnamed count**: unchanged at 329 (no renames applied this
+pass — all 5 reads stay MEDIUM/MEDIUM-HIGH).
+
