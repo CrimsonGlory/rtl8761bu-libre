@@ -4020,13 +4020,76 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries, count updated to 861)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 28)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 33 (rank ~196+ cold-triage)
-          Continue from where Pass 32 left off. Exclude the 6 confirmed Ghidra
-          mis-disassembly artifacts (0x8005d548/0x8005dd04/0x8005e3a8/0x8005e71c/
-          0x8005f880/0x80052f18 — all halt_baddata()/data-overlap stubs, not real
-          functions) from candidate lists. Also consider naming FUN_8004a318 (HCI
-          Command-Status handler, 296B) and its callees FUN_8005c80c/FUN_8005c86c,
-          surfaced as caller-context in Pass 32 but not yet named. 224 unnamed remain.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 33 (rank ~196+ cold-triage) (2026-06-27)
+          ColdTriageRegion80050000Pass33.java confirmed 366 total / 142 named / 224 unnamed,
+          218 triageable after excluding the 6 known artifacts -- and ranks 196-218 turned
+          out to be the ENTIRE remaining tail (nothing beyond rank 218). Batch-decompiled
+          all 23 candidates, plus caller/callee-context decompiles for 2 alloc-helpers
+          (FUN_8005e7fc/FUN_8005eb2c) and the Pass-32 carryover trio (FUN_8004a318,
+          FUN_8005c80c, FUN_8005c86c; also FUN_8005af8c/FUN_8005f8a0 for context only,
+          left unnamed). 26 HIGH renames applied via RenamePass33Region80050000.java
+          (renamed=26 alreadyOk=0 missing=0 failed=0; 25 in-region + 1 cross-region in
+          0x80040000):
+          0x8005ed24 -> check_active_flag_and_substate1_then_assign_0x134
+          0x8005fa34 -> log_then_apply_link_param_with_default_fallback
+          0x80055a68 -> read_calib_register_pair_by_index_masked
+          0x8005fa94 -> log_then_apply_link_param_using_default_field
+          0x8005f218 -> alloc_event_record_and_log_tag_0x2
+          0x8005eae8 -> alloc_tag_0x7_record_with_byte_and_assign_0x134
+          0x8005621c -> set_clk_adj_state_bits_if_lmp_power_req_enabled
+          0x80050e38 -> unlink_record_from_list_and_remove_by_key
+          0x80059f94 -> remap_small_index_to_code_1_2_3_with_log_fallback
+          0x8005a00c -> remap_small_index_to_code_1_2_4_with_log_fallback
+          0x8005c9c8 -> compute_link_param_type_code_for_index
+          0x800559d4 -> pack_hw_calib_fields_from_globals
+          0x8005daa4 -> alloc_event_record_tag_0x13_and_assign_0x134
+          0x8005eaa8 -> alloc_tag_0x7_record_with_const_0x10_and_assign_0x134
+          0x8005eac8 -> alloc_tag_0x7_record_with_const_0xf_and_assign_0x134
+          0x80051170 -> release_refcounted_object_a_if_held
+          0x80051194 -> release_refcounted_object_b_if_held
+          0x80055a10 -> set_top_nibble_of_calib_register
+          0x8005603c -> compute_indexed_record_addr_if_valid_flag_set
+          0x8005bdc4 -> init_record_slot_with_status_0xb
+          0x8005be90 -> copy_global_word_to_struct_offset_0x106
+          0x8005e7fc -> alloc_event_record_and_log_tag_0x7
+          0x8005eb2c -> alloc_event_record_and_log_tag_0x6
+          0x8005c80c -> allocate_free_link_slot_if_enabled
+          0x8005c86c -> dispatch_link_slot_state_op
+          0x8004a318 -> process_link_feature_toggle_command_and_send_status_event (region 0x80040000)
+          Also identified 2 MORE Ghidra mis-disassembly artifacts (0x80052f1a, 0x80059cde --
+          now 8 total cumulative with Pass 32's 6), NOT renamed.
+          Region-wide: 366 total, 199 unnamed (was 224), 167 named (was 142).
+          MAJOR FINDING: the xrefs=0 tail (what Passes 19-32's "ranks N+" methodology has
+          been targeting) is now fully exhausted in this region. A diagnostic re-rank
+          (CheckTopRanksRegion80050000.java) shows ranks 1-~20 hold a genuine, never-visited
+          xrefs>=1 backlog, topped by 0x8005af8c (1796B, 7 xrefs -- the single LARGEST
+          unnamed function in the region) and 0x8005e01c (144B, 11 xrefs -- the error/log
+          dispatcher already referenced by name in this pass's writeup). Pass 34 should
+          pivot to a fresh rank-1 re-rank, NOT continue any "196+"-style window.
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 33 section)
+          -> analysis/rom/reverse_engineering_region_0x80040000.md (addendum: cross-region rename)
+          -> analysis/rom/rom_function_index.md (+26 entries, count updated to 934)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 34)
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 34 (fresh rank-1 re-rank, pivot from
+          exhausted xrefs=0 tail to the never-visited xrefs>=1 backlog)
+          Do NOT continue any "196+"-style cold-triage window -- Pass 33 confirmed that
+          tier is now empty. Instead do a fresh full rank-1 re-rank (xrefs DESC, size DESC)
+          of region 0x80050000-0x8005ffff and prioritize, in order:
+          1. 0x8005af8c (1796B, rank 14, 7 xrefs) -- largest unnamed function in the region.
+             A feature/capability-permission checker (param_1 categories 1/2/4, sub-index
+             param_2, checks global capability bitmasks gated by per-conn state fields).
+             Partially understood from Pass 33's context-decompile; needs full analysis.
+          2. 0x8005e01c (144B, rank 7, 11 xrefs) -- the error/log dispatcher (tag-based)
+             already used as a callee-reference in Pass 33's check_active_flag_and_substate1_
+             then_assign_0x134 writeup; likely a sink for many other gate functions.
+          3. Remaining rank 1-13/15-20 candidates by xref count (ranks 1,2,3,4,5,6,8,9,10,
+             11,12,13,15,16,17,18,19,20 -- see Pass 33 doc's printed table for addresses).
+          4. FUN_8005f8a0 (188B) -- the "apply negotiated link param by code" dispatcher
+             used by Pass 33's log_then_apply_link_param_with_default_fallback / _using_
+             default_field siblings; good secondary target once callers are clearer.
+          Continue excluding all 8 confirmed mis-disassembly artifacts (0x8005d548/
+          0x8005dd04/0x8005e3a8/0x8005e71c/0x8005f880/0x80052f18/0x80052f1a/0x80059cde).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

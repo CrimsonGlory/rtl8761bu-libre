@@ -2944,3 +2944,157 @@ pass and worth prioritizing next: `FUN_8005c80c`/`FUN_8005c86c` (PHY/codec selec
 called from the HCI Command Status path in `FUN_8004a318`) and `FUN_8004a318` itself (HCI
 event `0xe` / Command Status handler, 296B, currently unnamed despite being well-understood
 structurally from this pass's analysis).
+
+## Pass 33 — ranks 196-218 cold-triage tail EXHAUSTED + xrefs=0 tier complete + 2 new mis-disassembly artifacts + major rank-1 backlog discovered (2026-06-27)
+
+**Context**: Pass 32 left 224 unnamed (366 total, 142 named), with 6 confirmed
+mis-disassembly artifacts already excluded. `ColdTriageRegion80050000Pass33.java`
+confirmed those totals and explicitly excluded the 6 known artifacts from its
+candidate list, yielding exactly **218 triageable candidates** — and the
+rank-196-240 print window came back **empty past rank 218**, meaning ranks
+196-218 (23 entries) was not a partial slice but the **entire remaining tail**
+of the xrefs=0 group at the time this pass started.
+
+Batch-decompiled all 23 candidates at ranks 196-218 via `batch_decompile_functions`,
+then followed up with caller/callee-context decompiles for the alloc-helper
+functions referenced by several of them (`FUN_8005e7fc`, `FUN_8005eb2c`) and the
+Pass-32 carryover trio (`FUN_8004a318`, `FUN_8005c80c`, `FUN_8005c86c`, decompiled
+together with `FUN_8005af8c` and `FUN_8005f8a0` purely for caller-context — those
+two remain unnamed, see "Next" below). `xrefs_to` returned "no cross-references"
+for every rank-196+ candidate checked individually, but this is **not** a tooling
+gap this time — the in-script `ReferenceManager.getReferencesTo()` count (which
+is known-reliable, used for the ranking itself) independently confirms `xrefs=0`
+for this entire tier: these functions are reached exclusively via computed/indirect
+calls (function-pointer tables), consistent with the `lmp_esco_sco_negotiation_packet_handler`
+pattern documented in Pass 32.
+
+**25 new names applied within region `0x80050000`, plus 1 cross-region carryover
+rename in `0x80040000`** (26 total) via `RenamePass33Region80050000.java`
+(renamed=26 alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005ed24` | 96B | `check_active_flag_and_substate1_then_assign_0x134` | Rank 196. Per-connection gate: if active-flag bit0 (`+4`) clear → error `0x1a`; else if substate `+0xee==1` → allocs a tag-0x6 record (`alloc_event_record_and_log_tag_0x6`), assigns to `+0x134`, transitions substate to `3`; else error `0x25`. Errors routed through `FUN_8005e01c` (still-unnamed logger/dispatcher, tag 5). Sibling of Pass 31's `check_link_flag_bit6_and_assign_0x134`. HIGH: unambiguous gate/transition shape, named callee. |
+| `0x8005fa34` | 88B | `log_then_apply_link_param_with_default_fallback` | Rank 197. Logs a diagnostic event, then picks the command's code byte (`param_1[1]`) unless it's out of range (`>0x1b`), in which case it falls back to the per-connection default-code field (`+0x8d`); calls `FUN_8005f8a0` (still-unnamed "apply negotiated link param by code" dispatcher, see Next) with the resolved code + value byte. HIGH: clear, fully-traced control flow. |
+| `0x80055a68` | 78B | `read_calib_register_pair_by_index_masked` | Rank 198. Reads two adjacent 16-bit fields from a **fixed global base** (`DAT_80055ab8`) at one of 3 hardcoded offset-pairs selected by `param_1` (`{0xd4,0xd6}`/`{0x22a,0x22c}`/`{0x22e,0x230}`), packs them into a 32-bit value, ANDs with a global mask (`DAT_80055abc`). HIGH: fully unambiguous arithmetic/lookup, no branches. |
+| `0x8005fa94` | 78B | `log_then_apply_link_param_using_default_field` | Rank 199. Sibling of `log_then_apply_link_param_with_default_fallback` but unconditionally uses the per-connection default-code field (`+0x8d`) instead of checking the command byte first; same `FUN_8005f8a0` sink. HIGH: same evidence quality as its sibling. |
+| `0x8005f218` | 68B | `alloc_event_record_and_log_tag_0x2` | Rank 200. `alloc_tagged_record_via_pool(2, &local)`; on success stores `param_1` into the record's first byte field, logs, returns the alloc'd index. Exact structural sibling of the already-named `alloc_event_record_and_log_tag_0x13`/`_0x6`/`_0x7` family (see below) but with tag `2`. HIGH: matches established family pattern exactly. |
+| `0x8005eae8` | 64B | `alloc_tag_0x7_record_with_byte_and_assign_0x134` | Rank 201. Logs (tag 5), reads a byte from `*param_1`, calls the newly-named `alloc_event_record_and_log_tag_0x7` (`FUN_8005e7fc`) with it, assigns the result to the per-connection `+0x134` slot. HIGH: two named callees. |
+| `0x8005621c` | 60B | `set_clk_adj_state_bits_if_lmp_power_req_enabled` | Rank 202. Gated by config field `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit `0x2`; if set, clears bits 4-6 (`0x70`) of a fixed HW/control word (`DAT_8005625c`) and additionally sets bit4 (`0x10`) when `param_1==0`. HIGH: unambiguous bitfield arithmetic tied to a named config flag. |
+| `0x80050e38` | 56B | `unlink_record_from_list_and_remove_by_key` | Rank 203. Looks up a record via the named `lookup_record_ptr_by_key_via_bsearch`; if found, unlinks it from a doubly-linked list (patches predecessor's next-pointer, whether predecessor is the list head or another node) then calls the named `remove_entry_from_sorted_8byte_key_table`. Structural inverse of Pass 31's `lookup_record_by_key_and_promote_to_list_head`. HIGH: two named callees, clear unlink idiom. |
+| `0x80059f94` | 54B | `remap_small_index_to_code_1_2_3_with_log_fallback` | Rank 204. Pure value remap: `1→2, 0→1, 2→3`, any other value logs a diagnostic and returns `1`. Named structurally (mechanism, not domain) since no caller context was available (`xrefs=0`, indirect-call-only) to confirm the exact protocol field being encoded. HIGH on mechanism. |
+| `0x8005a00c` | 54B | `remap_small_index_to_code_1_2_4_with_log_fallback` | Rank 205. Sibling of the above with a different out-of-range/2-case constant (`1→2, 0→1, 2→4`, default `1` + log). HIGH on mechanism (same caveat as above). |
+| `0x8005c9c8` | 52B | `compute_link_param_type_code_for_index` | Rank 206. Confirmed via decompiling `FUN_8005f8a0` (188B, still unnamed, see Next) for context: this function's body is a **verbatim duplicate** of `FUN_8005f8a0`'s first computation stage (same `+0xef` gate, same `0xd`/`0x11`→`+0x8c` special case, same `table[param_2*2]&0x1f` fallback) — it computes the same "link-param type code" value that `FUN_8005f8a0` needs internally, factored out as a standalone helper. HIGH: structural match confirmed against a second, independently-decompiled function. |
+| `0x800559d4` | 46B | `pack_hw_calib_fields_from_globals` | Rank 207. Reads 3 fixed global pointers (`DAT_80055a04/08/0c`), packs a 2-bit field + a 16-bit field + a top-bit byte into the caller's output struct (`param_1`). HIGH: unambiguous bit-packing, no branches. |
+| `0x8005daa4` | 32B | `alloc_event_record_tag_0x13_and_assign_0x134` | Rank 208. Calls the already-named `alloc_event_record_and_log_tag_0x13` (Pass 31's `0x8005da64`) then assigns the result to `+0x134`. HIGH: named callee, thin wrapper. |
+| `0x8005eaa8` | 32B | `alloc_tag_0x7_record_with_const_0x10_and_assign_0x134` | Rank 209. Calls `alloc_event_record_and_log_tag_0x7` (`FUN_8005e7fc`) with a **fixed literal** `0x10` (not a parameter) then assigns to `+0x134`. Sibling of `0x8005eac8` below (literal `0xf`) and `0x8005eae8` above (caller-supplied byte). HIGH: named callee. |
+| `0x8005eac8` | 32B | `alloc_tag_0x7_record_with_const_0xf_and_assign_0x134` | Rank 210. Identical shape to `0x8005eaa8` with fixed literal `0xf` instead of `0x10`. HIGH: named callee. |
+| `0x80051170` | 30B | `release_refcounted_object_a_if_held` | Rank 211. If `*ptr != 0` (global slot `PTR_PTR_80051190`), calls the named `refcount_decrement_and_free()` and clears the slot. Twin of `0x80051194` below (different global slot, `0x24` bytes apart) — likely two roles (e.g. local/remote) of the same pending-negotiation object family documented in Pass 32's `lmp_esco_sco_negotiation_packet_handler` writeup. Named with neutral `_a`/`_b` suffixes since no caller context disambiguates the exact roles. HIGH on mechanism, named callee. |
+| `0x80051194` | 30B | `release_refcounted_object_b_if_held` | Rank 212. Twin of `0x80051170` (global slot `PTR_PTR_800511b4`). Same evidence/caveat as above. |
+| `0x80055a10` | 30B | `set_top_nibble_of_calib_register` | Rank 213. `*reg = (param_1<<12) | (*reg & 0xfff)` on a fixed global register (`DAT_80055a30`) — sets the top 4 bits, preserves the low 12. HIGH: unambiguous bitfield write, in the same `0x800559xx-0x80055axx` calibration cluster as `pack_hw_calib_fields_from_globals` and `read_calib_register_pair_by_index_masked` above. |
+| `0x8005603c` | 24B | `compute_indexed_record_addr_if_valid_flag_set` | Rank 214. 8-byte-stride record table lookup (`base + param_1*8`); if the record's validity-flag byte (`+7`) is set, returns `record[0] + record[+5]*4`, else `0`. HIGH: unambiguous conditional address computation. |
+| `0x8005bdc4` | 24B | `init_record_slot_with_status_0xb` | Rank 215. Writes a fixed status/tag byte `0xb` plus 3 zero bytes into an 8-byte-stride record table slot (`base + param_1*8 + 4..7`) — same record shape as `compute_indexed_record_addr_if_valid_flag_set` above but a different table (`PTR_PTR_8005bddc` vs `PTR_PTR_80056054`). HIGH: unambiguous fixed-value initialization. |
+| `0x8005be90` | 14B | `copy_global_word_to_struct_offset_0x106` | Rank 216. Copies one 16-bit global (`DAT_8005bea0`) into a fixed offset (`+0x106`) of another global struct (`PTR_DAT_8005bea4`). HIGH: trivial unconditional copy. |
+
+**2 alloc-helper callees named via context** (referenced by 3+ of the candidates above; same family as Pass 31's `alloc_event_record_and_log_tag_0x13`):
+
+| Address | Size | New name | Evidence |
+|---------|------|----------|----------|
+| `0x8005e7fc` | 56B | `alloc_event_record_and_log_tag_0x7` | `alloc_tagged_record_via_pool(7, &local)` + log + return alloc'd index. Called by `alloc_tag_0x7_record_with_byte_and_assign_0x134` and both `_with_const_0x10_`/`_with_const_0xf_` siblings above. |
+| `0x8005eb2c` | 48B | `alloc_event_record_and_log_tag_0x6` | `alloc_tagged_record_via_pool(6, &local)` + log + return alloc'd index. Called by `check_active_flag_and_substate1_then_assign_0x134` above. |
+
+**Pass-32 carryover trio resolved** (flagged in Pass 32's "Next" note as the HCI
+Command-Status handler `FUN_8004a318` + its two then-unnamed callees):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x8005c80c` | ~70B | `allocate_free_link_slot_if_enabled` | Allocates the first free slot among 3 candidate slots (indices 1/2/3) in a 7-byte-stride global table, gated by a busy sentinel (`PTR_DAT_8005c864==-1`) and a struct-enable flag (`PTR_DAT_8005c868[2]!=0`); checks each slot's busy-bit (`table[3+7*n]` bit1) in order, sets the bit and returns the index on success, or `0xff` on exhaustion/disabled. A `param_1==1` "dry run" short-circuit returns `0` without touching state. HIGH: clear single-purpose allocator. |
+| `0x8005c86c` | ~90B | `dispatch_link_slot_state_op` | 6-opcode dispatcher (`switch(param_2-1)`) over the **same** 7-byte-stride table as the allocator above: op1=claim-as-active (commits a global "current" mirror), op2=release+clear-used-bit, op3=release-only, op4=clear-used-bit (shared fallthrough target with op2), op5=set "active" bit2 + increment a counter byte, op6=clear bit2 + decrement the counter. HIGH: exhaustive, unambiguous switch over a well-understood table shape. |
+| `0x8004a318` *(region `0x80040000`)* | 296B | `process_link_feature_toggle_command_and_send_status_event` | Global (non-per-connection) command handler on control record `bos[0xb]`. Re-entrancy-gated by a state byte (`field96_0x60`); on a mode byte (`param_1[3]`) of `1`, validates a 3-bit sub-feature code via `FUN_8005af8c` (still-unnamed, see Next) + the named `is_index_value_below_2`, then allocates+commits a link slot via the two functions above. Toggles a HW feature through enable/disable function-pointer globals keyed on whether the mode byte is `0`; on the enable path also re-stages 3 timing sub-fields. If config bit `0xd8&0x80` is set, applies BD-addr/channel scrambling via the named `set_channel_bdaddr_scramble_fields`. Always terminates by sending an internal event (tag `0xe`) via `hci_event_sender`. HIGH on overall structure/control-flow (re-entrancy gate, mode dispatch, slot alloc, fn-ptr toggle, conditional scramble, terminal event-send are all unambiguous); the exact end-user BT feature being toggled (role switch? AFH? sniff subrate?) is **not** pinned down — name avoids over-claiming unverified domain specifics. Renamed here (cross-region) since both its in-scope callees were resolved in this pass; region `0x80040000`'s own doc gets a short addendum pointer (it has been formally parked since its own Pass 7). |
+
+**2 new Ghidra mis-disassembly artifacts found** (same signature as Pass 32's
+cluster of 6 — NOT renamed, not real functions):
+
+- `0x80052f1a` (2B, `xrefs=0`) decompiles to `return in_v1 + in_v0 & param_1` reading
+  **uninitialized** registers (`in_v0`/`in_v1`) — this is literally 2 bytes
+  immediately after Pass 32's already-documented artifact `0x80052f18` (also 2B).
+  Both addresses are almost certainly the same 4-byte garbage/data region
+  mis-disassembled by Ghidra's forced-MIPS16e pass at two different starting
+  offsets, producing two separate fake `FUN_*` entries from the same bytes.
+- `0x80059cde` (2B, `xrefs=0`) decompiles to the exact `/* WARNING: Control flow
+  encountered bad instruction data */` + `halt_baddata()` signature used to
+  identify all 5 of Pass 32's `halt_baddata()`-style artifacts.
+
+Combined with Pass 32's 6, this region now has **8 confirmed mis-disassembly
+artifacts**: `0x8005d548`, `0x8005dd04`, `0x8005e3a8`, `0x8005e71c`, `0x8005f880`,
+`0x80052f18`, `0x80052f1a`, `0x80059cde`. None should be renamed or re-triaged.
+
+**Region-wide unnamed count**: **366 total, 199 unnamed (down from 224), 167
+named (up from 142)** — 25 new in-region renames applied via
+`RenamePass33Region80050000.java` (the 26th, `0x8004a318`, is in region
+`0x80040000`). Re-running `ColdTriageRegion80050000Pass33.java` after the
+renames confirms persistence: `Total: 366 Named: 167 Unnamed: 199`.
+
+**Major finding — the xrefs=0 tail is now fully exhausted, and a large
+xrefs≥1 backlog sits untouched at the top of the rank list.** A diagnostic
+re-rank (`CheckTopRanksRegion80050000.java`, ranks 1-40 of the post-Pass-33
+population) shows the rank-196+ window this pass (and Passes 24-32 before it)
+has been targeting is the **low end of the sort order** (`xrefs=0`,
+indirect-call-only functions) — and that tail is now empty (the post-rename
+candidate list has only 193 entries, all below where the rank-196 window
+starts). But ranks 1-40 are **not** artifacts or already-resolved functions —
+they are genuine still-unnamed `FUN_*` with real direct callers that this
+cold-triage lineage has never visited:
+
+```
+Rank   1: 0x80056608  size=   72  xrefs=22
+Rank   2: 0x80057008  size=  126  xrefs=16
+Rank   3: 0x800564bc  size=   74  xrefs=15
+Rank   4: 0x8005a048  size=  134  xrefs=12
+Rank   5: 0x8005aa70  size=   54  xrefs=12
+Rank   6: 0x80055c80  size=  290  xrefs=11
+Rank   7: 0x8005e01c  size=  144  xrefs=11   <- the error/log dispatcher used by 0x8005ed24 above
+Rank   8: 0x80055dc4  size=   18  xrefs=11
+Rank   9: 0x80055e50  size=  108  xrefs=10
+Rank  10: 0x8005a384  size=  738  xrefs=8
+Rank  14: 0x8005af8c  size= 1796  xrefs=7    <- LARGEST unnamed function in the region
+Rank  15: 0x800590b0  size=  852  xrefs=7
+Rank  20: 0x80054144  size=  894  xrefs=5
+```
+
+`0x8005af8c` (rank 14, 1796B, 7 xrefs) — decompiled in this pass purely for
+`FUN_8004a318` context — is the single **largest unnamed function in the
+entire region** and was never touched by any prior pass. It is a
+feature/capability-permission checker: dispatches on `param_1` (categories
+`1`/`2`/`4`) and a sub-index `param_2`, checking a battery of global
+capability bitmasks (`PTR_DAT_8005b6a4/a8/ac/b4/b8/...`) gated by several
+per-connection state fields (`field40_0x28`, `field68_0x44`, `field407_0x1a4`,
+`field451-454_0x1d0-1d3`) to decide whether a given link-layer
+procedure/feature is currently permitted on the connection — structurally
+similar in spirit to the much smaller `validate_feature_bitmap_and_dispatch_to_0x134`
+(Pass 29) but far larger and not yet fully traced. `FUN_8005f8a0` (188B, 1+
+direct callers from this pass's `log_then_apply_link_param_*` siblings) is
+also still unnamed and was decompiled in this pass for context only — see Next.
+
+This strongly suggests the historical "Pass N covers ranks X-Y, continue from
+rank Y+1" framing (Passes 19-32) was implicitly auto-converging on the
+**xrefs=0 tail specifically**, because once a window's top entries get
+renamed, the *next* window naturally lands on lower-xref material — but
+nothing in that lineage went back to formally re-rank from **rank 1**, so the
+small number of genuinely high-xref/high-size functions (1-40ish) that never
+happened to fall inside any pass's chosen window were never addressed. This is
+likely good news, not a backlog crisis: only ~13-39 functions appear to have
+`xrefs>=4` (a natural "still worth dedicated attention" cutoff), well within
+a 1-2 pass budget.
+
+**Next**: Pass 34 should **pivot to ranks 1-20 of a fresh full re-rank**
+(do **not** continue any "196+"-style window — that tier is exhausted) and
+prioritize, in order: `0x8005af8c` (1796B, rank 14 — biggest single win
+available in this region), `0x8005e01c` (144B, rank 7 — the error/log
+dispatcher already referenced by name in this pass's `check_active_flag_and_substate1_then_assign_0x134`
+writeup, used as a sink by likely many other gate functions), then the
+remaining rank 1-13/15-20 candidates by xref count. `FUN_8005f8a0` (188B,
+the "apply negotiated link param by code" dispatcher used by both
+`log_then_apply_link_param_*` siblings from this pass) is also a good target
+once its callers are better understood. Continue excluding all 8 confirmed
+mis-disassembly artifacts listed above.

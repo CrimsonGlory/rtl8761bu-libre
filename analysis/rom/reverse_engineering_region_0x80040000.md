@@ -524,3 +524,13 @@ observations across other 64KiB regions). Estimated effort-to-reward ratio for
 the 206 remaining functions is unfavorable relative to fresher regions
 (0x80050000 with 345 unnamed, 0x80070000 with 191 unnamed) where prior cluster
 work has established clearer architectural landmarks and naming conventions.
+
+### Addendum (2026-06-27) — one cross-region rename from region 0x80050000 Pass 33
+
+`0x8004a318` → `process_link_feature_toggle_command_and_send_status_event` (296B)
+was renamed as a carryover from region `0x80050000`'s Pass 32/33 work (its two
+callees, `FUN_8005c80c`/`FUN_8005c86c`, are in-region for `0x80050000` and were
+named there too: `allocate_free_link_slot_if_enabled`/`dispatch_link_slot_state_op`).
+Full evidence is in `reverse_engineering_region_0x80050000.md`'s "Pass 33" section.
+This does not reopen this region's formal park — it's a single opportunistic
+rename, not a resumption of the 1-150B tier sweep described above.
