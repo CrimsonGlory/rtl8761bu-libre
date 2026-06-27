@@ -3478,7 +3478,7 @@ sweep beyond enumeration and is the most out-of-date):
           HIGH-confidence yield expected). Recommend pivoting to fresher regions
           (0x80050000 / 0x80070000) per standings work backlog.
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-25)
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 10-11 execution (2026-06-25)
           BLOCKED on a real, independently-confirmed wairz bug (NOT the "MCP tool not
           callable" anti-pattern — that correction below was right, tools ARE callable and
           were called directly this iteration). Before running Pass 10, re-verified Pass 9's
@@ -3510,7 +3510,7 @@ sweep beyond enumeration and is the most out-of-date):
           (it only reads/ranks, doesn't rename) — its rank 51+ candidate list is still valid
           for whenever this resumes.
 
-[BLOCKED]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve) (2026-06-26)
+[TODO]  Full RE: ROM region 0x80050000-0x8005ffff PASS 12+ (continue until 0 unnamed remain, ~343 to resolve) (2026-06-26)
           wairz_requested_changes.txt's rename-persistence entry was briefly marked [DONE]/
           "FIXED 2026-06-26" between iterations, which would have cleared this task's guard.
           Before starting PASS 12, independently re-verified that FIXED claim (per this task's
@@ -3569,7 +3569,7 @@ sweep beyond enumeration and is the most out-of-date):
         recommended renames, and HANDLER tier staging.
         → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 COMPLEX batch 2 section added)
 
-[BLOCKED]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
+[TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
           targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
           distribution table still counts 88 unnamed functions in this region that were always
