@@ -2729,3 +2729,32 @@ alreadyOk=0 missing=0 failed=0):
 **Next**: Pass 27 should continue cold-triage from rank 121+. Consider re-examining
 `FUN_80054b14` (1650B) and `FUN_8005aba8` (664B) which are large MEDIUM-HIGH holdovers.
 
+## Pass 27 — ranks 121-130 cold-triage, 7 HIGH renames (2026-06-27)
+
+**Context**: Pass 26 left 278 unnamed (366 total, 88 named). Pass 27 ran a fresh
+cold-triage (`ColdTriageRegion80050000Pass27.java`) confirming 366 total / 88 named
+/ 278 unnamed, then decompiled ranks 121-130 (10 functions, 232-350B, xrefs=1).
+
+**7 new names applied** via `RenamePass27Region80050000.java` (renamed=7
+alreadyOk=0 missing=0 failed=0):
+
+| Address | Size | New name | Evidence / purpose |
+|---------|------|----------|--------------------|
+| `0x80054570` | 338B | `commit_esco_parent_timing_to_slot_table` | Gets parent context, calls `clock_delta_to_slot_interval_count_parent_ctx` to compute timing params, packs into buffer via `optimized_memcpy`, programs slot table. HIGH: two named callees. |
+| `0x8005e950` | 326B | `validate_and_dispatch_connection_command_by_type` | Validates connection index (`< 0xb`) and type (`< 0x1c`); runs 4 checkers including `check_pending_features_and_alloc_mismatch_record`; dispatches via type-indexed fptr table; fallback calls `assign_pointer_to_0x1AC_offset_0x134`. HIGH: two named callees. |
+| `0x80052008` | 318B | `program_hw_channel_and_slot_params` | Calls `write_hw_channel_reg_pair_c(0,0)` + `write_hw_reg_bits15_14_B(uVar9)`; programs 3 MMIO registers from connection record fields. HIGH: two named callees (Pass 24/26). |
+| `0x8005a7ec` | 284B | `compute_and_store_esco_phase_offset_from_link_regs` | Reads HW registers via `read_indexed_link_register` (SCO, stride 0x1e) or `FUN_80056608` (eSCO, stride 0x14); computes modular phase offset `% (reg2 << 1)`; stores in `field_0x4e`. HIGH: named `read_indexed_link_register`. |
+| `0x8005a0d4` | 272B | `compute_esco_negotiated_packet_type_codes` | ANDs negotiation field pairs (`0x11a & 0x11d`, `0x11b & 0x11c`), maps results via switch-case to mode codes, stores to `field_0x11e/0x11f` (read by `write_sco_link_slot_params_type_d`). HIGH: structural output-consumer relationship. |
+| `0x8005c100` | 260B | `check_esco_timing_window_and_trigger` | Calls `wrapping_subtract_masked_by_shift` twice with mask=10; if both deltas < 6: sets trigger flag + calls `FUN_80055a34(0xf,1)`. HIGH: named `wrapping_subtract_masked_by_shift`. |
+| `0x80053514` | 232B | `compute_and_store_link_timing_in_slots` | Calls `resolve_parent_context_by_role`; dispatches to timing calculators by role bits; converts via `(val + 0x270) / 0x271` (Bluetooth slot); stores at `parent+0x26`. HIGH: named callee + slot literal `0x271`. |
+
+**3 remaining MEDIUM/MEDIUM-HIGH (not renamed)**:
+- `0x80050194` (350B): iterates connections, counts bit-flag members, packs up to 5 entries, calls unnamed `FUN_8004f910` → MEDIUM-HIGH
+- `0x800549fc` (270B): dispatches to unnamed slot-programming callees by connection type/flags → MEDIUM-HIGH
+- `0x80059734` (248B): bit-pattern validation of two HW register values; no named callee → MEDIUM
+
+**Region-wide unnamed count**: **366 total, 271 unnamed (down from 278), 95 named
+(up from 88)** — 7 new renames applied via `RenamePass27Region80050000.java`.
+
+**Next**: Pass 28 should continue cold-triage from rank 131+. Also `FUN_80054b14`
+(1650B, rank 67) and `FUN_8005aba8` (664B, rank 70) remain MEDIUM-HIGH holdovers.
