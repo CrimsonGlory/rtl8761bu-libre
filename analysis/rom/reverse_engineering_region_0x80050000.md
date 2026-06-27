@@ -3194,3 +3194,130 @@ caller-contextualized callees first — `FUN_80053cec` (290B, rank 20, called by
 `FUN_8005f614` (rank 9, the code-`0xb` delegate of
 `apply_negotiated_link_param_by_code`) — then the remaining ranks 1-7/10-17 by
 xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
+
+## Pass 35 — ranks 1-20 (fresh xrefs≥3 re-rank) + 5 priority callee-context targets, 20 HIGH renames (2026-06-27)
+
+**Session note:** MCP tools not directly callable in Cursor agent mode; used wairz REST bridge (`/api/v1/projects/{id}/tools/run`) with `decompile_function` and `find_callers` for analysis. `run_ghidra_headless` blocked via REST (write-capable); `RenamePass35Region80050000.java` written to `/root/wairz/ghidra/scripts/` pending MCP execution.
+
+**Cold triage state (from Pass 34 carry-forward):** 366 total / 188 named / 178 unnamed, fresh top tier has xrefs=4-5 at ranks 1-18, xrefs=3 at ranks 19-20. 8 confirmed mis-disassembly artifacts excluded.
+
+### Priority callee-context targets (caller known from Pass 34 writeups)
+
+**FUN_80053cec** (290B, rank 20, 3 xrefs) → `write_esco_packet_types_to_hw_channel_slots`
+- 5 params: mode byte (1-3 valid), TX packet type, TX mask, RX packet type, RX mask
+- Validates mode (if 0 → early return 0; if ≥4 → log error, return 5)
+- Calls `FUN_8002b9a4(0)` to get current state (returns 5 if state==4 = "busy/locked")
+- Sets field[0xa8] low 2 bits = mode, calls `FUN_80053a2c()` (flush/commit)
+- Loops 3 channels: per-channel TX slot via `FUN_8002b28c(ch, 0)`, sets packet-type ushort + data mask + bit0x80; RX slot similarly; updates link register ushort[1]
+- Callers: `program_link_mode_registers_and_commit` (abort if returns 5), `FUN_80053e20`, `FUN_800549fc`
+
+**FUN_80057180** (310B, rank 19, 3 xrefs) → `flush_hw_pending_slots_by_connection_type`
+- 1 param: connection type (0=ACL, 1=SCO, 2=eSCO)
+- Mode 0/1: 8-byte stride list, clears bits 0x02/0x04/0x80 in field[6], calls `write_indexed_link_register_b_with_slot_check` for register pair
+- Mode 2: 0x34-byte stride list, clears bits 0x04/0x08/0x10 in field[0x26], zeros 4 RAM counters (DAT_800572c8/cc/d0/d4)
+- Callers: `flush_pending_hw_writes_or_dispatch_mode1` (mode1 redirect), `FUN_80048e44`, `FUN_80049b40`
+
+**FUN_8005a680** (140B, rank 8, 4 xrefs) → `compute_slot_budget_for_link_mode`
+- 1 param: mode (0/1/2/6; else logs error, returns 0)
+- Reads T1=struct[0x36], T2=struct[0x37] from `PTR_base_of_0x1ac_struct_array_0xA_large2`
+- Mode 0: max(T1+T2+0x16, T1+0x3c) × 8 + 500
+- Mode 1: 0x2a6 + 200 = 886 (constant)
+- Mode 2: T1 × 8 + 200
+- Mode 6: (T1+T2) × 8 + 476 + 200
+- Callers: `program_link_mode_registers_and_commit`, `program_esco_sco_hw_link_params_and_log`, `FUN_80067cf0`
+
+**FUN_8005c930** (22B, rank 18, 4 xrefs) → `map_sco_link_type_to_hw_register_code`
+- Pure lookup: if (param_1-1) < 3 → return param_1+7 (maps 1→8, 2→9, 3→10); else → 15
+- BT SCO link type index → HW register code (8=HV1, 9=HV2, 10=HV3 equivalent codes)
+- Callers: `program_link_mode_registers_and_commit`, `program_esco_sco_hw_link_params_and_log`, `conn_status_word_state_machine_dispatcher`, `FUN_8004cb48`
+
+**FUN_8005f614** (124B, rank 9, 4 xrefs) → `finalize_esco_link_mode_and_dispatch_code_0xb`
+- 2 params: connection index (low byte), param_2 (passed through)
+- If field[0x90] bit2 clear → clear lower nibble of field[0x114] (clears status bits)
+- If field[0x78]|field[0x7c] bit0x400 → invoke fn-ptr at `PTR_DAT_8005f698` with conn record
+- If field[0x60] bit3 → call `FUN_8004ad0c(idx, param_2)` and clear bit
+- Callers: `pending_procedure_advance_and_commit`, `FUN_8005f69c`
+
+### Rank 1-7 (xrefs=4-5 tier)
+
+**0x800504e8** (146B, rank ~1-2) → `alloc_link_record_from_pool`
+- Pool alloc for 0x54-byte link records: pops head from linked list, memsets 0 (0x54B)
+- On null: logs error, calls `schedule_conn_diagnostic_dump_if_idle`
+- param_1==0 branch: init mode-specific flags, copy global byte to field[10]
+
+**0x8005cdd4** (52B, rank ~2) → `notify_lc_link_type_change_event`
+- Wraps `possible_logger_called_if_no_patch3` with opcode 0x74 + (param_3<<8) as data
+- Callers: `conn_field_swap_and_notify_dispatcher_3_4`, `conn_packet_type_apply_and_codec_table_sync`
+
+**0x800504b4** (48B, rank ~3) → `schedule_conn_diagnostic_dump_if_idle`
+- Re-entrancy guard: if bit0x10 in flag byte not set → set it, call `FUN_80050194` + `conn_diagnostic_batch_dump`, clear bit
+- Called on pool-alloc failures (from `alloc_link_record_from_pool`, `alloc_large_link_record_from_pool`) and by `conn_status_word_state_machine_dispatcher`
+
+**0x800562f4** (38B, rank ~4) → `set_hw_channel_active_flag`
+- Sets bit 7 of global ushort if param_1≠0, clears if 0 (uses `-(x)>>31` bitmask trick)
+- Callers: `program_hw_channel_and_slot_params`, VSC handler (`HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`), `FUN_80051d54`
+
+**0x80056f00** (248B, rank ~5) → `hw_crypto_compute_8word_in_8word_out`
+- Writes two 8×ushort arrays to `DAT_80056ff8`/`DAT_80056ffc`, sets bit1 of `DAT_80057000` (trigger), polls bit2 until set, reads result from `DAT_80056ffc`
+- Logs all 3 arrays at level 5 (full 16-word visibility for debug)
+- Likely baseband HW crypto function (E0/E1/E3 cipher acceleration)
+- Callers: `FUN_800492d8`, `FUN_8005e174`, `FUN_80074518`
+
+**0x80055ac0** (170B, rank ~6) → `poll_stable_hw_register_pair_for_channel`
+- 3 channel register address pairs: (0xd4/0xd6, 0x22a/0x22c, 0x22e/0x230)
+- Reads both regs of pair, masks with `DAT_80055b70`; busy-loops until (read1 XOR read2) & `DAT_80055b74` == 0 (stable)
+- Returns stable pair or 0xffffffff if param_1≥3
+- Called via COMPUTED_CALL from `FUN_80057ce8`
+
+**0x800508f8** (142B, rank ~7) → `setup_type2_esco_sco_conn_record_for_multilink`
+- Calls `alloc_link_record_from_pool(2)` + `alloc_large_link_record_from_pool()`, links into param_1[0x50][0x24]
+- Copies type/flag bits from param_1[0x1d], sets type code 2 in field[8]
+- Calls `conn_type_dispatch_hook(record)`. Returns 0/5
+- Caller: `conn_type0_multilink_setup_handler`
+
+### Rank 10-17 (xrefs=4 tier, continued)
+
+**0x80055ec8** (100B, rank 10) → `set_codec_active_and_store_params`
+- Sets/clears bit11 of `DAT_80055f2c` based on param_1≠0; if active: writes param_2 low word to `DAT_80055f30`, bits[17:16] to bits[9:8] of control ushort; returns previous bit11 state
+- Called by `FUN_80051d54`
+
+**0x8005d154** (72B, rank 11) → `atomically_drain_conn_pending_queue`
+- IRQ-atomic: disables interrupts, extracts 4-byte linked-list head from conn record[10] at fields `+0xdc-0xe4` (zeros all 9 affected bytes), re-enables IRQ
+- Walks extracted list: clears `+0x18` (next ptr), calls `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`
+- Called by `ring_buffer_event_drain_loop_variant2`
+
+**0x800505c4** (66B, rank 12) → `alloc_large_link_record_from_pool`
+- Pool alloc for 0xfc-byte structs (sibling of `alloc_link_record_from_pool` for 0x54B)
+- On null: logs at `0xd28`, calls `schedule_conn_diagnostic_dump_if_idle`
+- Called from `setup_type2_esco_sco_conn_record_for_multilink`
+
+**0x80059a1c** (64B, rank 13) → `validate_esco_packet_type_params_with_hook`
+- Optional fn-ptr override at `PTR_DAT_80059a5c`; if no fn or result==0: checks (param_1&7)==0 (pass) OR (param_2&7)!=0 (pass); returns 0 or 1
+- Called by `FUN_800480b0`
+
+**0x80051c24** (54B, rank 14) → `write_link_capability_flags_to_hw_reg_7`
+- Reads bits 0 and 1 of `PTR_PTR_80051c5c[8]`, maps: bit0→5, bit1→2, both→7, neither→0
+- Calls `FUN_80056320(7, flags)` (writes to HW register 7)
+- Callers: `FUN_80051d54`, `program_hw_channel_and_slot_params`
+
+**0x80059fd0** (54B, rank 15) → `validate_link_type_0_1_2`
+- Identity for valid link types 0/1/2: returns param_1 as-is; else logs error at 0xce/0xf53/0xd54, returns 0
+- Callers: `FUN_80051d54`, `program_hw_channel_and_slot_params`
+
+**0x80055a34** (46B, rank 16) → `pack_afh_channel_params_to_register`
+- Packs `(param_1&0x1f)<<3 | (param_2&7)` into low byte of ushort at `DAT_80055a64`
+- Callers: `afh_report_worst_channel`, `check_esco_timing_window_and_trigger`
+
+**0x80056260** (44B, rank 17) → `set_connection_pending_flag_bit15`
+- Sets/clears bit 15 of ushort at `DAT_8005628c` based on bool param
+- Callers (COMPUTED_CALL): `FUN_8004d294`, `conn_credit_or_counter_update_with_log`, `ring_buffer_event_drain_dispatch_loop`
+
+### Rename script
+
+`RenamePass35Region80050000.java` written to `/root/wairz/ghidra/scripts/` — 20 entries, `renamed=20 alreadyOk=0 missing=0 failed=0` **expected** (pending MCP execution via `run_ghidra_headless`).
+
+### Coverage after Pass 35
+
+366 total / **208 named** (was 188) / **158 unnamed** (was 178). Estimated 20 renames pending script execution.
+
+**Next**: Pass 36 should continue with the remaining ~158 unnamed functions. After the Pass 35 renames are applied via MCP, re-rank to find the next top-xref tier.

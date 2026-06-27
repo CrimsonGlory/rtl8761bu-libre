@@ -4111,27 +4111,31 @@ sweep beyond enumeration and is the most out-of-date):
           -> analysis/rom/rom_function_index.md (+21 entries, count updated to 955)
           -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 35)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 35 (continue rank-1 re-rank,
-          prioritize caller-contextualized callees surfaced by Pass 34)
-          Pass 34 resolved all of ranks 1-20 (post-Pass-33 ordering); a fresh re-rank now
-          shows 366 total / 188 named / 178 unnamed with a new top tier (ranks 1-18 have
-          xrefs=4-5, ranks 19+ drop to xrefs=3). Several of Pass 34's own callees now sit
-          near the top of this new ranking -- prioritize these first since they already
-          have caller context from Pass 34's writeups:
-          1. FUN_80053cec (290B, rank 20, 3 xrefs) -- the status/abort-check callee of
-             program_link_mode_registers_and_commit (aborts the rest of that function if
-             this returns 5).
-          2. FUN_80057180 (310B, rank 19, 3 xrefs) -- the param_1==1 redirect target of
-             flush_pending_hw_writes_or_dispatch_mode1.
-          3. FUN_8005a680 (140B, rank 8, 4 xrefs) and FUN_8005c930 (22B, rank 18, 4 xrefs)
-             -- both callees of program_link_mode_registers_and_commit.
-          4. FUN_8005f614 (124B, rank 9, 4 xrefs) -- the code-0xb delegate of
-             apply_negotiated_link_param_by_code (that function returns early after
-             calling this one, skipping its own final dispatch).
-          5. Remaining rank 1-7/10-17 candidates by xref count (0x800504e8, 0x8005cdd4,
-             0x800504b4, 0x800562f4, 0x80056f00, 0x80055ac0, 0x800508f8, 0x80055ec8,
-             0x8005d154, 0x800505c4, 0x80059a1c, 0x80051c24, 0x80059fd0, 0x80055a34,
-             0x80056260 -- see Pass 34 doc's printed table for full address list).
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 35 (rank-1-20 re-rank + callee-context targets) (2026-06-27)
+          All 20 functions in the fresh xrefs>=3 re-rank decompiled via wairz REST bridge
+          (MCP not directly callable in Cursor agent mode; used /api/v1/projects/{id}/tools/run
+          with decompile_function + find_callers). 20 HIGH renames staged in
+          RenamePass35Region80050000.java (/root/wairz/ghidra/scripts/) -- pending MCP
+          execution (REST bridge blocks run_ghidra_headless as write-capable).
+          Priority callee-context (5): write_esco_packet_types_to_hw_channel_slots (0x80053cec),
+          flush_hw_pending_slots_by_connection_type (0x80057180), compute_slot_budget_for_link_mode
+          (0x8005a680), map_sco_link_type_to_hw_register_code (0x8005c930),
+          finalize_esco_link_mode_and_dispatch_code_0xb (0x8005f614).
+          Ranks 1-17 (15 more): alloc_link_record_from_pool, notify_lc_link_type_change_event,
+          schedule_conn_diagnostic_dump_if_idle, set_hw_channel_active_flag,
+          hw_crypto_compute_8word_in_8word_out (HW crypto accelerator), poll_stable_hw_register_pair_for_channel,
+          setup_type2_esco_sco_conn_record_for_multilink, set_codec_active_and_store_params,
+          atomically_drain_conn_pending_queue, alloc_large_link_record_from_pool,
+          validate_esco_packet_type_params_with_hook, write_link_capability_flags_to_hw_reg_7,
+          validate_link_type_0_1_2, pack_afh_channel_params_to_register, set_connection_pending_flag_bit15.
+          Region-wide: 366 total / 208 named (was 188) / 158 unnamed (was 178).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 35 section), rom_function_index.md, analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 36 (apply Pass 35 renames + fresh re-rank of remaining ~158 unnamed)
+          PREREQUISITE: run RenamePass35Region80050000.java via run_ghidra_headless (requires
+          MCP tools -- use claude -p context with .mcp.json loaded, not Cursor agent mode).
+          After renames applied: re-rank to find new top xrefs tier among the ~158 remaining
+          unnamed functions. Expect ~20-30 more candidates in the next tier.
           Continue excluding all 8 confirmed mis-disassembly artifacts (0x8005d548/
           0x8005dd04/0x8005e3a8/0x8005e71c/0x8005f880/0x80052f18/0x80052f1a/0x80059cde).
 
