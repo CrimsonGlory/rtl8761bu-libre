@@ -3580,23 +3580,60 @@ sweep beyond enumeration and is the most out-of-date):
              (Renames Applied table), analysis/rom/rom_function_index.md (16 new HIGH rows +
              Summary bump), analysis/INDEX.md (region line updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 16 — continue live-FUN_* ranking from rank ~11 (325 unnamed remain) (2026-06-27)
-          PASS 15 (below, [DONE]) switched cold-triage methodology away from hand-maintained
-          exclusion lists (error-prone — see Pass 11 batch 2's stale-list discovery) to a
-          fresh re-enumeration of every function still live-named FUN_* in the GZF, ranked by
-          xref count then size (ColdTriageRegion80050000Pass15.java, reusable as-is for
-          subsequent passes since it always reads current Ghidra state rather than a frozen
-          list). PASS 15 decompiled the top 10 by xref count; continue from rank ~11 of that
-          same script's output (0x80055dc4, 0x80055e50, 0x8005a384, 0x80058680, 0x800572d8,
-          0x80055ddc, 0x8005af8c, 0x800590b0, 0x80053710, 0x800512a4, ...). Also consider
-          following up PASS 15's "major structural lead" on the 4-function hw link-context
-          register cluster (0x80056660/0x80056608/0x800573d8/0x80057094) — bits 13:14 are
-          confirmed power-state encoding, but the rest of the 16/32-bit value isn't pinned to
-          a single field; checking what else reads/writes connection-record offsets +0xc and
-          +0x118 may close it out. Continue until 0 unnamed remain in the region, or until a
-          run of ~8-9 consecutive 0-2-HIGH-yield passes triggers the project's established
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 17 — continue live-FUN_* ranking from rank ~22 (325 unnamed remain) (2026-06-27)
+          PASS 16 (below, [DONE]) continued from rank ~11 and decompiled 10 more (rank 12-21).
+          0 HIGH yield. Continue from rank ~22 of ColdTriageRegion80050000Pass15.java's output
+          (0x8005e7fc, 0x80055c68, 0x800599f8, 0x80054144, 0x8005c86c, 0x800504e8, 0x8005cdd4,
+          0x800504b4, 0x800562f4, ...). Also worth trying: decompile the unnamed callees
+          surfaced by PASS 16 (FUN_8004fa64, FUN_800532ac, FUN_80053688, FUN_80059a60,
+          FUN_8005a680, FUN_80053cec) since naming any would retroactively clear several PASS
+          11/16 MEDIUM-HIGH functions to HIGH via the project's named-sibling rule. Also
+          consider following up PASS 15's "major structural lead" on the 4-function hw
+          link-context register cluster (0x80056660/0x80056608/0x800573d8/0x80057094) — bits
+          13:14 are confirmed power-state encoding, but the rest of the 16/32-bit value isn't
+          pinned to a single field; PASS 16's 0x800572d8 finding (FUN_80057094 called with
+          index values up to 0xdf, well past the 0-7 connection-index range) is new evidence
+          the "index" param is a general register address, not a pure connection slot —
+          checking what else reads/writes connection-record offsets +0xc and +0x118 may still
+          close it out. Continue until 0 unnamed remain in the region, or until a run of ~8-9
+          consecutive 0-2-HIGH-yield passes triggers the project's established
           pivot-to-another-region policy (see Pass 9's precedent in
           reverse_engineering_region_0x80070000.md).
+
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 16 — continue live-FUN_* ranking from rank ~11, 0 HIGH yield (2026-06-27)
+          Re-ran ColdTriageRegion80050000Pass15.java fresh (no hand-maintained exclusion list
+          needed — script always reads current Ghidra state). Confirmed unchanged from Pass
+          15's close: 366 total, 325 unnamed, 41 named. Continued from rank ~11 of the fresh
+          top-40 list (ranks 1-11 already covered in Passes 11/15). Decompiled the next 10
+          (rank 12-21) via batch_decompile_functions (10/10 success, though the batch call's
+          own output truncated before showing 2 of the 10 and cut FUN_800590b0's body short —
+          fetched those via 3 follow-up decompile_function calls): 0x80055dc4, 0x80055e50,
+          0x8005a384, 0x80058680, 0x800572d8, 0x80055ddc, 0x8005af8c, 0x800590b0, 0x80053710,
+          0x800512a4.
+
+          0 cleared HIGH — all 10 stay LOW/MEDIUM/MEDIUM-HIGH. Highlights: 0x80055e50/
+          0x80055ddc are exact structural twins (toggle+conditional-2-field-write accessor,
+          differ only by bit position); 0x8005a384 (738B) is an unambiguous eSCO/SCO
+          min-of-both-sides parameter-negotiation core (textbook BT negotiation algorithm,
+          ties into the existing esco_packet_type_validate_and_set_air_mode/
+          esco_sco_param_validate_and_commit family) but has no opcode/named-sibling anchor;
+          0x80058680 is a generic BD_ADDR+type record-index lookup across 3 tables (same shape
+          as the HIGH find_duplicate_bdaddr_and_disconnect, minus its disconnect-call anchor);
+          0x800572d8 flushes a 32-entry pending-write queue through the still-unnamed
+          FUN_80057094 (Pass 15's open hw link-context cluster) using index values up to 0xdf —
+          new evidence the cluster's "index" param isn't limited to the 0-7 connection-index
+          range used elsewhere, logged for Pass 17; 0x8005af8c (1796B) is a large
+          feature/capability permission-gate dispatcher; 0x800590b0 (852B) is a
+          baseband-register-programming eSCO/SCO link-establishment commit matching the
+          0x80109980 pattern, gated by the still-unnamed FUN_80053cec; 0x80053710 pins a
+          microseconds-to-slots conversion via the 625us Bluetooth slot-duration literal but
+          the outer function's full role isn't pinned; 0x800512a4 is a fire-once wrapper around
+          the pre-existing possible_logger_called_if_no_patch3. Region-wide count unchanged
+          (confirmed via a fresh CountUnnamedRegion80050000.java re-run): 366 total, 325
+          unnamed, 41 named.
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 16 section),
+             analysis/INDEX.md (region line updated). rom_function_index.md not touched (no
+             new named functions this pass, consistent with prior 0-HIGH-yield passes).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 15 — fresh cold-triage methodology + 2 HIGH renames (2026-06-27)
           Switched cold-triage methodology: ColdTriageRegion80050000Pass15.java re-enumerates
