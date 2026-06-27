@@ -4157,13 +4157,32 @@ sweep beyond enumeration and is the most out-of-date):
           compute_slot_aligned_timing_offset_from_category_bank (0x80053604, 122B).
           30 renames total staged (Pass 35: 20, Pass 36: 10). Both scripts pending MCP execution.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 37 (apply all staged renames + FUN_80057ce8)
-          1. Run RenamePass35Region80050000.java via run_ghidra_headless (MCP required).
-          2. Run RenamePass36Region80050000.java via run_ghidra_headless (MCP required).
-          3. Fresh re-rank of remaining ~148 unnamed.
-          4. Dedicated decompile of FUN_80057ce8 (1314B largest unnamed in region).
-          5. Decompile FUN_80051368 (426B complex negotiation record allocator).
-          Both staged scripts at /root/wairz/ghidra/scripts/.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 37 (2026-06-27)
+          Decompiled the 2 large deferred targets + 2 caller-context functions (4 total).
+          1 HIGH rename staged in RenamePass37Region80050000.java:
+            0x80051368 → alloc_and_init_esco_sco_negotiation_subrecord (426B, HIGH)
+              Called by lmp_esco_sco_negotiation_packet_handler (×2) + patch 0x8010b9ec.
+              Validates conn type at param_1+8, computes BT slot count (0x271 unit) from
+              LMP param block at param_4+0x10, selects kind {0x26/0x30/6/10}, calls
+              alloc_kind_record_and_clear_tail, fills timing/air-mode/transport fields.
+          3 MEDIUM-HIGH documented (unrenamed):
+            0x80057ce8 (1314B): recompute_and_commit_esco_sco_slot_timing_budget
+              Reads 5 indexed link registers (stride 0x1e), validates slot ownership (bit14),
+              computes timing delta vs current phase, adjusts slot count with BT 0x271/0x270
+              constants, re-programs hw registers. Callers: FUN_8004a5f4/8004a660.
+            0x8004a5f4 (90B): check_connection_slot_pending_and_dispatch (region 0x80040000)
+            0x8004a660 (74B): check_connection_slot_update_pending_and_dispatch (0x80040000)
+          Rename scripts staged total: 31 (Pass35:20 + Pass36:10 + Pass37:1).
+          All pending MCP execution (run_ghidra_headless blocked via REST bridge).
+          analysis/rom/reverse_engineering_region_0x80050000.md → Pass 37 section added.
+          rom_function_index.md +1 HIGH entry (total named 986).
+          analysis/INDEX.md → region 0x80050000 updated.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 38 (apply all 31 staged renames + re-rank)
+          Apply RenamePass35/36/37Region80050000.java via run_ghidra_headless (MCP required).
+          After rename application: fresh re-rank of ~147 remaining unnamed functions.
+          Continue cold-triage of next xrefs≥2 tier (functions not yet visited).
+          Target: FUN_80057ce8 (1314B, MEDIUM-HIGH — needs opcode anchor to reach HIGH).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

@@ -3417,3 +3417,63 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 366 total / **218 named** (was 208) / **~148 unnamed** (was ~158). 30 renames pending script execution (Pass 35: 20, Pass 36: 10).
 
 **Next**: Pass 37 — apply both rename scripts via MCP, re-rank remaining ~148 unnamed, dedicated decompile of FUN_80057ce8 and FUN_80051368.
+
+## Pass 37 — large deferred targets + caller context (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Pass 36 deferred `FUN_80051368` (426B) and `FUN_80057ce8` (1314B). This session decompiles both, plus two caller-context functions.
+
+### Analyzed functions (4 total)
+
+**0x80051368** (426B) → `alloc_and_init_esco_sco_negotiation_subrecord` [HIGH]
+- Validates connection type byte at `param_1+8`:
+  - `0x30` → parent at `*(param_1+0x18)`
+  - `(bVar7 & 0x11) != 0` → self is parent
+  - `(bVar7 & 0x1f) == 6` → eSCO type 6 (EV3)
+  - else: log error and return 0
+- Reads LMP parameter block from `*(param_4+0x10)`:
+  - `iVar8 = 0x1e` if `pbVar10[0] >= 0` (no latency flag), else `300`
+  - `uVar5 = iVar8 * ((pbVar10[2] & 0x1f) << 8 | pbVar10[1])` (interval in µs)
+  - Divisor: `0x3e8` (1000) or `0x2710` (10000) depending on `pbVar10[0] & 0x40`
+  - `local_18 = (uVar5 - uVar2) / 0x271` → BT slot count (0x271 = 625µs unit)
+  - Stores slot count in `*param_6`
+- Record kind selection: `{0x26 if (bVar7&0x1f)==6, 0x30 if (bVar7&0x10), 6 default, 10 if bVar7==9 && (param_2+2)&0xc0==0x40}`
+- Calls `alloc_kind_record_and_clear_tail(kind)` — returns 0 on fail
+- Fills record: parent ptr at `+0x18`, air-mode bits from `param_2+2`, timing fields from `pbVar10`, slot count at `+0xc`
+- Transport type dispatch: SCO-bit path reads stride-0x14 table, eSCO path reads stride-0x1e
+- Calls `FUN_8004ed04(record, local_28)` at end
+- Callers: `lmp_esco_sco_negotiation_packet_handler` (×2 COMPUTED_CALL) + patch `0x8010b9ec` (COMPUTED_CALL)
+- HIGH: named callees + named callers + unambiguous eSCO/SCO record constructor pattern
+
+**0x80057ce8** (1314B) → `recompute_and_commit_esco_sco_slot_timing_budget` [MEDIUM-HIGH]
+- `param_1 = byte` connection index (shifted by -8)
+- Reads `0x1ac`-struct field at offset `0x22` (interval ushort) for `param_1`
+- Validates slot ownership: reads hw register via `DAT_80058218 + iVar34*2`, checks bit14=1; returns if not owned
+- Reads 5 indexed link registers at `stride = iVar34 * 0x1e`:
+  - `reg[+0]`, `reg[+4]`, `reg[+?]` (compute clock window), `reg[+0x15]`, `reg[+0x16]`
+  - Extracts from regs: slot interval `uVar29 = reg & 0x3ff`, timing `uVar27 = reg >> 10`, phase `uVar31 = (reg17>>18&7)<<6 | reg>>26`
+- Calls function pointer `*PTR_DAT_80058224(uVar25)` — likely `get_clock_phase_for_slot`
+- Computes timing delta: `uVar23 = (uVar19 - uVar20) % modulus` (with wrap correction)
+- Validates slot fits: complex arithmetic with `local_94`, `local_90`, 0x271/0x270 constants
+- Adjusts slot count up/down, retries via longlong 64-bit division
+- Callers: `FUN_8004a5f4`, `FUN_8004a660` (both COMPUTED_CALL, see below)
+- MEDIUM-HIGH: strong structural evidence for slot timing validator, but no opcode literal
+
+**FUN_8004a5f4** (90B) → `check_connection_slot_pending_and_dispatch` [MEDIUM-HIGH, region 0x80040000]
+- Checks bitmask `field453_0x1d2/0x1d3` (16-bit) for bit `param_1`
+- If set: validates `field3_0x3 & 4 == 0` (not busy), `_x26_entry_valid != 0`
+- Checks additional pending flags at `field297_0x130`, `field303_0x13c`, `field309_0x142`, and offset table
+- If all pass: dispatches via function pointer `*PTR_DAT_8004a65c` → FUN_80057ce8
+
+**FUN_8004a660** (74B) → `check_connection_slot_update_pending_and_dispatch` [MEDIUM-HIGH, region 0x80040000]
+- Simplified version: checks `field452_0x1d1 & 8` gate first, then same bitmask/validity checks
+- Dispatches via function pointer `*PTR_DAT_8004a6b4` → FUN_80057ce8
+
+### Rename script
+
+`RenamePass37Region80050000.java` written to `/root/wairz/ghidra/scripts/` — 1 entry. Pending MCP execution.
+
+### Coverage after Pass 37
+
+366 total / **~219 named** (was ~218) / **~147 unnamed** (was ~148). 31 renames staged total (Pass 35: 20, Pass 36: 10, Pass 37: 1), all pending MCP execution.
+
+**Next**: Pass 38 — apply all 31 staged renames via `run_ghidra_headless` (MCP required), fresh re-rank remaining ~147 unnamed, continue next xrefs≥2 tier.
