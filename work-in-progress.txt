@@ -3675,20 +3675,24 @@ sweep beyond enumeration and is the most out-of-date):
              analysis/rom/rom_function_index.md (3 new HIGH rows + Summary bump to 770
              named/2242 unnamed project-wide), analysis/INDEX.md (region line updated)
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 23 — continue rank 76-90 leftovers (10 functions, MEDIUM/MEDIUM-HIGH) + alloc_tagged_record_via_pool tags 0x23/0x2a follow-up (2026-06-27)
-          Pass 22 resolved FUN_8005faec (pending-procedure advance/commit state machine),
-          named the alloc_tagged_record_via_pool tag-0/1/3/0x18 "snapshot builder" family, and
-          named the indexed-link-register read/write pair — 8 HIGH renames, best yield since
-          Pass 12. 310 unnamed remain. Continue with the 10 rank-76-90 leftovers still
-          MEDIUM/MEDIUM-HIGH (0x80054b14, 0x80057ce8, 0x80057a00, 0x8005aba8, 0x80058740,
-          0x800577ec, 0x8005840c, 0x8005dd9c, 0x80058254, 0x8005c640, 0x80051678, 0x8005f8a0
-          — see Pass 22 section table in reverse_engineering_region_0x80050000.md for full
-          per-function notes). 0x80054b14 and 0x8005aba8 have the strongest partial anchors —
-          worth a 2nd look once their still-unnamed callees (FUN_8005693c, 0x8005aaac,
-          0x8005a7ec) get reviewed. Also worth following up FUN_8005dd70's newly-confirmed
-          tags 0x23/0x2a on alloc_tagged_record_via_pool via its caller 0x8005dd9c (would be
-          the 13th/14th known tags). The genuine rank-91+ tail is now mostly small leaf
-          functions (22B-162B) and is lower priority than these leftovers.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 23 — callee analysis unlocks 12 HIGH renames, best single-pass yield in region (2026-06-27)
+          Decompiled 8 still-unnamed key callees of the rank-76-90 leftovers (FUN_8005693c,
+          FUN_8005aaac, FUN_8005a7ec, FUN_8005dd70, FUN_8005d490, FUN_800574c8, FUN_8005734c,
+          FUN_80057370) + 6 secondary helpers (FUN_80057094, FUN_8005db04, FUN_8005dd24,
+          FUN_80051678, FUN_8005f8a0, FUN_8005164c). Then decompiled all 10 rank-76-90 leftovers
+          directly. Applied 12 HIGH renames via RenamePass23Region80050000.java (renamed=12
+          alreadyOk=0 missing=0 failed=0): dispatch_afhca_by_role_index,
+          write_link_register_with_slot_check_and_retry,
+          write_link_register_b_with_slot_check_and_retry,
+          write_indexed_link_register_b_with_slot_check (stride-0x14 alternate register bank),
+          write_link_type_hw_register_cmd (type-0xb/c/d packer),
+          alloc_tag11_record_with_params, alloc_tagd_record_with_param,
+          dispatch_alloc_tag_d_or_11_by_record_flag, alloc_tag_record_copy_payload_and_enqueue,
+          write_sco_esco_link_band_regs_with_retry, write_sco_link_slot_params_type_b,
+          write_sco_link_slot_params_type_c.
+          Correction: Pass 22's "tags 0x23/0x2a are 13th/14th alloc_tagged_record_via_pool tags"
+          was wrong — they're parameter values stored inside tag-0xd records, not pool tags.
+          Region: 366 total, 298 unnamed (down from 310), 68 named (up from 56).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 22 — rank 76-90 large-function sweep + FUN_8005faec resolved, 8 HIGH renames (best yield since Pass 12) (2026-06-27)
           Re-ran ColdTriageRegion80050000Pass19.java fresh: confirmed unchanged from Pass 21's
@@ -3917,7 +3921,7 @@ sweep beyond enumeration and is the most out-of-date):
         recommended renames, and HANDLER tier staging.
         → analysis/rom/reverse_engineering_region_0x80070000.md (PASS 11 COMPLEX batch 2 section added)
 
-[TODO]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
+[NEXT]  Full RE: ROM region 0x80000000-0x8000ffff out-of-gap-scope sweep (88 remaining)
           This region's 220-function "gap scope" (the two untouched stretches Phase 9 originally
           targeted) is fully resolved (PASS 1-9, 0 unresolved) — but `rom_function_index.md`'s
           distribution table still counts 88 unnamed functions in this region that were always

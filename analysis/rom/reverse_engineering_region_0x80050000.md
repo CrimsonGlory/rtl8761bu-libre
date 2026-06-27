@@ -2463,3 +2463,169 @@ and is lower priority than the rank-76-90 leftovers. Also worth following up
 `alloc_tagged_record_via_pool` (13th/14th known tags) via its caller
 `0x8005dd9c`.
 
+---
+
+## Pass 23 (2026-06-27)
+
+**Approach**: Decompile all still-unnamed key callees of the rank-76-90
+leftovers first, then re-evaluate the leftovers with the new anchor context.
+12 functions decompiled; 12 HIGH renames applied (`renamed=12 alreadyOk=0
+missing=0 failed=0`). Region count: **366 total, 298 unnamed (down from 310),
+68 named (up from 56)**.
+
+### Key callee resolutions (9 HIGH renames)
+
+#### `FUN_8005693c` → `dispatch_afhca_by_role_index` (HIGH)
+
+Maps a 0/1/2 role index to a 1/2/4 AFH-assessment code and dispatches to
+`VSC_0xfc73_AFH_Channel_Assessment_variant_1`. Invalid index logs and falls
+through to code 1. Pure mode-translation + dispatch, completely self-contained.
+
+#### `FUN_800574c8` → `write_link_register_with_slot_check_and_retry` (HIGH)
+
+Retry loop wrapping `write_indexed_link_register_with_slot_check` (the
+`0x800573d8` SCO-bank write function): spins until return == 0. Trivially
+understood from the single-call body.
+
+#### `FUN_8005734c` → `write_link_register_b_with_slot_check_and_retry` (HIGH)
+
+Symmetric retry loop wrapping `write_indexed_link_register_b_with_slot_check`
+(`FUN_80057094`, stride-0x14 bank). Same trivial body, different underlying
+write function.
+
+#### `FUN_80057094` → `write_indexed_link_register_b_with_slot_check` (HIGH)
+
+Structurally identical to `write_indexed_link_register_with_slot_check`
+(`0x800573d8`, stride-0x1e SCO bank) but using different MMIO base registers
+(`DAT_80057164/68/6c/70`) and a stride of 0x14 (20 registers per slot, max
+index 0x9f = 160 entries → 8 slots of 20 registers). This is the alternate
+indexed-register-bank write, likely the eSCO connection parameter bank vs.
+the SCO bank at stride 0x1e. Validated by `FUN_8005a7ec` and `FUN_8005aaac`
+using `read_indexed_link_register` for `param_2=='\0'` (SCO, stride 0x1e) and
+`FUN_80056608` (stride-0x14 read) for `param_2!='\0'` (eSCO). Returns error
+code 3 on slot-ownership mismatch.
+
+#### `FUN_80057370` → `write_link_type_hw_register_cmd` (HIGH)
+
+Validates `param_1` in [0xb, 0xd], packs `(param_2 & 3) << 9 | param_1` into
+a single hardware register word via `*puVar2 = ...`, logs (category 0xcd),
+returns 0 on success or 5 on invalid type. Called with:
+- type 0xb → by `write_sco_link_slot_params_type_b` (`0x8005840c`)
+- type 0xc → by `write_sco_link_slot_params_type_c` (`0x80058254`)
+- type 0xd → by `FUN_80057a00` (packet-type commit; not yet renamed)
+
+#### `FUN_8005db04` → `alloc_tag11_record_with_params` (HIGH)
+
+Calls `alloc_tagged_record_via_pool(0x11, ...)`, stores `param_1` at `+1`
+and `param_2` at `+2`, logs (category 0xcc), returns the record pointer (or 0
+on alloc failure). Pure record-allocation primitive.
+
+#### `FUN_8005dd24` → `alloc_tagd_record_with_param` (HIGH)
+
+Calls `alloc_tagged_record_via_pool(0xd, ...)`, stores `param_1` at `+1`,
+logs (category 0xcc), returns the record pointer. Symmetric to
+`alloc_tag11_record_with_params`.
+
+#### `FUN_8005dd70` → `dispatch_alloc_tag_d_or_11_by_record_flag` (HIGH)
+
+Checks bit 2 of `*(param_1 + 0x34)`: if **set** → calls
+`alloc_tag11_record_with_params(param_2)` (tag 0x11); if **clear** → calls
+`alloc_tagd_record_with_param(param_3)` (tag 0xd). Completely determinate
+flag-dispatch. **Correction to Pass 22's characterization**: the values 0x23
+and 0x2a passed by `FUN_8005dd9c` as `param_3` are stored *inside* tag-0xd
+records (at field `+1`), not new `alloc_tagged_record_via_pool` tags. The
+actual tags in this code path remain 0xd and 0x11 — the known tag count does
+**not** increase by 2 from this analysis.
+
+#### `FUN_8005d490` → `alloc_tag_record_copy_payload_and_enqueue` (HIGH)
+
+Allocates a tagged record (`param_2` = tag), copies `param_4` bytes from
+`param_3` into the new record, appends the record to the tail of a singly
+linked list anchored at `param_1 + 0x80` (walk-to-end + next-pointer append).
+Returns without a return value (caller checks the side effects). Fully
+self-contained, standard alloc-copy-enqueue.
+
+### Rank-76-90 leftovers resolved (3 HIGH renames)
+
+#### `FUN_800577ec` → `write_sco_esco_link_band_regs_with_retry` (HIGH)
+
+Writes 2+4 = 6 hardware register words to the SCO or eSCO link-register bank,
+selected by `param_1` (`'\0'` → SCO, stride 0x1e; else → eSCO, stride 0x14).
+The 2-entry array `param_3` is written to bank offsets `slot*stride + 7/8`,
+the 4-entry array `param_4` to offsets `slot*stride + 9/10/11/12`. Uses the
+appropriate retry wrapper (`write_link_register_with_slot_check_and_retry` for
+SCO, `write_link_register_b_with_slot_check_and_retry` for eSCO). Includes
+error logging and a retry counter. These register offsets (7-12 of each bank)
+are distinct from the 0x17-0x1b range used by the slot-param-type-b/c pair;
+likely channel or frequency tuning parameters.
+
+#### `FUN_8005840c` → `write_sco_link_slot_params_type_b` (HIGH)
+
+For SCO slots (bit 2 of `field3_0x3` clear): writes 4 hardware registers
+(offsets 0x17/0x19/0x1a/0x1b of the SCO bank) with packet-format and window
+fields from the connection struct (`field161_0xa8` = packet type byte,
+`field159_0xa6` = Tx window, `field155_0xa2` = max-latency cap,
+`field145_0x98`/`field147_0x9a` = Wesco), then calls
+`write_link_type_hw_register_cmd(0xb, slot)` to commit the write as "type-b".
+For eSCO slots: writes same fields to different MMIO registers and triggers
+a callback with code 2. The "type-b" label comes from the `0xb` argument to
+`write_link_type_hw_register_cmd`.
+
+#### `FUN_80058254` → `write_sco_link_slot_params_type_c` (HIGH)
+
+Exact structural twin of `write_sco_link_slot_params_type_b` but:
+- Uses type 0xc (`write_link_type_hw_register_cmd(0xc, slot)`)
+- Reads from a 7-byte-stride table at `PTR_DAT_800583f0` (rather than struct
+  array fields) for the register values at offsets 0x17/0x18/0x19
+- Operates on a different struct array (`PTR_base_of_0x1ac_struct_array ...
+  _800583e4`)
+
+Together `write_sco_link_slot_params_type_b` (type-0xb), this function
+(type-0xc), and `FUN_80057a00` (type-0xd, not yet renamed) form a three-type
+SCO/eSCO hardware slot commit sequence covering distinct register sets.
+
+### Rank-76-90 leftovers remaining below HIGH threshold
+
+The following 9 functions from Pass 22's batch remain unnamed — all have been
+freshly analyzed this pass with new callee context but do not meet the HIGH
+evidentiary bar:
+
+| Address | Size | Notes |
+|---------|------|-------|
+| `0x80054b14` | 1650B | Large SCO/eSCO hw-register commit: calls `resolve_parent_context_by_role`, `FUN_8005a048`/`FUN_8005a680` (÷0x271 timing), `dispatch_afhca_by_role_index` for AFH mode, mass-programs `DAT_800551xx` registers, allocates an SCO slot via `FUN_8005c930`. Too many still-unnamed callees (`FUN_800549fc`, `FUN_8005c930`, `FUN_80055ddc`, `FUN_2b894`) for HIGH. | MEDIUM-HIGH |
+| `0x80057ce8` | 1314B | SCO link timing adjustment: reads 5 indexed link registers (0x00/0x04/0x14/0x15/0x16 of SCO bank), performs fixed-point timing recalculation with explicit ÷0 guards, writes back updated timing registers via `write_indexed_link_register_with_slot_check`. "Prepare + commit" callback pair frames the write. No clean single domain anchor. | MEDIUM |
+| `0x80057a00` | 706B | SCO packet-type selection + hw commit: reads role/feature fields from struct, maps 3-bit packet-type bitmask (0x01/0x02/0x04) to a mode code (0/1/2/3), writes to link register 0x17 field, calls `write_link_type_hw_register_cmd(0xd, slot)`. The "type-d" commit is confirmed. The exact packet-type encoding semantics are not fully pinned. | MEDIUM-HIGH |
+| `0x8005aba8` | 664B | eSCO timing update + conditional renegotiate: calls `FUN_8005aaac` + `FUN_8005a7ec` (timing phase computations), then conditionally calls `esco_sco_param_validate_and_commit` based on config feature bit `0x4000`, computed phase drift, and AFH/slot boundary conditions. Full condition logic not fully understood. | MEDIUM-HIGH |
+| `0x80058740` | 534B | 3-pool keyed lookup/promote: type 0 (0xa0 entries, 0x20-byte stride), type 1 (0x20 entries, 0x20-byte stride), type 2 (variable-count, 0x34-byte stride). Matches a 6-byte key across the selected pool with find-and-promote semantics. Domain of the key unknown (BD_ADDR? LTK?). | MEDIUM |
+| `0x800577ec` (now `write_sco_esco_link_band_regs_with_retry`) | 516B | **Renamed — see above.** | HIGH |
+| `0x8005840c` (now `write_sco_link_slot_params_type_b`) | 506B | **Renamed — see above.** | HIGH |
+| `0x8005dd9c` | 494B | Feature compatibility checker + mismatch-record allocator: iterates set bits in `*(param_1+0x78)|(+0x7c)` feature bitmap, checks each against a feature-compatibility table, on mismatch calls `dispatch_alloc_tag_d_or_11_by_record_flag(param_1, param_2, 0x2a or 0x23)` to allocate a mismatch record. Values 0x23/0x2a are stored inside tag-0xd records, not pool tags. Falls through to `alloc_tag_record_copy_payload_and_enqueue` for non-flag-bit path. Complex condition logic. | MEDIUM-HIGH |
+| `0x80058254` (now `write_sco_link_slot_params_type_c`) | 400B | **Renamed — see above.** | HIGH |
+| `0x8005c640` | 206B | Per-connection-slot event queue processor: walks a per-slot queue up to `param_2` entries, dispatches by type (0: calls `FUN_8005cf6c` + callback + `FUN_8005d1a4`; 1: calls `FUN_8004b064`), then calls `FUN_8005be64`. Domain of queue/event types unclear. | MEDIUM-HIGH |
+| `0x80051678` | 194B | Multi-list cleanup with callbacks: walks two typed linked lists (tag `'\t'`=0x09 and `'\n'`=0x0a), removes matching nodes, fires `FUN_8004ee94` per type-0x0a removal, handles a final state flag + conditionally calls `FUN_80055f34` or a function pointer, then `FUN_8005164c`. More complex than Pass 22's "pure linked-list cleanup" description; domain unclear. | MEDIUM |
+| `0x8005f8a0` | 188B | Per-feature-index configuration dispatcher: reads a per-feature shift amount from `PTR_DAT_8005fa20` table, dispatches to case-specific handlers (case 8: `FUN_8005f614`; case 10: `send_evt_Meta_subevent_0x17`; cases 0/1: modifies `*(param_1+4)` bits and calls `possible_logger_called_if_no_patch3`; case 5: modifies `*(param_1+0x10e)`). `param_3` = 0x23/0x2a is checked against a per-feature flags table to choose a `uVar7` mode; tags 0x23/0x2a here are likely the same "event subtype" values stored inside tag-0xd records. At end: calls `*puVar2(param_1, uVar6, uVar7)` through fn ptr. | MEDIUM-HIGH |
+
+**Additional callees decompiled and analyzed but kept MEDIUM-HIGH** (not renamed):
+- `FUN_8005aaac` and `FUN_8005a7ec` — sibling timing-phase computation
+  functions (modulo-based phase derivation from indexed link registers); their
+  shared "phase = field16 ÷ window" logic is clear but the domain field names
+  (`field78_0x4e` = "current phase offset"?) are not confirmed. MEDIUM-HIGH.
+- `FUN_8005164c` — short terminal function calling
+  `LMP__25B__most_common_for_VSCs1`; domain context from enclosing teardown
+  unknown. MEDIUM.
+- `FUN_8005db04`, `FUN_8005dd24` — now renamed (see callees above).
+
+**Region-wide unnamed count**: **366 total, 298 unnamed (down from 310), 68
+named (up from 56)** — confirmed via `CountUnnamedRegion80050000.java`
+re-run after applying `RenamePass23Region80050000.java` (`renamed=12
+alreadyOk=0 missing=0 failed=0`).
+
+**Next**: The rank-91+ tail is now fully exposed (no more rank-76-90 leftovers
+pending). Most of those are small leaf functions (22B-162B). The 298 unnamed
+remaining include both the small tail and any medium-priority functions from
+prior passes not yet elevated. Suggest next pass survey the rank-91+ small-
+leaf functions via a fresh cold-triage run to see if any have cross-reference
+anchors from the newly-named functions (e.g. callees of
+`write_sco_link_slot_params_type_b`, `dispatch_afhca_by_role_index`,
+`alloc_tag_record_copy_payload_and_enqueue`, etc.).
+
