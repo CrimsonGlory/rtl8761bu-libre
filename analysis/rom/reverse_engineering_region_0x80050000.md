@@ -5312,4 +5312,23 @@ Pass 25/30.
 
 Region unnamed count after this pass: **40** (41 minus this rename).
 
-**Next:** Pass 54p — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+## Pass 54p (2026-06-28) — cold-triage rank-1 rename (post-54o re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54o: **366 total**, **326 named**,
+**40 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80059a60` → `decode_indexed_table_index_by_category_and_bank`** (78B, HIGH) via
+`RenamePass54pFun80059a60.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Byte-exact inverse of `compute_indexed_table_addr_by_category_and_bank`
+(`0x8005a048`): recovers table index via `(value - base) / stride`. When `param_2==0`
+(category-2 path): base `0x2d0`/`0x3d0`, divide by `0x40`; else base `0x1ce`/`0x20e`, divide
+by `0x10`. Bank selector `param_3` picks the low/high base variant (same 2-bank scheme as the
+encoder). Sole caller: `negotiate_link_interval_from_range_pairs_and_apply` — invoked on the
+bit-2 (`local_3c & 4`) negotiation path after clamping the range to minimum `0xa90`.
+
+**Confidence:** HIGH — mechanically verified encode/decode constant match (Pass 17); named sole
+caller; closes the long-standing "still-unnamed `FUN_80059a60`" gap in the negotiation core.
+
+Region unnamed count after this pass: **39** (40 minus this rename).
+
+**Next:** Pass 54q — continue down the xrefs=1 tier (re-run cold-triage for next rank).
