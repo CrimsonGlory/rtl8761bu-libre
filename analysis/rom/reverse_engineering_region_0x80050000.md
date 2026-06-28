@@ -5351,4 +5351,24 @@ are established HIGH siblings (`send_one_time_event_0x6f_if_not_sent`, `check_st
 
 Region unnamed count after this pass: **38** (39 minus this rename).
 
-**Next:** Pass 54r — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+**Next:** Pass 54s — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54r (2026-06-28) — cold-triage rank-1 rename (post-54q re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54q: **366 total**, **328 named**,
+**37 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005c0b0` → `compare_afh_channel_key_to_slot10_and_pack_or_restage`** (76B, HIGH) via
+`RenamePass54rFun8005c0b0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** AFH channel-assessment helper (sole caller `afh_report_worst_channel`). Compares
+`param_1+8` (dword) and `param_1+0xc` (short) against cached fields at global `0x1ac`-array
+index-10 (`+0x160`–`+0x165`). On match, calls `pack_afh_channel_params_to_register` with the
+already-staged channel/index bytes at `+0x166`/`+0x167` and returns 1 (early exit path sets status
+bit `0x4` in the parent). On mismatch, copies the incoming key into slot-10, sets `param_1+0x21`
+bit `0x40`, returns 0 so the parent continues the full worst-channel scan loop.
+
+**Confidence:** HIGH — sole caller is the already-named `afh_report_worst_channel`; pairs with
+Pass 54j's `compare_afh_wrapped_delta_and_stage_channel_entry` (bit `0x80` path); callee
+`pack_afh_channel_params_to_register` is established HIGH since Pass 35.
+
+Region unnamed count after this pass: **37** (38 minus this rename).
