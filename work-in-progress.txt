@@ -4559,7 +4559,7 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+1 entry, user-named count 1103)
           → analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54d: run ColdTriageRegion80050000Pass54.java
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54d: run ColdTriageRegion80050000Pass54.java
           (general cold-triage re-rank deferred from Pass 54b/54c) (2026-06-28)
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank, resolved all 3
@@ -4970,6 +4970,32 @@ sweep beyond enumeration and is the most out-of-date):
           — only `FUN_*`→real-name conversions do. The per-address script check is the precise, authoritative
           confirmation the ticket asked for, and it reports zero gaps.
           → analysis/rom/rom_function_index.md, analysis/INDEX.md
+
+[NEXT]  ROM 100% coverage: decompile and name every function in the `rom` block
+          (0x80000000–0x8007ffff) — drive live Ghidra user-named count to match
+          total real functions (each with HIGH-confidence purpose, region-doc
+          write-up, and `rom_function_index.md` row; mis-disassembly artifacts get
+          an explicit one-line "not a real function" note instead of a name).
+          **Definition of done:** `rom_function_index.md` Summary reads 0 unnamed
+          `FUN_*`, 0 medium, 0 low; named count == total real functions (see
+          "=== PHASE 9 GOAL" section above for full criteria).
+          **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
+          functions in `rom`, **1103** user-named live in Ghidra, **2168** unnamed
+          `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
+          re-application are DONE; the remaining work is the unnamed bulk.
+          **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
+          cold-triage by size/xref tier → `batch_decompile_functions` (5–10/call)
+          or `decompile_function` → evidenced rename via `RenamePassN*.java` in GZF
+          process mode → update that region's `reverse_engineering_region_0x800X0000.md`
+          + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
+          each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
+          mark a region DONE only when its unnamed count hits 0.
+          **Immediate first step:** promote and execute the carried `[TODO]` Pass 54d
+          for region `0x80050000` (`ColdTriageRegion80050000Pass54.java` general
+          cold-triage re-rank deferred from Pass 54b/54c), then continue the regional
+          sweep until that region's unnamed count is 0 before advancing to the next
+          highest-unnamed region per `RomRegionBreakdown.java`.
+          (2026-06-28)
 
 
 EXECUTION NOTES FOR PHASE 9 CONTINUATION (2026-06-25):
