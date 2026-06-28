@@ -5470,4 +5470,21 @@ Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54v: **366 total**
 
 Region unnamed count after this pass: **32** (33 minus this rename).
 
-**Next:** Pass 54x — continue down the xrefs=1 tier (rank-2 `FUN_8005c988`, 54B).
+**Next:** Pass 54y — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54x (2026-06-28) — cold-triage rank-2 rename (post-54w re-rank)
+
+Decompiled and renamed rank-2 **`FUN_8005c988` → `init_stride7_codec_table_defaults_for_sco_hw_codes`** (54B, HIGH) via
+`RenamePass54xFun8005c988.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sole caller `init_global_connection_table_and_bt_state`. Sets the active-index sentinel
+(`PTR_DAT_8005c9c4`) to `0xff`, zeroes a 31-byte (`0x1f`) stride-7 codec-config table
+(`PTR_DAT_8005c9c0`), then seeds header bytes `[2]=3` / `[3]=1` and row key bytes at offsets
+`0xb`/`0x12`/`0x19` with SCO HW register codes `8`/`9`/`10` — the same values
+`map_sco_link_type_to_hw_register_code` and `map_codec_type_byte_to_table_row_index` use elsewhere
+in this cluster.
+
+**Confidence:** HIGH — self-contained init with unambiguous linkage to the established
+codec-table / SCO-type-8/9/10 naming family; single named caller at global BT-state boot.
+
+Region unnamed count after this pass: **31** (32 minus this rename).
