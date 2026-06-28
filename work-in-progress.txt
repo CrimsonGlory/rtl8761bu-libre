@@ -4534,6 +4534,20 @@ sweep beyond enumeration and is the most out-of-date):
           a host with docker + wairz-backend-1 up. Script ready: scripts/ColdTriageRegion80050000Pass54.java.
           Also decompile FUN_8004ca10 + FUN_8002b6f4 as paired pipeline leads from Pass 54a.
 
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54b partial: decompile `FUN_8004ca10` (2026-06-28)
+          Decompiled `FUN_8004ca10` (102B, region `0x80040000`) and renamed to
+          `atomically_take_conn_list_b_and_apply_quota_overflow` (HIGH) via
+          `RenamePass54bFun8004ca10.java` (`renamed=1 alreadyOk=0 missing=0 failed=0`, live-verified).
+          Mechanism: IRQ-off snapshot of list-B head at `conn+0x144`, reset to empty sentinel `0xa0a`,
+          walk saved list via `FUN_8004b1d0` for quota-overflow dispatch. 3 documented HIGH callers
+          in the post-drain pipeline. Full write-up in `reverse_engineering_region_0x80040000.md`
+          Pass 54 addendum + `reverse_engineering_region_0x80050000.md` Pass 54b section.
+          → analysis/rom/rom_function_index.md (+1 entry, user-named count 1102)
+          → analysis/INDEX.md (both regions updated; [NEXT] set to Pass 54c)
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54c: run ColdTriageRegion80050000Pass54.java +
+          decompile `FUN_8002b6f4` as paired pipeline finalizer (2026-06-28)
+
 [DONE]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank, resolved all 3
           carried-forward holdovers + 3 cross-region 0x80040000 renames (2026-06-28)
           FUN_8005c720 -> drain_and_dispatch_conn_event_ring_by_kind_then_reinit (228B, HIGH):

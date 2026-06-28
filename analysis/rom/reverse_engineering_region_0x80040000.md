@@ -717,33 +717,40 @@ terminus).
 
 Full evidence is in `reverse_engineering_region_0x80050000.md`'s own Pass 53 section.
 
-## Pass 54 addendum (2026-06-28) — `FUN_8004ca10` caller-context triage (decompile blocked)
+## Pass 54 addendum (2026-06-28) — `atomically_take_conn_list_b_and_apply_quota_overflow` (`0x8004ca10`)
 
-Pass 54's planned full cold-triage re-rank for region `0x80050000` could not run this
-iteration (docker daemon / wairz MCP unavailable from this Cursor container). Instead,
-this pass triaged one standing unnamed callee surfaced by Pass 53:
-`FUN_8004ca10` (`0x8004ca10`, region `0x80040000`).
+Pass 54's planned full cold-triage re-rank for region `0x80050000` is still deferred
+(`ColdTriageRegion80050000Pass54.java` not run this iteration). This pass closed the
+standing Pass 54a lead: decompiled and renamed `FUN_8004ca10` →
+`atomically_take_conn_list_b_and_apply_quota_overflow` (102B, HIGH) via
+`RenamePass54bFun8004ca10.java` (`renamed=1 alreadyOk=0 missing=0 failed=0`, live-verified).
 
 **Confirmed callers** (all from already-HIGH documented parents in prior passes):
 
 | Caller | Region | Call context |
 |--------|--------|--------------|
-| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | `0x80000000` | After computing a per-slot quota delta and calling `drain_n_records_from_connection_event_queue`, calls `FUN_8004ca10` then `FUN_8002b6f4`; may also call `atomically_drain_conn_pending_queue` first if a config flag is set |
-| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | `0x80000000` | Single-shot counterpart of the ring drain above: after incrementing `field92_0x5c` and calling `drain_n_records_from_connection_event_queue`, conditionally calls `FUN_8004ca10` when a per-connection flag is set, then `FUN_8002b6f4` |
-| `drain_and_dispatch_conn_event_ring_by_kind_then_reinit` (`0x8005c720`) | `0x80050000` | After draining the per-connection pending-event ring and optionally calling `atomically_drain_conn_pending_queue`, conditionally calls `FUN_8004ca10` before reinitializing the ring |
+| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | `0x80000000` | After computing a per-slot quota delta and calling `drain_n_records_from_connection_event_queue`, calls this function then `FUN_8002b6f4`; may also call `atomically_drain_conn_pending_queue` first if a config flag is set |
+| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | `0x80000000` | Single-shot counterpart of the ring drain above: after incrementing `field92_0x5c` and calling `drain_n_records_from_connection_event_queue`, conditionally calls this function when a per-connection flag is set, then `FUN_8002b6f4` |
+| `drain_and_dispatch_conn_event_ring_by_kind_then_reinit` (`0x8005c720`) | `0x80050000` | After draining the per-connection pending-event ring and optionally calling `atomically_drain_conn_pending_queue`, conditionally calls this function before reinitializing the ring |
 
-**Mechanism (caller-context only, MEDIUM confidence):** `FUN_8004ca10` is a shared
-post-drain helper in the established "quota / pending-event reconciliation" pipeline —
-always sequenced after `drain_n_records_from_connection_event_queue` and before the still-
-unnamed finalizer `FUN_8002b6f4`. The three callers all operate on per-connection
-accumulator / pending-event state in the `0x1ac` struct-array family. Exact field
-semantics and whether it performs a second drain, a state-bit commit, or a HW-register
-side-effect are **not pinned** without a live `decompile_function` call.
+**Mechanism (decompile-confirmed, HIGH confidence):** keyed by connection index
+(`param_1 & 0xff`) into the established `0x1ac` struct array
+(`PTR_base_of_0x1ac_struct_array_0xA_large2_1__field0_0x0`). Under IRQ disable, snapshots
+the list-B head index byte at `conn+0x144` and immediately resets that field to the empty-list
+sentinel `0xa0a` — the same default constant `init_connection_record` /
+`release_connection_record` write at `+0x140/+0x144`, and the same `'\n'` (`0x0a`) empty check
+used by the already-HIGH `insert_byte_into_per_connection_singly_linked_list_head_or_tail`.
+After re-enabling interrupts, walks the saved list head via `FUN_8004b1d0`, which traverses
+the shared `0xc`-byte node table until the head index reaches `0x0a`, incrementing each linked
+record's 16-bit counter at `+0x104` and collecting records whose counter exceeds their limit
+at `+0x2`. If any overflow records were collected (`local_20 != 0`), calls `FUN_8004b3c0`; if
+`field411_0x1a8` is set on the connection, calls `FUN_8004c940`. This is the shared post-drain
+"take ownership of list B and apply quota overflow" step in the quota / pending-event
+reconciliation pipeline — sequenced after `drain_n_records_from_connection_event_queue` (or the
+Pass 53 ring-drain equivalent) and before the still-unnamed finalizer `FUN_8002b6f4`.
 
-**Not renamed** — below the project's HIGH bar (no decompile, no named-callee anchor).
 Adjacent at `0x8004ca7c` is the already-HIGH `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
 (Pass 4); same address cluster, unrelated purpose.
 
-**Next for this function:** `decompile_function("FUN_8004ca10")` + `find_callers` re-check
-when wairz MCP is available; also decompile `FUN_8002b6f4` as the paired finalizer in the
-same pipeline.
+**Next:** decompile `FUN_8002b6f4` as the paired pipeline finalizer; run
+`ColdTriageRegion80050000Pass54.java` for the general Pass 54b cold-triage re-rank.
