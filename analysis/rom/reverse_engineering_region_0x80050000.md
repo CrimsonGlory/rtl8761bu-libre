@@ -5292,4 +5292,24 @@ caller already named.
 
 Region unnamed count after this pass: **41** (42 minus this rename).
 
-**Next:** Pass 54o — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+## Pass 54o (2026-06-28) — cold-triage rank-1 rename (post-54n re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54n: **366 total**, **325 named**,
+**41 unnamed** (excl. 9 artifacts). Decompiled and renamed rank-1
+**`FUN_80055f68` → `enqueue_deduped_slot_to_indexed_ring_and_set_pending_bit`** (82B, HIGH) via
+`RenamePass54oFun80055f68.java` (`renamed=1`, live-verified).
+
+**Mechanism:** For index `param_1`, if pending bitmask `PTR_DAT_80055fbc[param_1*4]` does not
+already have bit `(1 << (param_2 & 0x1f))` set, enqueues `param_2` into the 8-byte ring control
+block at `PTR_PTR_80055fc0[param_1*8]` (4-byte entries, write-index at `+6`, fill count at `+7`,
+capacity in low byte of `+4`), then ORs the bit into the bitmask. Structural complement of
+`dequeue_from_per_slot_ring_buffer` (`0x80055fc4`, which clears the matching bit on dequeue) —
+same ring-control layout, adjacent globals, dedup guard via bitmask.
+
+**Confidence:** HIGH — self-contained ring-buffer + bitmask dedup pattern matches the established
+`enqueue_to_per_slot_ring_buffer` / `dequeue_from_per_slot_ring_buffer` family documented in
+Pass 25/30.
+
+Region unnamed count after this pass: **40** (41 minus this rename).
+
+**Next:** Pass 54p — continue down the xrefs=1 tier (re-run cold-triage for next rank).

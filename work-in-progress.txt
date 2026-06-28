@@ -5029,14 +5029,19 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54o for region `0x80050000`
+          **Immediate first step:** continue Pass 54p for region `0x80050000`
           (re-run `ColdTriageRegion80050000Pass54.java` for next xrefs=1 rank).
           (2026-06-28)
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54o: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54n re-rank output).
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54p: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54o re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54o (2026-06-28): decompiled+
+          renamed rank-1 `FUN_80055f68`→`enqueue_deduped_slot_to_indexed_ring_and_set_pending_bit`
+          (82B, HIGH). Region 40 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54o; rom_function_index.md; live named count 1115.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54g (2026-06-28): decompiled+
           renamed rank-1 `FUN_800531d4`→`compute_table_offset_pair_plus_peer_slot_us_timing`
