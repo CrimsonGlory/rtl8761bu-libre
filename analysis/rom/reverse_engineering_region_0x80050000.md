@@ -5169,7 +5169,7 @@ pool-tagged record via `alloc_tagged_record_via_pool(0x1b, ...)`; indexes the pe
 artifact address `0x8005d548`); logs timing byte fields at `+0x341` (>>3) and `+0x342` (&3)
 via `possible_logging_function__var_args` (category `0xcc`, format id `0xd83`); returns the
 allocated record pointer or 0 on failure. Sole caller: the LE extended-advertising parameter
-commit path inside `FUN_8005db5c` (calls this immediately before
+commit path inside `apply_extended_advertising_params_to_slot` (calls this immediately before
 `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1`).
 
 **Confidence:** HIGH — named `alloc_tagged_record_via_pool` callee, `0x1ac` stride anchor,
@@ -5730,4 +5730,26 @@ prior Pass 3c cluster context pins this as eSCO timing/codec negotiation.
 Region unnamed count after this pass: **19** (20 minus this rename).
 
 **Next:** Pass 54ak — continue xrefs=0 tier (re-run cold-triage for next rank).
+
+## Pass 54ak (2026-06-28) — cold-triage rank-1 rename (post-54aj re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54aj: **366 total**, **347 named**,
+**18 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005db5c` → `apply_extended_advertising_params_to_slot`** (424B, HIGH) via
+`RenamePass54akFun8005db5c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LE extended-advertising parameter commit for slot `param_3`: indexes the per-connection
+`0x1ac` record, logs incoming adv-param bytes via `possible_logging_function__var_args`, gates on
+`+0x14c` bit `0x8` and `+0x122`/`+0x151` feature flags, then on success copies param bytes into
+`+0x14d`/`+0x14e`, calls `alloc_tag0x1b_record_and_log_link_table_timing_by_index`, issues
+`VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1/2` (instance `0xf`), sets pending bit
+`0x1000` in `+0x7c`, and dispatches via hook table. Failure path allocates tag-`0x1a` record via
+`alloc_tag11_record_with_params`; both paths finish with `assign_pointer_to_0x1AC_offset_0x134`.
+
+**Confidence:** HIGH — named VSC 0xfc97 callees + established `0x1ac` stride offsets + prior Pass 54h
+caller context for `alloc_tag0x1b_record_and_log_link_table_timing_by_index`.
+
+Region unnamed count after this pass: **18** (19 minus this rename).
+
+**Next:** Pass 54al — continue xrefs=0 tier (re-run cold-triage for next rank).
 

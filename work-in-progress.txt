@@ -5121,12 +5121,17 @@ sweep beyond enumeration and is the most out-of-date):
           (484B, HIGH, xrefs=0 tier). Region 19 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54aj; rom_function_index.md; live named count 1136.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ak: decompile+rename next
-          cold-triage rank on the xrefs=0 tier (post-54aj re-rank output).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54ak (2026-06-28): decompiled+
+          renamed rank-1 `FUN_8005db5c`→`apply_extended_advertising_params_to_slot`
+          (424B, HIGH, xrefs=0 tier). Region 18 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54ak; rom_function_index.md; live named count 1137.
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54al: decompile+rename next
+          cold-triage rank on the xrefs=0 tier (post-54ak re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54al: continuation slot after 54ak.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54am: continuation slot after 54al.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`
