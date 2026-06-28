@@ -531,6 +531,26 @@ work has established clearer architectural landmarks and naming conventions.
 was renamed as a carryover from region `0x80050000`'s Pass 32/33 work (its two
 callees, `FUN_8005c80c`/`FUN_8005c86c`, are in-region for `0x80050000` and were
 named there too: `allocate_free_link_slot_if_enabled`/`dispatch_link_slot_state_op`).
+
+### Addendum (2026-06-28) — three cross-region renames from region 0x80050000 Pass 47
+
+Region `0x80050000`'s Pass 47 (deferred-callee sweep resolving that region's `FUN_8005c640`/
+`FUN_80057ce8` holdovers) decompiled and renamed 3 functions that live in this region:
+
+- `0x8004b064` → `insert_byte_into_per_connection_singly_linked_list_head_or_tail` (a tag-1
+  callee of region `0x80050000`'s `drain_n_records_from_connection_event_queue`)
+- `0x8004a5f4` → `dispatch_slot_timing_reprogram_if_pending_and_ready` (90B; confirmed direct
+  callee of the already-named `ring_buffer_event_drain_dispatch_loop`, region `0x80000000`)
+- `0x8004a660` → `dispatch_slot_timing_reprogram_if_feature_enabled_and_ready` (74B; structural
+  twin of the above, narrower gating, no static callers found)
+
+Both `0x8004a5f4`/`0x8004a660` dispatch (via a literal-pool function pointer) into region
+`0x80050000`'s `recompute_and_commit_esco_sco_slot_timing_window` (`0x80057ce8`) — i.e. these are
+this region's half of a cross-region "is this connection's eSCO/SCO timing dirty? if so,
+reprogram it" dispatch pair. Full evidence is in `reverse_engineering_region_0x80050000.md`'s
+"Pass 47" section. Per the precedent set by the 2026-06-27 addendum above, this does not reopen
+this region's formal park (Pass 7) — it's 3 opportunistic renames driven by another region's
+callee-resolution need, not a resumption of the 1-150B tier sweep.
 Full evidence is in `reverse_engineering_region_0x80050000.md`'s "Pass 33" section.
 This does not reopen this region's formal park — it's a single opportunistic
 rename, not a resumption of the 1-150B tier sweep described above.

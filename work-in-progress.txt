@@ -4368,19 +4368,67 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (21 rows updated)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 47)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 47: deferred callee sweep + possible re-rank
-          Three functions from Pass 46 were deferred pending callee context:
-          - FUN_8005c640 (206B drain-dispatch): calls FUN_8005cf6c (tag-0), FUN_8004b064 (tag-1),
-            FUN_8005be64 (unconditional each iteration) — decompile all 3 callees first, then name
-            FUN_8005c640 itself.
-          - FUN_80058740 (534B 3-table remove-by-key): identify the 3 tables (52B entries for case 2,
-            8B for cases 0/1; 6-byte key matches BD_ADDR size). Plausibly paired-device/link-key
-            table eviction. Check callers for context first (xrefs_to / find_callers).
-          - FUN_80057ce8 (1314B eSCO/SCO slot-timing reprogram): 4× write_indexed_link_register_with_
-            slot_check calls + fractional timing recomputation. Check callers FUN_8004a5f4/8004a660
-            (already-decompiled 90B/74B slot-update dispatchers in 0x80040000).
-          After naming these, consider another fresh cold-triage re-rank (Pass 46 yielded 21 HIGH
-          renames from xrefs=2 tier; xrefs=1 tier may have more).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 47: deferred callee sweep (2026-06-28)
+          Resolved all 3 of Pass 46's deferred holdovers in one batch_decompile_functions call
+          (8/8: the 3 holdovers + 5 supporting callees needed to get there). All 8 cleared HIGH
+          on caller-context/structural-twin evidence:
+          - FUN_8005c640 -> drain_n_records_from_connection_event_queue. Sole caller confirmed
+            (find_callers) as the already-named ring_buffer_event_drain_loop_variant2 (region
+            0x80000000), independently documented as an "RX-credit/buffer-quota reconciliation
+            loop" calling this exact function right after computing a delta — matches the
+            mechanical decompile (drain up to N queued records, dispatch by tag, dequeue).
+          - FUN_8005cf6c -> find_and_clear_pending_bit_for_index_and_dispatch (tag-0 callee):
+            bit-scan/match/clear/dispatch over a 32-bit pending mask.
+          - FUN_8004b064 -> insert_byte_into_per_connection_singly_linked_list_head_or_tail
+            (tag-1 callee, region 0x80040000 cross-region rename): anchor was the already-HIGH
+            init_connection_record/release_connection_record's documented "LST 0xa0a at both
+            +0x140 and +0x144" default — the little-endian halfword write sets both head/tail
+            sentinel bytes to the exact 0x0a ('\n') value this function tests for "list empty."
+          - FUN_8005be64 -> dequeue_head_from_per_connection_record_queue: ring-buffer head
+            advance + count decrement, structural sibling of dequeue_from_per_slot_ring_buffer
+            minus the bitmap-clear.
+          - FUN_80058740 -> remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot: matches
+            the exact 0xa0/0xe0/0x34-stride-0x122-entry 3-pool signature already documented
+            (Pass 9, MEDIUM) for FUN_80057180's "shared pool/free-list bulk-reset helper" — this
+            is its remove-by-key counterpart, resolving the "which three tables" question both
+            functions independently raised.
+          - FUN_80057ce8 -> recompute_and_commit_esco_sco_slot_timing_window: find_callers
+            confirmed both call sites are FUN_8004a5f4/FUN_8004a660 (resolved below), via
+            COMPUTED_CALL through a literal-pool fn pointer.
+          - FUN_8004a5f4 -> dispatch_slot_timing_reprogram_if_pending_and_ready (region
+            0x80040000 cross-region rename): confirmed direct callee of the already-named
+            ring_buffer_event_drain_dispatch_loop (region 0x80000000).
+          - FUN_8004a660 -> dispatch_slot_timing_reprogram_if_feature_enabled_and_ready (region
+            0x80040000 cross-region rename): structural twin of the above, narrower gating.
+          Renamed via RenamePass47Region80050000.java (written directly to
+          /root/wairz/ghidra/scripts/, NOT save_ghidra_script): renamed=8 alreadyOk=0 missing=0
+          failed=0, live-verified via decompile_function on 3 of the 8 (internal callee
+          references inside drain_n_records_from_connection_event_queue also show new names).
+          DOCUMENTATION-INTEGRITY FINDING: a fresh ground-truth recount
+          (ListUnnamedRegion80050000Pass47Check.java) found 95 unnamed / 271 named / 366 total
+          live, which does NOT arithmetically reconcile with Pass 46's claimed ending tally (89
+          unnamed / 275 named) — the ~11-function gap predates this pass (renames only ever
+          reduce the unnamed count) and is most likely an earlier pass's prose folding a
+          cross-region rename into this region's tally without the function actually living
+          here. Flagged in the region doc; 95/271/366 (this pass's live recount) is the number
+          to build on going forward.
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 47 section, incl.
+             documentation-integrity note)
+          -> analysis/rom/reverse_engineering_region_0x80040000.md (Addendum 2026-06-28: 3
+             cross-region renames, does not reopen this region's formal park)
+          -> analysis/rom/rom_function_index.md (+8 entries, user-named count updated to 1055,
+             unnamed count updated to 2196)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 48; region
+             0x80040000 addendum noted)
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 48: fresh cold-triage re-rank of remaining 95
+          unnamed functions (same lineage as Passes 44/46 — re-rank by xrefs/size now that the
+          xrefs=2 tier and Pass 46's deferred-callee backlog are both exhausted). Direct
+          continuations available from Pass 47's findings: FUN_8005ce94 (the dispatch target
+          inside find_and_clear_pending_bit_for_index_and_dispatch, still unnamed) and
+          FUN_80057180 (the already-MEDIUM 3-pool bulk-reset sibling of
+          remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot, now with a clearer
+          pool-identity anchor than when it was last reviewed at Pass 9).
           For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
           the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally.
 

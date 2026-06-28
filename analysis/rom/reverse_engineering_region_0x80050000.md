@@ -4206,3 +4206,162 @@ remain from Pass 44/45's flagged-callee list — `FUN_8004edc4` is now fully res
 study `FUN_80057ce8`'s 4 register-write sites directly against the BT eSCO spec, or pursue
 `FUN_80058740`'s 3-table identity) — or run another fresh cold-triage re-rank, same lineage as
 Passes 44-46.
+
+## Pass 47 — deferred callee sweep, all 3 Pass-46 holdovers resolved (2026-06-28)
+
+Batch-decompiled all 8 candidates from Pass 46's deferred list in one `batch_decompile_functions`
+call (8/8): the 3 deferred functions themselves (`FUN_8005c640`, `FUN_80058740`, `FUN_80057ce8`)
+plus 5 supporting callees needed to resolve them (`FUN_8005cf6c`, `FUN_8004b064`, `FUN_8005be64`,
+`FUN_8004a5f4`, `FUN_8004a660`). All 8 cleared HIGH on caller/structural-twin evidence — the best
+single-pass yield of this deferred-callee lineage.
+
+- **`FUN_8005c640`** (206B) → **HIGH**, renamed `drain_n_records_from_connection_event_queue`.
+  Drains up to `param_2` queued records for connection `param_1`: each iteration reads the queue
+  head via a per-connection ring-table (`PTR_PTR_8005c714`, fields at `+5`=head index,
+  `+7`=count), dispatches by the record's tag byte (0 vs 1), then unconditionally pops the head.
+  Tag-0 records call `find_and_clear_pending_bit_for_index_and_dispatch` + an indirect callback,
+  then re-append onto the already-named `append_to_slot10_linked_queue_and_update_tail`; tag-1
+  records go through `insert_byte_into_per_connection_singly_linked_list_head_or_tail`. If the
+  queue empties before `param_2` iterations complete, logs a quota-overrun warning (event
+  `0x1b4`/`0xd1f`). **Caller-context confirmation (the strongest evidence this pass)**:
+  `find_callers` resolved its one call site as the already-documented
+  `ring_buffer_event_drain_loop_variant2` (`0x800083ec`, region `0x80000000`) — itself described
+  in that region's docs as draining "a fixed-size ring of per-connection deltas and apply
+  them...looks like an RX-credit or buffer-quota reconciliation loop", calling
+  `FUN_8005c640(uVar16, uVar11)` immediately after computing a credit delta `uVar11`. The
+  region-`0x80000000` docs *also* independently name `conn_field_increment_and_cleanup_dispatch`
+  (`0x80008328`) as "near-identical body shape...same `FUN_8005c640`/.../call sequence...the
+  non-ring single-shot counterpart" — two independent pre-existing call-site descriptions both
+  converging on "apply N credits/drain N queue entries for a connection," matching this pass's
+  mechanical read exactly.
+- **`FUN_8005cf6c`** (tag-0 callee, called only from `drain_n_records_from_connection_event_queue`)
+  → **HIGH**, renamed `find_and_clear_pending_bit_for_index_and_dispatch`. Scans a 32-bit pending
+  bitmask at `conn_struct+0x84` for the lowest set bit, compares its bit-index (via
+  `count_leading_zeros_32`) against the record's index byte (`*param_2`); on a match, dispatches
+  `FUN_8005ce94(conn_struct, record, companion_bit+1)` (companion bit read from a second mask at
+  `+0x88`) and clears the matched bit from `+0x84`. Classic bit-scan/match/clear/dispatch
+  idiom — `FUN_8005ce94` itself stays unnamed (not decompiled this pass; no caller-context need
+  since the dispatch mechanics alone are unambiguous).
+- **`FUN_8004b064`** (region `0x80040000`, tag-1 callee) → **HIGH**, renamed
+  `insert_byte_into_per_connection_singly_linked_list_head_or_tail`. Inserts a 1-byte-keyed node
+  into one of 2 parallel per-connection singly-linked lists (selected by `param_4`: list-A at
+  `conn_struct+0x140`, list-B at `+0x144`), at head or tail (`param_3`), using a shared `0xc`-byte
+  node array (`PTR_PTR_8004b0f4`) and an interrupt-disabled critical section. **Anchor**: this
+  pass's caller `FUN_8005c640` packs `param_1[2]='\x01'` (count=1) and a sentinel check against
+  `'\n'` (`0x0a`) for "list empty" — which lines up exactly with the *already-HIGH-renamed*
+  `init_connection_record`/`release_connection_record`'s documented default-constant write of
+  "LST `0xa0a` at both `+0x140` and `+0x144`" (Pass 3c/9): `0xa0a` as a little-endian 16-bit store
+  writes *both* bytes of each list's head/tail pair to `0x0a` — i.e. the exact same sentinel this
+  function tests for "empty." Independent confirmation from a pre-existing high-confidence
+  doc, not a fresh guess.
+- **`FUN_8005be64`** (called unconditionally each drain iteration) → **HIGH**, renamed
+  `dequeue_head_from_per_connection_record_queue`. Advances a per-connection ring buffer's head
+  index mod capacity and decrements its count (`PTR_PTR_8005be8c[param_1*8 + {4,5,7}]`), trapping
+  (`trap(7)`) on a zero-capacity divide guard. Structural sibling of the already-named
+  `dequeue_from_per_slot_ring_buffer` (`0x80055fc4`, Pass 30) but operating on a different table
+  and *without* the bitmap-clear that function performs — the simpler "queue-pop" half of the
+  pattern, exactly matching `drain_n_records_from_connection_event_queue`'s use (pop the
+  just-processed head after dispatch).
+- **`FUN_80058740`** (534B, Pass 46's "3-table remove-by-key" holdover) → **HIGH**, renamed
+  `remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot`. Generic remove-by-key across one of
+  3 pools selected by `param_1` ∈ {0,1,2}: case 0 (HW-register base `0xa0`, 32-entry, 8-byte
+  records), case 1 (HW-register base `0xe0`, 32-entry, 8-byte records), case 2 (`0x122`-entry,
+  `0x34`-byte records, dynamic capacity). Matches on a flag bit plus a 6-byte (`memcpy(...,6)`,
+  BD_ADDR-sized) key, unlinks the matching entry from its in-use list, and pushes it back onto the
+  table's free list. Case 0/1 additionally clear a HW register pair via the already-named
+  `write_indexed_link_register_b_with_slot_check`; case 2 instead clears 3 bits in the matched
+  record plus the corresponding bit in 3 separate global bitmask trackers. **Anchor**: this
+  pass's `0xa0`/`0xe0`/`0x34`-stride-`0x122`-entry triple is the *exact same 3-pool signature*
+  already documented (Pass 9, MEDIUM, not renamed) for `FUN_80057180` — "a generic 3-way pool-table
+  walker keyed by `param_1` (0, 1, or 2)...case 0 selecting...`0xa0`-stride...case 1...`0xe0`-stride...
+  case 2...a `0x34`-stride `0x122`-entry table...reads as a shared pool/free-list bulk-reset helper
+  used by (at least) three distinct resource pools." This function is the missing remove-by-key
+  counterpart `FUN_80057180`'s doc flagged as unresolved context — together they now fully pin all
+  3 pools as BD_ADDR-keyed, HW/bitmap-backed resource tables (`FUN_80057180` stays MEDIUM/unnamed;
+  its bulk-reset role doesn't change, but the pool identity question this pass's own doc raised
+  — "which three tables" — is answered structurally even without naming the pools themselves).
+- **`FUN_80057ce8`** (1314B, Pass 46's largest-unnamed holdover) → **HIGH**, renamed
+  `recompute_and_commit_esco_sco_slot_timing_window`. Validates a flag-vs-index match (early
+  bailout + log on mismatch), checks a busy-state bitfield (`*puVar12 >> 0xe != 1`), reads 4
+  indexed link registers, computes a fractional slot-timing window via 64-bit (`longlong`)
+  division with explicit zero-divisor `trap(7)` guards, then commits the result through 4
+  sequential `write_indexed_link_register_with_slot_check` calls (each gated on the prior
+  succeeding) before updating 2 small per-index timing-state fields. Matches the work item's
+  exact framing ("4× write_indexed_link_register_with_slot_check + fractional timing
+  recomputation"). **Caller-context confirmation**: `find_callers` resolved both of its call
+  sites (via `COMPUTED_CALL`, i.e. through a literal-pool function pointer) as the 2 region-
+  `0x80040000` "slot-update dispatcher" functions this pass also renamed (below) — both gate on a
+  per-connection "ready"/"dirty" 16-bit bitmask before invoking this function, consistent with a
+  reprogram routine that should only fire when a connection's eSCO/SCO timing is flagged pending.
+- **`FUN_8004a5f4`** (region `0x80040000`, 90B) → **HIGH**, renamed
+  `dispatch_slot_timing_reprogram_if_pending_and_ready`. Checks bit `param_1` of a 16-bit
+  ready/dirty mask (`conn_array_header->field453_0x1d2/field454_0x1d3`); if set, and the target
+  connection is active (not mid-teardown, valid entry), and *any* of {3 flag fields, or a nonzero
+  queue count at offset `+7`} holds, dispatches the indirect call resolved above as
+  `recompute_and_commit_esco_sco_slot_timing_window`. Confirmed direct callee of the already-
+  documented `ring_buffer_event_drain_dispatch_loop` (`0x80007af0`, region `0x80000000`) — the
+  sibling "central ring-buffer-event consumer" to `ring_buffer_event_drain_loop_variant2` above,
+  itself already described as reprogramming "RSSI-history/quality fields" and an "LMP-procedure-
+  completion table" per-connection — a per-connection slot-timing gate fits that family exactly.
+- **`FUN_8004a660`** (region `0x80040000`, 74B) → **HIGH**, renamed
+  `dispatch_slot_timing_reprogram_if_feature_enabled_and_ready`. Near-identical twin of the above
+  but gated by an *additional*, narrower precondition: a master feature-enable bit
+  (`field452_0x1d1 & 8`) must also be set, and the inner active/valid check omits the 4-way
+  flag-or-queue-count OR `FUN_8004a5f4` has. Same ready-bit mask, same indirect dispatch target.
+  No static callers found (`find_callers` returned none — likely reached only via a function-
+  pointer slot not statically resolved), but the near-total structural overlap with its
+  HIGH-confirmed sibling carries it to HIGH on its own.
+
+### Cross-region rename note
+
+3 of this pass's 8 renames (`FUN_8004b064`, `FUN_8004a5f4`, `FUN_8004a660`) are at addresses in
+region `0x80040000`, not this region — they were decompiled here only because they're callees/
+callers needed to resolve this region's own `FUN_8005c640`/`FUN_80057ce8` holdovers. Per the
+precedent set by region `0x80050000` Pass 33's reciprocal cross-region rename (documented in
+`reverse_engineering_region_0x80040000.md`'s "Addendum (2026-06-27)"), this does not reopen
+region `0x80040000`'s formal park (Pass 7) — see the addendum added there this pass.
+
+### Rename application
+
+`RenamePass47Region80050000.java` written directly to `/root/wairz/ghidra/scripts/` (host-path
+workaround, see tooling note above), run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=8 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls on `drain_n_records_from_connection_event_queue`,
+`remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot`, and
+`recompute_and_commit_esco_sco_slot_timing_window` — all three resolved correctly under their
+new names, with internal callee references (`find_and_clear_pending_bit_for_index_and_dispatch`,
+`insert_byte_into_per_connection_singly_linked_list_head_or_tail`,
+`dequeue_head_from_per_connection_record_queue`) also showing their new names in the decompiled
+bodies.
+
+### Tooling/documentation-integrity note
+
+A fresh ground-truth recount this pass (`ListUnnamedRegion80050000Pass47Check.java`, full
+address-sorted enumeration of every remaining `FUN_*` in `0x80050000`-`0x8005ffff`) found **95
+unnamed / 271 named / 366 total** *after* this pass's 5 in-region renames (the other 3 are in
+region `0x80040000`, see above). Arithmetically this implies **100 unnamed / 266 named** just
+*before* this pass — which does not reconcile with Pass 46's claimed ending tally of "89
+unnamed / 275 named." The discrepancy (~11 functions) predates this pass (it cannot be caused by
+renames, which only ever reduce the unnamed count) and is most plausibly explained by an earlier
+pass's prose tally folding in cross-region renames (like this pass's own 3 region-`0x80040000`
+renames) as if they were in-region, inflating a past "named" count without a matching function
+actually living in `0x80050000`-`0x8005ffff`. Flagging per this project's standing caution that
+doc-claimed counts can drift from ground truth (see prior session memory on wip-loop doc claims)
+— a future pass should do a from-scratch reconciliation if the exact divergence point matters;
+for now, **95 unnamed / 271 named / 366 total** (this pass's live recount) is the authoritative
+number to build on.
+
+### Coverage after Pass 47
+
+366 total, **95 unnamed**, 271 named (live ground-truth recount; see documentation-integrity note
+above for why this doesn't arithmetically chain to Pass 46's claimed figures). No holdovers
+remain from Pass 46's deferred-callee list — all 3 (`FUN_8005c640`, `FUN_80058740`,
+`FUN_80057ce8`) are now fully resolved, along with all 5 supporting callees needed to get there.
+
+**Next**: Pass 48 — fresh cold-triage re-rank of the remaining 95 unnamed functions (same lineage
+as Passes 44/46: re-rank by xrefs/size now that the xrefs=2 tier and this pass's deferred-callee
+backlog are both exhausted), or pursue `FUN_8005ce94` (the dispatch target inside
+`find_and_clear_pending_bit_for_index_and_dispatch`, still unnamed) and `FUN_80057180` (the
+already-MEDIUM 3-pool bulk-reset sibling of this pass's `remove_pool_entry_by_bdaddr_and_release_
+hw_or_bitmap_slot`, now with a clearer pool-identity anchor than when it was last looked at) as
+direct continuations of this pass's findings.
