@@ -3569,3 +3569,49 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 35 renames staged total across all pending scripts (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3). These are in multiple regions but all discovered during analysis of the 0x80050000 cluster.
 
 **Next**: Pass 40 — apply all 35 staged renames, re-rank, continue analysis.
+
+## Pass 40 — cross-region central callers (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Followed callers of the 4 Pass 39 functions — found `FUN_80053aa4` calls ALL 4, and `FUN_8002c018` is a related slot table initializer.
+
+### Analyzed functions (2 total)
+
+**0x80053aa4** (region 0x80050000) → `program_sco_hw_slot_registers_from_conn_record` [HIGH]
+- Reads connection record packet count: `uVar9 = *(param_1+9) - 1`
+- Applies HV1/HV2/HV3 slot adjustments (same pattern as `compute_sco_esco_timing_offsets_for_both_records`):
+  - Base timing: `local_20 = *(param_1+0x4c) + 2`
+  - bit0 of `param_1+0xb`: if count≥7, subtracts 6, adds 6 to base timing
+  - bit1: another +6 step
+- Acquires HW slot via `release_active_slot_bitmask(0)` — clears slot 0 from bitmask
+- Sets config byte `puVar1[0xa8] &= 0xfc; |= 1`
+- Zeros 3-slot range via `FUN_80053a2c()` (3-slot zero-init helper)
+- Loop (uVar7=0, then 1+):
+  - Gets table addresses: `FUN_8002b270(uVar7)` and `FUN_8002b28c(uVar7, 0)`
+  - Writes packet count (left-shifted by 2) to slot register bits[12:2]
+  - Writes timing offset (masked) to slot register
+  - For uVar7≥1: writes additional fields from `param_1+0x30`, `param_1+0x3c` (pair slot ranges)
+- Called by `FUN_80053cec` (staged `write_esco_packet_types_to_hw_channel_slots`)
+- Also called by `FUN_800546e4` (compute_sco_esco_timing_offsets_for_both_records) and `commit_esco_parent_timing_to_slot_table`
+- HIGH: named callees (all 4 Pass 39 HIGH functions) + named caller chain
+
+**0x8002c018** (region 0x80020000) → `init_or_reset_sco_hw_slot_table` [HIGH]
+- Optional fn-ptr hook first; if hook or early-return condition: skip init
+- If `param_1 == 0`: full reset:
+  - `memset(PTR_DAT_8002c250, 0, 0x13c)` — clears 13-slot × 0x13c/13 ≈ 0xc bytes each
+  - `memset(PTR_DAT_8002c254, 0, 0x108)` — clears secondary table
+  - Loop 0..12 (13 entries): initializes slot record with index (low nibble), base ptr at `base + idx*8`, type bits from table `PTR_DAT_8002c260[idx]`
+  - Sets `*(record+0x9c) = 0x1fff` (enables all 13 bits)
+  - Second loop 0..12: switch on slot_type (0/1/2-5/9/10/0xb) — configures type-specific HW registers with different mask/shift patterns for each slot type
+- At end: releases slots via `release_active_slot_bitmask`
+- Caller of `FUN_8002b9a4` (release_active_slot_bitmask, HIGH)
+- HIGH: self-contained global initializer with clear 13-slot structure + named callee
+
+### Rename script
+
+`RenamePass40CrossRegion.java` written to `/root/wairz/ghidra/scripts/` — 2 entries. Pending MCP execution.
+
+### Coverage after Pass 40
+
+37 renames staged total pending MCP (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3 + Pass40:2). The 0x80050000 region has ~143 unnamed remaining.
+
+**Next**: Apply all 37 staged renames + continue sweep.

@@ -4218,10 +4218,36 @@ sweep beyond enumeration and is the most out-of-date):
           rom_function_index.md +3 HIGH entries.
           analysis/INDEX.md → updated.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 40 (apply all 35 staged renames + more)
-          Apply all staged rename scripts via run_ghidra_headless (MCP required).
-          Fresh re-rank of remaining ~143 unnamed.
-          Continue xref analysis: follow FUN_8002b9a4 callers and FUN_8004f898 callers.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 40 (2026-06-27, cross-region central callers)
+          Followed callers of Pass 39's 4 functions; found FUN_80053aa4 (central hub calling
+          ALL 4 utility functions) and FUN_8002c018 (13-slot SCO table initializer). 
+          2 HIGH renames staged in RenamePass40CrossRegion.java:
+            0x80053aa4 → program_sco_hw_slot_registers_from_conn_record (region 0x80050000)
+              Acquires slot 0 via release_active_slot_bitmask; zeros 3-slot range via FUN_80053a2c;
+              programs slot registers in a loop using compute_slot_table_base_ptr_by_type +
+              compute_slot_table_entry_ptr_by_type_and_bank; writes packet count (bits[12:2])
+              and timing offset to per-slot HW registers. Callee of FUN_80053cec (staged 
+              write_esco_packet_types_to_hw_channel_slots).
+            0x8002c018 → init_or_reset_sco_hw_slot_table (region 0x80020000)
+              Optional hook; if param_1==0: memset 0x13c+0x108 bytes, init 13-slot table
+              (loop 0xd, sets index/pointer/type fields), configures type-specific HW regs
+              via switch(slot_type) across types 0/1/2-5/9/10/0xb; releases slots via
+              release_active_slot_bitmask at end.
+          37 renames staged total (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3 + Pass40:2).
+          analysis/rom/reverse_engineering_region_0x80050000.md → Pass 40 section added.
+          rom_function_index.md +2 HIGH entries.
+          analysis/INDEX.md → updated.
+
+[NEXT]  Full RE: batch apply all 37 staged renames + continue region sweep
+          Apply all staged scripts via run_ghidra_headless (MCP required):
+            RenamePass35Region80050000.java (20)
+            RenamePass36Region80050000.java (10)
+            RenamePass37Region80050000.java (1)
+            RenamePass38Region80050000.java (1)
+            RenamePass39CrossRegion.java (3)
+            RenamePass40CrossRegion.java (2)
+          After application: fresh re-rank of remaining unnamed, continue xref sweep.
+          Next xref leads: FUN_80053aa4 callers, FUN_8002c018 callers.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
