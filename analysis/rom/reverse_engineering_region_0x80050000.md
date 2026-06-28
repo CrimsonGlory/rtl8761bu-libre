@@ -5548,3 +5548,22 @@ Region unnamed count after this pass: **28** (29 minus this rename).
 
 **Next:** Pass 54ab — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ab (2026-06-28) — cold-triage rank-1 rename (post-54aa re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54aa: **366 total**, **338 named**,
+**27 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80052ffc` → `maybe_send_le_meta_subevent_on_slot_match`** (46B, HIGH) via
+`RenamePass54abFun80052ffc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sole caller is `LC_event_RX_dispatcher` on LC RX opcode `0x2d3` when
+`param_1[2]==0` (deferred path vs immediate `send_evt_LE_Meta_Subevent`). If the pending
+flag byte at `buf+0x206` is set, reads a slot/counter via `PTR_DAT_8005302c`, and when
+`((counter>>1) - *(int*)(buf+0x200)) & mask == 0` calls `send_evt_LE_Meta_Subevent(buf)`.
+
+**Confidence:** HIGH — caller context in `LC_event_RX_dispatcher` disambiguates deferred vs
+immediate LE-meta send; slot-match guard is unambiguous in decompilation.
+
+Region unnamed count after this pass: **27** (28 minus this rename).
+
+**Next:** Pass 54ac — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
