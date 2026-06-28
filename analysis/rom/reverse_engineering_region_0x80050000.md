@@ -5565,5 +5565,23 @@ immediate LE-meta send; slot-match guard is unambiguous in decompilation.
 
 Region unnamed count after this pass: **27** (28 minus this rename).
 
-**Next:** Pass 54ac — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+**Next:** Pass 54ad — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54ac (2026-06-28) — cold-triage rank-1 rename (post-54ab re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ab: **366 total**, **339 named**,
+**26 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_800559a0` → `maybe_invoke_le_channel_update_timing_if_pending`** (46B, HIGH) via
+`RenamePass54acFun800559a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Checks bit 2 (`0x02`) of the status byte at `PTR_DAT_800559d0`; if set, calls
+`LE_connection_channel_update_timing_handler(param_1, param_2)` then clears the bit (`&= 0xfd`).
+Deferred-invocation wrapper around the already-named 950B LE channel-update timing handler.
+
+**Confidence:** HIGH — trivial bit-flag guard with a single named callee; confirms deferred
+dispatch pattern for `LE_connection_channel_update_timing_handler` (first triaged Pass 3c).
+
+Region unnamed count after this pass: **26** (27 minus this rename).
+
+**Next:** Pass 54ad — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
