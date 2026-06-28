@@ -5,6 +5,15 @@ Format: [TODO] or [DONE] status, date, description
 
 ---
 
+[DONE] 2026-06-28: resolve_gzf_path missed GZF archives when project has >100 research files
+  Issue: `GhidraResearchService.resolve_gzf_path()` called `list_by_project(project_id)`
+    with the default `limit=100`. Projects with 100+ uploaded Ghidra scripts never saw older
+    `.gzf` archives in the lookup — `run_ghidra_headless(use_saved_project=True)` returned
+    "No .gzf archive named '2026-04-25_rtl8761buv_USB_fw-and-ROM.bin.gzf' found".
+  Resolution: Query all `.gzf` rows for the project via SQL (`original_filename ILIKE '%.gzf'`)
+    instead of the capped list. Fixed in `backend/app/services/ghidra_research_service.py`;
+    restart `wairz-backend-1` to pick up (MCP reconnect required after restart).
+
 [DONE] 2026-06-24: Expose DecompilerCallback in Ghidra headless mode
   Context: PASS 6 of ROM region 0x80030000 exhaustive RE hit blocker
   Issue: mcp__wairz__run_ghidra_headless does not expose DecompilerCallback API

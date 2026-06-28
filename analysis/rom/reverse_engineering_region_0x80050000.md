@@ -5082,6 +5082,34 @@ byte is clear.
 
 Region unnamed count after this pass: **51** (52 minus this rename).
 
-**Next:** Pass 54e — decompile+rename cold-triage rank 2 (`0x800544e0`, 132B, xrefs=1)
+**Next:** Pass 54f — decompile+rename cold-triage rank 3 (`0x80057684`, 128B, xrefs=1)
 or continue down the xrefs=1 tier before tackling the xrefs=0 large-function tail
 (ranks 33+).
+
+## Pass 54e (2026-06-28) — cold-triage rank-2 rename
+
+One-function progress on Pass 54d rank 2: decompiled and renamed **`FUN_800544e0` →
+`build_linked_conn_param_buffers_and_schedule_link_timing_setup`** (132B, HIGH) via
+`RenamePass54eFun800544e0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** connection-setup orchestrator in the param-response / link-timing cluster
+(already-named callees throughout):
+
+1. Calls `compute_and_maybe_commit_slot_offset_from_parent()` (global slot-offset prep).
+2. Calls `build_param_response_buffer_by_bitmask(conn, 0)` on the primary record.
+3. When `conn+0x20` bit `0x10` is clear **and** `conn+0x50` points at a linked record:
+   builds param-response buffers for that sibling and any nested records at
+   `+0x24` / `+0x20` (same bitmask builder, mask `0`).
+4. Calls `compute_and_store_link_timing_in_slots(conn)` then
+   `sched_event_sorted_insert_with_overlap_pushback(conn)` to commit slot timing into
+   the sorted event queue.
+5. If global `PTR_DAT_80054564+8 == 0`, sends the one-time HCI event via
+   `send_one_time_event_0x71_if_not_sent(1, 0)`.
+6. If global `PTR_DAT_80054564+4 == -1`, invokes `VSC_0xfc95_called2(...)` and arms
+   `LMP__268__most_common_for_VSCs2_checks_fptr_patch(..., 0x1388)` (5000-tick timeout).
+
+**Confidence:** HIGH — six already-named callees anchor the param-buffer + timing-scheduler
+role; linked-record walk at `+0x50/+0x24/+0x20` matches the connection-tree shape used
+elsewhere in this region's Pass 34–36 param-buffer cluster.
+
+Region unnamed count after this pass: **50** (51 minus this rename).

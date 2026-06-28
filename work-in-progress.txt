@@ -4984,7 +4984,7 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_*`, 0 medium, 0 low; named count == total real functions (see
           "=== PHASE 9 GOAL" section above for full criteria).
           **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
-          functions in `rom`, **1104** user-named live in Ghidra, **2167** unnamed
+          functions in `rom`, **1105** user-named live in Ghidra, **2166** unnamed
           `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
           re-application are DONE; the remaining work is the unnamed bulk.
           **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
@@ -4994,15 +4994,21 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54e for region `0x80050000`
-          (cold-triage rank 2: `0x800544e0`, 132B, xrefs=1), then work down the
+          **Immediate first step:** continue Pass 54f for region `0x80050000`
+          (cold-triage rank 3: `0x80057684`, 128B, xrefs=1), then work down the
           xrefs=1 tier before the xrefs=0 large-function tail (ranks 33+).
           (2026-06-28)
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54e: decompile+rename cold-triage
-          rank 2 (`0x800544e0`, 132B, xrefs=1) from Pass 54d re-rank output.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54f: decompile+rename cold-triage
+          rank 3 (`0x80057684`, 128B, xrefs=1) from Pass 54d re-rank output.
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54e (2026-06-28): decompiled+
+          renamed rank-2 FUN_800544e0→build_linked_conn_param_buffers_and_
+          schedule_link_timing_setup (132B, HIGH, 6 named callees). Region
+          50 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54e; rom_function_index.md; live named count 1105.
 
 Region 0x80000000 status summary:
 - Gap-scope (220 targeted untouched stretches): COMPLETE (219 real functions + 1 non-function)
