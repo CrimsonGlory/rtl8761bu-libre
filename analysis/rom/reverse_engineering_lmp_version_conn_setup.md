@@ -20,7 +20,7 @@ confirmation of the purpose inferred from decompilation here.
 `0x8001d4a0`, 134 bytes. Kovah-named. Callers: an LMP dispatch slot
 (`0x8010b528`), patch `FUN_8010b64c`, ROM `0x800604e0`,
 `fHCI_Read_Remote_Version_Information_0x1D_send_LMP_VERSION_REQ_0x25`,
-`LMP_VERSION_RES_0x26`, and `FUN_8005e2c4`.
+`LMP_VERSION_RES_0x26`, and `commit_remote_lmp_version_res_and_dispatch_pending` (`FUN_8005e2c4`).
 
 ```c
 void send_evt_HCI_Read_Remote_Version_Information_Complete
@@ -59,7 +59,7 @@ a config feature bit for the second path.
 
 `0x8005e23c`, 118 bytes. Kovah-named. Callers: LMP dispatch slot (`0x8010b576`),
 patch `FUN_8010b5d8`, raw data caller (`0x4d70`),
-`c_by_fHCI_Read_Remote_Version_Information_various_0x1ac_manip`, `FUN_8005e2c4`.
+`c_by_fHCI_Read_Remote_Version_Information_various_0x1ac_manip`, `commit_remote_lmp_version_res_and_dispatch_pending`.
 
 ```c
 int access_config_at_0xa5_and_0x1ac_stuct_stuff(void)

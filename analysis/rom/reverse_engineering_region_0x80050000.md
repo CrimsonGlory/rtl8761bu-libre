@@ -5852,3 +5852,30 @@ Region unnamed count after this pass: **14** (15 minus this rename).
 
 **Next:** Pass 54ap — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54ap (2026-06-28) — cold-triage rank-1 rename (post-54ao re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ao: **366 total**, **353 named**,
+**13 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e2c4` → `commit_remote_lmp_version_res_and_dispatch_pending`**
+(228B, HIGH) via `RenamePass54apFun8005e2c4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP version-info commit handler for slot `param_3` on the `0x1ac` record array:
+stores incoming remote version fields from `param_1` into `+0x3c`/`+0x3e`/`+0x40` (version,
+company ID, subversion — same layout `send_evt_HCI_Read_Remote_Version_Information_Complete`
+reads), sets status bit 2 at `+0x90`. If HCI Read Remote Version was pending (global side-table
+bit 2 at `field96_0x60`), sends
+`send_evt_HCI_Read_Remote_Version_Information_Complete(0, handle, slot+10)` and clears the
+pending bit. First-commit path (`+0x90` bit 1 clear): sets pending bit `0x20` in `+0x7c`,
+dispatches hook `(slot, 6)`, builds local version payload via
+`access_config_at_0xa5_and_0x1ac_stuct_stuff`, appends via
+`assign_pointer_to_0x1AC_offset_0x134`, may propagate pending bits into `+0x84`/`+0x88`.
+Retry path (bit 1 already set): alternate hook dispatch `(rec, 0x20, 1)`.
+
+**Confidence:** HIGH — field offsets match established LMP/HCI version-exchange documentation
+(`reverse_engineering_lmp_version_conn_setup.md`); three already-named callees with unambiguous
+roles; listed as caller of `send_evt_HCI_Read_Remote_Version_Information_Complete` in that doc.
+
+Region unnamed count after this pass: **13** (14 minus this rename).
+
+**Next:** Pass 54aq — continue xrefs=0 tier (re-run cold-triage for next rank).
+
