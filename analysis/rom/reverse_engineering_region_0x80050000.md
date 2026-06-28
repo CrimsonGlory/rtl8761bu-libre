@@ -5411,3 +5411,24 @@ Same `0x800561xx` HW-register cluster as `write_connection_struct_fields_1c_1e_2
 in the established MMIO programming cluster.
 
 Region unnamed count after this pass: **35** (36 minus this rename).
+
+**Next:** Pass 54u — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54u (2026-06-28) — cold-triage rank-1 rename (post-54t re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54t: **366 total**, **331 named**,
+**34 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80056510` → `irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`** (62B, HIGH) via
+`RenamePass54uFun80056510.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Saves CP0 interrupt state, reads idle flag byte `PTR_PTR_80056550[7]`, calls
+`enqueue_deduped_slot_to_indexed_ring_and_set_pending_bit(0, slot)` under the IRQ mask, restores
+interrupts, and if the flag was zero calls `set_validated_slot_index_high_byte_and_notify(slot)` —
+the enqueue-side complement of Pass 44's `dequeue_from_ring_buffer_and_dispatch_by_index`.
+
+**Confidence:** HIGH — self-contained IRQ-safe wrapper with two already-named callees in the
+established `0x800565xx` indexed-ring cluster.
+
+Region unnamed count after this pass: **34** (35 minus this rename).
+
+**Next:** Pass 54v — continue down the xrefs=1 tier (re-run cold-triage for next rank).

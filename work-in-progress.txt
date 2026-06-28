@@ -5034,7 +5034,7 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_*`, 0 medium, 0 low; named count == total real functions (see
           "=== PHASE 9 GOAL" section above for full criteria).
           **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
-          functions in `rom`, **1120** user-named live in Ghidra, **2157** unnamed
+          functions in `rom`, **1121** user-named live in Ghidra, **2156** unnamed
           `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
           re-application are DONE; the remaining work is the unnamed bulk.
           **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
@@ -5044,14 +5044,19 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54u for region `0x80050000`
+          **Immediate first step:** continue Pass 54v for region `0x80050000`
           (re-run `ColdTriageRegion80050000Pass54.java` for next xrefs=1 rank).
           (2026-06-28)
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54u: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54t re-rank output).
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54v: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54u re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
+          renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`
+          (62B, HIGH). Region 34 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54u; rom_function_index.md; live named count 1121.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54r (2026-06-28): decompiled+
           renamed rank-1 `FUN_8005c0b0`→`compare_afh_channel_key_to_slot10_and_pack_or_restage`
