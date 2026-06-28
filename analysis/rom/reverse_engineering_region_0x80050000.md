@@ -5801,3 +5801,28 @@ Region unnamed count after this pass: **16** (17 minus this rename).
 
 **Next:** Pass 54an — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54an (2026-06-28) — cold-triage rank-1 rename (post-54am re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54am: **366 total**, **351 named**,
+**15 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005ca30` → `commit_timing_short_delta_to_slot_and_dispatch_or_reject`**
+(278B, HIGH) via `RenamePass54anFun8005ca30.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Timing-short commit handler for slot `param_3` on the `0x1ac` record array: reads
+incoming ushort from `param_1+6`, compares against prior value at `field40_0x28`; on valid delta
+(within `0x7fff` and different) stores new value at `field163_0xaa`, sets pending bit `2` in
+`field120_0x7c`, indexes a 2-bit subfield from `field3_0x3` into global side table
+`field465_0x1de`, caches 5 bytes from `param_1+1..+5` into `PTR_DAT_8005cb58`, dispatches hook via
+`PTR_DAT_8005cb5c` with `(slot, new_timing)`, logs success. Invalid/no-change path calls reject
+allocator via `PTR_DAT_8005cb4c` with code `2` and logs rejection. Same negotiation-commit family
+as Pass 11's prior MEDIUM-HIGH triage and sibling `alloc_tag1_record_and_snapshot_timing` (`+0xaa`
+timing snapshot field).
+
+**Confidence:** HIGH — unambiguous commit-if-changed / reject-else pattern on established
+`+0x28`/`+0xaa`/`+0x7c` offsets; prior Pass 11 decompilation review + Pass 54an fresh decompile
+confirm.
+
+Region unnamed count after this pass: **15** (16 minus this rename).
+
+**Next:** Pass 54ao — continue xrefs=0 tier (re-run cold-triage for next rank).
+
