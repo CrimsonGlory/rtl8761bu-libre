@@ -4365,3 +4365,155 @@ backlog are both exhausted), or pursue `FUN_8005ce94` (the dispatch target insid
 already-MEDIUM 3-pool bulk-reset sibling of this pass's `remove_pool_entry_by_bdaddr_and_release_
 hw_or_bitmap_slot`, now with a clearer pool-identity anchor than when it was last looked at) as
 direct continuations of this pass's findings.
+
+## Pass 48 — fresh cold-triage re-rank (xrefs=2 tier) + 2 flagged continuations resolved (2026-06-28)
+
+**Documentation-integrity correction first**: Pass 47's "Next" note flagged `FUN_80057180` as "the
+already-MEDIUM 3-pool bulk-reset sibling...still unnamed" — this was stale. `0x80057180` was
+actually renamed `flush_hw_pending_slots_by_connection_type` back in **Pass 35** (2026-06-27),
+HIGH confidence, and confirmed live this pass via a fresh `decompile_function` call (resolves
+correctly under its current name). Pass 47's prose carried forward an outdated framing without
+checking ground truth. Of Pass 47's 2 flagged "direct continuations," only `FUN_8005ce94` was
+genuinely still open.
+
+Re-ran the cold-triage rank script (`ColdTriageRegion80050000Pass48.java`, identical methodology
+and 8-entry exclusion list to Pass 44/46): **366 total, 87 unnamed, 279 named** (this script's
+convention treats the 8 known mis-disassembly artifacts as outside the "unnamed" tally). This
+reconciles cleanly with Pass 47's ground-truth recount of "95 unnamed" (`ListUnnamedRegion80050000
+Pass47Check.java`, which counts every `FUN_*` literally including the 8 artifacts): 95 − 8 = 87 —
+**no real discrepancy**, just two different counting conventions across the two check scripts.
+Flagging this explicitly so a future pass doesn't re-open Pass 47's "11-function gap" question;
+it's fully explained.
+
+Top of the fresh rank list still showed a 12-entry **xrefs=2 tier** (Pass 46/47's renames don't
+remove xrefs=2 candidates that weren't themselves renamed — the "xrefs=2 tier...exhausted" framing
+in Pass 47's "Next" note was aspirational, not actual). Batch-decompiled all 12 xrefs=2 candidates
+plus the 1 genuine flagged continuation (`FUN_8005ce94`) and 3 supporting callees
+(`FUN_80056058`, `FUN_80056084`, `FUN_80051588`) in 3 `batch_decompile_functions` calls (10+4+3),
+then ran `find_callers` on 13 of the candidates to get caller-context anchors.
+
+**Rank 12 (`0x80059ce0`, 1B, xrefs=2) is a 9th confirmed mis-disassembly artifact** — decompiles to
+`halt_baddata()` ("Control flow encountered bad instruction data"), same signature as the existing
+8. Added to the exclusion list for future passes (see Tooling note below); not a real function, not
+renamed.
+
+**8 HIGH renames applied** via `RenamePass48Region80050000.java`:
+
+- **`FUN_800565ac`** (86B) → **HIGH**, renamed `find_and_dispatch_or_remove_pending_class_mode_entry`.
+  Disables interrupts, checks ring-active flag at `PTR_PTR_80056604+7`; if the ring head entry
+  (index byte at `+5`) matches `param_1`, dispatches immediately via the already-named
+  `dequeue_from_ring_buffer_and_dispatch_by_index`; otherwise scans via `FUN_80056058(0)` for a
+  matching entry elsewhere in a *different* indexed ring-table (`PTR_PTR_80056080`/`PTR_PTR_800560
+  d8`, ring index 0) and removes it via `FUN_80056084(0)` without dispatching. **Caller-context
+  anchor**: both call sites are `conn_class_mode_apply_and_log` and its `_variant2` — i.e. this is
+  the "dedup a pending class-mode-apply entry for this value: fire it now if it's already due
+  (head), else cancel the stale duplicate" helper invoked before re-queuing a fresh class-mode-apply
+  request. `FUN_80056058`/`FUN_80056084` themselves stay unnamed — their `param_2` is passed as a
+  bare literal `0` with no second argument at the only call sites, making their generic search/
+  remove mechanics not confidently nameable without more context; flagged as a lead below.
+- **`FUN_8005220c`** (72B, no static callers) → **HIGH**, renamed
+  `reset_record_and_reinit_default_tag9_subrecord`. Zeroes a 24-byte block, memcpys a fixed 5-byte
+  template, then calls `lazy_alloc_tag9_singleton_and_encode_lowbit_index(1)` +
+  `release_kind_sized_subrecord` + inits the exact same 3 fields (`+0x18/+0x1a/+0x1c` = `0x10`) and
+  2 flags (`+0x5e/+0x5f` = `1`) as the already-HIGH `teardown_links_and_reinit_default_subrecord`
+  (Pass 46) — but using the **tag-9** lazy-singleton allocator instead of tag-5. This is the tag-9
+  structural counterpart of that function's default-reinit tail, with a different (smaller, no-LMP-
+  send) kind-appropriate cleanup prefix. Same "structural twin sufficiency" standard already used to
+  HIGH-rename `lazy_alloc_tag9_singleton_and_encode_lowbit_index` itself (Pass 46).
+- **`FUN_80059684`** (66B) → **HIGH**, renamed `compute_connection_subbuffer_size_or_table_offset`.
+  Pure arithmetic helper: given a count and a type selector (1/2/4, with a further sub-selector for
+  type 4), returns either `(count+const)*stride` (types 1/2, sizing) or `base+count*stride` (type 4,
+  offset). **Caller-context anchor**: sole caller is the already-HIGH `init_connection_record` —
+  this is the size/offset calculator it uses to lay out one of a connection record's variable-length
+  sub-buffers by type during initialization.
+- **`FUN_800598ec`** (32B) → **HIGH**, renamed `read_and_wrap_clock_phase_for_slot_timing_offset`.
+  Reads a 12-bit field from a clock/timer register (`&0xfff`), right-shifts 2, then wraps modulo
+  `0x270` (624). **Caller-context anchor**: both call sites are `sco_esco_slot_timing_offset_calc_
+  variant1`/`_variant2` — this is their shared "normalize the current clock phase into the
+  slot-timing-offset domain" base read.
+- **`FUN_80059704`** (44B) → **HIGH**, renamed `allocate_free_ready_dirty_mask_index_for_sco_setup`.
+  Scans the 16-bit `field453_0x1d2`/`field454_0x1d3` bitmask (the connection-record-array header's
+  established "ready/dirty mask," per Pass 47's `dispatch_slot_timing_reprogram_if_pending_and_
+  ready`) for the first *unset* bit (0-7), sets it, and returns the allocated index — or `0xb` (11,
+  sentinel) if all 8 are already taken. **Caller-context anchor**: sole caller is
+  `HCI_Setup_Synchronous_Connection_handler` — allocating a free ready/dirty-mask slot-timing index
+  is exactly what setting up a new SCO/eSCO connection needs, and it operates on the identical
+  bitmask fields Pass 47 already pinned to per-connection slot-timing reprogram gating.
+- **`FUN_800577c0`** (42B, no static callers) → **HIGH**, renamed
+  `clear_ext_adv_param_field0xf_bit13_for_instance`. Reads a 16-bit value via the already-named
+  `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1(param_1, 0xf)`, clears bit 13
+  (`& 0xffffdfff`), writes it back via `..._variant_2`. HIGH on 2 named-callee anchors with an
+  unambiguous single-bit-clear mechanism.
+- **`FUN_8005ce94`** (198B) → **HIGH**, renamed
+  `process_pending_event_record_by_tag_and_notify_link_type_change`. This is the genuine resolution
+  of Pass 47's one real flagged continuation — the dispatch target inside `find_and_clear_pending_
+  bit_for_index_and_dispatch`. Dispatches on the queued record's tag byte (`*param_2`): tag 6 calls
+  the already-named `advance_esco_state_0x77_to_4_if_config_e4`; tags `0xd`/`0x11` remap through a
+  secondary byte to check for a tag-6-equivalent condition; all non-tag-1 paths fall through to a
+  link-type-bitmask computation (direct table lookup for ordinary tags, a per-connection stored
+  field for `0xd`/`0x11`) feeding the already-named `notify_lc_link_type_change_event`. HIGH on 2
+  named callees plus the caller-context Pass 47 already established (direct call from an
+  already-HIGH dispatcher, decompiled and live-verified this pass).
+- **`FUN_80051a3c`** (68B) → **HIGH**, renamed
+  `commit_or_retry_sco_esco_timing_field_via_clock_window_check`. Sets 2 status bits on a record,
+  then checks a clock-window condition (calls a clock-getter function pointer, compares against a
+  stored reference + mask); if the window check fails (or a status bit was already clear), calls
+  `FUN_80051588` (itself a thin forwarder to the already-named `LMP__268__most_common_for_VSCs2_
+  checks_fptr_patch`); if it passes, calls the already-named `service_pending_flags_and_send_
+  lmp25c`. **Caller-context anchor**: sole caller is `sco_esco_timing_field_diagnostic_logger`.
+
+**Renames not made — documented as MEDIUM/MEDIUM-HIGH leads for a future pass** (mechanism
+reasonably clear but no caller context and/or no named-sibling anchor, consistent with this
+project's standing convention of only renaming at HIGH):
+
+- **`FUN_80058638`** (62B, no static callers): sets HW-status bit `0x200`, conditionally clears bit
+  7 of a resolved-parent-context's `+0x2b` field via the already-named `resolve_parent_context_by_
+  role`. Mechanism clear, semantic role of the 2 bits unconfirmed.
+- **`FUN_8005e40c`** (58B, no static callers): thin logged-alloc wrapper — calls `alloc_tagged_
+  record_via_pool(0xb, ...)`, logs an event (codes `0xcc`/`0x966`/`0xccb`) on success, returns the
+  handle or 0 on failure. Mechanism unambiguous; exact semantic meaning of "tag `0xb`" unconfirmed.
+- **`FUN_8005058c`** (54B): caller is `FUN_80047c50` (unnamed, no anchor). Allocates via the
+  already-named `alloc_link_record_from_pool`, error-codes `*param_2=7` on failure, else calls
+  `FUN_8004e298` (unnamed init helper, region `0x80040000`) and success-codes `*param_2=0`.
+- **`FUN_80056320`** (38B): caller `FUN_8004d294` (unnamed, region `0x80040000`) is itself called
+  from the already-named `reset_sco_esco_hw_subsystem_on_link_loss` plus 2 other unnamed functions
+  — suggestive SCO/eSCO-HW-reset context, but the body's `(A^old)&(B^old)` nibble-merge operation
+  on a HW-register-like global (`DAT_80056348`) isn't pinned precisely enough for HIGH. Flagged as a
+  cross-region lead once `FUN_8004d294` itself gets resolved.
+
+### Tooling/documentation-integrity note
+
+`0x80059ce0` confirmed as a 9th Ghidra mis-disassembly artifact (`halt_baddata()`, 1-byte stub) —
+added to the exclusion list used by `ColdTriageRegion80050000Pass48.java`. **Future passes should
+carry forward all 9 addresses**: `0x8005d548, 0x8005dd04, 0x8005e3a8, 0x8005e71c, 0x8005f880,
+0x80052f18, 0x80052f1a, 0x80059cde, 0x80059ce0`.
+
+Also corrected Pass 47's stale "`FUN_80057180` still unnamed" framing (see top of this section) —
+this function has carried its real name (`flush_hw_pending_slots_by_connection_type`) since Pass 35,
+13 passes before Pass 47 referenced it as unnamed. Worth a standing caution: "Next" notes that name
+a specific `FUN_*` address as a lead should be spot-checked against current ground truth (e.g. via
+`decompile_function`) before being acted on, not assumed current from prose alone.
+
+### Rename application
+
+`RenamePass48Region80050000.java` written directly to `/root/wairz/ghidra/scripts/` (host-path
+workaround, same as recent passes), run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=8 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls on `allocate_free_ready_dirty_mask_index_for_sco_setup` and
+`process_pending_event_record_by_tag_and_notify_link_type_change` — both resolve correctly under
+their new names with internal callee references intact.
+
+### Coverage after Pass 48
+
+366 total, **78 unnamed** (87 minus this pass's 8 in-region HIGH renames minus 1 newly-excluded
+mis-disassembly artifact — `0x80059ce0` moves from "unnamed" to "excluded artifact," so the
+arithmetic is 87 − 8 = 79, then − 1 for the artifact reclassification = **78**), 9 confirmed
+mis-disassembly artifacts (was 8).
+
+**Next**: Pass 49 — fresh cold-triage re-rank of the remaining 78 unnamed functions (same lineage
+as Passes 44/46/48). Two unresolved leads available as direct continuations:
+`FUN_80056058`/`FUN_80056084` (the generic ring search/remove helpers behind this pass's
+`find_and_dispatch_or_remove_pending_class_mode_entry` — worth another look if `param_2`'s
+implicit-register-value mystery can be resolved via disassembly-level inspection rather than
+decompiled C) and `FUN_80056320` (pending `FUN_8004d294`'s own resolution, a region-`0x80040000`
+cross-region lead in the SCO/eSCO-HW-reset-on-link-loss neighborhood).

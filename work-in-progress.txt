@@ -4421,14 +4421,59 @@ sweep beyond enumeration and is the most out-of-date):
           -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 48; region
              0x80040000 addendum noted)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 48: fresh cold-triage re-rank of remaining 95
-          unnamed functions (same lineage as Passes 44/46 — re-rank by xrefs/size now that the
-          xrefs=2 tier and Pass 46's deferred-callee backlog are both exhausted). Direct
-          continuations available from Pass 47's findings: FUN_8005ce94 (the dispatch target
-          inside find_and_clear_pending_bit_for_index_and_dispatch, still unnamed) and
-          FUN_80057180 (the already-MEDIUM 3-pool bulk-reset sibling of
-          remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot, now with a clearer
-          pool-identity anchor than when it was last reviewed at Pass 9).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 48: fresh cold-triage re-rank of xrefs=2 tier,
+          8 HIGH renames, 1 doc-staleness correction (2026-06-28)
+          Corrected Pass 47's stale "FUN_80057180 still unnamed" claim — it's been
+          flush_hw_pending_slots_by_connection_type since Pass 35, 13 passes earlier; live
+          decompile_function confirmed. Of Pass 47's 2 flagged continuations only FUN_8005ce94
+          was genuinely open. Re-ran ColdTriageRegion80050000Pass48.java (same 8-artifact
+          exclusion list as Pass 44/46): 366 total, 87 unnamed/279 named — reconciles exactly
+          with Pass 47's ground-truth recount of 95 (95 - 8 artifacts = 87, no real discrepancy,
+          just two counting conventions). Top of fresh rank list was still a 12-entry xrefs=2
+          tier (Pass 47's "xrefs=2 tier exhausted" framing was aspirational, not actual — renames
+          don't remove xrefs=2 candidates unless the candidate itself got renamed). Batch-
+          decompiled all 12 + FUN_8005ce94 + 3 supporting callees (FUN_80056058/FUN_80056084/
+          FUN_80051588) across 3 batch_decompile_functions calls, ran find_callers on 13
+          candidates for caller-context anchors. Rank 12 (0x80059ce0, 1B) confirmed as a 9th
+          mis-disassembly artifact (halt_baddata()).
+          8 HIGH renames via RenamePass48Region80050000.java (renamed=8 alreadyOk=0 missing=0
+          failed=0, live-verified on 2 of 8):
+          0x800565ac -> find_and_dispatch_or_remove_pending_class_mode_entry (callers:
+            conn_class_mode_apply_and_log/_variant2)
+          0x8005220c -> reset_record_and_reinit_default_tag9_subrecord (structural twin of
+            teardown_links_and_reinit_default_subrecord, tag-9 instead of tag-5)
+          0x80059684 -> compute_connection_subbuffer_size_or_table_offset (sole caller:
+            init_connection_record)
+          0x800598ec -> read_and_wrap_clock_phase_for_slot_timing_offset (callers:
+            sco_esco_slot_timing_offset_calc_variant1/2)
+          0x80059704 -> allocate_free_ready_dirty_mask_index_for_sco_setup (sole caller:
+            HCI_Setup_Synchronous_Connection_handler; operates on the same ready/dirty mask
+            fields Pass 47 pinned for dispatch_slot_timing_reprogram_if_pending_and_ready)
+          0x800577c0 -> clear_ext_adv_param_field0xf_bit13_for_instance (2 named VSC_0xfc97
+            callees)
+          0x8005ce94 -> process_pending_event_record_by_tag_and_notify_link_type_change (the
+            real Pass-47 holdover; calls advance_esco_state_0x77_to_4_if_config_e4 +
+            notify_lc_link_type_change_event)
+          0x80051a3c -> commit_or_retry_sco_esco_timing_field_via_clock_window_check (sole
+            caller: sco_esco_timing_field_diagnostic_logger)
+          3 leads documented but NOT renamed (MEDIUM/MEDIUM-HIGH, no caller anchor):
+          FUN_80058638, FUN_8005e40c, FUN_8005058c. FUN_80056320 also left unnamed pending its
+          unnamed caller FUN_8004d294's own resolution (itself called from the already-named
+          reset_sco_esco_hw_subsystem_on_link_loss).
+          Region-wide: 366 total, 78 unnamed (was 87), 9 mis-disassembly artifacts (was 8).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 48 section, incl.
+             documentation-integrity corrections)
+          -> analysis/rom/rom_function_index.md (+8 entries, user-named count updated to 1063,
+             unnamed count updated to 2188)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 49)
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 49: fresh cold-triage re-rank of remaining 78
+          unnamed functions (same lineage as Passes 44/46/48). Two unresolved leads available as
+          direct continuations: FUN_80056058/FUN_80056084 (the generic ring search/remove helpers
+          behind Pass 48's find_and_dispatch_or_remove_pending_class_mode_entry — worth a look at
+          disassembly level to resolve the param_2 implicit-register-value mystery) and
+          FUN_80056320 (pending FUN_8004d294's own resolution, a region-0x80040000 cross-region
+          lead in the SCO/eSCO-HW-reset-on-link-loss neighborhood).
           For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
           the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally.
 
