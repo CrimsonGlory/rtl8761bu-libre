@@ -5332,3 +5332,23 @@ caller; closes the long-standing "still-unnamed `FUN_80059a60`" gap in the negot
 Region unnamed count after this pass: **39** (40 minus this rename).
 
 **Next:** Pass 54q — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54q (2026-06-28) — cold-triage rank-1 rename (post-54p re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54p: **366 total**, **327 named**,
+**39 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80051310` → `set_esco_neg_pending_and_dispatch_or_send_event_0x6f`** (76B, HIGH) via
+`RenamePass54qFun80051310.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Post-wire kickoff from `alloc_and_init_esco_sco_negotiation_subrecord` when
+`FUN_8004ed04` sets the defer flag. If no active subrecord pointer at `PTR_DAT_8005135c+4`, calls
+`send_one_time_event_0x6f_if_not_sent`. Else, if pending bit 2 is clear on the control block at
+`PTR_PTR_80051360+6`, sets it and dispatches by connection-type byte at `subrecord+8`: bit 4 →
+indirect callback via `PTR_DAT_80051364`; bit 8 → `check_state_ready_and_invoke_or_busy`.
+
+**Confidence:** HIGH — sole caller is the already-named eSCO/SCO subrecord allocator; two callees
+are established HIGH siblings (`send_one_time_event_0x6f_if_not_sent`, `check_state_ready_and_invoke_or_busy`).
+
+Region unnamed count after this pass: **38** (39 minus this rename).
+
+**Next:** Pass 54r — continue down the xrefs=1 tier (re-run cold-triage for next rank).
