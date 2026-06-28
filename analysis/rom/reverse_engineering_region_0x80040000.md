@@ -729,8 +729,8 @@ standing Pass 54a lead: decompiled and renamed `FUN_8004ca10` →
 
 | Caller | Region | Call context |
 |--------|--------|--------------|
-| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | `0x80000000` | After computing a per-slot quota delta and calling `drain_n_records_from_connection_event_queue`, calls this function then `FUN_8002b6f4`; may also call `atomically_drain_conn_pending_queue` first if a config flag is set |
-| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | `0x80000000` | Single-shot counterpart of the ring drain above: after incrementing `field92_0x5c` and calling `drain_n_records_from_connection_event_queue`, conditionally calls this function when a per-connection flag is set, then `FUN_8002b6f4` |
+| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | `0x80000000` | After computing a per-slot quota delta and calling `drain_n_records_from_connection_event_queue`, calls this function then `apply_per_slot_quota_delta_and_validate_link_register`; may also call `atomically_drain_conn_pending_queue` first if a config flag is set |
+| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | `0x80000000` | Single-shot counterpart of the ring drain above: after incrementing `field92_0x5c` and calling `drain_n_records_from_connection_event_queue`, conditionally calls this function when a per-connection flag is set, then `apply_per_slot_quota_delta_and_validate_link_register` |
 | `drain_and_dispatch_conn_event_ring_by_kind_then_reinit` (`0x8005c720`) | `0x80050000` | After draining the per-connection pending-event ring and optionally calling `atomically_drain_conn_pending_queue`, conditionally calls this function before reinitializing the ring |
 
 **Mechanism (decompile-confirmed, HIGH confidence):** keyed by connection index
@@ -747,10 +747,12 @@ at `+0x2`. If any overflow records were collected (`local_20 != 0`), calls `FUN_
 `field411_0x1a8` is set on the connection, calls `FUN_8004c940`. This is the shared post-drain
 "take ownership of list B and apply quota overflow" step in the quota / pending-event
 reconciliation pipeline — sequenced after `drain_n_records_from_connection_event_queue` (or the
-Pass 53 ring-drain equivalent) and before the still-unnamed finalizer `FUN_8002b6f4`.
+Pass 53 ring-drain equivalent) and before the pipeline finalizer
+`apply_per_slot_quota_delta_and_validate_link_register` (`0x8002b6f4`, region `0x80020000`,
+renamed Pass 54c).
 
 Adjacent at `0x8004ca7c` is the already-HIGH `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
 (Pass 4); same address cluster, unrelated purpose.
 
-**Next:** decompile `FUN_8002b6f4` as the paired pipeline finalizer; run
-`ColdTriageRegion80050000Pass54.java` for the general Pass 54b cold-triage re-rank.
+**Next:** run `ColdTriageRegion80050000Pass54.java` for the deferred Pass 54 general cold-triage
+re-rank (region `0x80050000`).

@@ -4545,8 +4545,22 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+1 entry, user-named count 1102)
           → analysis/INDEX.md (both regions updated; [NEXT] set to Pass 54c)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54c: run ColdTriageRegion80050000Pass54.java +
-          decompile `FUN_8002b6f4` as paired pipeline finalizer (2026-06-28)
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54c partial: decompile `FUN_8002b6f4` pipeline
+          finalizer (2026-06-28)
+          Decompiled `FUN_8002b6f4` (390B, region `0x80020000`) and renamed to
+          `apply_per_slot_quota_delta_and_validate_link_register` (HIGH) via
+          `RenamePass54cFun8002b6f4.java` (`renamed=1`, GZF process-mode live-verified).
+          Closes Pass 54a/54b quota pipeline: per-slot delta apply + link-register validate;
+          2 documented HIGH callers (`ring_buffer_event_drain_loop_variant2`,
+          `conn_field_increment_and_cleanup_dispatch`). ColdTriage Pass54 still deferred → Pass 54d.
+          → analysis/rom/reverse_engineering_region_0x80020000.md (Pass 54c addendum)
+          → analysis/rom/reverse_engineering_region_0x80040000.md (Pass 54 caller table updated)
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 54c section)
+          → analysis/rom/rom_function_index.md (+1 entry, user-named count 1103)
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54d: run ColdTriageRegion80050000Pass54.java
+          (general cold-triage re-rank deferred from Pass 54b/54c) (2026-06-28)
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank, resolved all 3
           carried-forward holdovers + 3 cross-region 0x80040000 renames (2026-06-28)

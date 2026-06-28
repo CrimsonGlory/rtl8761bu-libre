@@ -5031,5 +5031,15 @@ next iteration. One-function progress: decompiled and renamed the Pass 54a pipel
 `0x80040000`, HIGH). See `reverse_engineering_region_0x80040000.md` Pass 54 addendum for
 full mechanism + caller table.
 
-**Next**: Pass 54c — run `ColdTriageRegion80050000Pass54.java` + decompile `FUN_8002b6f4` as
-the paired pipeline finalizer.
+## Pass 54c (2026-06-28) — partial: decompiled pipeline finalizer `apply_per_slot_quota_delta_and_validate_link_register`
+
+One-function progress: decompiled and renamed `FUN_8002b6f4` →
+`apply_per_slot_quota_delta_and_validate_link_register` (390B, region `0x80020000`, HIGH).
+See `reverse_engineering_region_0x80020000.md` Pass 54c addendum for mechanism + caller table.
+Completes the Pass 54a/54b quota-reconciliation pipeline (`…` →
+`atomically_take_conn_list_b_and_apply_quota_overflow` → this finalizer).
+
+Full Pass 54 cold-triage (`ColdTriageRegion80050000Pass54.java`) still not run — deferred to
+Pass 54d.
+
+**Next**: Pass 54d — run `ColdTriageRegion80050000Pass54.java` (general cold-triage re-rank).

@@ -525,3 +525,30 @@ function. See `rom_function_index.md` update in this pass.
 confirmed accurate, no Ghidra renames needed). 1 of 25 rows removed as a
 phantom duplicate (data-integrity fix, not a confidence upgrade). 0
 low-confidence functions remain in this region.
+
+## Pass 54c addendum (2026-06-28) — `apply_per_slot_quota_delta_and_validate_link_register` (`0x8002b6f4`)
+
+Decompiled and renamed `FUN_8002b6f4` → `apply_per_slot_quota_delta_and_validate_link_register`
+(390B, HIGH) via `RenamePass54cFun8002b6f4.java` (`renamed=1`, live-verified in GZF process
+mode). Closes the Pass 54a/54b pipeline lead: this is the **finalizer** sequenced after
+`atomically_take_conn_list_b_and_apply_quota_overflow` in the quota / pending-event
+reconciliation path.
+
+**Confirmed callers** (all already-HIGH, region `0x80000000`):
+
+| Caller | Call context |
+|--------|--------------|
+| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | After drain + optional list-B take, applies the per-slot quota delta |
+| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | Single-shot counterpart of the ring drain |
+
+**Mechanism (decompile-confirmed, HIGH):** `(slot_index, delta_count, log_flag)`. Optional
+early-out via hook at `PTR_DAT_8002b87c`. Clamps `delta_count` against per-slot quota in the
+12-byte slot table at `PTR_PTR_8002b880` (`+8` nibble counter, `+9` lower 5-bit quota).
+Loops `delta_count` times: checks link-register availability bitmask at `DAT_8002b888+0x440` or
+`+0x464` (eSCO vs SCO bank selected by slot bit 3), increments slot counters. Calls the
+already-named `read_link_register_0xe_top_nibble_by_slot` to validate the HW link-register
+top nibble matches the software counter; on mismatch (or bitmap hit with `log_flag==0`), logs
+via `possible_logging_function__var_args` with tags `0x5aa` / `0x5a2`.
+
+**Next:** run `ColdTriageRegion80050000Pass54.java` for the deferred Pass 54 general cold-triage
+re-rank (region `0x80050000`).
