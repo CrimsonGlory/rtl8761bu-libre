@@ -5217,3 +5217,22 @@ anchor, AFH staging-table copy pattern, and sole caller `afh_report_worst_channe
 Region unnamed count after this pass: **45** (46 minus this rename).
 
 **Next:** Pass 54k — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54k (2026-06-28) — cold-triage rank-1 rename (post-54j re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_8005b968` → `init_connection_tx_timing_triple_from_template_or_defaults`** (90B, HIGH) via
+`RenamePass54kFun8005b968.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Connection-record TX timing initializer called solely from `init_connection_record`.
+When global `field327_0x154` bit 0 is set and `param_4 == 0`, copies three 16-bit defaults from
+global DAT literals into `param_1+0x2e`/`+0x30`/`+0x32` and sets `param_1+0x2d` from the low bit
+of `DAT_8005b9d4`; otherwise `optimized_memcpy`s 6 bytes from `param_2` into `+0x2e` and sets
+`+0x2d = param_3` (central-role template path).
+
+**Confidence:** HIGH — sole caller `init_connection_record`, same `field327_0x154` gate as the AFH
+cluster, TX triple offsets match `afh_channel_quality_poll_commit`/`FUN_80056988` pattern.
+
+Region unnamed count after this pass: **44** (45 minus this rename).
+
+**Next:** Pass 54l — continue down the xrefs=1 tier (re-run cold-triage for next rank).
