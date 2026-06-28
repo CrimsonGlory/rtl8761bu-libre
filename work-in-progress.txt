@@ -4238,16 +4238,36 @@ sweep beyond enumeration and is the most out-of-date):
           rom_function_index.md +2 HIGH entries.
           analysis/INDEX.md → updated.
 
-[NEXT]  Full RE: batch apply all 37 staged renames + continue region sweep
+[DONE]  Full RE: batch apply all 37 staged renames + continue region sweep (2026-06-27)
+          Followed callers of FUN_8002c018 (init_or_reset_sco_hw_slot_table): found
+          FUN_80037394 called from LMP_link_supervision_tick_scheduler (named HIGH).
+          Also decompiled sibling FUN_80037370.
+          1 HIGH rename staged in RenamePass41CrossRegion.java:
+            0x80037394 → reset_sco_esco_hw_subsystem_on_link_loss (162B, region 0x80030000)
+              Resets SCO/eSCO HW on link supervision timeout:
+              disables HW registers 0xbe/0xc0, calls HW teardown helpers, calls
+              init_or_reset_sco_hw_slot_table(0) (full slot reset), clears init flag 0x10b,
+              writes 0xff to status register.
+              Callers: LMP_link_supervision_tick_scheduler (HIGH, link timeout path).
+          1 MEDIUM-HIGH documented:
+            0x80037370 (34B): configure_hw_regs_and_init_for_sco_teardown (region 0x80030000)
+              Calls hw_register_config_with_timeout(1), FUN_8003bd94(0,0,0), FUN_80036fa8(1).
+          38 renames staged total pending MCP.
+          analysis/rom/reverse_engineering_region_0x80050000.md → Pass 41 section added.
+          rom_function_index.md +1 HIGH entry.
+          analysis/INDEX.md → updated.
+
+[NEXT]  Full RE: batch apply all 38 staged renames (MCP required) + region 0x80030000 follow-up
           Apply all staged scripts via run_ghidra_headless (MCP required):
-            RenamePass35Region80050000.java (20)
-            RenamePass36Region80050000.java (10)
-            RenamePass37Region80050000.java (1)
-            RenamePass38Region80050000.java (1)
-            RenamePass39CrossRegion.java (3)
-            RenamePass40CrossRegion.java (2)
-          After application: fresh re-rank of remaining unnamed, continue xref sweep.
-          Next xref leads: FUN_80053aa4 callers, FUN_8002c018 callers.
+            RenamePass35Region80050000.java (20 — region 0x80050000)
+            RenamePass36Region80050000.java (10 — region 0x80050000)
+            RenamePass37Region80050000.java (1 — region 0x80050000)
+            RenamePass38Region80050000.java (1 — region 0x80050000)
+            RenamePass39CrossRegion.java (3 — region 0x80020000)
+            RenamePass40CrossRegion.java (2 — regions 0x80050000, 0x80020000)
+            RenamePass41CrossRegion.java (1 — region 0x80030000)
+          After application: continue xref sweep from FUN_8003bd94 and FUN_80036fa8
+          (the two unknown callees of configure_hw_regs_and_init_for_sco_teardown).
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

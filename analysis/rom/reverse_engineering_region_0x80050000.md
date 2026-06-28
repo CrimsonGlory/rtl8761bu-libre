@@ -3615,3 +3615,48 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 37 renames staged total pending MCP (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3 + Pass40:2). The 0x80050000 region has ~143 unnamed remaining.
 
 **Next**: Apply all 37 staged renames + continue sweep.
+
+## Pass 41 — cross-region callers of init_or_reset_sco_hw_slot_table (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Followed callers of `init_or_reset_sco_hw_slot_table` (FUN_8002c018, Pass 40). Found `FUN_80037394` called from `LMP_link_supervision_tick_scheduler` (named HIGH).
+
+### Analyzed functions (2 total)
+
+**0x80037394** (162B) → `reset_sco_esco_hw_subsystem_on_link_loss` [HIGH, region 0x80030000]
+- Optional function pointer hook first; if no hook and `field[0x10b] != 0` (slot table initialized):
+  - Calls `*puVar1(0xbe, 0xffff)` and `*puVar1(0xc0, 0xffff)` — disables HW registers 0xbe/0xc0
+  - `FUN_800344f8()`, `FUN_80037370()` — HW teardown helpers
+  - `*puVar3(1)` — some subsystem init
+  - `FUN_80034480()`, `*puVar3(puVar4, puVar2)` — additional resets
+  - `FUN_80033ed8()`, `FUN_800132f4(1)` — further teardown
+  - `FUN_8002c018(0)` → **`init_or_reset_sco_hw_slot_table(0)`** — full slot table reset
+  - Clears HW reg bits: `*(puVar5) &= 0x20d0`, re-enables then re-reads 0xbe/0xc0
+- Clears `field[0x10b]` (marks slot table as not-initialized)
+- Sets `*(puVar6) = 0xff` (status register reset)
+- Caller: `LMP_link_supervision_tick_scheduler` (HIGH, link supervision timeout path)
+- HIGH: named callee (`init_or_reset_sco_hw_slot_table`) + named caller — unambiguous SCO teardown on link loss
+
+**0x80037370** (34B) → `configure_hw_regs_and_init_for_sco_teardown` [MEDIUM-HIGH, region 0x80030000]
+- Calls `hw_register_config_with_timeout(1)` (HIGH from Pass 6, region 0x80030000)
+- Calls `FUN_8003bd94(0, 0, 0)` — unknown (region 0x80030000)
+- Calls `FUN_80036fa8(1)` — unknown (region 0x80030000)
+- Called by `reset_sco_esco_hw_subsystem_on_link_loss` as a HW teardown helper
+- MEDIUM-HIGH: named callee `hw_register_config_with_timeout` + clear structural role, but unnamed callees FUN_8003bd94/FUN_80036fa8
+
+### Rename script
+
+`RenamePass41CrossRegion.java` written to `/root/wairz/ghidra/scripts/` — 1 entry. Pending MCP execution.
+
+### Session summary (Passes 36-41, this Cursor agent session)
+
+All 6 WIP iterations analyzed additional functions beyond the initial Pass 35 renames:
+- Pass 36: 10 HIGH renames staged (RenamePass36Region80050000.java)
+- Pass 37: 1 HIGH staged (alloc_and_init_esco_sco_negotiation_subrecord) + 3 MEDIUM-HIGH
+- Pass 38: 1 HIGH staged (program_esco_sco_hw_link_params_inner) + 2 MEDIUM-HIGH
+- Pass 39: 3 HIGH staged (region 0x80020000 table-lookup trio) + 1 MEDIUM-HIGH
+- Pass 40: 2 HIGH staged (program_sco_hw_slot_registers_from_conn_record, init_or_reset_sco_hw_slot_table) + 0 MEDIUM-HIGH  
+- Pass 41: 1 HIGH staged (reset_sco_esco_hw_subsystem_on_link_loss) + 1 MEDIUM-HIGH
+
+**Total: 18 HIGH renames staged across 6 passes (38 total pending MCP across this + prior session's 20).**
+
+**Next**: Apply all 38 staged renames via `run_ghidra_headless` (requires `claude -p --mcp-config .mcp.json`), then continue xref sweep from `FUN_8003bd94` and `FUN_80036fa8` (callees of `configure_hw_regs_and_init_for_sco_teardown`).
