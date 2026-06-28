@@ -4467,15 +4467,56 @@ sweep beyond enumeration and is the most out-of-date):
              unnamed count updated to 2188)
           -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 49)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 49: fresh cold-triage re-rank of remaining 78
-          unnamed functions (same lineage as Passes 44/46/48). Two unresolved leads available as
-          direct continuations: FUN_80056058/FUN_80056084 (the generic ring search/remove helpers
-          behind Pass 48's find_and_dispatch_or_remove_pending_class_mode_entry — worth a look at
-          disassembly level to resolve the param_2 implicit-register-value mystery) and
-          FUN_80056320 (pending FUN_8004d294's own resolution, a region-0x80040000 cross-region
-          lead in the SCO/eSCO-HW-reset-on-link-loss neighborhood).
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 50: "negotiation-finalize / clock-phase
+          slot-offset" cluster follow-up. FUN_80052f38 (76B, calls FUN_8004e820 then
+          FUN_800528b0, then packs/enqueues via hci_evt_pack_conn_field_into_buf and frees a
+          pending-record slot) — resolving this unblocks FUN_800528b0 (358B, PDU-type-switch
+          HCI-event-field builder, structural sibling of Pass 49's
+          build_conn_negotiation_complete_hci_event_fields) with a clean named-caller anchor.
+          Also: FUN_80059b18 (450B, eSCO slot-timing-offset allocator scanning indexed eSCO link
+          registers) + its sole caller FUN_80059cec (242B, clock-drift/RSSI-style correction,
+          same slot-timing-offset neighborhood as Pass 47/48's
+          read_and_wrap_clock_phase_for_slot_timing_offset /
+          dispatch_slot_timing_reprogram_if_pending_and_ready) — worth resolving together.
           For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
           the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally.
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 49: resolved both Pass 48 holdover leads (2026-06-28)
+          Raw-disassembly inspection (DisasmPass49Helper.java) resolved the FUN_80056058/
+          FUN_80056084 "implicit param_2" mystery: a1 is set once before the search loop
+          (head-entry address) and thereafter only ever carries forward the prior call's own
+          return value — never an explicit 2nd argument at the call site. Both are generic
+          ring-table primitives: find_next_ring_table_entry_or_zero_at_tail (was FUN_80056058),
+          remove_ring_table_entry_and_close_gap (was FUN_80056084). Cross-region follow-up on
+          FUN_8004d294 (region 0x80040000, reached via fHCI_Reset_0x03_full_subsystem_teardown
+          -> FUN_8004d220 and an indirect call site inside reset_sco_esco_hw_subsystem_on_link_loss)
+          confirmed it as a 1280B SCO/eSCO HW-register init/reset blob that calls
+          FUN_80056320(7,7), resolving set_masked_nibble_field_on_sco_esco_hw_register (was
+          FUN_80056320) — masked-nibble XOR bit-merge onto a HW-register-like global.
+          FUN_8004d294 itself left unrenamed (indirect-call evidence too indirect for HIGH).
+          Fresh cold-triage (ColdTriageRegion80050000Pass49.java, same 9-artifact exclusion list)
+          reconfirmed 366 total/78 unnamed (no drift from Pass 48), then surfaced 4 more
+          sole-named-caller HIGH candidates from the xrefs=1 tier via batch_decompile_functions +
+          find_callers:
+          0x800546e4 -> program_esco_hw_slot_registers_with_secondary_record (sole caller
+            program_esco_sco_hw_link_params_inner)
+          0x80058dd4 -> program_sco_esco_hw_registers_from_connection_record (sole caller
+            HCI_Setup_Synchronous_Connection_handler)
+          0x80052a38 -> build_conn_negotiation_complete_hci_event_fields (sole caller
+            conn_negotiation_finalize_gate_dispatch)
+          0x80050194 -> collect_and_dispatch_conn_diagnostic_batches (sole caller
+            schedule_conn_diagnostic_dump_if_idle)
+          7 HIGH renames total via RenamePass49Region80050000.java (renamed=7 alreadyOk=0
+          missing=0 failed=0), live-verified via fresh decompile_function calls. Pass 48's 3
+          remaining MEDIUM/MEDIUM-HIGH leads (FUN_80058638, FUN_8005e40c, FUN_8005058c)
+          re-checked fresh, no new anchor, left undisturbed. 2 functions decompiled for context
+          but not renamed (FUN_80059b18, FUN_800528b0 + their callers FUN_80059cec/FUN_80052f38)
+          — flagged as the Pass 50 lead.
+          Region-wide: 366 total, 71 unnamed (was 78).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 49 section)
+          -> analysis/rom/rom_function_index.md (+7 entries, user-named count updated to 1070,
+             unnamed count updated to 2181)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 50)
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

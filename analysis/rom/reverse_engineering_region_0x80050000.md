@@ -4517,3 +4517,147 @@ as Passes 44/46/48). Two unresolved leads available as direct continuations:
 implicit-register-value mystery can be resolved via disassembly-level inspection rather than
 decompiled C) and `FUN_80056320` (pending `FUN_8004d294`'s own resolution, a region-`0x80040000`
 cross-region lead in the SCO/eSCO-HW-reset-on-link-loss neighborhood).
+
+## Pass 49 (2026-06-28) — both Pass 48 holdover leads resolved + xrefs=1 sole-caller sweep
+
+**Lead 1 — the `FUN_80056058`/`FUN_80056084` "implicit param_2" mystery, resolved via raw
+disassembly.** `decompile_function` on both showed a 2-parameter signature
+(`int FUN_80056058(int param_1, int param_2)`) but their sole caller,
+`find_and_dispatch_or_remove_pending_class_mode_entry`, only ever passes a single explicit
+argument (`FUN_80056058(0)`) inside a `do { ... } while` search loop — the "mystery" flagged by
+Passes 47/48. A small one-off Ghidra script (`DisasmPass49Helper.java`, dumps raw instructions for
+all 3 functions) resolved it directly: at the loop's entry, `a1` is set once
+(`addu a1,v0,a1` at `0x800565ca`, computing `ring_base + head_index*4` — the head entry's address)
+and is **never reloaded with a literal** for the rest of the function. Each subsequent iteration's
+`jal FUN_80056058` / `jal FUN_80056084` reuses whatever value is already sitting in `a1` —
+either the head-entry address (first iteration) or `FUN_80056058`'s own previous return value
+(`move a1,v0` at `0x800565ee`, set right after the call). This is exactly the same "callee-register
+carried forward across loop iterations without an explicit reload" pattern this codebase's MIPS16e
+ABI already does elsewhere — the decompiler just doesn't surface it as visible dataflow into the
+call expression.
+
+With that resolved, both functions' generic mechanics are now fully nailed down:
+
+- **`FUN_80056058`** (40B, ring-table index `param_1`, current-entry address `param_2`): computes
+  `next_index = ((param_2 - ring_base) >> 2 + 1) % capacity`, then returns `ring_base +
+  next_index*4` unless `next_index` equals the tail-index byte at offset `+6` of the table-row
+  descriptor (`{ring_base:4, capacity:1@+4, pad:1, tail_index:1@+6, count:1@+7}`, indexed by
+  `param_1*8` into `PTR_PTR_80056080`) — in which case it returns 0. A "give me the next entry
+  after this one, or tell me I've reached the tail" ring iterator. Renamed
+  **`find_next_ring_table_entry_or_zero_at_tail`**.
+- **`FUN_80056084`** (84B, same table layout via `PTR_PTR_800560d8`): removes the entry at
+  `param_2`'s address, shift-compacting every subsequent ring entry back by one slot (a `do/while`
+  copy loop) until it reaches the tail index, then writes the new (decremented) tail index and
+  decrements the count byte. The matching "remove and close the gap" counterpart. Renamed
+  **`remove_ring_table_entry_and_close_gap`**.
+
+Both HIGH on: full mechanism resolution (raw disasm, not guesswork) + sole-caller anchor
+(`find_and_dispatch_or_remove_pending_class_mode_entry`, already HIGH since Pass 48).
+
+**Lead 2 — `FUN_80056320`, via cross-region follow-up on `FUN_8004d294`.** `find_callers` on
+`FUN_80056320` confirmed its sole call site is inside `FUN_8004d294` (region `0x80040000`),
+called with literal arguments `FUN_80056320(7,7)`. Decompiling `FUN_8004d294` (1280B) showed a
+giant SCO/eSCO HW-register init/reset routine: dozens of sequential writes to `DAT_*` HW-register
+globals, large blocks gated on `param_1 == '\0'` (suggesting a "full init" vs. "partial/quick
+reset" mode selector), config-blob field copies, and two `write_*_link_register*_with_retry`
+calls in a loop (0x40 and 0xb iterations) over already-named per-link HW-register writers.
+`find_callers` on `FUN_8004d294` itself found 3 sites: `FUN_8004d220` (which is itself the sole
+callee of the already-named `fHCI_Reset_0x03_full_subsystem_teardown`), the already-named
+`reset_sco_esco_hw_subsystem_on_link_loss` (via one of its many indirect/fn-pointer calls —
+`find_callers`'s `[COMPUTED_CALL]` tag, not a direct call instruction), and `FUN_8004a4bc`
+(unnamed, no static callers itself — likely reached only via an indirect fptr-table registration,
+consistent with this ROM's established `interesting_string_user_fptr_registration_function`
+pattern). This triangulates `FUN_8004d294` squarely into the SCO/eSCO subsystem
+init/teardown/reset family, but the indirect-call evidence for the two named callers isn't clean
+enough to confidently assign param_1's semantics or rename `FUN_8004d294` itself this pass — left
+as a documented region-`0x80040000` lead for a future cross-region pass.
+
+That's enough context for `FUN_80056320` itself, though: it's `*reg = ((param_2&0xff)<<4 ^ *reg)
+& (param_1&0xff)<<4 ^ *reg` — the standard XOR masked-bitfield-assignment identity `X ^ (mask &
+(value^X))`, which is algebraically equivalent to `X = (X & ~mask) | (value & mask)`. With
+`param_1` as the mask source and `param_2` as the value source (both shifted left 4 before use),
+this sets the bits of `DAT_80056348` selected by `(param_1<<4)` to the corresponding bits of
+`(param_2<<4)`. At its one call site `(7,7)`, both mask and value are `0x70` — i.e. an
+unconditional "force bits 4-6 to `0b111`" as one step of the giant HW-register init blob. Renamed
+**`set_masked_nibble_field_on_sco_esco_hw_register`** — HIGH on the fully-derived mechanism +
+sole-caller anchor (a function reachable from 2 already-named SCO/eSCO-subsystem-reset entry
+points, even though the precise direct/indirect call shape into it stays open).
+
+**xrefs=1 sole-caller sweep.** Re-ran cold-triage (`ColdTriageRegion80050000Pass49.java`, same
+9-artifact exclusion list as Pass 48): **366 total, 78 unnamed, 288 named** — confirms Pass 48's
+ending tally exactly, no drift. Top of the fresh rank list reproduced the same 4 xrefs=2 candidates
+Pass 48 left as MEDIUM/MEDIUM-HIGH leads (`FUN_80058638`, `FUN_8005e40c`, `FUN_8005058c`,
+`FUN_80056320` — the last now resolved above); re-checked `find_callers` on the first 3 fresh and
+got the same answer as Pass 48 (`FUN_80058638`/`FUN_8005e40c`: 0 static callers — their xrefs=2
+must be data/fptr-table references, not call sites; `FUN_8005058c`: sole caller still the unnamed
+`FUN_80047c50`) — no new anchor, left undisturbed at MEDIUM/MEDIUM-HIGH.
+
+Below that, batch-decompiled the next 10 candidates (xrefs=1 tier, 776B down to 350B) and ran
+`find_callers` on all 6 of the 776B-350B group. 4 had a clean **already-named sole caller**:
+
+- **`FUN_800546e4`** (776B) → **HIGH**, renamed `program_esco_hw_slot_registers_with_secondary_record`.
+  Computes per-slot timing/count fields for both a "secondary" linked record (`param_1+0x24`, only
+  when a type flag indicates one exists) and the primary record itself — each with the same
+  diagnostic-log-if-out-of-range shape — then commits both via the already-named
+  `compute_slot_table_base_ptr_by_type` / `compute_slot_table_entry_ptr_by_type_and_bank` /
+  `commit_esco_parent_timing_to_slot_table`. **Caller-context anchor**: sole caller is
+  `program_esco_sco_hw_link_params_inner`, called from the branch taken when the connection-type
+  field is non-zero — the sibling branch (type-0/SCO) of that same dispatcher calls the
+  already-named `program_sco_hw_slot_registers_from_conn_record`, confirming this is its eSCO
+  (multi-slot, optionally-paired) counterpart.
+- **`FUN_80058dd4`** (628B) → **HIGH**, renamed `program_sco_esco_hw_registers_from_connection_record`.
+  Bulk-copies roughly 20 connection-record fields (BD class, clock offset, slot/role bytes, etc.)
+  into a long sequence of HW-register-like data globals, calls `FUN_8002b894` plus an indirect
+  HW-commit callback, then logs the full field set. **Caller-context anchor**: sole caller (2 call
+  sites) is `HCI_Setup_Synchronous_Connection_handler` — the HW-register-programming step of
+  SCO/eSCO connection setup.
+- **`FUN_80052a38`** (464B) → **HIGH**, renamed `build_conn_negotiation_complete_hci_event_fields`.
+  Builds link-type/class/RSSI/clock-offset fields into an HCI event buffer from a packet header and
+  link-type record, calling the already-named `classify_link_type_code_to_category` +
+  `return_RSSI_value`, then `append_data_to_hci_event_buffer_with_chunked_flush` to send.
+  **Caller-context anchor**: sole caller is `conn_negotiation_finalize_gate_dispatch`. Structural
+  sibling of `FUN_800528b0` (358B, same RSSI/clock-offset/category tail, but dispatches via a
+  switch on a PDU-type opcode nibble instead of condition flags) — `FUN_800528b0` left unrenamed
+  this pass because its own sole caller, `FUN_80052f38`, is itself unnamed; flagged below as a
+  Pass 50 lead.
+- **`FUN_80050194`** (350B) → **HIGH**, renamed `collect_and_dispatch_conn_diagnostic_batches`.
+  Iterates the connection-record array twice: first counting active link-type-0 connections with a
+  feature bit set (logging a warning if the count exceeds a config-driven threshold), then
+  collecting 3 diagnostic fields per matching connection into a 5-entry batch buffer and calling
+  `FUN_8004f910` once per full batch plus once more for any partial trailing batch (<4 entries).
+  **Caller-context anchor**: sole caller is `schedule_conn_diagnostic_dump_if_idle` — exactly the
+  batched-collection body that name implies its caller schedules.
+
+The other 2 of the 6 (`FUN_80059b18`, 450B; `FUN_800528b0`, 358B) and their own callers
+(`FUN_80059cec`, `FUN_80052f38`) were decompiled for context but **not renamed** — see "Next"
+below; they form a tight, well-understood-but-unnamed cluster best resolved together in a
+dedicated follow-up rather than partially.
+
+**Rename application.** `RenamePass49Region80050000.java` written directly to
+`/root/wairz/ghidra/scripts/`, run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=7 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls on `find_next_ring_table_entry_or_zero_at_tail` and
+`program_esco_hw_slot_registers_with_secondary_record` — both resolve correctly under their new
+names with internal callee references intact.
+
+### Coverage after Pass 49
+
+366 total, **71 unnamed** (78 minus this pass's 7 in-region HIGH renames), 9 confirmed
+mis-disassembly artifacts (unchanged).
+
+**Next**: Pass 50 — a "negotiation-finalize / clock-phase slot-offset" cluster follow-up, picking
+up this pass's 2 deferred functions plus their callers:
+
+- `FUN_80052f38` (76B, calls `FUN_8004e820` then `FUN_800528b0`, then packs/enqueues via the
+  already-named `hci_evt_pack_conn_field_into_buf` and frees a pending-record slot via a linked-list
+  unlink) — resolving this unblocks `FUN_800528b0` (358B, the PDU-type-switch HCI-event-field
+  builder, structural sibling of this pass's `build_conn_negotiation_complete_hci_event_fields`)
+  with a clean named-caller anchor.
+- `FUN_80059b18` (450B, scans 11 indexed eSCO link registers via `read_indexed_esco_link_register`
+  to find either a direct per-link value or the best available slot-timing "gap" among active
+  links — an eSCO slot-timing-offset allocator) and its sole caller `FUN_80059cec` (242B, a
+  clock-drift/RSSI-style correction combining `FUN_80059b18`'s outputs with a time-difference
+  64-bit multiply/divide, writing back into the same per-connection `0x1ac`-struct-array field
+  family as Pass 47/48's `read_and_wrap_clock_phase_for_slot_timing_offset` /
+  `dispatch_slot_timing_reprogram_if_pending_and_ready` — same slot-timing-offset neighborhood,
+  worth resolving together).
