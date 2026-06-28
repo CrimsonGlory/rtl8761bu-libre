@@ -5082,9 +5082,8 @@ byte is clear.
 
 Region unnamed count after this pass: **51** (52 minus this rename).
 
-**Next:** Pass 54f — decompile+rename cold-triage rank 3 (`0x80057684`, 128B, xrefs=1)
-or continue down the xrefs=1 tier before tackling the xrefs=0 large-function tail
-(ranks 33+).
+**Next:** Pass 54g — continue down the xrefs=1 tier (rank 4+) before tackling the
+xrefs=0 large-function tail (ranks 33+). (Rank 3 `0x80057684` resolved in Pass 54f.)
 
 ## Pass 54e (2026-06-28) — cold-triage rank-2 rename
 
@@ -5113,3 +5112,47 @@ role; linked-record walk at `+0x50/+0x24/+0x20` matches the connection-tree shap
 elsewhere in this region's Pass 34–36 param-buffer cluster.
 
 Region unnamed count after this pass: **50** (51 minus this rename).
+
+## Pass 54f (2026-06-28) — cold-triage rank-3 rename
+
+One-function progress on Pass 54d rank 3: decompiled and renamed **`FUN_80057684` →
+`merge_masked_high_halfword_into_link_register_for_slot`** (128B, HIGH) via
+`RenamePass54fFun80057684.java` (`renamed=1`, live-verified).
+
+**Mechanism:** structural twin of the already-named `toggle_link_register_bit1_for_slot`
+(`0x800574ec`, Pass 29) — same eSCO/SCO slot split (`param_1 < 8` → stride-`0x14` bank via
+`read_indexed_esco_link_register` + `write_indexed_link_register_b_with_slot_check`; else
+stride-`0x1e` bank via `read_indexed_link_register` +
+`write_indexed_link_register_with_slot_check`), same retry loop on
+`PTR_DAT_80057704` slot-ownership failure. Instead of toggling bit 1, merges
+`(param_2 & 0xff) << 16` into the current register value after masking with global
+`DAT_80057708`. SCO path returns early when the write succeeds (`return == 0`).
+
+**Confidence:** HIGH — 4 already-named callees, exact structural match to
+`toggle_link_register_bit1_for_slot` with a different bit-field merge operation.
+
+Region unnamed count after this pass: **49** (50 minus this rename).
+
+## Pass 54g (2026-06-28) — cold-triage rank-1 rename (post-54f re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54f: **366 total**, **317 named**,
+**49 unnamed** (9 artifacts excluded). New xrefs=1 rank 1: decompiled and renamed
+**`FUN_800531d4` → `compute_table_offset_pair_plus_peer_slot_us_timing`** (102B, HIGH) via
+`RenamePass54gFun800531d4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** resolves the peer/secondary connection record via
+`resolve_peer_record_ptr_by_conn_type`, then sums two
+`compute_indexed_table_addr_by_category_and_bank` lookups (dynamic bank/index from peer
+`+0x8/+0x9/+0x10/+0x11` fields, plus a fixed `bank=0/index=0x30` term — same second-term
+shape as `compute_combined_table_offset_for_category1_or_log_error` at `0x80053688`). Adds
+`*(short*)(param_1+0x24) * 0x271` (625µs Bluetooth slot-duration conversion of the peer's
+cached timing-offset field) plus literal `+300`. Sibling of the Pass 52
+`compute_esco_slot_budget_with_repeat_count_*` cluster without the repeat-count branch.
+
+**Confidence:** HIGH — 2 already-named callees, `0x271` slot anchor, `+0x24` peer-timing field,
+and `+300` guard constant all match established patterns in this region's eSCO slot-timing
+cluster (Passes 46/52/53).
+
+Region unnamed count after this pass: **48** (49 minus this rename).
+
+**Next:** Pass 54h — continue down the xrefs=1 tier (current rank 2: `0x8005d4e0`, 98B).
