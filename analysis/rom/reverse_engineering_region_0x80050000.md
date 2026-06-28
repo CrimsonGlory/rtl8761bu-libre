@@ -5625,3 +5625,25 @@ Region unnamed count after this pass: **24** (25 minus this rename).
 
 **Next:** Pass 54af — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54af (2026-06-28) — cold-triage rank-1 rename (post-54ae re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ae: **366 total**, **342 named**,
+**23 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80059af8` → `compute_circular_mod_distance`** (30B, HIGH) via
+`RenamePass54afFun80059af8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Pure circular modular-distance helper on a ring of size `param_1` (modulus).
+If `param_2 <= param_3`, returns `(param_3 - param_2) % param_1`; otherwise returns
+`param_1 - ((param_2 - param_3) % param_1)`. Sole caller is the already-named
+`scan_esco_link_registers_and_allocate_slot_timing_offset` — it computes pairwise gaps
+between active eSCO timing-window candidates before `bubble_sort_uint32_array_ascending`
+picks the largest free gap's midpoint for slot allocation.
+
+**Confidence:** HIGH — unambiguous self-contained arithmetic idiom (same evidentiary class as
+`wrapping_subtract_masked_by_shift` / `wrapping_subtract_with_fixed_modulus_and_mask`);
+sole named caller context fully documented since Pass 50.
+
+Region unnamed count after this pass: **23** (24 minus this rename).
+
+**Next:** Pass 54ag — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
