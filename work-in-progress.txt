@@ -5048,7 +5048,7 @@ sweep beyond enumeration and is the most out-of-date):
           (50B, HIGH). Region 30 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54y; rom_function_index.md; live named count 1125.
 
-[NEXT]  ROM 100% coverage: decompile and name every function in the `rom` block
+[DONE]  ROM 100% coverage: decompile and name every function in the `rom` block
           (0x80000000–0x8007ffff) — drive live Ghidra user-named count to match
           total real functions (each with HIGH-confidence purpose, region-doc
           write-up, and `rom_function_index.md` row; mis-disassembly artifacts get
@@ -5057,7 +5057,7 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_*`, 0 medium, 0 low; named count == total real functions (see
           "=== PHASE 9 GOAL" section above for full criteria).
           **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
-          functions in `rom`, **1125** user-named live in Ghidra, **2153** unnamed
+          functions in `rom`, **1127** user-named live in Ghidra, **2152** unnamed
           `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
           re-application are DONE; the remaining work is the unnamed bulk.
           **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
@@ -5067,19 +5067,21 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54aa for region `0x80050000`
+          **Immediate first step:** continue Pass 54ab for region `0x80050000`
           (re-run cold-triage on xrefs=1 tier for next rank).
           (2026-06-28)
 
-[DONE]  Full RE: ROM region 0x80050000 — Pass 54z (2026-06-28): decompiled+
-          renamed rank-1 `FUN_8005bde0`→`init_0x58_stride_conn_record_ptr_table_11_slots`
-          (50B, HIGH). Region 29 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
-          Pass 54z; rom_function_index.md; live named count 1126.
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54aa (2026-06-28): decompiled+
+          renamed rank-1 `FUN_80050164`→`init_zero_0x208_dual_256b_chunk_with_boundary_markers`
+          (48B, HIGH). Region 28 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54aa; rom_function_index.md; live named count 1127.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54aa: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54z re-rank output).
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ab: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54aa re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
+
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54ac: continuation slot after 54ab.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`

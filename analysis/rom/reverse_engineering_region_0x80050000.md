@@ -5529,3 +5529,22 @@ pool-and-pointer-table wiring helpers in the record-pool bootstrap family.
 Region unnamed count after this pass: **29** (30 minus this rename).
 
 **Next:** Pass 54aa — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54aa (2026-06-28) — cold-triage rank-1 rename (post-54z re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54z: **366 total**, **337 named**,
+**29 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80050164` → `init_zero_0x208_dual_256b_chunk_with_boundary_markers`** (48B, HIGH) via
+`RenamePass54aaFun80050164.java` (`renamed=1`, live-verified).
+
+**Mechanism:** `memset(param_1, 0, 0x208)` then seeds four boundary marker bytes on a dual
+256-byte layout: byte `[0]=0x0d`, `[0xff]=2`, `[0x100]=0x0f`, `[0x1ff]=1` — zero-fill plus
+chunk-start/chunk-end sentinel bytes for two back-to-back 0x100 regions within one 0x208 buffer.
+
+**Confidence:** HIGH — self-contained init with unambiguous size/layout semantics; no alternate
+interpretation of the four fixed offsets and marker values.
+
+Region unnamed count after this pass: **28** (29 minus this rename).
+
+**Next:** Pass 54ab — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
