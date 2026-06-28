@@ -5709,3 +5709,25 @@ Region unnamed count after this pass: **20** (21 minus this rename).
 
 **Next:** Pass 54aj — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54aj (2026-06-28) — cold-triage rank-1 rename (post-54ai re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ai: **366 total**, **346 named**,
+**19 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0** (xrefs≥1 tier
+exhausted). Decompiled and renamed rank-1 **`FUN_8005f69c` → `apply_esco_timing_codec_params_to_slot`**
+(484B, HIGH) via `RenamePass54ajFun8005f69c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** eSCO parameter-negotiation handler for slot `param_3`: reads codec-active bytes from
+`param_1+1/+2` and a new timing ushort from `param_1+3`, stores it at connection-record `+0x120`
+(0x1ac stride), compares against prior `+0x28` timing, logs via `possible_logging_function__var_args`,
+and on invalid timing delta may early-return or call `finalize_esco_link_mode_and_dispatch_code_0xb`.
+Success path copies codec bytes into connection `+0x11c..+0x11f`, sets link-type nibble `9` in
+`+0x114`, dispatches via hook table, and sets pending bit `0x400` in `+0x7c`. Callee of the
+already-named `clear_pending_procedure_bit_and_finalize_if_idle` on the procedure-clear path.
+
+**Confidence:** HIGH — unambiguous 0x1ac connection-record field writes + named eSCO finalize callee;
+prior Pass 3c cluster context pins this as eSCO timing/codec negotiation.
+
+Region unnamed count after this pass: **19** (20 minus this rename).
+
+**Next:** Pass 54ak — continue xrefs=0 tier (re-run cold-triage for next rank).
+
