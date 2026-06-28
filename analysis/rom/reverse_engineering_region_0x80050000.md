@@ -5777,3 +5777,27 @@ Region unnamed count after this pass: **17** (18 minus this rename).
 
 **Next:** Pass 54am — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54am (2026-06-28) — cold-triage rank-1 rename (post-54al re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54al: **366 total**, **350 named**,
+**16 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005ee8c` → `commit_pairing_key_material_and_dispatch_lmp26f`**
+(328B, HIGH) via `RenamePass54amFun8005ee8c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Pairing-key commit handler for slot `param_3` on the `0x1ac` record array: logs via
+`possible_logging_function__var_args`; if active-flag bit0 at `field4_0x4` clear → tag-0x1a alloc +
+`assign_pointer_to_0x1AC_offset_0x134` (inactive path). When active: ORs `0xc0` into `field4_0x4`,
+sets pending bit `4` or `8` in `field120_0x7c` (branch on bit2), hook dispatch via `PTR_DAT_8005efdc`
+with payload type 3/4, tag-0x4 alloc via `alloc_event_record_and_log_tag_0x4_with_random_bytes`,
+copies 22 bytes of key material from `param_1` into connection fields at `+0xac`/`+0xb4`/`+0xb5`/
+`+0xc6`/`+0xd6`, logs/dispatches LMP `0x26f` via `possible_logger_called_if_no_patch3`, sets substate
+`field231_0xee` to `1`.
+
+**Confidence:** HIGH — unambiguous 0x1ac stride field writes + LMP 0x26f dispatch; structural sibling of
+Pass 54al's `handle_connection_substate_2_or_3_and_dispatch_lmp26f` (same opcode family, complementary
+substate path).
+
+Region unnamed count after this pass: **16** (17 minus this rename).
+
+**Next:** Pass 54an — continue xrefs=0 tier (re-run cold-triage for next rank).
+

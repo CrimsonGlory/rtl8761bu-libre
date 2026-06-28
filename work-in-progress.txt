@@ -5131,12 +5131,17 @@ sweep beyond enumeration and is the most out-of-date):
           (416B, HIGH, xrefs=0 tier). Region 17 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54al; rom_function_index.md; live named count 1138.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54am: decompile+rename next
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54am: decompile+rename next
           cold-triage rank on the xrefs=0 tier (post-54al re-rank output).
+          FUN_8005ee8c→commit_pairing_key_material_and_dispatch_lmp26f (328B).
+          2026-06-28.
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54an: decompile+rename next
+          cold-triage rank on the xrefs=0 tier (post-54am re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54an: continuation slot after 54am.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54ao: continuation slot after 54an.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`
