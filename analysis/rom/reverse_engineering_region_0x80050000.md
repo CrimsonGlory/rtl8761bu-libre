@@ -5753,3 +5753,27 @@ Region unnamed count after this pass: **18** (19 minus this rename).
 
 **Next:** Pass 54al — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54al (2026-06-28) — cold-triage rank-1 rename (post-54ak re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ak: **366 total**, **348 named**,
+**17 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005eb6c` → `handle_connection_substate_2_or_3_and_dispatch_lmp26f`**
+(416B, HIGH) via `RenamePass54alFun8005eb6c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Connection-procedure substate handler for slot `param_3` on the `0x1ac` record array:
+gates on active-flag bit0 at `field4_0x4`; if clear → error `0x1a` via
+`report_procedure_outcome_and_update_param_type_bitmask`. When `+3 & 4 == 0` and substate `+0xee == 2`:
+allocs tag-0x6 record (`alloc_event_record_and_log_tag_0x6`), assigns `+0x134`, sets pending bits
+`0x40` in `+0x84`/`+0x88`, sets bit 2 in `+4`. When `+3 & 4 != 0` and substate `+0xee == 3`:
+advances substate to `4`, dispatches via hook fptr (`PTR_DAT_8005ed14`) with 4- or 8-byte payload
+(branch on `+0xef == 4`), builds LMP packet word with `(param_3 & 0xf) << 5 | 3/4`, logs via
+`possible_logger_called_if_no_patch3` with opcode `0x26f`. Else error `0x25`. Structural sibling of
+Pass 33's `check_active_flag_and_substate1_then_assign_0x134` (substate 1→3 path).
+
+**Confidence:** HIGH — unambiguous substate machine at `+0xee`/`+0xef` with named callees; sibling
+context from `check_active_flag_and_substate1_then_assign_0x134` pins the procedure family.
+
+Region unnamed count after this pass: **17** (18 minus this rename).
+
+**Next:** Pass 54am — continue xrefs=0 tier (re-run cold-triage for next rank).
+
