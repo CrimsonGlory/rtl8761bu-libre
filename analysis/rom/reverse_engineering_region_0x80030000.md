@@ -1002,3 +1002,38 @@ region. All 6 decompiled individually via `decompile_function`.
 **Confidence**: all 6 upgraded **low → HIGH** in `rom_function_index.md`. Two
 recommended renames flagged (not applied — rename-persistence bug); the other
 4 confirmed accurate as-is. 0 low-confidence functions remain in this region.
+
+---
+
+## Pass 42 — SCO teardown callees xref sweep (2026-06-28)
+
+**Context**: Continuation after applying all 38 staged renames from region 0x80050000 Passes 35–41 (see `reverse_engineering_region_0x80050000.md` Pass 42). Targeted the two unnamed callees of `configure_hw_regs_and_init_for_sco_teardown` (`0x80037370`, 34B, MEDIUM-HIGH holdover from Pass 41).
+
+### Analyzed functions (3 HIGH renames applied)
+
+**`0x8003bd94`** → `dispatch_bb_register_da_d6_write_with_hook` [HIGH]
+- Optional override hook at `PTR_DAT_8003bde0`: if set, calls `hook(0, reg_id, mode, value)` and returns early if hook returns non-zero.
+- Fallback: if `mode==1`, sets bit 6 on `reg_id`; if `mode==0`, calls `poll_and_write_bb_registers_0xda_0xd6(reg_id, value)`.
+- Callers include `hw_register_config_with_timeout` (`FUN_8003bd94(0,1,0)`), `AFH_channel_map_hw_register_programmer`, and `configure_hw_regs_and_init_for_sco_teardown` (`(0,0,0)`).
+- Resolves the long-standing "BB-register write sibling of hw_register_config_with_timeout" note from Pass 8.
+
+**`0x8003bc54`** → `poll_and_write_bb_registers_0xda_0xd6` [HIGH]
+- Reference-counted BB register writer: on first entry (when bit 6 clear), optionally primes register 0xda with 0x100 flag.
+- Writes merged value to 0xda and `(reg_id<<8)|0x8000|value` to 0xd6 via `PTR_DAT_8003bd74` function pointer.
+- Poll loop waits for completion bit 0x80 in status register; timeout logs via `possible_logging_function__var_args`.
+- Self-contained mechanism — same evidentiary bar as `binary_search_sorted_table_by_8byte_key`.
+
+**`0x80036fa8`** → `init_or_clear_sco_hw_channel_subsystem` [HIGH]
+- `param_1==0`: comprehensive SCO/eSCO HW subsystem init — reads `config_struct`, programs registers 0x6c/0xbe/0x22/0x24/0x26/0x28/0x2a/0xa8/0xaa/0xac/0xd8/0x17a/0x17e/0x186/0x46, iterates 8+4+3 channel slots calling `FUN_800430ac` for parameter commit, finishes with `FUN_80043158`/`FUN_80013bc0`.
+- `param_1!=0`: teardown partial path — writes 0 to register 0xee only (exact path taken by `configure_hw_regs_and_init_for_sco_teardown` which passes `1`).
+- Large but param-dispatch semantics are unambiguous.
+
+### Rename script
+
+`RenamePass42CrossRegion.java` — 3 entries, applied via `run_ghidra_headless` (`renamed=3 alreadyOk=0 missing=0 failed=0`).
+
+### Coverage after Pass 42
+
+Region 0x80030000: +3 HIGH names (includes Pass 41's `reset_sco_esco_hw_subsystem_on_link_loss` now live in Ghidra from the Pass 35–41 batch). **MEDIUM-HIGH holdover**: `0x80037370` `configure_hw_regs_and_init_for_sco_teardown` — callees now named, candidate for promotion next pass.
+
+**Next**: Xref sweep from `reset_sco_esco_hw_subsystem_on_link_loss` callees (`FUN_800344f8`, `FUN_80034480`, `FUN_80033ed8`, `FUN_80037370`).

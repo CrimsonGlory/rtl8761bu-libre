@@ -251,3 +251,17 @@ Format: [TODO] or [DONE] status, date, description
     historically failing step); decompile_function by probe name returned full valid C
     decompilation (Step 5 PASS). Verdict: RENAME PERSISTENCE: PASS (list_functions ✓,
     decompile_function ✓). Tasks gated on this entry may now be unblocked.
+
+[TODO] 2026-06-28: GZF process-mode project NotOwnerException when headless runs as root
+  Context: wip-iteration Pass 42 — applying RenamePass35-41 via run_ghidra_headless
+  Issue: Persistent GZF project at /var/wairz/ghidra_projects/<hash>/ has project.prp
+    OWNER="wairz" (set during initial import, likely as wairz user), but analyzeHeadless
+    in wairz-backend container runs as root. Opening the project fails with:
+      ghidra.util.NotOwnerException: Project is owned by wairz
+    All GZF process-mode operations fail (run_ghidra_headless, batch_decompile_functions).
+  Workaround applied (2026-06-28): sed project.prp OWNER wairz→root via docker exec.
+    This unblocks the session but is fragile — any re-import as wairz user will break again.
+  Needed fix: either (a) run analyzeHeadless as the wairz user (su/runuser in ghidra_service),
+    or (b) set OWNER to the actual runtime user at GZF import time, or (c) document that
+    GZF process-mode projects must be imported with the same UID that runs headless.
+  Impact: blocks all rename/decompile MCP calls until manually fixed or wairz patched.

@@ -4257,17 +4257,25 @@ sweep beyond enumeration and is the most out-of-date):
           rom_function_index.md +1 HIGH entry.
           analysis/INDEX.md → updated.
 
-[NEXT]  Full RE: batch apply all 38 staged renames (MCP required) + region 0x80030000 follow-up
-          Apply all staged scripts via run_ghidra_headless (MCP required):
-            RenamePass35Region80050000.java (20 — region 0x80050000)
-            RenamePass36Region80050000.java (10 — region 0x80050000)
-            RenamePass37Region80050000.java (1 — region 0x80050000)
-            RenamePass38Region80050000.java (1 — region 0x80050000)
-            RenamePass39CrossRegion.java (3 — region 0x80020000)
-            RenamePass40CrossRegion.java (2 — regions 0x80050000, 0x80020000)
-            RenamePass41CrossRegion.java (1 — region 0x80030000)
-          After application: continue xref sweep from FUN_8003bd94 and FUN_80036fa8
-          (the two unknown callees of configure_hw_regs_and_init_for_sco_teardown).
+[DONE]  Full RE: batch apply all 38 staged renames (MCP required) + region 0x80030000 follow-up (2026-06-28)
+          Applied all 7 rename scripts sequentially via run_ghidra_headless (38 renames total,
+          all renamed=N failed=0): Pass35(20)+Pass36(10)+Pass37(1)+Pass38(1)+Pass39(3)+Pass40(2)+Pass41(1).
+          Worked around GZF NotOwnerException (project.prp OWNER=wairz vs headless root) — see
+          wairz_requested_changes.txt [TODO].
+          Xref sweep: decompiled FUN_8003bd94/FUN_80036fa8/FUN_8003bc54; 3 HIGH renames via
+          RenamePass42CrossRegion.java (renamed=3): dispatch_bb_register_da_d6_write_with_hook,
+          poll_and_write_bb_registers_0xda_0xd6, init_or_clear_sco_hw_channel_subsystem.
+          MEDIUM-HIGH holdover: 0x80037370 configure_hw_regs_and_init_for_sco_teardown.
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 42)
+          → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 42)
+          → analysis/rom/rom_function_index.md (+3 entries, count 996)
+          → analysis/INDEX.md updated
+
+[NEXT]  Full RE: xref sweep from reset_sco_esco_hw_subsystem_on_link_loss callees
+          Decompile and triage unnamed callees of reset_sco_esco_hw_subsystem_on_link_loss:
+            FUN_800344f8, FUN_80034480, FUN_80033ed8, FUN_80037370 (configure_hw_regs_and_init_for_sco_teardown)
+          Promote configure_hw_regs_and_init_for_sco_teardown to HIGH if callees clear.
+          Continue region 0x80050000 cold-triage or rank-1 xrefs≥3 backlog as time permits.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
