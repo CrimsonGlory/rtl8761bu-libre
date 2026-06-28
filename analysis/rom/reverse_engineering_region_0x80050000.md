@@ -5372,3 +5372,24 @@ Pass 54j's `compare_afh_wrapped_delta_and_stage_channel_entry` (bit `0x80` path)
 `pack_afh_channel_params_to_register` is established HIGH since Pass 35.
 
 Region unnamed count after this pass: **37** (38 minus this rename).
+
+## Pass 54s (2026-06-28) — cold-triage rank-1 rename (post-54r re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54r: **366 total**, **329 named**,
+**36 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80059ab0` → `bubble_sort_uint32_array_ascending`** (72B, HIGH) via
+`RenamePass54sFun80059ab0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Classic nested-loop bubble sort on a `uint32_t` array: outer loop `uVar2` from 0 to
+`param_2-1`, inner loop compares adjacent elements at `param_1+uVar1*4` and `param_1+(uVar1+1)*4`,
+swapping when the higher-index element is smaller (ascending order). Sole caller
+`scan_esco_link_registers_and_allocate_slot_timing_offset` fills `local_64[]` with per-link timing
+offset candidates (via sibling `FUN_80059af8`), then sorts ascending before selecting the largest
+inter-candidate gap for the final slot-timing allocation.
+
+**Confidence:** HIGH — self-contained O(n²) sort with unambiguous swap logic; caller context
+confirms timing-candidate ordering step in the eSCO link-register scan pipeline.
+
+Region unnamed count after this pass: **36** (37 minus this rename).
+
+**Next:** Pass 54t — continue down the xrefs=1 tier (re-run cold-triage for next rank).
