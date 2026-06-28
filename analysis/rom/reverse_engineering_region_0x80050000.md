@@ -5605,3 +5605,23 @@ Region unnamed count after this pass: **25** (26 minus this rename).
 
 **Next:** Pass 54ae — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ae (2026-06-28) — cold-triage rank-1 rename (post-54ad re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ad: **366 total**, **341 named**,
+**24 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_800518dc` → `vsc_0xfc95_init_if_uninitialized`** (32B, HIGH) via
+`RenamePass54aeFun800518dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Pure lazy-init variant of the established `VSC_0xfc95` triad pattern (same family as
+`vsc_0xfc95_init_and_clear_flag_bit4` at `0x80051908`, Pass 45): if the feature slot at
+`PTR_PTR_800518fc + 0x18` is still `-1`, calls `VSC_0xfc95_called2(0, PTR_DAT_80051900,
+PTR_LAB_8004f1c4_1_80051904, 0, 0)` — no post-init flag clear (unlike the sibling at `+0x1c` offset
+with bit-4 clear).
+
+**Confidence:** HIGH — identical lazy-init idiom to the already-named Pass 45 siblings; sole named
+callee `VSC_0xfc95_called2`; structural subset of `vsc_0xfc95_init_and_clear_flag_bit4`.
+
+Region unnamed count after this pass: **24** (25 minus this rename).
+
+**Next:** Pass 54af — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+

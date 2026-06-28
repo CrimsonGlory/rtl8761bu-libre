@@ -5091,12 +5091,17 @@ sweep beyond enumeration and is the most out-of-date):
           (38B, HIGH). Region 25 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54ad; rom_function_index.md; live named count 1130.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ae: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54ad re-rank output).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54ae (2026-06-28): decompiled+
+          renamed rank-1 `FUN_800518dc`→`vsc_0xfc95_init_if_uninitialized`
+          (32B, HIGH). Region 24 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54ae; rom_function_index.md; live named count 1131.
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54af: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54ae re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54af: continuation slot after 54ae.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54ag: continuation slot after 54af.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`
