@@ -4661,3 +4661,118 @@ up this pass's 2 deferred functions plus their callers:
   family as Pass 47/48's `read_and_wrap_clock_phase_for_slot_timing_offset` /
   `dispatch_slot_timing_reprogram_if_pending_and_ready` — same slot-timing-offset neighborhood,
   worth resolving together).
+
+## Pass 50 (2026-06-28) — resolved both Pass 49 holdover leads
+
+Decompiled the 4 named Pass-50 targets (`FUN_80052f38`, `FUN_800528b0`,
+`FUN_80059b18`, `FUN_80059cec`) via `batch_decompile_functions`, then pulled
+in `FUN_8004e820` (the allocator both `FUN_80052f38` and the already-named
+`conn_param_commit_bdaddr_and_role` call) for full context.
+
+**Cluster 1 — LMP-PDU-driven negotiation-complete event, finalize+emit.**
+`xrefs_to`/`find_callers` only resolved 1 of `FUN_8004e820`'s 2 real call
+sites (`conn_param_commit_bdaddr_and_role`) — the decompile of `FUN_80052f38`
+itself shows a second, direct `FUN_8004e820(param_3)` call that the
+reference-manager-backed xref tools missed (same general undercounting gap
+documented for this GZF in earlier passes; not re-filed since it didn't block
+resolution — the decompiled call evidence is unambiguous).
+
+- **`0x8004e820`** (50B, region `0x80040000`) → **HIGH**, renamed
+  `get_or_alloc_conn_negotiation_state`. Lazily allocates a record from a
+  free list (`PTR_PTR_8004e854`) into the connection record's `+0x14` slot
+  if not already populated, initializing a few fields based on a bit read
+  from `+0x8`; returns the existing record unchanged if `+0x14` is already
+  set. **Caller-context anchor**: `reverse_engineering_conn_feature_dispatch.md`
+  already documents this function informally (as `record = FUN_8004e820(...)`)
+  inside both `conn_param_commit_bdaddr_and_role` (commits a negotiated
+  BD_ADDR/role into the returned record) and `conn_negotiation_finalize_gate_dispatch`
+  (gates on the returned record's `field0==0`, then dispatches to
+  `build_conn_negotiation_complete_hci_event_fields` + a follow-up). This
+  pass's `FUN_80052f38` is a 3rd independent call site with the identical
+  get-or-alloc-then-use-`+0x14` shape — 3-for-3 consistent semantics is well
+  past the HIGH bar despite the tool gap above.
+- **`0x800528b0`** (358B) → **HIGH**, renamed
+  `build_negotiation_complete_hci_event_fields_from_lmp_pdu`. Switches on the
+  low nibble of an incoming LMP PDU's opcode byte (cases 0/1/2/4/6, each
+  picking a variable-length tail size and an internal event-subtype code
+  0x10/0x12/0x13/0x15/0x1a-or-0x1b) to locate the PDU's variable-length tail,
+  then runs the **exact same RSSI/clock-offset/category tail** as Pass 49's
+  `build_conn_negotiation_complete_hci_event_fields`: calls the already-named
+  `classify_link_type_code_to_category` + `return_RSSI_value`, then
+  `append_data_to_hci_event_buffer_with_chunked_flush` for the tail. **HIGH**:
+  confirmed structural sibling (Pass 49 flagged this exact relationship) plus
+  a clean sole-caller anchor once `FUN_80052f38` itself resolved this pass.
+- **`0x80052f38`** (76B) → **HIGH**, renamed
+  `finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`. Calls
+  `get_or_alloc_conn_negotiation_state`, then
+  `build_negotiation_complete_hci_event_fields_from_lmp_pdu` to populate it; on
+  success, packs it into the real HCI event buffer via the already-named
+  `hci_evt_pack_conn_field_into_buf`, then frees the state record back onto
+  its free list (linked-list push via `PTR_PTR_80052f88`) and clears the
+  connection record's `+0x14` slot. This is the complete
+  alloc→build→pack→free cycle that, for the "normal" (non-LMP-PDU) negotiation
+  path, is split across `conn_negotiation_finalize_gate_dispatch` +
+  `build_conn_negotiation_complete_hci_event_fields` + an unreviewed
+  follow-up (`FUN_80052774`, left unexamined — out of scope for this pass).
+  **Caller-context anchor**: sole caller is `FUN_8004bde8` (354B, the
+  eSCO/SCO LMP-PDU-type dispatcher in region `0x80040000` — flagged below as
+  the Pass 51 lead), called only when its own PDU-type dispatch table
+  (`PTR_DAT_8004bf58`) does *not* already handle "meta subevent 0x13" mode.
+
+**Cluster 2 — eSCO slot-timing-offset allocation + clock-drift correction.**
+
+- **`0x80059b18`** (450B) → **HIGH**, renamed
+  `scan_esco_link_registers_and_allocate_slot_timing_offset`. Iterates all 11
+  eSCO link-register slots via the already-named `read_indexed_esco_link_register`,
+  filtering to slots in state `3` ("established"). Two modes selected by
+  `param_5`/`param_6`: **direct-lookup** (param_5==1) returns the one matching
+  slot's raw register value via the output param; **gap-allocation** (the
+  default path) computes each active slot's configured window
+  (`field34_0x22`, doubled), finds the smallest one, and — when there are 2+
+  candidates — sorts the pairwise gaps between candidate windows (via
+  `FUN_80059af8`/`FUN_80059ab0`, left unreviewed) to pick the **largest free
+  gap's midpoint** as the allocated timing offset. This is a textbook
+  TDM slot-placement algorithm: find room for a new eSCO link's clock phase
+  without colliding with already-active links.
+- **`0x80059cec`** (242B) → **HIGH**, renamed
+  `apply_clock_drift_correction_to_esco_slot_phase`. Sole caller of
+  `scan_esco_link_registers_and_allocate_slot_timing_offset`, invoked in its
+  **direct-lookup** mode (param_5==1) for one specific slot (param_2) while
+  simultaneously gathering the gap-allocation outputs from the *other* active
+  slots. Combines an RSSI-filtered drift estimate (via the already-named
+  `apply_iir_filter_to_rssi_and_store`) with a 64-bit
+  multiply/divide-and-modulus normalization of an elapsed-clock-tick product
+  against the gap window, then writes a corrected phase value back into the
+  same per-connection `0x1ac`-struct-array field family Pass 47/48 established
+  (`read_and_wrap_clock_phase_for_slot_timing_offset` /
+  `dispatch_slot_timing_reprogram_if_pending_and_ready`). **HIGH**: sole-caller
+  anchor + exact field-family match with already-documented siblings.
+
+**Rename application.** `RenamePass50Region80050000.java` written directly to
+`/root/wairz/ghidra/scripts/`, run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=5 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via
+fresh `decompile_function` calls on `finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`
+and `scan_esco_link_registers_and_allocate_slot_timing_offset` — both resolve
+correctly under their new names with internal callee references intact
+(including the freshly-renamed `get_or_alloc_conn_negotiation_state` and
+`build_negotiation_complete_hci_event_fields_from_lmp_pdu` showing up by name
+inside the decompile of their caller).
+
+### Coverage after Pass 50
+
+366 total (region `0x80050000` only), **67 unnamed** (71 minus this pass's 4
+in-region HIGH renames — `0x8004e820` is a cross-region rename in
+`0x80040000` and isn't counted against this region's tally), 9 confirmed
+mis-disassembly artifacts (unchanged).
+
+**Next**: Pass 51 — `FUN_8004bde8` (354B, region `0x80040000`; the eSCO/SCO
+LMP-PDU dispatcher that is the sole caller of this pass's
+`finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`). It dispatches
+via a 16-entry PDU-type function-pointer table (`PTR_DAT_8004bf58`) and calls
+`esco_sco_param_negotiate_and_stage`, `dispatch_meta_subevent_0x13_with_addr_resolve`,
+plus 3 still-unnamed callees (`FUN_8005001c`, `FUN_8004bc74`, `FUN_8004ba34`,
+`FUN_80050f7c`) — a self-contained dispatcher cluster worth a dedicated pass
+of its own rather than a partial follow-up. Also still open: Pass 48's 3
+long-standing MEDIUM/MEDIUM-HIGH leads (`FUN_80058638`, `FUN_8005e40c`,
+`FUN_8005058c`) — re-check again for new anchors if they surface in a future
+cold-triage re-rank.
