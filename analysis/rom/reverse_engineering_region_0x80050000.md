@@ -5255,4 +5255,23 @@ record stride matches the established eSCO indexed-link-register cluster.
 
 Region unnamed count after this pass: **43** (44 minus this rename).
 
-**Next:** Pass 54m — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+**Next:** Pass 54n — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54m (2026-06-28) — cold-triage rank-1 rename (post-54l re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_8005537c` → `scan_indexed_link_slots_le_channel_select_and_lmp_vsc_dispatch`** (84B, HIGH) via
+`RenamePass54mFun8005537c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks the indexed link-slot table at `PTR_PTR_800553d0` (`count` at `+8`, pointer
+array at `+0`). For each non-null slot where `(slot+8)&7==0` and `(slot+0x1d)&2!=0`, calls
+`conditional_dispatch_LE_channel_selection_algorithm()`. After the loop, if pending LMP state at
+`PTR_DAT_800553d4+4 != -1`, calls `LMP__25B__most_common_for_VSCs1(PTR_DAT_800553d8)`.
+
+**Confidence:** HIGH — calls two already-named functions (`conditional_dispatch_LE_channel_selection_algorithm`,
+`LMP__25B__most_common_for_VSCs1`); flag checks mirror the `+0x1d` bit-2 gate used elsewhere in the
+LE channel-selection cluster (Pass 24 `0x80055320`).
+
+Region unnamed count after this pass: **42** (43 minus this rename).
+
+**Next:** Pass 54n — continue down the xrefs=1 tier (re-run cold-triage for next rank).
