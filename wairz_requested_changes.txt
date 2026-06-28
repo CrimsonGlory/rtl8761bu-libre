@@ -323,3 +323,13 @@ Format: [TODO] or [DONE] status, date, description
     is currently a no-op as far as run_ghidra_headless can see, until whatever
     materializes /root/wairz/ghidra/scripts on the host is restored. Existing
     pre-restart scripts on disk are unaffected and still work fine.
+  Re-verified 2026-06-28 (still [TODO], NOT fixed): wip-iteration startup check ran
+    save_ghidra_script(filename="ProbeBlocker20260628.java") with trivial content.
+    Tool reported success with a stable file ID (f6b2774c-ee35-4b29-ae12-8a4ad2ca4dae),
+    but `ls` for that filename failed with "No such file or directory" in all three
+    locations: host /root/wairz/ghidra/scripts/, wairz-backend-1:/opt/ghidra_scripts/,
+    and wairz-worker-1:/opt/ghidra_scripts/. Confirms the gap is still live post the
+    2026-06-28 container-restart window described above. wip-iteration correctly
+    treated this as a hard blocker per check-blockers.sh and exited without attempting
+    a new Ghidra script write — the documented host-path workaround above remains the
+    only way to run NEW (not-yet-on-disk) Ghidra scripts until this is fixed upstream.
