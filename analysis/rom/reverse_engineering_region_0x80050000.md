@@ -5196,4 +5196,24 @@ and established `0xce` debug-log category used elsewhere in this region's status
 
 Region unnamed count after this pass: **46** (47 minus this rename).
 
-**Next:** Pass 54j — continue down the xrefs=1 tier (next rank: `0x8005c214`, 92B).
+## Pass 54j (2026-06-28) — cold-triage rank-1 rename (post-54i re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_8005c214` → `compare_afh_wrapped_delta_and_stage_channel_entry`** (92B, HIGH) via
+`RenamePass54jFun8005c214.java` (`renamed=1`, live-verified).
+
+**Mechanism:** AFH channel-assessment helper called from `afh_report_worst_channel`.
+Computes a 10-bit-wrapped timing delta via `wrapping_subtract_masked_by_shift` between
+`param_1+8` and the four-byte reference at index 10 of the per-connection `0x1ac` struct
+array (`+0x160`–`+0x163`); stores the result at `param_1+4`. When the delta is zero or
+overlaps global mask `DAT_8005c274`, and the channel index at `+0x166` is not sentinel
+`0xf`, copies three channel fields (`+0x168`, `+0x16a`, `+0x16c`) into the 16-byte AFH
+staging table at `PTR_DAT_8005c278` (indexed by `+0x166 * 0x10`), sets bit `0x80` on
+`param_1+0x21`, and returns 1; otherwise returns 0.
+
+**Confidence:** HIGH — named `wrapping_subtract_masked_by_shift` callee, `0x1ac` struct
+anchor, AFH staging-table copy pattern, and sole caller `afh_report_worst_channel`.
+
+Region unnamed count after this pass: **45** (46 minus this rename).
+
+**Next:** Pass 54k — continue down the xrefs=1 tier (re-run cold-triage for next rank).
