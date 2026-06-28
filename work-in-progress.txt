@@ -5111,12 +5111,17 @@ sweep beyond enumeration and is the most out-of-date):
           (26B, HIGH). Region 21 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54ah; rom_function_index.md; live named count 1134.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ai: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54ah re-rank output).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54ai (2026-06-28): decompiled+
+          renamed rank-1 `FUN_80051588`→`send_lmp268_checks_if_global_record_field_0x1c_valid`
+          (24B, HIGH). Region 20 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54ai; rom_function_index.md; live named count 1135.
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54aj: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54ai re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54aj: continuation slot after 54ai.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54ak: continuation slot after 54aj.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`

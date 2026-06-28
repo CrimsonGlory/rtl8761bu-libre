@@ -5689,3 +5689,23 @@ Region unnamed count after this pass: **21** (22 minus this rename).
 
 **Next:** Pass 54ai — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ai (2026-06-28) — cold-triage rank-1 rename (post-54ah re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ah: **366 total**, **345 named**,
+**21 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80051588` → `send_lmp268_checks_if_global_record_field_0x1c_valid`** (24B, HIGH) via
+`RenamePass54aiFun80051588.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin forwarder on global record `PTR_PTR_800515a0`: if dword at `+0x1c` is not `-1`,
+calls the already-named `LMP__268__most_common_for_VSCs2_checks_fptr_patch` with that slot ID and
+constant `3`. Sole static caller is the already-named
+`commit_or_retry_sco_esco_timing_field_via_clock_window_check` (failure/retry path when the
+clock-window check does not pass).
+
+**Confidence:** HIGH — unambiguous guard-and-dispatch to a named LMP callee; caller context from
+Pass 48 pins this as SCO/eSCO timing retry plumbing.
+
+Region unnamed count after this pass: **20** (21 minus this rename).
+
+**Next:** Pass 54aj — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
