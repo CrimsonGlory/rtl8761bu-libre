@@ -5488,3 +5488,24 @@ in this cluster.
 codec-table / SCO-type-8/9/10 naming family; single named caller at global BT-state boot.
 
 Region unnamed count after this pass: **31** (32 minus this rename).
+
+## Pass 54y (2026-06-28) — cold-triage rank-1 rename (post-54x re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54x: **366 total**, **336 named**,
+**30 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005241c` → `init_link_globals_alloc_slot_table_and_teardown_links`** (50B, HIGH) via
+`RenamePass54yFun8005241c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sub-init called from `init_record_pools_and_related_substates` (Pass 31). Clears
+link-global sentinel dwords at `+0x18` and `+0x1c` to `0xffffffff`, derives a slot-count nibble from
+config fields `field470_0x1e2`/`field471_0x1e3`, calls the already-named
+`alloc_and_wire_0x14_slot_index_table_in_link_globals`, then
+`teardown_links_and_reinit_default_subrecord` — the link-global pool wiring + default-link teardown
+step in the record-pool bootstrap sequence.
+
+**Confidence:** HIGH — sole documented caller in the established `init_record_pools_and_related_substates`
+dispatcher; two already-named callees with unambiguous roles.
+
+Region unnamed count after this pass: **30** (31 minus this rename).
+
+**Next:** Pass 54z — continue down the xrefs=1 tier (re-run cold-triage for next rank).
