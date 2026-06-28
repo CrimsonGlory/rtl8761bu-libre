@@ -4915,3 +4915,110 @@ holdovers, see above) and the still-unnamed `FUN_8004faa4`/`FUN_8004faf4` (the s
 functions both `setup_type3_esco_sco_conn_record_*` siblings depend on for their `+0x20`
 linkage — cross-region in `0x80040000`, structurally close to the already-named `FUN_8004fa64`
 "peer lookup" family).
+
+## Pass 53 (2026-06-28) — all 3 carried-forward holdovers resolved + 3 cross-region renames in `0x80040000`
+
+Resolved all 3 of Pass 52's unexamined fresh-top-10 leads, plus the cross-region `FUN_8004faa4`/
+`FUN_8004faf4` pair and a documentation-staleness gap on `FUN_8004fa64`. 6 renames total via
+`RenamePass53Region80050000.java` (`renamed=6 alreadyOk=0 missing=0 failed=0`, `Save succeeded`).
+Live-verified via fresh `decompile_function` calls on 3 of the 6
+(`drain_and_dispatch_conn_event_ring_by_kind_then_reinit`,
+`find_tail_of_payload_subrecord_chain_at_field0x50`, `resolve_peer_record_ptr_by_conn_type`) —
+all resolve correctly under their new names with internal callee references intact.
+
+**`0x8005c720` → `drain_and_dispatch_conn_event_ring_by_kind_then_reinit`** (228B, HIGH): walks
+the per-connection pending-event ring at `PTR_PTR_8005c804` (an 8-byte-per-connection struct:
+base ptr, capacity, head index, tail index, count). For each queued entry up to the count, reads
+a "kind" byte and dispatches: kind 0 → already-named `append_to_slot10_linked_queue_and_update_tail`
+(only when `param_2`'s mode flag is 0); kind 1 → already-named
+`insert_byte_into_per_connection_singly_linked_list_head_or_tail` (mode=tail, list-select=2).
+After draining, conditionally calls the already-named `atomically_drain_conn_pending_queue` once
+(gated on a config flag + mode==0) and conditionally calls still-unnamed `FUN_8004ca10`. Always
+reinitializes the ring at the end regardless of whether it ran (capacity=`0xb`, head=tail=count=0).
+3 named callees — HIGH.
+
+**`0x80055b78` → `decode_hw_config_registers_into_conn_record_and_expand_bitmap`** (208B,
+MEDIUM-HIGH, not HIGH): reads 3 fixed 16-bit HW-register-shaped globals (`DAT_80055c48`/`4c`/`50`,
+not parameters — consistent with this chip's memory-mapped-peripheral-register read pattern) and
+unpacks their bitfields into a connection-record-shaped output struct at `param_1+0x8`..`0x21`
+(several small bitfields plus a combined ~21-bit value spanning `+8`/`+0xc`). The top bit of the
+first register additionally gates a bitmap-expansion loop: a ~14-bit quantity (`uVar8`, built
+from the 2nd+3rd registers) has each set bit's index written sequentially into `param_1+0x12`,
+with the resulting count stored at `+0x20`. Returns 0 if the top 2 bits of the first register are
+both clear (treated as "absent"/"type 0"), 1 otherwise. **No callers found** (`find_callers`/
+`xrefs_to` both empty) and **no callees** (pure register-read + bit-twiddling, nothing to anchor
+against) — the weakest-evidenced of this pass's 3 region-local leads. Named for its mechanically
+self-evident behavior; held at MEDIUM-HIGH per the established standard (a generic, anchor-free
+shape doesn't clear HIGH even when fully understood — same precedent as Pass 17's `FUN_80059f54`
+and others).
+
+**`0x8005bea8` → `sync_nibble_field0x118_via_clock_window_check_and_log`** (152B, HIGH): gated on
+two conditions — (1) a lookup-table-derived byte (`UNK_00001471`, indexed via a 2-bit field
+extracted from `field3_0x3`) equals the connection's own index, and (2) an unsigned 16-bit delta
+`field40_0x28 - field281_0x120 < 0x7fff` (the same "is the window still open" idiom already
+established in `commit_or_retry_sco_esco_timing_field_via_clock_window_check`, Pass 48). When both
+hold: if the high and low nibble of `field273_0x118` differ, copies the low nibble into the high
+nibble (commit the pending value) and logs a diagnostic event (tag `0xca`) carrying `bVar1`, a bit
+from `field3_0x3`, the `field40_0x28` value, `field279_0x11e`, `field280_0x11f`, and the
+just-committed nibble. Sole caller per `find_callers` (a `COMPUTED_CALL` — indirect/function-
+pointer site, not visually confirmed in the caller's own decompile, but accepted per this
+project's established practice of trusting `find_callers`/`xrefs_to` results) is the already-named
+`conn_index_status_bit_apply_and_log`. HIGH on the clock-window structural match + named-caller
+evidence.
+
+**Cross-region in `0x80040000`: `FUN_8004faa4`/`FUN_8004faf4` resolved, plus `FUN_8004fa64`'s
+documentation-staleness gap closed.**
+
+- **`0x8004faa4` → `find_tail_of_payload_subrecord_chain_at_field0x50`** (74B): a tail-of-singly-
+  linked-list walker. Starts at `*(param_1+0x50)`, follows the `+0x20` next-pointer chain, and
+  returns the node whose own `+0x20` is null — i.e. the tail. Capped at `0x65` (101) hops with an
+  error log on overrun (a cycle/runaway-list safety net, same idiom as other capped-walk helpers
+  in this codebase). Decompiling its sole caller, `FUN_80047628` (832B, previously flagged
+  MEDIUM-HIGH in `reverse_engineering_region_0x80040000.md` as a "near-identical sibling shape" to
+  `FUN_80047304`), reveals both are LMP-PDU/HCI-command fragment-reassembly handlers: they look up
+  a connection record by handle, validate a role/type byte and a length field, then copy received
+  payload bytes into a per-connection sub-record's buffer (`+0x14`, with a running used-count at
+  `+0x11`), allocating a fresh sub-record via `setup_type3_esco_sco_conn_record_with_role_bit_set`
+  when the current tail's buffer is full and re-querying this function for the new tail to
+  continue the copy. This is also exactly the call `setup_type3_esco_sco_conn_record_with_role_bit_set`
+  itself makes (established in Pass 52) to find where to link a freshly-allocated sub-record's
+  `+0x20` pointer. 2 independent caller contexts — HIGH.
+- **`0x8004faf4` → `find_tail_of_payload_subrecord_chain_at_field0x50_0x24`** (74B): exact twin of
+  the above, except the walk starts one level deeper — at `(*(param_1+0x50))+0x24` instead of
+  `param_1+0x50` directly. Mirrors the established set/clear pairing exactly: its sole caller is
+  `FUN_80047304` (780B, the structural twin of `FUN_80047628` from the same flagged pair), and it
+  is also the lookup `setup_type3_esco_sco_conn_record_with_role_bit_clear` uses (Pass 52). Same
+  evidentiary class as its sibling — HIGH. **`FUN_80047628`/`FUN_80047304` themselves are not
+  renamed this pass** — their exact HCI/LMP opcode identity isn't pinned down (only the
+  fragment-reassembly *mechanism* is confirmed); this enriches but doesn't resolve the existing
+  MEDIUM-HIGH cold-triage entry in `reverse_engineering_region_0x80040000.md`, left as a future
+  lead there.
+- **`0x8004fa64` → `resolve_peer_record_ptr_by_conn_type`** (60B): selects between 2 possible
+  peer/secondary-record pointer fields based on a 3-bit connection-type code at `param_1+8`:
+  returns `*(param_1+0x20)` for type 1-3, else `param_1+0x50` (the default — also used for type 0,
+  or type≥4 with an error log first). **Documentation-staleness correction**: this function has
+  been referred to as "the already-named `FUN_8004fa64` 'peer lookup' family" in this doc's own
+  Pass 52 prose (and similarly in `propagate_timing_offset_to_peer_record_by_type`'s Pass 34
+  entry) for 3+ passes, but a direct `decompile_function` check this pass confirmed it was
+  **never actually renamed in Ghidra** — still literally `FUN_8004fa64`. Closed this pass: 1
+  already-documented named caller (`propagate_timing_offset_to_peer_record_by_type`) plus 2 more
+  named functions (this pass's own `compute_esco_slot_budget_with_repeat_count_and_peer_offset`
+  and `program_esco_packet_types_for_conn_and_peer_by_category`, both from Pass 52) reference it
+  directly by the informal "peer lookup" framing that decompiling it now confirms exactly. HIGH.
+
+### Coverage after Pass 53
+
+366 total (region `0x80050000` only), **52 unnamed** (55 minus this pass's 3 in-region HIGH/
+MEDIUM-HIGH renames — `FUN_8005c720`, `FUN_80055b78`, `FUN_8005bea8`), 9 confirmed
+mis-disassembly artifacts (unchanged). (The 3 cross-region `0x80040000` renames —
+`FUN_8004faa4`/`FUN_8004faf4`/`FUN_8004fa64` — are counted in that region's own tally, not here.)
+
+**Next**: Pass 54 — general cold-triage re-rank (Pass 53's renames may shake loose new
+sole-named-caller candidates, per the established pattern from Passes 44-53). No concrete leads
+explicitly carried forward this time; a fresh cold-triage run is needed to find the next batch.
+One opportunistic side-lead for a future pass: `FUN_80047628`/`FUN_80047304` (region `0x80040000`,
+832B/780B) are now understood mechanically (LMP-PDU/HCI-command fragment-reassembly handlers) but
+not opcode-identified — pinning down the exact HCI command or LMP PDU type they implement would
+need a dedicated investigation (e.g. checking the BT spec for which command takes a
+handle+role-byte+variable-length-payload shape with a `Command_Complete` (event code `0xe`)
+response), out of scope for a quick cold-triage pass.

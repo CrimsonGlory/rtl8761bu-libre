@@ -280,8 +280,8 @@ each other on content alone).
 |---|---|---|---|
 | `0x8004c4a8` | 894B | Large handler, shape and field-touches not yet isolated to one specific purpose. | MEDIUM |
 | `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
-| `0x80047628` | 832B | Near-identical sibling shape to `0x80047304` — likely a paired HCI command for chunked variable-length data (e.g. a read/write variant pair). | MEDIUM-HIGH |
-| `0x80047304` | 780B | Sibling of `0x80047628` (see above). | MEDIUM-HIGH |
+| `0x80047628` | 832B | Near-identical sibling shape to `0x80047304` — likely a paired HCI command for chunked variable-length data (e.g. a read/write variant pair). **Pass 53 update (region `0x80050000`'s Pass 53):** mechanism now confirmed — an HCI-command/LMP-PDU fragment-reassembly handler: looks up a connection by handle, validates a role/type byte + length field, copies received payload bytes into a per-connection sub-record buffer (allocating a fresh sub-record via `setup_type3_esco_sco_conn_record_with_role_bit_set` + the newly-named `find_tail_of_payload_subrecord_chain_at_field0x50` when the current one fills), terminates via `hci_event_sender(0xe,...)` (Command Complete). Exact opcode/command identity still not pinned down — stays MEDIUM-HIGH. | MEDIUM-HIGH |
+| `0x80047304` | 780B | Sibling of `0x80047628` (see above). **Pass 53 update:** same mechanism, paired with `setup_type3_esco_sco_conn_record_with_role_bit_clear` + `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` (the nested-chain variant) instead. Stays MEDIUM-HIGH. | MEDIUM-HIGH |
 | `0x8004cb48` | 722B | Calls the known eSCO table processor `FUN_80044730` twice — strong structural link to the eSCO cluster. | MEDIUM-HIGH |
 | `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
@@ -680,3 +680,39 @@ cross-region pass. 12 more functions named (cluster total now includes
 `esco_sco_lmp_pdu_validate_negotiate_and_dispatch` and its full dispatch fork). The 5 orphaned
 call-site addresses identified above are a concrete future force-disassembly target if anyone
 revisits the MIPS16e code-after-data gap tooling.
+
+### Addendum (2026-06-28, region `0x80050000` Pass 53): 3 opportunistic cross-region renames
+
+Paired with region `0x80050000`'s own Pass 53 (general cold-triage re-rank, carrying forward the
+cross-region leads `FUN_8004faa4`/`FUN_8004faf4` plus a documentation-staleness check on
+`FUN_8004fa64`). 3 renames via `RenamePass53Region80050000.java` — does not reopen this region's
+formal park:
+
+- **`0x8004faa4` → `find_tail_of_payload_subrecord_chain_at_field0x50`** (74B, HIGH): tail-of-
+  singly-linked-list walker (`+0x20` next-pointer chain rooted at `param_1+0x50`, capped at `0x65`
+  hops with an overrun log). Decompiling its sole caller, `0x80047628` (the cold-triage entry
+  above), confirmed both `0x80047628` and `0x80047304` are LMP-PDU/HCI-command fragment-
+  reassembly handlers that call this function to find where to append received payload bytes,
+  and that it is the exact lookup the already-named (region `0x80050000`, Pass 52)
+  `setup_type3_esco_sco_conn_record_with_role_bit_set` uses to link a freshly-allocated sub-record
+  onto the chain's tail. 2 independent caller contexts.
+- **`0x8004faf4` → `find_tail_of_payload_subrecord_chain_at_field0x50_0x24`** (74B, HIGH): exact
+  twin of the above, walk rooted one level deeper at `(*(param_1+0x50))+0x24`. Sole caller
+  `0x80047304` (the cold-triage entry's sibling); also the lookup
+  `setup_type3_esco_sco_conn_record_with_role_bit_clear` uses. Same evidentiary class as its
+  sibling.
+- **`0x8004fa64` → `resolve_peer_record_ptr_by_conn_type`** (60B, HIGH): selects between 2 peer/
+  secondary-record pointer fields by a 3-bit type code at `param_1+8`. Closes a documentation-
+  staleness gap: this function had been called "the already-named `FUN_8004fa64` 'peer lookup'"
+  in region `0x80050000`'s own docs across 3+ prior passes (Pass 34, 52) without ever actually
+  being renamed in Ghidra — confirmed via a direct `decompile_function` check this pass. 1
+  previously-documented named caller (`propagate_timing_offset_to_peer_record_by_type`) plus 2
+  more named callers from Pass 52.
+
+`0x80047628`/`0x80047304` themselves remain unrenamed (mechanism confirmed, exact HCI/LMP opcode
+identity not pinned down — see the updated cold-triage table entries above); a future pass
+wanting to push them to HIGH would need to identify the specific command/PDU type from the BT
+spec (handle + role-byte + variable-length-payload shape, `Command_Complete` event-code `0xe`
+terminus).
+
+Full evidence is in `reverse_engineering_region_0x80050000.md`'s own Pass 53 section.
