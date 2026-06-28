@@ -4348,15 +4348,41 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+7 entries +1 MEDIUM-HIGH note, count updated to 1026)
           → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 46)
 
-[NEXT]  Full RE: ROM region 0x80050000 — continue cold-triage (Pass 46) or revisit FUN_8004edc4
-          Re-rank region 0x80050000 again (Pass 44 and 45 were both productive, renames may
-          have shaken loose another top tier) or take another look at FUN_8004edc4 (the sole
-          Pass-44/45 holdover — flag-gated length/offset computation, no clean anchor yet)
-          once its callers/callees surface more context (find_callers/xrefs_to now work for
-          static call sites — worth trying on any newly-decompiled neighbor functions). For any
-          NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via the
-          file-write tool (NOT save_ghidra_script — see wairz_requested_changes.txt) and call
-          run_ghidra_headless with script_name=... normally.
+[DONE]  Full RE: ROM region 0x80050000 — Pass 46: xrefs=2 re-rank + FUN_8004edc4 resolution (2026-06-28)
+          ColdTriageRegion80050000Pass46.java re-ranked (366 total / 254 named / 112 unnamed at
+          re-rank time; all xrefs=2, 1314B-94B). Batch-decompiled top 20 + 3 supporting callees.
+          21 renames applied via RenamePass46Region80050000.java (renamed=21 alreadyOk=0 missing=0
+          failed=0, live-verified): compute_slot_timing_field_0xc_for_apply, apply_slot_timing_now_
+          or_defer_if_busy, cancel_pending_tag9_tag10_procedures_and_send_lmp25b, append_data_to_hci
+          _event_buffer_with_chunked_flush, alloc_tag1/tag0_record_if_slot_state_0xb_else_set_fail_flag,
+          log_connection_timing_fields_0xf0_to_0x106, compute_combined_table_offset_for_category1_or_
+          log_error, alloc_tag9_record_via_pool_and_init_from_template, teardown_links_and_reinit_
+          default_subrecord, alloc_tag3_or_tag0xa_record_and_dispatch_by_flag_bit1, lazy_alloc_tag9/5_
+          singleton_and_encode_lowbit_index, bit_index_from_value_1_2_or_4, find_or_insert_entry_in_
+          sorted_8byte_key_table, lru_cache_get_or_insert_by_8byte_key, set_or_clear_esco_link_register
+          _bit0_via_fptr_with_retry, write_esco_link_register_high_nibble_field_with_retry, validate_
+          random_value_bit_pattern_or_reject, generate_validated_random_value_with_retry (+ 1 MEDIUM-HIGH:
+          read_random_source_bytes_into_4B_and_8B_outputs). Region: 366 total / 89 unnamed / 275 named.
+          FUN_8004edc4 resolved as compute_slot_timing_field_0xc_for_apply (no longer a holdover).
+          → analysis/rom/reverse_engineering_region_0x80050000.md (Pass 46 section added)
+          → analysis/rom/rom_function_index.md (21 rows updated)
+          → analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 47)
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 47: deferred callee sweep + possible re-rank
+          Three functions from Pass 46 were deferred pending callee context:
+          - FUN_8005c640 (206B drain-dispatch): calls FUN_8005cf6c (tag-0), FUN_8004b064 (tag-1),
+            FUN_8005be64 (unconditional each iteration) — decompile all 3 callees first, then name
+            FUN_8005c640 itself.
+          - FUN_80058740 (534B 3-table remove-by-key): identify the 3 tables (52B entries for case 2,
+            8B for cases 0/1; 6-byte key matches BD_ADDR size). Plausibly paired-device/link-key
+            table eviction. Check callers for context first (xrefs_to / find_callers).
+          - FUN_80057ce8 (1314B eSCO/SCO slot-timing reprogram): 4× write_indexed_link_register_with_
+            slot_check calls + fractional timing recomputation. Check callers FUN_8004a5f4/8004a660
+            (already-decompiled 90B/74B slot-update dispatchers in 0x80040000).
+          After naming these, consider another fresh cold-triage re-rank (Pass 46 yielded 21 HIGH
+          renames from xrefs=2 tier; xrefs=1 tier may have more).
+          For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
+          the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

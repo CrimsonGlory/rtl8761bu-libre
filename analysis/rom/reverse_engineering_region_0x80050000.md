@@ -3997,3 +3997,212 @@ new names with unchanged decompiled bodies.
 **Next**: Continue general cold-triage sweep (re-rank again — Pass 44/45's renames have now
 shaken loose two consecutive top tiers, same lineage likely continues) or take another look at
 `FUN_8004edc4` once its own callers/callees surface more context.
+
+## Pass 46 — fresh xrefs=2 re-rank + FUN_8004edc4 resolution via second call site (2026-06-28)
+
+Took both options staged by Pass 45 in one pass. Re-ran the cold-triage rank script
+(`ColdTriageRegion80050000Pass46.java`, identical methodology to Pass 44, same 8-entry
+mis-disassembly exclusion list) — Pass 44/45's renames had shaken loose a new top tier, this
+time all at `xrefs=2` (the `xrefs=3` and `xrefs≥1`-priority tiers exhausted by Passes 34-45).
+Live count at re-rank time: 366 total, 112 unnamed / 254 named (table convention counts the 8
+excluded mis-disassembly artifacts as "named" regardless of their real `SourceType`, same
+convention used since Pass 32 — this produced a harmless ±2 drift against Pass 45's hand-tracked
+"256 named" figure; not chased further since it's pure bookkeeping, not a real regression —
+confirmed via direct `decompile_function` spot-checks that `sorted_event_list_insert_by_relative_key`
+and `gcd` both still hold their Pass 44/45 names).
+
+Batch-decompiled the top 20 (all `xrefs=2`, 1314B down to 94B) via 2×`batch_decompile_functions`
+calls (10/10 + 10/10), then decompiled 3 supporting callees (`FUN_80059ed0`, `FUN_80050e78`,
+`FUN_80059734`) referenced by 4 of the 20 candidates to firm up otherwise-ambiguous mechanics
+before naming.
+
+### `FUN_8004edc4` resolution (the Pass 44/45 holdover)
+
+Rank-18 candidate `FUN_80051ae0` (94B) turned out to contain a **second independent direct call**
+to `FUN_8004edc4`:
+
+```c
+void FUN_80051ae0(void)
+{
+  ...
+  if ((puVar2[6] & 1) == 0) {
+    FUN_8004edc4(iVar4);
+    *(undefined2 *)(iVar4 + 0x1c) = *(undefined2 *)(iVar4 + 0x1a);
+    puVar3 = (undefined4 *)PTR_DAT_80051b48;
+    (*(code *)*puVar3)(iVar4);
+    ...
+    vsc_0xfc95_init_and_clear_flag_bit4();
+    vsc_0xfc95_init_and_dispatch_lmp268_if_slot_state2();
+    set_hw_control_flag_bit0();
+  } else {
+    puVar2[7] = puVar2[7] | 4;   // busy: defer instead of applying now
+  }
+}
+```
+
+This is structurally the **same apply-path shape** already documented for
+`apply_or_revert_slot_timing_and_set_recompute_flag`'s `param_1==1` branch (Pass 44/rom_function_index
+row `0x80051b54`): call `FUN_8004edc4(record)` → copy `+0x1c = +0x1a` → commit via a function-pointer
+dispatch → call the same two already-named `VSC_0xfc95` triad functions
+(`vsc_0xfc95_init_and_clear_flag_bit4`, `vsc_0xfc95_init_and_dispatch_lmp268_if_slot_state2`, both
+named in Pass 45) → `set_hw_control_flag_bit0` (named in Pass 36). Two independent callers now
+converge on the identical "compute new value for record `+0xc`, then commit" sequence, which is
+the self-contained structural-sibling evidentiary bar this region has used for HIGH since Pass 5.
+**`FUN_8004edc4` renamed to `compute_slot_timing_field_0xc_for_apply`** (HIGH) — and `FUN_80051ae0`
+itself renamed to `apply_slot_timing_now_or_defer_if_busy` (HIGH: an unconditional, busy-deferred
+sibling of `apply_or_revert_slot_timing_and_set_recompute_flag`'s apply branch, lacking only the
+revert option and the feature-permission gating).
+
+### Per-function findings (remaining 19 of the top-20 batch)
+
+- **`FUN_80051678`** (194B) → **HIGH**, renamed `cancel_pending_tag9_tag10_procedures_and_send_lmp25b`.
+  Walks two singly-linked lists unlinking entries tagged `'\t'` (9) and `'\n'` (10) respectively;
+  the second list's removal re-inserts the freed node via the already-named (Pass 45)
+  `sorted_event_list_insert_by_relative_key`. Finishes by calling the already-named
+  `check_state_ready_and_invoke_or_busy` (or a function-pointer fallback) and unconditionally
+  `send_LMP_25B_if_both_flags_clear` (both already-named). Three named-callee anchors chained in
+  an unambiguous cancel→requeue→notify shape.
+- **`FUN_8005280c`** (160B) → **HIGH**, renamed `append_data_to_hci_event_buffer_with_chunked_flush`.
+  Classic ring-buffer chunked-append: while the incoming length would overflow the 230-byte
+  (`0xe6`) event-buffer capacity, copies a chunk to fill it, toggles a full/flush flag pair, and
+  calls the already-named `hci_evt_pack_conn_field_into_buf` to flush; copies the remainder after
+  the loop. Named-callee anchor plus a self-evident buffering pattern.
+- **`FUN_8005f37c`** (160B, this pass) and **`FUN_8005f598`** (114B) → **HIGH**, renamed
+  `alloc_tag1_record_if_slot_state_0xb_else_set_fail_flag` and
+  `alloc_tag0_record_if_slot_state_0xb_else_set_fail_flag` respectively. Exact structural twins:
+  each checks a different field/bit of the per-connection `0x1ac` struct array (`field465_0x1de`
+  vs `field461_0x1da`) against the literal `0x0b`; on match, calls an already-named
+  `alloc_tag1_record_and_snapshot_timing`/`alloc_tag0_record_and_snapshot_timing` +
+  `assign_pointer_to_0x1AC_offset_0x134` (both already-named), sets a tag-specific bit of `+0x78`,
+  clears the same-numbered bit of `+0x8f`, and dispatches via a function pointer; on mismatch,
+  just sets the `+0x8f` fail bit and returns false. Two named-callee anchors each, paired
+  structural-twin evidence.
+- **`FUN_8005a2dc`** (162B) → **HIGH**, renamed `log_connection_timing_fields_0xf0_to_0x106`. Pure
+  diagnostic dump: three `possible_logging_function__var_args` calls with literal
+  (severity=1, module=0xce, line, line) pairs incrementing by 5 each call — almost certainly
+  original Realtek source line numbers — printing 12 `ushort` fields from offsets `0xf0`-`0x106`
+  of the connection record. No control flow, no side effects; same "pure logger, HIGH by
+  self-evidence" precedent as Pass 45's `log_event_0x2d3_with_param`.
+- **`FUN_80053688`** (130B) → **HIGH**, renamed `compute_combined_table_offset_for_category1_or_log_error`.
+  For category tag `1` only, sums two calls to the already-named
+  `compute_indexed_table_addr_by_category_and_bank` plus a literal `+300` guard constant; any
+  other category logs an error and returns 0.
+- **`FUN_8005e514`** (128B) → **HIGH**, renamed `alloc_tag9_record_via_pool_and_init_from_template`.
+  Guarded by `param_1 < 0xb` (the established 11-slot bound, Pass 28/45); calls the already-named
+  `alloc_tagged_record_via_pool(9, ...)`, zeroes then `memcpy`s an 8-byte static template blob
+  into the new record, logs all 8 copied bytes plus `param_1`, returns the record.
+- **`FUN_800522bc`** (120B) → **HIGH**, renamed `teardown_links_and_reinit_default_subrecord`. Sends
+  `LMP__25B__most_common_for_VSCs1` (already-named) for each of two active-link slots (`+0x18`/
+  `+0x1c`, guarded by the `!= -1` "no link" sentinel), wipes the `0x22c`-byte struct, resets both
+  slots to the sentinel, then calls this same batch's `FUN_80052260` to fetch/create a tag-5
+  subrecord, releases it via the already-named `release_kind_sized_subrecord`, and initializes
+  three timing fields to `0x10` plus two flag bytes to `1`.
+- **`FUN_8005f1a0`** (116B) → **HIGH**, renamed `alloc_tag3_or_tag0xa_record_and_dispatch_by_flag_bit1`.
+  Branches on bit 1 of a pre-existing flags byte: clear → already-named
+  `alloc_tag3_record_and_copy_link_fields` + `assign_pointer_to_0x1AC_offset_0x134`, dispatch id
+  `3`; set → already-named `alloc_event_record_and_log_tag_0xa` + the same assign helper, dispatch
+  id `4`. Three named-callee anchors.
+- **`FUN_800521b0`** (88B) and **`FUN_80052260`** (88B) → **HIGH**, renamed
+  `lazy_alloc_tag9_singleton_and_encode_lowbit_index` and
+  `lazy_alloc_tag5_singleton_and_encode_lowbit_index`. Exact structural twins (differ only by
+  tag/static-singleton-address/target-field-offset): lazily allocate a singleton record via the
+  already-named `alloc_kind_record_and_clear_tail`, isolate the lowest set bit of `param_1`
+  (`-param_1 & param_1`), convert it to a bit index via this pass's `bit_index_from_value_1_2_or_4`,
+  and store both the 3-bit index and the original bitmask byte into the record. `FUN_80052260` has
+  direct caller-context confirmation: `teardown_links_and_reinit_default_subrecord` (above) calls
+  `FUN_80052260(1)` directly to obtain its tag-5 subrecord.
+- **`FUN_80059ed0`** (supporting callee, decompiled for context) → **HIGH**, renamed
+  `bit_index_from_value_1_2_or_4`. Fully deterministic 3-way literal mapping (`2`→1, `4`→2, `1`→0,
+  else log error) — a textbook single-bit-to-index decoder, no ambiguity.
+- **`FUN_80050e78`** (supporting callee) → **HIGH**, renamed
+  `find_or_insert_entry_in_sorted_8byte_key_table`. Calls the already-named
+  `binary_search_sorted_table_by_8byte_key`; on miss, evicts/shifts to insert a new entry at the
+  correct sorted position (capacity-checked); on hit, returns the existing entry directly. Classic
+  find-or-insert primitive, named-callee anchor.
+- **`FUN_80050ef8`** (124B) → **HIGH**, renamed `lru_cache_get_or_insert_by_8byte_key`. Now fully
+  legible given the above: loops `find_or_insert_entry_in_sorted_8byte_key_table`, evicting the
+  LRU head (via the already-named `remove_entry_from_sorted_8byte_key_table`) and retrying
+  whenever the table is full; once an entry is obtained, unlinks it from wherever it currently sits
+  and re-links it onto the tail of a separate MRU list, reporting via `param_2` whether the entry
+  was already linked (cache "touch") vs freshly inserted. A complete LRU-cache get-or-insert
+  primitive.
+- **`FUN_80057564`** (142B) and **`FUN_800575fc`** (128B) → **HIGH**, renamed
+  `set_or_clear_esco_link_register_bit0_via_fptr_with_retry` and
+  `write_esco_link_register_high_nibble_field_with_retry`. Structural-pair: both branch on
+  `param_1 < 8` to select `read/write_indexed_esco_link_register` (eSCO-indexed) vs the general
+  `read/write_indexed_link_register`, both retry on a busy flag at a fixed static byte. The first
+  decides set-vs-clear of bit 0 via a function-pointer's boolean result; the second writes the top
+  nibble (`<<0x1c`) of the register from `param_2`, masked. Self-contained structural-sibling
+  evidence (same precedent class as the region's other matched register-access pairs).
+- **`FUN_80059734`** (supporting callee, 114B-ish region) → **HIGH**, renamed
+  `validate_random_value_bit_pattern_or_reject`. XORs a freshly-read 32-bit candidate against a
+  static reference, rejects on zero-difference or simple-repeat patterns, then runs a run-length /
+  bit-toggle analysis (rejecting overlong runs and excessive same-direction transitions) — a
+  textbook degenerate-output rejection filter ("runs test") for a hardware random/noise source.
+  The exact magic thresholds (6, 0x18, 0xb, 2) aren't individually derived, but the overall
+  accept/reject purpose is unambiguous.
+- **`FUN_8005983c`** (114B) → **HIGH**, renamed `generate_validated_random_value_with_retry`. Direct
+  caller of `validate_random_value_bit_pattern_or_reject` in a 20-attempt retry loop; on exhaustion,
+  falls back to reading+rotating a separate HW-latched value deterministically. Dispatches the
+  final value to an optional function pointer before returning it.
+- **`FUN_8005b8e8`** (114B) → **MEDIUM-HIGH**, renamed `read_random_source_bytes_into_4B_and_8B_outputs`.
+  Writes the same "select=5" pattern seen in `generate_validated_random_value_with_retry`'s
+  fallback three times in a row, each followed by a fresh 2-`ushort` read, splitting 12 bytes of
+  output across a 4-byte and an 8-byte caller buffer (`param_1` itself is unused). Strongly
+  consistent with harvesting raw bytes from the same HW random/noise source established above, but
+  kept at MEDIUM-HIGH rather than HIGH since this function alone has no validation logic to confirm
+  the "random" characterization — flagged for re-confirmation if a clearer anchor surfaces later.
+
+### Functions decompiled but NOT renamed this pass
+
+- **`FUN_80057ce8`** (1314B) — the region's largest remaining unnamed function. Heavy eSCO/SCO
+  slot-timing renegotiation: 4× `write_indexed_link_register_with_slot_check` calls, fractional
+  (longlong-division) timing-window recomputation, an early "already this value" logged-bailout.
+  Almost certainly a major renegotiation handler in the same family as Pass 32's
+  `lmp_esco_sco_negotiation_packet_handler`, but the exact field semantics need a dedicated
+  follow-up pass rather than a guess.
+- **`FUN_80058740`** (534B) — generic remove-by-key across one of three tables (selected by
+  `param_1` ∈ {0,1,2}; case 2 uses 52-byte/`0x34` entries, cases 0/1 use 8-byte entries), keyed by
+  a 6-byte (`memcpy(...,6)`) value matching a BD_ADDR's size, with doubly-linked free-list
+  maintenance and (for case 2) clearing 3 specific flag bits plus updating 3 separate bitmap
+  tables. Plausibly a paired-device/link-key table eviction, but which three tables and why case 2
+  alone touches bitmaps is unresolved.
+- **`FUN_8005c640`** (206B) — drains up to `param_2` queued records for a connection, dispatching by
+  a tag byte (0 vs 1) to different unnamed handlers (`FUN_8005cf6c`, `FUN_8004b064`), calling the
+  already-named `append_to_slot10_linked_queue_and_update_tail` on the tag-0 path and `FUN_8005be64`
+  unconditionally each iteration. Needs those three callees decompiled before a confident name.
+
+All three are flagged as Pass 47 candidates below.
+
+### Rename application
+
+`RenamePass46Region80050000.java` written directly to `/root/wairz/ghidra/scripts/` (host-path
+workaround — `save_ghidra_script` still doesn't materialize files, see
+`wairz_requested_changes.txt`), run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=21 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls on `compute_slot_timing_field_0xc_for_apply`,
+`lru_cache_get_or_insert_by_8byte_key`, and `generate_validated_random_value_with_retry` — all
+three resolved correctly under their new names, with internal callee references
+(`find_or_insert_entry_in_sorted_8byte_key_table`, `validate_random_value_bit_pattern_or_reject`)
+also showing their new names in the decompiled bodies.
+
+### Tooling note
+
+`get_global_layout` failed both attempts this pass with `Permission denied
+(HeadlessAnalyzer) java.io.IOException: Permission denied` while every other tool
+(`list_functions`, `decompile_function`, `run_ghidra_headless` with a rename/triage script)
+worked normally throughout. Did not chase further (non-blocking, had an alternative path via
+direct decompilation) — logged as a new non-blocking entry in `wairz_requested_changes.txt` in
+case it recurs on a tool this region's analysis actually depends on.
+
+### Coverage after Pass 46
+
+366 total, 110 unnamed → **89 unnamed** (21 renamed: 20 HIGH + 1 MEDIUM-HIGH; named count
+region-wide rises by 21 from this pass's pre-rename live count of 254 → **275**). No holdovers
+remain from Pass 44/45's flagged-callee list — `FUN_8004edc4` is now fully resolved.
+
+**Next**: Pass 47 — decompile the 3 deferred candidates' unnamed callees
+(`FUN_8005cf6c`, `FUN_8004b064`, `FUN_8005be64` for `FUN_8005c640`'s drain-dispatch; either
+study `FUN_80057ce8`'s 4 register-write sites directly against the BT eSCO spec, or pursue
+`FUN_80058740`'s 3-table identity) — or run another fresh cold-triage re-rank, same lineage as
+Passes 44-46.
