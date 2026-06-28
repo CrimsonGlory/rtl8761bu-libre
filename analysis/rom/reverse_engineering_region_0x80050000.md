@@ -5647,3 +5647,25 @@ Region unnamed count after this pass: **23** (24 minus this rename).
 
 **Next:** Pass 54ag — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ag (2026-06-28) — cold-triage rank-1 rename (post-54af re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54af: **366 total**, **343 named**,
+**22 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005cfcc` → `advance_linked_queue_head_at_plus_0x80_and_notify`** (30B, HIGH) via
+`RenamePass54agFun8005cfcc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** If the linked-list head pointer at `param_1+0x80` is non-zero, advances it via the
+`+0x18` next-pointer field (`*(param_1+0x80) = *(*(param_1+0x80)+0x18)`), then calls
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests(*PTR_DAT_8005cfec)` — a
+single-step variant of the `atomically_drain_conn_pending_queue` family (which detaches the full
+list at conn-record slot 10 `+0xdc` under IRQ mask and walks every node with the two-arg wrap
+call). This helper uses offset `+0x80` instead and only advances one head step before notifying.
+
+**Confidence:** HIGH — unambiguous linked-list-head advance idiom with the established `+0x18`
+next-field and `wraps_uninteresting_if_0x80100000` notification callee; structural twin of
+`atomically_drain_conn_pending_queue` at a different conn-record offset.
+
+Region unnamed count after this pass: **22** (23 minus this rename).
+
+**Next:** Pass 54ah — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
