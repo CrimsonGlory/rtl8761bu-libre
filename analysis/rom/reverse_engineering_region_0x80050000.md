@@ -5669,3 +5669,23 @@ Region unnamed count after this pass: **22** (23 minus this rename).
 
 **Next:** Pass 54ah — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ah (2026-06-28) — cold-triage rank-1 rename (post-54ag re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ag: **366 total**, **344 named**,
+**22 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80058a34` → `init_global_queue_descriptor_with_count_11`** (26B, HIGH) via
+`RenamePass54ahFun80058a34.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Initializes an 8-byte global queue descriptor at `PTR_PTR_80058a50`: sets `+0` to
+`PTR_DAT_80058a54`, writes count byte `0xb` (11) at `+4`, clears `+5..+7`, and zeroes
+`*PTR_DAT_80058a58`. Sole caller is `init_global_connection_table_and_bt_state` (region
+`0x80040000`) mid global BT-state bring-up — same `0xb` slot count as the 11-entry connection
+table loop in that initializer.
+
+**Confidence:** HIGH — unambiguous fixed-pointer + count-byte init idiom; caller context ties
+`0xb` to the established 11-slot connection-record array.
+
+Region unnamed count after this pass: **21** (22 minus this rename).
+
+**Next:** Pass 54ai — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
