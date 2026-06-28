@@ -5432,3 +5432,23 @@ established `0x800565xx` indexed-ring cluster.
 Region unnamed count after this pass: **34** (35 minus this rename).
 
 **Next:** Pass 54v — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54v (2026-06-28) — cold-triage rank-1 rename (post-54u re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54u: **366 total**, **332 named**,
+**33 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005c064` → `commit_sco_esco_timing_via_clock_and_log_if_debug_flag`** (62B, HIGH) via
+`RenamePass54vFun8005c064.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Calls the already-named `commit_or_retry_sco_esco_timing_field_via_clock_window_check`
+(Pass 48), then if debug flag bit `0x8` at `PTR_PTR_8005c0a4[8]` is set, invokes the clock getter
+at `PTR_DAT_8005c0a8` and logs (tag `0xca`, format `0x174f`/`0xd52`) with the shifted clock value.
+Sole caller `top_level_link_event_status_dispatcher_loop2` when connection status word bit `0x10`
+is set inside the `0x100` status-bit handler path.
+
+**Confidence:** HIGH — self-contained wrapper around an established named callee plus the same
+debug-gated logging idiom as `sync_nibble_field0x118_via_clock_window_check_and_log` (Pass 53).
+
+Region unnamed count after this pass: **33** (34 minus this rename).
+
+**Next:** Pass 54w — continue down the xrefs=1 tier (re-run cold-triage for next rank).
