@@ -5042,4 +5042,46 @@ Completes the Pass 54a/54b quota-reconciliation pipeline (`…` →
 Full Pass 54 cold-triage (`ColdTriageRegion80050000Pass54.java`) still not run — deferred to
 Pass 54d.
 
-**Next**: Pass 54d — run `ColdTriageRegion80050000Pass54.java` (general cold-triage re-rank).
+## Pass 54d (2026-06-28) — cold-triage re-rank + rank-1 rename
+
+Ran `ColdTriageRegion80050000Pass54.java` (general cold-triage re-rank deferred since
+Pass 54a/54b/54c). Live counts: **366 total**, **314 named**, **52 unnamed** (9
+mis-disassembly artifacts excluded, unchanged).
+
+Top-40 xrefs-ranked candidates (rank 1 = highest):
+
+| Rank | Address | Size | Xrefs |
+|------|---------|------|-------|
+| 1 | `0x80052774` | 140B | 1 |
+| 2 | `0x800544e0` | 132B | 1 |
+| 3 | `0x80057684` | 128B | 1 |
+| … | … | … | … |
+
+One-function progress on rank 1: decompiled and renamed **`FUN_80052774` →
+`transfer_or_emit_conn_negotiation_state_at_field0x14`** (140B, HIGH) via
+`RenamePass54dFun80052774.java` (`renamed=1`, live-verified).
+
+**Mechanism:** operates on the per-connection negotiation sub-record pointer at
+`conn+0x14` (same field as `get_or_alloc_conn_negotiation_state` /
+`finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`). Two paths:
+
+- **`param_2 == NULL`:** calls the already-named `hci_evt_pack_conn_field_into_buf`
+  to flush an HCI event buffer, then — if the connection is in the expected role/state
+  (`+0x8` bit 0 / `+0x1d == 1`) — prepends any existing `+0x14` sub-record node onto
+  the global free-list head at `PTR_PTR_80052800` and clears `conn+0x14`.
+- **`param_2 != NULL`:** transfers or allocates negotiation state between two
+  connection records: on the central/peripheral mismatch path calls
+  `FUN_8004ffc4` (pool pop + template memcpy) into `param_2+0x14`; otherwise merges
+  the linked sub-record from `param_1+0x14` into `param_2+0x14` (returning any
+  displaced node to the free list first) and zeroes the source slot.
+
+**Caller context:** documented callee of `FUN_80052c1c` (negotiation-result
+post-processing gate in `reverse_engineering_conn_feature_dispatch.md` §7) — invoked
+after `FUN_80052a38` applies negotiated parameters when the negotiation state's first
+byte is clear.
+
+Region unnamed count after this pass: **51** (52 minus this rename).
+
+**Next:** Pass 54e — decompile+rename cold-triage rank 2 (`0x800544e0`, 132B, xrefs=1)
+or continue down the xrefs=1 tier before tackling the xrefs=0 large-function tail
+(ranks 33+).

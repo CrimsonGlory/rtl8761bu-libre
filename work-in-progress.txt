@@ -4559,8 +4559,6 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+1 entry, user-named count 1103)
           → analysis/INDEX.md
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54d: run ColdTriageRegion80050000Pass54.java
-          (general cold-triage re-rank deferred from Pass 54b/54c) (2026-06-28)
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank, resolved all 3
           carried-forward holdovers + 3 cross-region 0x80040000 renames (2026-06-28)
@@ -4971,6 +4969,12 @@ sweep beyond enumeration and is the most out-of-date):
           confirmation the ticket asked for, and it reports zero gaps.
           → analysis/rom/rom_function_index.md, analysis/INDEX.md
 
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54d (2026-06-28): ran
+          ColdTriageRegion80050000Pass54.java (314 named / 52 unnamed); decompiled+
+          renamed rank-1 FUN_80052774→transfer_or_emit_conn_negotiation_state_at_field0x14.
+          Region 51 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54d; rom_function_index.md; live named count 1104.
+
 [NEXT]  ROM 100% coverage: decompile and name every function in the `rom` block
           (0x80000000–0x8007ffff) — drive live Ghidra user-named count to match
           total real functions (each with HIGH-confidence purpose, region-doc
@@ -4980,7 +4984,7 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_*`, 0 medium, 0 low; named count == total real functions (see
           "=== PHASE 9 GOAL" section above for full criteria).
           **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
-          functions in `rom`, **1103** user-named live in Ghidra, **2168** unnamed
+          functions in `rom`, **1104** user-named live in Ghidra, **2167** unnamed
           `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
           re-application are DONE; the remaining work is the unnamed bulk.
           **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
@@ -4990,15 +4994,15 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** promote and execute the carried `[TODO]` Pass 54d
-          for region `0x80050000` (`ColdTriageRegion80050000Pass54.java` general
-          cold-triage re-rank deferred from Pass 54b/54c), then continue the regional
-          sweep until that region's unnamed count is 0 before advancing to the next
-          highest-unnamed region per `RomRegionBreakdown.java`.
+          **Immediate first step:** continue Pass 54e for region `0x80050000`
+          (cold-triage rank 2: `0x800544e0`, 132B, xrefs=1), then work down the
+          xrefs=1 tier before the xrefs=0 large-function tail (ranks 33+).
           (2026-06-28)
 
-
-EXECUTION NOTES FOR PHASE 9 CONTINUATION (2026-06-25):
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54e: decompile+rename cold-triage
+          rank 2 (`0x800544e0`, 132B, xrefs=1) from Pass 54d re-rank output.
+          Continue until region unnamed count hits 0, then advance per
+          RomRegionBreakdown.java.
 
 Region 0x80000000 status summary:
 - Gap-scope (220 targeted untouched stretches): COMPLETE (219 real functions + 1 non-function)

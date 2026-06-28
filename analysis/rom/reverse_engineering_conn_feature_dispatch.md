@@ -191,7 +191,7 @@ void FUN_80052c1c(p1, p2, p3, conn_record, p5)
     state = FUN_8004e820(conn_record);
     if (state != NULL && state->field0 == 0) {
         FUN_80052a38(p1, p2, p3, conn_record, p5, state);   // apply negotiated params
-        FUN_80052774(conn_record, p5, state);                // follow-up / notify step
+        transfer_or_emit_conn_negotiation_state_at_field0x14(conn_record, p5, state);  // follow-up / notify step
     }
 }
 ```
@@ -199,9 +199,10 @@ void FUN_80052c1c(p1, p2, p3, conn_record, p5)
 **Purpose:** thin gate-and-dispatch wrapper — only proceeds if the connection
 state's first field is clear (i.e. "not already finalized"), then calls two
 further (out-of-scope-for-this-ticket) functions to apply parameters and
-trigger a follow-up notification. `FUN_80052a38`/`FUN_80052774` were not in
-the original consolidation list and remain undocumented; flagged here as a
-natural follow-up target for future ROM RE work.
+trigger a follow-up notification. `FUN_80052a38` remains undocumented;
+`FUN_80052774` was renamed Pass 54d (2026-06-28) →
+`transfer_or_emit_conn_negotiation_state_at_field0x14` — see
+`reverse_engineering_region_0x80050000.md` Pass 54d.
 
 ## 8. `FUN_8004e808` — Linked-list push (LIFO)
 
