@@ -5274,4 +5274,22 @@ LE channel-selection cluster (Pass 24 `0x80055320`).
 
 Region unnamed count after this pass: **42** (43 minus this rename).
 
-**Next:** Pass 54n — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+## Pass 54n (2026-06-28) — cold-triage rank-1 rename (post-54m re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_80052458` → `alloc_0x60_and_0x108_record_pools_from_config_and_wire`** (82B, HIGH) via
+`RenamePass54nFun80052458.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Reads `PTR_config_base` fields `0x1e1`/`0x1e2` to derive two record counts, allocates
+via `func1_structs_at_0x80100000` pools of `count1×0x60` and `count2×0x108` bytes, stores bases in
+`PTR_PTR_800524b0` / `PTR_PTR_800524b4`, then calls `FUN_8004e878` (sibling wire-up that links
+records through pointer chains at strides `0x60` / `0x108`). Sole documented caller:
+`init_record_pools_and_related_substates` (Pass 31).
+
+**Confidence:** HIGH — same config-derived dual-pool alloc pattern as
+`alloc_0x54_record_pool_and_ptr_table` / `alloc_and_wire_0x14_slot_index_table_in_link_globals`;
+caller already named.
+
+Region unnamed count after this pass: **41** (42 minus this rename).
+
+**Next:** Pass 54o — continue down the xrefs=1 tier (re-run cold-triage for next rank).
