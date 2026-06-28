@@ -4271,11 +4271,32 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md (+3 entries, count 996)
           → analysis/INDEX.md updated
 
-[NEXT]  Full RE: xref sweep from reset_sco_esco_hw_subsystem_on_link_loss callees
-          Decompile and triage unnamed callees of reset_sco_esco_hw_subsystem_on_link_loss:
-            FUN_800344f8, FUN_80034480, FUN_80033ed8, FUN_80037370 (configure_hw_regs_and_init_for_sco_teardown)
-          Promote configure_hw_regs_and_init_for_sco_teardown to HIGH if callees clear.
-          Continue region 0x80050000 cold-triage or rank-1 xrefs≥3 backlog as time permits.
+[DONE]  Full RE: xref sweep from reset_sco_esco_hw_subsystem_on_link_loss callees (2026-06-28)
+          Decompiled+renamed all 3 remaining unnamed direct callees, all HIGH via
+          RenamePass43CrossRegion.java (renamed=3 alreadyOk=0 missing=0 failed=0):
+            0x800344f8 -> write_sco_hw_reg_and_poll_bit0_clear_with_timeout
+            0x80034480 -> write_sco_hw_reg_and_poll_mask_clear_with_timeout
+            0x80033ed8 -> disable_esco_hw_slot_for_each_active_connection
+          Promoted configure_hw_regs_and_init_for_sco_teardown (0x80037370) MEDIUM-HIGH -> HIGH
+          (all 3 of its own callees now HIGH-named). Full SCO/eSCO-link-loss teardown call
+          tree (caller + 4 callees) now fully resolved, no remaining low/medium holdovers.
+          Also hit + resolved/worked-around 2 wairz infra issues this session — see
+          wairz_requested_changes.txt: (1) GZF project.prp OWNER regressed to NotOwnerException
+          after a container restart activated the root->wairz privilege-drop fix; reverted
+          OWNER back to "wairz" to match, verified via repeated list_functions. (2)
+          save_ghidra_script silently stopped materializing files to /opt/ghidra_scripts
+          (mounted read-only in both backend+worker containers from host path
+          /root/wairz/ghidra/scripts) post-restart; worked around by writing the rename
+          script directly to that host path with matching root:root/644 ownership.
+          → analysis/rom/reverse_engineering_region_0x80030000.md (Pass 43)
+          → analysis/rom/rom_function_index.md (+3 entries +1 promotion, count 999)
+          → analysis/INDEX.md updated
+
+[NEXT]  Full RE: ROM region 0x80050000 cold-triage or rank-1 xrefs≥3 backlog
+          No specific lead queued from Pass 43 — the teardown call tree it was chasing is
+          now closed out. Continue general cold-triage sweep of region 0x80050000 (largest
+          remaining unnamed-function region) or pick up the rank-1 xrefs≥3 backlog per
+          analysis/INDEX.md's region 0x80050000 summary.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,

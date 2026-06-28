@@ -1036,4 +1036,90 @@ recommended renames flagged (not applied — rename-persistence bug); the other
 
 Region 0x80030000: +3 HIGH names (includes Pass 41's `reset_sco_esco_hw_subsystem_on_link_loss` now live in Ghidra from the Pass 35–41 batch). **MEDIUM-HIGH holdover**: `0x80037370` `configure_hw_regs_and_init_for_sco_teardown` — callees now named, candidate for promotion next pass.
 
-**Next**: Xref sweep from `reset_sco_esco_hw_subsystem_on_link_loss` callees (`FUN_800344f8`, `FUN_80034480`, `FUN_80033ed8`, `FUN_80037370`).
+---
+
+## Pass 43 — reset_sco_esco_hw_subsystem_on_link_loss callee sweep + promotion (2026-06-28)
+
+**Context**: Finished the xref sweep flagged at the end of Pass 42. Decompiled the
+3 remaining unnamed direct callees of `reset_sco_esco_hw_subsystem_on_link_loss`
+(`0x80037394`): `FUN_800344f8`, `FUN_80034480`, `FUN_80033ed8`. The 4th callee,
+`configure_hw_regs_and_init_for_sco_teardown` (`0x80037370`), was already named
+(Pass 41) and is promoted below now that all 3 of *its* callees are also HIGH.
+
+Re-decompiling `reset_sco_esco_hw_subsystem_on_link_loss` confirmed the exact call
+order inside the `field[0x10b] != 0` teardown branch: disable HW regs 0xbe/0xc0 →
+`FUN_800344f8()` → `configure_hw_regs_and_init_for_sco_teardown()` → fptr(1) →
+`FUN_80034480()` → fptr(addr,len) → `FUN_80033ed8()` → `FUN_800132f4(1)` →
+`init_or_reset_sco_hw_slot_table(0)` → clear status bits → re-enable regs 0xbe/0xc0.
+All 3 targets have a single caller (`xrefs_to` returns none — same indirect-call
+visibility gap Ghidra has for the other direct calls in this function; confirmed by
+re-reading the decompiled body instead).
+
+### Analyzed functions (3 HIGH renames applied)
+
+**`0x800344f8`** (98B) → `write_sco_hw_reg_and_poll_bit0_clear_with_timeout` [HIGH]
+- Writes fixed command byte `0x3c` to a HW register (`DAT_8003455c`), then polls
+  (≤2000 iterations) for bit 0 of that register to clear (ack/done).
+- On timeout: logs via `possible_logging_function__var_args(1, 0x24, &DAT_00002614,
+  &DAT_000023ad, 2, <reg_ptr>, 1, <iter_count>)`, then force-writes the register's low
+  byte to `0xa5` (fallback/abort value) before returning.
+- Same shape as the already-documented `poll_status_sign_bit_with_timeout_0x65` /
+  `_variant` pair (`region_0x80000000`) — a "write cmd, poll ack bit, timeout fallback
+  + log" idiom that recurs across HW-register helpers in this firmware.
+
+**`0x80034480`** (94B) → `write_sco_hw_reg_and_poll_mask_clear_with_timeout` [HIGH]
+- Structurally identical to `write_sco_hw_reg_and_poll_bit0_clear_with_timeout` above,
+  but every value is read from a `DAT_800344e*` global instead of an inline immediate
+  (write value `DAT_800344e4`, poll mask `DAT_800344e8`, timeout fallback mask/value
+  `DAT_800344f0`/`DAT_800344f4`). No parameters — same single hardcoded register/value
+  set, just compiled with the constants spilled to a literal pool instead of immediates
+  (consistent with MIPS16e's narrow immediate-encoding limits forcing larger constants
+  out of the instruction stream). Logs via the same `possible_logging_function__var_args`
+  call shape on timeout (distinct format-string pointer `&DAT_00002637`, same shared
+  second string `&DAT_000023ad`).
+- Near-duplicate of the previous function for a *different* register — not merged,
+  matching the project's existing precedent for this exact situation
+  (`poll_status_sign_bit_with_timeout_0x65_variant`).
+
+**`0x80033ed8`** (158B) → `disable_esco_hw_slot_for_each_active_connection` [HIGH]
+- Gated on `PTR_struct_of_at_least_0x300_size_80033f78->field_0x173 != 0`.
+- Sweeps up to 10 connection records (`PTR_big_ol_struct_80033f7c[i].bos_entry_valid_
+  == 1`); for each active entry without `field369_0x2b5` set, resolves an eSCO slot
+  index via the already-named `conn_record_role_to_esco_slot_index(i)` and, if
+  resolved, issues 3 HW commands through a function pointer
+  (`PTR_DAT_80033f88`) to disable that connection's eSCO HW slot:
+  1. `(2, (byte_0xCC&0x1f)<<0xb | bos_connection__array_index<<5)` — encoded
+     link-parameter disable command.
+  2. `(slot_table_value, register_at_that_value & 0xfffd)` — clears bit 1 of an
+     indexed register.
+  3. `(0, 0x21)` — fixed terminator command.
+- Single caller confirms scope: this is the per-connection eSCO HW slot teardown
+  sweep invoked once, early, in the full subsystem teardown.
+
+### Promotion: `configure_hw_regs_and_init_for_sco_teardown` MEDIUM-HIGH → HIGH
+
+`0x80037370` (34B): `hw_register_config_with_timeout(1)` +
+`dispatch_bb_register_da_d6_write_with_hook(0,0,0)` +
+`init_or_clear_sco_hw_channel_subsystem(1)`. All 3 callees are now HIGH-confidence
+named (the first two pre-existing, the third from Pass 42), and its single caller
+(`reset_sco_esco_hw_subsystem_on_link_loss`) is HIGH. No remaining ambiguity —
+promoted to HIGH in `rom_function_index.md`.
+
+### Rename script
+
+`RenamePass43CrossRegion.java` — 3 entries, applied via `run_ghidra_headless`
+(`renamed=3 alreadyOk=0 missing=0 failed=0`). See `wairz_requested_changes.txt` for
+two infrastructure issues hit and resolved/worked around while applying this pass
+(GZF project ownership regression; `save_ghidra_script` not materializing files
+post-container-restart).
+
+### Coverage after Pass 43
+
+Region 0x80030000: +3 HIGH names, +1 promotion (MEDIUM-HIGH → HIGH). All 4 direct
+callees of `reset_sco_esco_hw_subsystem_on_link_loss` are now HIGH-confidence named;
+the full SCO/eSCO-link-loss teardown call tree (caller + 4 callees + their callees)
+is fully resolved with no remaining low/medium-confidence holdovers.
+
+**Next**: Continue region 0x80050000 cold-triage or rank-1 xrefs≥3 backlog as time
+permits (no specific lead queued from this pass — the teardown call tree it was
+chasing is now closed out).

@@ -252,16 +252,74 @@ Format: [TODO] or [DONE] status, date, description
     decompilation (Step 5 PASS). Verdict: RENAME PERSISTENCE: PASS (list_functions ✓,
     decompile_function ✓). Tasks gated on this entry may now be unblocked.
 
-[TODO] 2026-06-28: GZF process-mode project NotOwnerException when headless runs as root
-  Context: wip-iteration Pass 42 — applying RenamePass35-41 via run_ghidra_headless
-  Issue: Persistent GZF project at /var/wairz/ghidra_projects/<hash>/ has project.prp
-    OWNER="wairz" (set during initial import, likely as wairz user), but analyzeHeadless
-    in wairz-backend container runs as root. Opening the project fails with:
-      ghidra.util.NotOwnerException: Project is owned by wairz
-    All GZF process-mode operations fail (run_ghidra_headless, batch_decompile_functions).
-  Workaround applied (2026-06-28): sed project.prp OWNER wairz→root via docker exec.
-    This unblocks the session but is fragile — any re-import as wairz user will break again.
-  Needed fix: either (a) run analyzeHeadless as the wairz user (su/runuser in ghidra_service),
-    or (b) set OWNER to the actual runtime user at GZF import time, or (c) document that
-    GZF process-mode projects must be imported with the same UID that runs headless.
-  Impact: blocks all rename/decompile MCP calls until manually fixed or wairz patched.
+[DONE] 2026-06-28 (MISDIAGNOSED then CORRECTED same day): GZF process-mode project
+  NotOwnerException — was caused by an incorrect manual workaround, not a wairz bug.
+  Context: wip-iteration Pass 42 — applying RenamePass35-41 via run_ghidra_headless.
+  Original issue (correctly observed): project.prp OWNER="wairz", analyzeHeadless
+    appeared to run as root in wairz-backend container → NotOwnerException: Project is
+    owned by wairz.
+  WRONG workaround applied 2026-06-28 00:20: sed project.prp OWNER wairz→root via
+    docker exec. This appeared to unblock Pass 42's rename scripts at the time, but
+    re-broke GZF process-mode access shortly after (confirmed via repeated
+    list_functions calls in the next wip-iteration session, ~02:32 same day) —
+    every call failed with: NotOwnerException: Project is owned by root.
+  Root cause found 2026-06-28 (next session): wairz's OWN code already handles this.
+    /app/app/services/ghidra_service.py defines _make_ghidra_preexec_fn(), which drops
+    privileges to the 'wairz' OS user (setgid/setuid) before every analyzeHeadless
+    subprocess exec when the caller is root — specifically so backend (root, via
+    entrypoint.sh... actually drops to wairz) and worker (root, direct arq entrypoint)
+    both always execute analyzeHeadless AS 'wairz', keeping project ownership
+    consistent regardless of which container does the initial -import. Docstring
+    explicitly documents this exact failure mode and states the normalized owner is
+    always 'wairz'. The manual sed to OWNER="root" directly contradicted this existing
+    design and was the actual bug — not a missing wairz feature.
+  Fix applied 2026-06-28: reverted project.prp OWNER back to "wairz" via docker exec
+    sed (undoing the wrong workaround, restoring the value _make_ghidra_preexec_fn
+    already normalizes every invocation to). Verified: list_functions on the GZF
+    succeeded twice in a row immediately after (500 functions returned both times).
+  No wairz code change needed — this was a self-inflicted state corruption, not a
+    product bug. Leaving this entry as a cautionary record: do NOT manually edit
+    project.prp OWNER as a "fix" for NotOwnerException again. If it recurs, check
+    _make_ghidra_preexec_fn() is still wired into the analyzeHeadless subprocess call
+    (ghidra_service.py ~line 714) before assuming OWNER needs hand-editing.
+
+[TODO] 2026-06-28: save_ghidra_script / script_file_id do not materialize files the
+  wairz-user-privileged analyzeHeadless process can read — both broke together when
+  the backend/worker containers restarted (~02:23) and the root→wairz privilege drop
+  (see entry above) started actually taking effect.
+  Context: wip-iteration Pass 43 — applying a new rename script (RenamePass43CrossRegion.java)
+    via run_ghidra_headless against the persistent GZF project.
+  Issue A (script_name path): save_ghidra_script reported "Script created/updated
+    successfully" with a stable file ID, but the file never appeared on disk in
+    /opt/ghidra_scripts/ in either wairz-backend-1 or wairz-worker-1 (confirmed via
+    `docker exec ... ls`, twice, after a create AND an update call). Consequently
+    run_ghidra_headless(script_name=...) failed: "Script not found: RenamePass43CrossRegion.java".
+  Issue B (script_file_id path, tried as a fallback): run_ghidra_headless(script_file_id=...)
+    is documented as "written to a temp dir and executed", and the log does show the
+    temp dir added to the script search path (/tmp/ghidra_script_p37glj33), but the
+    script still wasn't found there either: "Script not found: /tmp/ghidra_script_p37glj33/
+    RenamePass43CrossRegion.java". So the temp-dir materialization for this path is
+    ALSO broken (or written with permissions the now-correctly-non-root analyzeHeadless
+    process — running as 'wairz' post-fix above — can't read).
+  Root cause (partially diagnosed): `docker inspect` shows /opt/ghidra_scripts is
+    mounted READ-ONLY in both wairz-backend-1 and wairz-worker-1 (source
+    /root/wairz/ghidra/scripts on the host, rw=false in both containers). Pre-existing
+    scripts (RenamePass3..42*.java) ARE present on disk, all owned root:root — meaning
+    SOME process with host-level or root-bind-mount write access wrote them historically,
+    but neither container can write there now. Whatever mechanism used to materialize
+    save_ghidra_script's DB-persisted content onto that host path appears to no longer
+    be running/reachable post-restart (same restart window as the OWNER bug above).
+    Did not chase further into wairz internals per project policy (CLAUDE.md: report,
+    don't patch) — the read-only-mount discovery alone is probably enough for whoever
+    owns this to find the missing sync step.
+  Workaround applied 2026-06-28 (content-only, not a code patch): wrote the script
+    directly to the host path /root/wairz/ghidra/scripts/RenamePass43CrossRegion.java
+    (root:root, 644 — matching every sibling file's ownership/perms exactly), which
+    immediately became visible inside both containers via the existing read-only bind
+    mount. run_ghidra_headless(script_name=...) then succeeded normally (exit 0,
+    renamed=3 alreadyOk=0 missing=0 failed=0). This restores save_ghidra_script's
+    INTENDED end state by hand; it does not fix the tool itself.
+  Impact: every NEW save_ghidra_script call (not just updates to pre-existing files)
+    is currently a no-op as far as run_ghidra_headless can see, until whatever
+    materializes /root/wairz/ghidra/scripts on the host is restored. Existing
+    pre-restart scripts on disk are unaffected and still work fine.
