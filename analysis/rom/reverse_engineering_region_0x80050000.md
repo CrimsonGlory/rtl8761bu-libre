@@ -5392,4 +5392,22 @@ confirms timing-candidate ordering step in the eSCO link-register scan pipeline.
 
 Region unnamed count after this pass: **36** (37 minus this rename).
 
-**Next:** Pass 54t — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+**Next:** Pass 54u — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54t (2026-06-28) — cold-triage rank-1 rename (post-54s re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54s: **366 total**, **330 named**,
+**35 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005610c` → `write_mmio_reg_pair_low_bytes_if_slot_lt_11_and_dispatch_3`** (66B, HIGH) via
+`RenamePass54tFun8005610c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** If `(param_1 & 0xff) < 0xb` (valid slot indices 0–10), mask-writes the low bytes of
+`param_1` and `param_2` into MMIO ushort globals `DAT_80056150` and `DAT_80056154` (preserving
+each register's high byte), then invokes the function pointer at `PTR_DAT_80056158` with opcode `3`.
+Same `0x800561xx` HW-register cluster as `write_connection_struct_fields_1c_1e_20_to_hw_regs`
+(Pass 26) and `set_hw_ctrl_bits_and_update_conn10_0x154` (Pass 29).
+
+**Confidence:** HIGH — self-contained guard + mask-write + indirect dispatch; structural neighbor
+in the established MMIO programming cluster.
+
+Region unnamed count after this pass: **35** (36 minus this rename).
