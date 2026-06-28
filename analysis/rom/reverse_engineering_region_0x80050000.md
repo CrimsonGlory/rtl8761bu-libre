@@ -3907,3 +3907,93 @@ HIGH/MEDIUM-HIGH tag).
 loose another top tier, same lineage as this pass) or pick a targeted xref follow-up from one
 of this pass's unnamed callees (`FUN_8004ee94`, `FUN_8005122c`, `FUN_8004edc4`, `FUN_8004f160`,
 `FUN_80051260`, `FUN_80051908`, `FUN_80051aa0`, `FUN_800560dc`).
+
+## Pass 45 — targeted xref follow-up on Pass 44's flagged callees (2026-06-28)
+
+Took the second option staged by Pass 44: decompiled all 8 flagged unnamed callees via a
+single `batch_decompile_functions` call (8/8 success), then cross-checked each against
+already-named siblings/anchors established earlier in this region and in region `0x80000000`.
+
+### Per-function findings
+
+- **`FUN_8004ee94`** (100B) → **HIGH**, renamed `sorted_event_list_insert_by_relative_key`.
+  Decompiled side-by-side with the already-HIGH `sched_event_sorted_insert_with_overlap_pushback`
+  (`0x800538b4`, Pass 5/39) and found the *same* core algorithm: sorted doubly-linked-list insert
+  keyed by `param_1[3]` relative to the list head (`piVar4[3]`), masked-wraparound key comparison,
+  walk-while-loop, head/tail pointer maintenance on a static struct (`PTR_DAT_8004eef8` here vs
+  `PTR_DAT_80053a18` there). This function omits the overlap-pushback timing-adjustment branch
+  (no `resolve_parent_context_by_role` calls, no logger-on-mismatch path) — it's the plain
+  sorted-insert primitive, operating on an independent event queue. Same evidentiary bar as its
+  sibling: self-contained, unambiguous structural match.
+- **`FUN_8005122c`** (8B) → **HIGH**, renamed `log_event_0x2d3_with_param`. One-line unconditional
+  `possible_logger_called_if_no_patch3(*puVar1, 0, param_1, 0x2d3, 0)` fire — exact shape of the
+  region's other literal-coded logger-wrapper one-liners.
+- **`FUN_8004edc4`** (24B) → stays **MEDIUM-HIGH**, not renamed. Flag-gated computation of a
+  length/offset field written to `param_1+0xc`: if a struct flag at `+8` is zero, calls a function
+  pointer and computes `(result>>1)+2`; else reads two fields from a nested pointer chain and sums
+  them (`+0x1c` ushort + 2 + `+0xc` int), then masks the result. No opcode literal, no named-sibling
+  match, no BT-spec anchor found this pass — genuinely ambiguous without more context.
+- **`FUN_8004f160`** (56B) → **HIGH**, renamed `advance_periodic_schedule_boundary_by_slot_multiple`.
+  Decompiled alongside the already-documented `send_LMP_268_with_slot_timing_adjustment`
+  (`0x8005152c`, Pass 24 — "computes `(field+0x14 - clock>>1) & mask`, guards with a second mask,
+  converts via `* 0x271 / 1000` [625µs slot]"). `FUN_8004f160` computes the **identical** delta
+  formula on the same field offsets (`+0x10`/`+0x14`) with the same dual-mask guard and the same
+  `0x271` conversion constant (inverted: `*1000/0x271`, i.e. interval→slot-count instead of
+  slot-count→interval) — but instead of sending an LMP 268 PDU with the adjustment, it directly
+  requantizes the boundary field `+0x14` to the next integer multiple of the slot-count period,
+  with a `trap(7)` guard against a zero-period divide. Same conversion-constant evidentiary class
+  used throughout this region (Passes 24/27/etc.) to anchor HIGH confidence — this is a sibling
+  reschedule primitive to the LMP-268 sender, not the sender itself.
+- **`FUN_80051260`** (36B) → **HIGH**, renamed `send_one_time_event_0x6f_if_not_sent`. Exact
+  structural twin of the already-HIGH `send_one_time_event_0x71_if_not_sent` (`0x800512a4`):
+  "if a one-shot flag is clear, fire the logger with a literal event code, set the flag on
+  success" — differs only in the literal code (`0x6f` vs `0x71`) and the flag's storage location
+  (byte at static-struct `+0x20`, set to `1`, vs a bitmask OR at a different static byte).
+- **`FUN_80051908`** (36B) → **HIGH**, renamed `vsc_0xfc95_init_and_clear_flag_bit4`. Matches the
+  region `0x80000000`-documented `VSC_0xfc95` lazy-init triad pattern (see
+  `conn_link_quality_history_reset_and_vsc_0xfc95_trigger` / the `link_state6_afh_or_channel_feature_toggle1/2/3`
+  siblings): lazily initializes a feature value via `VSC_0xfc95_called2` if uninitialized (`== -1`),
+  then unconditionally clears bit 4 (`& 0xef`) of a flags byte in the same static struct.
+- **`FUN_80051aa0`** (54B) → **HIGH**, renamed `vsc_0xfc95_init_and_dispatch_lmp268_if_slot_state2`.
+  Same `VSC_0xfc95` lazy-init opening as `vsc_0xfc95_init_and_clear_flag_bit4` above, but instead of
+  a flag clear, it gates a `LMP__268__most_common_for_VSCs2_checks_fptr_patch` send on a
+  slot-state-2 check performed via the already-named `call_fptr_if_set_wraps_check_slot_state_eq2`.
+  Three already-named callees chained in an unambiguous init→check→dispatch shape.
+- **`FUN_800560dc`** (38B) → **HIGH**, renamed `set_validated_slot_index_high_byte_and_notify`.
+  Structural superset of the already-HIGH `write_esco_slot_count_high_byte` (`0x80056204`, Pass 36
+  — writes the high byte of a 16-bit field at a fixed static address): this function adds a range
+  guard (`param_1 < 0xb`, i.e. indices 0-10 — matching the established 11-slot table size from
+  Pass 28's `scan_active_slots_and_extract_timing_ranges`) before the identical high-byte write,
+  then fires a function-pointer dispatch with literal arg `9` — the same write+dispatch combo
+  shape as `send_event_0x71_with_high_byte_extracted` (Pass 36). Validated-range write matching a
+  known table size, plus an established dispatch-combo shape, together clear HIGH.
+
+### xref check
+
+`find_callers` now resolves statically-recorded call sites (confirmed working again this pass —
+e.g. `FUN_8004ee94` has exactly 1 caller, `FUN_8004ef08`), but all 7 renamed functions plus the
+1 holdover returned **zero** callers. This is consistent with the region's long-documented gap:
+these are almost certainly invoked only through function-pointer/dispatch-table indirection
+(the same kind of indirect-only call site that left `FUN_8005d438`'s and `FUN_8005a048`'s true
+caller counts under-reported in Passes 18/19). Absence of static xrefs did not block naming here
+since all 7 renames rest on self-contained structural-sibling evidence, the same evidentiary bar
+used throughout this region since Pass 5.
+
+### Rename application
+
+`RenamePass45Region80050000.java` written directly to `/root/wairz/ghidra/scripts/` (host-path
+workaround, see Pass 44's tooling note — `save_ghidra_script` still doesn't materialize files),
+run via `run_ghidra_headless(use_saved_project=true)`: `renamed=7 alreadyOk=0 missing=0 failed=0`,
+`Save succeeded`. Live-verified via fresh `decompile_function` calls on
+`sorted_event_list_insert_by_relative_key`, `vsc_0xfc95_init_and_dispatch_lmp268_if_slot_state2`,
+and `set_validated_slot_index_high_byte_and_notify` — all three resolved correctly under their
+new names with unchanged decompiled bodies.
+
+### Coverage after Pass 45
+
+366 total, 117 unnamed → **110 unnamed** (7 HIGH renamed; named count region-wide 249 → **256**).
+`FUN_8004edc4` remains the sole unresolved holdover from Pass 44's flagged-callee list.
+
+**Next**: Continue general cold-triage sweep (re-rank again — Pass 44/45's renames have now
+shaken loose two consecutive top tiers, same lineage likely continues) or take another look at
+`FUN_8004edc4` once its own callers/callees surface more context.
