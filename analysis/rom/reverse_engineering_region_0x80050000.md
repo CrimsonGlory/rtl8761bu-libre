@@ -5176,3 +5176,24 @@ commit path inside `FUN_8005db5c` (calls this immediately before
 established `+0x341/+0x342` timing-field offsets, and caller context in the VSC 0xfc97 cluster.
 
 Region unnamed count after this pass: **47** (48 minus this rename).
+
+## Pass 54i (2026-06-28) — cold-triage rank-1 rename (post-54h re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54h: **366 total**, **319 named**,
+**46 unnamed** (9 artifacts excluded). New xrefs=1 rank 1: decompiled and renamed
+**`FUN_80059e64` → `clear_dual_status_flag_bits_and_log_pending_mask`** (96B, HIGH) via
+`RenamePass54iFun80059e64.java` (`renamed=1`, live-verified).
+
+**Mechanism:** polls two adjacent global status halfwords (`DAT_80059ec4`, `DAT_80059ec8`):
+if bit 0 of the first is set, clears it and records flag bit 0 in a combined mask; if bit 7
+(`0x80`) of the second is set, records flag bit 1 (Ghidra shows a no-op store on the second
+word — likely a failed decompile of `&= ~0x80`). When any pending flag was observed, logs via
+`possible_logging_function__var_args` (category `0xce`, format id `0xfce`, literal `0x1287`)
+passing the combined mask and `PTR_unknown_dat_ref_by_logger_80059ecc`.
+
+**Confidence:** HIGH — named logging callee, explicit bit-test/clear pattern on two globals,
+and established `0xce` debug-log category used elsewhere in this region's status-poll helpers.
+
+Region unnamed count after this pass: **46** (47 minus this rename).
+
+**Next:** Pass 54j — continue down the xrefs=1 tier (next rank: `0x8005c214`, 92B).
