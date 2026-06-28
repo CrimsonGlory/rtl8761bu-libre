@@ -4995,6 +4995,11 @@ sweep beyond enumeration and is the most out-of-date):
           (90B, HIGH). Region 44 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54k; rom_function_index.md; live named count 1111.
 
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54l (2026-06-28): decompiled+
+          renamed rank-1 FUN_800523bc→alloc_and_wire_0x14_slot_index_table_in_link_globals
+          (88B, HIGH). Region 43 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54l; rom_function_index.md; live named count 1112.
+
 [NEXT]  ROM 100% coverage: decompile and name every function in the `rom` block
           (0x80000000–0x8007ffff) — drive live Ghidra user-named count to match
           total real functions (each with HIGH-confidence purpose, region-doc
@@ -5004,7 +5009,7 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_*`, 0 medium, 0 low; named count == total real functions (see
           "=== PHASE 9 GOAL" section above for full criteria).
           **Baseline (2026-06-28, `rom_function_index.md` Summary):** 2737 total
-          functions in `rom`, **1111** user-named live in Ghidra, **2160** unnamed
+          functions in `rom`, **1112** user-named live in Ghidra, **2159** unnamed
           `FUN_*` remain. Doc-table named/medium/low cleanup and historical rename
           re-application are DONE; the remaining work is the unnamed bulk.
           **Method (unchanged from PHASE 9 CONTINUED splitting rule):** per-region
@@ -5014,12 +5019,12 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54l for region `0x80050000`
+          **Immediate first step:** continue Pass 54m for region `0x80050000`
           (re-run `ColdTriageRegion80050000Pass54.java` for next xrefs=1 rank).
           (2026-06-28)
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54l: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54k re-rank output).
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54m: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54l re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 

@@ -5236,3 +5236,23 @@ cluster, TX triple offsets match `afh_channel_quality_poll_commit`/`FUN_80056988
 Region unnamed count after this pass: **44** (45 minus this rename).
 
 **Next:** Pass 54l — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54l (2026-06-28) — cold-triage rank-1 rename (post-54k re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_800523bc` → `alloc_and_wire_0x14_slot_index_table_in_link_globals`** (88B, HIGH) via
+`RenamePass54lFun800523bc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Single-pool alloc of `param_1 * 0x18` bytes via `func1_structs_at_0x80100000`
+(tag 1). Layout: `param_1` pointer-index dwords followed by `param_1` records of `0x14` bytes
+each (eSCO slot stride); loop wires `index[i]` to `base + param_1*4 + i*0x14`. Stores base at
+link-global `+0x22c`/`+0x230`, count at `+0x234`, clears `+0x238`/`+0x23c`, sets `+0x240` to
+default template `PTR_DAT_80052418`.
+
+**Confidence:** HIGH — structural twin of `alloc_0x54_record_pool_and_ptr_table` /
+`alloc_and_link_0xfc_record_pool` (same pool allocator + pointer-table init family); `0x14`
+record stride matches the established eSCO indexed-link-register cluster.
+
+Region unnamed count after this pass: **43** (44 minus this rename).
+
+**Next:** Pass 54m — continue down the xrefs=1 tier (re-run cold-triage for next rank).
