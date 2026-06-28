@@ -5509,3 +5509,23 @@ dispatcher; two already-named callees with unambiguous roles.
 Region unnamed count after this pass: **30** (31 minus this rename).
 
 **Next:** Pass 54z — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54z (2026-06-28) — cold-triage rank-1 rename (post-54y re-rank)
+
+Decompiled and renamed rank-1 **`FUN_8005bde0` → `init_0x58_stride_conn_record_ptr_table_11_slots`**
+(50B, HIGH) via `RenamePass54zFun8005bde0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sub-init called from `init_global_connection_table_and_bt_state` (region
+`0x80040000`, Pass 51 cluster). Loops `i = 0..10` (`0xb`): for each index, writes an
+8-byte table entry at `PTR_PTR_8005be14` — dword pointer `= PTR_DAT_8005be18 + i*0x58`
+(conn-record stride) plus four metadata bytes `{0x0b, 0, 0, 0}` at offsets +4..+7.
+Wires the global 11-slot pointer table to the `0x58`-byte-stride connection-record pool
+before per-record field initialization.
+
+**Confidence:** HIGH — sole caller is the already-named global connection-table initializer;
+structural twin of `alloc_and_wire_0x14_slot_index_table_in_link_globals` / other
+pool-and-pointer-table wiring helpers in the record-pool bootstrap family.
+
+Region unnamed count after this pass: **29** (30 minus this rename).
+
+**Next:** Pass 54aa — continue down the xrefs=1 tier (re-run cold-triage for next rank).

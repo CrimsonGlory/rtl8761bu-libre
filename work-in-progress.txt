@@ -5067,12 +5067,17 @@ sweep beyond enumeration and is the most out-of-date):
           + `rom_function_index.md` + `analysis/INDEX.md` each pass. Shrink scope
           each turn; chain the continuation as a new `[TODO]` promoted to `[NEXT]`;
           mark a region DONE only when its unnamed count hits 0.
-          **Immediate first step:** continue Pass 54z for region `0x80050000`
-          (re-run cold-triage on xrefs=1 tier for next rank — rank-1 is `0x8005bde0`).
+          **Immediate first step:** continue Pass 54aa for region `0x80050000`
+          (re-run cold-triage on xrefs=1 tier for next rank).
           (2026-06-28)
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54z: decompile+rename next
-          cold-triage rank on the xrefs=1 tier (post-54y re-rank output).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54z (2026-06-28): decompiled+
+          renamed rank-1 `FUN_8005bde0`→`init_0x58_stride_conn_record_ptr_table_11_slots`
+          (50B, HIGH). Region 29 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54z; rom_function_index.md; live named count 1126.
+
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54aa: decompile+rename next
+          cold-triage rank on the xrefs=1 tier (post-54z re-rank output).
           Continue until region unnamed count hits 0, then advance per
           RomRegionBreakdown.java.
 
