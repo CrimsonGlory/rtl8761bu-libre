@@ -4467,17 +4467,65 @@ sweep beyond enumeration and is the most out-of-date):
              unnamed count updated to 2188)
           -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 49)
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 51: FUN_8004bde8 (354B; the eSCO/SCO
-          LMP-PDU-type dispatcher confirmed by Pass 50 as the sole caller of
-          finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu). Dispatches via a
-          16-entry PDU-type function-pointer table (PTR_DAT_8004bf58) and calls
-          esco_sco_param_negotiate_and_stage, dispatch_meta_subevent_0x13_with_addr_resolve, plus
-          3 still-unnamed callees (FUN_8005001c, FUN_8004bc74, FUN_8004ba34, FUN_80050f7c) — a
-          self-contained dispatcher cluster worth a dedicated pass. Also re-check Pass 48's 3
-          long-standing MEDIUM/MEDIUM-HIGH leads (FUN_80058638, FUN_8005e40c, FUN_8005058c) for
-          new anchors if a fresh cold-triage re-rank surfaces supporting callers.
+[DONE]  Full RE: ROM region 0x80040000/0x80050000 — Pass 51: FUN_8004bde8 dispatcher cluster,
+          12 HIGH renames, both Pass 48 holdovers resolved (2026-06-28)
+          FUN_8004bde8 (354B, region 0x80040000) -> esco_sco_lmp_pdu_validate_negotiate_and_dispatch:
+          confirmed as the master per-PDU eSCO/SCO LMP dispatcher — validates a buffer/header-length
+          budget, stages params via esco_sco_param_negotiate_and_stage, dispatches via a 16-entry
+          opcode-nibble fptr table, optionally emits dispatch_meta_subevent_0x13_with_addr_resolve,
+          then forks on a subsystem-mode flag into either the link-slot-alloc path
+          (resolve_or_alloc_link_slot_and_program_hw_register_for_lmp_pdu +
+          append_rssi_entry_to_pending_batch_and_flush_if_full, flushed via
+          flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb) or the negotiation-finalize path
+          (negotiation_lru_promote_and_gate_completion_bit -> the already-named
+          finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu, confirming the
+          bidirectional sole-caller relationship Pass 50 flagged). Called by thin per-opcode
+          wrappers (FUN_8004bf60 confirmed via find_callers; the other 5 call sites are
+          orphaned/mis-disassembled code per a dedicated FindContainingFunctionsPass51.java
+          lookup — not resolvable to named sibling wrappers without a force-disassembly pass).
+          classify_and_commit_lmp_pdu_negotiation_category (was FUN_8005001c, region 0x80050000)
+          classifies the PDU opcode into a 1-5 category and delegates to
+          commit_bdaddr_role_fields_to_negotiation_state (was FUN_8004fee4, region 0x80040000).
+          Resolved BOTH of region 0x80050000's Pass 48 holdover leads: FUN_8005058c ->
+          alloc_link_record_and_register_by_index (sole caller FUN_80047c50, found via
+          find_callers; calls alloc_link_record_from_pool +
+          set_link_record_index_and_register_in_table/insert_record_into_sorted_index_table_if_absent/
+          binary_search_sorted_table_by_index_byte, all region 0x80040000); FUN_8005e40c ->
+          alloc_event_record_and_log_tag_0xb (structural twin of the established
+          alloc_event_record_and_log_tag_{0x2,0x5,0x6,0x7,0xa,0x12,0x13} family). Pass 48's 3rd
+          lead FUN_80058638 still has no caller (find_callers returns none) — stays MEDIUM.
+          12 HIGH renames total via RenamePass51Region80040000.java (renamed=12 alreadyOk=0
+          missing=0 failed=0, live-verified): 8 are region 0x80040000 addresses, 4 are region
+          0x80050000 addresses (documented in each region's own file per a doc-accuracy
+          correction made this same pass — initially all 12 were drafted into the 0x80040000
+          doc before catching the address-range mismatch).
+          Tooling: confirmed run_ghidra_headless's script_args parameter is broken for every
+          invocation shape tested (script_name/script_file_id, with/without
+          use_saved_project, single/multi-value) — fails with
+          "InvalidInputException: Bad argument" at AnalyzeHeadless.parseOptions. Logged
+          non-blocking [DONE] entry to wairz_requested_changes.txt; workaround (hardcode
+          addresses into the script body, no script_args) proven twice this pass.
+          -> analysis/rom/reverse_engineering_region_0x80040000.md (Pass 51 section, 8 in-region
+             renames + cross-region pointers + tooling note)
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 51 section, 4 in-region
+             renames, both Pass 48 holdovers resolved; coverage 67->65 unnamed; [NEXT] set to
+             Pass 52)
+          -> analysis/rom/rom_function_index.md (+12 entries across both regions, user-named
+             count updated to 1087; corrected 4 rows' region cross-reference after the doc-accuracy
+             catch)
+          -> analysis/INDEX.md (both regions' summaries updated; 0x80050000 [NEXT] set to Pass 52)
+          -> wairz_requested_changes.txt (new non-blocking [DONE] entry: script_args regression)
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 52: general cold-triage re-rank (Pass 51's renames
+          may shake loose new sole-named-caller candidates in the xrefs=1/xrefs=2 tiers, per the
+          established pattern from Passes 44-50). FUN_80058638 (region 0x80050000, sets a
+          HW-config bit + conditionally clears a parent-context bit via the already-named
+          resolve_parent_context_by_role) remains a standing MEDIUM-confidence lead if a caller
+          surfaces.
           For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
-          the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally.
+          the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally. Do
+          NOT pass script_args (currently broken — hardcode addresses/names into the script body
+          instead, per the wairz_requested_changes.txt entry logged this pass).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 50: resolved both Pass 49 holdover leads (2026-06-28)
           FUN_80052f38 -> finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu (76B):

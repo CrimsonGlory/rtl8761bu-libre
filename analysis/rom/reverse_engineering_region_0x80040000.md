@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tiers (206 functions) remain as low-priority future work per diminishing-returns policy
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tiers (206 functions) remain as low-priority future work per diminishing-returns policy. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 51, 2026-06-28, 12 HIGH renames).
 
 ## Overview
 
@@ -554,3 +554,129 @@ callee-resolution need, not a resumption of the 1-150B tier sweep.
 Full evidence is in `reverse_engineering_region_0x80050000.md`'s "Pass 33" section.
 This does not reopen this region's formal park — it's a single opportunistic
 rename, not a resumption of the 1-150B tier sweep described above.
+
+## Pass 51 — eSCO/SCO LMP-PDU dispatcher cluster, 12 HIGH renames (2026-06-28)
+
+Region `0x80050000`'s Pass 50 confirmed `FUN_8004bde8` (region `0x80040000`, 354B) as the
+**sole caller** of `finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`. This pass
+fully resolved that function and its dispatcher cluster — a self-contained, opportunistic
+cross-region pass driven by another region's caller-resolution need (same pattern as the
+2026-06-27/2026-06-28 addenda above), not a resumption of the 1-150B tier sweep this region
+formally parked at after Pass 7.
+
+**`0x8004bde8` → `esco_sco_lmp_pdu_validate_negotiate_and_dispatch`** (354B): the master per-PDU
+eSCO/SCO LMP dispatcher. Validates a buffer/header-length budget (`*pbVar7*2+6+header_len`),
+stages the PDU's negotiation parameters via the already-named `esco_sco_param_negotiate_and_stage`,
+dispatches through a 16-entry opcode-nibble function-pointer table (`PTR_DAT_8004bf58`),
+optionally emits `dispatch_meta_subevent_0x13_with_addr_resolve`, then forks on a subsystem-mode
+flag (`PTR_PTR_8004bf54[4]`) into one of two paths:
+- **link-slot-allocation path** (flag clear): `resolve_or_alloc_link_slot_and_program_hw_register_for_lmp_pdu`,
+  and on success `append_rssi_entry_to_pending_batch_and_flush_if_full`.
+- **negotiation-finalize path** (flag set): `negotiation_lru_promote_and_gate_completion_bit`, and
+  on success `finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu` (the already-named
+  Pass 50 function — confirming the bidirectional caller/callee relationship Pass 50 flagged).
+
+Called by thin per-opcode wrapper functions — `FUN_8004bf60` (46B, confirmed via `find_callers`)
+passes fixed args `(min_header_len=6, default_answer=1)`. `find_callers`/`xrefs_to` reported 5
+more call sites (`0x8004bfb0`/`0x8004c046`/`0x8004c084`/`0x8004c0b4`/`0x8004c0e4`), but a
+dedicated `FindContainingFunctionsPass51.java` run (written directly to
+`/root/wairz/ghidra/scripts/`, hardcoded addresses — see Tooling Note below) confirmed all 5 sit
+in `NO_CONTAINING_FUNCTION` territory: orphaned/mis-disassembled code, not resolvable to a named
+sibling wrapper without a force-disassembly pass (the project's known MIPS16e
+code-after-data gap). These are presumably more per-opcode wrapper thunks analogous to
+`FUN_8004bf60`, immediately preceding the already-named `LMP_opcode_0x26F_LE_event_router`
+(`0x8004c0f4`) — left unresolved as a future force-disassembly candidate, not blocking this
+pass's HIGH renames.
+
+**Link-slot-allocation / RSSI-batch fork** (3 renames):
+- **`0x8004bc74` → `resolve_or_alloc_link_slot_and_program_hw_register_for_lmp_pdu`** (364B):
+  resolves an existing link-table slot by bdaddr/index (already-named
+  `find_link_record_by_bdaddr_and_flag`) or allocates a new one (already-named
+  `conn_slot_alloc_type01_and_store_bdaddr`/`conn_slot_alloc_and_commit_dispatch`), then programs
+  the corresponding HW link register via the already-named
+  `write_indexed_link_register_b_with_slot_check`. All 4 callees pre-named — HIGH on direct
+  structural grounds.
+- **`0x8004ba34` → `append_rssi_entry_to_pending_batch_and_flush_if_full`** (534B): computes an
+  RSSI value (`return_RSSI_value`) plus a per-connection adjustment, gates on a config flag via
+  `FUN_80074940`, then appends bdaddr+opcode+RSSI into one of two mode-selected per-instance
+  pending-batch arrays, incrementing a counter byte; once the counter reaches a config-derived
+  max (`cVar13`), flushes both batches via `FUN_8004574c` and resets the counter to 0.
+- **`0x8004574c` → `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`**: a 2-call body —
+  calls the already-named `send_evt_Meta_subevent_0x2_or_0x0b` once on each of the exact two
+  per-instance array families `append_rssi_entry_to_pending_batch_and_flush_if_full` populates.
+  This is the confirming anchor that clears the batch-append function to HIGH: the "flush" was
+  otherwise just inferred from the counter-threshold shape.
+
+**Correction: 4 of the 12 renamed addresses are region `0x80050000`, not this region.**
+`esco_sco_lmp_pdu_validate_negotiate_and_dispatch` calls `negotiation_lru_promote_and_gate_completion_bit`
+(was `FUN_80050f7c`) and `classify_and_commit_lmp_pdu_negotiation_category` (was `FUN_8005001c`) —
+both `0x80050xxx` addresses, i.e. region `0x80050000`. Likewise the link-record-alloc-chain's entry
+point `alloc_link_record_and_register_by_index` (was `FUN_8005058c`) and the structural-twin
+`alloc_event_record_and_log_tag_0xb` (was `FUN_8005e40c`) are also region-`0x80050000` addresses.
+Full evidence for all 4 is documented in `reverse_engineering_region_0x80050000.md`'s own "Pass 51"
+section, not here — only the genuinely-in-region functions are detailed below.
+
+**Category-classify's in-region callee** (1 rename): the cross-region
+`classify_and_commit_lmp_pdu_negotiation_category` (region `0x80050000`) delegates its field commit
+to:
+- **`0x8004fee4` → `commit_bdaddr_role_fields_to_negotiation_state`**: fetches/allocates the
+  connection's negotiation-state record via the already-named `get_or_alloc_conn_negotiation_state`,
+  then commits the bdaddr/role fields (`+4`/`+0xa`/`+0xe`/`+0x10`/`+0xb`) from either a
+  secondary/peer link record or the incoming PDU's own fields — matches the field layout the
+  Pass 49/50 negotiation-state cluster already established.
+
+**Link-record-alloc-and-index chain's in-region helpers** (3 renames — supporting the cross-region
+entry point `alloc_link_record_and_register_by_index`, which itself resolves region `0x80050000`'s
+Pass 48 holdover `FUN_8005058c` via its sole caller `FUN_80047c50`, the large eSCO/SCO LMP
+parameter validator/committer):
+- **`0x8004e298` → `set_link_record_index_and_register_in_table`** (26B): writes the record's
+  connection-index field (`+0x10`) — the identical field `FUN_80047c50` itself writes directly on
+  its "already had a record" branch — then registers the record into a sorted lookup table via
+  `FUN_8004e100`.
+- **`0x8004e100` → `insert_record_into_sorted_index_table_if_absent`** (84B): binary-searches via
+  `FUN_8004e0b0`; if absent and there's room, shifts entries to make space and inserts the new
+  record pointer at the returned position, incrementing the table's count.
+- **`0x8004e0b0` → `binary_search_sorted_table_by_index_byte`** (80B): binary search over a
+  `{array,capacity,count}` table struct keyed on a record's index-byte field (`+0x10`) — the
+  structural twin of the already-named `lookup_record_ptr_by_key_via_bsearch`'s underlying bsearch
+  helper (region `0x80050000` Pass 31), distinguished only by a 1-byte index key instead of an
+  8-byte key.
+
+**Pass 48's 3rd holdover, `0x80058638` (region `0x80050000`), stays unrenamed**: sets a HW-config
+bit (`0x200` on `DAT_80058678`), then conditionally clears a bit on a parent-context record via
+the already-named `resolve_parent_context_by_role`. No callers found (`find_callers` returns none
+— likely reached only via an indirect/table call, the project's standing tooling gap for indirect
+xrefs). Generic utility shape with no command-specific anchor; left at MEDIUM.
+
+**This region's share of Pass 51: 8 of the pass's 12 HIGH renames** — the dispatcher itself, its
+link-slot-alloc/RSSI-batch fork, the `0x8004e2xx`/`0x8004e1xx`/`0x8004e0xx` index-table helper
+chain, and the negotiation-state field-commit callee. The other 4 are region-`0x80050000`
+addresses, applied by the same `RenamePass51Region80040000.java` script (cross-region rename
+scripts spanning both regions are an established pattern in this project — see the Pass 47/48
+addenda above) but documented in that region's own file. Full script result: `renamed=12
+alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via a fresh `decompile_function`
+call on `esco_sco_lmp_pdu_validate_negotiate_and_dispatch` — all 4 renamed callee references (2
+in-region, 2 cross-region) resolve correctly under their new names.
+
+**Tooling note (script_args regression, 2026-06-28):** `run_ghidra_headless`'s `script_args`
+parameter is currently broken for **every** invocation shape tested this pass —
+`script_name`+`script_args` (no `use_saved_project`), `script_file_id`+`script_args` (with and
+without `use_saved_project=true`) — all fail identically with
+`ghidra.util.exception.InvalidInputException: Bad argument: <value>` thrown from
+`AnalyzeHeadless.parseOptions`, even for a single hex address with no comma. This blocks the
+documented `BatchDecompileList.java`/parameterized-script workflow entirely; confirmed not
+specific to any one script (reproduced with both the pre-existing `BatchDecompileList.java` and a
+brand-new `FindContainingFunctionsPass51.java`). **Workaround used this pass (and the one
+documented in CLAUDE.md/the WIP ticket text already, now re-confirmed necessary in practice, not
+just in principle): write the script directly to `/root/wairz/ghidra/scripts/` with hardcoded
+addresses/names baked into the script body, and invoke via `script_name` +
+`use_saved_project=true` with no `script_args`.** This worked cleanly for both the lookup script
+and the 12-rename script in this pass. Logged as a `[TODO]` in `wairz_requested_changes.txt`.
+
+### Region 0x80040000 status after Pass 51
+
+Still formally parked (Pass 7) for the bulk 1-150B-tier sweep — this was a fully opportunistic
+cross-region pass. 12 more functions named (cluster total now includes
+`esco_sco_lmp_pdu_validate_negotiate_and_dispatch` and its full dispatch fork). The 5 orphaned
+call-site addresses identified above are a concrete future force-disassembly target if anyone
+revisits the MIPS16e code-after-data gap tooling.

@@ -367,3 +367,54 @@ Format: [TODO] or [DONE] status, date, description
     matching existing siblings) instead of calling save_ghidra_script, then call
     run_ghidra_headless(script_name=...) normally. Do not call save_ghidra_script at all
     until this entry is marked truly [DONE] by a from-scratch materialization re-test.
+
+[DONE] 2026-06-28 (non-blocking — reliable fallback confirmed, same iteration as discovery):
+  run_ghidra_headless's `script_args` parameter is broken for every invocation shape tested.
+
+  Issue: during ROM region 0x80040000 Pass 51, needed to pass a comma-separated address list
+    to a parameterized script (the documented `BatchDecompileList.java` workflow, or a
+    purpose-built lookup script). Every attempt failed identically:
+      - script_file_id + use_saved_project=true: "ERROR REPORT SCRIPT ERROR: Script not found"
+        (the script file never lands at the expected /tmp/ghidra_script_*/ path when
+        script_args is also supplied — reproduced twice, with both the pre-existing
+        BatchDecompileList.java (UUID c4318d2d-5b17-4de2-84dc-067493696586) and a brand-new
+        FindContainingFunctionsPass51.java saved fresh via save_ghidra_script in the same
+        session).
+      - script_file_id, no use_saved_project: gets past script loading, then fails at
+        analyzeHeadless's own option parser: "Exception in thread main
+        ghidra.util.exception.InvalidInputException: Bad argument: <value>" at
+        AnalyzeHeadless.parseOptions (AnalyzeHeadless.java:422).
+      - script_name (DecompileAddr.java, a long-documented-working script per
+        GHIDRA_SCRIPTS.md) + script_args, no use_saved_project: same "Bad argument"
+        InvalidInputException.
+      - Isolated the trigger: NOT specific to commas in the value — a single bare hex
+        address with no comma ("0x8004bfb0") reproduces the same "Bad argument" failure.
+        So script_args itself is broken at the CLI-construction layer for run_ghidra_headless,
+        regardless of script_name vs script_file_id vs use_saved_project, regardless of
+        single-vs-multi-value, regardless of script identity (reproduced on 3 different
+        scripts: BatchDecompileList.java, DecompileAddr.java, FindContainingFunctionsPass51.java).
+        This contradicts GHIDRA_SCRIPTS.md's claim ("`script_args` with `0x`-prefixed hex
+        literals work fine for at least DiagAddr.java/DecompileAddr.java, verified
+        2026-06-21") — that claim no longer holds as of 2026-06-28; something regressed
+        between then and now.
+
+  Workaround (proven, used successfully this same iteration): skip script_args entirely.
+    Write the script directly to /root/wairz/ghidra/scripts/ via the Write tool (already the
+    standing workaround for the separate save_ghidra_script materialization bug above) with
+    all addresses/names HARDCODED into the script body as a static array, then call
+    run_ghidra_headless(script_name=..., use_saved_project=true) with NO script_args at all.
+    Verified end-to-end twice this iteration: once for a 6-address lookup script
+    (FindContainingFunctionsPass51.java) and once for a 12-entry rename script
+    (RenamePass51Region80040000.java, `renamed=12 alreadyOk=0 missing=0 failed=0`, live
+    decompile-verified). This matches the procedure CLAUDE.md/the work-in-progress.txt
+    ticket text already mandated for any NEW script ("write it directly to
+    /root/wairz/ghidra/scripts/ via the file-write tool (NOT save_ghidra_script) and call
+    run_ghidra_headless normally") — that text doesn't explicitly call out avoiding
+    script_args, but in practice the hardcoded-content approach sidesteps script_args too,
+    so the existing guidance already prescribes a working path. Reclassifying as
+    non-blocking for the same reason as the entry above: a reliable, zero-extra-cost
+    fallback exists and costs nothing extra to use by default. Going forward, prefer
+    hardcoding addresses/names into a fresh script over passing them via script_args, even
+    for scripts (like BatchDecompileList.java) that are designed to take script_args — until
+    this entry is marked truly [DONE] by a from-scratch script_args reproduction test showing
+    it works again.

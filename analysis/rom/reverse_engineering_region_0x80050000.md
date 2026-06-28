@@ -4765,14 +4765,61 @@ in-region HIGH renames — `0x8004e820` is a cross-region rename in
 `0x80040000` and isn't counted against this region's tally), 9 confirmed
 mis-disassembly artifacts (unchanged).
 
-**Next**: Pass 51 — `FUN_8004bde8` (354B, region `0x80040000`; the eSCO/SCO
-LMP-PDU dispatcher that is the sole caller of this pass's
-`finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`). It dispatches
-via a 16-entry PDU-type function-pointer table (`PTR_DAT_8004bf58`) and calls
-`esco_sco_param_negotiate_and_stage`, `dispatch_meta_subevent_0x13_with_addr_resolve`,
-plus 3 still-unnamed callees (`FUN_8005001c`, `FUN_8004bc74`, `FUN_8004ba34`,
-`FUN_80050f7c`) — a self-contained dispatcher cluster worth a dedicated pass
-of its own rather than a partial follow-up. Also still open: Pass 48's 3
-long-standing MEDIUM/MEDIUM-HIGH leads (`FUN_80058638`, `FUN_8005e40c`,
-`FUN_8005058c`) — re-check again for new anchors if they surface in a future
-cold-triage re-rank.
+## Pass 51 (2026-06-28) — `FUN_8004bde8` dispatcher cluster resolved, both Pass 48 holdovers closed
+
+Cross-region pass (region `0x80040000`'s own "Pass 51" covers the rest of this same
+investigation): decompiled `FUN_8004bde8` (region `0x80040000`, the eSCO/SCO LMP-PDU dispatcher
+flagged above as this pass's lead) and its full callee chain. Full evidence for the dispatcher
+itself and its in-region (`0x80040000`) callees is in `reverse_engineering_region_0x80040000.md`'s
+"Pass 51" section. This region's own 4 renamed addresses:
+
+- **`0x80050f7c` → `negotiation_lru_promote_and_gate_completion_bit`** (declared signature
+  `undefined4(byte*,undefined4,int)`): looks up/promotes the connection record's negotiation-state
+  sub-entry — `param_3+0x14`, the exact field `get_or_alloc_conn_negotiation_state` manages — via
+  the already-named `lookup_record_by_key_and_promote_to_list_head` or (a different already-named
+  function found live in this decompile) `lru_cache_get_or_insert_by_8byte_key`, then sets/checks
+  the "ready to complete" bit (`+0x11 & 0x10`) that the cross-region
+  `esco_sco_lmp_pdu_validate_negotiate_and_dispatch` checks before calling
+  `finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu`. 2 pre-named callees plus the
+  exact target-field match to the Pass 50 negotiation-state cluster — HIGH.
+- **`0x8005001c` → `classify_and_commit_lmp_pdu_negotiation_category`**: gated on the
+  negotiation-state record existing + a feature bit + a validity check (`FUN_80059f54`),
+  classifies the PDU opcode nibble (with a feature-mode special case for opcode 4/6/0) into a 1-5
+  category code written to the negotiation-state record's `+0x20` field, then delegates the field
+  commit to the cross-region `commit_bdaddr_role_fields_to_negotiation_state` (region `0x80040000`,
+  was `FUN_8004fee4`). `FUN_80059f54` itself (a small 0/1/2-tristate validity remapper with logging
+  on the out-of-range case) stays unrenamed — generic shape, no command-specific anchor.
+- **`0x8005058c` → `alloc_link_record_and_register_by_index`** (54B): **resolves Pass 48's 3rd
+  holdover lead.** Calls the already-named `alloc_link_record_from_pool`, then indexes/registers
+  the result via the cross-region `set_link_record_index_and_register_in_table` (region
+  `0x80040000`, was `FUN_8004e298`); returns the record pointer, or 0 with status byte 7 on alloc
+  failure. Sole caller (found via `find_callers`) is `FUN_80047c50`, a large (not yet itself named)
+  eSCO/SCO LMP parameter validator/committer in region `0x80040000` — invokes this exactly when its
+  own connection-record lookup comes back empty.
+- **`0x8005e40c` → `alloc_event_record_and_log_tag_0xb`**: **resolves Pass 48's other holdover
+  lead.** `alloc_tagged_record_via_pool(0xb,...)` + conditional log + return allocated index; exact
+  structural twin (differing only in the tag constant) of the established
+  `alloc_event_record_and_log_tag_{0x2,0x5,0x6,0x7,0xa,0x12,0x13}` family (Pass 31/33).
+
+**Pass 48's 3rd lead, `FUN_80058638`, stays unrenamed**: sets a HW-config bit (`0x200` on
+`DAT_80058678`), then conditionally clears a bit on a parent-context record via the already-named
+`resolve_parent_context_by_role`. No callers found (`find_callers` returns none — likely reached
+only via an indirect/table call, the standing tooling gap for indirect xrefs). Generic utility
+shape with no command-specific anchor; stays MEDIUM.
+
+4 of this pass's 12 total HIGH renames applied via the same `RenamePass51Region80040000.java`
+script as the cross-region functions (cross-region scripts spanning both regions are an
+established pattern — see Pass 47/48 addenda in `reverse_engineering_region_0x80040000.md`):
+`renamed=12 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls.
+
+### Coverage after Pass 51
+
+366 total (region `0x80050000` only), **65 unnamed** (67 minus this pass's 4 in-region HIGH
+renames — `FUN_80050f7c`, `FUN_8005001c`, `FUN_8005058c`, `FUN_8005e40c`), 9 confirmed
+mis-disassembly artifacts (unchanged).
+
+**Next**: Pass 52 — continue general cold-triage sweep (re-rank again — Pass 51's renames may have
+shaken loose new sole-named-caller candidates in the xrefs=1/xrefs=2 tiers, per the established
+pattern from Passes 44-50). `FUN_80058638` remains a standing lead if a future cold-triage re-rank
+or cross-region pass surfaces a caller for it.
