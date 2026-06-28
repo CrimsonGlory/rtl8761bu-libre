@@ -716,3 +716,34 @@ spec (handle + role-byte + variable-length-payload shape, `Command_Complete` eve
 terminus).
 
 Full evidence is in `reverse_engineering_region_0x80050000.md`'s own Pass 53 section.
+
+## Pass 54 addendum (2026-06-28) — `FUN_8004ca10` caller-context triage (decompile blocked)
+
+Pass 54's planned full cold-triage re-rank for region `0x80050000` could not run this
+iteration (docker daemon / wairz MCP unavailable from this Cursor container). Instead,
+this pass triaged one standing unnamed callee surfaced by Pass 53:
+`FUN_8004ca10` (`0x8004ca10`, region `0x80040000`).
+
+**Confirmed callers** (all from already-HIGH documented parents in prior passes):
+
+| Caller | Region | Call context |
+|--------|--------|--------------|
+| `ring_buffer_event_drain_loop_variant2` (`0x800083ec`) | `0x80000000` | After computing a per-slot quota delta and calling `drain_n_records_from_connection_event_queue`, calls `FUN_8004ca10` then `FUN_8002b6f4`; may also call `atomically_drain_conn_pending_queue` first if a config flag is set |
+| `conn_field_increment_and_cleanup_dispatch` (`0x80008328`) | `0x80000000` | Single-shot counterpart of the ring drain above: after incrementing `field92_0x5c` and calling `drain_n_records_from_connection_event_queue`, conditionally calls `FUN_8004ca10` when a per-connection flag is set, then `FUN_8002b6f4` |
+| `drain_and_dispatch_conn_event_ring_by_kind_then_reinit` (`0x8005c720`) | `0x80050000` | After draining the per-connection pending-event ring and optionally calling `atomically_drain_conn_pending_queue`, conditionally calls `FUN_8004ca10` before reinitializing the ring |
+
+**Mechanism (caller-context only, MEDIUM confidence):** `FUN_8004ca10` is a shared
+post-drain helper in the established "quota / pending-event reconciliation" pipeline —
+always sequenced after `drain_n_records_from_connection_event_queue` and before the still-
+unnamed finalizer `FUN_8002b6f4`. The three callers all operate on per-connection
+accumulator / pending-event state in the `0x1ac` struct-array family. Exact field
+semantics and whether it performs a second drain, a state-bit commit, or a HW-register
+side-effect are **not pinned** without a live `decompile_function` call.
+
+**Not renamed** — below the project's HIGH bar (no decompile, no named-callee anchor).
+Adjacent at `0x8004ca7c` is the already-HIGH `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
+(Pass 4); same address cluster, unrelated purpose.
+
+**Next for this function:** `decompile_function("FUN_8004ca10")` + `find_callers` re-check
+when wairz MCP is available; also decompile `FUN_8002b6f4` as the paired finalizer in the
+same pipeline.

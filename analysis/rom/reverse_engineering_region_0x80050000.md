@@ -5022,3 +5022,19 @@ not opcode-identified — pinning down the exact HCI command or LMP PDU type the
 need a dedicated investigation (e.g. checking the BT spec for which command takes a
 handle+role-byte+variable-length-payload shape with a `Command_Complete` (event code `0xe`)
 response), out of scope for a quick cold-triage pass.
+
+## Pass 54a (2026-06-28) — partial: `FUN_8004ca10` caller-context triage (MCP blocked)
+
+Full Pass 54 cold-triage (`ColdTriageRegion80050000Pass54.java`, staged in `scripts/`) did not
+run — docker daemon / wairz MCP unavailable from this Cursor container. One-function progress
+instead: caller-context triage of the still-unnamed `FUN_8004ca10` (`0x8004ca10`, region
+`0x80040000`), which this region's Pass 53 rename `drain_and_dispatch_conn_event_ring_by_kind_
+then_reinit` calls conditionally after `atomically_drain_conn_pending_queue`.
+
+Three documented callers share the same post-drain pipeline shape:
+`drain_n_records_from_connection_event_queue` → (optional `atomically_drain_conn_pending_queue`)
+→ `FUN_8004ca10` → `FUN_8002b6f4`. Full caller table and MEDIUM-confidence characterization in
+`reverse_engineering_region_0x80040000.md`'s Pass 54 addendum. Not renamed (no decompile).
+
+**Next**: Pass 54b — run `ColdTriageRegion80050000Pass54.java` + decompile top candidates when
+wairz MCP is available; decompile `FUN_8004ca10` and `FUN_8002b6f4` as paired pipeline leads.

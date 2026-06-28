@@ -4516,22 +4516,23 @@ sweep beyond enumeration and is the most out-of-date):
           -> analysis/INDEX.md (both regions' summaries updated; 0x80050000 [NEXT] set to Pass 52)
           -> wairz_requested_changes.txt (new non-blocking [DONE] entry: script_args regression)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54: general cold-triage re-rank (Pass 53's renames
-          may shake loose new sole-named-caller candidates, per the established pattern from
-          Passes 44-53). No concrete leads explicitly carried forward this time — Pass 53
-          resolved all 3 of Pass 52's unexamined fresh top-10 holdovers plus both cross-region
-          0x80040000 leads, so a fresh cold-triage re-rank is needed to find the next batch.
-          Opportunistic side-lead (not a cold-triage candidate, lower priority): FUN_80047628/
-          FUN_80047304 (region 0x80040000, 832B/780B) are now mechanically understood as
-          LMP-PDU/HCI-command fragment-reassembly handlers (Pass 53 traced their use of
-          find_tail_of_payload_subrecord_chain_at_field0x50[_0x24]) but their exact HCI
-          opcode/LMP PDU type identity is still unpinned — would need a dedicated BT-spec lookup
-          (handle + role-byte + variable-length-payload shape, Command_Complete event-code 0xe
-          terminus), out of scope for a quick cold-triage pass.
-          For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
-          the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally. Do
-          NOT pass script_args (currently broken — hardcode addresses/names into the script body
-          instead, per the wairz_requested_changes.txt entry logged in Pass 51).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54a: caller-context triage of FUN_8004ca10 (2026-06-28)
+          MCP/docker blocked — could not run ColdTriageRegion80050000Pass54.java or decompile_function.
+          Documented FUN_8004ca10 (0x8004ca10, region 0x80040000) from 3 already-HIGH callers:
+          ring_buffer_event_drain_loop_variant2, conn_field_increment_and_cleanup_dispatch,
+          drain_and_dispatch_conn_event_ring_by_kind_then_reinit. Shared pipeline:
+          drain_n_records_from_connection_event_queue -> (optional atomically_drain_conn_pending_queue)
+          -> FUN_8004ca10 -> FUN_8002b6f4. MEDIUM confidence, not renamed.
+          Staged scripts/ColdTriageRegion80050000Pass54.java for Pass 54b when MCP returns.
+          -> analysis/rom/reverse_engineering_region_0x80040000.md (Pass 54 addendum)
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 54a section)
+          -> analysis/INDEX.md
+
+[BLOCKED]  Full RE: ROM region 0x80050000 — Pass 54b: general cold-triage re-rank (2026-06-28)
+          BLOCKED: docker daemon not accessible (no /var/run/docker.sock). wairz MCP requires
+          `docker exec wairz-backend-1`. Run Pass 54b via ./run-wip-loop-unattended-cursor.sh on
+          a host with docker + wairz-backend-1 up. Script ready: scripts/ColdTriageRegion80050000Pass54.java.
+          Also decompile FUN_8004ca10 + FUN_8002b6f4 as paired pipeline leads from Pass 54a.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank, resolved all 3
           carried-forward holdovers + 3 cross-region 0x80040000 renames (2026-06-28)
