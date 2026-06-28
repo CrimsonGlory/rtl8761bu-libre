@@ -5879,3 +5879,27 @@ Region unnamed count after this pass: **13** (14 minus this rename).
 
 **Next:** Pass 54aq — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54aq (2026-06-28) — cold-triage rank-1 rename (post-54ap re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ap: **366 total**, **354 named**,
+**12 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005ff54` → `validate_and_commit_LE_DLE_length_params_or_reject`**
+(218B, HIGH) via `RenamePass54aqFun8005ff54.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LE Data Length Extension (DLE) length-parameter commit handler for slot
+`param_3` on the `0x1ac` record array: gates on established-link bit at `+0x78 & 0x80`; if
+clear, allocates tag-0x15 record (`alloc_tag11_record_with_params`) and assigns via
+`assign_pointer_to_0x1AC_offset_0x134` (inactive path). When established: reads two ushort
+pairs from `param_1`, validates each via `validate_value_pair_within_threshold_range`; on
+success commits to `+0xf2`/`+0xfa`/`+0xf6`/`+0xfe` and calls
+`complete_LE_DLE_pending_proc_and_send_data_length_change_evt(rec, 5)`; on failure calls
+`report_procedure_outcome_and_update_param_type_bitmask(rec, 0x15, 0x1e, 1)`. Promoted from
+Pass 24's MEDIUM-HIGH triage (same validate-then-commit family as `esco_sco_param_validate_and_commit`).
+
+**Confidence:** HIGH — named callees identify LE DLE completion path; field offsets match
+Pass 24's `complete_LE_DLE_pending_proc_and_send_data_length_change_evt` documentation.
+
+Region unnamed count after this pass: **12** (13 minus this rename).
+
+**Next:** Pass 54ar — continue xrefs=0 tier (re-run cold-triage for next rank).
+
