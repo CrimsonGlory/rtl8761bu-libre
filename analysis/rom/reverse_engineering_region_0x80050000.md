@@ -4823,3 +4823,95 @@ mis-disassembly artifacts (unchanged).
 shaken loose new sole-named-caller candidates in the xrefs=1/xrefs=2 tiers, per the established
 pattern from Passes 44-50). `FUN_80058638` remains a standing lead if a future cold-triage re-rank
 or cross-region pass surfaces a caller for it.
+
+### Documentation-integrity correction (Pass 52)
+
+Pass 51's "65 unnamed (67 minus this pass's 4 in-region HIGH renames)" arithmetic is wrong:
+67 − 4 = **63**, not 65. `ColdTriageRegion80050000Pass52.java`'s fresh ground-truth
+re-derivation (366 total, 63 unnamed, 9 artifacts excluded from the unnamed tally) confirms 63
+is the correct figure — Pass 51's prose simply mis-subtracted. No functions were missed or
+double-counted; this is a documentation-only fix, consistent with the standing caution (added in
+Pass 48 after catching a similar staleness in Pass 47's framing) that a pass's own arithmetic
+should be spot-checked against a live re-derivation rather than trusted from prose alone.
+
+## Pass 52 (2026-06-28) — standing lead `FUN_80058638` resolved (AFH-poll-guard re-arm) + 7 more HIGH renames
+
+Fresh cold-triage re-rank (`ColdTriageRegion80050000Pass52.java`, same 9-artifact exclusion list)
+re-confirmed **366 total, 63 unnamed** (see documentation-integrity correction above) and put
+the Pass 48-51 standing lead `FUN_80058638` at **rank 1 with `xrefs=2`** — a change from every
+prior pass's "no static callers" finding.
+
+**`FUN_80058638` resolved.** The wairz `xrefs_to`/`find_callers` tools still reported zero
+cross-references (confirmed by direct re-check this pass), but the in-Ghidra-script
+`ReferenceManager.getReferencesTo()` count the cold-triage ranker relies on is independent and
+authoritative. A dedicated diagnostic (`DiagXrefs80058638Pass52.java`) dumped the 2 raw
+references directly: both are `UNCONDITIONAL_CALL` (`jal`) instructions at `0x80048cf8` and
+`0x80048d1c`, and both have `containingFn=NONE` — i.e. they sit in a gap Ghidra never claimed as
+part of any `Function` (`FUN_80048cd5`, a 1-byte stub, ends just before; `FUN_80048d6c` starts
+just after). This is why the function-boundary-based wairz tools find nothing despite real call
+sites existing — the same "orphaned/mis-disassembled call site" pattern Pass 51 documented for
+`FUN_8004bde8`'s per-opcode wrapper cluster, now confirmed for a second, independent function in
+the same general `0x80048cxx-0x80048dxx` neighborhood. A follow-up disassembly dump
+(`CheckOrphanCallSitesPass52.java`) confirmed both are real code: `0x80048cf4-0x80048d04` is a
+thin save-ra/call/restore-ra/`jr a3` wrapper stub; `0x80048d04-0x80048d54` is a larger
+conditional handler (literal-pool-driven struct lookups, a 2-branch gate, a second call to ROM
+`0x80009a6c`) that calls `FUN_80058638` on one branch. Neither orphaned blob is itself
+characterizable as a clean function without a force-disassembly pass (same caveat as Pass 51), so
+this pass does not attempt to name them — but their existence and call-site evidence is now
+on record, resolving the "no callers found" half of the standing lead.
+
+That caller evidence wasn't actually needed to clear HIGH, though: re-reading
+`FUN_80058638`'s body (sets bit `0x200` on `DAT_80058678` unconditionally; if a HW-config enable
+bit is set and a count field is non-zero, calls the already-named `resolve_parent_context_by_role`
+and clears **bit `0x80` of the parent's `+0x2b` field**) against the already-named
+`maybe_commit_afh_quality_poll_to_parent_if_below_threshold` (`0x80053034`, Pass 30) shows it
+clears the **exact same guard bit** that function *sets* after successfully committing an AFH
+quality poll (`"if +0x2b & 0x80 == 0: ...commit...; sets +0x2b & 0x80"`). `FUN_80058638` is that
+guard's re-arm/reset counterpart — gated on a feature-enable flag plus a non-zero active-link
+count, it clears the "already polled" guard so `maybe_commit_afh_quality_poll_to_parent_if_below_
+threshold` can fire again. **HIGH**: complementary set/clear pair against an already-named,
+already-documented sibling, reinforced by concrete (if uncharacterized) caller evidence. Renamed
+`set_hw_status_bit0x200_and_clear_afh_poll_guard_if_active`.
+
+**7 more HIGH renames from the fresh top-10 candidates:**
+
+| Address | Size | New name | Evidence |
+|---------|------|----------|----------|
+| `0x8005edc8` | 186B | `alloc_event_record_and_log_tag_0x4_with_random_bytes` | `alloc_tagged_record_via_pool(4, &local)`; on success calls `read_random_source_bytes_into_4B_and_8B_outputs` to fill 8+4 bytes into the per-connection `0x1ac`-struct-array fields, copies the same bytes into the new record, logs (tag `0xcc`/`0xcc4`), returns the index. Structural cousin of the established `alloc_event_record_and_log_tag_{0x2,0x5,0x6,0x7,0xa,0x12,0x13,0xb}` family (Pass 31/33/51) but with an extra random-fill payload step. HIGH: exact alloc-then-log skeleton match plus a named callee. |
+| `0x8005d54c` | 160B | `alloc_event_record_and_log_tag_0x1a_with_packed_conn_bitfields` | `alloc_tagged_record_via_pool(0x1a, &local)`; on success packs 2 bit-fields extracted from the per-connection `field319_0x14c`/`field320_0x14d` pair into the new record's first byte, logs (tag `0xcc`), returns the index. Same family as above, tag `0x1a`. HIGH: same evidence quality. |
+| `0x800509ec` | 152B | `setup_type3_esco_sco_conn_record_with_role_bit_set` | Structural twin of the already-named `setup_type2_esco_sco_conn_record_for_multilink` (`0x800508f8`, Pass 35): `alloc_link_record_from_pool(3)` + `alloc_large_link_record_from_pool()`, links the new record into a sub-record returned by the still-unnamed `FUN_8004faa4(param_1)` (at `+0x20`, rather than directly into `param_1` the way the type-2 sibling does), copies role/type bits from `param_1+0x1d`, sets bit `0x80` of the new record's `+0x10`, then dispatches via `conn_type_dispatch_hook`. Returns `0`/`5`. HIGH: 3 named callees + exact mechanism match against an already-HIGH sibling. |
+| `0x80050a90` | 142B | `setup_type3_esco_sco_conn_record_with_role_bit_clear` | Exact twin of the above (`FUN_8004faf4(param_1)` instead of `FUN_8004faa4`, otherwise identical allocator/link/dispatch sequence) except it **clears** rather than sets bit `0x80` of `+0x10`. HIGH: same evidence as its sibling. |
+| `0x80053384` | 182B | `compute_esco_slot_budget_with_repeat_count_and_peer_offset` | Calls still-unnamed `FUN_8004fa64()` + `FUN_8004faa4(param_1)`, the already-named `compute_indexed_table_addr_by_category_and_bank` and (conditionally) `compute_required_slot_count_from_offset_sum`, validity-gates on a repeat-count field at `+0x2b` bits 3-6 (logs+returns `0` if `<2`), else multiplies `(count-1)` by the table value and the BT 625µs slot-duration constant (`0x271`), then adds the peer's cached `+0x24` timing-offset field (the same field `propagate_timing_offset_to_peer_record_by_type`, Pass 34, populates for type-0 connections) scaled by the same constant. HIGH: 2 named callees + the established 625µs slot-duration anchor. |
+| `0x80053440` | 206B | `compute_esco_slot_budget_with_repeat_count_peer_offset_and_category1_term` | Structural twin of the above with the same repeat-count gate, the same named-callee pair, and the same peer-`+0x24` term, plus a second `compute_indexed_table_addr_by_category_and_bank` call summed with a literal `+300` — the same "two category-table lookups plus a `+300` guard constant" shape as the already-named `compute_combined_table_offset_for_category1_or_log_error` (`0x80053688`, Pass 46), inlined here alongside the repeat-count/peer-offset logic rather than calling that helper directly. HIGH: same anchor as its sibling plus the category-1 structural match. |
+| `0x80053e20` | 148B | `program_esco_packet_types_for_conn_and_peer_by_category` | Looks up a category code from a fixed table indexed by `param_1+0x1d`'s top 3 bits; validity-gates on that code (logs+returns `5` for any value outside `{0,1,2,6}`); computes packet-count/type arguments from `param_1`'s own fields and the still-unnamed `FUN_8004fa64()`'s result (including reading the peer's cached `+0x24` field, and the `+0x14` "large link record" pointer the `setup_type3_*` pair above stores at allocation time), then dispatches into the already-named `write_esco_packet_types_to_hw_channel_slots`. HIGH: named callee + arguments fully traced through the established peer/`+0x24`/`+0x14` field cluster. |
+
+**Rename application.** `RenamePass52Region80050000.java` written directly to
+`/root/wairz/ghidra/scripts/`, run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=8 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via fresh
+`decompile_function` calls on `set_hw_status_bit0x200_and_clear_afh_poll_guard_if_active`,
+`setup_type3_esco_sco_conn_record_with_role_bit_set`, and
+`program_esco_packet_types_for_conn_and_peer_by_category` — all three resolve correctly under
+their new names with internal callee references intact (`conn_type_dispatch_hook`,
+`alloc_link_record_from_pool`, `alloc_large_link_record_from_pool`,
+`resolve_parent_context_by_role`, `write_esco_packet_types_to_hw_channel_slots` all show by name).
+
+**Not yet investigated this pass** (ranks 2, 3, 9 of the fresh top-10 — left as standing leads for
+Pass 53): `FUN_8005c720` (228B, a connection-pool-draining/queue-walk function with 2 named
+callees — `append_to_slot10_linked_queue_and_update_tail`,
+`insert_byte_into_per_connection_singly_linked_list_head_or_tail` — worth a closer look),
+`FUN_80055b78` (208B, unpacks several bit-fields from 3 fixed global pointers into a connection
+record — possible HCI command/event parameter parser), `FUN_8005bea8` (152B, conditional nibble
+doubling on a per-connection field gated by a lookup-table match + an unsigned-delta range check).
+
+### Coverage after Pass 52
+
+366 total (region `0x80050000` only), **55 unnamed** (63 minus this pass's 8 in-region HIGH
+renames), 9 confirmed mis-disassembly artifacts (unchanged).
+
+**Next**: Pass 53 — continue general cold-triage sweep (re-rank again; Pass 52's renames may
+shake loose new candidates, per the established pattern from Passes 44-52). Two concrete leads
+carried forward: `FUN_8005c720`/`FUN_80055b78`/`FUN_8005bea8` (this pass's unexamined top-10
+holdovers, see above) and the still-unnamed `FUN_8004faa4`/`FUN_8004faf4` (the sub-record lookup
+functions both `setup_type3_esco_sco_conn_record_*` siblings depend on for their `+0x20`
+linkage — cross-region in `0x80040000`, structurally close to the already-named `FUN_8004fa64`
+"peer lookup" family).

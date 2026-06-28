@@ -4516,16 +4516,58 @@ sweep beyond enumeration and is the most out-of-date):
           -> analysis/INDEX.md (both regions' summaries updated; 0x80050000 [NEXT] set to Pass 52)
           -> wairz_requested_changes.txt (new non-blocking [DONE] entry: script_args regression)
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 52: general cold-triage re-rank (Pass 51's renames
-          may shake loose new sole-named-caller candidates in the xrefs=1/xrefs=2 tiers, per the
-          established pattern from Passes 44-50). FUN_80058638 (region 0x80050000, sets a
-          HW-config bit + conditionally clears a parent-context bit via the already-named
-          resolve_parent_context_by_role) remains a standing MEDIUM-confidence lead if a caller
-          surfaces.
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 53: general cold-triage re-rank (Pass 52's renames
+          may shake loose new sole-named-caller candidates, per the established pattern from
+          Passes 44-52). Concrete leads carried forward from Pass 52's unexamined fresh top-10:
+          FUN_8005c720 (228B, connection-pool-draining/queue-walk fn, 2 named callees already
+          identified), FUN_80055b78 (208B, unpacks bit-fields from 3 fixed globals — possible
+          HCI command/event parameter parser), FUN_8005bea8 (152B, conditional nibble-doubling
+          gated by a lookup-table match + unsigned-delta range check). Also still-unnamed
+          FUN_8004faa4/FUN_8004faf4 (cross-region in 0x80040000 — the sub-record lookup
+          functions both new setup_type3_esco_sco_conn_record_* siblings depend on for their
+          +0x20 linkage; structurally close to the already-named FUN_8004fa64 "peer lookup").
           For any NEW Ghidra script needed, write it directly to /root/wairz/ghidra/scripts/ via
           the file-write tool (NOT save_ghidra_script) and call run_ghidra_headless normally. Do
           NOT pass script_args (currently broken — hardcode addresses/names into the script body
-          instead, per the wairz_requested_changes.txt entry logged this pass).
+          instead, per the wairz_requested_changes.txt entry logged in Pass 51).
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 52: general cold-triage re-rank, resolved the
+          Pass 48-51 standing lead FUN_80058638 + 7 more HIGH renames (2026-06-28)
+          FUN_80058638 -> set_hw_status_bit0x200_and_clear_afh_poll_guard_if_active: found
+          concrete caller evidence via a ReferenceManager diagnostic (2 UNCONDITIONAL_CALL refs
+          at 0x80048cf8/0x80048d1c, both in orphaned/mis-disassembled code with no Function
+          boundary -- explains why xrefs_to/find_callers kept reporting none) and a structural
+          anchor: it clears the exact +0x2b bit-0x80 guard that the already-named
+          maybe_commit_afh_quality_poll_to_parent_if_below_threshold sets after committing an
+          AFH quality poll -- this is that guard's re-arm/reset counterpart.
+          7 more HIGH renames from the fresh cold-triage top-10 (batch_decompile_functions,
+          10/10): FUN_8005edc8 -> alloc_event_record_and_log_tag_0x4_with_random_bytes and
+          FUN_8005d54c -> alloc_event_record_and_log_tag_0x1a_with_packed_conn_bitfields (2 more
+          members of the established alloc_event_record_and_log_tag_* family, tags 0x4/0x1a,
+          with extra random-fill/bitfield-pack payload logic); FUN_800509ec/FUN_80050a90 ->
+          setup_type3_esco_sco_conn_record_with_role_bit_set/_clear (structural twins of the
+          already-named setup_type2_esco_sco_conn_record_for_multilink, type 3 instead of 2,
+          differ only in a role bit at +0x10); FUN_80053384/FUN_80053440 ->
+          compute_esco_slot_budget_with_repeat_count_and_peer_offset /
+          _peer_offset_and_category1_term (2 named callees apiece, same 625us slot-duration
+          anchor as compute_combined_table_offset_for_category1_or_log_error, consume the same
+          peer +0x24 cached-timing field propagate_timing_offset_to_peer_record_by_type
+          populates); FUN_80053e20 -> program_esco_packet_types_for_conn_and_peer_by_category
+          (dispatches into the already-named write_esco_packet_types_to_hw_channel_slots with
+          args traced through the same peer/+0x24/+0x14 field cluster).
+          8 HIGH renames total via RenamePass52Region80050000.java (renamed=8 alreadyOk=0
+          missing=0 failed=0), live-verified via fresh decompile_function calls on 3 of the 8
+          (internal callee references resolve correctly by name).
+          Documentation-integrity correction: Pass 51's "65 unnamed (67 minus 4)" arithmetic was
+          wrong (67-4=63, not 65) -- Pass 52's fresh ground-truth cold-triage re-derivation
+          confirms 63 is correct. No functions were missed/double-counted; prose-only fix.
+          Region-wide (0x80050000 only): 366 total, 55 unnamed (was 63), 9 mis-disassembly
+          artifacts (unchanged).
+          -> analysis/rom/reverse_engineering_region_0x80050000.md (Pass 52 section + doc-
+             integrity correction note)
+          -> analysis/rom/rom_function_index.md (+8 entries, user-named count updated to 1095,
+             unnamed count updated to 2168)
+          -> analysis/INDEX.md (region 0x80050000 updated, [NEXT] set to Pass 53)
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 50: resolved both Pass 49 holdover leads (2026-06-28)
           FUN_80052f38 -> finalize_and_emit_negotiation_complete_hci_event_from_lmp_pdu (76B):
