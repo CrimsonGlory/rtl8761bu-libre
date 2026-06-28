@@ -5452,3 +5452,22 @@ debug-gated logging idiom as `sync_nibble_field0x118_via_clock_window_check_and_
 Region unnamed count after this pass: **33** (34 minus this rename).
 
 **Next:** Pass 54w — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
+## Pass 54w (2026-06-28) — cold-triage rank-1 rename (post-54v re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54v: **366 total**, **333 named**,
+**32 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_80059f54` → `remap_negotiation_param2_2bit_subfield_to_abort_code`** (60B, HIGH) via
+`RenamePass54wFun80059f54.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Maps the 2-bit subfield `(*param_2 >> 1) & 3` to an abort code used by
+`classify_and_commit_lmp_pdu_negotiation_category`: input `0` → return `0` (proceed); `1` → `1`
+(abort); `2`–`3` → `2` (abort); values `≥4` log via `possible_logging_function__var_args` (tag
+`0xce`) and return `0`. Resolves the Pass 51 holdover note that left this callee unnamed.
+
+**Confidence:** HIGH — sole caller context with exact bit-extract pattern in the gate condition
+(`iVar3 != 0` early-return).
+
+Region unnamed count after this pass: **32** (33 minus this rename).
+
+**Next:** Pass 54x — continue down the xrefs=1 tier (rank-2 `FUN_8005c988`, 54B).
