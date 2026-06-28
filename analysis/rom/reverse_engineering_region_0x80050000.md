@@ -5155,4 +5155,24 @@ cluster (Passes 46/52/53).
 
 Region unnamed count after this pass: **48** (49 minus this rename).
 
-**Next:** Pass 54h — continue down the xrefs=1 tier (current rank 2: `0x8005d4e0`, 98B).
+**Next:** Pass 54i — continue down the xrefs=1 tier (next rank after `0x8005d4e0`).
+
+## Pass 54h (2026-06-28) — cold-triage rank-2 rename (post-54g re-rank)
+
+Fresh continuation of the xrefs=1 tier: decompiled and renamed
+**`FUN_8005d4e0` → `alloc_tag0x1b_record_and_log_link_table_timing_by_index`** (98B, HIGH) via
+`RenamePass54hFun8005d4e0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** bounds-checks connection index `param_1 & 0xff < 0xb` (11 slots); allocates a
+pool-tagged record via `alloc_tagged_record_via_pool(0x1b, ...)`; indexes the per-connection
+`0x1ac` struct array at `_FUN_8005d548 + index * 0x1ac` (data symbol at the mis-disassembly
+artifact address `0x8005d548`); logs timing byte fields at `+0x341` (>>3) and `+0x342` (&3)
+via `possible_logging_function__var_args` (category `0xcc`, format id `0xd83`); returns the
+allocated record pointer or 0 on failure. Sole caller: the LE extended-advertising parameter
+commit path inside `FUN_8005db5c` (calls this immediately before
+`VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_1`).
+
+**Confidence:** HIGH — named `alloc_tagged_record_via_pool` callee, `0x1ac` stride anchor,
+established `+0x341/+0x342` timing-field offsets, and caller context in the VSC 0xfc97 cluster.
+
+Region unnamed count after this pass: **47** (48 minus this rename).
