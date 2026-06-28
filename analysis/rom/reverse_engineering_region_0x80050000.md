@@ -3524,3 +3524,48 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 366 total / **~220 named** (was ~219) / **~146 unnamed** (was ~147). 32 renames staged total pending MCP.
 
 **Next**: Pass 39 — apply all 32 staged renames, re-rank, continue analysis.
+
+## Pass 39 — cross-region callee discovery via FUN_800546e4 (2026-06-27, Cursor agent via REST bridge)
+
+**Context**: Used `xrefs_from` on `FUN_800546e4` (the Pass 38 MEDIUM-HIGH timing offset computer) to discover its callees. Found 4 unnamed functions in regions 0x80020000 and 0x80040000.
+
+### Analyzed functions (4 total)
+
+**0x8002b270** (22B) → `compute_slot_table_base_ptr_by_type` [HIGH, region 0x80020000]
+- Single-arg lookup: `return *(base + 0xa0) + table[(param_1 & 0xff) + 0xac] * 4`
+- Computes base address of a type-indexed slot register table entry
+- Called by `FUN_800546e4` (compute_sco_esco_timing_offsets_for_both_records) and siblings
+- HIGH: self-contained pure table arithmetic, same bar as `binary_search_sorted_table_by_8byte_key`
+
+**0x8002b28c** (38B) → `compute_slot_table_entry_ptr_by_type_and_bank` [HIGH, region 0x80020000]
+- Two-arg lookup: `return *(base + 0xa4) + ((param_2 * stride_from_a8 + table[param_1 + 0xaf]) & 0xff) * 4`
+- 2D indexed: `param_1` = type/category, `param_2` = bank; stride from configurable field `+0xa8 >> 2`
+- Sibling of `FUN_8002b270` — more general 2D version of the same table-address computation
+- HIGH: self-contained, structurally clear sibling pair
+
+**0x8002b9a4** (100B) → `release_active_slot_bitmask` [HIGH, region 0x80020000]
+- IRQ-protected: disables interrupts before operation
+- Validates `param_1 < 4` (4-entry bitmask)
+- Checks bit `param_1` is set in `ushort` at `base + 0x138`
+- If set: atomically clears that bit
+- Returns slot index on success, 4 (error sentinel) if bit not set / out-of-range
+- Called by FUN_800546e4 in the slot-release path
+- HIGH: IRQ-safe atomic-release pattern identical to already-named slot-allocation variants; self-contained
+
+**0x8004f898** (98B) → `init_per_connection_hw_state_word` [MEDIUM-HIGH, region 0x80040000]
+- Reads `uint` at `base + (param_1 * 4)` (per-connection word indexed by connection index)
+- Logs if high bits [31:31] are non-zero (validation guard)
+- Writes back: `(val & mask) | ((config_byte & 3) << 0x16) | fn_ptr_addr`
+- Packs a function pointer address into bits [21:0] and a 2-bit type code into bits [23:22]
+- Called by FUN_800546e4 in initialization path
+- MEDIUM-HIGH: clear structure but no domain anchor (no opcode literal or named sibling in this slot)
+
+### Rename script
+
+`RenamePass39CrossRegion.java` written to `/root/wairz/ghidra/scripts/` — 3 entries (all in region 0x80020000). Pending MCP execution.
+
+### Coverage update
+
+35 renames staged total across all pending scripts (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3). These are in multiple regions but all discovered during analysis of the 0x80050000 cluster.
+
+**Next**: Pass 40 — apply all 35 staged renames, re-rank, continue analysis.

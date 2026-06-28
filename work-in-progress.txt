@@ -4199,10 +4199,29 @@ sweep beyond enumeration and is the most out-of-date):
           rom_function_index.md +1 entry (total staged 986+1=987).
           analysis/INDEX.md → region 0x80050000 updated.
 
-[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 39 (apply all 32 staged renames + more)
-          Apply RenamePass35-38Region80050000.java via run_ghidra_headless (MCP required).
-          Fresh re-rank of remaining ~146 unnamed.
-          Next batch: target FUN_800546e4 callee chain and the MEDIUM-HIGH holdovers.
+[DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 39 (2026-06-27, cross-region callee discovery)
+          Followed xrefs_from FUN_800546e4; discovered 4 more unnamed callees.
+          3 HIGH renames staged in RenamePass39CrossRegion.java (cross-region):
+            0x8002b270 → compute_slot_table_base_ptr_by_type (22B, region 0x80020000)
+              Table lookup: *(base+0xa0) + table[param_1+0xac]*4; self-contained.
+            0x8002b28c → compute_slot_table_entry_ptr_by_type_and_bank (38B, region 0x80020000)
+              2D lookup: *(base+0xa4) + ((param_2*stride + table[param_1+0xaf])&0xff)*4
+            0x8002b9a4 → release_active_slot_bitmask (100B, region 0x80020000)
+              IRQ-safe: clears bit param_1 (0-3) from ushort bitmask at base+0x138;
+              returns slot on success, 4 with log on failure.
+          1 MEDIUM-HIGH documented:
+            0x8004f898 (98B): init_per_connection_hw_state_word (region 0x80040000)
+              Reads per-connection uint, validates high-bit field, writes 2 bits at [23:22]
+              from config byte + function pointer addr.
+          35 renames staged total (Pass35:20 + Pass36:10 + Pass37:1 + Pass38:1 + Pass39:3).
+          analysis/rom/reverse_engineering_region_0x80050000.md → Pass 39 section added.
+          rom_function_index.md +3 HIGH entries.
+          analysis/INDEX.md → updated.
+
+[NEXT]  Full RE: ROM region 0x80050000-0x8005ffff PASS 40 (apply all 35 staged renames + more)
+          Apply all staged rename scripts via run_ghidra_headless (MCP required).
+          Fresh re-rank of remaining ~143 unnamed.
+          Continue xref analysis: follow FUN_8002b9a4 callers and FUN_8004f898 callers.
 
 [DONE]  Full RE: ROM region 0x80050000-0x8005ffff PASS 32 (rank 176+ cold-triage) (2026-06-27)
           ColdTriageRegion80050000Pass32.java confirmed 366 total / 132 named / 234 unnamed,
