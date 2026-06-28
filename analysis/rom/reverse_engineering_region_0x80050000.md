@@ -3696,3 +3696,214 @@ Decompiled `FUN_8003bd94`, `FUN_80036fa8`, and supporting callee `FUN_8003bc54` 
 **MEDIUM-HIGH holdover** (documented, not renamed): `0x80037370` → `configure_hw_regs_and_init_for_sco_teardown` (34B; calls `hw_register_config_with_timeout(1)` + the two functions above).
 
 **Next**: Continue xref sweep from `reset_sco_esco_hw_subsystem_on_link_loss`'s still-unnamed callees (`FUN_800344f8`, `FUN_80034480`, `FUN_80033ed8`) and promote `configure_hw_regs_and_init_for_sco_teardown` once callees are fully named.
+
+*(Resolved as Pass 43, documented in `analysis/rom/reverse_engineering_region_0x80030000.md` — the callees live in region `0x80030000`, not here. The SCO-teardown call tree is now fully closed. Region `0x80050000`'s own continuation resumes below as Pass 44, a general cold-triage sweep, per `work-in-progress.txt`'s guidance after Pass 43 closed out.)*
+
+## Pass 44 — fresh xrefs≥3 cold-triage re-rank (2026-06-28)
+
+**Context**: Pass 43 closed the SCO-teardown call tree (region `0x80030000`, not here). No specific
+lead was queued for region `0x80050000` itself, so this pass re-ran the xrefs≥3 cold-triage
+ranking (same lineage as Pass 34/35) to see what the Pass 35-43 renames had shaken loose. Wrote
+`ColdTriageRegion80050000Pass44.java` (same exclude-list-of-8-artifacts pattern as Pass 35).
+
+**wairz tooling note**: `save_ghidra_script` is currently broken (does not materialize files —
+see `wairz_requested_changes.txt`, re-verified broken again this session). Used the documented
+host-path-write fallback instead: wrote both `ColdTriageRegion80050000Pass44.java` and
+`RenamePass44Region80050000.java` directly via the file-write tool to
+`/root/wairz/ghidra/scripts/` (matching existing siblings' `root:root`/644), confirmed visible
+inside both `wairz-backend-1` and `wairz-worker-1` via the read-only bind mount, then called
+`run_ghidra_headless(script_name=...)` normally. Both scripts ran successfully (exit 0).
+
+### Re-rank result
+
+366 total, 229 named, 137 unnamed (up from ~220/146 after Pass 42 — some Pass 35-43 renames
+promoted other functions, shaking loose a fresh top tier). Top 20 by xrefs desc/size desc, all
+at xrefs=3 (sizes 224B down to 4B):
+
+```
+rank1:  0x8005174c  224B    rank11: 0x80051980  84B
+rank2:  0x800532ac  198B    rank12: 0x80056554  82B
+rank3:  0x8005d924  194B    rank13: 0x8005d1a4  74B
+rank4:  0x80051b54  188B    rank14: 0x80059f14  58B
+rank5:  0x80050610  144B    rank15: 0x8005ca00  48B
+rank6:  0x80053a2c  110B    rank16: 0x80055f34  38B
+rank7:  0x8005323c  106B    rank17: 0x8005c960  38B
+rank8:  0x8005a228  98B     rank18: 0x800598d4  22B
+rank9:  0x8005cd6c  96B     rank19: 0x8005634c  20B
+rank10: 0x800519d8  88B     rank20: 0x80056200  4B
+```
+
+### Analyzed functions (20 total)
+
+All 20 batch-decompiled via `batch_decompile_functions` (2 calls of 10, both 10/10 — no
+fallback to individual `decompile_function` needed this pass).
+
+**0x8005174c** (224B) → `cleanup_pending_records_and_send_lmp25b` [HIGH]
+- Clears a 2-bit flag in a status struct
+- Walks a linked list removing tag-5 records (unconditional)
+- If `param_1==0`: walks a second linked list removing tag-6 records, calling `FUN_8004ee94`
+  per removal
+- Checks a status byte: if clear, calls `FUN_8005122c(1)` and returns 0; else sets a pending
+  bit and invokes a callback fn-ptr, returns 1
+- If `param_1==0`: also calls `send_LMP_25B_for_fixed_default_record` and
+  `send_LMP_25B_if_both_flags_clear` (both already HIGH-named, Pass 31)
+- HIGH: named-callee anchors at both the cleanup-trigger end and the LMP-send end
+
+**0x800532ac** (198B) → `compute_required_slot_count_from_offset_sum` [HIGH]
+- Optional override hook first
+- Dispatches by link-type byte (`param_1+8 & 7`): `==0` → `sum_indexed_table_offsets_mod_wrap`
+  (this pass) + optional per-byte table offset; `<4` → `compute_indexed_table_addr_by_category_and_bank`;
+  else → `sum_indexed_table_offsets_mod_wrap` + log
+- Divides result by `0x271` (625 decimal — the Bluetooth slot duration in µs) to round up to a
+  slot count, clamped against a table-derived minimum
+- HIGH: named callee + the `0x271` constant unambiguously anchors this in the slot-timing domain
+
+**0x8005d924** (194B) → `alloc_esco_event_record_tag_0x14_or_0x15_by_param2` [HIGH]
+- `param_2==1` (and not already in the "both allocated + nibble==0x20" state): allocates via
+  `alloc_and_pack_esco_event_record_tag_0x14`, sets `+0x78` bit 0x80, packs `+0x10e` high nibble
+- Else: allocates via `alloc_and_pack_esco_event_record_tag_0x15`, sets `+0x7c` bit 0x80, packs
+  `+0x10e` low nibble
+- Both paths: `assign_pointer_to_0x1AC_offset_0x134(result, device_id)`, clear a status bit
+- HIGH: 2 named callees; directly paired with `set_esco_event_record_config_bit_if_allocated`
+  (rank15, same pass) which gates on the exact same `+0x78`/`+0x7c` fields
+
+**0x80051b54** (188B) → `apply_or_revert_slot_timing_and_set_recompute_flag` [HIGH]
+- `param_1==1`: calls `FUN_8004edc4`, commits via a fn-ptr, calls
+  `send_LMP_268_with_slot_timing_adjustment` (HIGH), saves a field, runs extra setup
+  (`FUN_80051908`, a u16 multiply-store, `FUN_80051aa0`)
+- Else: calls `FUN_8004f160`, restores the saved field, same commit + `send_LMP_268_...` call
+- Both paths converge: checks a secondary status field and optionally invokes another fn-ptr,
+  then resets 3 fields (`+0x23c`/`+0x240`/`+0x238`) and calls `set_recompute_pending_flag_bit0`
+  (this pass)
+- HIGH: 2 named-callee anchors, one of which is named in this same pass
+
+**0x80050610** (144B) → `alloc_link_record_pair_and_dispatch_conn_type_hook` [HIGH]
+- Allocates a small link record (`alloc_link_record_from_pool(1)`) and a large one
+  (`alloc_large_link_record_from_pool`); on either failure returns error code `5`
+- Links them (`small[0x18]=ptr_table`, `small[0x14]=large`), stores the small record into the
+  connection record's `+0x50` field
+- Packs type bits from `+0x1d` and a config byte into the small record's status byte
+- Calls `conn_type_dispatch_hook(small_record)`, returns `0`
+- HIGH: 3 named callees, clean self-contained allocator+dispatch pattern
+
+**0x80053a2c** (110B) → `clear_slot_table_entries_across_all_types` [HIGH]
+- Loops the 3 slot-table types (0,1,2): for each, gets the base ptr
+  (`compute_slot_table_base_ptr_by_type`) and per-bank entry ptr
+  (`compute_slot_table_entry_ptr_by_type_and_bank`), zeroes all entries (count from a table),
+  clears a status bit per bank
+- This is the exact "3-slot zero-init helper" already referenced (unnamed) in Pass 40's
+  write-up of `program_sco_hw_slot_registers_from_conn_record`
+- HIGH: 2 named callees + a pre-existing documented caller reference
+
+**0x8005323c** (106B) → `sum_indexed_table_offsets_mod_wrap` [HIGH]
+- For each of 3 iterations, if the matching bit of a per-record bitmask (`+0x11`) is set,
+  accumulates `compute_indexed_table_addr_by_category_and_bank(...) + table[0]`
+- Wraps the final sum modulo `table[0]` (subtracts once if `>=`)
+- Callee of `compute_required_slot_count_from_offset_sum` (rank2, this pass)
+- HIGH: named callee, self-contained modular-accumulator algorithm
+
+**0x8005a228** (98B) → `select_override_or_default_byte_pair_and_log` [HIGH]
+- For 2 output bytes, each independently selects either a passed-in default or a global
+  override value based on a 2-bit flags mask, then logs all inputs+outputs via
+  `possible_logging_function__var_args`
+- HIGH: trivial, fully self-contained selector+log utility
+
+**0x8005cd6c** (96B) → `pack_and_log_param_pair_0x26f` [HIGH]
+- Packs `param_1`/`param_2` into a 32-bit value via `CONCAT22` with bit-shifting/masking
+- Calls `possible_logger_called_if_no_patch3` with the packed value and fixed literal code `0x26f`
+- HIGH: matches the project's established literal-opcode log-wrapper naming convention
+  (e.g. `VSC_0xfc46`, `LMP_25B`-family names)
+
+**0x800519d8** (88B) → `service_pending_flags_and_log_on_field_match` [HIGH]
+- Extracts a 2-bit field (bits 13-14) from `param_1`; if the value is 1 or 2:
+  - Calls `service_pending_flags_and_send_lmp25c` (rank11, this pass)
+  - If a status-struct bit3 is set: calls a fn-ptr and logs the result + the extracted field
+- HIGH: named callee anchor
+
+**0x80051980** (84B) → `service_pending_flags_and_send_lmp25c` [HIGH]
+- Tests+clears pending-flag bit2: if set, calls `FUN_80051260` +
+  `atomic_increment_dword_at_ptr_plus0x28` (HIGH)
+- Tests+clears pending-flag bit3: if set, calls `FUN_8005122c(bit0_of_same_byte)`
+- Unconditionally calls `send_lmp25c_and_clear_pending_flag_if_idle` (HIGH, Pass 30)
+- HIGH: 2 named callees, clear flag-test-and-service pattern
+
+**0x80056554** (82B) → `dequeue_from_ring_buffer_and_dispatch_by_index` [HIGH]
+- IRQ-safe: calls `dequeue_from_per_slot_ring_buffer(param_1, 0)` (HIGH, Pass 30)
+- Reads an index byte from a fixed struct; if the struct's count field is non-zero, looks up an
+  index value; if non-negative (cast to signed char), dispatches to `FUN_800560dc(index)`
+- HIGH: named callee, clear IRQ-safe dequeue-then-dispatch pattern
+
+**0x8005d1a4** (74B) → `append_to_slot10_linked_queue_and_update_tail` [HIGH]
+- Guarded by a non-zero count byte (`param_1[2]`)
+- IRQ-safe: operates on struct-array index 10 (`PTR_base_of_0x1ac_struct_array_0xA_large2`)
+- If the "first" 4-byte field (offset 0xdc) is empty (0): writes the new value directly there
+- Else: writes through the *old* "tail" pointer field's (offset 0xe0) `+0x18` slot
+- Always overwrites the tail pointer field with the new value, increments a count byte
+  (offset 0xe4) by the guard count
+- HIGH: classic linked-list tail-insertion pattern, unambiguous once recognized
+
+**0x80059f14** (58B) → `classify_link_type_code_to_category` [MEDIUM-HIGH]
+- `param_1==1` → returns 2; `param_1==0` → returns 1; `param_1` in `{2,3}` → returns 3;
+  `param_1>=4` → logs, returns 1
+- Small fixed-domain classifier; mechanism is unambiguous but no caller context confirms the
+  exact protocol meaning of the input code or output category
+- MEDIUM-HIGH: clear mechanism, unconfirmed semantics
+
+**0x8005ca00** (48B) → `set_esco_event_record_config_bit_if_allocated` [HIGH]
+- Gated on either `+0x7c` or `+0x78` being non-zero (the exact two fields
+  `alloc_esco_event_record_tag_0x14_or_0x15_by_param2`, rank3 this pass, allocates into)
+- Sets bit `param_2` of `+0x84`, writes `(param_3>>1)` into the matching bit-window of `+0x88`
+- HIGH: directly paired with rank3's allocator via identical field offsets
+
+**0x80055f34** (38B) → `check_state_ready_and_invoke_or_busy` [MEDIUM-HIGH]
+- If a status-struct bit0 is set, OR a separate byte flag is non-zero: invokes a fn-ptr with
+  constant `1`, returns its result
+- Else: returns busy/error sentinel `5`
+- MEDIUM-HIGH: clear gate+invoke shape, exact field semantics (what "ready" means here) unconfirmed
+
+**0x8005c960** (38B) → `dispatch_link_slot_state_op_for_index_8_to_10` [HIGH]
+- Range-checks `param_1` to `[8,10]` (`(byte)(param_1-8) < 3`), excludes the edge case where
+  the adjusted index would be `-1`
+- Forwards to `dispatch_link_slot_state_op(param_1-7, param_2)` (already HIGH-named, Pass 33)
+- HIGH: single-purpose range-adapter wrapping an already-named dispatcher
+
+**0x800598d4** (22B) → `gcd` [HIGH]
+- Textbook Euclidean GCD: `while (param_2 != 0) { tmp = param_1 % param_2; param_1 = param_2;
+  param_2 = tmp; }`, with a defensive `trap(7)` on a mid-loop zero divisor that the outer
+  `while` guard already precludes (likely compiler-generated safety code for the `%` operator)
+- HIGH: unambiguous standalone algorithm, no domain-specific context needed
+
+**0x8005634c** (20B) → `set_recompute_pending_flag_bit0` [HIGH]
+- `*(ushort*)DAT_80056360 |= 1;` — single global bit-set, nothing else
+- Called as the final step of `apply_or_revert_slot_timing_and_set_recompute_flag` (rank4, this
+  pass) immediately after a 3-field timing-state reset — consistent with a "mark dirty, recompute
+  on next cycle" idiom seen elsewhere in this region (e.g. `invalidate_field_and_reset_procedure_state`)
+- HIGH on mechanism (trivial, unambiguous bit-set); exact downstream consumer of the flag not traced
+
+**0x80056200** (4B) → `noop_handler_stub` [HIGH]
+- Decompiles to an empty body (`return;` only) — a valid, fully-compiled no-op function, distinct
+  from the Pass-32/33 `halt_baddata()` mis-disassembly artifacts (those fail to decompile at all
+  or show garbage register reads; this one is a clean, deliberate empty function)
+- Has 3 live callers (hence surfacing at xrefs=3 in this rank); most likely a default/unimplemented
+  hook target
+- HIGH: trivially confirmed by decompile, no ambiguity about behavior (even though *why* it
+  exists as a stub is unclear, that's not a confidence question)
+
+### Rename application
+
+`RenamePass44Region80050000.java` written directly to `/root/wairz/ghidra/scripts/` (host-path
+workaround, see tooling note above), run via `run_ghidra_headless(use_saved_project=true)`:
+`renamed=20 alreadyOk=0 missing=0 failed=0`, `Save succeeded`. Live-verified via
+`decompile_function("gcd")` and `decompile_function("noop_handler_stub")` — both resolved
+correctly under their new names in a fresh tool call (not just the run log).
+
+### Coverage after Pass 44
+
+366 total, 137 unnamed → 117 unnamed (18 HIGH + 2 MEDIUM-HIGH renamed; named count region-wide
+229 → 249, all 20 counted as named per the project's table convention regardless of
+HIGH/MEDIUM-HIGH tag).
+
+**Next**: Continue general cold-triage sweep (re-rank again — fresh renames may have shaken
+loose another top tier, same lineage as this pass) or pick a targeted xref follow-up from one
+of this pass's unnamed callees (`FUN_8004ee94`, `FUN_8005122c`, `FUN_8004edc4`, `FUN_8004f160`,
+`FUN_80051260`, `FUN_80051908`, `FUN_80051aa0`, `FUN_800560dc`).
