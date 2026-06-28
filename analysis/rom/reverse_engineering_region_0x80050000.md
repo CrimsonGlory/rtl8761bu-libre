@@ -5585,3 +5585,23 @@ Region unnamed count after this pass: **26** (27 minus this rename).
 
 **Next:** Pass 54ad — continue down the xrefs=1 tier (re-run cold-triage for next rank).
 
+## Pass 54ad (2026-06-28) — cold-triage rank-1 rename (post-54ac re-rank)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ac: **366 total**, **340 named**,
+**25 unnamed** (9 artifacts excluded). Decompiled and renamed rank-1
+**`FUN_8005637c` → `set_hw_control_flag_bit6`** (38B, HIGH) via
+`RenamePass54adFun8005637c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sets/clears bit 6 (`0x40`) of ushort at `DAT_800563a4` based on whether
+`param_1 & 0xff` is non-zero (`*reg = *reg & 0xffbf | (sign_extend(-(param&0xff)) << 6)`).
+Structural twin of `set_hw_control_flag_bit0` at `0x80056364` (Pass 36, bit 0 on a different
+global). Sole caller is `FUN_8004d294` (region `0x80040000` SCO/eSCO HW-register init blob),
+which invokes `set_hw_control_flag_bit6(1)` mid-sequence after setting `0x2000` on another reg.
+
+**Confidence:** HIGH — unambiguous sign-extend bit-set idiom; naming family matches Pass 36
+sibling; caller context is the established SCO/eSCO HW programming sequence.
+
+Region unnamed count after this pass: **25** (26 minus this rename).
+
+**Next:** Pass 54ae — continue down the xrefs=1 tier (re-run cold-triage for next rank).
+
