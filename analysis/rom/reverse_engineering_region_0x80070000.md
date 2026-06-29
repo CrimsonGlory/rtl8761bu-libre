@@ -2267,13 +2267,25 @@ Decompiled and renamed:
 **`FUN_80064f60` → `validate_psm_qos_channel_slot_and_emit_lmp_0x268`**
 (74B, HIGH, SIMPLE-tier) via `RenamePass12euRegion80070000Fun80064f60.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Takes channel-slot index `param_1`. `FUN_80063f28` validates per-slot enable flag bit 1 and scans up to 10 eligibility entries via `FUN_80063ea0`; on success `FUN_80064e98` aggregates ACL timing stats over 0x4f channels into a 10-byte buffer and calls `FUN_80064bf4`. Stores current slot to `PTR_DAT_80064fac`; when global mode dword at `PTR_DAT_80064fb0` is `-1`, emits VSC 0xFC95 via `VSC_0xfc95_called2`; always finishes with `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Returns 1 on success, 0 if slot ineligible. Callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots` on the non-dual-quantizer channel-slot iteration path. Lives at `0x80064f60` (region `0x80060000`).
+**Mechanism:** Takes channel-slot index `param_1`. `check_psm_qos_channel_slot_eligibility_scan10` validates per-slot enable flag bit 1 and scans up to 10 eligibility entries via `FUN_80063ea0`; on success `FUN_80064e98` aggregates ACL timing stats over 0x4f channels into a 10-byte buffer and calls `FUN_80064bf4`. Stores current slot to `PTR_DAT_80064fac`; when global mode dword at `PTR_DAT_80064fb0` is `-1`, emits VSC 0xFC95 via `VSC_0xfc95_called2`; always finishes with `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Returns 1 on success, 0 if slot ineligible. Callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots` on the non-dual-quantizer channel-slot iteration path. Lives at `0x80064f60` (region `0x80060000`).
 
 **Confidence:** HIGH — full decompilation; channel-slot worker in PSM/QoS quantizer gate cluster.
 
 Live named **1304** (global; in-region unnamed **46**).
 
-**Next:** Pass 12ev — decompile+rename `FUN_80063f28` (channel-slot eligibility validator; callee of `validate_psm_qos_channel_slot_and_emit_lmp_0x268`).
+## Pass 12ev (2026-06-29) — PSM/QoS channel-slot eligibility scan `FUN_80063f28`
+
+Decompiled and renamed:
+**`FUN_80063f28` → `check_psm_qos_channel_slot_eligibility_scan10`**
+(68B, HIGH, SIMPLE-tier) via `RenamePass12evRegion80070000Fun80063f28.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes channel-slot index `param_1`. When per-slot enable flag bit 1 is set at `PTR_DAT_80063f6c[(slot)+4]`, scans eligibility entries `0..9` via `FUN_80063ea0(entry, slot)`; returns 1 if any entry passes, else 0. Sole eligibility gate before `validate_psm_qos_channel_slot_and_emit_lmp_0x268` proceeds to timing setup + LMP 0x268 emit. Lives at `0x80063f28` (region `0x80060000`).
+
+**Confidence:** HIGH — full decompilation; eligibility-scan leaf in PSM/QoS channel-slot worker cluster.
+
+Live named **1305** (global; in-region unnamed **45**).
+
+**Next:** Pass 12ew — decompile+rename `FUN_80063ea0` (per-entry PSM/QoS channel-slot eligibility test; callee of `check_psm_qos_channel_slot_eligibility_scan10`).
 
 ## Pass 12es (2026-06-29) — PSM/QoS 5-byte eligibility bitmask from 10-byte template `FUN_800643a0`
 
