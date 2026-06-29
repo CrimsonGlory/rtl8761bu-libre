@@ -6027,8 +6027,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dh: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (82 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dh (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80075f58`→`init_resource_pool_64_slot_freelist_descriptors`
+          (96B, HIGH, SIMPLE-tier). Zeros 64-dword table at `PTR_DAT_80075fb8` +
+          init 64×28-byte linked freelist at `PTR_DAT_80075fbc`; second step in
+          `init_isr_extended_and_crypto_timer_resources` setup chain after Pass 12dg.
+          Region 81 unnamed remain; live named 1265.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12di: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (81 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

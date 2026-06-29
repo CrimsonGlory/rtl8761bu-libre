@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dh — cold-triage rank-1 SIMPLE-tier unnamed continuation (82 in-region remain).
+**Next:** Pass 12di — cold-triage rank-1 SIMPLE-tier unnamed continuation (81 in-region remain).
+
+## Pass 12dh (2026-06-29) — resource pool 64-slot freelist init `FUN_80075f58`
+
+Decompiled and renamed:
+**`FUN_80075f58` → `init_resource_pool_64_slot_freelist_descriptors`**
+(96B, HIGH, SIMPLE-tier) via `RenamePass12dhRegion80070000Fun80075f58.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeros 64 dword slots at `PTR_DAT_80075fb8`, then initializes 64 × 28-byte (`0x1c`) slot descriptors at `PTR_DAT_80075fbc` as a singly-linked freelist: each entry stores its index at `[0]`, busy byte at `[4]`, and next pointer at `[0x14]` chaining entry `i` → `i+1` for indices `0..0x3e`; terminal entry `0x3f` has no successor. Sets head/tail pointers at `PTR_PTR_80075fc0`/`80075fc4`, clears ushort at `PTR_DAT_80075fc8` and dword at `PTR_DAT_80075fcc`. Second step in `init_isr_extended_and_crypto_timer_resources` setup chain (after Pass 12dg's `init_resource_pool_11_type_slot_descriptors`, before `func6_that_uses_structs_at_0x80100000` and `FUN_80075c68`).
+
+**Confidence:** HIGH — unambiguous 64-entry linked-freelist init idiom; direct caller chain from Pass 12cl cold-boot init pins domain.
+
+Region unnamed count after this pass: **81** (82 minus this rename). Live named **1265**.
 
 ## Pass 12dg (2026-06-29) — resource pool type-descriptor table init `FUN_80075ae8`
 
