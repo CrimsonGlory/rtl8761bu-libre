@@ -1543,6 +1543,20 @@ Region unnamed count after this pass: **131** (132 minus this rename). Live name
 
 **Next:** Pass 12ax — cold-triage rank-1 SIMPLE-tier unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
 
+## Pass 12ax (2026-06-29) — bignum mod-reduce loop `FUN_80076b7c`
+
+Decompiled and renamed:
+**`FUN_80076b7c` → `crypto_bignum_reduce_mod_by_repeated_subtract`**
+(90B, HIGH) via `RenamePass12axRegion80070000Fun80076b7c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** In-place modular reduction loop over uint32 limb arrays: while `compare_uint32_arrays_lexicographic_msb_to_lsb(dest, len, modulus, mod_len) >= 1`, call `crypto_bignum_sub_u32_arrays_with_borrow(dest, len, modulus, mod_len)` then trim trailing zero limbs and refresh effective length. Returns when `dest < modulus`. Sole caller `FUN_8002d818` in region `0x8002xxxx` — same SSP/ECDH bignum cluster as Pass 12t compare + Pass 12u subtract siblings.
+
+**Confidence:** HIGH — unambiguous compare/subtract/trim loop idiom; callee names already HIGH from Passes 12t/12u pin arithmetic role.
+
+Region unnamed count after this pass: **130** (131 minus this rename). Live named **1205**.
+
+**Next:** Pass 12ay — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+
 ## Pass 12av (2026-06-29) — VSC FCA1 log thunk `FUN_800778aa`
 
 Decompiled and renamed:

@@ -5538,8 +5538,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12aw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ax: cold-triage rank-1 SIMPLE-tier
-          unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ax (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076b7c`→`crypto_bignum_reduce_mod_by_repeated_subtract`
+          (90B, HIGH, SIMPLE-tier). In-place mod-reduce loop: while dest≥modulus,
+          subtract + trim trailing zero limbs; sole caller `FUN_8002d818` SSP/ECDH
+          bignum cluster. Region 130 unnamed remain; live named 1205.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ax;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ay: cold-triage rank-1 SIMPLE-tier
+          unnamed (crypto-bignum cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
