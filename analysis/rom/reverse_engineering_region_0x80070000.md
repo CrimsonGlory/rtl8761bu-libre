@@ -1935,6 +1935,20 @@ Region unnamed count after this pass: **110** (111 minus this rename). Live name
 
 **Next:** Pass 12ca — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
 
+## Pass 12ca (2026-06-29) — max-slot packet-type selector `FUN_80072474`
+
+Decompiled and renamed:
+**`FUN_80072474` → `select_max_slot_packet_type_on_feature_page_and_config`**
+(158B, HIGH) via `RenamePass12caRegion80070000Fun80072474.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-only selector returning max-slot packet-type code `1`, `3`, or `5` for packet-type negotiation (same encoding as LMP_MAX_SLOT_REQ payload bytes). Default `1`; when global + conn feature-page bit `1` both set → `3`; when global + conn bit `2` both set → `5`. If global BR/EDR capability struct (`struct_of_at_least_0x300_size` bytes `0x16f`/`0x170`/`0x171`/`0x172`) indicates BR-only path, forces `1`. When `param_1 != 0xff` and result ≠ `1`, invokes patch hook `calls_fptr_down_LMP__47E_path` and compares returned weight against two global thresholds (`PTR_DAT_80072520`, `PTR_DAT_80072524`) to refine selection among `1`/`3`/`5`. Non-sending companion of Pass 12bz `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state` in the `0x800724xx` cluster adjacent to already-named `send_LMP_NOT_ACCEPTED` (`0x80072404`) and `send_LMP_ACCEPTED` (`0x8007243c`).
+
+**Confidence:** HIGH — unambiguous feature-bit gating + same 1/3/5 slot encoding as Pass 12bz sender; BR/EDR config override + LMP 0x47E hook path pins packet-type negotiation domain.
+
+Region unnamed count after this pass: **109** (110 minus this rename). Live named **1232**.
+
+**Next:** Pass 12cb — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
