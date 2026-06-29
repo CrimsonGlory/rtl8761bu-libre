@@ -6109,6 +6109,30 @@ Region unnamed count after this pass: **1** (2 minus this rename; sole survivor 
 
 **Next:** Pass 54bc — final xrefs=0 tier rename (`FUN_8005d1f4`, 110B).
 
+## Pass 54bc (2026-06-29) — final xrefs=0 tier rename (region sweep complete)
+
+Decompiled and renamed the last remaining unnamed function in region `0x80050000`:
+**`FUN_8005d1f4` → `insert_index_into_conn_field0x134_or_global_list_head_or_tail`**
+(110B, HIGH) via `RenamePass54bcFun8005d1f4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked singly-linked-list insert (head or tail via `param_3`), gated on
+nonzero node count at `param_1[2]`. When `param_4==0`, anchors at per-connection field `+0x134`
+within the `0x1ac` struct array (`PTR_base_of_0x1ac_struct_array_0xA_large2_1__field301_0x134`);
+else uses global list head at `PTR_DAT_8005d264`. Links via `+0x18` back-pointer field on index-
+keyed nodes (distinct from the byte-keyed `0xc`-stride node pool used by
+`insert_byte_into_per_connection_singly_linked_list_head_or_tail`). Accumulates count at anchor
+`+8`. Structural sibling of `assign_pointer_to_0x1AC_offset_0x134` (88B, tail-only variant at
+`0x8005d26c`).
+
+**Confidence:** HIGH — two already-named interrupt helpers plus established `+0x134` pending-
+procedure queue field and structural twin to both the byte-insert list primitive and the tail-
+only assign helper.
+
+Region unnamed count after this pass: **0** (xrefs=0 cold-triage tier exhausted for this region;
+9 mis-disassembly artifacts remain excluded).
+
+**Next:** pivot to next ROM region or xrefs≥1 backlog re-rank as appropriate.
+
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
 Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,
