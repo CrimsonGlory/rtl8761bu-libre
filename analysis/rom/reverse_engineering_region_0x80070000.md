@@ -1527,7 +1527,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **136** (137 minus this rename). Live named **1199**.
 
-**Next:** Pass 12as — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x800779a8`).
+**Next:** Pass 12at — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+
+## Pass 12as (2026-06-29) — int16 array mean scaler `FUN_800779a8`
+
+Decompiled and renamed:
+**`FUN_800779a8` → `mean_int16_array_divide_and_shift7`**
+(40B, HIGH) via `RenamePass12asRegion80070000Fun800779a8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sums `int16` samples from dense array `param_1` over `param_3` elements (`*(short*)(base + i*2)`), divides by count (mean), returns `(short)(mean >> 7)` fixed-point scale-down. Array-based sibling of Pass 12aq's window variant `mean_int16_window_divide_and_shift7` (`0x80077988`, 32B); shared helper in quantizer/PSM-or-QoS cluster alongside quicksort pair and FIR smoother; callers `FUN_80077bcc`, `PSM_or_QoS_packet_slot_optimizer` (`0x8007814c`).
+
+**Confidence:** HIGH — unambiguous sum/divide/`>>7` idiom; caller cluster pins quantizer ranking metric role.
+
+Region unnamed count after this pass: **135** (136 minus this rename). Live named **1200**.
+
+**Next:** Pass 12at — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12aq (2026-06-29) — int16 window mean scaler `FUN_80077988`
 
