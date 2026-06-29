@@ -5340,8 +5340,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12t
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12u: cold-triage rank-1 unnamed
-          from remaining 159.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12u: FUN_8007677c (2026-06-29)
+          renamed→`crypto_bignum_sub_u32_arrays_with_borrow` (112B, HIGH).
+          In-place multi-word u32 subtract with borrow propagation; rank-1
+          SIMPLE-tier (19 xrefs); callers in 0x8002xxxx bignum cluster. via
+          RenamePass12uRegion80070000Fun8007677c.java (renamed=1, live-verified).
+          158 unnamed remain; live named 1176.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12u
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12v: cold-triage rank-1 unnamed
+          from remaining 158.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

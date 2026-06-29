@@ -1475,7 +1475,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **160** (161 minus this rename).
 
-**Next:** Pass 12u — cold-triage rank-1 unnamed from remaining 159.
+**Next:** Pass 12v — cold-triage rank-1 unnamed from remaining 158.
+
+## Pass 12u (2026-06-29) — bignum subtract with borrow `FUN_8007677c`
+
+Decompiled and renamed:
+**`FUN_8007677c` → `crypto_bignum_sub_u32_arrays_with_borrow`**
+(112B, HIGH) via `RenamePass12uRegion80070000Fun8007677c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** In-place multi-word subtract: for `i` in `0..count-1`, `dest[i] -= src[i]` with standard unsigned borrow chain. If borrow remains after the active length, skip trailing zero words then decrement the next non-zero limb (or saturate intermediate zeros to `0xffffffff`). Pure arithmetic — no LMP/HCI logic. Cold-triage rank-1 SIMPLE-tier candidate (112B, 19 xref-in); callers in region `0x8002xxxx` (`FUN_8002d464`, `FUN_8002d818`, `FUN_8002dffc`, `FUN_8002e55c`) — same SSP/ECDH bignum cluster as Pass 12t's `compare_uint32_arrays_lexicographic_msb_to_lsb`. Structural subtract sibling of Pass 12's `crypto_bignum_add_u32_arrays_with_carry` (`0x80076708`).
+
+**Confidence:** HIGH — unambiguous subtract-with-borrow idiom; caller cluster + add/compare siblings pin role in bignum primitive set.
+
+Region unnamed count after this pass: **158** (159 minus this rename).
 
 ## Pass 12t (2026-06-29) — lexicographic u32 array compare `FUN_80076904`
 
