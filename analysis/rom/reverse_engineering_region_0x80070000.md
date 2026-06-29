@@ -2309,6 +2309,20 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
+## Pass 12fn (2026-06-29) — link-sample counter flush + average-event dispatch `FUN_80074020`
+
+Decompiled and renamed:
+**`FUN_80074020` → `flush_link_sample_counters_and_emit_periodic_average_event`**
+(160B, HIGH, HANDLER-tier) via `RenamePass12fnRegion80070000Fun80074020.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes per-link index `param_1`; resolves a 0x1c-stride record at `PTR_DAT_800740c0 + index*0x1c` (same struct/stride as `FUN_8007419c`'s sample-record sibling). Optional override callback at `PTR_DAT_800740c4` can veto the flush. Two independent threshold-counter paths gated by flag bits at `+0xf`: bit0 — short counter at `+0x14` vs limit `+0x12`; on reach, resets counter, clears bits 0-1, and dispatches `FUN_800321f8(0, id@+0x16, last_raw_sample@+0x1a)` (raw-value report). Bit1 — byte counter at `+0x11` vs limit `+0x10`; on reach, resets counter, computes average `sum@+4 / count@+2` (with `trap(7)` divide-by-zero guard), dispatches the same `FUN_800321f8` callback with the average, then zeroes the sum/count accumulator. Sole identified caller (per decompiled body, not yet xref-confirmed — `xrefs_to`/`find_callers` returned empty against this GZF for this symbol, likely a tool/indirect-call resolution gap rather than true zero-callers): `FUN_800740c8`, a periodic-tick dispatcher that walks two connection-handle bitmasks (`bos+0x10` ushort, `bos+2` byte) plus a per-struct flag bitmask, invoking this flush for every active link once per 9-tick cycle (`PTR_DAT_80074194` counter wraps at 9).
+
+**Confidence:** HIGH for the mechanism (clear counter/threshold/average-dispatch idiom, consistent record layout with `FUN_8007419c`); the caller link is inferred from `FUN_800740c8`'s decompiled body rather than confirmed via xref tooling — flagged rather than assumed.
+
+Live named **1323** (global; in-region unnamed **29**; HANDLER-tier unnamed **14**).
+
+**Next:** Pass 12fo — `FUN_8007419c` (per-link sample-record writer + threshold-crossing event, same `0x1c`-stride record/`PTR_DAT_8007423c` override hook as this pass) and/or `FUN_800740c8` itself (periodic-tick dispatcher, identified above as this function's caller).
+
 ## Pass 12fm (2026-06-29) — timer-wheel reschedule primitive `FUN_80076110`
 
 Decompiled and renamed:

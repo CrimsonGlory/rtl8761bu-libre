@@ -6509,9 +6509,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fn: cold-triage next HANDLER-tier
-          candidate (FUN_8007419c / FUN_800740c8 / FUN_80074020, tied rank at
-          xref_in=2) or continue HANDLER-tier sweep (15 unnamed remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fn (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80074020`→`flush_link_sample_counters_and_emit_periodic_average_event`
+          (160B, HIGH, HANDLER-tier). Per-link periodic-tick counter flush: bit0 path reports
+          last raw sample, bit1 path reports sum/count average via `FUN_800321f8`; caller
+          `FUN_800740c8` (9-tick periodic dispatcher walking connection bitmasks). HANDLER-tier
+          unnamed 14 remain; live named 1323.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fo: `FUN_8007419c` (per-link
+          sample-record writer + threshold-crossing event, same 0x1c-stride record
+          as Pass 12fn) and/or its caller `FUN_800740c8` (periodic-tick dispatcher).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`
