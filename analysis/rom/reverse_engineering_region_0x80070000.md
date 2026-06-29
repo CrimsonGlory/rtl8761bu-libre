@@ -2073,6 +2073,20 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **101** (102 minus this rename). Live named **1245**.
 
+## Pass 12co (2026-06-29) — HCI reset VSC 0xFC95 triad `FUN_80078be8`
+
+Decompiled and renamed:
+**`FUN_80078be8` → `hci_reset_invoke_vsc_fc95_lmp_triad`**
+(38B, HIGH, SIMPLE-tier) via `RenamePass12coRegion80070000Fun80078be8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin wrapper around the established `VSC_0xfc95` triad for the HCI-reset path: `FUN_80078bb4` (LMP 0x25B gateway when init flag `!= -1`) → `VSC_0xfc95_called2(1, …)` → `FUN_80078b94` (LMP 0x268 dispatch with dword from param-block `+0x20`). Sole callee of Pass 12cm's config-gated branch — the VSC 0xFC95 step between param-block reinit and HW-register programming.
+
+**Confidence:** HIGH — unambiguous triad idiom matching `irq_safe_set_vsc_fc95_mode_and_dispatch_lmp_triad` / `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`; caller chain from Pass 12cm pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
+
+**Next:** Pass 12cp — cold-triage rank-1 SIMPLE-tier unnamed continuation (100 in-region remain).
+
 ## Pass 12cl (2026-06-29) — ISR/timer resource init `FUN_80075428`
 
 Decompiled and renamed:
