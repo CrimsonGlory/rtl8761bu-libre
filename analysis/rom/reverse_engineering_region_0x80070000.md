@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fi — cold-triage rank-1 SIMPLE-tier continuation (2 remain: `FUN_80076d90`, `FUN_80074244`).
+**Next:** Pass 12fj — cold-triage rank-1 SIMPLE-tier continuation (`FUN_80074244`).
+
+## Pass 12fi (2026-06-29) — BB slot instant delta threshold gate `FUN_80076d90`
+
+Decompiled and renamed:
+**`FUN_80076d90` → `evaluate_bb_slot_instant_delta_exceeded_flag`**
+(52B, HIGH, SIMPLE-tier) via `RenamePass12fiRegion80070000Fun80076d90.java` (`renamed=1`, live-verified).
+
+**Mechanism:** On BB-slot struct `PTR_DAT_80076dc4`, reads ushort instants at `+0x10` and `+0x12`. Computes absolute delta; writes `*param_1 = 0` when delta `<=` threshold at `+0x1c` **or** wrap-path `(instant_12 + 0x4e2 - instant_10) <= threshold` (1250-slot period, same constant as `classify_bb_slot_modulo_timing_flags_and_offset`); else `*param_1 = 1` (exceeded). BB link-timing cluster sibling of Pass 12k `accumulate_bb_slot_timing_drift_counters_or_set_mode` and Pass 12l `resolve_bb_slot_instant_by_status_timing_mode` in the `eSCO_SCO_connection_slave_establishment_orchestrator` (`0x8007718c`) chain. No direct xref-in (fn-ptr / orchestrator indirect only).
+
+**Confidence:** HIGH — full decompilation; paired instant fields + `0x4e2` wrap threshold match established BB-slot timing idiom.
+
+Live named **1318** (global; in-region unnamed **33**; SIMPLE-tier unnamed **1**).
 
 ## Pass 12fh (2026-06-29) — param TLV codec-page apply gate `FUN_80078de0`
 

@@ -6464,9 +6464,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fi: cold-triage rank-1 SIMPLE-tier
-          continuation (decompile+rename top remaining unnamed: `FUN_80076d90`
-          or `FUN_80074244`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fi (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076d90`→`evaluate_bb_slot_instant_delta_exceeded_flag`
+          (52B, HIGH, SIMPLE-tier). BB-slot instant pair delta threshold gate: |+0x10−+0x12|
+          or wrap (+0x12+0x4e2−+0x10) vs threshold +0x1c → *param_1 0=within/1=exceeded.
+          SIMPLE-tier unnamed 1 remain (`FUN_80074244`); live named 1318.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fi;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fj: cold-triage rank-1 SIMPLE-tier
+          continuation (decompile+rename last remaining unnamed: `FUN_80074244`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`
