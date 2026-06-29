@@ -6324,9 +6324,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eo;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ep: decompile+rename
-          `FUN_800645a0` (PSM/QoS fast-path tail callee when pre-hook returns 1;
-          sibling of Pass 12eo `apply_psm_qos_10byte_fastpath_template_merge_and_copy`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ep (2026-06-29): decompiled+
+          renamed `FUN_800645a0`→`finalize_psm_qos_5byte_fastpath_staged_bitmask_commit`
+          (294B, HIGH, MEDIUM-tier). PSM/QoS 5-byte fast-path tail: hook gate,
+          idle copy/AND-merge at +0x286, popcount <2 reload, staged commit;
+          callee of Pass 12eo when pre-hook returns 1. Region 51 unnamed remain;
+          live named 1299.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ep;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eq: decompile+rename
+          `FUN_80064444` (PSM/QoS eligibility bitmask sync when BOS field_0xf0
+          bit0 set; callee of Pass 12ep `finalize_psm_qos_5byte_fastpath_staged_bitmask_commit`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

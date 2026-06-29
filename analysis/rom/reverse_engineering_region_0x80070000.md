@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12ep — decompile+rename `FUN_800645a0` (PSM/QoS fast-path tail callee when pre-hook returns 1; sibling of Pass 12eo).
+**Next:** Pass 12eq — decompile+rename `FUN_80064444` (PSM/QoS eligibility bitmask sync callee when BOS `field_0xf0` bit0 set; called from Pass 12ep finalize path).
+
+## Pass 12ep (2026-06-29) — PSM/QoS 5-byte fast-path staged bitmask commit `FUN_800645a0`
+
+Decompiled and renamed:
+**`FUN_800645a0` → `finalize_psm_qos_5byte_fastpath_staged_bitmask_commit`**
+(294B, HIGH, MEDIUM-tier) via `RenamePass12epRegion80070000Fun800645a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Tail callee of `apply_psm_qos_10byte_fastpath_template_merge_and_copy` when its pre-hook returns `1`; also reachable from `FUN_80066c3c` and patch `FUN_8010fa34`. Optional early-exit hook at `PTR_PTR_800646c8`. When idle flag `PTR_DAT_800646cc[1]==0`: copies 5-byte template from `PTR_DAT_800646d8` into work buffer `PTR_DAT_800646d0+0x286`, sets bytes at offsets 2 and 4 to `1`. Else: AND-merges five bytes at `+0x286..+0x28a` with BOS struct mask fields `0x10..0x14`, popcounts set bits in eligibility table `PTR_DAT_800646dc` over `0x25` indices, and when count `<2` reloads from BOS struct. When idle or `memcmp` of eligibility vs reference `PTR_DAT_800646e0` differs: if BOS `field_0xf0` bit0 set, calls `FUN_80064444(eligibility,2)`; copies staged `+0x286..+0x28a` to commit slots `+0x290..+0x294`. Else logs duplicate-path via `possible_logging_function__var_args`. Sets idle flag `PTR_DAT_800646cc[1]=1`.
+
+**Confidence:** HIGH — full decompilation; 5-byte fast-path sibling of Pass 12eo 10-byte template path; shared popcount/AND-merge/commit pattern at different buffer offsets.
+
+Live named **1299** (global; in-region unnamed **51**).
 
 ## Pass 12eo (2026-06-29) — PSM/QoS fast-path 10-byte template merge+copy `FUN_800646e8`
 
@@ -2257,7 +2269,7 @@ Decompiled and renamed:
 **`FUN_800646e8` → `apply_psm_qos_10byte_fastpath_template_merge_and_copy`**
 (214B, HIGH, MEDIUM-tier) via `RenamePass12eoRegion80070000Fun800646e8.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Sole caller `dispatch_psm_qos_10byte_bitmask_by_channel_state` when field `0x181==1` and enable/config/status gates select the fast path. Optional pre-hook at `PTR_PTR_800647c0` (returns context `iVar6`) and post-gate hook at `PTR_PTR_800647c4` (early exit on non-zero). When idle flag `PTR_DAT_800647c8[0]==0`: copies 10-byte template from `PTR_DAT_800647cc` into work buffer at `PTR_DAT_800647d0+0x27c`, sets bytes at offsets 2 and 4 to `1`. Else: AND-merges work buffer with mask `PTR_DAT_800647d4` for 10 bytes, popcounts set bits in eligibility table `PTR_DAT_800647d8` over `0x4f` indices, and when count `<0x14` reloads first 10 bytes from `PTR_DAT_800647d4` into work buffer. `optimized_memcpy` copies 10 bytes from eligibility table to output `param_2`, sets idle flag to `1`; when pre-hook returned `1`, tail-calls `FUN_800645a0`.
+**Mechanism:** Sole caller `dispatch_psm_qos_10byte_bitmask_by_channel_state` when field `0x181==1` and enable/config/status gates select the fast path. Optional pre-hook at `PTR_PTR_800647c0` (returns context `iVar6`) and post-gate hook at `PTR_PTR_800647c4` (early exit on non-zero). When idle flag `PTR_DAT_800647c8[0]==0`: copies 10-byte template from `PTR_DAT_800647cc` into work buffer at `PTR_DAT_800647d0+0x27c`, sets bytes at offsets 2 and 4 to `1`. Else: AND-merges work buffer with mask `PTR_DAT_800647d4` for 10 bytes, popcounts set bits in eligibility table `PTR_DAT_800647d8` over `0x4f` indices, and when count `<0x14` reloads first 10 bytes from `PTR_DAT_800647d4` into work buffer. `optimized_memcpy` copies 10 bytes from eligibility table to output `param_2`, sets idle flag to `1`; when pre-hook returned `1`, tail-calls `finalize_psm_qos_5byte_fastpath_staged_bitmask_commit`.
 
 **Confidence:** HIGH — full decompilation; sole caller is already-named `dispatch_psm_qos_10byte_bitmask_by_channel_state`; fast-path sibling of the `0x16`/`0x0a` sub-dispatch cluster.
 
