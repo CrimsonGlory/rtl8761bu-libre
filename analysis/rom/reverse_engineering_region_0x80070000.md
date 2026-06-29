@@ -1963,6 +1963,20 @@ Region unnamed count after this pass: **108** (109 minus this rename). Live name
 
 **Next:** Pass 12cc — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
 
+## Pass 12cc (2026-06-29) — max-slot packet-type state updater `FUN_80072528`
+
+Decompiled and renamed:
+**`FUN_80072528` → `update_field_0x248_packet_type_state_from_selector_and_hci`**
+(110B, HIGH) via `RenamePass12ccRegion80070000Fun80072528.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Non-sending companion in the `0x800724xx` max-slot cluster (sits between Pass 12ca selector `0x80072474` and Pass 12cb sender `0x8007259c`). Calls `select_max_slot_packet_type_on_feature_page_and_config` for the target slot byte `1`/`3`/`5`. When selector returns `1`, sets `field_0x248` to `2`. Otherwise derives slot class from `HCI_Create_Connection_PacketType` bitmask (`0xf000` nibble → `1`/`3`/`5` encoding) and upgrades `field_0x248` when current state is below the derived class (`0xff` for 5-slot, `1` for 3-slot, `2` for 1-slot path). Does not call `send_LMP_pkt` — state-only sync sibling of Pass 12bz `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state` which also mutates `field_0x248` on send.
+
+**Confidence:** HIGH — unambiguous reuse of Pass 12ca selector + same `field_0x248` / HCI packet-type encoding as Pass 12bz max-slot-req sender; physical placement in the `0x800725xx` gap between selector and LMP_MAX_SLOT sender pins cluster identity.
+
+Region unnamed count after this pass: **107** (108 minus this rename). Live named **1234**.
+
+**Next:** Pass 12cd — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` cluster continuation or `FUN_80036420` downgrade-commit callee chain).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
