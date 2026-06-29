@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cw — cold-triage rank-1 SIMPLE-tier unnamed continuation (93 in-region remain).
+**Next:** Pass 12cx — cold-triage rank-1 SIMPLE-tier unnamed continuation (92 in-region remain).
+
+## Pass 12cw (2026-06-29) — HCI reset config apply `FUN_80079934`
+
+Decompiled and renamed:
+**`FUN_80079934` → `hci_reset_apply_bdaddr_scramble_and_patch_hooks`**
+(176B, HIGH, HANDLER-tier) via `RenamePass12cwRegion80070000Fun80079934.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Tail callee of Pass 12cv's HCI-reset VSC 0xFC95 path. Writes mode byte `0xe0` to global config struct `+0x34`, copies timing words from `big_ol_struct` (`+0x10/+0x12` → config `+0x36/+0x38`). When init flag `[0xb]&1`: on certain `field_0x14` encodings, computes slot bit mask (`1 << (field>>3)`), calls `clear_bits_in_global_0xfc39_helper` + `scrambled_bdaddr_field_writer_pair1`, and when field class `0x58` + VSC 0xFCA1 reg `0x38` bit 3 set, polls BB reg via `poll_bb_reg_ready_write_offset_value_poll_complete`. Invokes patch hooks at `PTR_DAT_800799f0(0)` and conditionally `PTR_DAT_800799f8(1)`, clears `PTR_DAT_800799f4`, calls `FUN_8007913c` (codec/feature-page). When `field_0xe & 0x20`, calls `FUN_8004ab0c`. HCI-reset continuation sibling of Passes 12cm–12cv.
+
+**Confidence:** HIGH — unambiguous config-field copy + BDADDR scramble + patch-hook idiom; tail caller from Pass 12cv pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **92** (93 minus this rename). Live named **1254**.
 
 ## Pass 12cv (2026-06-29) — HCI reset VSC FC95 init gateway `FUN_80078ca8`
 
@@ -2093,7 +2105,7 @@ Decompiled and renamed:
 **`FUN_80078ca8` → `hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`**
 (54B, HIGH, SIMPLE-tier) via `RenamePass12cvRegion80070000Fun80078ca8.java` (`renamed=1`, live-verified).
 
-**Mechanism:** When global mode dword at `PTR_DAT_80078ce0` equals `-1` (uninitialized sentinel): calls `VSC_0xfc95_called2(1, …)` and on success invokes `LMP__268__most_common_for_VSCs2_checks_fptr_patch(mode, 0x2710)` (timer constant 10000 — sibling of `LMP__264__FUN_80071b50` defaults). Always tail-calls `FUN_80079934` (176B HANDLER-tier continuation). Cold-triage rank-1 SIMPLE-tier candidate (54B, **2 xref-in** — tied highest in tier at Pass 11 re-run). Callers `fHCI_Reset_0x03_full_subsystem_teardown` and patch installer `calls_to_0x8010a001_as_fptr_to_install_patches` — HCI-reset VSC 0xFC95 cluster sibling of Passes 12co–12cr.
+**Mechanism:** When global mode dword at `PTR_DAT_80078ce0` equals `-1` (uninitialized sentinel): calls `VSC_0xfc95_called2(1, …)` and on success invokes `LMP__268__most_common_for_VSCs2_checks_fptr_patch(mode, 0x2710)` (timer constant 10000 — sibling of `LMP__264__FUN_80071b50` defaults). Always tail-calls `hci_reset_apply_bdaddr_scramble_and_patch_hooks` (176B HANDLER-tier continuation). Cold-triage rank-1 SIMPLE-tier candidate (54B, **2 xref-in** — tied highest in tier at Pass 11 re-run). Callers `fHCI_Reset_0x03_full_subsystem_teardown` and patch installer `calls_to_0x8010a001_as_fptr_to_install_patches` — HCI-reset VSC 0xFC95 cluster sibling of Passes 12co–12cr.
 
 **Confidence:** HIGH — unambiguous `-1` sentinel gate + established VSC 0xFC95 / LMP 0x268 triad idiom; caller chain pins HCI-reset init sub-step role.
 
