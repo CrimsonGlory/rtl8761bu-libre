@@ -1515,6 +1515,20 @@ Region unnamed count after this pass: **142** (143 minus this rename). Live name
 
 **Next:** Pass 12aq — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x80077988`).
 
+## Pass 12ar (2026-06-29) — quantizer offset step adjuster `FUN_80077928`
+
+Decompiled and renamed:
+**`FUN_80077928` → `adjust_quantizer_offset_coarse_or_fine_by_metric`**
+(92B, HIGH) via `RenamePass12arRegion80070000Fun80077928.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional patchable hook at `PTR_DAT_80077984` — if installed and returns non-zero, skip default path. Otherwise adjusts dword at `ctx+0x14` based on metric `param_2`: when `param_2 < 0x18`, coarse step back (`−8`); else fine step forward (`+1`). Clamps offset to `[0, 0x38]`. Returns mode `1` when adjusted offset `< 0x21`, else `2`. Shared helper in quantizer/PSM-or-QoS cluster; callers `PSM_or_QoS_packet_slot_optimizer` (`0x8007814c`) and patch `FUN_8010e350`.
+
+**Confidence:** HIGH — unambiguous hook-gate + threshold-based coarse/fine step + clamp idiom; caller cluster pins quantizer adaptive-threshold role.
+
+Region unnamed count after this pass: **136** (137 minus this rename). Live named **1199**.
+
+**Next:** Pass 12as — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x800779a8`).
+
 ## Pass 12aq (2026-06-29) — int16 window mean scaler `FUN_80077988`
 
 Decompiled and renamed:

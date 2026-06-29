@@ -5499,8 +5499,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12aq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ar: cold-triage rank-1 SIMPLE-tier
-          unnamed (quantizer/sort cluster continuation, e.g. `0x80077928`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ar (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80077928`→`adjust_quantizer_offset_coarse_or_fine_by_metric`
+          (92B, HIGH, SIMPLE-tier). Coarse/fine step on ctx+0x14 by metric threshold;
+          quantizer cluster helper. Region 136 unnamed remain; live named 1199.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ar;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12as: cold-triage rank-1 SIMPLE-tier
+          unnamed (quantizer/sort cluster continuation, e.g. `0x800779a8`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
