@@ -6456,9 +6456,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fg;
           rom_function_index.md; analysis/INDEX.md
 
-[TODO]  Full RE: ROM region 0x80070000 — Pass 12fh: cold-triage rank-1 SIMPLE-tier
-          continuation (decompile+rename top remaining unnamed: `FUN_80078de0`,
-          `FUN_80076d90`, or `FUN_80074244`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fh (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078de0`→`apply_codec_page_on_param_tlv_0xff_status_0x5d_nibble_2`
+          (136B, HIGH, SIMPLE-tier). Param TLV status-0x5d gate: when entry word==1 +
+          global bit + nibble 2, calls Pass 12be codec-page apply. SIMPLE-tier unnamed 2 remain;
+          live named 1317.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fi: cold-triage rank-1 SIMPLE-tier
+          continuation (decompile+rename top remaining unnamed: `FUN_80076d90`
+          or `FUN_80074244`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`

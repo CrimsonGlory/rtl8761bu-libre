@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fh — cold-triage rank-1 SIMPLE-tier continuation (3 remain: `FUN_80078de0`, `FUN_80076d90`, `FUN_80074244`).
+**Next:** Pass 12fi — cold-triage rank-1 SIMPLE-tier continuation (2 remain: `FUN_80076d90`, `FUN_80074244`).
+
+## Pass 12fh (2026-06-29) — param TLV codec-page apply gate `FUN_80078de0`
+
+Decompiled and renamed:
+**`FUN_80078de0` → `apply_codec_page_on_param_tlv_0xff_status_0x5d_nibble_2`**
+(136B, HIGH, SIMPLE-tier) via `RenamePass12fhRegion80070000Fun80078de0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Calls Pass 12dx `lookup_param_tlv_entry_type_0xff_if_status_0x5d()`. When entry's ushort at `+4 == 1`, logs via `possible_logging_function__var_args(3,0x8d,0x37,…)`; if global at `Ram80078e64` has bit 0 at `+0xb` set **and** `*param_1 & 0xf == 2`, calls Pass 12be `on_codec_page_bdaddr_match_parse_and_apply_if_version_changed(iVar5)` and sets `*param_3 = 0`. Otherwise logs alternate tag `0x45`. Cold-triage rank-1 SIMPLE-tier candidate (136B, **1 xref-in**). Apply-path sibling of Pass 12dx TLV lookup in the `0x80078dxx` HCI-reset / codec-page cluster.
+
+**Confidence:** HIGH — unambiguous callee chain (TLV lookup → codec-page BD_ADDR/version apply) + established logging idiom + nibble-2 type gate.
+
+Live named **1317** (global; in-region unnamed **34**; SIMPLE-tier unnamed **2**).
 
 ## Pass 12fg (2026-06-29) — BOS-slot LMP 0x2e broadcast sweep `FUN_800723cc`
 
