@@ -6342,9 +6342,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12er: decompile+rename
-          `FUN_80064b08` (PSM/QoS path caller of Pass 12eq sync; sibling of finalize
-          fast-path cluster).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12er (2026-06-29): decompiled+
+          renamed `FUN_80064b08`→`dispatch_psm_qos_opcode_mode_merge_bitmask_and_sync`
+          (208B, HIGH, SIMPLE-tier). Opcode-mode byte gates BOS `field_0xf0` bit for
+          conn-slot sync; AND-merge via `FUN_80063f70`, log, bitmask via `FUN_800643a0`,
+          conditional `sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask`,
+          VSC FC95+LMP 268 when mode uninitialized; caller
+          `multi_field_opcode_dispatcher_type1_msg`. Region 49 unnamed remain;
+          live named 1301.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12er;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12es: decompile+rename
+          `FUN_800643a0` (10-byte eligibility bitmask builder; callee of Pass 12er).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
