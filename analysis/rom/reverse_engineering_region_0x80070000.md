@@ -1439,3 +1439,17 @@ Region unnamed count after this pass: **163** (164 minus this rename).
 
 **Next:** Pass 12q — cold-triage rank-1 unnamed from remaining 163 (sibling `FUN_80075b50`/`FUN_80075c00` in same pool family).
 
+## Pass 12q (2026-06-29) — pool slot descriptor field-8 flush `FUN_80075b50`
+
+Decompiled and renamed:
+**`FUN_80075b50` → `clear_pool_slot_descriptor_field8_if_set_or_invalid`**
+(20B, HIGH) via `RenamePass12qRegion80070000Fun80075b50.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns `0xffffffff` if `param_1 == 0`; otherwise if dword at `param_1+8` is non-zero, zeroes it; returns `0`. Caller `func5_that_uses_structs_at_0x80100000` (`0x800756c0`) passes `piVar4+1` (descriptor tail starting at word 1 of the 6-word slot) as a precondition flush before memset-zeroing all six words — pool-slot "reset" path in the func1–func8 `0x80100000` resource-pool family.
+
+**Confidence:** HIGH — trivial guard+clear idiom; caller context from already-named `func5_that_uses_structs_at_0x80100000` pins role as pre-reset flush sibling of Pass 12p stack-pop.
+
+Region unnamed count after this pass: **162** (163 minus this rename).
+
+**Next:** Pass 12r — decompile+rename `FUN_80075c00` (pool-family sibling called by `func7_that_uses_structs_at_0x80100000`).
+
