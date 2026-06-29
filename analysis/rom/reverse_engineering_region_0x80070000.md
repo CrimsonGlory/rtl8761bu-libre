@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12ff — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fg — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12ff (2026-06-29) — 20-slot resource pool init `FUN_80073888`
+
+Decompiled and renamed:
+**`FUN_80073888` → `init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`**
+(80B, HIGH, SIMPLE-tier) via `RenamePass12ffRegion80070000Fun80073888.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loops 20 times (`0x14`): for each index `i`, sets byte at `PTR_DAT_800738d8 + i*0x24 + 0x1814` to `i+1` (sequential slot IDs 1..20). Sets global range markers at `+0x26c=0`, `+0x26d=0x13` (19), `+0x26e=0x14` (20). Clears 5 dwords at `(0x9c+i)*4` for `i=0..4`. Sets `+0x26b=0`. Cold-triage rank-1 SIMPLE-tier candidate (80B, **1 xref-in** — tied highest in tier at Pass 12ff re-run). Resource-pool init sibling of Pass 12dg `init_resource_pool_11_type_slot_descriptors` / Pass 12dh `init_resource_pool_64_slot_freelist_descriptors` / Pass 12di `init_resource_pool_11_slot_12byte_descriptors` in the `init_isr_extended_and_crypto_timer_resources` setup chain.
+
+**Confidence:** HIGH — unambiguous sequential-ID init loop + range-marker bytes + pointer clear idiom on documented pool globals.
+
+Live named **1315** (global; in-region unnamed **36**; SIMPLE-tier unnamed **4**).
 
 ## Pass 12fe (2026-06-29) — mod64 ring cursor scan logger `FUN_80075ffc`
 

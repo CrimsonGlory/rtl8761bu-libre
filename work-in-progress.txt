@@ -6447,8 +6447,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fe;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ff: cold-triage rank-1 SIMPLE-tier
+[TODO]  Full RE: ROM region 0x80070000 — Pass 12fg: cold-triage rank-1 SIMPLE-tier
           continuation (decompile+rename top remaining unnamed candidate).
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`
+          (80B, HIGH, SIMPLE-tier). 20×0x24 stride table init: sequential IDs 1..20,
+          range markers +0x26c..+0x26e, clear 5 dwords. SIMPLE-tier unnamed 4 remain;
+          live named 1315.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ff;
+          rom_function_index.md; analysis/INDEX.md
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fd (2026-06-29): decompiled+
           renamed rank-1 `FUN_80072020`→`log_afh_lap_channel_map_when_offset_byte_active`
