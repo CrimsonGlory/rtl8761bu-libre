@@ -2059,7 +2059,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **102** (103 minus this rename). Live named **1244**.
 
-**Next:** Pass 12cn — cold-triage rank-1 SIMPLE-tier unnamed continuation (102 in-region remain).
+**Next:** Pass 12co — cold-triage rank-1 SIMPLE-tier unnamed continuation (101 in-region remain).
+
+## Pass 12cn (2026-06-29) — HCI reset param-block default seed `FUN_80078a78`
+
+Decompiled and renamed:
+**`FUN_80078a78` → `hci_reset_memset_and_seed_default_param_block`**
+(106B, HIGH, SIMPLE-tier) via `RenamePass12cnRegion80070000Fun80078a78.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeros the 0x48-byte HCI reset param block at `PTR_DAT_80078ae4` via `memset`, then seeds default timing/constants: dword `+0x20 = 0x32`, ushort triple `0xffff` at `+0x28/+0x2a/+0x2c`, and scattered byte defaults via `PTR_DAT_80078ae8`–`80078b08` (values `0x18`, `0x20`, `0x28`, `0x2e`, `0x34`, `0x3b`, `0`, `1`, `3`). Sole callee of Pass 12cm's `hci_reset_reinit_param_block_and_vsc_fc95_if_config_enabled` — the memset+defaults step before the config-flag gate and VSC 0xFC95 triad.
+
+**Confidence:** HIGH — unambiguous memset+constant-seed idiom; caller chain from Pass 12cm pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **101** (102 minus this rename). Live named **1245**.
 
 ## Pass 12cl (2026-06-29) — ISR/timer resource init `FUN_80075428`
 

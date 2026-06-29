@@ -5882,8 +5882,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cn: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (102 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cn (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078a78`→`hci_reset_memset_and_seed_default_param_block`
+          (106B, HIGH, SIMPLE-tier). memset 0x48-byte HCI reset param block + seed
+          default timing/constants; sole callee of Pass 12cm. Region 101 unnamed remain;
+          live named 1245.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12co: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (101 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
