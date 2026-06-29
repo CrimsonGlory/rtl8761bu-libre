@@ -5427,11 +5427,15 @@ sweep beyond enumeration and is the most out-of-date):
           Region 147 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12af; rom_function_index.md; live named count 1187.
 
-[TODO]  Full RE: ROM region 0x80070000 — Pass 12ag: cold-triage rank-1 unnamed
-          from remaining 147.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ag (2026-06-29): decompiled+
+          renamed `FUN_8007180c`→`unpack_lmp_pdu_packed_6byte_field_from_offset4`
+          (50B, HIGH). Bit-packed 6-byte LMP PDU field unpack from offset +4;
+          callers `FUN_80071138` + `FUN_80041028`. Region 146 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ag;
+          rom_function_index.md; live named count 1188.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ag: cold-triage rank-1 unnamed
-          from remaining 147.
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ah: cold-triage rank-1 unnamed
+          from remaining 146 (sibling `FUN_80071840` in connection-accept path).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

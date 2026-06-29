@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ag — cold-triage rank-1 unnamed from remaining 147.
+**Next:** Pass 12ah — cold-triage rank-1 unnamed from remaining 146 (sibling `FUN_80071840` in connection-accept path).
+
+## Pass 12ag (2026-06-29) — LMP PDU 6-byte field unpack `FUN_8007180c`
+
+Decompiled and renamed:
+**`FUN_8007180c` → `unpack_lmp_pdu_packed_6byte_field_from_offset4`**
+(50B, HIGH) via `RenamePass12agRegion80070000Fun8007180c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Unpacks a bit-packed 6-byte field from an LMP PDU buffer starting at `param_1+4`: merges bytes at offsets `+4`…`+10` with shifts `(byte+5)<<6`, `(byte+6)<<0xe`, and `(byte+7)<<0x16` into six output bytes at `param_2[0..5]`. Pure format conversion — no hooks or side effects. Callers `FUN_80071138` (connection acceptance handler, HIGH-ready) and `FUN_80041028` (IRQ-masked connection-setup path that feeds unpacked bytes into indirect register callbacks). Sibling of Pass 12x's `lookup_esco_packet_type_table_entry_for_3_or_4_pair` in the `0x800718xx` LMP connection-setup cluster.
+
+**Confidence:** HIGH — unambiguous bit-unpack idiom with fixed 6-byte output; caller context pins LMP PDU field extraction role.
+
+Region unnamed count after this pass: **146** (147 minus this rename).
 
 ## Pass 12af (2026-06-29) — LMP slot offset sender `FUN_800721a0`
 
