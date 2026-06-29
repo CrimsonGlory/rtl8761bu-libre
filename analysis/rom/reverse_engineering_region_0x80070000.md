@@ -2309,7 +2309,39 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fm — cold-triage rank-3 HANDLER-tier or next-largest unnamed continuation.
+## Pass 12fm (2026-06-29) — timer-wheel reschedule primitive `FUN_80076110`
+
+Decompiled and renamed:
+**`FUN_80076110` → `reschedule_timer_wheel_slot_by_delay_ticks`**
+(152B, HIGH, HANDLER-tier) via direct-Write workaround (see `wairz_requested_changes.txt`
+save_ghidra_script entry) + `RenamePass12fmRegion80070000Fun80076110.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Guards `param_1 < 0x40` (slot index) and `param_2 != 0` (delay ticks). On a
+distinct 0x1c-stride, 64-slot pool (`PTR_DAT_800761a8`, separate global from the LMP-0x25B
+pending-slot pool at `PTR_DAT_80076108`) with status byte `+7`: if slot inactive (`+7==0`),
+fails with `0xffffffff`. If active, optionally calls the same-pattern unlink helper
+(literal call target `unlink_lmp_25b_pending_slot_from_index_queue`, though no argument is
+visible at this call site in the MIPS16e decompilation — likely a calling-convention/register-reuse
+quirk rather than true cross-pool coupling) when status `==2`. Reads a 16-bit tick counter
+from `PTR_DAT_800761ac`, computes target bucket `(param_2 + tick) & 0x3f` with a rollover
+adjust when the bucket would collide with the current tick and the delay's high byte is zero,
+sets status `=2`, stores the bucket index and delay, clears the slot's next-link, then
+tail-appends the slot into the 64-bucket linked-list array at `PTR_DAT_800761b0[bucket]` —
+a classic timer-wheel insert. Cold-triage rank-1 HANDLER-tier candidate (152B, 2 xref-in via
+listing; `xrefs_to` resolves 1 direct caller: `crypto_state_machine_loop_handler`), used to
+defer a slot's next check by N ticks.
+
+**Confidence:** HIGH for the mechanism (unambiguous timer-wheel bucket-insert idiom on a
+self-contained 64-slot pool); MEDIUM for the literal-named callee relationship since the
+unlink call shows no visible argument in this MIPS16e decompilation — flagged rather than
+assumed.
+
+Live named **1322** (global).
+
+**Next:** Pass 12fn — cold-triage next HANDLER-tier candidate (`FUN_8007419c`/`FUN_800740c8`/
+`FUN_80074020`, tied rank at xref_in=2) or continue HANDLER-tier sweep (15 unnamed remain
+per `ListHandler80070000.java` after this rename).
 
 ## Pass 12fl (2026-06-29) — resource-pool chain alloc `FUN_800738dc`
 
