@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dc — cold-triage rank-1 SIMPLE-tier unnamed continuation (87 in-region remain).
+**Next:** Pass 12dd — cold-triage rank-1 SIMPLE-tier unnamed continuation (86 in-region remain).
+
+## Pass 12dc (2026-06-29) — LE conn-param template filler `FUN_80078eb8`
+
+Decompiled and renamed:
+**`FUN_80078eb8` → `fill_le_conn_param_defaults_by_profile_byte`**
+(192B, HIGH, HANDLER-tier) via `RenamePass12dcRegion80070000Fun80078eb8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Switch on `param_2` with cases `0x20`–`0x25` (profile-byte selector): fills output struct at `param_1+4` with packet-type bytes (`0x20`/`0x18`/`0x0e`/`0x2a`/`0x10` etc.), interval/count dwords from literal-pool constants (`0x1194`, `0x2328`, 4000, 500, 0x230, 0x69a, 0x379, 0x5dc, …), and returns 1. Sole computed callee of `parse_codec_page_bitfields_into_0x2c_descriptor` (Pass 12bd) — default LE connection-parameter template seeding during codec/feature-page descriptor parse. VSC 0xFC7A cluster sibling (`VSC_0xfc7a_FUN_80078e68` validates channel range; `caseD_1`/`caseD_2` are Ghidra switch-case fragments of this same switch).
+
+**Confidence:** HIGH — unambiguous multi-case profile switch with fixed timing literals + established codec-page parser caller; completes the `0x80078e`/`0x800791xx` TLV template path.
+
+Region unnamed count after this pass: **86** (87 minus this rename). Live named **1260**.
 
 ## Pass 12db (2026-06-29) — BDADDR scramble mode branch `FUN_80079844`
 
