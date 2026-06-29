@@ -5962,8 +5962,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cz: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (90 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cz (2026-06-29): decompiled+
+          renamed `FUN_8007127c`→`emit_hci_inquiry_result_or_extended_and_maybe_complete`
+          (214B, HIGH, HANDLER-tier). Inquiry HCI result vs extended-inquiry fork +
+          counter-driven inquiry complete; callee of `LMP__47F__FUN_80071370`.
+          Region 89 unnamed remain; live named 1257.
+          → reverse_engineering_region_0x80070000.md Pass 12cz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12da: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (89 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

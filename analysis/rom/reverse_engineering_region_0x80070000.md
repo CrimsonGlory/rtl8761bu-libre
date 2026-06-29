@@ -1165,7 +1165,7 @@ no renames needed, no phantom/duplicate rows found (contrast with region
 | Address | Size | Name | Confirmed purpose |
 |---------|------|------|--------------------|
 | `0x80070ba4` | 92B | `LMP__25C__FUN_80070ba4` | Per-connection event-0x25C cleanup: conditionally fires `LMP__25C_called1`, then unconditionally `LMP__25C_called2`/`_called3`, resets two status fields, and tail-calls `HCI_EVT_0x500_FUN_800707dc`. |
-| `0x80071370` | 82B | `LMP__47F__FUN_80071370` | EIR-data-pointer dispatch: branches on whether `ptr_to_EIR_data` is a sentinel `&UNK_2`/`&UNK_3`, optionally logs, then calls `FUN_8007127c` and a final notify callback. |
+| `0x80071370` | 82B | `LMP__47F__FUN_80071370` | EIR-data-pointer dispatch: branches on whether `ptr_to_EIR_data` is a sentinel `&UNK_2`/`&UNK_3`, optionally logs, then calls `emit_hci_inquiry_result_or_extended_and_maybe_complete` and a final notify callback. |
 | `0x80071620` | 20B | `called_at_end_of_crypto_state_machine_update` | One-line tail-call to `called_by_called_at_end_of_crypto_state_machine_update`. |
 | `0x80071b50` | 44B | `LMP__264__FUN_80071b50` | Config-flag-driven timer-default setter: writes `10000` or `3000` to a global depending on two config-struct bits. |
 | `0x80071b84` | 26B | `set_bos[bosi].0xb2_index=arg2` | Confirmed thin setter: `bos[idx]._xb2_byte_minus_4... = param_2`. |
@@ -2099,7 +2099,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12cz — cold-triage rank-1 SIMPLE-tier unnamed continuation (90 in-region remain).
+**Next:** Pass 12da — cold-triage rank-1 SIMPLE-tier unnamed continuation (89 in-region remain).
+
+## Pass 12cz (2026-06-29) — inquiry-result HCI emitter `FUN_8007127c`
+
+Decompiled and renamed:
+**`FUN_8007127c` → `emit_hci_inquiry_result_or_extended_and_maybe_complete`**
+(214B, HIGH, HANDLER-tier) via `RenamePass12czRegion80070000Fun8007127c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Gated by `FUN_8006753c()` success. On valid inquiry-response slot at `PTR_DAT_80071354`: when EIR flag byte `(param_1+0xb)&4` clear OR global `field_0x17d≠0x02`, emits `send_evt_HCI_Inquiry_Result_or_HCI_Inquiry_Result_with_RSSI`; else emits `send_evt_HCI_Extended_Inquiry_Result` with EIR payload from `param_1+0x1c`. Increments response counter at `PTR_DAT_80071364` against target `PTR_DAT_80071360`; when count reaches target, calls `fHCI_inquiry_cancel()`, `send_evt_HCI_Inquiry_Complete(0)`, resets inquiry state, clears `ptr_to_EIR_data` when sentinel `0x03`, rotates slot index `(*pbVar3+1)&3`. Sole callee of `LMP__47F__FUN_80071370` EIR-dispatch path — completes inquiry-response HCI event lifecycle.
+
+**Confidence:** HIGH — unambiguous HCI inquiry-result vs extended-inquiry fork + counter-driven inquiry-complete idiom; established `send_evt_HCI_*` callees pin role.
+
+Region unnamed count after this pass: **89** (90 minus this rename). Live named **1257**.
+
+**Next:** Pass 12da — cold-triage rank-1 SIMPLE-tier unnamed continuation (89 in-region remain).
 
 ## Pass 12cx (2026-06-29) — HCI reset OGC3 OCF1 invoke `FUN_8007913c`
 
