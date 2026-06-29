@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12ct — cold-triage rank-1 SIMPLE-tier unnamed continuation (96 in-region remain).
+**Next:** Pass 12cu — cold-triage rank-1 SIMPLE-tier unnamed continuation (95 in-region remain).
+
+## Pass 12ct (2026-06-29) — role-switch pending commit `FUN_8007159c`
+
+Decompiled and renamed:
+**`FUN_8007159c` → `commit_pending_role_switch_emit_hci_or_lmp_slot_offset`**
+(128B, HIGH, SIMPLE-tier) via `RenamePass12ctRegion80070000Fun8007159c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Stores pending role-switch params into `big_ol_struct` slot: sets `field_0xc5=1`, `field_0xb8=param_3`, `field_0xbb=param_4`. When connection status `_xb2...==0x0e`: on failure (`param_2==0`) calls `FUN_8001ab44` (LMP Slot Offset 0x34 send path); on success emits `send_evt_HCI_Role_Change(0x1f, BDADDR, bdaddr_random_)`, sets status index to 4 via `set_bos_bosi__0xb2_index_arg2`, clears `field_0xc5`, and calls `FUN_80017d2c` with mode 4. Cold-triage rank-1 SIMPLE-tier candidate (128B, **1 xref-in** via computed call from `FUN_800247b4` crypto-state path). Role-switch sibling of Pass 12's `LMP_role_switch_completion_handler` (`0x80070084`).
+
+**Confidence:** HIGH — unambiguous status-0x0e gate + HCI Role Change / LMP slot-offset fork idiom; established callee names pin role-switch sub-step.
+
+Region unnamed count after this pass: **95** (96 minus this rename). Live named **1251**.
 
 ## Pass 12cs (2026-06-29) — BB register triplet writer `FUN_80078798`
 
