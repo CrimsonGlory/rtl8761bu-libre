@@ -1475,7 +1475,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **160** (161 minus this rename).
 
-**Next:** Pass 12v — cold-triage rank-1 unnamed from remaining 158.
+## Pass 12v (2026-06-29) — AFH LAP channel-map clear `FUN_800719a0`
+
+Decompiled and renamed:
+**`FUN_800719a0` → `clear_afh_lap_channel_map_for_matching_group`**
+(114B, HIGH) via `RenamePass12vRegion80070000Fun800719a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80071a14` — if installed and returns non-zero, skip default path. Otherwise uses `param_1` (or `param_2` when non-zero) as the LAP group-byte selector. Loops 6 LAP table entries on global `struct_of_at_least_0x300_size`; when `_x142_LAP[uVar4+0x49]` matches the group byte, clears channel-map bytes at offsets `+0x49/+0x4f/+0x55/+0x5b/+0x61/+0x67` to `0xff` and zeroes the dword pair at `+0x6e`. Cold-triage rank-1 SIMPLE-tier candidate (114B, **17 xref-in** — highest in tier at Pass 11 re-run). AFH/LAP sibling of Pass 6–7 `0x80072bac`/`0x80072924` pair and Pass 8 `0x8007276c`.
+
+**Confidence:** HIGH — unambiguous channel-mask clear idiom on documented `_x142_LAP` struct.
+
+Region unnamed count after this pass: **157** (158 minus this rename).
+
+**Next:** Pass 12w — cold-triage rank-1 unnamed from remaining 157.
 
 ## Pass 12u (2026-06-29) — bignum subtract with borrow `FUN_8007677c`
 
