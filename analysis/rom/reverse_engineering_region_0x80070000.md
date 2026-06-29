@@ -2199,7 +2199,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **64** (65 minus this rename). Live named **1283**.
 
-**Next:** Pass 12ea — cold-triage rank-1 SIMPLE-tier quantizer-cluster continuation (`0x80077bcc` / `0x8007814c` pair or adjacent `0x80077bxx` helpers).
+**Next:** Pass 12eb — rename sibling quantizer pair `FUN_8007814c` (1388B, 0x50-channel variant).
+
+## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
+
+Decompiled and renamed:
+**`FUN_80077bcc` → `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`**
+(1388B, HIGH, COMPLEX-tier) via `RenamePass12eaRegion80070000Fun80077bcc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80078138`. When history length at `ctx+0x1c` is `<9`, emits sentinel 5-byte output (`0xff,0xff,0xff,0xff,0x1f`) and returns `0x25`. Otherwise: unpacks 40 (`0x28`) channel flags via embedded index table `PTR_DAT_80078144`, blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 5-byte bitmask at `param_4` via `PTR_DAT_80078148` remap table, updates mean at `ctx+0x1a`. Caller: `FUN_800647dc`. Sibling variant of `0x8007814c` (0x50-channel ACL page set).
+
+**Confidence:** HIGH — full decompilation with named callees across the quantizer cluster; structural twin of documented `0x8007814c` with 0x28 vs 0x50 array sizing.
+
+Region unnamed count after this pass: **63** (64 minus this rename). Live named **1284**.
 
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 

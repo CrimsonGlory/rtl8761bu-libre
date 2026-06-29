@@ -6185,9 +6185,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ea: cold-triage rank-1
-          SIMPLE-tier quantizer-cluster continuation (`0x80077bcc` / `0x8007814c`
-          pair or adjacent `0x80077bxx` helpers).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ea (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80077bcc`→`search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`
+          (1388B, HIGH, COMPLEX-tier). PSM/QoS quantizer search over 0x28 channels;
+          sibling variant of `0x8007814c`; caller `FUN_800647dc`. via
+          RenamePass12eaRegion80070000Fun80077bcc.java (renamed=1, live-verified).
+          Region 63 unnamed remain; live named 1284.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ea;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eb: rename sibling quantizer pair
+          `FUN_8007814c` (1388B, 0x50-channel ACL variant of Pass 12ea).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
