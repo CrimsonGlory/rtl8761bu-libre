@@ -2205,21 +2205,30 @@ Decompiled and renamed:
 **`FUN_8007814c` → `search_psm_qos_quantizer_and_pack_channel_bitmask_0x50`**
 (1388B, HIGH, COMPLEX-tier) via `RenamePass12ebRegion80070000Fun8007814c.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Optional early-exit hook at `PTR_PTR_800786b8`. When history length at `ctx+0x1c` is `<9`, emits sentinel 10-byte output (`0xff`×9 + `0x7f`) and returns `0x4f`. Otherwise: unpacks 80 (`0x50`) channel flags directly from `param_3` bitmask bytes (inverted bit polarity), blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 10-byte bitmask at `param_4` via direct-index OR (`1<<(i&7)`), updates mean at `ctx+0x1a`. Caller: `FUN_800647dc`. Sibling variant of `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28` (0x28-channel page uses remap tables `PTR_DAT_80078144`/`PTR_DAT_80078148` and 5-byte output).
+**Mechanism:** Optional early-exit hook at `PTR_PTR_800786b8`. When history length at `ctx+0x1c` is `<9`, emits sentinel 10-byte output (`0xff`×9 + `0x7f`) and returns `0x4f`. Otherwise: unpacks 80 (`0x50`) channel flags directly from `param_3` bitmask bytes (inverted bit polarity), blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 10-byte bitmask at `param_4` via direct-index OR (`1<<(i&7)`), updates mean at `ctx+0x1a`. Caller: `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`. Sibling variant of `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28` (0x28-channel page uses remap tables `PTR_DAT_80078144`/`PTR_DAT_80078148` and 5-byte output).
 
 **Confidence:** HIGH — full decompilation with named callees across the quantizer cluster; structural twin of Pass 12ea with 0x50 vs 0x28 array sizing and 10-byte vs 5-byte bitmask output.
 
 Region unnamed count after this pass: **62** (63 minus this rename). Live named **1285**.
 
-**Next:** Pass 12ec — rename quantizer caller `FUN_800647dc`.
-
-## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
+## Pass 12ec (2026-06-29) — PSM/QoS dual quantizer dispatcher `FUN_800647dc`
 
 Decompiled and renamed:
-**`FUN_80077bcc` → `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`**
+**`FUN_800647dc` → `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`**
+(600B, HIGH, COMPLEX-tier) via `RenamePass12ecRegion80070000Fun800647dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80064a34`. When state byte `PTR_DAT_80064a38[2]==1`, logs and emits LMP 0x25C via `LMP__25C_called1` with minimal state (`*puVar3=2`). Otherwise: scans 10 valid BOS entries for minimum timing metric `iVar9` (from `unknown2_0x88/0x10` + ushort at `puVar3+0xc`); scans 11 bits of `_x1F4_struct` field `0x1d2/0x1d3` for minimum `iVar12`; calls `search_psm_qos_quantizer_and_pack_channel_bitmask_0x50` then `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`, storing 10-byte + 5-byte channel bitmasks at `puVar8+0x27c..0x28a`; logs both results; finishes with `LMP__25C_called1` and sets state `*puVar3=2`. Caller: `FUN_80065068` @ `0x80065008`. Lives at `0x800647dc` (region `0x80060000`); quantizer-cluster parent of Passes 12ea/12eb.
+
+**Confidence:** HIGH — full decompilation with both quantizer callees already named; dual 0x28/0x50 dispatch + LMP 0x25C emit pattern clear.
+
+Live named **1286** (global; function outside `0x80070000` so in-region unnamed count unchanged at **62**).
+
+**Next:** Pass 12ed — rename caller `FUN_80065068` (quantizer dispatch parent).
+
+## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
 (1388B, HIGH, COMPLEX-tier) via `RenamePass12eaRegion80070000Fun80077bcc.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Optional early-exit hook at `PTR_DAT_80078138`. When history length at `ctx+0x1c` is `<9`, emits sentinel 5-byte output (`0xff,0xff,0xff,0xff,0x1f`) and returns `0x25`. Otherwise: unpacks 40 (`0x28`) channel flags via embedded index table `PTR_DAT_80078144`, blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 5-byte bitmask at `param_4` via `PTR_DAT_80078148` remap table, updates mean at `ctx+0x1a`. Caller: `FUN_800647dc`. Sibling variant of `0x8007814c` (0x50-channel ACL page set).
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80078138`. When history length at `ctx+0x1c` is `<9`, emits sentinel 5-byte output (`0xff,0xff,0xff,0xff,0x1f`) and returns `0x25`. Otherwise: unpacks 40 (`0x28`) channel flags via embedded index table `PTR_DAT_80078144`, blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 5-byte bitmask at `param_4` via `PTR_DAT_80078148` remap table, updates mean at `ctx+0x1a`. Caller: `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`. Sibling variant of `0x8007814c` (0x50-channel ACL page set).
 
 **Confidence:** HIGH — full decompilation with named callees across the quantizer cluster; structural twin of documented `0x8007814c` with 0x28 vs 0x50 array sizing.
 

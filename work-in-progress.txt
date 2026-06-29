@@ -6188,7 +6188,7 @@ sweep beyond enumeration and is the most out-of-date):
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ea (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077bcc`→`search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`
           (1388B, HIGH, COMPLEX-tier). PSM/QoS quantizer search over 0x28 channels;
-          sibling variant of `0x8007814c`; caller `FUN_800647dc`. via
+          sibling variant of `0x8007814c`; caller `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`. via
           RenamePass12eaRegion80070000Fun80077bcc.java (renamed=1, live-verified).
           Region 63 unnamed remain; live named 1284.
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ea;
@@ -6197,14 +6197,24 @@ sweep beyond enumeration and is the most out-of-date):
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12eb (2026-06-29): decompiled+
           renamed rank-1 `FUN_8007814c`→`search_psm_qos_quantizer_and_pack_channel_bitmask_0x50`
           (1388B, HIGH, COMPLEX-tier). PSM/QoS quantizer search over 0x50 ACL channels;
-          sibling variant of Pass 12ea `0x80077bcc`; caller `FUN_800647dc`. via
+          sibling variant of Pass 12ea `0x80077bcc`; caller `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`. via
           RenamePass12ebRegion80070000Fun8007814c.java (renamed=1, live-verified).
           Region 62 unnamed remain; live named 1285.
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ec: rename quantizer caller
-          `FUN_800647dc` (dispatches to both 0x28 and 0x50 channel quantizers).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ec (2026-06-29): decompiled+
+          renamed `FUN_800647dc`→`run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`
+          (600B, HIGH, COMPLEX-tier). PSM/QoS dual quantizer dispatcher: calls 0x28+0x50
+          search fns, emits LMP 0x25C; parent of Passes 12ea/12eb; caller `FUN_80065068`.
+          Lives at `0x800647dc` (region `0x80060000`). via
+          RenamePass12ecRegion80070000Fun800647dc.java (renamed=1, live-verified).
+          In-region 62 unnamed unchanged; live named 1286.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ec;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ed: rename quantizer dispatch
+          caller `FUN_80065068` (parent of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
