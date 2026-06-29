@@ -1921,6 +1921,20 @@ Region unnamed count after this pass: **111** (112 minus this rename). Live name
 
 **Next:** Pass 12bz — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800723xx` PDU sender cluster continuation, e.g. `FUN_80072304`).
 
+## Pass 12bz (2026-06-29) — LMP max-slot-req sender `FUN_80072304`
+
+Decompiled and renamed:
+**`FUN_80072304` → `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state`**
+(192B, HIGH) via `RenamePass12bzRegion80070000Fun80072304.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP_MAX_SLOT_REQ (opcode `0x2e`) sender for packet-type / max-slot negotiation. Takes conn index + optional override byte (`param_2`; `-1` = auto-select). When auto-selecting: reads `big_ol_struct[conn]._xe3_features_pages_array_0_[0]` feature bits and `field_0x248` packet-type state; if state is `1`, checks feature-page bit `1` (BR) on conn + global base → payload `0x03` (3-slot) and sets state `2`; if state is `-1`, checks bit `2` (EDR) → payload `0x05` (5-slot) and sets state `1`. Explicit overrides `0x03`/`0x05` update `field_0x248` then send. Builds 3-byte PDU (`opcode 0x2e` + slot byte) via `send_LMP_pkt(conn, buf, 3, 3, 100, 0)`. Caller `fHCI_Change_Connection_Packet_Type_0x0F` (`0x8001b84c`) invokes on unencrypted path after setting packet-status bit `0x20`. Receiver sibling `LMP_MAX_SLOT_REQ_0x2E` at `0x8006a450` (region `0x80060000`).
+
+**Confidence:** HIGH — unambiguous opcode `0x2e` matching existing Kovah-named LMP_MAX_SLOT_REQ handler; feature-bit gating + `field_0x248` state machine + HCI Change Packet Type caller pin packet-type negotiation domain; `0x800723xx` cluster sibling of Pass 12by auto-rate (`0x23`) and Pass 12bx preferred-rate (`0x24`) encoders.
+
+Region unnamed count after this pass: **110** (111 minus this rename). Live named **1231**.
+
+**Next:** Pass 12ca — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
