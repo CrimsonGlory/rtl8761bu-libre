@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12db — cold-triage rank-1 SIMPLE-tier unnamed continuation (88 in-region remain).
+**Next:** Pass 12dc — cold-triage rank-1 SIMPLE-tier unnamed continuation (87 in-region remain).
+
+## Pass 12db (2026-06-29) — BDADDR scramble mode branch `FUN_80079844`
+
+Decompiled and renamed:
+**`FUN_80079844` → `apply_bdaddr_scramble_by_config_mode_bits`**
+(98B, HIGH, SIMPLE-tier) via `RenamePass12dbRegion80070000Fun80079844.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Reads config byte at `PTR_struct_at_least_0xF_big_800798a8+0x14`. When mode bits `(byte>>1)&3 == 0`, calls `scrambled_bdaddr_field_writer_pair2(byte>>3)` (same writer as HCI-reset apply path). When `== 1`, patches dword at `DAT_800798ac`: sets MSB byte bit 1 from `param_1` vs config bit 0, masks via `FUN_8001186c`, writes back. Cold-triage rank-1 SIMPLE-tier candidate (98B, **3 xref-in** — highest in tier at Pass 11 re-run). HCI-reset / BDADDR-scramble cluster sibling of Pass 12cw `hci_reset_apply_bdaddr_scramble_and_patch_hooks` and region `0x80000000` `set_channel_bdaddr_scramble_fields`.
+
+**Confidence:** HIGH — unambiguous mode-bit fork into established `scrambled_bdaddr_field_writer_pair2` + dword patch idiom; cluster context pins role.
+
+Region unnamed count after this pass: **87** (88 minus this rename). Live named **1259**.
 
 ## Pass 12da (2026-06-29) — EIR sentinel inquiry dispatch `FUN_80071370`
 

@@ -5977,8 +5977,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12da;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12db: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (88 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12db (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80079844`→`apply_bdaddr_scramble_by_config_mode_bits`
+          (98B, HIGH, SIMPLE-tier). BDADDR scramble mode-bit fork: mode 0 →
+          `scrambled_bdaddr_field_writer_pair2`, mode 1 → dword patch + mask;
+          HCI-reset cluster sibling of Pass 12cw. Region 87 unnamed remain;
+          live named 1259.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12db;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dc: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (87 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
