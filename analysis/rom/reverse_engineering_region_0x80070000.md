@@ -2045,7 +2045,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
 
-**Next:** Pass 12ck — cold-triage rank-1 SIMPLE-tier unnamed continuation (105 in-region remain).
+**Next:** Pass 12cl — cold-triage rank-1 SIMPLE-tier unnamed continuation (104 in-region remain).
+
+## Pass 12ck (2026-06-29) — AFH LAP channel bitmap merger `FUN_8007276c`
+
+Decompiled and renamed:
+**`FUN_8007276c` → `merge_afh_lap_peer_channel_maps_and_find_free_channel`**
+(424B, HIGH, HANDLER-tier) via `RenamePass12ckRegion80070000Fun8007276c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80072914` — if installed and returns non-zero, skip default path. Uses `param_1` (or `param_2` when non-zero) as the LAP group-byte selector. Scans 6 LAP table entries on `PTR_struct_of_at_least_0x300_size_80072918` for a matching group; builds a 36-byte merged channel bitmap by zeroing slots occupied by other LAP entries (stride/offset/length from `+0x55/+0x67/+0x5b`). When conn `bdaddr_random_==0`, calls `compute_afh_lap_slot_offset_from_conn_cc_and_timing_base` (Pass 12ci) to align the scan window. Loops slot indices until a free channel (`acStack_44[i]==0`) is found — returns `1` on success, `0` when no channel available. Sole caller `FUN_80072bac` AFH/LAP allocator extended variant.
+
+**Confidence:** HIGH — unambiguous nested LAP-table merge + channel-bitmap scan idiom; callee/caller chain with Passes 12ci/12cj pins AFH negotiation cluster role (closes Pass 11 COMPLEX batch “ready to rename” backlog).
+
+Region unnamed count after this pass: **104** (105 minus this rename). Live named **1242**.
+
+**Next:** Pass 12cl — cold-triage rank-1 SIMPLE-tier unnamed continuation (104 in-region remain).
 
 ## Pass 12cj (2026-06-29) — AFH LAP free-group index `FUN_80071a84`
 
@@ -2059,7 +2073,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **105** (106 minus this rename). Live named **1241**.
 
-**Next:** Pass 12ck — cold-triage rank-1 SIMPLE-tier unnamed continuation (105 in-region remain).
+**Next:** Pass 12cl — cold-triage rank-1 SIMPLE-tier unnamed continuation (104 in-region remain).
 
 ## Pass 12ci (2026-06-29) — AFH/LAP slot offset `FUN_80072694`
 

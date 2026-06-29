@@ -5858,8 +5858,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ck: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (105 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ck (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8007276c`→`merge_afh_lap_peer_channel_maps_and_find_free_channel`
+          (424B, HIGH, HANDLER-tier). AFH LAP channel-bitmap merger: optional hook,
+          merge peer LAP channel maps + scan for free channel; sole caller `FUN_80072bac`.
+          Region 104 unnamed remain; live named 1242.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ck;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cl: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (104 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
