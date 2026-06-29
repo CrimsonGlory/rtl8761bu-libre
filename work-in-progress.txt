@@ -5691,8 +5691,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bo;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bq: cold-triage rank-1 SIMPLE-tier
-          unnamed (LMP feature-page cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bq (2026-06-29): decompiled+
+          renamed `FUN_80074dd4`→`invoke_feature_page_hook_fallback_with_log_0x385`
+          (36B, HIGH, STUB-tier). Feature-page fptr-dispatch fallback when
+          `called_by_unknown_fptr_indexA_2` predicate returns zero; invokes hook
+          at `PTR_DAT_80074df8` with log tag `0x385`. Region 114 unnamed; live
+          named 1223.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12br: cold-triage rank-1 SIMPLE-tier
+          unnamed (LMP feature-page cluster continuation, e.g. `unknown_fptr_indexA`
+          dispatcher siblings).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

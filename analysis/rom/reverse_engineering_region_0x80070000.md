@@ -1651,7 +1651,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **118** (119 minus this rename). Live named **1217**.
 
-**Next:** Pass 12bq — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation).
+**Next:** Pass 12br — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation, e.g. `unknown_fptr_indexA` dispatcher siblings).
+
+## Pass 12bq (2026-06-29) — feature-page hook fallback `FUN_80074dd4`
+
+Decompiled and renamed:
+**`FUN_80074dd4` → `invoke_feature_page_hook_fallback_with_log_0x385`**
+(36B, HIGH) via `RenamePass12bqRegion80070000Fun80074dd4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin fallback path in the `unknown_fptr_indexA` fptr-dispatch family: invokes patchable hook fptr at `*PTR_DAT_80074df8` via `possible_logger_called_if_no_patch3` with log tag `0x385`. Sole callee when `called_by_unknown_fptr_indexA_2` (`0x80074dfc`) finds its registered predicate fptr returns zero — sibling success path forwards to a second fptr with a 16-bit arg. STUB-tier size but unambiguous hook-dispatch idiom; sits in the `0x80074dxx` feature-page / logger fptr cluster adjacent to Pass 12bl–12bn TLV receive chain.
+
+**Confidence:** HIGH — unambiguous single-hook invoke + fixed log tag; parent dispatcher already HIGH from low→high pass pins fallback role.
+
+Region unnamed count after this pass: **114** (115 minus this rename). Live named **1223**.
+
+**Next:** Pass 12br — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation).
 
 ## Pass 12bp (2026-06-29) — LMP TX hook dispatch `FUN_8002f220`
 
