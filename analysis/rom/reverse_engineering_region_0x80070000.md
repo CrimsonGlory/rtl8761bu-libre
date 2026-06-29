@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cr — cold-triage rank-1 SIMPLE-tier unnamed continuation (98 in-region remain; HCI-reset triad sibling `FUN_80078b94`).
+**Next:** Pass 12cs — cold-triage rank-1 SIMPLE-tier unnamed continuation (97 in-region remain).
+
+## Pass 12cr (2026-06-29) — HCI reset LMP 0x268 gateway `FUN_80078b94`
+
+Decompiled and renamed:
+**`FUN_80078b94` → `hci_reset_invoke_lmp_268_with_param_block_dword`**
+(22B, HIGH, SIMPLE-tier) via `RenamePass12crRegion80070000Fun80078b94.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loads dword from param-block `+0x20` via `PTR_DAT_80078bb0` and passes it with `*PTR_DAT_80078bac` to `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Third step of the HCI-reset `VSC_0xfc95` triad inside `hci_reset_invoke_vsc_fc95_lmp_triad` (Pass 12co) — the LMP 0x268 dispatch after `VSC_0xfc95_called2`.
+
+**Confidence:** HIGH — unambiguous LMP 0x268 callee + param-block offset; caller chain from Pass 12co pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **97** (98 minus this rename). Live named **1249**.
 
 ## Pass 12cq (2026-06-29) — HCI reset LMP 0x25B gateway `FUN_80078bb4`
 
