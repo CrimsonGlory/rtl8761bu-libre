@@ -2003,7 +2003,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1236**.
 
-**Next:** Pass 12cf — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_80033248` or `FUN_800363a0`/`FUN_800333fc`).
+**Next:** Pass 12cg — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_800363a0` or `FUN_800333fc`).
+
+## Pass 12cf (2026-06-29) — setup-chain step 1 `FUN_80033248` (cross-region `0x80030000`)
+
+Decompiled and renamed:
+**`FUN_80033248` → `merge_packet_type_mask_from_conn_slot_and_feature_page`**
+(296B, HIGH, HANDLER-tier) via `RenamePass12cfCrossRegionFun80033248.java` (`renamed=1`, live-verified).
+
+**Mechanism:** First step in the four-function setup chain inside `recompute_and_store_field_0x250_packet_type_on_conn_slot` (Pass 12cd). Reads `HCI_Create_Connection_PacketType` and `field_0x72` from `big_ol_struct[slot]`; when global flag at `PTR_DAT_80033370` bit `0x40` is clear, intersects those fields into a local mask (rejecting the `0x3306` sentinel). Clears `*param_2` to `& 0xe8`, then ORs packet-type bits (`0x10`, `0x2`, `0x4`, `0x400`/`0x800`, `0x4000`/`0x8000`, `0x100`/`0x200`, `0x1000`/`0x2000`) gated by the selected mask and feature-page bytes at `PTR_some_feature_page_base_80033378` (bits 0/1, byte 4 sign, byte 5 bit 0). Feeds Pass 12ce `mask_packet_type_bitmask_by_max_slot_fields_0x24a_0x24b` and downstream steps `FUN_800363a0`/`FUN_800333fc`.
+
+**Confidence:** HIGH — unambiguous conn-slot index param, explicit read of `HCI_Create_Connection_PacketType` + feature-page gating idiom, and documented caller chain from Pass 12cd pins setup-chain step-1 role.
+
+Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1237**.
+
+**Next:** Pass 12cg — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_800363a0` or `FUN_800333fc`).
 
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
