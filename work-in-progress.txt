@@ -5750,8 +5750,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bx: cold-triage rank-1 SIMPLE-tier
-          unnamed (`FUN_80071f60` preferred-rate payload encoder, Pass 12al callee).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bx (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80071f60`→`encode_lmp_preferred_rate_payload_byte`
+          (176B, HIGH, SIMPLE-tier). LMP preferred-rate payload encoder: mode
+          `field_0xb7` + min(`field_0x24a`,`field_0x24b`) table lookup + EDR
+          feature-bit pack; callee of `maybe_send_lmp_preferred_rate_0x24_pdu`.
+          Region 112 unnamed remain; live named 1229.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12by: cold-triage rank-1 SIMPLE-tier
+          unnamed (LMP `0x800722xx` PDU sender cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

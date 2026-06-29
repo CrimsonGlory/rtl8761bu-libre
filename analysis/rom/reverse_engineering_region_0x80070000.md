@@ -1507,7 +1507,7 @@ Decompiled and renamed:
 **`FUN_8007223c` → `maybe_send_lmp_preferred_rate_0x24_pdu`**
 (102B, HIGH) via `RenamePass12alRegion80070000Fun8007223c.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Optional patchable hook at `PTR_DAT_800722a4` — if installed and returns non-zero, skip default path. Otherwise gates on conn-index `param_1`: requires feature-page bit `4` set in both `big_ol_struct[conn]._xe3_features_pages_array_0_[1]` and `some_feature_page_base[1]`, plus `field_0xcb≠0`. Calls `FUN_80071f60()` to compute the preferred-rate payload byte; when non-zero, builds 3-byte LMP PDU (opcode `0x24` = LMP_PREFERRED_RATE) and sends via `send_LMP_pkt(conn, buf, 3, 3, 100, 0)`. Sibling of Pass 12af's `send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template` in the `0x800722xx` LMP PDU sender cluster; callee `FUN_80071f60` encodes rate from `field_0xb7` mode + min(`field_0x24a`,`field_0x24b`) table lookup.
+**Mechanism:** Optional patchable hook at `PTR_DAT_800722a4` — if installed and returns non-zero, skip default path. Otherwise gates on conn-index `param_1`: requires feature-page bit `4` set in both `big_ol_struct[conn]._xe3_features_pages_array_0_[1]` and `some_feature_page_base[1]`, plus `field_0xcb≠0`. Calls `encode_lmp_preferred_rate_payload_byte()` to compute the preferred-rate payload byte; when non-zero, builds 3-byte LMP PDU (opcode `0x24` = LMP_PREFERRED_RATE) and sends via `send_LMP_pkt(conn, buf, 3, 3, 100, 0)`. Sibling of Pass 12af's `send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template` in the `0x800722xx` LMP PDU sender cluster; callee `encode_lmp_preferred_rate_payload_byte` (Pass 12bx) encodes rate from `field_0xb7` mode + min(`field_0x24a`,`field_0x24b`) table lookup.
 
 **Confidence:** HIGH — unambiguous hook-gate + feature-bit checks + `send_LMP_pkt` opcode `0x24` idiom; sibling `LMP_PREFERRED_RATE_0x24` at `0x80069d9c` (region `0x80060000`) confirms opcode.
 
@@ -1893,13 +1893,27 @@ Region unnamed count after this pass: **114** unchanged (semantic rename of exis
 
 **Next:** Pass 12bx — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80071f60` preferred-rate payload encoder, Pass 12al callee chain).
 
+## Pass 12bx (2026-06-29) — LMP preferred-rate payload encoder `FUN_80071f60`
+
+Decompiled and renamed:
+**`FUN_80071f60` → `encode_lmp_preferred_rate_payload_byte`**
+(176B, HIGH) via `RenamePass12bxRegion80070000Fun80071f60.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Conn-index encoder for LMP_PREFERRED_RATE (opcode `0x24`) PDU payload byte. Reads `big_ol_struct[conn].field_0xb7` (mode), `field_0x24a`/`field_0x24b` (rate candidates). Calls `gate_lmp_preferred_rate_send_by_version_and_edr_config` (Pass 12bw); when gate allows, picks `min(field_0x24a, field_0x24b)` and maps via `PTR_DAT_80072014[(rate−1)]` lookup table (valid rates 1–5). Mode `field_0xb7==0`: returns table byte `| 1`. Mode `==2`: ORs EDR feature bits from `some_feature_page_base[3]` (`&4`→2, `&2`→1), shifts `(table & 0x7f) << 1`, returns `(result & 0x1f) << 3`. Other modes: log via `possible_logging_function__var_args` (tag `0xeb0`) and return `0`. Sole caller `maybe_send_lmp_preferred_rate_0x24_pdu` (Pass 12al).
+
+**Confidence:** HIGH — unambiguous mode-switch + table lookup + feature-page EDR bit packing; caller/callee chain pins LMP_PREFERRED_RATE negotiation context.
+
+Region unnamed count after this pass: **112** (113 minus this rename). Live named **1229**.
+
+**Next:** Pass 12by — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800722xx` PDU sender cluster continuation).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
 **`FUN_80071ee0` → `gate_lmp_preferred_rate_send_by_version_and_edr_config`**
 (116B, HIGH) via `RenamePass12bwRegion80070000Fun80071ee0.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Returns `0xff` (proceed) when peer `LMP_VERSION_REQ_Version` > 3 OR any of three global BR/EDR capability bytes on `struct_of_at_least_0x300_size` are set (`byte_0x16f==0 && field_0x170!=0`, `field_0x171!=0`, or `field_0x172==1`); otherwise logs via `possible_logging_function__var_args` (tag `0xf0a`) and returns `0` (abort). Sole caller `FUN_80071f60` — rate-payload encoder in the `maybe_send_lmp_preferred_rate_0x24_pdu` (Pass 12al) callee chain adjacent to the `0x800716xx` crypto/SSP fptr cluster.
+**Mechanism:** Returns `0xff` (proceed) when peer `LMP_VERSION_REQ_Version` > 3 OR any of three global BR/EDR capability bytes on `struct_of_at_least_0x300_size` are set (`byte_0x16f==0 && field_0x170!=0`, `field_0x171!=0`, or `field_0x172==1`); otherwise logs via `possible_logging_function__var_args` (tag `0xf0a`) and returns `0` (abort). Sole caller `encode_lmp_preferred_rate_payload_byte` (Pass 12bx) — rate-payload encoder in the `maybe_send_lmp_preferred_rate_0x24_pdu` (Pass 12al) callee chain adjacent to the `0x800716xx` crypto/SSP fptr cluster.
 
 **Confidence:** HIGH — unambiguous version/config gate idiom with explicit log-on-deny path; caller chain pins LMP_PREFERRED_RATE negotiation context.
 
