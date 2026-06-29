@@ -2187,7 +2187,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **65** (66 minus this rename). Live named **1282**.
 
-**Next:** Pass 12dz — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_80077b8c`, 60B, 1 xref-in).
+## Pass 12dz (2026-06-29) — quantizer bitmask unpack (40 mapped indices) `FUN_80077b8c`
+
+Decompiled and renamed:
+**`FUN_80077b8c` → `unpack_bitmask_40_mapped_bits_to_inverted_short_flags`**
+(60B, HIGH, SIMPLE-tier) via `RenamePass12dzRegion80070000Fun80077b8c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loops 40 (`0x28`) iterations over embedded index bytes at `PTR_DAT_80077bc8` (ROM table immediately following the function at `0x80077bc8`). Each table byte encodes a source bitmask byte index (`>>3`) and bit position (`&7`). For each mapped index, reads the selected bit from `param_1` and writes `1-bit` as an `int16` at `param_2 + i*2` — same inverted-short polarity as Pass 12au `unpack_bitmask_0x50_to_index_select_short_flags`, but over 40 **non-sequential** mapped indices instead of sequential `0..0x4f`. Quantizer / PSM-or-QoS cluster sibling of Pass 12at `pack_index_select_flags_into_bitmask_0x50` and Pass 12au unpack.
+
+**Confidence:** HIGH — unambiguous structural twin of the already-named 0x50 sequential unpack with only the index-walk differing; embedded table at fixed ROM offset pins role.
+
+Region unnamed count after this pass: **64** (65 minus this rename). Live named **1283**.
+
+**Next:** Pass 12ea — cold-triage rank-1 SIMPLE-tier quantizer-cluster continuation (`0x80077bcc` / `0x8007814c` pair or adjacent `0x80077bxx` helpers).
 
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 

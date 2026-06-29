@@ -6176,8 +6176,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dz: cold-triage rank-1
-          SIMPLE-tier unnamed continuation (`FUN_80077b8c`, 60B, 1 xref-in).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dz (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80077b8c`→`unpack_bitmask_40_mapped_bits_to_inverted_short_flags`
+          (60B, HIGH, SIMPLE-tier). 40 mapped bitmask bits via `PTR_DAT_80077bc8`
+          embedded index table → inverted int16 flags; quantizer-cluster sibling of
+          Pass 12at pack / Pass 12au 0x50 unpack. Region 64 unnamed remain;
+          live named 1283.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ea: cold-triage rank-1
+          SIMPLE-tier quantizer-cluster continuation (`0x80077bcc` / `0x8007814c`
+          pair or adjacent `0x80077bxx` helpers).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
