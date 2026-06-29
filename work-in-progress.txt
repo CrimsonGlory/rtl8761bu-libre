@@ -6480,8 +6480,24 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fk: cold-triage rank-1 HANDLER-tier
-          or next-largest unnamed continuation (SIMPLE-tier sweep complete).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fk (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800720c4`→`apply_or_defer_conn_role_change_emit_hci_evt_sync`
+          (206B, HIGH, HANDLER-tier). Conn role-change apply/defer: pending flag stores
+          role to `field_0xc0` or emits `send_evt_HCI_Role_Change` + eSCO status transitions;
+          10 xref-in (rank-1 HANDLER-tier). HANDLER-tier unnamed 17 remain; live named 1320.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fk;
+          rom_function_index.md; analysis/INDEX.md
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fl (2026-06-29): decompiled+
+          renamed rank-2 `FUN_800738dc`→`allocate_resource_pool_chain_slots_by_type`
+          (202B, HIGH, HANDLER-tier). Chain-walk alloc from Pass 12ff 20-slot pool:
+          types 1–4, bitmask at +0x270/+0x26a, lazy init; caller `FUN_800305f4`;
+          HANDLER-tier unnamed 16 remain; live named 1321.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fm: cold-triage rank-3 HANDLER-tier
+          or next-largest unnamed continuation.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`

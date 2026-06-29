@@ -2309,7 +2309,31 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fk — cold-triage rank-1 HANDLER-tier or next unnamed cluster continuation (SIMPLE-tier sweep complete).
+**Next:** Pass 12fm — cold-triage rank-3 HANDLER-tier or next-largest unnamed continuation.
+
+## Pass 12fl (2026-06-29) — resource-pool chain alloc `FUN_800738dc`
+
+Decompiled and renamed:
+**`FUN_800738dc` → `allocate_resource_pool_chain_slots_by_type`**
+(202B, HIGH, HANDLER-tier) via `RenamePass12flRegion80070000Fun800738dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Allocates `param_2` consecutive slots from the Pass 12ff 20-slot resource pool (`PTR_DAT_800739a8`, `0x24` stride, next-link byte at `+0x1814`, terminator `0x14`). Lazy-inits via `init_resource_pool_20_slot_sequential_ids_clear_five_ptrs` when `+0x26b==0`. Validates resource type `param_1` in `1..4` and that `param_2 <= +0x26e` (available count). Walks the chain `param_2` steps, marks the tail link `0x14`, updates head at `+0x26c`/`+0x26d`, decrements `+0x26e`, sets global active bitmask at `+0x270`, per-type bitmask at `(0x9c+type)*4`, and type flag byte `+0x26a`. Returns first allocated slot index or `0xff` on failure. Sole direct caller `FUN_800305f4` (HCI/cmd handler) with types 1–4 for feature-page / extended-inquiry record staging into pool slots before binding to `0x1ac` struct array entries.
+
+**Confidence:** HIGH — full decompilation; chain-walk + bitmask updates match Pass 12ff pool layout and caller memcpy into `+0x1818`/`+0x1819` payload fields.
+
+Live named **1321** (global; in-region unnamed **30**; HANDLER-tier unnamed **16**).
+
+## Pass 12fk (2026-06-29) — conn role-change apply/defer + HCI evt `FUN_800720c4`
+
+Decompiled and renamed:
+**`FUN_800720c4` → `apply_or_defer_conn_role_change_emit_hci_evt_sync`**
+(206B, HIGH, HANDLER-tier) via `RenamePass12fkRegion80070000Fun800720c4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes conn slot index `param_1` and new role byte `param_2`. When `field_0xc5` pending flag is set and `field_0xbb` clear: optional `FUN_80022098` when `field_0xb8==1`, then stores role to `field_0xc0` and returns (defer path). Otherwise: status `0x0a` → `FUN_80060898` + set status 3; status `0x0e` → set status 4; clears `PTR_DAT_80072198`; emits `send_evt_HCI_Role_Change(param_2, BDADDR, bdaddr_random_ ^ 1)`; logs via `possible_logger_called_if_no_patch3`; calls `FUN_80017d2c(bos_connection__array_index, byte_0xCC, 4)` for conn sync. Cold-triage rank-1 HANDLER-tier (206B, **10 xref-in** — highest in tier at Pass 12fk re-run via `ListHandler80070000.java`). Callers `apply_codec_type_and_role_switch_hook_dispatch` (role `0x35`), `FUN_8006f994`, `FUN_8006fd20`. Role-switch apply sibling of Pass 12ct `commit_pending_role_switch_emit_hci_or_lmp_slot_offset` and `LMP_role_switch_completion_handler`.
+
+**Confidence:** HIGH — explicit `send_evt_HCI_Role_Change` + pending-flag defer path + eSCO status transitions (`0x0a`/`0x0e`) match established role-switch cluster idiom.
+
+Live named **1320** (global; in-region unnamed **31**; HANDLER-tier unnamed **17**).
 
 ## Pass 12fj (2026-06-29) — resource-pool BDADDR/page matcher `FUN_80074244`
 
