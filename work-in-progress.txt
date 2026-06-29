@@ -6084,8 +6084,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12do: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (75 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12do (2026-06-29): decompiled+
+          renamed `FUN_800786dc`→`iir_blend_afh_quantizer_int16_history_80tap`
+          (180B, HIGH, quantizer/AFH cluster). Optional hook + first-sample
+          memcpy vs IIR 80-tap blend; caller `AFH_channel_map_table_builder`.
+          Region 74 unnamed remain; live named 1272.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12do;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dp: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (74 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

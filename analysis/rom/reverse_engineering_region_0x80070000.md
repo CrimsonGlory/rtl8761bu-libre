@@ -2113,7 +2113,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **77** (78 minus this rename). Live named **1269**.
 
-**Next:** Pass 12do — cold-triage rank-1 SIMPLE-tier unnamed continuation (75 in-region remain).
+**Next:** Pass 12dm — cold-triage rank-1 SIMPLE-tier unnamed continuation (76 in-region remain).
+
+## Pass 12do (2026-06-29) — AFH quantizer history IIR blend `FUN_800786dc`
+
+Decompiled and renamed:
+**`FUN_800786dc` → `iir_blend_afh_quantizer_int16_history_80tap`**
+(180B, HIGH, quantizer/AFH cluster — slightly above SIMPLE-tier size ceiling) via `RenamePass12doRegion80070000Fun800786dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80078790` — if installed and returns non-zero, skip default path. Reads blend coefficients `param_1[0]`/`param_1[1]`. When `param_1[0xe]==0`, `optimized_memcpy(param_1+0x10, param_2, 0xa0)` seeds the 80×int16 history buffer; else loops `0x50` indices applying IIR-style blend of each `param_2[i]` into `param_1[i+0x10]` using the two coeffs and fixed-point scaling (`>>0xf`). Increments dword at `param_1+0xe`; when count reaches `DAT_80078794`, sets `param_1[0xe]=0xffff` and clears `param_1[0xf]`. Quantizer/PSM-or-QoS cluster sibling of Pass 12dk `reset_psm_or_qos_quantizer_context_length_and_history` (`0x800786c4`); sole caller `AFH_channel_map_table_builder` (region `0x80030000`) — pushes blended quantizer history during AFH channel-map construction.
+
+**Confidence:** HIGH — unambiguous optional-hook + first-sample memcpy vs IIR blend loop idiom; 0xa0/0x50 sizing matches established quantizer context layout; caller pins AFH channel-map domain.
+
+Region unnamed count after this pass: **74** (75 minus this rename). Live named **1272**.
+
+**Next:** Pass 12dp — cold-triage rank-1 SIMPLE-tier unnamed continuation (74 in-region remain).
 
 ## Pass 12dn (2026-06-29) — indexed 28-byte table type/key/range matcher `FUN_800743b4`
 
