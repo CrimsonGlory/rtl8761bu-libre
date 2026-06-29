@@ -1569,7 +1569,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **126** (127 minus this rename). Live named **1209**.
 
-**Next:** Pass 12be — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. caller `FUN_800794cc`).
+**Next:** Pass 12bc — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
+
+## Pass 12be (2026-06-29) — codec page version-change gate `FUN_800794cc`
+
+Decompiled and renamed:
+**`FUN_800794cc` → `on_codec_page_bdaddr_match_parse_and_apply_if_version_changed`**
+(228B, HIGH) via `RenamePass12beRegion80070000Fun800794cc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Feature-page/codec TLV receive handler in the `0x800791xx` cluster. `memcmp` on 6-byte BD_ADDR at `param_1+8` against `PTR_DAT_800795b0`; on match, logs current version/state via `possible_logging_function__var_args(3,0x8e,...)`. When `PTR_struct_at_least_0xF_big_800795b8[0xb]` has bit `0x40`, compares version ushort at `param_1+6..7` against stored `+0xc` and returns early on mismatch. Compares version byte `param_1[0xe]&0x7f` against `PTR_DAT_800795bc[0x30]`; on change calls `parse_codec_page_bitfields_into_0x2c_descriptor` (Pass 12bd) then `FUN_80079460` to commit. Parse-path counterpart to Pass 12aa–12ae serialize chain.
+
+**Confidence:** HIGH — unambiguous BD_ADDR gate + version-byte change detection idiom; callee chain from Pass 12bd pins feature-page apply role.
+
+Region unnamed count after this pass: **123** (124 minus this rename). Live named **1212**.
+
+**Next:** Pass 12bf — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079460`).
 
 ## Pass 12bd (2026-06-29) — codec page bitfield parser `FUN_800791d0`
 
@@ -1577,7 +1591,7 @@ Decompiled and renamed:
 **`FUN_800791d0` → `parse_codec_page_bitfields_into_0x2c_descriptor`**
 (608B, HIGH) via `RenamePass12bdRegion80070000Fun800791d0.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Parses a codec/feature-page payload buffer (`param_1`) into a 0x2c-byte output descriptor at `param_2+4`. Byte `param_1[0xf]` encodes bit-length in the low 5 bits (default 0x20 when zero) and type in the top 3 bits; when type bits are clear, extracts nibble-packed ushort fields and flag bits from `param_1+0x10+byte_len`, optionally left-shifting all six dword fields by `*pbVar8>>6`. When type bits are set, delegates to indirect hook `PTR_DAT_80079438`. Logs each extracted byte and final field set via `possible_logging_function__var_args(3,0x8e,...)`. Sole caller `FUN_800794cc` (BD_ADDR match + version-byte change gate before applying parsed descriptor). Serialize-path counterpart is Pass 12aa–12ae `serialize_codec_context_lsb_with_pre_hook_and_optional_tail` chain.
+**Mechanism:** Parses a codec/feature-page payload buffer (`param_1`) into a 0x2c-byte output descriptor at `param_2+4`. Byte `param_1[0xf]` encodes bit-length in the low 5 bits (default 0x20 when zero) and type in the top 3 bits; when type bits are clear, extracts nibble-packed ushort fields and flag bits from `param_1+0x10+byte_len`, optionally left-shifting all six dword fields by `*pbVar8>>6`. When type bits are set, delegates to indirect hook `PTR_DAT_80079438`. Logs each extracted byte and final field set via `possible_logging_function__var_args(3,0x8e,...)`. Sole caller `on_codec_page_bdaddr_match_parse_and_apply_if_version_changed` (Pass 12be BD_ADDR match + version-byte change gate before applying parsed descriptor). Serialize-path counterpart is Pass 12aa–12ae `serialize_codec_context_lsb_with_pre_hook_and_optional_tail` chain.
 
 **Confidence:** HIGH — unambiguous bit-packed field extraction idiom matching prior Pass 8/9 TLV cluster analysis; caller context pins feature-page version-update role.
 
