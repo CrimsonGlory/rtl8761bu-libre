@@ -1331,5 +1331,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **171** (172 minus this rename).
 
-**Next:** Pass 12h cont — remaining `FUN_80076f*` siblings (`FUN_80076fa8`, `FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
+## Pass 12i (2026-06-29) — BB slot timing commit `FUN_80076fa8`
+
+Decompiled and renamed:
+**`FUN_80076fa8` → `commit_bb_slot_timing_flags_sync_and_tail_hook`**
+(110B, HIGH) via `RenamePass12iRegion80070000Fun80076fa8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When `param_1==0`, runs `classify_bb_slot_modulo_timing_flags_and_offset` on the stored instant at `PTR_DAT_80077018+0x1e` and writes the classified ushort to `+0x8`. When reference instant `+0x12` equals current instant `+0x16`, clears low 3 bits of status byte `+0x28` and zeroes link-timing bytes `+0x26`/`+0x27`. Always copies current instant `+0x16` → stored instant `+0x1e`. Optional indirect tail hook via `PTR_DAT_8007701c` with `(param_1, param_2)`. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`), invoked after `classify_bb_slot_modulo_timing_flags_and_offset` in the BB link-timing cluster.
+
+**Confidence:** HIGH — unambiguous field-sync/clear idiom chained to the already-named classifier; caller chain pins role (Passes 12f–12i).
+
+Region unnamed count after this pass: **170** (171 minus this rename).
+
+**Next:** Pass 12i cont — remaining `FUN_80076f*` siblings (`FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
 
