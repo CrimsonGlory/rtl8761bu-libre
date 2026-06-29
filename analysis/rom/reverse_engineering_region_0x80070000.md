@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dg — cold-triage rank-1 SIMPLE-tier unnamed continuation (83 in-region remain).
+**Next:** Pass 12dh — cold-triage rank-1 SIMPLE-tier unnamed continuation (82 in-region remain).
+
+## Pass 12dg (2026-06-29) — resource pool type-descriptor table init `FUN_80075ae8`
+
+Decompiled and renamed:
+**`FUN_80075ae8` → `init_resource_pool_11_type_slot_descriptors`**
+(80B, HIGH, SIMPLE-tier) via `RenamePass12dgRegion80070000Fun80075ae8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeros live-count dword at `PTR_PTR_80075b38+0xdc`, then loops 11 type indices (`0..0xa`): for each 20-byte (`0x14`) entry clears words at offsets `0/4/8`, sets status dword at `+0x10` to `0xffffffff` (free marker consumed by Pass 12de's `allocate_resource_pool_slot_with_scaled_buffer`). Clears four auxiliary 12-byte globals at `PTR_DAT_80075b3c`–`80075b4c`. First step in `init_isr_extended_and_crypto_timer_resources` setup chain (`FUN_80075ae8` → `FUN_80075f58` → `func6_that_uses_structs_at_0x80100000` → `FUN_80075c68`) before `register_typed_resource_slot_if_index_free` registers `tISR_EXTENDED`/`tTimer` slots.
+
+**Confidence:** HIGH — unambiguous 11-slot memset idiom with `+0x10==-1` free tag matching Pass 12de allocator; caller chain from Pass 12cl cold-boot init pins domain.
+
+Region unnamed count after this pass: **82** (83 minus this rename). Live named **1264**.
 
 ## Pass 12df (2026-06-29) — resource pool bump heap allocator `FUN_800752d0`
 
