@@ -1259,5 +1259,17 @@ Decompiled and renamed rank-1 SIMPLE-tier high-xref candidate from Pass 11 backl
 
 Region unnamed count after this pass: **177** (178 minus this rename).
 
-**Next:** Pass 12c — rename `FUN_80077508` (230B) or continue SIMPLE-tier backlog.
+## Pass 12c (2026-06-29) — HW register init sequence `FUN_80077508`
+
+Decompiled and renamed:
+**`FUN_80077508` → `init_bb_hw_registers_via_mailbox_with_patch_hooks`**
+(230B, HIGH) via `RenamePass12cRegion80070000Fun80077508.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable fptr (`PTR_first_patchable_fptr_800775f0`) — if installed and returns non-zero, entire init is skipped. Otherwise: programs baseband registers via `poll_bb_reg_ready_write_offset_value_poll_complete` at offsets `0x14`, `0x38`, `0x20`, `0x50`, `0x58`, `0x5c`, `0x60`, `0x64` (`100`), `0x68`, `0x6c`, `0x70`; calls `FUN_80076c50`; branches on second optional hook (`PTR_PTR_800775f4`) — either `VSC_0xfca1_FUN_80077474(0x38)|0x80` path or alternate callback; stores `VSC_0xfca1_FUN_80077474(0x204)` to `PTR_DAT_80077618`; clears reg `0x14`; optional second patchable fptr at end. Called by `call2funcs` (`0x80077620`) after `FUN_80077130`.
+
+**Confidence:** HIGH — decompilation matches cold-triage HW-init description; callee chain to Pass 12b mailbox primitive and VSC 0xFCA1 path confirmed.
+
+Region unnamed count after this pass: **176** (177 minus this rename).
+
+**Next:** Pass 12d — continue SIMPLE-tier backlog (`FUN_80076c50` callee, 34B) or next high-xref unnamed.
 
