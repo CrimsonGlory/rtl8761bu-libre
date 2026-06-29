@@ -1186,7 +1186,7 @@ no renames needed, no phantom/duplicate rows found (contrast with region
 | `0x8007572c` | 106B | `func7_that_uses_structs_at_0x80100000` | Pool-slot "init/zero-fill" op: computes an alignment-rounded size and `memset`s the slot's backing buffer before calling `FUN_80075c00`. Sibling of func4–func6. |
 | `0x8007579c` | 188B | `func8_that_uses_structs_at_0x80100000` | Pool-slot "allocate" op: scans the 12-slot table for a free entry, reserves it (`FUN_80075c2c`), computes the aligned buffer size, calls `func1_that_uses_structs_at_0x80100000` to get backing storage, and returns the slot index. Completes the func1–func8 alloc/use/free family. |
 | `0x80075e34` | 106B | `possible_logger_called_if_no_patch4_recursive_to_possible_logger` | Confirmed: bounded (`<0xb`) MMIO-send attempt via `memcpy_to_MMIO_for_sending_packets_`; on failure (and tag != 900) logs via `possible_logging_function__var_args`. Not actually recursive in this decompile — the name's "recursive to possible_logger" likely refers to the call chain through the logging helper family, not direct self-recursion. |
-| `0x800761f4` | 116B | `LMP__25B_meat` | Confirmed: per-index (0–0x3f) state dispatch — status `0x02` triggers an extra `FUN_80076090` call, any non-zero status calls `FUN_800761b4`, zero status logs an out-of-range/invalid-state warning with different log codes above/below index 0x40. |
+| `0x800761f4` | 116B | `LMP__25B_meat` | Confirmed: per-index (0–0x3f) state dispatch — status `0x02` triggers `unlink_lmp_25b_pending_slot_from_index_queue`, any non-zero status calls `enqueue_lmp_25b_pending_slot_to_index_queue`, zero status logs an out-of-range/invalid-state warning with different log codes above/below index 0x40. |
 | `0x8007666c` | 22B | `unknown_fptr_index1` | Confirmed thin dispatcher: if `param_1[4] == 200`, forwards `param_1[0]` to `called_by_unknown_fptr_index1_big_do_while_true`. |
 | `0x80076bd8` | 48B | `swap_byte_order` | Confirmed: classic in-place byte-reversal loop (two-pointer swap, `n/2` iterations). |
 | `0x80077620` | 22B | `call2funcs` | Confirmed: calls exactly `FUN_80077130()` then `FUN_80077508()`, no arguments, no return value used. |
@@ -1410,4 +1410,18 @@ Decompiled and renamed:
 Region unnamed count after this pass: **165** (166 minus this rename).
 
 **Next:** Pass 12o — decompile+rename `FUN_800761b4` (LMP__25B_meat non-zero-status callee sibling).
+
+## Pass 12o (2026-06-29) — LMP 0x25B pending-slot enqueue `FUN_800761b4`
+
+Decompiled and renamed:
+**`FUN_800761b4` → `enqueue_lmp_25b_pending_slot_to_index_queue`**
+(54B, HIGH) via `RenamePass12oRegion80070000Fun800761b4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked tail-append to the singly-linked pending queue headed at `PTR_PTR_800761ec` / tailed at `PTR_PTR_800761f0`. Clears status byte `+7` and next-link dword `+0x14` on the slot node, then appends: if queue empty sets head=node, else links `tail[+0x14]=node` and advances tail. Sole caller: `LMP__25B_meat` on any non-zero-status path (after optional `unlink_lmp_25b_pending_slot_from_index_queue` when status==0x02).
+
+**Confidence:** HIGH — mirror idiom of Pass 12n unlink; queue head/tail globals and `+0x14` next-field match the unlink walker.
+
+Region unnamed count after this pass: **164** (165 minus this rename).
+
+**Next:** Pass 12p — cold-triage rank-1 unnamed from remaining 164.
 

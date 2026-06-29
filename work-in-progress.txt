@@ -5286,8 +5286,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12n
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12o: FUN_800761b4
-          (LMP__25B_meat non-zero-status callee sibling).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12o: FUN_800761b4 (2026-06-29)
+          renamed→`enqueue_lmp_25b_pending_slot_to_index_queue` (54B, HIGH).
+          IRQ-masked LMP-0x25B pending-queue tail-append; clears status+next;
+          sole caller `LMP__25B_meat` non-zero-status path. via
+          RenamePass12oRegion80070000Fun800761b4.java (renamed=1, live-verified).
+          164 unnamed remain; live named 1170.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12o
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12p: cold-triage rank-1 unnamed
+          (164 remain after Pass 12o LMP-0x25B enqueue sibling).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
