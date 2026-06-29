@@ -5578,11 +5578,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bb;
           rom_function_index.md; analysis/INDEX.md
 
-[TODO]  Full RE: ROM region 0x80070000 — Pass 12bc: cold-triage rank-1 SIMPLE-tier
-          unnamed (crypto-bignum cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bc (2026-06-29): decompiled+
+          renamed `FUN_80078fdc`→`merge_feature_page_bytes_into_conn_record_bitfields_0x44_0x49`
+          (344B, HIGH). Feature-page flag-byte merge into conn-record `+0x44..+0x49`
+          with save/restore; 9 callers incl. Pass 12ak IRQ hook. Region 125 unnamed
+          remain; live named 1210.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bc;
+          rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bc: cold-triage rank-1 SIMPLE-tier
-          unnamed (crypto-bignum cluster continuation).
+[TODO]  Full RE: ROM region 0x80070000 — Pass 12bd: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bd: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

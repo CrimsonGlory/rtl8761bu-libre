@@ -1569,7 +1569,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **126** (127 minus this rename). Live named **1209**.
 
-**Next:** Pass 12bc — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+**Next:** Pass 12bd — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
+
+## Pass 12bc (2026-06-29) — feature-page conn-record bit-field merge `FUN_80078fdc`
+
+Decompiled and renamed:
+**`FUN_80078fdc` → `merge_feature_page_bytes_into_conn_record_bitfields_0x44_0x49`**
+(344B, HIGH) via `RenamePass12bcRegion80070000Fun80078fdc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Merges incoming feature-page flag bytes from `param_1` into the global per-connection struct (`PTR_base_of_0x1ac_struct_array_0xA_large2_80079134`) fields at offsets `+0x44..+0x49` (bit-packing into `field68_0x44`/`field69_0x45`, copying bytes into `+0x46..+0x49`), invokes optional patch hook at `PTR_DAT_80079138` with `param_2`, sets `param_1[0] |= 1`, then restores the original `+0x44..+0x49` bytes from saved locals. Nine callers including `irq_safe_feature_page_hook_clear_bit34_and_merge` (Pass 12ak), `LMP_power_and_clk_adj_procedure_orchestrator`, and patch `FUN_801109f8` — `0x800791xx` TLV/feature-page cluster sibling of Pass 12ak hook wrapper.
+
+**Confidence:** HIGH — unambiguous bit-merge + save/restore idiom on conn-record fields; callee chain from Pass 12ak pins feature-page maintenance role.
+
+Region unnamed count after this pass: **125** (126 minus this rename). Live named **1210**.
+
+**Next:** Pass 12bd — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
 
 ## Pass 12ba (2026-06-29) — bignum u8 add with carry `FUN_800766a4`
 
@@ -1743,7 +1757,7 @@ Decompiled and renamed:
 **`FUN_80079180` → `irq_safe_feature_page_hook_clear_bit34_and_merge`**
 (68B, HIGH) via `RenamePass12akRegion80070000Fun80079180.java` (`renamed=1`, live-verified).
 
-**Mechanism:** IRQ-masked feature-page maintenance wrapper in the `0x800791xx` TLV/codec cluster (sibling of `FUN_800791d0` parse path and Pass 12aa–12ae serialize chain). Disables interrupts, invokes patchable hook at `PTR_DAT_800791c4`, clears LSB of byte at offset `+0x34` in ctx `PTR_DAT_800791c8`, and when `param_1≠0` calls `FUN_80078fdc` (bit-field merge on `0x1ac_struct_array` fields `+0x44..+0x49`) on buffer `PTR_DAT_800791cc`. Cold-triage Pass 12ak re-run: **144 unnamed** remain; rank-1 SIMPLE-tier lead at `0x80079180` (68B, **4 xref-in**).
+**Mechanism:** IRQ-masked feature-page maintenance wrapper in the `0x800791xx` TLV/codec cluster (sibling of `FUN_800791d0` parse path and Pass 12aa–12ae serialize chain). Disables interrupts, invokes patchable hook at `PTR_DAT_800791c4`, clears LSB of byte at offset `+0x34` in ctx `PTR_DAT_800791c8`, and when `param_1≠0` calls `merge_feature_page_bytes_into_conn_record_bitfields_0x44_0x49` (bit-field merge on `0x1ac_struct_array` fields `+0x44..+0x49`) on buffer `PTR_DAT_800791cc`. Cold-triage Pass 12ak re-run: **144 unnamed** remain; rank-1 SIMPLE-tier lead at `0x80079180` (68B, **4 xref-in**).
 
 **Confidence:** HIGH — unambiguous IRQ-guard + patch-hook + flag-clear + conditional merge idiom; callee `FUN_80078fdc` already documented in feature-page cluster pins domain.
 
