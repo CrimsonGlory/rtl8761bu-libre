@@ -1583,7 +1583,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **123** (124 minus this rename). Live named **1212**.
 
-**Next:** Pass 12bf — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079460`).
+**Next:** Pass 12bg — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
+
+## Pass 12bf (2026-06-29) — codec page descriptor commit `FUN_80079460`
+
+Decompiled and renamed:
+**`FUN_80079460` → `commit_codec_page_descriptor_status_and_notify_if_unsent`**
+(96B, HIGH) via `RenamePass12bfRegion80070000Fun80079460.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Commit/apply step in the `0x800791xx` codec/feature-page cluster, callee of Pass 12be `on_codec_page_bdaddr_match_parse_and_apply_if_version_changed` after `parse_codec_page_bitfields_into_0x2c_descriptor`. When descriptor byte `[0]==1` and `*PTR_DAT_800794c0==0`, emits `send_evt_INVALID_opcode_0xFF(param_1, param_2[1])`. When one-shot flag `param_2[0x31]` is clear, sets it and calls `possible_logger_called_if_no_patch4_recursive_to_possible_logger` with tag `0x492`. Always stores status byte `param_1` at `param_2[0x30]`.
+
+**Confidence:** HIGH — unambiguous one-shot notify flag + invalid-opcode reject path; caller chain from Pass 12be pins feature-page apply role.
+
+Region unnamed count after this pass: **122** (123 minus this rename). Live named **1213**.
+
+**Next:** Pass 12bg — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
 
 ## Pass 12bd (2026-06-29) — codec page bitfield parser `FUN_800791d0`
 

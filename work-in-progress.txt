@@ -5602,8 +5602,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12be;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bf: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079460`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bf (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80079460`→`commit_codec_page_descriptor_status_and_notify_if_unsent`
+          (96B, HIGH, SIMPLE-tier). Codec-page descriptor commit: invalid-opcode reject,
+          one-shot logger notify (tag 0x492), stores status at `+0x30`; callee of Pass 12be.
+          Region 122 unnamed remain; live named 1213.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bg: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
