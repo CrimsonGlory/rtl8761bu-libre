@@ -5741,8 +5741,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bw: cold-triage rank-1 SIMPLE-tier
-          unnamed (crypto/SSP fptr cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bw (2026-06-29): decompiled+
+          renamed `FUN_80071ee0`→`gate_lmp_preferred_rate_send_by_version_and_edr_config`
+          (116B, HIGH, SIMPLE-tier). LMP preferred-rate send gate: returns `0xff` when
+          peer LMP version > 3 or BR/EDR config flags set, else logs and returns `0`;
+          sole caller `FUN_80071f60` (Pass 12al callee chain). Region 113 unnamed
+          remain; live named 1228.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bx: cold-triage rank-1 SIMPLE-tier
+          unnamed (`FUN_80071f60` preferred-rate payload encoder, Pass 12al callee).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

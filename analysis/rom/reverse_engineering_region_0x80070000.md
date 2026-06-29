@@ -1891,7 +1891,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1225** (entry updated).
 
-**Next:** Pass 12bw — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
+**Next:** Pass 12bx — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80071f60` preferred-rate payload encoder, Pass 12al callee chain).
+
+## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
+
+Decompiled and renamed:
+**`FUN_80071ee0` → `gate_lmp_preferred_rate_send_by_version_and_edr_config`**
+(116B, HIGH) via `RenamePass12bwRegion80070000Fun80071ee0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns `0xff` (proceed) when peer `LMP_VERSION_REQ_Version` > 3 OR any of three global BR/EDR capability bytes on `struct_of_at_least_0x300_size` are set (`byte_0x16f==0 && field_0x170!=0`, `field_0x171!=0`, or `field_0x172==1`); otherwise logs via `possible_logging_function__var_args` (tag `0xf0a`) and returns `0` (abort). Sole caller `FUN_80071f60` — rate-payload encoder in the `maybe_send_lmp_preferred_rate_0x24_pdu` (Pass 12al) callee chain adjacent to the `0x800716xx` crypto/SSP fptr cluster.
+
+**Confidence:** HIGH — unambiguous version/config gate idiom with explicit log-on-deny path; caller chain pins LMP_PREFERRED_RATE negotiation context.
+
+Region unnamed count after this pass: **113** (114 minus this rename). Live named **1228**.
+
+**Next:** Pass 12bx — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80071f60` preferred-rate payload encoder).
 
 ## Pass 12bv (2026-06-29) — crypto fptr finalizer wrapper `called_at_end_of_crypto_state_machine_update`
 
@@ -1905,7 +1919,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1227** (entry updated).
 
-**Next:** Pass 12bw — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
+**Next:** Pass 12bx — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80071f60` preferred-rate payload encoder).
 
 ## Pass 12bu (2026-06-29) — crypto fptr dispatcher `unknown_fptr_index1`
 
