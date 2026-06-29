@@ -1527,7 +1527,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **136** (137 minus this rename). Live named **1199**.
 
-**Next:** Pass 12au — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+**Next:** Pass 12av — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+
+## Pass 12au (2026-06-29) — bitmask unpacker `FUN_80077b2c`
+
+Decompiled and renamed:
+**`FUN_80077b2c` → `unpack_bitmask_0x50_to_index_select_short_flags`**
+(50B, HIGH) via `RenamePass12auRegion80070000Fun80077b2c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks `0x50` bit indices; for each `i`, reads bit `(i&7)` from byte `param_1[i>>3]` and writes `int16` at `param_2[i*2]` as `1 - bit` (bit set → `0`, bit clear → `1`). Inverse/unpack sibling of Pass 12at's `pack_index_select_flags_into_bitmask_0x50`; sits immediately after it in the quantizer cluster. Sole caller patch `FUN_8010e350` (same as pack).
+
+**Confidence:** HIGH — unambiguous bitmask→short-flag expand idiom; symmetric address placement + shared caller with pack pins role.
+
+Region unnamed count after this pass: **133** (134 minus this rename). Live named **1202**.
+
+**Next:** Pass 12av — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
 
