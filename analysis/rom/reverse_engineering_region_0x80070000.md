@@ -1513,7 +1513,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **142** (143 minus this rename). Live named **1193**.
 
-**Next:** Pass 12ao — cold-triage rank-1 SIMPLE-tier unnamed (`0x80077a50` partition helper).
+**Next:** Pass 12ap — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+
+## Pass 12ao (2026-06-29) — quicksort Lomuto partition `FUN_80077a50`
+
+Decompiled and renamed:
+**`FUN_80077a50` → `quicksort_lomuto_partition_int16_and_index_perm`**
+(116B, HIGH) via `RenamePass12aoRegion80070000Fun80077a50.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Lomuto-style partition over parallel int16 key and uint16 index-permutation arrays. Scans `[lo, pivot-1]`; when `keys[j] <= keys[pivot]`, increments store-index `i`, swaps both `keys[i]↔keys[j]` and paired `index_perm[i]↔index_perm[j]`. Final pass swaps pivot element into position `i+1` on both arrays. Sole callee of Pass 12am's `quicksort_int16_keys_with_index_perm_recursive`; shared helper in quantizer/PSM-or-QoS cluster (`0x8007814c`/`0x80077bcc`).
+
+**Confidence:** HIGH — unambiguous dual-array Lomuto partition idiom; caller already renamed in Pass 12am.
+
+Region unnamed count after this pass: **139** (140 minus this rename). Live named **1196**.
+
+**Next:** Pass 12ap — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12an (2026-06-29) — bignum right-shift one bit `FUN_80076974`
 
@@ -1527,15 +1541,13 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **140** (141 minus this rename). Live named **1195**.
 
-**Next:** Pass 12ao — cold-triage rank-1 SIMPLE-tier unnamed (`0x80077a50` partition helper).
-
 ## Pass 12am (2026-06-29) — quicksort recursion `FUN_80077ac4`
 
 Decompiled and renamed:
 **`FUN_80077ac4` → `quicksort_int16_keys_with_index_perm_recursive`**
 (64B, HIGH) via `RenamePass12amRegion80070000Fun80077ac4.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Classic recursive quicksort driver over parallel int16 key and index-permutation arrays. While `lo < hi`, calls partition helper `FUN_80077a50` (Lomute-style pivot swap on keys + paired uint16 index array), recurses on `[lo, pivot-1]`, then advances `lo` to `pivot+1`. Shared helper in the Pass 6 quantizer/PSM-or-QoS cluster (`0x8007814c`/`0x80077bcc`); callee of `FUN_800779d0` sort entry points.
+**Mechanism:** Classic recursive quicksort driver over parallel int16 key and index-permutation arrays. While `lo < hi`, calls partition helper `quicksort_lomuto_partition_int16_and_index_perm` (Lomuto-style pivot swap on keys + paired uint16 index array), recurses on `[lo, pivot-1]`, then advances `lo` to `pivot+1`. Shared helper in the Pass 6 quantizer/PSM-or-QoS cluster (`0x8007814c`/`0x80077bcc`); callee of `FUN_800779d0` sort entry points.
 
 **Confidence:** HIGH — unambiguous divide-and-conquer loop with self-recursion + dedicated partition callee; no opcode literals needed.
 
