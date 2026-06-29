@@ -1583,7 +1583,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **123** (124 minus this rename). Live named **1212**.
 
-**Next:** Pass 12bg — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
+**Next:** Pass 12bf — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079460`).
 
 ## Pass 12bf (2026-06-29) — codec page descriptor commit `FUN_80079460`
 
