@@ -5331,8 +5331,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12s
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12t: cold-triage rank-1 unnamed
-          from remaining 160.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12t: FUN_80076904 (2026-06-29)
+          renamed→`compare_uint32_arrays_lexicographic_msb_to_lsb` (110B, HIGH).
+          MSB-first lexicographic uint32 array compare; rank-1 SIMPLE-tier (30
+          xrefs); callers in 0x8002xxxx. via
+          RenamePass12tRegion80070000Fun80076904.java (renamed=1, live-verified).
+          159 unnamed remain; live named 1175.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12t
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12u: cold-triage rank-1 unnamed
+          from remaining 159.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

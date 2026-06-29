@@ -1475,5 +1475,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **160** (161 minus this rename).
 
-**Next:** Pass 12t — cold-triage rank-1 unnamed from remaining 160.
+**Next:** Pass 12u — cold-triage rank-1 unnamed from remaining 159.
+
+## Pass 12t (2026-06-29) — lexicographic u32 array compare `FUN_80076904`
+
+Decompiled and renamed:
+**`FUN_80076904` → `compare_uint32_arrays_lexicographic_msb_to_lsb`**
+(110B, HIGH) via `RenamePass12tRegion80070000Fun80076904.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trims trailing zero elements from each of two `uint32` arrays (scan high index downward), compares effective lengths, then walks from the MSB index downward element-by-element. Returns `1` if `param_3`/`param_4` array is greater, `0` if equal, `0xffffffff` if less — standard signed tri-state lexicographic compare. Cold-triage rank-1 SIMPLE-tier candidate (110B, highest xref-in count in tier); callers in region `0x8002xxxx` (`FUN_8002d464`, `FUN_8002d818`, `FUN_8002dda4`, `FUN_8002dffc`, `FUN_8002e55c`). Bignum/crypto utility sibling of Pass 12's `crypto_bignum_add_u32_arrays_with_carry` (`0x80076708`).
+
+**Confidence:** HIGH — unambiguous compare idiom with no protocol literals needed; structural role clear from decompilation alone.
+
+Region unnamed count after this pass: **159** (160 minus this rename).
 
