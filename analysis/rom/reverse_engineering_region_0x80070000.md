@@ -1369,5 +1369,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **168** (169 minus this rename).
 
-**Next:** Pass 12j cont — remaining `FUN_80076f*` sibling (`FUN_80076e58`).
+**Next:** Pass 12l — remaining `FUN_80076f*` sibling (`FUN_80076e58`).
+
+## Pass 12l (2026-06-29) — BB slot instant resolver `FUN_80076e58`
+
+Decompiled and renamed:
+**`FUN_80076e58` → `resolve_bb_slot_instant_by_status_timing_mode`**
+(136B, HIGH) via `RenamePass12lRegion80070000Fun80076e58.java` (`renamed=1`, live-verified).
+
+**Mechanism:** On BB slot struct `PTR_DAT_80076ee0`: if stored instant `+0x1e` is `0xffff` or status byte `+0x28` low/high nibbles mismatch, snaps current instant `+0x16` to reference `+0x10` and emits out-code 6. Otherwise dispatches on low 3 mode bits: mode 1 advances `+0x16` by `+0x18` offset capped at `+0x12+0x4e2` (code 4); mode 2 subtracts `+0x18` from stored with floor at `+0x12` (codes 2/3); other modes copy stored instant to `+0x16` (code 5). Writes flag byte to `*param_1` and mode/result code to `*param_2`. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`), between drift accumulation (Pass 12k) and wrap-guard (Pass 12g) in the BB link-timing cluster.
+
+**Confidence:** HIGH — unambiguous mode-dispatch idiom on the already-mapped BB slot struct fields; sole caller pins role as instant resolver in the `FUN_80076f*` sibling cluster.
+
+Region unnamed count after this pass: **167** (168 minus this rename).
+
+**Next:** Pass 12m — rename orchestrator `FUN_8007718c` now that all `FUN_80076f*` cluster siblings are named.
 
