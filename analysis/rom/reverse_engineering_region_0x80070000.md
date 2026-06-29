@@ -1977,6 +1977,20 @@ Region unnamed count after this pass: **107** (108 minus this rename). Live name
 
 **Next:** Pass 12cd — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` cluster continuation or `FUN_80036420` downgrade-commit callee chain).
 
+## Pass 12cd (2026-06-29) — downgrade-commit callee `FUN_80036420` (cross-region `0x80030000`)
+
+Decompiled and renamed:
+**`FUN_80036420` → `recompute_and_store_field_0x250_packet_type_on_conn_slot`**
+(156B, HIGH, HANDLER-tier) via `RenamePass12cdCrossRegionFun80036420.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Packet-type field commit on connection slot index. Optional patch hook at `PTR_DAT_800364c0` — if installed and returns non-zero, skips default path. Otherwise reads current `field_0x250` from `big_ol_struct[slot]`, runs four-step setup chain (`FUN_80033248` → `FUN_8003337c` → `FUN_800363a0` → `FUN_800333fc`), masks to `0xff` when `field_0x206==1`, ORs bit 8 when global flag at `PTR_DAT_800364c4` is clear, writes result back to `field_0x250`, then calls `FUN_800144b8()`. Called on max-slot downgrade from Pass 12cb `send_lmp_max_slot_0x2d_pdu_on_feature_and_field_0x249`, from `LMP_unknown_else` sweep, and from HCI Create Connection (`fHCI_Create_Connection_0x05`).
+
+**Confidence:** HIGH — unambiguous conn-slot index param, explicit read/modify/write of `field_0x250`, and documented caller chain from Pass 12cb max-slot downgrade path pins role as packet-type state commit after negotiation.
+
+Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1235**.
+
+**Next:** Pass 12ce — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` cluster continuation or setup-chain callees `FUN_80033248`/`FUN_8003337c`).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
