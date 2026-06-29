@@ -2199,7 +2199,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **64** (65 minus this rename). Live named **1283**.
 
-**Next:** Pass 12eb — rename sibling quantizer pair `FUN_8007814c` (1388B, 0x50-channel variant).
+## Pass 12eb (2026-06-29) — PSM/QoS quantizer search (0x50 channels) `FUN_8007814c`
+
+Decompiled and renamed:
+**`FUN_8007814c` → `search_psm_qos_quantizer_and_pack_channel_bitmask_0x50`**
+(1388B, HIGH, COMPLEX-tier) via `RenamePass12ebRegion80070000Fun8007814c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional early-exit hook at `PTR_PTR_800786b8`. When history length at `ctx+0x1c` is `<9`, emits sentinel 10-byte output (`0xff`×9 + `0x7f`) and returns `0x4f`. Otherwise: unpacks 80 (`0x50`) channel flags directly from `param_3` bitmask bytes (inverted bit polarity), blends with history at `ctx+0x20` scaled by `ctx+0xd`, smooths via `moving_average_fir_smooth_int16_4tap`, quicksorts via `quicksort_int16_keys_with_index_perm_recursive`, searches quantizer index from high end against threshold `param_2*0x80`, packs selected channels into 10-byte bitmask at `param_4` via direct-index OR (`1<<(i&7)`), updates mean at `ctx+0x1a`. Caller: `FUN_800647dc`. Sibling variant of `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28` (0x28-channel page uses remap tables `PTR_DAT_80078144`/`PTR_DAT_80078148` and 5-byte output).
+
+**Confidence:** HIGH — full decompilation with named callees across the quantizer cluster; structural twin of Pass 12ea with 0x50 vs 0x28 array sizing and 10-byte vs 5-byte bitmask output.
+
+Region unnamed count after this pass: **62** (63 minus this rename). Live named **1285**.
+
+**Next:** Pass 12ec — rename quantizer caller `FUN_800647dc`.
 
 ## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
 
