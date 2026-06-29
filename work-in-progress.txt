@@ -6425,7 +6425,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ez;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fa: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fa (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076c90`→`emit_lmp_0x274_and_reset_bb_slot_timing_flags`
+          (72B, HIGH, SIMPLE-tier). LMP 0x274 via `PTR_DAT_80076cdc` + masked ushort from
+          `DAT_80076cd8`; resets BB-slot `+0x1e/+0x28` on `PTR_DAT_80076ce0`. Region 41
+          unnamed remain; live named 1310.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fa;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fb: cold-triage rank-1 SIMPLE-tier
           continuation (decompile+rename top remaining unnamed candidate).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+

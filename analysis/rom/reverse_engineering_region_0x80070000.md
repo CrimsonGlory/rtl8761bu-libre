@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fa — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fb — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12fa (2026-06-29) — LMP 0x274 emit + BB slot timing flag reset `FUN_80076c90`
+
+Decompiled and renamed:
+**`FUN_80076c90` → `emit_lmp_0x274_and_reset_bb_slot_timing_flags`**
+(72B, HIGH, SIMPLE-tier) via `RenamePass12faRegion80070000Fun80076c90.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loads masked ushort from `DAT_80076cd8` (`& 0x7fff`), invokes LMP send helper at `PTR_DAT_80076cdc` with opcode **`0x274`** and that value. Then resets BB-slot status on `PTR_DAT_80076ce0`: sets ushort at `+0x1e` to `0xffff`, clears status byte at `+0x28` to `&= 0x78` (preserves bits 3–6 only). BB link-timing cluster sibling of `program_bb_link_param_regs_0x26e_0x274` (Pass 12f) — this path emits LMP 0x274 rather than writing BB register `0x274` directly. No direct xref-in (fn-ptr / table dispatch only).
+
+**Confidence:** HIGH — full decompilation; opcode literal `0x274` + paired slot-field reset pattern.
+
+Live named **1310** (global; in-region unnamed **41**).
 
 ## Pass 12ey (2026-06-29) — PSM/QoS 10-byte channel timing entry filler `FUN_80064bf4`
 
