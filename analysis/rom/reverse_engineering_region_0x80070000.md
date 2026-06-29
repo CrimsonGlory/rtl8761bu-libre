@@ -2139,6 +2139,20 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
 
+## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
+
+Decompiled and renamed:
+**`FUN_800758cc` → `read_packet_slot_ring_fill_count_or_invalid`**
+(24B, HIGH, STUB-tier — below SIMPLE-tier size floor) via `RenamePass12duRegion80070000Fun800758cc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Bounds-checked read of dword at offset `+0x10` in the 20-byte (`0x14`) per-slot packet descriptor table at `PTR_PTR_800758e4`. When slot index `param_1 > 10`, returns `0xffffffff`; otherwise returns the fill-count dword (same field decremented by Pass 12dr `irq_safe_dequeue_16byte_from_packet_slot_ring_buffer` at `slot[4]` in the sibling table at `PTR_PTR_80075944`). Packet-slot cluster accessor sibling of `clear_packet_slot_descriptor_fields` (`0x80075890`) and Pass 12dr dequeue — read complement before IRQ-masked ring dequeue.
+
+**Confidence:** HIGH — unambiguous bounds-checked table accessor on the established 20-byte stride / max-11-slots idiom shared with `clear_packet_slot_descriptor_fields`.
+
+Region unnamed count after this pass: **69** (70 minus this rename). Live named **1278**.
+
+**Next:** Pass 12dv — packet-slot cluster STUB sibling `FUN_800758b4` (empty-ring test) or cold-triage rank-1 SIMPLE-tier continuation.
+
 ## Pass 12dt (2026-06-29) — pool index-stack tag push primitive `FUN_80075b64`
 
 Decompiled and renamed:
