@@ -6221,8 +6221,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ed;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ee: identify function at
-          `0x80065008` (sole caller of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ee (2026-06-29): orphan-gap recovery
+          at `0x80064fbc`→`gate_psm_qos_dual_quantizer_or_iter_channel_slots`
+          (142B, HIGH). `0x80065008` is jal call site inside this fn; bit-1 gate
+          → dual quantizer else channel-slot loop via FUN_80064f60. Live named 1288.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ee;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ef: decompile+rename
+          `FUN_80066914` (top-level PSM/QoS dispatch entry for eligibility-bitmask
+          / gate path).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

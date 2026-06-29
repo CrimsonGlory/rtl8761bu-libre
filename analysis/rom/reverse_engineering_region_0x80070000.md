@@ -2217,7 +2217,7 @@ Decompiled and renamed:
 **`FUN_800647dc` → `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`**
 (600B, HIGH, COMPLEX-tier) via `RenamePass12ecRegion80070000Fun800647dc.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Optional early-exit hook at `PTR_DAT_80064a34`. When state byte `PTR_DAT_80064a38[2]==1`, logs and emits LMP 0x25C via `LMP__25C_called1` with minimal state (`*puVar3=2`). Otherwise: scans 10 valid BOS entries for minimum timing metric `iVar9` (from `unknown2_0x88/0x10` + ushort at `puVar3+0xc`); scans 11 bits of `_x1F4_struct` field `0x1d2/0x1d3` for minimum `iVar12`; calls `search_psm_qos_quantizer_and_pack_channel_bitmask_0x50` then `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`, storing 10-byte + 5-byte channel bitmasks at `puVar8+0x27c..0x28a`; logs both results; finishes with `LMP__25C_called1` and sets state `*puVar3=2`. Sole xref-in at `0x80065008` (caller function TBD — not `build_psm_qos_channel_eligibility_bitmask_0x50`). Lives at `0x800647dc` (region `0x80060000`); quantizer-cluster parent of Passes 12ea/12eb.
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80064a34`. When state byte `PTR_DAT_80064a38[2]==1`, logs and emits LMP 0x25C via `LMP__25C_called1` with minimal state (`*puVar3=2`). Otherwise: scans 10 valid BOS entries for minimum timing metric `iVar9` (from `unknown2_0x88/0x10` + ushort at `puVar3+0xc`); scans 11 bits of `_x1F4_struct` field `0x1d2/0x1d3` for minimum `iVar12`; calls `search_psm_qos_quantizer_and_pack_channel_bitmask_0x50` then `search_psm_qos_quantizer_and_pack_channel_bitmask_0x28`, storing 10-byte + 5-byte channel bitmasks at `puVar8+0x27c..0x28a`; logs both results; finishes with `LMP__25C_called1` and sets state `*puVar3=2`. Sole xref-in at `0x80065008` inside caller `gate_psm_qos_dual_quantizer_or_iter_channel_slots` (Pass 12ee). Lives at `0x800647dc` (region `0x80060000`); quantizer-cluster parent of Passes 12ea/12eb.
 
 **Confidence:** HIGH — full decompilation with both quantizer callees already named; dual 0x28/0x50 dispatch + LMP 0x25C emit pattern clear.
 
@@ -2235,7 +2235,21 @@ Decompiled and renamed:
 
 Live named **1287** (global; in-region unnamed unchanged at **62**).
 
-**Next:** Pass 12ee — identify function at `0x80065008` (sole caller of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`).
+## Pass 12ee (2026-06-29) — PSM/QoS quantizer gate `FUN_80064fbc` (orphan gap)
+
+Identified and renamed:
+**`FUN_80064fbc` → `gate_psm_qos_dual_quantizer_or_iter_channel_slots`**
+(142B, HIGH, SIMPLE-tier) via `RenamePass12eeRegion80070000Fun80064fbc.java` (`renamed=1`, live-verified).
+
+**Discovery:** `0x80065008` is not a function entry — it is the **`jal run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`** call site inside a Ghidra orphan gap between `FUN_80064f60` (ends `0x80064faa`) and `build_psm_qos_channel_eligibility_bitmask_0x50` at `0x80065068`. Real prologue at **`0x80064fbc`** (`addiu sp,-0x28` … epilogue `0x80065048`).
+
+**Mechanism:** Optional hook pair at `PTR_PTR_8006504c` / `PTR_DAT_80065050` (early exit on non-zero). When global state byte `PTR_DAT_80065054[0]` has **bit 1** set → calls `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c(iVar7)` (the xref at `0x80065008`). Else: if hook context `iVar7==0` and BOS `field_0x16e==0`, skip; else if config `field285_0x129` bit 0 set with enable byte at `PTR_DAT_8006505c`, fall through to dual-quantizer path; otherwise iterate channel slots `0..3` via `FUN_80064f60(uVar9)` when per-slot flags `(byte>>1)&1` at `PTR_DAT_80065064+4+uVar9`, or call `FUN_80064f60(pcVar4[2])` on alternate enable path. Tail indirect jump via hook table at `0x80065046`.
+
+**Confidence:** HIGH — full decompilation after manual function creation at correct entry; sole caller of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`.
+
+Live named **1288** (global; in-region unnamed unchanged at **62**).
+
+**Next:** Pass 12ef — decompile+rename `FUN_80066914` (top-level PSM/QoS dispatch entry for `build_psm_qos_channel_eligibility_bitmask_0x50` / gate path).
 
 ## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
 (1388B, HIGH, COMPLEX-tier) via `RenamePass12eaRegion80070000Fun80077bcc.java` (`renamed=1`, live-verified).
