@@ -5313,8 +5313,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12q
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12r: FUN_80075c00 (pool-family
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12r: FUN_80075c00 (pool-family
           sibling called by func7_that_uses_structs_at_0x80100000).
+          renamed `FUN_80075c00`→`clear_pool_subdescriptor_backing_and_invalidate_state`
+          (42B, HIGH) — memset sub-descriptor backing + invalidate state word;
+          via RenamePass12rRegion80070000Fun80075c00.java (renamed=1, live-verified).
+          161 unnamed remain; live named 1173.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12r
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12s: FUN_80075c2c (pool-family
+          reserve helper called by func8_that_uses_structs_at_0x80100000).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

@@ -1183,7 +1183,7 @@ no renames needed, no phantom/duplicate rows found (contrast with region
 | `0x80075650` | 102B | `func4_that_uses_structs_at_0x80100000` | Pool-slot "close" op: looks up a slot descriptor, calls `FUN_80075b88` to flush, decrements a refcount byte, or logs on failure — part of a small fixed-size (12-slot) resource-pool family (func1–func8) backed by `0x80100000`-resident structs. |
 | `0x800756c0` | 62B | `func5_that_uses_structs_at_0x80100000` | Pool-slot "reset" op: validates + flushes (`FUN_80075b50`) then zeroes a 6-word descriptor. Sibling of func4 above. |
 | `0x80075704` | 34B | `func6_that_uses_structs_at_0x80100000` | Pool-wide bulk clear: `memset`s a fixed 0x120-byte region plus a trailing word. Sibling of func4/func5. |
-| `0x8007572c` | 106B | `func7_that_uses_structs_at_0x80100000` | Pool-slot "init/zero-fill" op: computes an alignment-rounded size and `memset`s the slot's backing buffer before calling `FUN_80075c00`. Sibling of func4–func6. |
+| `0x8007572c` | 106B | `func7_that_uses_structs_at_0x80100000` | Pool-slot "init/zero-fill" op: computes an alignment-rounded size and `memset`s the slot's backing buffer before calling `clear_pool_subdescriptor_backing_and_invalidate_state`. Sibling of func4–func6. |
 | `0x8007579c` | 188B | `func8_that_uses_structs_at_0x80100000` | Pool-slot "allocate" op: scans the 12-slot table for a free entry, reserves it (`FUN_80075c2c`), computes the aligned buffer size, calls `func1_that_uses_structs_at_0x80100000` to get backing storage, and returns the slot index. Completes the func1–func8 alloc/use/free family. |
 | `0x80075e34` | 106B | `possible_logger_called_if_no_patch4_recursive_to_possible_logger` | Confirmed: bounded (`<0xb`) MMIO-send attempt via `memcpy_to_MMIO_for_sending_packets_`; on failure (and tag != 900) logs via `possible_logging_function__var_args`. Not actually recursive in this decompile — the name's "recursive to possible_logger" likely refers to the call chain through the logging helper family, not direct self-recursion. |
 | `0x800761f4` | 116B | `LMP__25B_meat` | Confirmed: per-index (0–0x3f) state dispatch — status `0x02` triggers `unlink_lmp_25b_pending_slot_from_index_queue`, any non-zero status calls `enqueue_lmp_25b_pending_slot_to_index_queue`, zero status logs an out-of-range/invalid-state warning with different log codes above/below index 0x40. |
@@ -1451,5 +1451,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **162** (163 minus this rename).
 
-**Next:** Pass 12r — decompile+rename `FUN_80075c00` (pool-family sibling called by `func7_that_uses_structs_at_0x80100000`).
+## Pass 12r (2026-06-29) — pool subdescriptor backing clear `FUN_80075c00`
+
+Decompiled and renamed:
+**`FUN_80075c00` → `clear_pool_subdescriptor_backing_and_invalidate_state`**
+(42B, HIGH) via `RenamePass12rRegion80070000Fun80075c00.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns `0xffffffff` if `param_1 == 0`; otherwise `memset(param_1[2], 0, *param_1)` then sets `param_1[1] = 0xffffffff`; returns `0`. Caller `func7_that_uses_structs_at_0x80100000` (`0x8007572c`) passes `piVar6+1` (descriptor tail at words 1–3 of the 6-word slot) after it has already zeroed the main slot backing buffer — clears the auxiliary sub-descriptor buffer and marks the state word invalid in the func1–func8 `0x80100000` resource-pool family.
+
+**Confidence:** HIGH — trivial memset+sentinel idiom; caller context from already-named `func7_that_uses_structs_at_0x80100000` pins role as post-init sub-descriptor cleanup sibling of Pass 12q field-8 flush.
+
+Region unnamed count after this pass: **161** (162 minus this rename).
+
+**Next:** Pass 12s — decompile+rename `FUN_80075c2c` (pool-family reserve helper called by `func8_that_uses_structs_at_0x80100000`).
 
