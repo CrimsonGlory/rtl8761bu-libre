@@ -2297,19 +2297,31 @@ Decompiled and renamed:
 
 Live named **1306** (global; in-region unnamed **45**).
 
+## Pass 12ez (2026-06-29) — PSM/QoS tail channel-range timing wrapper `FUN_80064e54`
+
+Decompiled and renamed:
+**`FUN_80064e54` → `fill_psm_qos_10byte_channel_timing_entries_10_to_79_for_slot`**
+(22B, HIGH, STUB-tier) via `RenamePass12ezRegion80070000Fun80064e54.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin wrapper taking channel-slot index `param_1`. Calls `fill_psm_qos_10byte_channel_timing_entries_from_acl_with_qos_adjust(10, 0x4f, param_1)` — fills PSM/QoS 10-byte timing entries for ACL channel indices **10..78** (complementing `aggregate_acl_channel_timing_averages_into_10byte_buffer`, which calls the same filler with range `0..10`). Also invoked as tail callee from `fill_psm_qos_10byte_channel_timing_entries_from_acl_with_qos_adjust` after the primary loop completes channels `[param_1, param_2)`. Lives at `0x80064e54` (region `0x80060000`).
+
+**Confidence:** HIGH — trivial decompilation; fixed-range wrapper in PSM/QoS channel-slot timing cluster.
+
+Live named **1309** (global; in-region unnamed **42**).
+
+**Next:** Pass 12fa — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
 ## Pass 12ey (2026-06-29) — PSM/QoS 10-byte channel timing entry filler `FUN_80064bf4`
 
 Decompiled and renamed:
 **`FUN_80064bf4` → `fill_psm_qos_10byte_channel_timing_entries_from_acl_with_qos_adjust`**
 (576B, HIGH, MEDIUM-tier) via `RenamePass12eyRegion80070000Fun80064bf4.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Takes channel-index range `[param_1, param_2)` and channel-slot index `param_3`. Optional early-exit hook at `PTR_DAT_80064e34`. When slot status at `PTR_DAT_80064e3c[slot]` is `0xDD`, `memset` clears the 0x452-byte ACL record buffer at `PTR_DAT_80064e40`. For each channel index in range: skips inactive channels (`PTR_DAT_80064e44[i]==0`); when status is `0xDD` writes default timing pair `(1000, 1)` into the 10-byte entry at `PTR_DAT_80064e48 + i*10`; when enable bit clear in `PTR_DAT_80064e4c` writes `(0xfc18, 200)`; else derives timing from the 14-byte ACL record at `PTR_DAT_80064e40 + i*0xe` (weighted sum of bytes 2–4 minus slot-offset term, average from bytes 0xc/0x5) and applies QoS tier adjustments using threshold bytes from `PTR_DAT_80064e38` and packet-count field at entry offset +4 (±100..±1000 depending on tier and `PTR_DAT_80064e50[slot+4]` bit0). Callees: `aggregate_acl_channel_timing_averages_into_10byte_buffer` (`0,10,slot`) and `FUN_80064e54`. Lives at `0x80064bf4` (region `0x80060000`).
+**Mechanism:** Takes channel-index range `[param_1, param_2)` and channel-slot index `param_3`. Optional early-exit hook at `PTR_DAT_80064e34`. When slot status at `PTR_DAT_80064e3c[slot]` is `0xDD`, `memset` clears the 0x452-byte ACL record buffer at `PTR_DAT_80064e40`. For each channel index in range: skips inactive channels (`PTR_DAT_80064e44[i]==0`); when status is `0xDD` writes default timing pair `(1000, 1)` into the 10-byte entry at `PTR_DAT_80064e48 + i*10`; when enable bit clear in `PTR_DAT_80064e4c` writes `(0xfc18, 200)`; else derives timing from the 14-byte ACL record at `PTR_DAT_80064e40 + i*0xe` (weighted sum of bytes 2–4 minus slot-offset term, average from bytes 0xc/0x5) and applies QoS tier adjustments using threshold bytes from `PTR_DAT_80064e38` and packet-count field at entry offset +4 (±100..±1000 depending on tier and `PTR_DAT_80064e50[slot+4]` bit0). Callees: `aggregate_acl_channel_timing_averages_into_10byte_buffer` (`0,10,slot`) and `fill_psm_qos_10byte_channel_timing_entries_10_to_79_for_slot`. Lives at `0x80064bf4` (region `0x80060000`).
 
 **Confidence:** HIGH — full decompilation; core PSM/QoS per-channel timing commit in channel-slot worker cluster.
 
 Live named **1308** (global; in-region unnamed **43**).
-
-**Next:** Pass 12ez — decompile+rename `FUN_80064e54` (second caller of `fill_psm_qos_10byte_channel_timing_entries_from_acl_with_qos_adjust`).
 
 ## Pass 12ex (2026-06-29) — ACL channel timing averages into 10-byte PSM/QoS buffer `FUN_80064e98`
 

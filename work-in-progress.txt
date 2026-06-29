@@ -6417,9 +6417,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ey;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ez: decompile+rename
-          `FUN_80064e54` (second caller of
-          `fill_psm_qos_10byte_channel_timing_entries_from_acl_with_qos_adjust`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ez (2026-06-29): decompiled+
+          renamed `FUN_80064e54`→`fill_psm_qos_10byte_channel_timing_entries_10_to_79_for_slot`
+          (22B, HIGH, STUB-tier). Thin wrapper calling Pass 12ey filler with fixed range
+          `(10, 0x4f, slot)` — ACL channels 10..78 complement of Pass 12ex aggregator (0..10).
+          Region 42 unnamed remain; live named 1309.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ez;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fa: cold-triage rank-1 SIMPLE-tier
+          continuation (decompile+rename top remaining unnamed candidate).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
