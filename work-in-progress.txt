@@ -5403,8 +5403,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ab;
           rom_function_index.md; live named count 1183.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ac: cold-triage rank-1 unnamed
-          from remaining 151.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ac (2026-06-29): decompiled+
+          renamed `FUN_800795c0`→`call_codec_patch_hook_and_spin_delay_for_counts`
+          (78B, HIGH). Patchable codec hook @ Ram80079610 + spin delays for dword
+          counts; callee of Pass 12ab triplet router. Region 150 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ac;
+          rom_function_index.md; live named count 1184.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ad: cold-triage rank-1 unnamed
+          from remaining 150.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
