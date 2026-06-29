@@ -6353,8 +6353,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12er;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12es: decompile+rename
-          `FUN_800643a0` (10-byte eligibility bitmask builder; callee of Pass 12er).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12es (2026-06-29): decompiled+
+          renamed `FUN_800643a0`→`build_psm_qos_5byte_eligibility_bitmask_from_10byte_template`
+          (152B, HIGH, SIMPLE-tier). Optional hook; 2-bit-pair decode from 10-byte
+          template into scratch flags; channel lookup ORs bits into 5-byte output;
+          callee of `dispatch_psm_qos_opcode_mode_merge_bitmask_and_sync`. Region
+          48 unnamed remain; live named 1302.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12es;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12et: decompile+rename
+          `FUN_80063f70` (10-byte AND-merge of three template buffers; callee of Pass 12er).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
