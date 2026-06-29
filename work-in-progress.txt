@@ -6237,8 +6237,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ef;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eg: decompile+rename
-          `FUN_800661b8` (PSM/QoS sub-dispatcher when per-channel state is `0x16`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12eg (2026-06-29): decompiled+
+          renamed `FUN_800661b8`→`run_psm_qos_state_0x16_eligibility_subdispatch`
+          (322B, HIGH, MEDIUM-tier). PSM/QoS state-0x16 sub-dispatch: eligibility
+          bitmask build, retry-counter sub-state machine, AND-merge, popcount,
+          finalize via `FUN_80065f0c`; caller `dispatch_psm_qos_10byte_bitmask_by_channel_state`.
+          Region 60 unnamed remain; live named 1290.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eh: decompile+rename
+          `FUN_80066330` (PSM/QoS sub-dispatcher when per-channel state is `0x0a`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

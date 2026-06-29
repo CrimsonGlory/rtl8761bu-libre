@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12eg — decompile+rename `FUN_800661b8` (PSM/QoS sub-dispatcher called when per-channel state byte is `0x16` from `dispatch_psm_qos_10byte_bitmask_by_channel_state`).
+**Next:** Pass 12eh — decompile+rename `FUN_80066330` (PSM/QoS sub-dispatcher called when per-channel state byte is `0x0a` from `dispatch_psm_qos_10byte_bitmask_by_channel_state`).
+
+## Pass 12eg (2026-06-29) — PSM/QoS state-0x16 sub-dispatch `FUN_800661b8`
+
+Decompiled and renamed:
+**`FUN_800661b8` → `run_psm_qos_state_0x16_eligibility_subdispatch`**
+(322B, HIGH, MEDIUM-tier) via `RenamePass12egRegion80070000Fun800661b8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Called from `dispatch_psm_qos_10byte_bitmask_by_channel_state` when per-channel state byte is `0x16`. Builds eligibility via `build_psm_qos_channel_eligibility_bitmask_0x50`, copies 10-byte result to per-index buffer `PTR_DAT_800662fc` and global template `PTR_DAT_80066300`. Optional hook at `PTR_DAT_80066304` (early exit on non-zero). Sub-state machine on retry counter `PTR_DAT_80066308[param_1]`: `0` → `FUN_800640c4`; `1` → `FUN_80065d94`; even → `FUN_800658f0`; odd → increment counter. AND-merge output with template `PTR_DAT_8006630c`, popcount set bits. When counter `>8`, reset state tables (`PTR_DAT_80066308`..`80066328`) to idle/`0x16`/`0x0a`. Finalize via `FUN_80065f0c`, copy merged bitmask back to global template and snapshot `PTR_DAT_8006632c`.
+
+**Confidence:** HIGH — full decompilation; calls already-named `build_psm_qos_channel_eligibility_bitmask_0x50`; sole caller is `dispatch_psm_qos_10byte_bitmask_by_channel_state`.
+
+Live named **1290** (global; in-region unnamed **60**).
 
 ## Pass 12ef (2026-06-29) — PSM/QoS top-level bitmask dispatch `FUN_80066914`
 
