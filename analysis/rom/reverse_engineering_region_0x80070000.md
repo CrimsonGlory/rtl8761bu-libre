@@ -1527,7 +1527,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **136** (137 minus this rename). Live named **1199**.
 
-**Next:** Pass 12at — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+**Next:** Pass 12au — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+
+## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
+
+Decompiled and renamed:
+**`FUN_80077b04` → `pack_index_select_flags_into_bitmask_0x50`**
+(38B, HIGH) via `RenamePass12atRegion80070000Fun80077b04.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks `0x50` byte flags in `param_1`; for each index where `flags[i]==1`, ORs `1<<(i&7)` into `param_2[i>>3]`. Direct-index variant of the remap-table bitmask pack at the tail of `PSM_or_QoS_packet_slot_optimizer` (`0x8007814c`, uses `PTR_DAT_80078148` permutation). Sits immediately after the quicksort cluster (`0x80077ac4`/`0x80077a50`); sole caller patch `FUN_8010e350`.
+
+**Confidence:** HIGH — unambiguous per-index flag→bitmask OR idiom; address placement + quantizer-cluster sibling context.
+
+Region unnamed count after this pass: **134** (135 minus this rename). Live named **1201**.
+
+**Next:** Pass 12au — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12as (2026-06-29) — int16 array mean scaler `FUN_800779a8`
 
