@@ -2045,7 +2045,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
 
-**Next:** Pass 12cm — cold-triage rank-1 SIMPLE-tier unnamed continuation (103 in-region remain).
+**Next:** Pass 12cn — cold-triage rank-1 SIMPLE-tier unnamed continuation (102 in-region remain).
+
+## Pass 12cm (2026-06-29) — HCI reset param-block reinit `FUN_80078c18`
+
+Decompiled and renamed:
+**`FUN_80078c18` → `hci_reset_reinit_param_block_and_vsc_fc95_if_config_enabled`**
+(118B, HIGH, SIMPLE-tier) via `RenamePass12cmRegion80070000Fun80078c18.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80078c90` — if installed, invoke hook and return. Otherwise calls `FUN_80078a78` (memset 0x48-byte param block + seed default timing/constants), then gates on `config_base->field208_0xd8 & DAT_80078c98`. When enabled: `FUN_80078be8` (VSC 0xFC95 triad via `VSC_0xfc95_called2`) + conditional log when `puVar4[0x10b]==0` + `FUN_80078b0c` (HW register writes via indirect callback fptr). Sole caller `fHCI_Reset_0x03_full_subsystem_teardown` — HCI Reset (OGF=3/OCF=3) subsystem teardown path in region `0x80010000`.
+
+**Confidence:** HIGH — unambiguous hook-or-default + config-flag gate + VSC 0xFC95 + HW-register programming idiom; sole caller pins HCI-reset sub-step role. Cold-triage rank-1 SIMPLE-tier candidate (118B, 2 xref-in + 4 xref-out — highest in tier at Pass 11 re-run).
+
+Region unnamed count after this pass: **102** (103 minus this rename). Live named **1244**.
+
+**Next:** Pass 12cn — cold-triage rank-1 SIMPLE-tier unnamed continuation (102 in-region remain).
 
 ## Pass 12cl (2026-06-29) — ISR/timer resource init `FUN_80075428`
 
@@ -2059,7 +2073,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **103** (104 minus this rename). Live named **1243**.
 
-**Next:** Pass 12cm — cold-triage rank-1 SIMPLE-tier unnamed continuation (103 in-region remain).
+**Next:** Pass 12cn — cold-triage rank-1 SIMPLE-tier unnamed continuation (102 in-region remain).
 
 ## Pass 12ck (2026-06-29) — AFH LAP channel bitmap merger `FUN_8007276c`
 
