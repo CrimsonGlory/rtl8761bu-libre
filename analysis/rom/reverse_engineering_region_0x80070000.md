@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ae — cold-triage rank-1 unnamed from remaining 149.
+**Next:** Pass 12af — cold-triage rank-1 unnamed from remaining 148.
+
+## Pass 12ae (2026-06-29) — codec context serialize entry `FUN_80079808`
+
+Decompiled and renamed:
+**`FUN_80079808` → `serialize_codec_context_lsb_with_pre_hook_and_optional_tail`**
+(58B, HIGH) via `RenamePass12aeRegion80070000Fun80079808.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Top-level codec serialize orchestrator for the TLV/feature-page cluster. Calls `call_codec_patch_hook_and_spin_delay_for_counts` with dword counts from ctx `+0x10/+0x14` (pre-hook), then `serialize_codec_buffer_bits_lsb_to_state_machine` on the nested buffer at `param_1+4`. When ctx byte `+0xb` is set, optionally chains `FUN_80079634` (post-tail hook selecting count from `+0x14` or `+0x1c` by mode byte `+8`). Clears status byte at `+0x31` on completion. Sole caller of Pass 12ad's bit-stream serializer — completes the Pass 12aa–12ad feeder chain at the entry point.
+
+**Confidence:** HIGH — unambiguous three-step serialize pipeline with all callees already named; direct caller relationship to Pass 12ad pins role.
+
+Region unnamed count after this pass: **148** (149 minus this rename).
 
 ## Pass 12ad (2026-06-29) — codec bit-stream serializer `FUN_800796b8`
 
