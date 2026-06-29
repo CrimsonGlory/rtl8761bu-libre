@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12di — cold-triage rank-1 SIMPLE-tier unnamed continuation (81 in-region remain).
+**Next:** Pass 12dj — cold-triage rank-1 SIMPLE-tier unnamed continuation (80 in-region remain).
+
+## Pass 12di (2026-06-29) — resource pool 11-slot 12-byte table init `FUN_80075c68`
+
+Decompiled and renamed:
+**`FUN_80075c68` → `init_resource_pool_11_slot_12byte_descriptors`**
+(50B, HIGH, SIMPLE-tier) via `RenamePass12diRegion80070000Fun80075c68.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Clears byte at `PTR_PTR_80075c9c+0x84`, sets head marker `*PTR_DAT_80075ca0 = 0xffffffff`, then loops 11 indices (`0..0xa`): for each 12-byte (`0xc`) entry at `PTR_PTR_80075c9c` zeros dword `[0]`, sets dword `[1] = 0xffffffff` (free tag), zeros dword `[2]`. Third step in `init_isr_extended_and_crypto_timer_resources` setup chain (after Pass 12dg's 20-byte type table + Pass 12dh's 64-slot freelist, before `func6_that_uses_structs_at_0x80100000` bulk clear and `register_typed_resource_slot_if_index_free`).
+
+**Confidence:** HIGH — unambiguous 11-entry memset idiom with `+4==0xffffffff` free marker matching sibling pool tables; direct caller chain from Pass 12cl cold-boot init pins domain.
+
+Region unnamed count after this pass: **80** (81 minus this rename). Live named **1266**.
 
 ## Pass 12dh (2026-06-29) — resource pool 64-slot freelist init `FUN_80075f58`
 
