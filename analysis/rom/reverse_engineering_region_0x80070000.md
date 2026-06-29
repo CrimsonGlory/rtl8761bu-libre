@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ab — cold-triage rank-1 unnamed from remaining 152.
+**Next:** Pass 12ac — cold-triage rank-1 unnamed from remaining 151.
+
+## Pass 12ab (2026-06-29) — codec bit→field triplet router `FUN_80079654`
+
+Decompiled and renamed:
+**`FUN_80079654` → `select_codec_field_triplet_by_bit_and_feed`**
+(38B, HIGH) via `RenamePass12abRegion80070000Fun80079654.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When `param_1==0`, loads dword pair from codec ctx offsets `+0x1c/+0x20` and byte from `+6`; else from `+0x14/+0x18/+5`. Passes triplet to `FUN_800795c0` (patchable hook at `Ram80079610` + `spin_delay_10x_iterations`). Sole callee from Pass 12aa's `feed_value_bits_lsb_to_codec_state_machine` — TLV/feature-page codec serialize cluster.
+
+**Confidence:** HIGH — unambiguous bit-branch field-select idiom; caller/callee chain pins role.
+
+Region unnamed count after this pass: **151** (152 minus this rename).
 
 ## Pass 12aa (2026-06-29) — LSB bit codec feeder `FUN_8007967c`
 
@@ -1507,7 +1519,7 @@ Decompiled and renamed:
 **`FUN_8007967c` → `feed_value_bits_lsb_to_codec_state_machine`**
 (60B, HIGH) via `RenamePass12aaRegion80070000Fun8007967c.java` (`renamed=1`, live-verified).
 
-**Mechanism:** LSB-first bit iterator: for `param_2` iterations, extracts `param_1 & 1`, calls `FUN_80079654(bit, param_3)` which selects one of two dword/byte field triplets from the codec context struct and invokes `FUN_800795c0` (patchable hook at `Ram80079610` + `spin_delay_10x_iterations`). Cold-triage rank-1 SIMPLE-tier candidate (60B, **5 xref-in** — tied highest remaining in tier after Pass 12z). Sole direct caller `FUN_800796b8` (336B bit-stream serializer) — TLV/feature-page serialize cluster sibling of `0x800791d0` parse path.
+**Mechanism:** LSB-first bit iterator: for `param_2` iterations, extracts `param_1 & 1`, calls `select_codec_field_triplet_by_bit_and_feed(bit, param_3)` which selects one of two dword/byte field triplets from the codec context struct and invokes `FUN_800795c0` (patchable hook at `Ram80079610` + `spin_delay_10x_iterations`). Cold-triage rank-1 SIMPLE-tier candidate (60B, **5 xref-in** — tied highest remaining in tier after Pass 12z). Sole direct caller `FUN_800796b8` (336B bit-stream serializer) — TLV/feature-page serialize cluster sibling of `0x800791d0` parse path.
 
 **Confidence:** HIGH — unambiguous LSB-shift loop + per-bit branch into established codec feeder chain.
 

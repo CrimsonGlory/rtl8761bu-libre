@@ -5396,8 +5396,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12aa;
           rom_function_index.md; live named count 1182.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ab: cold-triage rank-1 unnamed
-          from remaining 152.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ab (2026-06-29): decompiled+
+          renamed `FUN_80079654`→`select_codec_field_triplet_by_bit_and_feed`
+          (38B, HIGH). Bit-branch codec-ctx field triplet router; callee of Pass 12aa
+          feeder. Region 151 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ab;
+          rom_function_index.md; live named count 1183.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ac: cold-triage rank-1 unnamed
+          from remaining 151.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
