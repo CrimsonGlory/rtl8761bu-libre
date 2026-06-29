@@ -6289,9 +6289,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ek;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12el: decompile+rename
-          `FUN_800640c4` (PSM/QoS state-0x16 sub-state callee when retry
-          counter `== 0`, sibling of Pass 12ek / `FUN_800658f0`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12el (2026-06-29): decompiled+
+          renamed `FUN_800640c4`→`expand_psm_qos_state_0x16_retry0_sequential_channel_bitpair_eligibility`
+          (316B, HIGH, MEDIUM-tier). PSM/QoS state-0x16 retry-0 sub-state: sequential
+          channel walk `0..0x4e` with dual bitpair eligibility buffers; sole caller
+          `run_psm_qos_state_0x16_eligibility_subdispatch` when retry counter `==0`.
+          Region 55 unnamed remain; live named 1295.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12el;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12em: decompile+rename
+          `FUN_800658f0` (PSM/QoS state-0x16 even-retry sub-state callee,
+          sibling of Pass 12el / Pass 12ek).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
