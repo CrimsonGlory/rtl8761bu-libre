@@ -1307,5 +1307,17 @@ Decompiled and renamed (prior decompile from final-reconciliation pass; first Gh
 
 Region unnamed count after this pass: **173** (174 minus this rename).
 
-**Next:** Pass 12g — continue BB HW init cluster siblings (`FUN_8007718c` orchestrator or adjacent `FUN_80076f*` cluster).
+## Pass 12g (2026-06-29) — BB slot clock wrap guard `FUN_80076f10`
+
+Decompiled and renamed:
+**`FUN_80076f10` → `reset_bb_slot_instant_on_clock_wrap_guard`**
+(62B, HIGH) via `RenamePass12gRegion80070000Fun80076f10.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional predicate at `PTR_DAT_80076f50` — if non-null and returns non-zero, exits early. Otherwise compares three ushort fields on the BB slot struct at `PTR_DAT_80076f54`: `+0x10` (reference instant), `+0x16` (current instant), `+0x1a` (wrap threshold). When `field_0x10 < field_0x16` and `field_0x1a < (field_0x16 - field_0x10)`, snaps `field_0x16` back to `field_0x10` and sets out-params `*param_1=0`, `*param_2=9`. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`), invoked after slot clock-window comparison and before `program_bb_link_param_regs_0x26e_0x274`.
+
+**Confidence:** HIGH — unambiguous clock-wrap reset idiom with explicit out-status bytes; caller chain pins role in the BB link-timing cluster (Passes 12f–12g).
+
+Region unnamed count after this pass: **172** (173 minus this rename).
+
+**Next:** Pass 12h — continue `FUN_80076f*` siblings (`FUN_80076f58`, `FUN_80076fa8`, `FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
 
