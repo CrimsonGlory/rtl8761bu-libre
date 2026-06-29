@@ -5759,8 +5759,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bx;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12by: cold-triage rank-1 SIMPLE-tier
-          unnamed (LMP `0x800722xx` PDU sender cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12by (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800722b0`→`send_lmp_auto_rate_0x23_pdu_on_feature_bit4`
+          (76B, HIGH, SIMPLE-tier). LMP_AUTO_RATE (opcode 0x23) sender: feature-page
+          bit4 gate on conn + global base, 2-byte PDU via `send_LMP_pkt`; sibling of
+          Pass 12al/12af in `0x800722xx` cluster. Region 111 unnamed remain; live named 1230.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12by;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bz: cold-triage rank-1 SIMPLE-tier
+          unnamed (LMP `0x800723xx` PDU sender cluster continuation, e.g. `FUN_80072304`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

@@ -1907,6 +1907,20 @@ Region unnamed count after this pass: **112** (113 minus this rename). Live name
 
 **Next:** Pass 12by — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800722xx` PDU sender cluster continuation).
 
+## Pass 12by (2026-06-29) — LMP auto-rate sender `FUN_800722b0`
+
+Decompiled and renamed:
+**`FUN_800722b0` → `send_lmp_auto_rate_0x23_pdu_on_feature_bit4`**
+(76B, HIGH) via `RenamePass12byRegion80070000Fun800722b0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When feature-page bit `4` is set in both `big_ol_struct[conn]._xe3_features_pages_array_0_[1]` and `some_feature_page_base[1]`, builds 2-byte LMP PDU (opcode `0x23` = LMP_AUTO_RATE) and sends via `send_LMP_pkt(conn, buf, 2, 3, 100, 0)`. Same EDR feature-bit4 gate as Pass 12al's `maybe_send_lmp_preferred_rate_0x24_pdu` but without patch hook or payload encoder — thin unconditional sender in the `0x800722xx` LMP PDU sender cluster adjacent to Pass 12af slot-offset (`0x34`) and Pass 12al preferred-rate (`0x24`) senders.
+
+**Confidence:** HIGH — unambiguous opcode `0x23` + dual feature-page bit4 gate + `send_LMP_pkt` idiom; sibling cluster context pins LMP rate-negotiation domain.
+
+Region unnamed count after this pass: **111** (112 minus this rename). Live named **1230**.
+
+**Next:** Pass 12bz — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800723xx` PDU sender cluster continuation, e.g. `FUN_80072304`).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
