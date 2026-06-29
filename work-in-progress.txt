@@ -6257,9 +6257,21 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ei: decompile+rename
-          `FUN_800666a0` (PSM/QoS alternate-path sub-dispatcher when state is `0x16`
-          and `PTR_DAT_80066b0c` selects the non-`0x800661b8` route).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ei (2026-06-29): decompiled+
+          renamed `FUN_800666a0`→`run_psm_qos_state_0x16_alternate_eligibility_subdispatch`
+          (572B, HIGH, COMPLEX-tier). PSM/QoS state-0x16 alternate-path sub-dispatch:
+          eligibility bitmask + random-index bit-pair expansion + retry-counter state
+          machine, finalize via `FUN_80065f0c`; caller
+          `dispatch_psm_qos_10byte_bitmask_by_channel_state` when `PTR_DAT_80066b0c`
+          selects alternate route from Pass 12eg sibling. via
+          RenamePass12eiRegion80070000Fun800666a0.java (renamed=1, live-verified).
+          Region 58 unnamed remain; live named 1292.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ei;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ej: decompile+rename
+          `FUN_80065f0c` (PSM/QoS eligibility finalize helper called by all
+          `run_psm_qos_state_*` sub-dispatchers).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
