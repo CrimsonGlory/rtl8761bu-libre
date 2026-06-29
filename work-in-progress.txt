@@ -5610,8 +5610,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bf;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bg: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bg (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80079614`→`flush_codec_partial_byte_remainder_via_patch_hook`
+          (30B, HIGH, SIMPLE-tier). Partial-byte remainder flush via patch hook when
+          codec-ctx `+0x26` set; sole caller Pass 12ad serializer. Region 121 unnamed
+          remain; live named 1214.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bh: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079634`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

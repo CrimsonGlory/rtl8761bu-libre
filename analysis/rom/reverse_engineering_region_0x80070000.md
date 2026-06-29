@@ -1599,6 +1599,20 @@ Region unnamed count after this pass: **122** (123 minus this rename). Live name
 
 **Next:** Pass 12bg — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
 
+## Pass 12bg (2026-06-29) — codec partial-byte flush `FUN_80079614`
+
+Decompiled and renamed:
+**`FUN_80079614` → `flush_codec_partial_byte_remainder_via_patch_hook`**
+(30B, HIGH) via `RenamePass12bgRegion80070000Fun80079614.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Partial-byte remainder flush at end of LSB bit-stream serialization. When codec-ctx flag `+0x26` is set, passes dword count from `+0x14` to `call_codec_patch_hook_and_spin_delay_for_counts` with ushort at `+0x28` and swap-order flag `1`; otherwise passes count `0`. Sole caller `serialize_codec_buffer_bits_lsb_to_state_machine` (Pass 12ad) — serialize-path sibling of Pass 12aa–12ae chain.
+
+**Confidence:** HIGH — unambiguous conditional count select + patch-hook invoke idiom; sole-caller chain pins partial-align tail role.
+
+Region unnamed count after this pass: **121** (122 minus this rename). Live named **1214**.
+
+**Next:** Pass 12bh — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079634`).
+
 ## Pass 12bd (2026-06-29) — codec page bitfield parser `FUN_800791d0`
 
 Decompiled and renamed:
