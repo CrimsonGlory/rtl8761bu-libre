@@ -6518,10 +6518,23 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fq: cold-triage next HANDLER-tier
-          candidate (13 remain) and/or decompile+rename `FUN_80073f5c` (LMP
-          extended-feature-page retry + divide-based average/reset, surfaced as
-          Pass 12fp's third-bitmask callee, not yet renamed).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fq (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80073f5c`→`retry_ext_feature_page_req_and_flush_quality_average_sample`
+          (188B, HIGH, HANDLER-tier). Per-link `0x114`-stride record (distinct table from
+          Pass 12fn/fo's `0x1c`-stride record): retry-counter path re-sends LMP ext-feature-page
+          request via `alloc_and_send_lmp_ext_feature_page_req_pdu_with_log`; independent counter
+          path computes divide-based average (sum/count) fed to `FUN_80073e94`, which posts into
+          the RSSI/link-quality batch arrays flushed via
+          `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`. No direct callers found
+          (reached only via Pass 12fp's third 32-bit bitmask walk, indirect dispatch).
+          HANDLER-tier unnamed 13 remain; live named 1326. Used the documented direct-Write
+          `/root/wairz/ghidra/scripts/` fallback (script_file_id+use_saved_project mode failed
+          again — see wairz_requested_changes.txt).
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fr: cold-triage next HANDLER-tier
+          candidate (13 remain, per `ListHandler80070000.java`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

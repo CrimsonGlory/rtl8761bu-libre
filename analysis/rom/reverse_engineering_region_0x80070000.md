@@ -2334,7 +2334,36 @@ This is the top-level periodic-tick fan-out that Pass 12fn's flush function and 
 
 Live named **1325** (global; in-region unnamed **27**; HANDLER-tier unnamed **13**, since `FUN_80073f5c` discovered along the way remains unnamed).
 
-**Next:** cold-triage next HANDLER-tier candidate, and/or `FUN_80073f5c` (LMP extended-feature-page retry + divide-based average/reset on `0x114`-stride record, called from this pass's third bitmask walk).
+## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
+
+Decompiled and renamed:
+**`FUN_80073f5c` → `retry_ext_feature_page_req_and_flush_quality_average_sample`**
+(188B, HIGH, HANDLER-tier) via `RenamePass12fqFun80073f5c.java` (direct-Write-to-scripts-dir
+fallback per Pass 12fm's documented workaround; live-verified).
+
+**Mechanism:** Per-link record on a distinct `0x114`-stride table (`PTR_DAT_80074018`),
+indexed by `param_1 & 0xff`. An optional override callback at `PTR_DAT_8007401c` may veto the
+whole call (nonzero return suppresses). Only acts when the record's state nibble (`*pbVar7 & 3`)
+equals `2`: (1) increments a retry counter at `+6`; once it reaches the limit at `+4`, resets the
+counter, clears the state back to `1`, and calls Pass-documented
+`alloc_and_send_lmp_ext_feature_page_req_pdu_with_log(...)` to retry the LMP extended-feature-page
+request; (2) independently, if bit3 of the state byte is set, increments a second counter at `+9`
+against limit `+8`; once exceeded, resets it and — if the accumulated sample count at `+10` is
+nonzero — divides the sum at `+0xc` by that count and passes the average to `FUN_80073e94`
+(`pbVar7+0x10`, avg), which posts the value into the RSSI/link-quality batch arrays flushed via
+`flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`, then zeroes the accumulator fields
+`+0xa..+0xf`. `find_callers` returned no direct xrefs (consistent with Pass 12fp's note that this
+is reached only via its third 32-bit bitmask walk, an indirect per-link dispatch, not a direct
+call site).
+
+**Confidence:** HIGH — straightforward decompile; record layout (retry counter/limit pair,
+separate average accumulator pair) and the downstream average-sink call to `FUN_80073e94` are
+both directly readable from the decompilation.
+
+Live named **1326** (global; in-region unnamed **26**; HANDLER-tier unnamed **13**, no change —
+this function was tracked separately from the HANDLER-tier cold-triage list).
+
+**Next:** cold-triage next HANDLER-tier candidate (13 remain).
 
 **Tool note (2026-06-29):** `run_ghidra_headless(use_saved_project=true, script_file_id=<uuid>)` failed 5/5 times this pass with `Script not found: /tmp/ghidra_script_*/...\.java` (Ghidra's headless `compileScripts` looking for the script before/without it landing in the temp dir) — reproduced across both a brand-new `save_ghidra_script` UUID and a pre-existing one from an earlier successful pass, so it's not file-specific. `script_name` + `use_saved_project=true` against an on-disk script in `/root/wairz/ghidra/scripts/` (written directly via the `Write` tool, bypassing `save_ghidra_script` entirely) worked first try. See `wairz_requested_changes.txt` for the full repro and the standing workaround.
 
