@@ -5447,9 +5447,15 @@ sweep beyond enumeration and is the most out-of-date):
           `0x80036370`. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12ai; rom_function_index.md; live named count 1190.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aj: rename HIGH-ready
-          `FUN_80071138` → `LMP_accept_or_mirror_connection_handler` (306B connection
-          acceptance handler; completes `0x800718xx` cluster).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12aj (2026-06-29): decompiled+
+          renamed `FUN_80071138`→`LMP_accept_or_mirror_connection_handler`
+          (306B, HIGH). LMP connection-accept orchestrator; completes `0x800718xx`
+          cluster. Region 144 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12aj; rom_function_index.md; live named count 1191.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ak: cold-triage rank-1 SIMPLE-tier
+          unnamed (post-12aj re-run `ColdTriageRegion80070000Pass11.java`).
+
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

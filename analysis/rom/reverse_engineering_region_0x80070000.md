@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12aj — rename HIGH-ready `FUN_80071138` → `LMP_accept_or_mirror_connection_handler` (connection acceptance handler; completes `0x800718xx` cluster).
+**Next:** Pass 12ak — cold-triage rank-1 SIMPLE-tier unnamed (post-12aj re-run).
+
+## Pass 12aj (2026-06-29) — LMP accept/mirror connection handler `FUN_80071138`
+
+Decompiled and renamed:
+**`FUN_80071138` → `LMP_accept_or_mirror_connection_handler`**
+(306B, HIGH) via `RenamePass12ajRegion80070000Fun80071138.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP connection-acceptance orchestrator on incoming PDU buffer (`param_1`), flag bytes (`param_2`/`param_3`), and BDADDR (`param_4`). Unpacks 6-byte field via `unpack_lmp_pdu_packed_6byte_field_from_offset4`, allocates BOS slot via `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`. Branch A (slot status `0x02`): clears BDADDR, optional remote-name-request cleanup. Branch B (fresh slot): LMP-25C notify + HCI event `HCI_EVT_0x500_FUN_800707dc`. On `set_check_for_1_to_1` success: wires conn index, config timing, clears role-switch hook, calls `FUN_800607dc`, sets status `0x02`, then `unpack_lmp_accept_conn_pdu_into_bos_slot` + `init_subopcode_slot_descriptor_and_assign_conn_index`. Returns `1` on success, `0xff` on failure. Completes the `0x800718xx` LMP connection-setup cluster (Passes 12ag–12ai callees).
+
+**Confidence:** HIGH — full decompile with named callee chain pins accept-connection role; Pass 8/9 cold-triage already documented at MEDIUM-HIGH, promoted after cluster siblings named.
+
+Region unnamed count after this pass: **144** (145 minus this rename). Live named **1191**.
 
 ## Pass 12ai (2026-06-29) — connection-accept finalizer `FUN_80036370` (cross-region `0x80036370`)
 
