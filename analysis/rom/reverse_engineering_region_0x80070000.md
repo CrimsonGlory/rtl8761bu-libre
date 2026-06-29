@@ -2087,6 +2087,20 @@ Region unnamed count after this pass: **100** (101 minus this rename). Live name
 
 **Next:** Pass 12cy — cold-triage rank-1 SIMPLE-tier unnamed continuation (91 in-region remain).
 
+## Pass 12cy (2026-06-29) — BB reg 0x212 quad writer `FUN_80078938`
+
+Decompiled and renamed:
+**`FUN_80078938` → `write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook`**
+(120B, HIGH, SIMPLE-tier) via `RenamePass12cyRegion80070000Fun80078938.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_800789b4` — if installed and returns non-zero, skip default path. Reads base ushort from `DAT_800789b0`, then toggles bit `0x4000` on the working value based on global config flag at `PTR_DAT_800789b8+0x44` bit 0 (`|=` when clear, `&= 0xbfff` when set). When the value changes, loops four BB register offsets `0x212/0x214/0x216/0x218` and writes via indirect callback at `PTR_DAT_800789bc`. Callee of `FUN_8004ab0c` (HCI-reset config-flag branch from Pass 12cw) and `conn_index_status_bit_apply_and_log` — BB-register programming sibling of Pass 12cp's `hci_reset_program_baseband_regs_via_patch_hook` (which also seeds `0x212/0x214` with `0xffa`).
+
+**Confidence:** HIGH — unambiguous optional-hook + `0x4000` bit-toggle + quad BB-reg write idiom via patch-hook fptr; caller chain from HCI-reset apply path pins domain.
+
+Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
+
+**Next:** Pass 12cz — cold-triage rank-1 SIMPLE-tier unnamed continuation (90 in-region remain).
+
 ## Pass 12cx (2026-06-29) — HCI reset OGC3 OCF1 invoke `FUN_8007913c`
 
 Decompiled and renamed:
