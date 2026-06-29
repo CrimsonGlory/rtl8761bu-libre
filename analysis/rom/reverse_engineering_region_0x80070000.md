@@ -2113,7 +2113,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **77** (78 minus this rename). Live named **1269**.
 
-**Next:** Pass 12dn — cold-triage rank-1 SIMPLE-tier unnamed continuation (76 in-region remain).
+**Next:** Pass 12do — cold-triage rank-1 SIMPLE-tier unnamed continuation (75 in-region remain).
+
+## Pass 12dn (2026-06-29) — indexed 28-byte table type/key/range matcher `FUN_800743b4`
+
+Decompiled and renamed:
+**`FUN_800743b4` → `match_28byte_indexed_table_by_type_and_6byte_key_with_range`**
+(110B, HIGH, SIMPLE-tier) via `RenamePass12dnRegion80070000Fun800743b4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks `PTR_DAT_80074424` table (count at `PTR_DAT_80074428`), stride `0x1c` per entry. Matches when `entry[+8]==param_1` and `memcmp(param_2, entry+9, 6)==0`. If matched, checks `param_3` lies in `[entry[0], entry[1]]` inclusive. Returns `0`=match in range, `1`=no match, `2`=match but out of range. Cold-triage rank-1 SIMPLE-tier candidate (110B, **2 xref-in** — tied highest in tier at fresh Pass 11 re-run). Sole caller `assoc_w_tHCI_TD_FUN_8002f518` (region `0x80020000`) validates sub-records in HCI connection-data opcodes `'>'` and `'/'` paths — indexed-table sibling of Pass 12bk `walk_tlv_stream_match_tag_name_in_indexed_table` in the `0x800743xx`/`0x800745xx` TLV/feature-page cluster.
+
+**Confidence:** HIGH — unambiguous indexed-table walk + 6-byte memcmp + byte-range gate idiom; return-code tri-state matches caller loop semantics (`<2` break, `==2` reject); caller context pins HCI connection-data validation domain.
+
+Region unnamed count after this pass: **75** (76 minus this rename). Live named **1271**.
 
 ## Pass 12dm (2026-06-29) — LMP 0x25C pending-flag cleanup `FUN_80071c68`
 
