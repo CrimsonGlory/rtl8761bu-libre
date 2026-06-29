@@ -6039,6 +6039,29 @@ Region unnamed count after this pass: **4** (5 minus this rename).
 
 **Next:** Pass 54az — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54az (2026-06-29) — cold-triage rank-1 rename (post-54ay re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ay: **366 total**, **363 named**,
+**3 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005d2c8` → `commit_conn_byte7_or_dispatch_lmp25b_and_log_param_0x26f`**
+(146B, HIGH) via `RenamePass54azFun8005d2c8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Reads one byte from
+`param_1+1`, logs via `possible_logging_function__var_args`. Under interrupt disable: if status
+byte at `+0x6` lacks bit `0x40`, sets bit `0x80` on `+0x6` and stores the input byte at `+0x7`
+(first-commit path). If bit `0x40` already set (retry/finalize path): re-enables interrupts, sends
+`LMP__25B__most_common_for_VSCs1` for each pending pointer at `+0x64` and `+0x68` when not
+`-1`, then calls `pack_and_log_param_pair_0x26f(conn_idx, byte)`. Sibling of
+`handle_connection_substate_2_or_3_and_dispatch_lmp26f` (Pass 54al — uses the same LMP-25B +
+0x26f log tail pattern).
+
+**Confidence:** HIGH — three already-named callees plus established `+0x6`/`+0x7` status-byte
+layout and interrupt-bracketed commit idiom.
+
+Region unnamed count after this pass: **3** (4 minus this rename).
+
+**Next:** Pass 54ba — continue xrefs=0 tier (re-run cold-triage for next rank).
+
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
 Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,

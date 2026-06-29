@@ -5186,10 +5186,15 @@ sweep beyond enumeration and is the most out-of-date):
           (158B, HIGH, xrefs=0 tier). Region 4 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54ay; rom_function_index.md; live named count 1151.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54az: continuation slot after 54ay
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54az (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8005d2c8`→`commit_conn_byte7_or_dispatch_lmp25b_and_log_param_0x26f`
+          (146B, HIGH, xrefs=0 tier). Region 3 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54az; rom_function_index.md; live named count 1152.
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ba: continuation slot after 54az
           (cold-triage rank on the xrefs=0 tier; re-run Pass54 script for next rank).
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54ba: continuation slot after 54az.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54bb: continuation slot after 54ba.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`
