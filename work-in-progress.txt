@@ -5898,8 +5898,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12co;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cp: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (100 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cp (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078b0c`→`hci_reset_program_baseband_regs_via_patch_hook`
+          (102B, HIGH, SIMPLE-tier). BB HW reg programming via patch-hook fptr
+          (`0xf4`, `0x1f8`, `0x216-214`) + RMW on reg `0x40`; callee of Pass 12cm
+          after VSC 0xFC95 triad. Region 99 unnamed remain; live named 1247.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cq: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (99 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

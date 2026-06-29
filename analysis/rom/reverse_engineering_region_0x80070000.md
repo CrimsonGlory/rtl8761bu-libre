@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cp — cold-triage rank-1 SIMPLE-tier unnamed continuation (100 in-region remain).
+**Next:** Pass 12cq — cold-triage rank-1 SIMPLE-tier unnamed continuation (99 in-region remain).
+
+## Pass 12cp (2026-06-29) — HCI reset BB register programming `FUN_80078b0c`
+
+Decompiled and renamed:
+**`FUN_80078b0c` → `hci_reset_program_baseband_regs_via_patch_hook`**
+(102B, HIGH, SIMPLE-tier) via `RenamePass12cpRegion80070000Fun80078b0c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Programs baseband HW registers through indirect callback at `PTR_DAT_80078b74` (same patchable hook-fptr idiom as Pass 12c): writes `0xf4=1`, `0x1f8=0x7f`, and timing-related regs `0x216/0x218/0x212/0x214=0xffa`. Then read-modify-writes status register `0x40` via `FUN_80011510` / `FUN_80011608`, OR-ing in mask `DAT_80078b78`. Sole callee of Pass 12cm's config-gated branch after `hci_reset_invoke_vsc_fc95_lmp_triad` — the HW-register programming step completing the HCI Reset sub-chain.
+
+**Confidence:** HIGH — unambiguous indirect HW-write callback + RMW on reg `0x40`; caller chain from Pass 12cm pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **99** (100 minus this rename). Live named **1247**.
 
 ## Pass 12cl (2026-06-29) — ISR/timer resource init `FUN_80075428`
 
