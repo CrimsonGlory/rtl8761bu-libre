@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cu — cold-triage rank-1 SIMPLE-tier unnamed continuation (95 in-region remain).
+**Next:** Pass 12cv — cold-triage rank-1 SIMPLE-tier unnamed continuation (94 in-region remain).
+
+## Pass 12cu (2026-06-29) — link-loss teardown dispatch `FUN_800737f0`
+
+Decompiled and renamed:
+**`FUN_800737f0` → `conn_link_loss_teardown_unsniff_or_lmp_detach`**
+(138B, HIGH, SIMPLE-tier) via `RenamePass12cuRegion80070000Fun800737f0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection slot teardown on `big_ol_struct[param_2]`. When `field_0x204 == 0x10`, delegates to `connection_teardown_HCI_event_finalizer`. Otherwise logs via `possible_logging_function__var_args`, compares `field_0x34` against global `DAT_80073884` — on match clears `field_0x204`; on mismatch sets `field_0xff = 0x22` (HCI error) and either sends `LMP_0x18_LMP_UNSNIFF_REQ` when `field_0x206 == 1` or calls `possible_LMP_DETACH_handler` with reason `0x22`. Cold-triage rank-1 SIMPLE-tier candidate (138B, **1 xref-in** via `conn_teardown_and_link_loss_cleanup_handler`). Link-loss escalation sibling of Pass 12ct role-switch path.
+
+**Confidence:** HIGH — unambiguous status-0x10 branch + error-0x22 unsniff/detach fork idiom; caller pins conn-teardown sub-step role.
+
+Region unnamed count after this pass: **94** (95 minus this rename). Live named **1252**.
 
 ## Pass 12ct (2026-06-29) — role-switch pending commit `FUN_8007159c`
 

@@ -5929,8 +5929,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cs;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cu: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (95 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cu (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800737f0`→`conn_link_loss_teardown_unsniff_or_lmp_detach`
+          (138B, HIGH, SIMPLE-tier). Per-slot link-loss teardown: status 0x10 → HCI
+          event finalizer, else error 0x22 → LMP unsniff or detach; caller
+          `conn_teardown_and_link_loss_cleanup_handler`. Region 94 unnamed remain;
+          live named 1252.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cv: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (94 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ct (2026-06-29): decompiled+
           renamed rank-1 `FUN_8007159c`→`commit_pending_role_switch_emit_hci_or_lmp_slot_offset`
