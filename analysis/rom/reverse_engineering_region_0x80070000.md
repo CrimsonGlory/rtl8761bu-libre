@@ -1651,7 +1651,37 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **118** (119 minus this rename). Live named **1217**.
 
-**Next:** Pass 12bo — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation, e.g. hook at `PTR_DAT_80073e90`).
+**Next:** Pass 12bq — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation).
+
+## Pass 12bp (2026-06-29) — LMP TX hook dispatch `FUN_8002f220`
+
+Decompiled and renamed cross-region callee:
+**`FUN_8002f220` → `invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`**
+(48B, HIGH, region `0x80030000`) via `RenamePass12bpRegion80070000Fun8002f220.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin LMP transmit wrapper: builds 32-bit length word `(buffer[1]+2)<<16|0x190` from the PDU buffer, then invokes patchable hook fptr at `*PTR_DAT_8002f250` via `possible_logger_called_if_no_patch3` idiom. Callee of `alloc_and_send_lmp_ext_feature_page_req_pdu_with_log` (Pass 12bo) after extended-feature-page request PDU assembly; also called from `assoc_w_tHCI_EVT` and `FUN_8003ff44`.
+
+**Confidence:** HIGH — unambiguous hook-dispatch idiom; caller chain from renamed Pass 12bo feature-page request sender pins LMP TX role.
+
+Region unnamed count after this pass: **115** unchanged (rename is cross-region `0x8002f220`). Live named **1222**.
+
+**Next:** Pass 12bq — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation).
+
+## Pass 12bo (2026-06-29) — `PTR_DAT_80073e90` hook slot + callee `FUN_80032138`
+
+**Hook slot (`PTR_DAT_80073e90`):** NOT a function — `DumpPtr80073e90.java` reports `PTR_VALUE=0x80121600`, `FN_AT_SLOT=null`, `FN_AT_TARGET=null`. Same pattern as Pass 12bi `PTR_DAT_80079438` → `0x80120b38`: ROM dword holds a RAM/patch hook target consulted by `update_feature_page_slot_record_from_tlv_payload` before the record state machine runs (`if (hook != NULL && hook(...) != 0) return`).
+
+Decompiled and renamed cross-region callee:
+**`FUN_80032138` → `alloc_and_send_lmp_ext_feature_page_req_pdu_with_log`**
+(180B, HIGH, region `0x80030000`) via `RenamePass12boRegion80070000Fun80032138.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When Pass 12bn slot updater is in mode-1 (`record[0] & 3 == 1`), builds an LMP PDU buffer (opcode byte `0x12`, 8-byte template from `PTR_DAT_800321f0`, BD_ADDR 6 bytes from payload `+2`, slot index + flags) via optional alloc hook at `PTR_DAT_800321ec+4`, then dispatches through `invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`. Always logs outcome via `possible_logging_function__var_args` (tag `0x499`).
+
+**Confidence:** HIGH — unambiguous LMP PDU pack + send idiom; sole caller from renamed Pass 12bn updater pins extended-feature-page request path.
+
+Region unnamed count after this pass: **115** unchanged (rename is cross-region `0x80032138`). Live named **1221**.
+
+**Next:** Pass 12bp — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation).
 
 ## Pass 12bn (2026-06-29) — feature-page slot record updater `FUN_80073db8`
 

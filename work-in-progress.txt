@@ -5675,8 +5675,24 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bo: cold-triage rank-1 SIMPLE-tier
-          unnamed (LMP feature-page cluster continuation, e.g. hook at `PTR_DAT_80073e90`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bp (2026-06-29): decompiled+
+          renamed cross-region `FUN_8002f220`→`invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`
+          (48B, HIGH, SIMPLE-tier). LMP TX hook dispatch: length word from buffer[1]+2 and 0x190,
+          invoke fptr at PTR_DAT_8002f250; callee of alloc_and_send_lmp_ext_feature_page_req_pdu_with_log.
+          Region 115 unnamed unchanged; live named 1222.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bp;
+          rom_function_index.md; analysis/INDEX.md
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bo (2026-06-29): documented
+          PTR_DAT_80073e90 RAM hook slot (0x80121600, not a function) + decompiled+renamed
+          cross-region `FUN_80032138`→`alloc_and_send_lmp_ext_feature_page_req_pdu_with_log`
+          (180B, HIGH). LMP extended-feature-page request PDU builder/sender.
+          Region 115 unnamed unchanged; live named 1221.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bo;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bq: cold-triage rank-1 SIMPLE-tier
+          unnamed (LMP feature-page cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
