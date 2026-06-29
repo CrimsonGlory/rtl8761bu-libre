@@ -5278,13 +5278,16 @@ sweep beyond enumeration and is the most out-of-date):
           sole caller FUN_8007718c. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12l; rom_function_index.md; live named count 1167.
 
-[DONE]  Full RE: ROM region 0x80070000 — Pass 12m: FUN_8007718c (2026-06-29)
-          renamed→`eSCO_SCO_connection_slave_establishment_orchestrator` (524B, HIGH).
-          BB-slot link-timing orchestrator chaining all Pass 12f–12l callees; caller
-          `unknown_fptr_index0` @ 0x80013a1c. via RenamePass12mRegion80070000Fun8007718c.java
-          (renamed=1, live-verified). 166 unnamed remain; live named 1168.
-          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12m
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12n: FUN_80076090 (2026-06-29)
+          renamed→`unlink_lmp_25b_pending_slot_from_index_queue` (120B, HIGH).
+          IRQ-masked LMP-0x25B pending-queue unlink when slot status==0x02;
+          sole caller `LMP__25B_meat`. via RenamePass12nRegion80070000Fun80076090.java
+          (renamed=1, live-verified). 165 unnamed remain; live named 1169.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12n
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12o: FUN_800761b4
+          (LMP__25B_meat non-zero-status callee sibling).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

@@ -1397,5 +1397,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **166** (167 minus this rename).
 
-**Next:** Pass 12n — cold-triage next rank-1 unnamed in region `0x80070000`.
+## Pass 12n (2026-06-29) — LMP 0x25B pending-slot unlink `FUN_80076090`
+
+Decompiled and renamed:
+**`FUN_80076090` → `unlink_lmp_25b_pending_slot_from_index_queue`**
+(120B, HIGH) via `RenamePass12nRegion80070000Fun80076090.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked per-index (0–0x3f) handler on the 0x1c-stride slot table at `PTR_DAT_80076108`. When entry status byte `+7 == 0x02`, walks the singly-linked pending queue at `PTR_DAT_8007610c` (head indexed by byte at `+4`) searching for a node whose dword `*node == index`; unlinks via `node[5]` next-pointer, clears dword at `+0x14`, sets status `+7` to `0x01`, returns 0. Returns `0xffffffff` if index ≥ 0x40 or status ≠ 0x02. Sole caller: `LMP__25B_meat` (`0x800761f4`) on status-0x02 branch — sibling of still-unnamed `FUN_800761b4` on the non-zero-status path.
+
+**Confidence:** HIGH — unambiguous IRQ-guarded linked-list unlink idiom; caller context from already-named `LMP__25B_meat` pins role as LMP-0x25B pending-queue removal.
+
+Region unnamed count after this pass: **165** (166 minus this rename).
+
+**Next:** Pass 12o — decompile+rename `FUN_800761b4` (LMP__25B_meat non-zero-status callee sibling).
 
