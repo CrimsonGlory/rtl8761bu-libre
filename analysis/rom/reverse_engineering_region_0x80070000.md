@@ -1513,7 +1513,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **142** (143 minus this rename). Live named **1193**.
 
-**Next:** Pass 12an — cold-triage rank-1 SIMPLE-tier unnamed (`0x80076974` 68B).
+**Next:** Pass 12ao — cold-triage rank-1 SIMPLE-tier unnamed (`0x80077a50` partition helper).
+
+## Pass 12an (2026-06-29) — bignum right-shift one bit `FUN_80076974`
+
+Decompiled and renamed:
+**`FUN_80076974` → `crypto_bignum_right_shift_u32_array_by_one_bit`**
+(68B, HIGH) via `RenamePass12anRegion80070000Fun80076974.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Right-shifts a MSB-first `uint32` limb array in-place by one bit: for indices `0..count-2`, each word becomes `(next_word << 31) | (word >> 1)`; then the penultimate word gets a final `>> 1`; if that limb becomes zero, decrements the returned effective word count. Cold-triage rank-1 SIMPLE-tier lead (68B, 1 xref-in). Sole caller `FUN_8002d464` in region `0x8002xxxx` — same SSP/ECDH bignum cluster as Pass 12t compare, Pass 12u subtract, and Pass 12z left-shift (`0x800769b8`).
+
+**Confidence:** HIGH — unambiguous cross-limb right-shift idiom; crypto-cluster caller + left-shift/compare/subtract siblings pin role.
+
+Region unnamed count after this pass: **140** (141 minus this rename). Live named **1195**.
+
+**Next:** Pass 12ao — cold-triage rank-1 SIMPLE-tier unnamed (`0x80077a50` partition helper).
 
 ## Pass 12am (2026-06-29) — quicksort recursion `FUN_80077ac4`
 

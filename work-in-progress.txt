@@ -5472,8 +5472,14 @@ sweep beyond enumeration and is the most out-of-date):
           live named 1194. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12am; rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12an: cold-triage rank-1 SIMPLE-tier
-          unnamed (next lead `0x80076974` 68B).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12an (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076974`→`crypto_bignum_right_shift_u32_array_by_one_bit`
+          (68B, HIGH, SIMPLE-tier bignum right-shift). Region 140 unnamed remain;
+          live named 1195. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12an; rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ao: cold-triage rank-1 SIMPLE-tier
+          unnamed (next lead `0x80077a50` quicksort partition helper).
 
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
