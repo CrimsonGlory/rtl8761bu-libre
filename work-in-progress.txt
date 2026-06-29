@@ -6153,8 +6153,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dw: cold-triage rank-1
-          SIMPLE-tier unnamed continuation (68 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dw (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8007190c`→`read_config_rssi_threshold_high_byte_or_low_word`
+          (54B, HIGH, SIMPLE-tier). Config RSSI high byte at +0x102 or low threshold
+          word at +0x104; caller `LMP_power_control_RSSI_trigger`. Region 67 unnamed
+          remain; live named 1280.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dx: cold-triage rank-1
+          SIMPLE-tier unnamed continuation (`FUN_80078d8c`, 78B, 1 xref-in).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

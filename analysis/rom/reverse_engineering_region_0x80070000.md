@@ -2151,7 +2151,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **68** (69 minus this rename). Live named **1279**.
 
-**Next:** Pass 12dw — cold-triage rank-1 SIMPLE-tier unnamed continuation or next packet-slot cluster STUB sibling.
+**Next:** Pass 12dx — cold-triage rank-1 SIMPLE-tier unnamed continuation (`ListUnnamed80070000.java` rank-1: `FUN_80078d8c`).
+
+## Pass 12dw (2026-06-29) — config RSSI threshold reader `FUN_8007190c`
+
+Decompiled and renamed:
+**`FUN_8007190c` → `read_config_rssi_threshold_high_byte_or_low_word`**
+(54B, HIGH, SIMPLE-tier — at size floor) via `RenamePass12dwRegion80070000Fun8007190c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Reads from global `PTR_config_base_80071944`. When selector `param_2 == 1`, returns signed byte at `config_base+0x102` (`field247_0x102`); otherwise returns signed 16-bit value assembled from bytes at `+0x104`/`+0x105` (`field248_0x104` / `field249_0x105`). Cold-triage rank-1 SIMPLE-tier candidate (54B, **2 xref-in** per fresh `ListUnnamed80070000.java` run). Sole caller `LMP_power_control_RSSI_trigger` — same high/low RSSI threshold pair documented at `rssi_threshold_delta_for_bos_index` in region `0x80010000` (`field247_0x102` / `field248_0x104`).
+
+**Confidence:** HIGH — unambiguous config-field selector on established RSSI threshold offsets; caller pins LMP power-control domain.
+
+Region unnamed count after this pass: **67** (68 minus this rename). Live named **1280**.
+
+**Next:** Pass 12dx — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_80078d8c`, 78B, 1 xref-in).
 
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 
