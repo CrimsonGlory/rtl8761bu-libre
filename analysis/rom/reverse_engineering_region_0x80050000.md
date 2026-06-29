@@ -5989,7 +5989,29 @@ procedure tags and hook dispatch).
 
 Region unnamed count after this pass: **8** (9 minus this rename).
 
-**Next:** Pass 54aw — continue xrefs=0 tier (re-run cold-triage for next rank).
+**Next:** Pass 54ax — continue xrefs=0 tier (re-run cold-triage for next rank).
+
+## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,
+**6 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005fd0c` → `validate_and_commit_esco_packet_type_params_hook1_or_reject`**
+(178B, HIGH) via `RenamePass54awFun8005fd0c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Reads two packet-type
+bytes from `param_1+1`/`+2`, invokes hooks at `PTR_DAT_8005fdc4`/`8005fdc8`/`8005fdcc`, logs via
+`possible_logging_function__var_args`, validates via `validate_esco_packet_type_params_with_hook`;
+on success stores to `+0x11c`/`+0x11d`, sets lower nibble of `+0x114` to `3`, and commits via
+`pending_procedure_advance_and_commit(rec, 1)`; on failure calls
+`report_procedure_outcome_and_update_param_type_bitmask(rec, 0x17, 0x1e, 1)`. Sibling of
+`validate_and_commit_esco_packet_type_params_or_reject` (Pass 54av — procedure tags `0x16/0x1e/2`,
+commit step 2, nibble 3/7 by bit 4).
+
+**Confidence:** HIGH — three already-named callees plus established eSCO packet-type field offsets.
+
+Region unnamed count after this pass: **6** (7 minus this rename).
+
+**Next:** Pass 54ax — continue xrefs=0 tier (re-run cold-triage for next rank).
 
 ## Pass 54av (2026-06-29) — cold-triage rank-1 rename (post-54au re-rank; xrefs=0 tier)
 
