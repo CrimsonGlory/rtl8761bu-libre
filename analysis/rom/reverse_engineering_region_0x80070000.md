@@ -2247,9 +2247,19 @@ Identified and renamed:
 
 **Confidence:** HIGH — full decompilation after manual function creation at correct entry; sole caller of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`.
 
-Live named **1288** (global; in-region unnamed unchanged at **62**).
+Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12ef — decompile+rename `FUN_80066914` (top-level PSM/QoS dispatch entry for `build_psm_qos_channel_eligibility_bitmask_0x50` / gate path).
+**Next:** Pass 12eg — decompile+rename `FUN_800661b8` (PSM/QoS sub-dispatcher called when per-channel state byte is `0x16` from `dispatch_psm_qos_10byte_bitmask_by_channel_state`).
+
+## Pass 12ef (2026-06-29) — PSM/QoS top-level bitmask dispatch `FUN_80066914`
+
+Decompiled and renamed:
+**`FUN_80066914` → `dispatch_psm_qos_10byte_bitmask_by_channel_state`**
+(424B, HIGH, MEDIUM-tier) via `RenamePass12efRegion80070000Fun80066914.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional pre-hook at `PTR_DAT_80066abc` (early exit on non-zero). When init flag `PTR_DAT_80066ac0==0`, seeds per-channel state tables (`PTR_DAT_80066ac4`..`80066adc`) with `0xdd`/zeros for index `param_1&0xff`. Gated by `struct_of_at_least_0x300` field `0x181==1`: fast path via `FUN_800646e8` when enable byte + config `field285_0x129` bit 0 set and status byte `PTR_DAT_80066aec` has bit `0x80` (memcpy 10-byte stack buffer to `param_2`). Otherwise per-channel state machine on `PTR_DAT_80066ac4[param_1]`: `0xdd` → AND-merge two 10-byte templates + retry counter → LMP `0x268` via patch fptr when counter `>1`; `0x1e` → memcpy cached per-index buffer; `0x16` → `FUN_800661b8` or `FUN_800666a0` per `PTR_DAT_80066b0c`; `0x0a` → `FUN_80066330`. When field `0x181!=1`, memcpy default template `PTR_DAT_80066af0`. Post-hook at `PTR_DAT_80066b14`. Callers: `FUN_800639b4`, `FUN_80066c3c`, `LMP_CHANNEL_CLASSIFICATION_REQ_0x7F_10`. Top-level entry upstream of `build_psm_qos_channel_eligibility_bitmask_0x50` cluster.
+
+**Confidence:** HIGH — full decompilation; state-machine routes to three already-documented PSM/QoS sub-dispatchers; caller xrefs include LMP 0x7F handler.
 
 ## Pass 12ea (2026-06-29) — PSM/QoS quantizer search (0x28 channels) `FUN_80077bcc`
 (1388B, HIGH, COMPLEX-tier) via `RenamePass12eaRegion80070000Fun80077bcc.java` (`renamed=1`, live-verified).
