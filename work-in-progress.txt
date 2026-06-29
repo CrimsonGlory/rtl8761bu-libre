@@ -6143,8 +6143,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12du;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dv: packet-slot STUB sibling
-          `FUN_800758b4` (empty-ring test at +0x10) or cold-triage rank-1 SIMPLE-tier.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dv (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800758b4`→`is_packet_slot_ring_empty`
+          (18B, HIGH, STUB-tier). Returns true when fill-count dword at
+          `+0x10` in 20-byte packet-slot table at `PTR_PTR_800758c8` is zero;
+          boolean complement of Pass 12du fill-count read. via
+          RenamePass12dvRegion80070000Fun800758b4.java (renamed=1, live-verified).
+          Region 68 unnamed remain; live named 1279.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dw: cold-triage rank-1
+          SIMPLE-tier unnamed continuation (68 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

@@ -2139,6 +2139,20 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
 
+## Pass 12dv (2026-06-29) — packet-slot empty-ring test `FUN_800758b4`
+
+Decompiled and renamed:
+**`FUN_800758b4` → `is_packet_slot_ring_empty`**
+(18B, HIGH, STUB-tier — below SIMPLE-tier size floor) via `RenamePass12dvRegion80070000Fun800758b4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns true when dword at offset `+0x10` in the 20-byte (`0x14`) per-slot packet descriptor table at `PTR_PTR_800758c8` is zero (ring has no pending entries). No bounds check in-body — callers must supply valid slot index. Boolean complement of Pass 12du `read_packet_slot_ring_fill_count_or_invalid` (`0x800758cc`, table `PTR_PTR_800758e4`) and dequeue path Pass 12dr `irq_safe_dequeue_16byte_from_packet_slot_ring_buffer` (`0x800758e8`).
+
+**Confidence:** HIGH — unambiguous empty-ring predicate on the established `+0x10` fill-count field; packet-slot cluster accessor sibling of `clear_packet_slot_descriptor_fields` and Pass 12du fill-count read.
+
+Region unnamed count after this pass: **68** (69 minus this rename). Live named **1279**.
+
+**Next:** Pass 12dw — cold-triage rank-1 SIMPLE-tier unnamed continuation or next packet-slot cluster STUB sibling.
+
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 
 Decompiled and renamed:
