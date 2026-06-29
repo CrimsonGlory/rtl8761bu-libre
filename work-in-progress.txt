@@ -5196,10 +5196,12 @@ sweep beyond enumeration and is the most out-of-date):
           (128B, HIGH, xrefs=0 tier). Region 2 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54ba; rom_function_index.md; live named count 1153.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54bb: continuation slot after 54ba
-          (cold-triage rank on the xrefs=0 tier; re-run Pass54 script for next rank).
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54bb (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8005cff0`→`dispatch_hook0x1000_and_meta_evt_0x17_if_adv_high_bits_clear`
+          (124B, HIGH, xrefs=0 tier). Region 1 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54bb; rom_function_index.md; live named count 1154.
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54bc: continuation slot after 54bb.
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54bc: final xrefs=0 tier rename (`FUN_8005d1f4`, 110B).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`

@@ -6086,6 +6086,29 @@ Region unnamed count after this pass: **2** (3 minus this rename).
 
 **Next:** Pass 54bb — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54bb (2026-06-29) — cold-triage rank-1 rename (post-54ba re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ba: **366 total**, **365 named**,
+**1 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005cff0` → `dispatch_hook0x1000_and_meta_evt_0x17_if_adv_high_bits_clear`**
+(124B, HIGH) via `RenamePass54bbFun8005cff0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Logs via
+`possible_logging_function__var_args` (tag `0xcc`) packing bitfields from `+0x14e` (low 2 bits)
+and `+0x14d` (bits 3+). Dispatches hook `(conn_idx, 0x1000, 1)` via `PTR_DAT_8005d074` (pending-
+procedure family). When `+0x14d & 0xf8 == 0` (upper adv-bit nibble clear): masks `+0x14c` and calls
+`send_evt_Meta_subevent_0x17(rec, 0)`. Sibling of `commit_pending_proc_bit0x1000_if_cap_not_set`
+(Pass 24) and `apply_extended_advertising_params_to_slot` (Pass 54ak — same `+0x14c/+0x14d/+0x14e`
+field cluster).
+
+**Confidence:** HIGH — two already-named callees (`possible_logging_function__var_args`,
+`send_evt_Meta_subevent_0x17`) plus established ext-adv bitfield offsets and pending-proc hook
+`0x1000` idiom.
+
+Region unnamed count after this pass: **1** (2 minus this rename; sole survivor `FUN_8005d1f4`).
+
+**Next:** Pass 54bc — final xrefs=0 tier rename (`FUN_8005d1f4`, 110B).
+
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
 Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,
