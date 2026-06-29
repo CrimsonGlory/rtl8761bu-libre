@@ -6161,8 +6161,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dx: cold-triage rank-1
-          SIMPLE-tier unnamed continuation (`FUN_80078d8c`, 78B, 1 xref-in).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dx (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078d8c`→`lookup_param_tlv_entry_type_0xff_if_status_0x5d`
+          (78B, HIGH, SIMPLE-tier). TLV scan at param+8 for type 0xff; log + return
+          entry only when status ushort == 0x5d. Region 66 unnamed remain; live named 1281.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dy: cold-triage rank-1
+          SIMPLE-tier unnamed continuation (`FUN_800789c0`, 126B, 1 xref-in).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

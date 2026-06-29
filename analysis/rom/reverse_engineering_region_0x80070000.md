@@ -2151,8 +2151,6 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **68** (69 minus this rename). Live named **1279**.
 
-**Next:** Pass 12dx — cold-triage rank-1 SIMPLE-tier unnamed continuation (`ListUnnamed80070000.java` rank-1: `FUN_80078d8c`).
-
 ## Pass 12dw (2026-06-29) — config RSSI threshold reader `FUN_8007190c`
 
 Decompiled and renamed:
@@ -2165,7 +2163,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **67** (68 minus this rename). Live named **1280**.
 
-**Next:** Pass 12dx — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_80078d8c`, 78B, 1 xref-in).
+## Pass 12dx (2026-06-29) — param TLV lookup gate `FUN_80078d8c`
+
+Decompiled and renamed:
+**`FUN_80078d8c` → `lookup_param_tlv_entry_type_0xff_if_status_0x5d`**
+(78B, HIGH, SIMPLE-tier) via `RenamePass12dxRegion80070000Fun80078d8c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Scans length-prefixed TLV bytes at `param_1+8` for `param_2 = *(byte*)(param_1+1) - 6` bytes via `FUN_8002141c` (linear walk: advance by `entry[0]+1`, match type byte at `entry[1]==0xff`). On hit, reads status ushort at `entry+2`, logs via `possible_logging_function__var_args(3,0x8d,0x1f,0x32e0,…)` with entry type + status, and returns the entry pointer only when status `== 0x5d`; otherwise returns null. Cold-triage rank-1 SIMPLE-tier candidate (78B, **1 xref-in**). Sits in the `0x80078dxx` HCI-reset / VSC TLV cluster adjacent to Pass 12cm `hci_reset_reinit_param_block_and_vsc_fc95_if_config_enabled` and Pass 12cv `hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`.
+
+**Confidence:** HIGH — unambiguous length-prefixed TLV scan + status gate + established logging idiom; `FUN_8002141c` walker pattern matches other TLV helpers in region.
+
+Region unnamed count after this pass: **66** (67 minus this rename). Live named **1281**.
+
+**Next:** Pass 12dy — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_800789c0`, 126B, 1 xref-in).
 
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 
