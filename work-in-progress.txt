@@ -5434,8 +5434,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ag;
           rom_function_index.md; live named count 1188.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ah: cold-triage rank-1 unnamed
-          from remaining 146 (sibling `FUN_80071840` in connection-accept path).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ah (2026-06-29): decompiled+
+          renamed `FUN_80071840`→`unpack_lmp_accept_conn_pdu_into_bos_slot`
+          (138B, HIGH). LMP accept-conn PDU → BOS slot unpack; sole caller
+          `FUN_80071138`. Region 145 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12ah; rom_function_index.md; live named count 1189.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ai: cold-triage rank-1 unnamed
+          from remaining 145 (`FUN_80036370` callee in connection-accept path).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

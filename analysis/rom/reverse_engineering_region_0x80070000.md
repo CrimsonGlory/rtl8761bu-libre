@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ah — cold-triage rank-1 unnamed from remaining 146 (sibling `FUN_80071840` in connection-accept path).
+**Next:** Pass 12ai — cold-triage rank-1 unnamed from remaining 145 (`FUN_80036370` callee in connection-accept path).
+
+## Pass 12ah (2026-06-29) — LMP accept-conn PDU → BOS slot `FUN_80071840`
+
+Decompiled and renamed:
+**`FUN_80071840` → `unpack_lmp_accept_conn_pdu_into_bos_slot`**
+(138B, HIGH) via `RenamePass12ahRegion80070000Fun80071840.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Indexes `big_ol_struct` at `PTR_big_ol_struct_800718cc[param_2 & 0xffff]`, calls sibling `unpack_lmp_pdu_packed_6byte_field_from_offset4` on `param_1+1` to store BDADDR, then unpacks HCI Create Connection fields from the LMP PDU buffer: 3-byte triplet at offsets `+0xf`…`+0x11`, PSRM nibble from byte `+0xb` bits 4–5, `field_0xdf` from bits 6–7, RFU from byte `+0x15` bit 5, and clock offset from bytes `+0x12`…`+0x13` minus `(*param_1 >> 2) & 0x7fff` masked to 15 bits. Sole caller `FUN_80071138` (connection acceptance handler) — finalization step after `set_bos_bosi__0xb2_index_arg2` sets status `0x02`, immediately before `FUN_80036370`. Completes the `0x800718xx` LMP connection-setup cluster alongside Pass 12ag's bit-unpack helper.
+
+**Confidence:** HIGH — unambiguous struct-field unpack idiom with named HCI field labels in decompiler output; caller chain pins LMP accept-connection finalization role.
+
+Region unnamed count after this pass: **145** (146 minus this rename).
 
 ## Pass 12ag (2026-06-29) — LMP PDU 6-byte field unpack `FUN_8007180c`
 
