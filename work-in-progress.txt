@@ -5546,8 +5546,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ax;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ay: cold-triage rank-1 SIMPLE-tier
-          unnamed (crypto-bignum cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ay (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076c2c`→`crypto_bignum_effective_u32_word_count`
+          (34B, HIGH, SIMPLE-tier). MSB-down scan for last non-zero u32 limb,
+          returns effective word count; 7 callers in SSP/ECDH bignum cluster
+          (`FUN_8002d818` et al.). Region 129 unnamed remain; live named 1206.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ay;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12az: cold-triage rank-1 SIMPLE-tier
+          unnamed (crypto-bignum cluster continuation, e.g. `FUN_80076684`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

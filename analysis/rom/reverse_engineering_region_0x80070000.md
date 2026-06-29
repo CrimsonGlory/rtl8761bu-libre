@@ -1543,6 +1543,20 @@ Region unnamed count after this pass: **131** (132 minus this rename). Live name
 
 **Next:** Pass 12ax — cold-triage rank-1 SIMPLE-tier unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
 
+## Pass 12ay (2026-06-29) — bignum effective word count `FUN_80076c2c`
+
+Decompiled and renamed:
+**`FUN_80076c2c` → `crypto_bignum_effective_u32_word_count`**
+(34B, HIGH) via `RenamePass12ayRegion80070000Fun80076c2c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Scans a `uint32` limb array from the highest index downward, skipping trailing zero limbs, and returns the effective word count (`last_nonzero_index + 1`, minimum 1 when `max_len > 0`). Used throughout the SSP/ECDH bignum cluster immediately before compare/subtract/reduce calls to refresh active lengths. Seven callers in region `0x8002xxxx` (`FUN_8002d464`, `FUN_8002d818`, `FUN_8002db50`, `FUN_8002dda4`, `FUN_8002dffc`, `FUN_8002e55c`, `FUN_8002eb94`) — same cluster as Pass 12t compare, Pass 12u subtract, and Pass 12ax mod-reduce.
+
+**Confidence:** HIGH — unambiguous trailing-zero trim idiom; heavy caller reuse in already-named bignum primitives pins role.
+
+Region unnamed count after this pass: **129** (130 minus this rename). Live named **1206**.
+
+**Next:** Pass 12az — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation, e.g. `FUN_80076684` zero-fill helper).
+
 ## Pass 12ax (2026-06-29) — bignum mod-reduce loop `FUN_80076b7c`
 
 Decompiled and renamed:
