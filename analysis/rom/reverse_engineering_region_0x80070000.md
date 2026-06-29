@@ -1543,6 +1543,20 @@ Region unnamed count after this pass: **131** (132 minus this rename). Live name
 
 **Next:** Pass 12ax — cold-triage rank-1 SIMPLE-tier unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
 
+## Pass 12az (2026-06-29) — bignum u32 word fill `FUN_80076684`
+
+Decompiled and renamed:
+**`FUN_80076684` → `crypto_bignum_fill_u32_words`**
+(32B, HIGH) via `RenamePass12azRegion80070000Fun80076684.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Fills `count` consecutive u32 limbs at `dest` with `value` (`param_2 & 0xffff` iterations, `*(uint32*)(dest + i*4) = value`). Used to zero-clear destination bignum buffers before add/subtract results are written back — e.g. `FUN_8002d818` calls `crypto_bignum_fill_u32_words(param_1, local_18, 0)` immediately before `crypto_bignum_add_u32_arrays_with_carry`. Six callers in region `0x8002xxxx` SSP/ECDH bignum cluster (`FUN_8002d464`, `FUN_8002d818`, `FUN_8002db50`, `FUN_8002dda4`, `FUN_8002dffc`, `FUN_8002e55c`) — same cluster as Passes 12t–12ay compare/subtract/reduce/length primitives.
+
+**Confidence:** HIGH — unambiguous memset-style limb-fill loop; caller context in already-named bignum arithmetic pins role.
+
+Region unnamed count after this pass: **128** (129 minus this rename). Live named **1207**.
+
+**Next:** Pass 12ba — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+
 ## Pass 12ay (2026-06-29) — bignum effective word count `FUN_80076c2c`
 
 Decompiled and renamed:
