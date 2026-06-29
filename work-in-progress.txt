@@ -5784,7 +5784,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ca;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cb: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cb (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8007259c`→`send_lmp_max_slot_0x2d_pdu_on_feature_and_field_0x249`
+          (164B, HIGH, SIMPLE-tier). LMP_MAX_SLOT (opcode 0x2d) sender: Pass 12ca
+          selector + `field_0x249` skip/commit + downgrade log; caller `LMP_unknown_else`.
+          Region 108 unnamed remain; live named 1233.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cc: cold-triage rank-1 SIMPLE-tier
           unnamed (LMP `0x800724xx` PDU sender cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+

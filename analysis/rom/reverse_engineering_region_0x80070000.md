@@ -1949,6 +1949,20 @@ Region unnamed count after this pass: **109** (110 minus this rename). Live name
 
 **Next:** Pass 12cb — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
 
+## Pass 12cb (2026-06-29) — LMP max-slot sender `FUN_8007259c`
+
+Decompiled and renamed:
+**`FUN_8007259c` → `send_lmp_max_slot_0x2d_pdu_on_feature_and_field_0x249`**
+(164B, HIGH) via `RenamePass12cbRegion80070000Fun8007259c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP_MAX_SLOT (opcode `0x2d`) sender for packet-type / max-slot negotiation. Calls `select_max_slot_packet_type_on_feature_page_and_config` (Pass 12ca) for slot byte `1`/`3`/`5`; skips send when `field_0x249` already matches. Builds 3-byte PDU (`opcode 0x2d` + slot byte) via `send_LMP_pkt(conn, buf, 3, 3, 100, 0)`, then stores result in `field_0x249`. On downgrade (new slot < previous), calls `FUN_80036420` and logs via `possible_logging_function__var_args`. Caller `LMP_unknown_else` (`0x80072648`) sweeps status-`0x03` slots. Receiver sibling `LMP_MAX_SLOT_0x2D` at `0x8006a3dc` (region `0x80060000`); request sibling Pass 12bz `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state` at `0x80072304`.
+
+**Confidence:** HIGH — unambiguous opcode `0x2d` matching existing Kovah-named receiver; uses Pass 12ca selector + `field_0x249` commit idiom; `LMP_unknown_else` caller pins default-case cleanup path in `0x800724xx` cluster.
+
+Region unnamed count after this pass: **108** (109 minus this rename). Live named **1233**.
+
+**Next:** Pass 12cc — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` PDU sender cluster continuation).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:
