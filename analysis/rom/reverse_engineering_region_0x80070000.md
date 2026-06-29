@@ -1555,7 +1555,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **128** (129 minus this rename). Live named **1207**.
 
-**Next:** Pass 12ba — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+**Next:** Pass 12bb — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+
+## Pass 12ba (2026-06-29) — bignum u8 add with carry `FUN_800766a4`
+
+Decompiled and renamed:
+**`FUN_800766a4` → `crypto_bignum_add_u8_arrays_with_carry`**
+(98B, HIGH) via `RenamePass12baRegion80070000Fun800766a4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Byte-wise multi-limb add with carry. Phase 1: for `i` in `0..count-1`, `dest[i] += src[i] + carry` with standard unsigned overflow carry (`carry >>= 8`). Phase 2: while carry≠0 and `i < max_len`, propagate carry through remaining `dest` bytes. Pure arithmetic — no LMP/HCI logic. Structural byte-width sibling of Pass 12's `crypto_bignum_add_u32_arrays_with_carry` (`0x80076708`) and address-adjacent to Pass 12az's `crypto_bignum_fill_u32_words` (`0x80076684`) in the `0x800766xx` SSP/ECDH bignum cluster.
+
+**Confidence:** HIGH — unambiguous add-with-carry loop idiom matching the u32 variant's two-phase shape; zero Ghidra xref-in on this GZF snapshot (possible dead code or indirect-only call site) but algorithmic role is clear from decompilation alone, same bar as Pass 8's multiply pair.
+
+Region unnamed count after this pass: **127** (128 minus this rename). Live named **1208**.
+
+**Next:** Pass 12bb — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
 
 ## Pass 12ay (2026-06-29) — bignum effective word count `FUN_80076c2c`
 
