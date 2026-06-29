@@ -2139,6 +2139,20 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
 
+## Pass 12dt (2026-06-29) — pool index-stack tag push primitive `FUN_80075b64`
+
+Decompiled and renamed:
+**`FUN_80075b64` → `push_tag_to_pool_descriptor_index_stack_or_fail`**
+(36B, HIGH, micro-primitive — below SIMPLE-tier size floor) via `RenamePass12dtRegion80070000Fun80075b64.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Bounds-checked push into pool descriptor index stack: requires non-null `param_1`, non-zero `param_2` tag, and `param_1[1] < *param_1 - 1` (index below capacity). Increments index at `param_1[1]`, stores tag dword at `param_1[2] + index*4`, returns `0` on success or `0xffffffff` on failure. Direct push complement of Pass 12p `pop_indexed_entry_from_pool_descriptor_stack` (`0x80075b88`); callee of Pass 12ds `push_incrementing_tags_to_resource_pool_stack_or_fail` stepped-tag retry loop — completes the func1–func8 resource-pool index-stack push/pop pair in the `0x80075bxx` cluster.
+
+**Confidence:** HIGH — unambiguous indexed-stack push idiom mirroring the already-named pop primitive; caller chain from Pass 12ds pins role.
+
+Region unnamed count after this pass: **70** (71 minus this rename). Live named **1277**.
+
+**Next:** Pass 12du — cold-triage rank-1 SIMPLE-tier unnamed continuation (70 in-region remain per Pass 11 re-run).
+
 ## Pass 12ds (2026-06-29) — resource pool index-stack tag push `FUN_800754e0`
 
 Decompiled and renamed:
@@ -2151,7 +2165,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **71** (72 minus this rename). Live named **1276**.
 
-**Next:** Pass 12dt — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain per Pass 11 re-run; 70 after this rename).
+**Next:** Pass 12du — cold-triage rank-1 SIMPLE-tier unnamed continuation (70 in-region remain per Pass 11 re-run).
 
 ## Pass 12dr (2026-06-29) — packet-slot ring dequeue `FUN_800758e8`
 
