@@ -6440,7 +6440,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fe: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fe (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80075ffc`→`advance_mod64_ring_cursor_and_log_active_slot`
+          (68B, HIGH, SIMPLE-tier). Mod64 ring cursor: log via tag 200 when table slot
+          active, advance cursor `& 0x3f`. SIMPLE-tier unnamed 5 remain; live named 1314.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fe;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ff: cold-triage rank-1 SIMPLE-tier
           continuation (decompile+rename top remaining unnamed candidate).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fd (2026-06-29): decompiled+

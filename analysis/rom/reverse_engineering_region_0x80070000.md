@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fe — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12ff — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12fe (2026-06-29) — mod64 ring cursor scan logger `FUN_80075ffc`
+
+Decompiled and renamed:
+**`FUN_80075ffc` → `advance_mod64_ring_cursor_and_log_active_slot`**
+(68B, HIGH, SIMPLE-tier) via `RenamePass12feRegion80070000Fun80075ffc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Increments global counter at `PTR_DAT_80076040`. Reads current ring cursor ushort at `PTR_DAT_80076044`; when dword table entry `PTR_DAT_80076048[cursor*4] != 0`, invokes `possible_logger_called_if_no_patch3` with hook fptr at `PTR_DAT_8007604c`, cursor index, and log tag `200` (0xc8). Advances cursor with `(*cursor + 1) & 0x3f` — 64-slot round-robin scan step. One-shot per call (not a full loop). Cold-triage rank-1 SIMPLE-tier candidate (68B, **1 xref-in** — tied highest in tier at Pass 12fe re-run). Ring-buffer / event-slot logging primitive sibling of Pass 12dr packet-slot ring dequeue cluster.
+
+**Confidence:** HIGH — unambiguous mod-64 index advance + conditional logger idiom on parallel cursor/table globals.
+
+Live named **1314** (global; in-region unnamed **37**; SIMPLE-tier unnamed **5**).
 
 ## Pass 12fd (2026-06-29) — AFH LAP channel-map debug logger `FUN_80072020`
 
