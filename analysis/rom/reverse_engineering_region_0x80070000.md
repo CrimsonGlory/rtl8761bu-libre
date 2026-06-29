@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fj — cold-triage rank-1 SIMPLE-tier continuation (`FUN_80074244`).
+**Next:** Pass 12fk — cold-triage rank-1 HANDLER-tier or next unnamed cluster continuation (SIMPLE-tier sweep complete).
+
+## Pass 12fj (2026-06-29) — resource-pool BDADDR/page matcher `FUN_80074244`
+
+Decompiled and renamed:
+**`FUN_80074244` → `match_active_resource_pool_slot_by_bdaddr_page_update_tlv`**
+(134B, HIGH, SIMPLE-tier) via `RenamePass12fjRegion80070000Fun80074244.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks active-slot bitmask at `PTR_DAT_800742cc + 0x280`. For each set bit in slots `0..0x13` (20 entries, `0x24` stride — same pool as Pass 12ff `init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`), compares feature-page bit `(*param_1 >> 6) & 1` against byte at `slot + 0x1818` and 6-byte BD_ADDR at `param_1 + 2` against `slot + 0x1819` via `memcmp`. On first match calls `update_feature_page_slot_record_from_tlv_payload(slot_index, param_1, param_2)` (Pass 12bn), returns 1; else 0. Writes matched slot index to `*param_3`. Resource-pool lookup sibling in the `0x800742xx` feature-page / pool cluster.
+
+**Confidence:** HIGH — full decompilation; bitmask walk + page-bit + 6-byte key match + callee chain to Pass 12bn updater matches established pool-table layout.
+
+Live named **1319** (global; in-region unnamed **32**; SIMPLE-tier unnamed **0** — tier sweep complete).
 
 ## Pass 12fi (2026-06-29) — BB slot instant delta threshold gate `FUN_80076d90`
 

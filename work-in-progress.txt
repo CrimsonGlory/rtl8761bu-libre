@@ -6472,8 +6472,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fi;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fj: cold-triage rank-1 SIMPLE-tier
-          continuation (decompile+rename last remaining unnamed: `FUN_80074244`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fj (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80074244`→`match_active_resource_pool_slot_by_bdaddr_page_update_tlv`
+          (134B, HIGH, SIMPLE-tier). Active-pool bitmask walk: page-bit + 6-byte BDADDR
+          match → `update_feature_page_slot_record_from_tlv_payload`; SIMPLE-tier unnamed 0
+          (sweep complete); live named 1319.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fk: cold-triage rank-1 HANDLER-tier
+          or next-largest unnamed continuation (SIMPLE-tier sweep complete).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`
