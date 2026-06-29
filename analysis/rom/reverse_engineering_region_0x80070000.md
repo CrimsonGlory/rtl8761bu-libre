@@ -1487,7 +1487,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **157** (158 minus this rename).
 
-**Next:** Pass 12x — cold-triage rank-1 unnamed from remaining 156.
+**Next:** Pass 12y — cold-triage rank-1 unnamed from remaining 155.
+
+## Pass 12x (2026-06-29) — eSCO packet-type pair lookup `FUN_800718d0`
+
+Decompiled and renamed:
+**`FUN_800718d0` → `lookup_esco_packet_type_table_entry_for_3_or_4_pair`**
+(52B, HIGH) via `RenamePass12xRegion80070000Fun800718d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Directional lookup for eSCO packet-type pairs involving codes 3 and 4. When `(param_2,param_3)==(4,3)` indexes `PTR_DAT_80071904[param_1]`; when `(3,4)` indexes `PTR_DAT_80071908[param_1]` — valid only for `param_1<3`, otherwise returns default `3`; any other pair returns `0xff` (invalid). Cold-triage rank-1 SIMPLE-tier candidate (52B, **6 xref-in** — highest in tier at Pass 11 re-run). Callers include `LMP_eSCO_LINK_REQ_0x7F_0C` and `init_inquiry_page_state_from_config` — eSCO link-setup / inquiry-state sibling of Pass 7's `LMP_SCO_LINK_REQ_0x17_handler` packet-type cluster.
+
+**Confidence:** HIGH — unambiguous symmetric 3↔4 pair gate + dual lookup-table idiom; LMP eSCO caller pins domain.
+
+Region unnamed count after this pass: **155** (156 minus this rename).
 
 ## Pass 12w (2026-06-29) — VSC 0xFCA1 status bitfield decode `FUN_80077638`
 

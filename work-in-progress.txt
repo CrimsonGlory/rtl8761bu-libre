@@ -5367,8 +5367,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12w
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12x: cold-triage rank-1 unnamed
-          from remaining 156.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12x: FUN_800718d0 (2026-06-29)
+          renamed→`lookup_esco_packet_type_table_entry_for_3_or_4_pair` (52B, HIGH).
+          Directional eSCO packet-type 3↔4 pair lookup via dual tables; rank-1
+          SIMPLE-tier (6 xref-in); caller `LMP_eSCO_LINK_REQ_0x7F_0C`. via
+          RenamePass12xRegion80070000Fun800718d0.java (renamed=1, live-verified).
+          155 unnamed remain; live named 1179.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12x
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12y: cold-triage rank-1 unnamed
+          from remaining 155.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
