@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12de — cold-triage rank-1 SIMPLE-tier unnamed continuation (85 in-region remain).
+**Next:** Pass 12df — cold-triage rank-1 SIMPLE-tier unnamed continuation (84 in-region remain).
+
+## Pass 12de (2026-06-29) — resource pool buffer allocator `FUN_80075a64`
+
+Decompiled and renamed:
+**`FUN_80075a64` → `allocate_resource_pool_slot_with_scaled_buffer`**
+(126B, HIGH, SIMPLE-tier) via `RenamePass12deRegion80070000Fun80075a64.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Validates scale param in `1..100` and preferred type index `< 0xb`. When the 20-byte entry at `PTR_PTR_80075ae4 + type*0x14` has status word at `+0x10 == -1` (free), or after scanning types `0..0xa` for first free slot, stores scale at `[+0xc]`, allocates `param_1 << 4` bytes via `FUN_800752d0`, stores pointer at `[0]`, clears `[+4]`, increments live-count at `+0xdc`, returns type index. On alloc failure returns `0xffffffff`. Direct callee of Pass 12dd's `register_typed_resource_slot_if_index_free` — backing allocator for the `interesting_string_user_fptr_registration_function` / `0x80100000` resource-pool family (siblings Pass 12p–12s `pop_indexed_entry_from_pool_descriptor_stack`, `clear_pool_slot_descriptor_field8_if_set_or_invalid`, etc.).
+
+**Confidence:** HIGH — unambiguous bounds-checked pool-slot scan + scaled heap alloc idiom; established caller/callee chain with Pass 12dd registrar pins domain.
+
+Region unnamed count after this pass: **84** (85 minus this rename). Live named **1262**.
 
 ## Pass 12dd (2026-06-29) — typed resource slot registrar `FUN_80075ee0`
 
@@ -2107,7 +2119,7 @@ Decompiled and renamed:
 **`FUN_80075ee0` → `register_typed_resource_slot_if_index_free`**
 (114B, HIGH, SIMPLE-tier) via `RenamePass12ddRegion80070000Fun80075ee0.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Validates type index `< 0xb`, context pointer non-null, and two bounded params in `1..100`. When the 12-byte slot at `PTR_PTR_80075f54 + index*0xc` is free (`[2]==0`), stores context at `[0]`, sets busy flag, calls `FUN_80075a64(param_4, index)` for pool lookup/allocation, stores handle at `[1]`, and updates high-water type index at offset `0x84`. On lookup failure clears busy flag and returns `0xffffffff`. Shared fallback implementation for the `interesting_string_user_fptr_registration_function` cluster (region `0x80000000`); direct caller `init_isr_extended_and_crypto_timer_resources` (Pass 12cl) registers `tISR_EXTENDED` (type 0) and `tTimer` (type 1) resource slots.
+**Mechanism:** Validates type index `< 0xb`, context pointer non-null, and two bounded params in `1..100`. When the 12-byte slot at `PTR_PTR_80075f54 + index*0xc` is free (`[2]==0`), stores context at `[0]`, sets busy flag, calls `allocate_resource_pool_slot_with_scaled_buffer(param_4, index)` for pool lookup/allocation, stores handle at `[1]`, and updates high-water type index at offset `0x84`. On lookup failure clears busy flag and returns `0xffffffff`. Shared fallback implementation for the `interesting_string_user_fptr_registration_function` cluster (region `0x80000000`); direct caller `init_isr_extended_and_crypto_timer_resources` (Pass 12cl) registers `tISR_EXTENDED` (type 0) and `tTimer` (type 1) resource slots.
 
 **Confidence:** HIGH — unambiguous 11-slot table bind idiom with bounds-checked params + established caller chain from patch cold-boot init and string-user-fptr registration wrappers.
 
