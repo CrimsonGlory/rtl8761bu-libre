@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12da — cold-triage rank-1 SIMPLE-tier unnamed continuation (89 in-region remain).
+**Next:** Pass 12db — cold-triage rank-1 SIMPLE-tier unnamed continuation (88 in-region remain).
+
+## Pass 12da (2026-06-29) — EIR sentinel inquiry dispatch `FUN_80071370`
+
+Decompiled and renamed:
+**`LMP__47F__FUN_80071370` → `dispatch_eir_sentinel_emit_inquiry_result_and_notify`**
+(82B, HIGH, SIMPLE-tier) via `RenamePass12daRegion80070000Fun80071370.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Branches on global `ptr_to_EIR_data` sentinel: when `&UNK_2`, gates on inquiry flag byte before emit; when `&UNK_3`, logs via `possible_logging_function__var_args` then calls `emit_hci_inquiry_result_or_extended_and_maybe_complete` (Pass 12cz callee). Always tail-invokes notify callback via `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`. Caller of Pass 12cz — completes inquiry EIR-state → HCI-result dispatch chain.
+
+**Confidence:** HIGH — unambiguous sentinel fork on `ptr_to_EIR_data` + established inquiry-result emitter callee + notify callback idiom; prior low→high pass 2026-06-26 documentation upgraded to full rename.
+
+Region unnamed count after this pass: **88** (89 minus this rename). Live named **1258**.
 
 ## Pass 12cz (2026-06-29) — inquiry-result HCI emitter `FUN_8007127c`
 
