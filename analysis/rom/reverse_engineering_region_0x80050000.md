@@ -6013,7 +6013,31 @@ layout.
 
 Region unnamed count after this pass: **5** (6 minus this rename).
 
-**Next:** Pass 54ay — continue xrefs=0 tier (re-run cold-triage for next rank).
+**Next:** Pass 54az — continue xrefs=0 tier (re-run cold-triage for next rank).
+
+## Pass 54ay (2026-06-29) — cold-triage rank-1 rename (post-54ax re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ax: **366 total**, **362 named**,
+**4 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e59c` → `commit_sco_8byte_params_hook5_alloc_tag9_no_ext_adv_clear`**
+(158B, HIGH) via `RenamePass54ayFun8005e59c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Compact sibling of Pass 54ar's
+`commit_esco_sco_8byte_params_and_alloc_tag9_subrecord` (210B): copies 8 bytes from `param_1+1`
+into per-connection `0x1ac` sub-record at `+0x34` via `optimized_memcpy`; derives active bit at
+`+0x4` from copied byte bit 0 gated on global `field451_0x1d0 & 0x20` (omits the full variant's
+`+0x6` status derivation and `clear_ext_adv_param_field0xf_bit13_for_instance` call); sets dirty
+bit `+0x7c |= 0x10`; dispatches hook `(conn_idx, 5)`; allocates tag-9 sub-record via
+`alloc_tag9_record_via_pool_and_init_from_template` and assigns via
+`assign_pointer_to_0x1AC_offset_0x134`; propagates pending bit `0x200` into `+0x84`/`+0x88` when
+either `+0x7c` or `+0x78` is nonzero.
+
+**Confidence:** HIGH — four already-named callees; structural match to established eSCO/SCO
+8-byte commit family with a clearly smaller tail (no ext-adv clear path).
+
+Region unnamed count after this pass: **4** (5 minus this rename).
+
+**Next:** Pass 54az — continue xrefs=0 tier (re-run cold-triage for next rank).
 
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
