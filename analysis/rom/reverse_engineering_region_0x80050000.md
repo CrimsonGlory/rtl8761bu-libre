@@ -6062,6 +6062,30 @@ Region unnamed count after this pass: **3** (4 minus this rename).
 
 **Next:** Pass 54ba — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54ba (2026-06-29) — cold-triage rank-1 rename (post-54az re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54az: **366 total**, **364 named**,
+**2 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e44c` → `handle_connection_ee4_ef0_advance_to_ef3_hook4_or_reject`**
+(128B, HIGH) via `RenamePass54baFun8005e44c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Gates on `+0x4` bit 0
+(active flag). When `+0xee == 4` and `+0xef == 0`: sets dirty bit `+0x7c |= 8`, dispatches hook
+`(conn_idx, 4)` via `PTR_DAT_8005e4d0`, sets `+0x4 |= 0xc0`, allocates tag-0xb event record via
+`alloc_event_record_and_log_tag_0xb`, assigns to `+0x134` via
+`assign_pointer_to_0x1AC_offset_0x134`, advances `+0xef` to `3`. Otherwise rejects via
+`report_procedure_outcome_and_update_param_type_bitmask(rec, 10, 0x1a|0x25, 2)` depending on
+whether `+0x4` bit 0 was clear (`0x1a`) or the ee/ef substate gate failed (`0x25`). Sibling of
+`handle_connection_ef_substate_2_or_3_advance_to_4_or_reject` (Pass 54ax — same ee/ef substate
+machine, different transition).
+
+**Confidence:** HIGH — four already-named callees plus established `+0xee`/`+0xef` substate
+layout and hook-dispatch `(idx, 4)` idiom.
+
+Region unnamed count after this pass: **2** (3 minus this rename).
+
+**Next:** Pass 54bb — continue xrefs=0 tier (re-run cold-triage for next rank).
+
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
 Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,
