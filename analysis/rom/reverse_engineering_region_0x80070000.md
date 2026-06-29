@@ -2045,7 +2045,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
 
-**Next:** Pass 12cj — cold-triage rank-1 SIMPLE-tier unnamed continuation (106 in-region remain).
+**Next:** Pass 12ck — cold-triage rank-1 SIMPLE-tier unnamed continuation (105 in-region remain).
+
+## Pass 12cj (2026-06-29) — AFH LAP free-group index `FUN_80071a84`
+
+Decompiled and renamed:
+**`FUN_80071a84` → `find_free_afh_lap_group_index_after_map_clear`**
+(90B, HIGH, SIMPLE-tier) via `RenamePass12cjRegion80070000Fun80071a84.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80071ae0` — if installed and returns non-zero, return hook result byte. Otherwise calls `clear_afh_lap_channel_map_for_matching_group` (Pass 12v), then scans 6 LAP table entries on `PTR_struct_of_at_least_0x300_size_80071ae4` for the first with group-byte `_x142_LAP[uVar4+0x49]==0xff` (unused slot). Returns index `0`–`5` or `6` if all occupied. Shared callee of `FUN_80072bac` and `FUN_80072924` AFH/LAP allocators — group-index acquisition step before slot-offset math (`compute_afh_lap_slot_offset_from_conn_cc_and_timing_base`, Pass 12ci).
+
+**Confidence:** HIGH — unambiguous hook-or-default + scan-for-0xff idiom; callee/caller chain pins AFH/LAP group-allocation role.
+
+Region unnamed count after this pass: **105** (106 minus this rename). Live named **1241**.
+
+**Next:** Pass 12ck — cold-triage rank-1 SIMPLE-tier unnamed continuation (105 in-region remain).
 
 ## Pass 12ci (2026-06-29) — AFH/LAP slot offset `FUN_80072694`
 
