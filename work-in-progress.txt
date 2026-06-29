@@ -5421,11 +5421,17 @@ sweep beyond enumeration and is the most out-of-date):
           Region 148 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12ae; rom_function_index.md; live named count 1186.
 
-[TODO]  Full RE: ROM region 0x80070000 — Pass 12af: cold-triage rank-1 unnamed
-          from remaining 148.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12af (2026-06-29): decompiled+
+          renamed `FUN_800721a0`→`send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template`
+          (138B, HIGH). LMP Slot Offset sender; callers role-switch path.
+          Region 147 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12af; rom_function_index.md; live named count 1187.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12af: cold-triage rank-1 unnamed
-          from remaining 148.
+[TODO]  Full RE: ROM region 0x80070000 — Pass 12ag: cold-triage rank-1 unnamed
+          from remaining 147.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ag: cold-triage rank-1 unnamed
+          from remaining 147.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

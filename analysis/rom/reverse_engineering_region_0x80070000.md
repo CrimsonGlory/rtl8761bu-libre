@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12af — cold-triage rank-1 unnamed from remaining 148.
+**Next:** Pass 12ag — cold-triage rank-1 unnamed from remaining 147.
+
+## Pass 12af (2026-06-29) — LMP slot offset sender `FUN_800721a0`
+
+Decompiled and renamed:
+**`FUN_800721a0` → `send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template`**
+(138B, HIGH) via `RenamePass12afRegion80070000Fun800721a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Builds a 10-byte LMP PDU with opcode `0x34` (LMP Slot Offset). IRQ-masked call to patchable hook at `PTR_DAT_80072230` with mode `2` and encoded `(bos_connection__array_index << 5 | byte_0xCC << 11) & 0xffff`; reads 2 payload bytes from `DAT_80072234`; copies 6-byte template from `PTR_DAT_80072238`; sends via `send_LMP_pkt(conn_idx, buf, 10, param_2, 100, 0)`. Cold-triage rank-1 SIMPLE-tier candidate (138B, **3 xref-in / 5 xref-out** — highest in SIMPLE tier at Pass 11 re-run). Callers `FUN_8001ab44` (role-switch initiator) and `LMP_SWITCH_REQ_0x13` (when `bdaddr_random_==0`) — sends slot-offset PDU ahead of role-switch acceptance per `reverse_engineering_lc_lmp_state_machine.md`.
+
+**Confidence:** HIGH — unambiguous LMP 0x34 opcode + `send_LMP_pkt` idiom; caller chain pins role-switch / slot-offset exchange role.
+
+Region unnamed count after this pass: **147** (148 minus this rename).
 
 ## Pass 12ae (2026-06-29) — codec context serialize entry `FUN_80079808`
 
