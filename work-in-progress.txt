@@ -5453,8 +5453,15 @@ sweep beyond enumeration and is the most out-of-date):
           cluster. Region 144 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12aj; rom_function_index.md; live named count 1191.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ak: cold-triage rank-1 SIMPLE-tier
-          unnamed (post-12aj re-run `ColdTriageRegion80070000Pass11.java`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ak (2026-06-29): cold-triage re-run
+          (`ColdTriageRegion80070000Pass11.java`, 144 unnamed) + decompiled+renamed
+          rank-1 `FUN_80079180`→`irq_safe_feature_page_hook_clear_bit34_and_merge`
+          (68B, HIGH, 4 xref-in SIMPLE-tier). Region 143 unnamed remain; live named 1192.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ak;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12al: cold-triage rank-1 SIMPLE-tier
+          unnamed (next lead `0x8007223c` 102B / `0x80077ac4` 64B / `0x80076974` 68B).
 
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58

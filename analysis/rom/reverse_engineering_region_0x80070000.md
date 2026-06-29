@@ -1501,6 +1501,18 @@ Region unnamed count after this pass: **154** (155 minus this rename).
 
 **Next:** Pass 12ak — cold-triage rank-1 SIMPLE-tier unnamed (post-12aj re-run).
 
+## Pass 12ak (2026-06-29) — feature-page IRQ hook `FUN_80079180`
+
+Decompiled and renamed:
+**`FUN_80079180` → `irq_safe_feature_page_hook_clear_bit34_and_merge`**
+(68B, HIGH) via `RenamePass12akRegion80070000Fun80079180.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked feature-page maintenance wrapper in the `0x800791xx` TLV/codec cluster (sibling of `FUN_800791d0` parse path and Pass 12aa–12ae serialize chain). Disables interrupts, invokes patchable hook at `PTR_DAT_800791c4`, clears LSB of byte at offset `+0x34` in ctx `PTR_DAT_800791c8`, and when `param_1≠0` calls `FUN_80078fdc` (bit-field merge on `0x1ac_struct_array` fields `+0x44..+0x49`) on buffer `PTR_DAT_800791cc`. Cold-triage Pass 12ak re-run: **144 unnamed** remain; rank-1 SIMPLE-tier lead at `0x80079180` (68B, **4 xref-in**).
+
+**Confidence:** HIGH — unambiguous IRQ-guard + patch-hook + flag-clear + conditional merge idiom; callee `FUN_80078fdc` already documented in feature-page cluster pins domain.
+
+Region unnamed count after this pass: **143** (144 minus this rename). Live named **1192**.
+
 ## Pass 12aj (2026-06-29) — LMP accept/mirror connection handler `FUN_80071138`
 
 Decompiled and renamed:
