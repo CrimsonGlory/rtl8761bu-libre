@@ -5485,8 +5485,15 @@ sweep beyond enumeration and is the most out-of-date):
           remain; live named 1196. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12ao; rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ap: cold-triage rank-1 SIMPLE-tier
-          unnamed (quantizer/sort cluster continuation, e.g. `0x800779d0`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ap (2026-06-29): renamed
+          `FUN_800779d0`→`moving_average_fir_smooth_int16_4tap` (126B, HIGH,
+          SIMPLE-tier). 4-tap int16 moving-average/FIR smoother; quantizer cluster
+          helper (decompiled Pass 8, rename closes FUN_* gap). Region 138 unnamed
+          remain; live named 1197. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12ap; rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aq: cold-triage rank-1 SIMPLE-tier
+          unnamed (quantizer/sort cluster continuation, e.g. `0x80077988`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

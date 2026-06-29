@@ -1513,7 +1513,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **142** (143 minus this rename). Live named **1193**.
 
-**Next:** Pass 12ap — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+**Next:** Pass 12aq — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x80077988`).
+
+## Pass 12ap (2026-06-29) — 4-tap FIR smoother `FUN_800779d0`
+
+Renamed (decompile from Pass 8 cross-confirm attempt; symbol still `FUN_*` until now):
+**`FUN_800779d0` → `moving_average_fir_smooth_int16_4tap`**
+(126B, HIGH) via `RenamePass12apRegion80070000Fun800779d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** In-place 4-tap moving-average / FIR smoothing over parallel `int16` source and destination arrays. Interior loop: `dst[i+1] = (src[i]+src[i+1]+src[i+2]+src[i+3]) >> 2`. Head: `dst[0]` averages `src[0..3]` with offset indexing; tail: duplicates averaged pair at `dst[len-3..len-2]`, zeroes `dst[len-1]`. Shared helper in quantizer/PSM-or-QoS cluster (`0x8007814c`/`0x80077bcc`); callee of `quicksort_int16_keys_with_index_perm_recursive` sort entry points — generic RSSI/AFH-channel-quality series smoother, not protocol-specific.
+
+**Confidence:** HIGH — unambiguous 4-tap average idiom; documented since Pass 8, rename closes the `FUN_*` gap.
+
+Region unnamed count after this pass: **138** (139 minus this rename). Live named **1197**.
+
+**Next:** Pass 12aq — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12ao (2026-06-29) — quicksort Lomuto partition `FUN_80077a50`
 
