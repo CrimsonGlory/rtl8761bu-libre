@@ -5570,7 +5570,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ba;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bb: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bb (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80076c08`→`crypto_copy_u8_array_reversed_to_dest`
+          (36B, HIGH, SIMPLE-tier). Reverse-index byte copy from src to dest;
+          sole caller `FUN_8002db50` SSP/ECDH bignum cluster. Region 126 unnamed
+          remain; live named 1209.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bb;
+          rom_function_index.md; analysis/INDEX.md
+
+[TODO]  Full RE: ROM region 0x80070000 — Pass 12bc: cold-triage rank-1 SIMPLE-tier
+          unnamed (crypto-bignum cluster continuation).
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bc: cold-triage rank-1 SIMPLE-tier
           unnamed (crypto-bignum cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+

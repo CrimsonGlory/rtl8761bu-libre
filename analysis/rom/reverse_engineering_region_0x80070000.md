@@ -1555,7 +1555,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **128** (129 minus this rename). Live named **1207**.
 
-**Next:** Pass 12bb — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+**Next:** Pass 12bc — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
+
+## Pass 12bb (2026-06-29) — bignum reverse byte copy `FUN_80076c08`
+
+Decompiled and renamed:
+**`FUN_80076c08` → `crypto_copy_u8_array_reversed_to_dest`**
+(36B, HIGH) via `RenamePass12bbRegion80070000Fun80076c08.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Copies `count` bytes from `src` to `dest` in reverse index order (`dest[count-1-i] = src[i]`). Out-of-place endianness/representation helper — sibling of in-place `swap_byte_order` (`0x80076bd8`). Sole caller `FUN_8002db50` in region `0x8002xxxx` SSP/ECDH bignum cluster; invoked at the end of that routine to reverse-copy completed bignum byte arrays to output buffers (`*(piVar7)` / `piVar7[1]` destinations, length `(conn_type & 0x3f) << 2`).
+
+**Confidence:** HIGH — unambiguous reverse-index copy loop; caller context in already-analyzed `FUN_8002db50` (heavy bignum primitive usage) pins role.
+
+Region unnamed count after this pass: **126** (127 minus this rename). Live named **1209**.
+
+**Next:** Pass 12bc — cold-triage rank-1 SIMPLE-tier unnamed (crypto-bignum cluster continuation).
 
 ## Pass 12ba (2026-06-29) — bignum u8 add with carry `FUN_800766a4`
 
