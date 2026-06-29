@@ -5236,8 +5236,14 @@ sweep beyond enumeration and is the most out-of-date):
           sole caller `call2funcs`. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12e; rom_function_index.md; live named count 1160.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12f: next high-xref unnamed
-          or SIMPLE-tier backlog (BB HW init cluster / cold-triage re-rank).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12f (2026-06-29): decompiled+
+          renamed `FUN_80077020`→`program_bb_link_param_regs_0x26e_0x274`
+          (240B, HIGH). BB link-param writer via callbacks at offsets 0x26e/0x274;
+          sole caller FUN_8007718c. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12f; rom_function_index.md; live named count 1161.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12g: next BB HW init cluster
+          sibling or SIMPLE-tier backlog (FUN_8007718c orchestrator / FUN_80076f* cluster).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`

@@ -1295,5 +1295,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **174** (175 minus this rename).
 
-**Next:** Pass 12f — continue SIMPLE-tier backlog or next high-xref unnamed in BB HW init cluster.
+## Pass 12f (2026-06-29) — BB link-param register writer `FUN_80077020`
+
+Decompiled and renamed (prior decompile from final-reconciliation pass; first Ghidra rename):
+**`FUN_80077020` → `program_bb_link_param_regs_0x26e_0x274`**
+(240B, HIGH) via `RenamePass12fRegion80070000Fun80077020.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loads default ushort templates from `DAT_80077110`/`DAT_80077114` into caller buffers; gates on `PTR_struct_of_at_least_0x300_size_80077118->field_0x173` and optional `check_if_80122df0_is_non_zero_else_ret_0xff` status nibble merge into `param_2+1`. When `param_1==0`, packs status/link-timing bitfields into `param_2`/`param_3` then invokes indirect register callback `PTR_DAT_80077124` for BB offsets **`0x26e`** and **`0x274`**; sets `PTR_DAT_80077128[0x28]|=0x80`. When `param_1!=0`, clears high bit on `param_3` and writes only `0x274`. Optional tail hook via `PTR_DAT_8007712c` if non-null. Sole caller: `FUN_8007718c` (slot-instant/clock-window comparator cluster).
+
+**Confidence:** HIGH — unambiguous bit-pack + dual BB-register callback idiom; callee chain ties into BB HW init cluster (Passes 12b–12e) via shared `0x771xx` globals.
+
+Region unnamed count after this pass: **173** (174 minus this rename).
+
+**Next:** Pass 12g — continue BB HW init cluster siblings (`FUN_8007718c` orchestrator or adjacent `FUN_80076f*` cluster).
 
