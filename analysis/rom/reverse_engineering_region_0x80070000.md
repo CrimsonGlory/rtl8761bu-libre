@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dd — cold-triage rank-1 SIMPLE-tier unnamed continuation (86 in-region remain).
+**Next:** Pass 12de — cold-triage rank-1 SIMPLE-tier unnamed continuation (85 in-region remain).
+
+## Pass 12dd (2026-06-29) — typed resource slot registrar `FUN_80075ee0`
+
+Decompiled and renamed:
+**`FUN_80075ee0` → `register_typed_resource_slot_if_index_free`**
+(114B, HIGH, SIMPLE-tier) via `RenamePass12ddRegion80070000Fun80075ee0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Validates type index `< 0xb`, context pointer non-null, and two bounded params in `1..100`. When the 12-byte slot at `PTR_PTR_80075f54 + index*0xc` is free (`[2]==0`), stores context at `[0]`, sets busy flag, calls `FUN_80075a64(param_4, index)` for pool lookup/allocation, stores handle at `[1]`, and updates high-water type index at offset `0x84`. On lookup failure clears busy flag and returns `0xffffffff`. Shared fallback implementation for the `interesting_string_user_fptr_registration_function` cluster (region `0x80000000`); direct caller `init_isr_extended_and_crypto_timer_resources` (Pass 12cl) registers `tISR_EXTENDED` (type 0) and `tTimer` (type 1) resource slots.
+
+**Confidence:** HIGH — unambiguous 11-slot table bind idiom with bounds-checked params + established caller chain from patch cold-boot init and string-user-fptr registration wrappers.
+
+Region unnamed count after this pass: **85** (86 minus this rename). Live named **1261**.
 
 ## Pass 12dc (2026-06-29) — LE conn-param template filler `FUN_80078eb8`
 
