@@ -5171,10 +5171,15 @@ sweep beyond enumeration and is the most out-of-date):
           (190B, HIGH, xrefs=0 tier). Region 9 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54at; rom_function_index.md; live named count 1146.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54au: continuation slot after 54at
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54av: continuation slot after 54au
           (cold-triage rank on the xrefs=0 tier; re-run Pass54 script for next rank).
 
-[TODO]  Full RE: ROM region 0x80050000 — Pass 54av: continuation slot after 54au.
+[TODO]  Full RE: ROM region 0x80050000 — Pass 54aw: continuation slot after 54av.
+
+[DONE]  Full RE: ROM region 0x80050000 — Pass 54au (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8005e0b0`→`validate_and_commit_timing_uint16_pairs_hook2_or_reject`
+          (186B, HIGH, xrefs=0 tier). Region 8 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
+          Pass 54au; rom_function_index.md; live named count 1147.
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54u (2026-06-28): decompiled+
           renamed rank-1 `FUN_80056510`→`irq_safe_enqueue_slot0_to_indexed_ring_and_notify_if_idle`

@@ -5970,3 +5970,24 @@ Region unnamed count after this pass: **9** (10 minus this rename).
 
 **Next:** Pass 54au — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54au (2026-06-29) — cold-triage rank-1 rename (post-54at re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54at: **366 total**, **358 named**,
+**8 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e0b0` → `validate_and_commit_timing_uint16_pairs_hook2_or_reject`**
+(186B, HIGH) via `RenamePass54auFun8005e0b0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Clears bits 4+5 of
+`+0x90` (`&= 0xcf`). Reads two ushort pairs from `param_1+1`/`+3`/`+5`/`+7`; validates each via
+`validate_value_pair_within_threshold_range`; on success commits to `+0xf2`/`+0xfa`/`+0xf6`/`+0xfe`
+and dispatches hook mode **2** via `PTR_DAT_8005e170`; on failure calls
+`report_procedure_outcome_and_update_param_type_bitmask(rec, 0x14, 0x1e, 2)`. Sibling of
+`validate_and_commit_LE_DLE_length_params_or_reject` (same validator + field offsets, different
+procedure tags and hook dispatch).
+
+**Confidence:** HIGH — two already-named callees plus established validate-then-commit field layout.
+
+Region unnamed count after this pass: **8** (9 minus this rename).
+
+**Next:** Pass 54av — continue xrefs=0 tier (re-run cold-triage for next rank).
+
