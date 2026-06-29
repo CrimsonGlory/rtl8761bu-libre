@@ -2045,7 +2045,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
 
-**Next:** Pass 12cl — cold-triage rank-1 SIMPLE-tier unnamed continuation (104 in-region remain).
+**Next:** Pass 12cm — cold-triage rank-1 SIMPLE-tier unnamed continuation (103 in-region remain).
+
+## Pass 12cl (2026-06-29) — ISR/timer resource init `FUN_80075428`
+
+Decompiled and renamed:
+**`FUN_80075428` → `init_isr_extended_and_crypto_timer_resources`**
+(110B, HIGH, SIMPLE-tier) via `RenamePass12clRegion80070000Fun80075428.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeros four ushort globals (`PTR_DAT_80075498`–`800754a4`), stores `param_1` at `PTR_DAT_800754a8`, then runs setup chain `FUN_80075ae8` → `FUN_80075f58` → `func6_that_uses_structs_at_0x80100000` → `FUN_80075c68`. Registers `tISR_EXTENDED` resource via `FUN_80075ee0` (type 0, callback `DAT_800754b0`, args 5/5) and stores handle at `PTR_DAT_800754b4`; on success registers `tTimer` via `FUN_80075ee0` (type 1, `invoke_crypto_state_machine_if_tag_200_1`, period `0x14`, priority 5) at `PTR_DAT_800754c0`. Returns `0` on both allocations succeeding, else `0xffffffff`. Sole caller: patch entry `calls_to_0x8010a001_as_fptr_to_install_patches` — ROM string xref cluster documents `tISR_EXTENDED`/`tTimer` from this address (region `0x80000000` gap pass).
+
+**Confidence:** HIGH — unambiguous dual `FUN_80075ee0` slot-registration idiom with embedded `tISR_EXTENDED`/`tTimer` string refs; caller from patch installer pins cold-boot resource-init role.
+
+Region unnamed count after this pass: **103** (104 minus this rename). Live named **1243**.
+
+**Next:** Pass 12cm — cold-triage rank-1 SIMPLE-tier unnamed continuation (103 in-region remain).
 
 ## Pass 12ck (2026-06-29) — AFH LAP channel bitmap merger `FUN_8007276c`
 
