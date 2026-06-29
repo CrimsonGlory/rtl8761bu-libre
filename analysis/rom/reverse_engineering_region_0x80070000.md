@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fd — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fe — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12fd (2026-06-29) — AFH LAP channel-map debug logger `FUN_80072020`
+
+Decompiled and renamed:
+**`FUN_80072020` → `log_afh_lap_channel_map_when_offset_byte_active`**
+(106B, HIGH, SIMPLE-tier) via `RenamePass12fdRegion80070000Fun80072020.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loops 6 LAP table entries on `PTR_struct_of_at_least_0x300_size_8007208c`; when `_x142_LAP[uVar3+0x4f] != 0xff` (offset-byte active / channel not cleared), logs via `possible_logging_function__var_args` (class `0x3b`, code `0x883`) dumping channel-map bytes at offsets `+0x4f`, `+0x49`, `+0x55`, `+0x5b`, `+0x61`, `+0x67` plus ushort at `+0x6e`. Debug/logging sibling of Pass 12dj's `clear_afh_lap_channel_map_for_matching_offset_group` (which clears on `+0x4f` match) and Pass 12v's group-byte clear — this path reports active entries rather than mutating them. Sole caller `unknown_fptr_index0` (fn-ptr dispatch).
+
+**Confidence:** HIGH — unambiguous 6-entry scan + logger idiom on documented `_x142_LAP` struct fields; AFH/LAP cluster context pins role.
+
+Live named **1313** (global; in-region unnamed **38**; SIMPLE-tier unnamed **6**).
 
 ## Pass 12fc (2026-06-29) — LMP power-req readiness gate `FUN_80073a5c`
 

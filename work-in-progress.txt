@@ -6440,10 +6440,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fd: cold-triage rank-1 SIMPLE-tier
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fe: cold-triage rank-1 SIMPLE-tier
           continuation (decompile+rename top remaining unnamed candidate).
 
-[DONE]  Full RE: ROM region 0x80070000 — Pass 12fb (2026-06-29): decompiled+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fd (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80072020`→`log_afh_lap_channel_map_when_offset_byte_active`
+          (106B, HIGH, SIMPLE-tier). AFH LAP debug logger when `+0x4f` offset byte active;
+          logging sibling of Pass 12dj clear. SIMPLE-tier unnamed 6 remain; live named 1313.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fd;
+          rom_function_index.md; analysis/INDEX.md
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fc (2026-06-29): decompiled+
           renamed rank-1 `FUN_80076270`→`pop_head_and_init_lmp_25b_pending_slot_with_params`
           (120B, HIGH, SIMPLE-tier). IRQ-masked head-pop from LMP-0x25B pending queue,
           init slot type/context/param; logs when empty. SIMPLE-tier unnamed 8 remain;
