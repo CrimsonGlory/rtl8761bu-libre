@@ -1851,6 +1851,20 @@ Region unnamed count after this pass: **133** (134 minus this rename). Live name
 
 **Next:** Pass 12av — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
+## Pass 12br (2026-06-29) — feature-page tag-900 ACL path `called_by_unknown_fptr_indexA_1`
+
+Decompiled and renamed:
+**`called_by_unknown_fptr_indexA_1` → `invoke_acl_ring_buffer_if_config_flag_0x40_and_index_valid`**
+(38B, HIGH) via `RenamePass12brRegion80070000Fun80074e84.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Tag-900 branch callee of `unknown_fptr_indexA` (`0x80074eb4`): when `PTR_config_base_80074eac->field208_0xd8 & 0x40` and `*PTR_DAT_80074eb0 != 0xff`, invokes `acl_packet_ring_buffer_manager` (`0x8003229c`). Otherwise no-op; always returns `0`. Sibling of Pass 12bq `invoke_feature_page_hook_fallback_with_log_0x385` on the tag-`0x385` path via `called_by_unknown_fptr_indexA_2`.
+
+**Confidence:** HIGH — unambiguous config-flag gate + resolved callee; dispatcher routing already HIGH from low→high pass pins tag-900 ACL ring-buffer role.
+
+Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1223** (entry updated).
+
+**Next:** Pass 12bs — cold-triage rank-1 SIMPLE-tier unnamed (rename `unknown_fptr_indexA` / `called_by_unknown_fptr_indexA_2` dispatcher siblings).
+
 ## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
 
 Decompiled and renamed:
