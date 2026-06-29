@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ai — cold-triage rank-1 unnamed from remaining 145 (`FUN_80036370` callee in connection-accept path).
+**Next:** Pass 12aj — rename HIGH-ready `FUN_80071138` → `LMP_accept_or_mirror_connection_handler` (connection acceptance handler; completes `0x800718xx` cluster).
+
+## Pass 12ai (2026-06-29) — connection-accept finalizer `FUN_80036370` (cross-region `0x80036370`)
+
+Decompiled and renamed:
+**`FUN_80036370` → `init_subopcode_slot_descriptor_and_assign_conn_index`**
+(42B, HIGH) via `RenamePass12aiRegion80070000Fun80036370.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Calls `FUN_800425e0(subopcode_index)` to initialize an 8-byte per-subopcode descriptor (sets status bytes `0x01`/`0x02`/`0xff`, populates timing fields from template tables), then stores the allocated BOS connection slot index (`param_1`) at descriptor byte `+3` in `PTR_DAT_8003639c`. Final step in `FUN_80071138` (connection acceptance handler) after `unpack_lmp_accept_conn_pdu_into_bos_slot` — binds the new connection slot to the LMP sub-opcode index. Callers: `FUN_80071138` (connection-accept path), `FUN_800161e4`, `FUN_8003fcc8`.
+
+**Confidence:** HIGH — unambiguous init-then-store idiom; caller chain pins connection-accept finalization role.
+
+Region `0x80070000` unnamed count unchanged at **145** (function lives in region `0x80030000`).
 
 ## Pass 12ah (2026-06-29) — LMP accept-conn PDU → BOS slot `FUN_80071840`
 

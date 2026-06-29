@@ -5440,8 +5440,16 @@ sweep beyond enumeration and is the most out-of-date):
           `FUN_80071138`. Region 145 unnamed remain. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12ah; rom_function_index.md; live named count 1189.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ai: cold-triage rank-1 unnamed
-          from remaining 145 (`FUN_80036370` callee in connection-accept path).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ai (2026-06-29): decompiled+
+          renamed `FUN_80036370`→`init_subopcode_slot_descriptor_and_assign_conn_index`
+          (42B, HIGH). Connection-accept finalizer: init subopcode descriptor +
+          store BOS conn slot at byte +3; callee of `FUN_80071138`. Cross-region
+          `0x80036370`. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12ai; rom_function_index.md; live named count 1190.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aj: rename HIGH-ready
+          `FUN_80071138` → `LMP_accept_or_mirror_connection_handler` (306B connection
+          acceptance handler; completes `0x800718xx` cluster).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
