@@ -5466,8 +5466,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12al;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12am: cold-triage rank-1 SIMPLE-tier
-          unnamed (next lead `0x80077ac4` 64B / `0x80076974` 68B).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12am (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80077ac4`→`quicksort_int16_keys_with_index_perm_recursive`
+          (64B, HIGH, SIMPLE-tier quicksort recursion helper). Region 141 unnamed remain;
+          live named 1194. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12am; rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12an: cold-triage rank-1 SIMPLE-tier
+          unnamed (next lead `0x80076974` 68B).
 
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
