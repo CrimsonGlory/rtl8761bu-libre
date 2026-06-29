@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fb — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fc — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12fb (2026-06-29) — LMP 0x25B pending slot head pop+init `FUN_80076270`
+
+Decompiled and renamed:
+**`FUN_80076270` → `pop_head_and_init_lmp_25b_pending_slot_with_params`**
+(120B, HIGH, SIMPLE-tier) via `RenamePass12fbRegion80070000Fun80076270.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When `param_1 < 2` and `param_2 != 0`, IRQ-masked pop from head queue at `PTR_PTR_800762e8`: advance head via `slot+0x14` next pointer, clear that link, set `slot+7=1`, `slot+6=(byte)param_1`, store `param_2` at `+0xc` and `param_3` at `+0x10`. When queue empty, logs via `possible_logging_function__var_args(0,0x43,0x298,0x209,...)`. LMP-0x25B pending-slot cluster sibling of Pass 12n `unlink_lmp_25b_pending_slot_from_index_queue` and Pass 12o `enqueue_lmp_25b_pending_slot_to_index_queue` — this path allocates/initializes from the head of the free/available queue rather than tail-append or status-gated unlink.
+
+**Confidence:** HIGH — full decompilation; linked-list head-pop + field-init idiom matches enqueue/unlink cluster.
+
+Live named **1311** (global; in-region unnamed **40**; SIMPLE-tier unnamed **8**).
 
 ## Pass 12fa (2026-06-29) — LMP 0x274 emit + BB slot timing flag reset `FUN_80076c90`
 
