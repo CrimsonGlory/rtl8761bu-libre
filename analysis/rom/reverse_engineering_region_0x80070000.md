@@ -1499,7 +1499,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ad — cold-triage rank-1 unnamed from remaining 150.
+**Next:** Pass 12ae — cold-triage rank-1 unnamed from remaining 149.
+
+## Pass 12ad (2026-06-29) — codec bit-stream serializer `FUN_800796b8`
+
+Decompiled and renamed:
+**`FUN_800796b8` → `serialize_codec_buffer_bits_lsb_to_state_machine`**
+(336B, HIGH) via `RenamePass12adRegion80070000Fun800796b8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks the codec context's source byte buffer (`*param_1` pointer, lengths at `+4` and `+0x25`) and feeds each byte (full 8-bit chunks plus trailing partial-bit remainders) into `feed_value_bits_lsb_to_codec_state_machine`. At partial-byte boundaries calls `FUN_80079614` (partial-align hook invoking `call_codec_patch_hook_and_spin_delay_for_counts`). Debug logging via `possible_logging_function__var_args(3,0x8e,...)`. Sole caller `FUN_80079808` — codec serialize entry that optionally chains `FUN_80079634` when `param_1+0xb` set. Serialize counterpart to parse path `FUN_800791d0`; completes the Pass 12aa–12ac feeder chain at the top level.
+
+**Confidence:** HIGH — unambiguous LSB bit-serialize loop with all callees already named; caller/callee chain pins TLV/feature-page codec cluster role.
+
+Region unnamed count after this pass: **149** (150 minus this rename).
 
 ## Pass 12ac (2026-06-29) — codec patch-hook + spin delay `FUN_800795c0`
 
