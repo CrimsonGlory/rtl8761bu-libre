@@ -6371,9 +6371,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12et;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eu: decompile+rename
-          `FUN_80064f60` (channel-slot iterator; callee of
-          `gate_psm_qos_dual_quantizer_or_iter_channel_slots`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12eu (2026-06-29): decompiled+
+          renamed `FUN_80064f60`→`validate_psm_qos_channel_slot_and_emit_lmp_0x268`
+          (74B, HIGH, SIMPLE-tier). Channel-slot worker: eligibility via
+          `FUN_80063f28`, timing setup via `FUN_80064e98`, VSC 0xFC95 when
+          mode==-1, LMP 0x268; callee of
+          `gate_psm_qos_dual_quantizer_or_iter_channel_slots`. Region 46 unnamed
+          remain; live named 1304.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12eu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ev: decompile+rename
+          `FUN_80063f28` (channel-slot eligibility validator; callee of
+          `validate_psm_qos_channel_slot_and_emit_lmp_0x268`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

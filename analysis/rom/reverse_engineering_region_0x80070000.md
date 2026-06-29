@@ -2241,9 +2241,9 @@ Identified and renamed:
 **`FUN_80064fbc` → `gate_psm_qos_dual_quantizer_or_iter_channel_slots`**
 (142B, HIGH, SIMPLE-tier) via `RenamePass12eeRegion80070000Fun80064fbc.java` (`renamed=1`, live-verified).
 
-**Discovery:** `0x80065008` is not a function entry — it is the **`jal run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`** call site inside a Ghidra orphan gap between `FUN_80064f60` (ends `0x80064faa`) and `build_psm_qos_channel_eligibility_bitmask_0x50` at `0x80065068`. Real prologue at **`0x80064fbc`** (`addiu sp,-0x28` … epilogue `0x80065048`).
+**Discovery:** `0x80065008` is not a function entry — it is the **`jal run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`** call site inside a Ghidra orphan gap between `validate_psm_qos_channel_slot_and_emit_lmp_0x268` (ends `0x80064faa`) and `build_psm_qos_channel_eligibility_bitmask_0x50` at `0x80065068`. Real prologue at **`0x80064fbc`** (`addiu sp,-0x28` … epilogue `0x80065048`).
 
-**Mechanism:** Optional hook pair at `PTR_PTR_8006504c` / `PTR_DAT_80065050` (early exit on non-zero). When global state byte `PTR_DAT_80065054[0]` has **bit 1** set → calls `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c(iVar7)` (the xref at `0x80065008`). Else: if hook context `iVar7==0` and BOS `field_0x16e==0`, skip; else if config `field285_0x129` bit 0 set with enable byte at `PTR_DAT_8006505c`, fall through to dual-quantizer path; otherwise iterate channel slots `0..3` via `FUN_80064f60(uVar9)` when per-slot flags `(byte>>1)&1` at `PTR_DAT_80065064+4+uVar9`, or call `FUN_80064f60(pcVar4[2])` on alternate enable path. Tail indirect jump via hook table at `0x80065046`.
+**Mechanism:** Optional hook pair at `PTR_PTR_8006504c` / `PTR_DAT_80065050` (early exit on non-zero). When global state byte `PTR_DAT_80065054[0]` has **bit 1** set → calls `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c(iVar7)` (the xref at `0x80065008`). Else: if hook context `iVar7==0` and BOS `field_0x16e==0`, skip; else if config `field285_0x129` bit 0 set with enable byte at `PTR_DAT_8006505c`, fall through to dual-quantizer path; otherwise iterate channel slots `0..3` via `validate_psm_qos_channel_slot_and_emit_lmp_0x268(uVar9)` when per-slot flags `(byte>>1)&1` at `PTR_DAT_80065064+4+uVar9`, or call `validate_psm_qos_channel_slot_and_emit_lmp_0x268(pcVar4[2])` on alternate enable path. Tail indirect jump via hook table at `0x80065046`.
 
 **Confidence:** HIGH — full decompilation after manual function creation at correct entry; sole caller of `run_psm_qos_dual_quantizer_search_and_emit_lmp_0x25c`.
 
@@ -2261,7 +2261,19 @@ Decompiled and renamed:
 
 Live named **1303** (global; in-region unnamed **47**).
 
-**Next:** Pass 12eu — decompile+rename `FUN_80064f60` (channel-slot iterator; callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots`).
+## Pass 12eu (2026-06-29) — PSM/QoS channel-slot validate+emit `FUN_80064f60`
+
+Decompiled and renamed:
+**`FUN_80064f60` → `validate_psm_qos_channel_slot_and_emit_lmp_0x268`**
+(74B, HIGH, SIMPLE-tier) via `RenamePass12euRegion80070000Fun80064f60.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes channel-slot index `param_1`. `FUN_80063f28` validates per-slot enable flag bit 1 and scans up to 10 eligibility entries via `FUN_80063ea0`; on success `FUN_80064e98` aggregates ACL timing stats over 0x4f channels into a 10-byte buffer and calls `FUN_80064bf4`. Stores current slot to `PTR_DAT_80064fac`; when global mode dword at `PTR_DAT_80064fb0` is `-1`, emits VSC 0xFC95 via `VSC_0xfc95_called2`; always finishes with `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Returns 1 on success, 0 if slot ineligible. Callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots` on the non-dual-quantizer channel-slot iteration path. Lives at `0x80064f60` (region `0x80060000`).
+
+**Confidence:** HIGH — full decompilation; channel-slot worker in PSM/QoS quantizer gate cluster.
+
+Live named **1304** (global; in-region unnamed **46**).
+
+**Next:** Pass 12ev — decompile+rename `FUN_80063f28` (channel-slot eligibility validator; callee of `validate_psm_qos_channel_slot_and_emit_lmp_0x268`).
 
 ## Pass 12es (2026-06-29) — PSM/QoS 5-byte eligibility bitmask from 10-byte template `FUN_800643a0`
 
