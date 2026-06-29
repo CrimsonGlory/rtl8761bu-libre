@@ -2033,6 +2033,20 @@ Region unnamed count unchanged (**107** — function lives in region `0x80030000
 
 **Next:** Pass 12ch — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain step 3 `FUN_800363a0`).
 
+## Pass 12ch (2026-06-29) — setup-chain step 3 `FUN_800363a0` (cross-region `0x80030000`)
+
+Decompiled and renamed:
+**`FUN_800363a0` → `mask_packet_type_bitmask_by_edr_feature_flags_and_slot_mode`**
+(116B, HIGH, SIMPLE-tier) via `RenamePass12chCrossRegionFun800363a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Third step in the four-function setup chain inside `recompute_and_store_field_0x250_packet_type_on_conn_slot` (Pass 12cd). When global `struct_of_at_least_0x175_size` has `byte_0x16f!=0` and either `ushort_0x24!=0x20` or feature flag `DAT_80036418 & field_0x170`, narrows `*param_2`: if `FUN_80042da0()==0` and `ushort_0x24==0x80` then `&= 0xfff`, else truncate to byte; when `PTR_DAT_8003641c==1` further `&= 0xffe9`. Separate branch when `byte_0x16f!=0 && ushort_0x24==0x20` forces `*param_2 = (*param_2 & 0xe1) | 1`. Sits between Pass 12ce max-slot narrow and Pass 12cg LMP-0x47E threshold narrow.
+
+**Confidence:** HIGH — unambiguous EDR/feature-flag + slot-mode (`0x20`/`0x80`) bitmask mask idiom; documented caller chain from Pass 12cd pins setup-chain step-3 role; completes the four-step `field_0x250` recompute chain (steps 1–4 now all named).
+
+Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
+
+**Next:** Pass 12ci — cold-triage rank-1 SIMPLE-tier unnamed continuation (107 in-region remain).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:

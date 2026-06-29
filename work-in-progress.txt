@@ -5833,8 +5833,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ch: cold-triage rank-1 SIMPLE-tier
-          unnamed (setup-chain step 3 FUN_800363a0).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ch (2026-06-29): decompiled+
+          renamed `FUN_800363a0`→`mask_packet_type_bitmask_by_edr_feature_flags_and_slot_mode`
+          (116B, HIGH, SIMPLE-tier, cross-region `0x80030000`) — setup-chain step 3 in
+          Pass 12cd `field_0x250` recompute chain; EDR feature flags + slot mode narrow.
+          Completes four-step chain (12cf/12ce/12ch/12cg). Region 107 unnamed unchanged;
+          live named 1239.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ch;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ci: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (107 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
