@@ -1693,7 +1693,7 @@ unambiguous semantic):
 | `0x8005bf4c` | 252B | `dispatch_link_power_mode_by_status_bits_and_commit` | Link power-mode transition dispatcher: `validate_connection_setup_preconditions` gate, then 2-bit mode dispatch on `+0x106 & 0x6000` (`0x2000`/`0x4000`/`0x6000`), updates `+0x104`/`+0x109`, may call `param_dispatch_with_rom_calls`, tail via `FUN_80033794`/`FUN_80035768` or `FUN_80034ccc`. HIGH — see Pass 54ao 2026-06-28 | HIGH (decompiled+documented, Pass 54ao 2026-06-28) |
 | `0x80051c60` / `0x80051f14` | 222B / 220B | Exact structural twins (only the specific paired-callee functions and one trailing dispatch constant differ — `0` vs `6`): each calls a "begin/end" pair (`FUN_80055ec8`/`FUN_80055e50`), a parameter-setter pair (`FUN_80056460`/`FUN_80056404`), a shared helper (`FUN_80051c24`), a conditional pair (`FUN_80056364`/`FUN_8005634c`), writes a packed bitfield into a cached ushort, a shared pair of calls (`FUN_8004eb18`/`FUN_8004ea2c`, `FUN_800562f4`), a shared lookup (`FUN_80059fd0`), a final pair (`FUN_800562ac`/`FUN_800562d0`), conditional logging, then a function-pointer dispatch with constant `0` vs `6` and a matching close-out call. Reads as the same PDU/event handler instantiated for two distinct connection types or channels (similar duality to Pass 11's `0x800573d8`/`0x80057094` 30-vs-20-divisor pair). | MEDIUM-HIGH — unambiguous "twin family" with paired callees throughout, but the A/B discriminator (type 0 vs 6) isn't pinned to a named connection-type/channel constant |
 | `0x80059910`'s sibling-shaped neighbor `0x8005ff54` | 200B | Gated on a per-link "established" bit (`puVar9+0x78 & 0x80`); if unset, allocates via `FUN_8005db04(0x15, 0x24)` and assigns the result into the connection sub-record, logging. If set, reads 2 ushort pairs from the input buffer, validates each pair via the already-existing helper `FUN_800599f8`, and on success commits both pairs into the sub-record (`+0xf2/+0xf6/+0xfa/+0xfe`) and calls `FUN_8005fedc(rec, 5)`; on failure calls an error-path helper `FUN_8005e01c(rec, 0x15, 0x1e, 1)` (note constant `0x15`=21 reused from the allocator call above). Same validate-then-commit family as `esco_sco_param_validate_and_commit` above, but the negotiated quantity and the `0x15`/`0x1e` constants aren't pinned to named opcodes. | MEDIUM-HIGH — same validate-then-commit family as this pass's HIGH rename, but lacks the literal HCI-status-code anchor that cleared the sibling |
-| `0x8005e648` | ~200B | Copies an 8-byte parameter block via the already-named `optimized_memcpy` into the sub-record at offset `0x34`, derives 2 status bits from the copied byte gated by a global feature flag (`field451_0x1d0 & 0x20`), conditionally triggers `FUN_800577c0`, sets a "dirty" bit (`+0x7c |= 0x10`), commits via a function-pointer call `(conn_idx, 5)` and `FUN_8005e514`/`assign_pointer_to_0x1AC_offset_0x134` (both already-named), then propagates a "pending" bit into two related cache fields (`+0x84`/`+0x88`) when either of two 32-bit fields is nonzero. Reads as the "commit negotiated parameters" step of the same eSCO/SCO cluster. | MEDIUM-HIGH — reuses 3 already-named helpers and matches the cluster's commit-step shape, but the specific 8-byte parameter block's meaning isn't pinned |
+| `0x8005e648` | 210B | `commit_esco_sco_8byte_params_and_alloc_tag9_subrecord` | eSCO/SCO 8-byte param commit: `optimized_memcpy` to `+0x34`, status bits at `+0x4`/`+0x6`, optional `clear_ext_adv_param_field0xf_bit13_for_instance`, hook dispatch `(idx,5)`, tag-9 alloc+assign. HIGH — see Pass 54ar 2026-06-28 | HIGH (decompiled+documented, Pass 54ar 2026-06-28) |
 
 **This exhausts the full rank-51-80 cold-triage list** staged in Pass 11
 (all 30 candidates now reviewed: `0x800573d8`/`0x80057094` HIGH in Pass 11,
@@ -5902,4 +5902,28 @@ Pass 24's `complete_LE_DLE_pending_proc_and_send_data_length_change_evt` documen
 Region unnamed count after this pass: **12** (13 minus this rename).
 
 **Next:** Pass 54ar — continue xrefs=0 tier (re-run cold-triage for next rank).
+
+## Pass 54ar (2026-06-28) — cold-triage rank-1 rename (post-54aq re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54aq: **366 total**, **355 named**,
+**11 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e648` → `commit_esco_sco_8byte_params_and_alloc_tag9_subrecord`**
+(210B, HIGH) via `RenamePass54arFun8005e648.java` (`renamed=1`, live-verified).
+
+**Mechanism:** eSCO/SCO negotiated-parameter commit step (promoted from Pass 24 MEDIUM-HIGH
+triage): copies an 8-byte block from `param_1+1` into the per-connection `0x1ac` sub-record at
+`+0x34` via `optimized_memcpy`; derives status bits at `+0x4` (gated on copied byte bit 0 and
+global `field451_0x1d0 & 0x20`) and `+0x6` (from copied byte bit 0x20 and global bit 6); when
+`(+0x36 & 6)==0` calls `clear_ext_adv_param_field0xf_bit13_for_instance`; sets dirty bit
+`+0x7c |= 0x10`; dispatches hook `(conn_idx, 5)`; allocates tag-9 sub-record via
+`alloc_tag9_record_via_pool_and_init_from_template` and assigns via
+`assign_pointer_to_0x1AC_offset_0x134`; propagates pending bit `0x200` into `+0x84`/`+0x88` when
+either `+0x7c` or `+0x78` is nonzero.
+
+**Confidence:** HIGH — five already-named callees with unambiguous roles; matches established
+eSCO/SCO negotiation-commit cluster (`esco_sco_param_validate_and_commit` sibling family).
+
+Region unnamed count after this pass: **11** (12 minus this rename).
+
+**Next:** Pass 54as — continue xrefs=0 tier (re-run cold-triage for next rank).
 
