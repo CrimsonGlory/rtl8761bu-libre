@@ -6068,8 +6068,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dm: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (77 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dm (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80071c68`→`emit_lmp_25c_and_clear_conn_pending_flags_d9_204`
+          (80B, HIGH, SIMPLE-tier). When `field_0xd9` or `field_0x204` set, emits
+          `LMP__25C_called1` with conn dword from `field_0x28`/`field_0x2c` then clears flag;
+          LMP-0x25C sibling of `LMP__25C__FUN_80070ba4`. Region 76 unnamed remain; live named 1270.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dn: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (76 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

@@ -2113,7 +2113,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **77** (78 minus this rename). Live named **1269**.
 
-**Next:** Pass 12dm — cold-triage rank-1 SIMPLE-tier unnamed continuation (77 in-region remain).
+**Next:** Pass 12dn — cold-triage rank-1 SIMPLE-tier unnamed continuation (76 in-region remain).
+
+## Pass 12dm (2026-06-29) — LMP 0x25C pending-flag cleanup `FUN_80071c68`
+
+Decompiled and renamed:
+**`FUN_80071c68` → `emit_lmp_25c_and_clear_conn_pending_flags_d9_204`**
+(80B, HIGH, SIMPLE-tier) via `RenamePass12dmRegion80070000Fun80071c68.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection slot cleanup on `big_ol_struct[param_1]`. When `field_0xd9 == 1`, calls `LMP__25C_called1(*(dword at field_0x28), 0)` and clears `field_0xd9`. When `field_0x204 == 1`, calls `LMP__25C_called1(*(dword at field_0x2c), 0)` and clears `field_0x204`. Cold-triage rank-1 SIMPLE-tier candidate (80B, **2 xref-in** — tied highest in tier at fresh Pass 11 re-run). LMP-0x25C pending-flag sibling of `LMP__25C__FUN_80070ba4` and region `0x80050000`'s `send_lmp25c_and_clear_pending_flag_if_idle`; neighbor of Pass 12dl's `dispatch_lmp_268_timers_with_hook_and_config_gates` in the `0x80071cxx` cluster.
+
+**Confidence:** HIGH — unambiguous dual-flag LMP-0x25C emit-and-clear idiom via established `LMP__25C_called1` callee; conn-record field offsets match HCI event sink cleanup paths documented at `HCI_EVT_0x500_FUN_800707dc`.
+
+Region unnamed count after this pass: **76** (77 minus this rename). Live named **1270**.
 
 ## Pass 12dk (2026-06-29) — PSM/QoS quantizer context reset `FUN_800786c4`
 
