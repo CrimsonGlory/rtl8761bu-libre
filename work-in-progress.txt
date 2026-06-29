@@ -5586,11 +5586,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bc;
           rom_function_index.md; analysis/INDEX.md
 
-[TODO]  Full RE: ROM region 0x80070000 — Pass 12bd: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bd (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800791d0`→`parse_codec_page_bitfields_into_0x2c_descriptor`
+          (608B, HIGH, SIMPLE-tier). Codec/feature-page bitfield parser into 0x2c
+          descriptor; sole caller `FUN_800794cc`. Region 124 unnamed remain; live
+          named 1211.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bd;
+          rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bd: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12be: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. caller `FUN_800794cc`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

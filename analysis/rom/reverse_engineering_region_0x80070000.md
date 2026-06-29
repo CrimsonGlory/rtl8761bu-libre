@@ -1569,7 +1569,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **126** (127 minus this rename). Live named **1209**.
 
-**Next:** Pass 12bd — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_800791d0`).
+**Next:** Pass 12be — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. caller `FUN_800794cc`).
+
+## Pass 12bd (2026-06-29) — codec page bitfield parser `FUN_800791d0`
+
+Decompiled and renamed:
+**`FUN_800791d0` → `parse_codec_page_bitfields_into_0x2c_descriptor`**
+(608B, HIGH) via `RenamePass12bdRegion80070000Fun800791d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Parses a codec/feature-page payload buffer (`param_1`) into a 0x2c-byte output descriptor at `param_2+4`. Byte `param_1[0xf]` encodes bit-length in the low 5 bits (default 0x20 when zero) and type in the top 3 bits; when type bits are clear, extracts nibble-packed ushort fields and flag bits from `param_1+0x10+byte_len`, optionally left-shifting all six dword fields by `*pbVar8>>6`. When type bits are set, delegates to indirect hook `PTR_DAT_80079438`. Logs each extracted byte and final field set via `possible_logging_function__var_args(3,0x8e,...)`. Sole caller `FUN_800794cc` (BD_ADDR match + version-byte change gate before applying parsed descriptor). Serialize-path counterpart is Pass 12aa–12ae `serialize_codec_context_lsb_with_pre_hook_and_optional_tail` chain.
+
+**Confidence:** HIGH — unambiguous bit-packed field extraction idiom matching prior Pass 8/9 TLV cluster analysis; caller context pins feature-page version-update role.
+
+Region unnamed count after this pass: **124** (125 minus this rename). Live named **1211**.
+
+**Next:** Pass 12be — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. caller `FUN_800794cc`).
 
 ## Pass 12bc (2026-06-29) — feature-page conn-record bit-field merge `FUN_80078fdc`
 
