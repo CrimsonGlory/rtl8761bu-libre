@@ -2127,7 +2127,7 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **73** (74 minus this rename). Live named **1273**.
 
-**Next:** Pass 12dr — cold-triage rank-1 SIMPLE-tier unnamed continuation (72 in-region remain).
+**Next:** Pass 12ds — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain).
 
 ## Pass 12dq (2026-06-29) — feature-page logger buffer `FUN_80074c04`
 
@@ -2141,7 +2141,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
 
-**Next:** Pass 12dr — cold-triage rank-1 SIMPLE-tier unnamed continuation (72 in-region remain).
+**Next:** Pass 12ds — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain).
+
+## Pass 12dr (2026-06-29) — packet-slot ring dequeue `FUN_800758e8`
+
+Decompiled and renamed:
+**`FUN_800758e8` → `irq_safe_dequeue_16byte_from_packet_slot_ring_buffer`**
+(90B, HIGH, SIMPLE-tier) via `RenamePass12drRegion80070000Fun800758e8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked dequeue from per-slot ring buffer table at `PTR_PTR_80075944 + param_1 * 0x14` (20-byte stride per slot). Saves/restores CP0 status around the critical section. Copies one 16-byte record from `base + read_idx * 0x10` into `param_2` via `optimized_memcpy`, advances read index modulo capacity at `slot[3]`, decrements fill count at `slot[4]`. Cold-triage rank-1 SIMPLE-tier candidate (90B, **1 xref-in** / **3 xref-out** per Pass 11 re-run). Packet-slot cluster sibling of `clear_packet_slot_descriptor_fields` (`0x80075890`) and `flush_check_packet_slot` / `send_packet_via_mmio_slot_table` documented in region `0x80000000` — dequeue complement of the per-slot ring enqueue family in region `0x80050000` (`dequeue_from_per_slot_ring_buffer`, `dequeue_from_ring_buffer_and_dispatch_by_index`).
+
+**Confidence:** HIGH — unambiguous IRQ-safe ring-buffer dequeue idiom with 0x10 record stride and modulo index wrap; 0x14 slot stride matches established packet-slot descriptor table layout.
+
+Region unnamed count after this pass: **71** (72 minus this rename). Live named **1275**.
 
 ## Pass 12do (2026-06-29) — AFH quantizer history IIR blend `FUN_800786dc`
 
