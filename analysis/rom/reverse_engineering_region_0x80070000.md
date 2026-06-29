@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cx — cold-triage rank-1 SIMPLE-tier unnamed continuation (92 in-region remain).
+**Next:** Pass 12cy — cold-triage rank-1 SIMPLE-tier unnamed continuation (91 in-region remain).
+
+## Pass 12cx (2026-06-29) — HCI reset OGC3 OCF1 invoke `FUN_8007913c`
+
+Decompiled and renamed:
+**`FUN_8007913c` → `hci_reset_invoke_ogc3_ocf1_zero_params_and_clear_global_bit2`**
+(62B, HIGH, SIMPLE-tier) via `RenamePass12cxRegion80070000Fun8007913c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Builds HCI command packet opcode `0x0C01` (OGF=3 OCF=1) with 8 zero parameter bytes and dispatches via `OGC_3_OCF_01`. Then clears bit 2 (`&= 0xfb`) on `struct_of_at_least_0x300_size->field_0x132`. Sole callee of Pass 12cw's `hci_reset_apply_bdaddr_scramble_and_patch_hooks` — HCI-reset sub-step after BDADDR scramble and patch-hook invocation.
+
+**Confidence:** HIGH — unambiguous opcode-literal `0xC01` + 8-byte zero param block + established `OGC_3_OCF_01` callee + global flag clear idiom; caller chain from Pass 12cw pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **91** (92 minus this rename). Live named **1255**.
 
 ## Pass 12cw (2026-06-29) — HCI reset config apply `FUN_80079934`
 
@@ -2093,7 +2105,7 @@ Decompiled and renamed:
 **`FUN_80079934` → `hci_reset_apply_bdaddr_scramble_and_patch_hooks`**
 (176B, HIGH, HANDLER-tier) via `RenamePass12cwRegion80070000Fun80079934.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Tail callee of Pass 12cv's HCI-reset VSC 0xFC95 path. Writes mode byte `0xe0` to global config struct `+0x34`, copies timing words from `big_ol_struct` (`+0x10/+0x12` → config `+0x36/+0x38`). When init flag `[0xb]&1`: on certain `field_0x14` encodings, computes slot bit mask (`1 << (field>>3)`), calls `clear_bits_in_global_0xfc39_helper` + `scrambled_bdaddr_field_writer_pair1`, and when field class `0x58` + VSC 0xFCA1 reg `0x38` bit 3 set, polls BB reg via `poll_bb_reg_ready_write_offset_value_poll_complete`. Invokes patch hooks at `PTR_DAT_800799f0(0)` and conditionally `PTR_DAT_800799f8(1)`, clears `PTR_DAT_800799f4`, calls `FUN_8007913c` (codec/feature-page). When `field_0xe & 0x20`, calls `FUN_8004ab0c`. HCI-reset continuation sibling of Passes 12cm–12cv.
+**Mechanism:** Tail callee of Pass 12cv's HCI-reset VSC 0xFC95 path. Writes mode byte `0xe0` to global config struct `+0x34`, copies timing words from `big_ol_struct` (`+0x10/+0x12` → config `+0x36/+0x38`). When init flag `[0xb]&1`: on certain `field_0x14` encodings, computes slot bit mask (`1 << (field>>3)`), calls `clear_bits_in_global_0xfc39_helper` + `scrambled_bdaddr_field_writer_pair1`, and when field class `0x58` + VSC 0xFCA1 reg `0x38` bit 3 set, polls BB reg via `poll_bb_reg_ready_write_offset_value_poll_complete`. Invokes patch hooks at `PTR_DAT_800799f0(0)` and conditionally `PTR_DAT_800799f8(1)`, clears `PTR_DAT_800799f4`, calls `hci_reset_invoke_ogc3_ocf1_zero_params_and_clear_global_bit2` (Pass 12cx). When `field_0xe & 0x20`, calls `FUN_8004ab0c`. HCI-reset continuation sibling of Passes 12cm–12cv.
 
 **Confidence:** HIGH — unambiguous config-field copy + BDADDR scramble + patch-hook idiom; tail caller from Pass 12cv pins HCI-reset sub-step role.
 

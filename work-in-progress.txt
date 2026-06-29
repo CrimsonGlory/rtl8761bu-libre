@@ -5946,8 +5946,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cx: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (92 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cx (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8007913c`→`hci_reset_invoke_ogc3_ocf1_zero_params_and_clear_global_bit2`
+          (62B, HIGH, SIMPLE-tier). OGF3 OCF1 (0xC01) with 8 zero params via `OGC_3_OCF_01`,
+          then clear bit2 on global `field_0x132`; callee of Pass 12cw HCI-reset apply.
+          Region 91 unnamed remain; live named 1255.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cy: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (91 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
