@@ -1989,7 +1989,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1235**.
 
-**Next:** Pass 12ce — cold-triage rank-1 SIMPLE-tier unnamed (LMP `0x800724xx` cluster continuation or setup-chain callees `FUN_80033248`/`FUN_8003337c`).
+**Next:** Pass 12cf — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_80033248` or `FUN_800363a0`/`FUN_800333fc`).
+
+## Pass 12ce (2026-06-29) — max-slot mask step `FUN_8003337c` (cross-region `0x80030000`)
+
+Decompiled and renamed:
+**`FUN_8003337c` → `mask_packet_type_bitmask_by_max_slot_fields_0x24a_0x24b`**
+(84B, HIGH, SIMPLE-tier) via `RenamePass12ceCrossRegionFun8003337c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Second step in the four-function setup chain inside `recompute_and_store_field_0x250_packet_type_on_conn_slot` (Pass 12cd). When `field_0x24a` is neither `0xff` nor `5` (unset / 5-slot), masks `*param_2`: value `3` → `& 0xfff`, else `& 0xff`. Repeats for `field_0x24b`. Sibling of Pass 12cb/12cc max-slot cluster fields (`field_0x248`/`field_0x249`); narrows the working packet-type bitmask before `FUN_800363a0`/`FUN_800333fc` finish the chain.
+
+**Confidence:** HIGH — unambiguous read/mask idiom on `field_0x24a`/`field_0x24b` with max-slot class encoding (`3` vs default); caller chain from Pass 12cd pins setup-chain role.
+
+Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1236**.
+
+**Next:** Pass 12cf — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_80033248` or `FUN_800363a0`/`FUN_800333fc`).
 
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 

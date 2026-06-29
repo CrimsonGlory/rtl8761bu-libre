@@ -5809,8 +5809,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ce: cold-triage rank-1 SIMPLE-tier
-          unnamed (LMP `0x800724xx` cluster continuation or setup-chain callees FUN_80033248/FUN_8003337c).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ce (2026-06-29): decompiled+
+          renamed cross-region `FUN_8003337c`→`mask_packet_type_bitmask_by_max_slot_fields_0x24a_0x24b`
+          (84B, HIGH, SIMPLE-tier). Max-slot field_0x24a/0x24b bitmask narrowing; setup-chain step 2
+          in Pass 12cd `recompute_and_store_field_0x250_packet_type_on_conn_slot`. Region 0x80070000
+          unnamed unchanged (107); live named 1236.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ce;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cf: cold-triage rank-1 SIMPLE-tier
+          unnamed (setup-chain callee FUN_80033248 or FUN_800363a0/FUN_800333fc).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
