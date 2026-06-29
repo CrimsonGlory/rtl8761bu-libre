@@ -2321,7 +2321,22 @@ Decompiled and renamed:
 
 Live named **1324** (global; in-region unnamed **28**; HANDLER-tier unnamed **13**).
 
-**Next:** Pass 12fp — `FUN_800740c8` itself (periodic-tick dispatcher, Pass 12fn's flush caller) and/or cold-triage next HANDLER-tier candidate.
+## Pass 12fp (2026-06-29) — periodic 9-tick dispatcher `FUN_800740c8`
+
+Decompiled and renamed:
+**`FUN_800740c8` → `periodic_9tick_dispatch_link_sample_flush_and_feature_retry`**
+(200B, HIGH, HANDLER-tier) via `RenamePass12fpFun800740c8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Gated by a tick counter at `PTR_DAT_80074194`: increments on every call and only proceeds once it wraps to `9` (`'\t'`) — i.e. runs its body once every 9 invocations — and only when a mode byte at `+0x268` of the link-table base (`PTR_DAT_80074190`) equals `2`. On the 9th tick: (1) walks the 16-bit connection-handle bitmask at `+0x10` of the same base; for each set bit, resolves the per-record BD_ADDR field (`+0x32` of the `0x1c`-stride record) via `lookup_up_to_3_bos_array_indices_by_connection_handle`, and when that lookup reports index 0, calls Pass 12fn's `flush_link_sample_counters_and_emit_periodic_average_event(link_index)` for that link; (2) walks a second, separate byte bitmask at `+2` of the same base (link indices offset by `+0x10`, i.e. covering a disjoint handle range from set 1) gated additionally on bit0 of `field451_0x1d0` and the corresponding bit of a 16-bit mask at `field453_0x1d2/field454_0x1d3` in the `0x1ac`-stride struct array, flushing each via the same `flush_link_sample_counters_and_emit_periodic_average_event(link_index + 0x10)`; (3) if bit0 of `field68_0x44` (a separate per-link enable flag) is set, walks a 32-bit bitmask at `+0x270` of the link-table base and calls `FUN_80073f5c(link_index)` for each set link — `FUN_80073f5c` is a distinct per-link periodic handler covering LMP extended-feature-page retry counting and a second divide-based average/reset path on a `0x114`-stride record (not yet renamed; out of scope for this pass). Finally resets the tick counter to 0.
+This is the top-level periodic-tick fan-out that Pass 12fn's flush function and Pass 12fo's record writer both feed into and out of — Pass 12fo writes per-sample data into the `0x1c`-stride record, Pass 12fn's flush reads it back out, and this function is what schedules that flush on a fixed 9-tick cadence across up to three independent per-link bitmask sources. `find_callers` on this function returned no callers (consistent with a periodic-tick dispatcher invoked indirectly via a connection/link housekeeping timer rather than a direct call site).
+
+**Confidence:** HIGH — straightforward decompile; tick-gate, bitmask-walk, and flush-call structure all directly readable, and the record-field cross-references match Pass 12fn/12fo's sibling functions exactly.
+
+Live named **1325** (global; in-region unnamed **27**; HANDLER-tier unnamed **13**, since `FUN_80073f5c` discovered along the way remains unnamed).
+
+**Next:** cold-triage next HANDLER-tier candidate, and/or `FUN_80073f5c` (LMP extended-feature-page retry + divide-based average/reset on `0x114`-stride record, called from this pass's third bitmask walk).
+
+**Tool note (2026-06-29):** `run_ghidra_headless(use_saved_project=true, script_file_id=<uuid>)` failed 5/5 times this pass with `Script not found: /tmp/ghidra_script_*/...\.java` (Ghidra's headless `compileScripts` looking for the script before/without it landing in the temp dir) — reproduced across both a brand-new `save_ghidra_script` UUID and a pre-existing one from an earlier successful pass, so it's not file-specific. `script_name` + `use_saved_project=true` against an on-disk script in `/root/wairz/ghidra/scripts/` (written directly via the `Write` tool, bypassing `save_ghidra_script` entirely) worked first try. See `wairz_requested_changes.txt` for the full repro and the standing workaround.
 
 ## Pass 12fn (2026-06-29) — link-sample counter flush + average-event dispatch `FUN_80074020`
 

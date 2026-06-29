@@ -427,3 +427,40 @@ Format: [TODO] or [DONE] status, date, description
     for scripts (like BatchDecompileList.java) that are designed to take script_args — until
     this entry is marked truly [DONE] by a from-scratch script_args reproduction test showing
     it works again.
+
+[DONE] (2026-06-29, ROM Pass 12fp, non-blocking — reliable fallback confirmed): run_ghidra_headless: script_file_id + use_saved_project=true
+  reliably fails with "Script not found: /tmp/ghidra_script_*/<name>.java" → checkScript →
+  InvalidArgumentException → analyzeHeadless exits 1. Reproduced 5/5 consecutive attempts in
+  this iteration:
+    - A brand-new save_ghidra_script upload (RenamePass12fpRegion80070000Fun800740c8.java,
+      fresh UUID), retried 3x including with timeout=300 and an 8s/15s sleep between retries.
+    - A pre-existing, previously-working script UUID from an earlier successful pass
+      (RP12fm.java, 28d1391f-2f62-43cc-a615-3effc5f334a7) — same failure, ruling out anything
+      specific to the new file's content or upload.
+    - A second brand-new upload under an intentionally unique throwaway filename
+      (RP12fp_unique_test_zz9.java) to rule out a stale-temp-dir filename collision — same
+      failure.
+  Isolated: the failure is specific to the script_file_id delivery mechanism (copy into
+  /tmp/ghidra_script_<random>/ before compileScripts runs), NOT to use_saved_project itself —
+  script_name (an on-disk script under /opt/ghidra_scripts/ or /root/wairz/ghidra/scripts/) +
+  use_saved_project=true works fine (verified via DecompileAddr.java with script_args, exit 0).
+  use_saved_project=false + script_file_id also "succeeds" but is a red herring: without the
+  GZF-process flag it silently imports the raw rtl8761bu_fw.bin instead of the GZF, so it can
+  never reach ROM-block addresses like 0x800740c8 ("MISSING at 0x800740c8") — not usable for
+  ROM work regardless of this bug.
+
+  Workaround (proven this same iteration, zero extra cost): skip save_ghidra_script +
+  script_file_id entirely for anything that needs use_saved_project=true (i.e. anything
+  touching the ROM block of the GZF). Write the script directly to
+  /root/wairz/ghidra/scripts/ via the Write tool, then call
+  run_ghidra_headless(binary_path=<gzf>, use_saved_project=true, script_name=<filename>).
+  Verified end-to-end: RenamePass12fpFun800740c8.java written this way ran on first try
+  (exit 0, `renamed=1 old=FUN_800740c8 new=...`), and the rename was confirmed persisted via
+  a separate, later decompile_function call by the new name. This is the same workaround
+  already documented further up this file for the save_ghidra_script-materialization bug and
+  the script_args CLI-construction bug — reclassifying as non-blocking per that same
+  precedent (a reliable fallback exists and costs nothing extra to use by default), but
+  logging the specific symptom/repro here since the earlier entries describe different
+  underlying failures (materialization-not-visible-to-script_name vs CLI-arg-parsing vs this
+  one's "Script not found" mid-compile race). Mark [DONE] once a from-scratch
+  script_file_id + use_saved_project=true reproduction shows it working again.
