@@ -1385,3 +1385,17 @@ Region unnamed count after this pass: **167** (168 minus this rename).
 
 **Next:** Pass 12m — rename orchestrator `FUN_8007718c` now that all `FUN_80076f*` cluster siblings are named.
 
+## Pass 12m (2026-06-29) — BB link-timing orchestrator `FUN_8007718c`
+
+Decompiled and renamed:
+**`FUN_8007718c` → `eSCO_SCO_connection_slave_establishment_orchestrator`**
+(524B, HIGH) via `RenamePass12mRegion80070000Fun8007718c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Orchestrates the full BB-slot link-timing pipeline when status byte `+0x9` mode bit 0 is set: seeds link fields from globals, calls `compute_bb_slot_link_timing_offsets_from_status_bits`, compares reference vs current instants with mod-`0x4e2` wrap window, runs `accumulate_bb_slot_timing_drift_counters_or_set_mode` + `resolve_bb_slot_instant_by_status_timing_mode` (or snaps on match), then `reset_bb_slot_instant_on_clock_wrap_guard` → mod-1250 normalize → `classify_bb_slot_modulo_timing_flags_and_offset` → `program_bb_link_param_regs_0x26e_0x274` → optional debug log (event-class `0x71` when bit `0x40` set) → `commit_bb_slot_timing_flags_sync_and_tail_hook`; finally syncs status nibbles and indirect tail dispatch. Sole caller: `unknown_fptr_index0` @ `0x80013a1c` (connection-type dispatcher case ~107).
+
+**Confidence:** HIGH — all 7 cluster callees now named (Passes 12f–12l); pipeline role and eSCO/SCO dispatcher caller context confirm the Pass 10 protocol identity.
+
+Region unnamed count after this pass: **166** (167 minus this rename).
+
+**Next:** Pass 12n — cold-triage next rank-1 unnamed in region `0x80070000`.
+

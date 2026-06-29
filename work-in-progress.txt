@@ -5278,8 +5278,13 @@ sweep beyond enumeration and is the most out-of-date):
           sole caller FUN_8007718c. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12l; rom_function_index.md; live named count 1167.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12m: FUN_8007718c
-          (eSCO/SCO slave establishment orchestrator — rename now cluster siblings done).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12m: FUN_8007718c (2026-06-29)
+          renamed→`eSCO_SCO_connection_slave_establishment_orchestrator` (524B, HIGH).
+          BB-slot link-timing orchestrator chaining all Pass 12f–12l callees; caller
+          `unknown_fptr_index0` @ 0x80013a1c. via RenamePass12mRegion80070000Fun8007718c.java
+          (renamed=1, live-verified). 166 unnamed remain; live named 1168.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12m
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
