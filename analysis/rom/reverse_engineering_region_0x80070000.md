@@ -1487,7 +1487,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **157** (158 minus this rename).
 
-**Next:** Pass 12w — cold-triage rank-1 unnamed from remaining 157.
+**Next:** Pass 12x — cold-triage rank-1 unnamed from remaining 156.
+
+## Pass 12w (2026-06-29) — VSC 0xFCA1 status bitfield decode `FUN_80077638`
+
+Decompiled and renamed:
+**`FUN_80077638` → `decode_vsc_fca1_bitfield_and_log_bb_status_flags`**
+(136B, HIGH) via `RenamePass12wRegion80070000Fun80077638.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_800778c0` — if installed and returns non-zero, skip default path. Reads `VSC_0xfca1_FUN_80077474` at offset `0x34` (mode byte `param_1==1`) or `0x30`, then checks reg `0x38` bit `0x10` to pick which global flag byte (`PTR_DAT_800778c4`/`c8`/`cc`) to clear. Decodes the returned status word's low 2-bit class + `>>3` bitfield: sets sticky flags in those globals and logs each decoded bit via `possible_logging_function__var_args` (class 0) or `FUN_800778aa` (classes 1–3). Cold-triage rank-1 SIMPLE-tier candidate (136B, **7 xref-in** — highest in tier at Pass 11 re-run). VSC 0xFCA1 / BB-status sibling of Passes 12b–12e HW-init cluster; caller `log_many_2_0x72_0x121-0x14e`.
+
+**Confidence:** HIGH — unambiguous VSC-read + bitfield-decode + logger idiom; callee chain to already-named `VSC_0xfca1_FUN_80077474` and logging infrastructure pins role.
+
+Region unnamed count after this pass: **156** (157 minus this rename).
 
 ## Pass 12u (2026-06-29) — bignum subtract with borrow `FUN_8007677c`
 

@@ -5358,8 +5358,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12v
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12w: cold-triage rank-1 unnamed
-          from remaining 157.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12w: FUN_80077638 (2026-06-29)
+          renamed→`decode_vsc_fca1_bitfield_and_log_bb_status_flags` (136B, HIGH).
+          VSC 0xFCA1 status-bitfield decode + BB config flag setter with logging;
+          rank-1 SIMPLE-tier (7 xref-in). via
+          RenamePass12wRegion80070000Fun80077638.java (renamed=1, live-verified).
+          156 unnamed remain; live named 1178.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12w
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12x: cold-triage rank-1 unnamed
+          from remaining 156.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
