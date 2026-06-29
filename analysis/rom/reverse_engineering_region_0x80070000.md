@@ -1891,7 +1891,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1225** (entry updated).
 
-**Next:** Pass 12bv — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
+**Next:** Pass 12bw — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
+
+## Pass 12bv (2026-06-29) — crypto fptr finalizer wrapper `called_at_end_of_crypto_state_machine_update`
+
+Decompiled and renamed:
+**`called_at_end_of_crypto_state_machine_update` → `invoke_crypto_state_machine_finalizer`**
+(20B, HIGH) via `RenamePass12bvRegion80070000Fun80071620.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin fptr-dispatch entry in the crypto/SSP cluster: unconditional tail-call forwarding `param_1` (conn/slot index) to `crypto_state_machine_finalizer` (`0x80073348`, 362B eSCO/encryption post-handshake finalizer from Pass 3a). Callers include `FUN_800249a8` and the SSP state-machine update path via `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?`. Sibling of Pass 12bu's tag-200 loop-handler dispatch (`invoke_crypto_state_machine_if_tag_200` @ `0x8007666c`).
+
+**Confidence:** HIGH — unambiguous one-instruction tail-call idiom; callee already HIGH from batch pass 3a pins finalizer role.
+
+Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1227** (entry updated).
+
+**Next:** Pass 12bw — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
 
 ## Pass 12bu (2026-06-29) — crypto fptr dispatcher `unknown_fptr_index1`
 

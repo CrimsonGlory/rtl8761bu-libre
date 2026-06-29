@@ -5732,7 +5732,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bv: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bv (2026-06-29): decompiled+
+          renamed `called_at_end_of_crypto_state_machine_update`→
+          `invoke_crypto_state_machine_finalizer` (20B, HIGH, SIMPLE-tier).
+          Tail-call forwards conn index to `crypto_state_machine_finalizer`;
+          crypto/SSP fptr cluster sibling of Pass 12bu. Region 114 unnamed
+          unchanged; live named 1227.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bw: cold-triage rank-1 SIMPLE-tier
           unnamed (crypto/SSP fptr cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
