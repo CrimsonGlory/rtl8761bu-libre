@@ -2267,7 +2267,7 @@ Decompiled and renamed:
 **`FUN_80064f60` → `validate_psm_qos_channel_slot_and_emit_lmp_0x268`**
 (74B, HIGH, SIMPLE-tier) via `RenamePass12euRegion80070000Fun80064f60.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Takes channel-slot index `param_1`. `check_psm_qos_channel_slot_eligibility_scan10` validates per-slot enable flag bit 1 and scans up to 10 eligibility entries via `test_psm_qos_channel_slot_eligibility_entry`; on success `FUN_80064e98` aggregates ACL timing stats over 0x4f channels into a 10-byte buffer and calls `FUN_80064bf4`. Stores current slot to `PTR_DAT_80064fac`; when global mode dword at `PTR_DAT_80064fb0` is `-1`, emits VSC 0xFC95 via `VSC_0xfc95_called2`; always finishes with `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Returns 1 on success, 0 if slot ineligible. Callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots` on the non-dual-quantizer channel-slot iteration path. Lives at `0x80064f60` (region `0x80060000`).
+**Mechanism:** Takes channel-slot index `param_1`. `check_psm_qos_channel_slot_eligibility_scan10` validates per-slot enable flag bit 1 and scans up to 10 eligibility entries via `test_psm_qos_channel_slot_eligibility_entry`; on success `aggregate_acl_channel_timing_averages_into_10byte_buffer` aggregates ACL timing stats over 0x4f channels into a 10-byte buffer and calls `FUN_80064bf4`. Stores current slot to `PTR_DAT_80064fac`; when global mode dword at `PTR_DAT_80064fb0` is `-1`, emits VSC 0xFC95 via `VSC_0xfc95_called2`; always finishes with `LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Returns 1 on success, 0 if slot ineligible. Callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots` on the non-dual-quantizer channel-slot iteration path. Lives at `0x80064f60` (region `0x80060000`).
 
 **Confidence:** HIGH — full decompilation; channel-slot worker in PSM/QoS quantizer gate cluster.
 
@@ -2297,7 +2297,19 @@ Decompiled and renamed:
 
 Live named **1306** (global; in-region unnamed **45**).
 
-**Next:** Pass 12ex — decompile+rename `FUN_80064e98` (ACL timing-stats aggregator over 0x4f channels into 10-byte buffer; callee of `validate_psm_qos_channel_slot_and_emit_lmp_0x268`).
+**Next:** Pass 12ey — decompile+rename `FUN_80064bf4` (PSM/QoS 10-byte buffer commit/dispatch; callee of `aggregate_acl_channel_timing_averages_into_10byte_buffer`).
+
+## Pass 12ex (2026-06-29) — ACL channel timing averages into 10-byte PSM/QoS buffer `FUN_80064e98`
+
+Decompiled and renamed:
+**`FUN_80064e98` → `aggregate_acl_channel_timing_averages_into_10byte_buffer`**
+(184B, HIGH, SIMPLE-tier) via `RenamePass12exRegion80070000Fun80064e98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes channel-slot index `param_1`. Iterates ACL channel indices `0..0x4e` (79 channels): requires per-channel active flag at `PTR_DAT_80064f50[i]` and enable bit in `PTR_DAT_80064f54[i>>3]`. For each matching 14-byte ACL record at `PTR_DAT_80064f58 + i*0xe`, when `entry[0]!=0` and `entry[1]==0`, accumulates `entry[5]` and `entry[0]` into running sums with a match count. On zero matches, zeros the derived averages; else divides sums by count. Packs a 10-byte PSM/QoS template at `PTR_DAT_80064f5c` (averaged timing fields at bytes 0–1 and 7–9, fixed constants `0x1e/10/9` at bytes 4–6, zeros at 2–3), then calls `FUN_80064bf4(0, 10, param_1)`. Callee of `validate_psm_qos_channel_slot_and_emit_lmp_0x268` on the eligible channel-slot path. Lives at `0x80064e98` (region `0x80060000`).
+
+**Confidence:** HIGH — full decompilation; timing-aggregator leaf in PSM/QoS channel-slot cluster.
+
+Live named **1307** (global; in-region unnamed **44**).
 
 ## Pass 12es (2026-06-29) — PSM/QoS 5-byte eligibility bitmask from 10-byte template `FUN_800643a0`
 
