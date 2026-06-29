@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cs — cold-triage rank-1 SIMPLE-tier unnamed continuation (97 in-region remain).
+**Next:** Pass 12ct — cold-triage rank-1 SIMPLE-tier unnamed continuation (96 in-region remain).
+
+## Pass 12cs (2026-06-29) — BB register triplet writer `FUN_80078798`
+
+Decompiled and renamed:
+**`FUN_80078798` → `program_baseband_regs_0x23e_0x254_0x25e_via_patch_hook`**
+(124B, HIGH, SIMPLE-tier) via `RenamePass12csRegion80070000Fun80078798.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Programs three baseband HW registers through indirect patch-hook callback at `PTR_DAT_80078818`: reg `0x23e` with masked value from `DAT_80078814` (`& 0xff21 | 0x400`), reg `0x254` with `DAT_8007881c | 0xc`, reg `0x25e` with `DAT_80078820 | 0x300`. Optional tail hook at `PTR_DAT_80078824` invoked with arg `0` when non-null. Cold-triage rank-1 SIMPLE-tier candidate (124B, **4 xref-in** — tied highest in tier at Pass 11 re-run). Callers include `fHCI_Reset_0x03_full_subsystem_teardown`, `apply_SCO_connection_params_to_hw`, and patch installer — shared BB-init path sibling of Pass 12cp's HCI-reset-specific register writer.
+
+**Confidence:** HIGH — unambiguous triple indirect HW-write idiom via established patch-hook fptr; multi-caller context (HCI reset + SCO + patch install) pins role.
+
+Region unnamed count after this pass: **96** (97 minus this rename). Live named **1250**.
 
 ## Pass 12cr (2026-06-29) — HCI reset LMP 0x268 gateway `FUN_80078b94`
 
