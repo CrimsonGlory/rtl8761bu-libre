@@ -2127,7 +2127,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **73** (74 minus this rename). Live named **1273**.
 
-**Next:** Pass 12dq — cold-triage rank-1 SIMPLE-tier unnamed continuation (73 in-region remain).
+**Next:** Pass 12dr — cold-triage rank-1 SIMPLE-tier unnamed continuation (72 in-region remain).
+
+## Pass 12dq (2026-06-29) — feature-page logger buffer `FUN_80074c04`
+
+Decompiled and renamed:
+**`FUN_80074c04` → `pack_and_log_event_buf_ff_05_22_tag_0x70190`**
+(128B, HIGH, SIMPLE-tier) via `RenamePass12dqRegion80070000Fun80074c04.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional buffer alloc via `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2` on patch-hook fptr at `PTR_DAT_80074c84+4`. Builds a 7-byte event buffer: header `0xff/0x05/0x22/0x00`, ushort `param_1`, byte `param_2`, then dispatches via `possible_logger_called_if_no_patch3` with log tag `0x70190`. On logger success, calls `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests` to release/wrap the buffer. Cold-triage rank-1 SIMPLE-tier candidate (128B, **1 xref-in** / **3 xref-out** per Pass 11 re-run). Sits in the `0x80074cxx` LMP feature-page / logger fptr cluster adjacent to `LMP_CH__0x3ed` (`0x80074c8c`) and post-hook slot `PTR_DAT_80074c00` used by `dispatch_lmp_feature_page_response_by_bitmask`.
+
+**Confidence:** HIGH — unambiguous fixed-header pack + `possible_logger_called_if_no_patch3` idiom with literal tag `0x70190`; matches established `pack_and_log_*` / `notify_lc_link_type_change_event` naming family in region `0x80050000`.
+
+Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
+
+**Next:** Pass 12dr — cold-triage rank-1 SIMPLE-tier unnamed continuation (72 in-region remain).
 
 ## Pass 12do (2026-06-29) — AFH quantizer history IIR blend `FUN_800786dc`
 

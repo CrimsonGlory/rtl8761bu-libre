@@ -6101,8 +6101,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dq: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (73 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dq (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80074c04`→`pack_and_log_event_buf_ff_05_22_tag_0x70190`
+          (128B, HIGH, SIMPLE-tier). Builds 7-byte `0xff/0x05/0x22/0x00` + ushort +
+          byte logger buffer, tag `0x70190`; feature-page cluster sibling of
+          `LMP_CH__0x3ed`. Region 72 unnamed remain; live named 1274.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dr: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (72 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
