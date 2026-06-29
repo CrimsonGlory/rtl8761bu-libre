@@ -2045,7 +2045,21 @@ Decompiled and renamed:
 
 Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1239**.
 
-**Next:** Pass 12ci — cold-triage rank-1 SIMPLE-tier unnamed continuation (107 in-region remain).
+**Next:** Pass 12cj — cold-triage rank-1 SIMPLE-tier unnamed continuation (106 in-region remain).
+
+## Pass 12ci (2026-06-29) — AFH/LAP slot offset `FUN_80072694`
+
+Decompiled and renamed:
+**`FUN_80072694` → `compute_afh_lap_slot_offset_from_conn_cc_and_timing_base`**
+(204B, HIGH, HANDLER-tier) via `RenamePass12ciRegion80070000Fun80072694.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked AFH/LAP timing-offset calculator shared by the `0x80072bac`/`0x80072924`/`0x8007276c` trio. Skips when conn slot `bdaddr_random_==1`. Otherwise reads slot `byte_0xCC` via `FUN_80034a24` into a working offset, aligns it against doubled slot period `param_2<<1` and a global base from `DAT_80072764`/`DAT_80072768`, applies parity adjustment when `param_4==0`, then returns `(offset % param_3)` wrapped to a byte. AFH/LAP cluster sibling of Pass 12v `clear_afh_lap_channel_map_for_matching_group` and the max-slot cluster at `0x800724xx`.
+
+**Confidence:** HIGH — unambiguous modular timing-alignment idiom with three documented AFH/LAP callers; conn-record `byte_0xCC` read pins slot-scoped role.
+
+Region unnamed count after this pass: **106** (107 minus this rename). Live named **1240**.
+
+**Next:** Pass 12cj — cold-triage rank-1 SIMPLE-tier unnamed continuation (106 in-region remain).
 
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 

@@ -5842,8 +5842,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ch;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ci: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (107 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ci (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80072694`→`compute_afh_lap_slot_offset_from_conn_cc_and_timing_base`
+          (204B, HIGH, HANDLER-tier). IRQ-masked AFH/LAP timing-offset calculator shared by
+          `FUN_8007276c`/`FUN_80072924`/`FUN_80072bac`; conn `byte_0xCC` + modular slot align.
+          Region 106 unnamed remain; live named 1240.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ci;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cj: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (106 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
