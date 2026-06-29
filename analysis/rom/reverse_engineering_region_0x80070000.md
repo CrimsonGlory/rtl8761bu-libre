@@ -1651,7 +1651,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **118** (119 minus this rename). Live named **1217**.
 
-**Next:** Pass 12bn — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80073db8`).
+**Next:** Pass 12bo — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation, e.g. hook at `PTR_DAT_80073e90`).
+
+## Pass 12bn (2026-06-29) — feature-page slot record updater `FUN_80073db8`
+
+Decompiled and renamed:
+**`FUN_80073db8` → `update_feature_page_slot_record_from_tlv_payload`**
+(210B, HIGH) via `RenamePass12bnRegion80070000Fun80073db8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-slot (0x114-byte stride) feature-page record updater in the LMP extended-feature-page receive cluster. Optional pre-hook at `PTR_DAT_80073e90` may short-circuit. State machine on record byte `[0] & 3`: mode 1 may call `FUN_80032138` and set status bits at `+8/+10/+0xc`; mode 2 updates counters and may clear `+6/+7`. Stores length `param_3` at `+3`, then `optimized_memcpy` of `param_2[1]+2` bytes to `+0x10`. Sole callee from Pass 12bm `match_feature_page_tlv_tag_for_bitmask_bits_and_update_slot` after TLV tag-name match — receive-path slot commit sibling of Pass 12bj case-2 field-extract parser.
+
+**Confidence:** HIGH — unambiguous indexed slot-table + memcpy payload commit idiom; caller chain from renamed Pass 12bm/12bl dispatcher pins LMP feature-page receive role.
+
+Region unnamed count after this pass: **115** (116 minus this rename). Live named **1220**.
+
+**Next:** Pass 12bo — cold-triage rank-1 SIMPLE-tier unnamed (LMP feature-page cluster continuation, e.g. hook at `PTR_DAT_80073e90`).
 
 ## Pass 12bm (2026-06-29) — feature-page case-1 tag matcher `FUN_80074718`
 
@@ -1659,7 +1673,7 @@ Decompiled and renamed:
 **`FUN_80074718` → `match_feature_page_tlv_tag_for_bitmask_bits_and_update_slot`**
 (146B, HIGH) via `RenamePass12bmRegion80070000Fun80074718.java` (`renamed=1`, live-verified).
 
-**Mechanism:** LMP extended-feature-page dispatch-table case 1. Iterates set bits in global bitmask at `PTR_DAT_800747ac+0x274` (up to 20 slots); for each active bit, walks indexed tag-name table entries via `walk_tlv_stream_match_tag_name_in_indexed_table` on payload at `param_1+8` until first match, then calls `FUN_80073db8(slot_index, param_1, param_2)` to copy/update the per-slot 0x114-byte record. Stores last matched slot index in `*param_3`; returns 1 on first match. Computed callee from Pass 12bl `dispatch_lmp_feature_page_response_by_bitmask` fn-ptr table — tag-name match receive path sibling of Pass 12bj case-2 field-extract parser.
+**Mechanism:** LMP extended-feature-page dispatch-table case 1. Iterates set bits in global bitmask at `PTR_DAT_800747ac+0x274` (up to 20 slots); for each active bit, walks indexed tag-name table entries via `walk_tlv_stream_match_tag_name_in_indexed_table` on payload at `param_1+8` until first match, then calls `update_feature_page_slot_record_from_tlv_payload(slot_index, param_1, param_2)` to copy/update the per-slot 0x114-byte record. Stores last matched slot index in `*param_3`; returns 1 on first match. Computed callee from Pass 12bl `dispatch_lmp_feature_page_response_by_bitmask` fn-ptr table — tag-name match receive path sibling of Pass 12bj case-2 field-extract parser.
 
 **Confidence:** HIGH — unambiguous bitmask-iterate + TLV tag-name match idiom; caller/callee chain from renamed dispatcher and Pass 12bk tag matcher pins LMP feature-page receive role.
 

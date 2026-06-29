@@ -5667,8 +5667,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bn: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. `FUN_80073db8`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bn (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80073db8`→`update_feature_page_slot_record_from_tlv_payload`
+          (210B, HIGH). Per-slot 0x114-byte feature-page record updater; callee of
+          `match_feature_page_tlv_tag_for_bitmask_bits_and_update_slot`. Region 115 unnamed
+          remain; live named 1220.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bo: cold-triage rank-1 SIMPLE-tier
+          unnamed (LMP feature-page cluster continuation, e.g. hook at `PTR_DAT_80073e90`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
