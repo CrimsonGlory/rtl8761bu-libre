@@ -6518,9 +6518,23 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fo: `FUN_8007419c` (per-link
-          sample-record writer + threshold-crossing event, same 0x1c-stride record
-          as Pass 12fn) and/or its caller `FUN_800740c8` (periodic-tick dispatcher).
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fp: `FUN_800740c8` (periodic-tick
+          dispatcher, Pass 12fn's flush caller, walks two connection-handle bitmasks
+          on a 9-tick cycle) and/or cold-triage next HANDLER-tier candidate (13 remain).
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fo (2026-06-29): decompiled+
+          renamed rank-1 `FUN_8007419c`→`write_link_sample_record_and_arm_threshold_crossing_flags`
+          (158B, HIGH, HANDLER-tier). Per-link sample-record writer: optional override
+          hook at `PTR_DAT_8007423c` may veto; writes raw sample to +0x1a, accumulates
+          sum/count when bit1 of +0xf set, and on threshold crossing sets bit0,
+          dispatches `FUN_800321f8(0, id@+0x16, sample)`, re-arms bit1 when byte
+          counter +0x10 nonzero/non-saturated; producer-side complement of Pass 12fn's
+          flush function on the same 0x1c-stride record (`PTR_DAT_80074240`). 2
+          confirmed callers via find_callers: `lmp_pdu_received_top_level_processor` +
+          `ring_buffer_event_drain_dispatch_loop`. HANDLER-tier unnamed 13 remain;
+          live named 1324.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fo;
+          rom_function_index.md; analysis/INDEX.md
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ff (2026-06-29): decompiled+
           renamed rank-1 `FUN_80073888`→`init_resource_pool_20_slot_sequential_ids_clear_five_ptrs`

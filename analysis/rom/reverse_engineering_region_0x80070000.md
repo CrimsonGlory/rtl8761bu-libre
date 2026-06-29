@@ -2309,6 +2309,20 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
+## Pass 12fo (2026-06-29) — link-sample record writer + threshold-crossing arm `FUN_8007419c`
+
+Decompiled and renamed:
+**`FUN_8007419c` → `write_link_sample_record_and_arm_threshold_crossing_flags`**
+(158B, HIGH, HANDLER-tier) via `RenamePass12foRegion80070000Fun8007419c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Takes per-link index `param_1` and a new sample byte `param_2`. Resolves the same 0x1c-stride record (`PTR_DAT_80074240 + index*0x1c`) used by Pass 12fn's flush function. Optional override callback at `PTR_DAT_8007423c` may veto the entire write (returns nonzero to suppress). On the default path: stores the raw sample to `+0x1a` (`last_raw_sample`, read by the flush function's bit0 path); when bit1 of flag byte `+0xf` is set, increments the short counter at `+2` and accumulates `sample` into the sum at `+4` (the same accumulator the flush function divides for its average report). When `sample >= limit@+1`: if bit0 of `+0xf` is not yet set, sets bit0, clears `+0x14`, dispatches `FUN_800321f8(0, id@+0x16, sample)` (an immediate threshold-crossing report distinct from the periodic flush), and — if the byte counter `+0x10` is nonzero and not saturated (`(byte)(+0x10 - 1) < 0xfe`) — re-arms the periodic-average path by zeroing `+2`, setting bit1 of `+0xf`, clearing `+0x11`, and resetting the sum at `+4` to `bVar1 & 1` (effectively 0 or 1 depending on whether bit0 was previously clear). Finally, when `sample > limit@+0` or bit0 of `+0xf` is unset, clears the crossed-id fields `+0x14`/`+0x15`. Confirmed callers via `find_callers` (non-empty this time): `lmp_pdu_received_top_level_processor` and `ring_buffer_event_drain_dispatch_loop` — i.e. this is the producer-side ingestion point for per-link quality/signal samples arriving from both LMP PDU processing and ring-buffer event drain, feeding the threshold/average reporting machinery that Pass 12fn's `flush_link_sample_counters_and_emit_periodic_average_event` later flushes on its periodic 9-tick cycle.
+
+**Confidence:** HIGH — record layout, flag bits, and accumulator fields are fully consistent with Pass 12fn's sibling flush function on the same struct; both confirmed callers resolved cleanly via `find_callers` (unlike Pass 12fn's caller link, which had to be inferred).
+
+Live named **1324** (global; in-region unnamed **28**; HANDLER-tier unnamed **13**).
+
+**Next:** Pass 12fp — `FUN_800740c8` itself (periodic-tick dispatcher, Pass 12fn's flush caller) and/or cold-triage next HANDLER-tier candidate.
+
 ## Pass 12fn (2026-06-29) — link-sample counter flush + average-event dispatch `FUN_80074020`
 
 Decompiled and renamed:
