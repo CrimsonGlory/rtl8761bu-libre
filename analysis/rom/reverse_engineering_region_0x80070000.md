@@ -1487,7 +1487,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **157** (158 minus this rename).
 
-**Next:** Pass 12y — cold-triage rank-1 unnamed from remaining 155.
+**Next:** Pass 12z — cold-triage rank-1 unnamed from remaining 154.
+
+## Pass 12y (2026-06-29) — VSC 0xFC95 triad mode setter `FUN_80073b08`
+
+Decompiled and renamed:
+**`FUN_80073b08` → `irq_safe_set_vsc_fc95_mode_and_dispatch_lmp_triad`**
+(96B, HIGH) via `RenamePass12yRegion80070000Fun80073b08.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked wrapper around the established `VSC_0xfc95` triad (`LMP__25B__most_common_for_VSCs1` → `VSC_0xfc95_called2` → mode-byte store → `LMP__268__most_common_for_VSCs2_checks_fptr_patch(param_2)`). Skips when global mode at `PTR_DAT_80073b68` is already `0x01` and `param_1 != 0x01` (idempotent guard). Cold-triage rank-1 SIMPLE-tier candidate (96B, **5 xref-in** — highest remaining in tier at Pass 11 re-run). Callers include `connection_event_status_handler`, `assoc_w_tHCI_CMD`, and patch `FUN_8010c854` — same triad documented at `conn_link_quality_history_reset_and_vsc_0xfc95_trigger` and `lmp_25b_afh_toggle_via_vsc_0xfc95` in region `0x80000000`.
+
+**Confidence:** HIGH — unambiguous IRQ-safe triad idiom with all four callees already named; `param_2` passed through to LMP-268 as delay/timeout (seen at `0x800798b0` escalation path).
+
+Region unnamed count after this pass: **154** (155 minus this rename).
 
 ## Pass 12x (2026-06-29) — eSCO packet-type pair lookup `FUN_800718d0`
 

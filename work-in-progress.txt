@@ -5376,8 +5376,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12x
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12y: cold-triage rank-1 unnamed
-          from remaining 155.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12y: FUN_80073b08 (2026-06-29)
+          renamed→`irq_safe_set_vsc_fc95_mode_and_dispatch_lmp_triad` (96B, HIGH).
+          IRQ-masked VSC 0xFC95 triad mode setter; rank-1 SIMPLE-tier (5 xrefs).
+          via RenamePass12yRegion80070000Fun80073b08.java (renamed=1, live-verified).
+          154 unnamed remain; live named 1180.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12y
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12z: cold-triage rank-1 unnamed
+          from remaining 154.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
