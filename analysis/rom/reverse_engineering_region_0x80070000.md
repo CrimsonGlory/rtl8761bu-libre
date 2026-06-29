@@ -2249,6 +2249,20 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
+## Pass 12et (2026-06-29) — PSM/QoS 10-byte triple template AND-merge `FUN_80063f70`
+
+Decompiled and renamed:
+**`FUN_80063f70` → `and_merge_psm_qos_10byte_three_template_buffers`**
+(62B, HIGH, SIMPLE-tier) via `RenamePass12etRegion80070000Fun80063f70.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80063fb0` — when hook present and returns non-zero, skip merge. Default path: for indices `0..9`, writes `out[i] = buf_a[i] & buf_b[i] & buf_c[i]` where output is `PTR_DAT_80063fbc` and sources are `PTR_DAT_80063fb4` / `80063fb8` / `80063fc0`. Callee of `dispatch_psm_qos_opcode_mode_merge_bitmask_and_sync` before log + 5-byte bitmask build.
+
+**Confidence:** HIGH — full decompilation; merge leaf in PSM/QoS opcode-mode cluster.
+
+Live named **1303** (global; in-region unnamed **47**).
+
+**Next:** Pass 12eu — decompile+rename `FUN_80064f60` (channel-slot iterator; callee of `gate_psm_qos_dual_quantizer_or_iter_channel_slots`).
+
 ## Pass 12es (2026-06-29) — PSM/QoS 5-byte eligibility bitmask from 10-byte template `FUN_800643a0`
 
 Decompiled and renamed:
@@ -2261,15 +2275,13 @@ Decompiled and renamed:
 
 Live named **1302** (global; in-region unnamed **48**).
 
-**Next:** Pass 12et — decompile+rename `FUN_80063f70` (10-byte AND-merge of three template buffers; callee of Pass 12er).
-
 ## Pass 12er (2026-06-29) — PSM/QoS opcode-mode dispatch `FUN_80064b08`
 
 Decompiled and renamed:
 **`FUN_80064b08` → `dispatch_psm_qos_opcode_mode_merge_bitmask_and_sync`**
 (208B, HIGH, SIMPLE-tier) via `RenamePass12erRegion80070000Fun80064b08.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Opcode-mode byte `param_1` gates conn-slot sync: `0` → BOS `field_0xf0` bit2, `1` → bit1, else always sync. Optional early-exit hook at `PTR_PTR_80064bdc`. Calls `FUN_80063f70` (10-byte AND-merge of three template buffers), logs via `possible_logging_function__var_args`, builds 5-byte eligibility stack buffer via `build_psm_qos_5byte_eligibility_bitmask_from_10byte_template`, and when gate set calls `sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask`. When global mode `*PTR_DAT_80064be8 == -1`, emits VSC 0xFC95 + LMP 0x268 (same uninitialized-mode triad as Pass 12cv). Sole caller: `multi_field_opcode_dispatcher_type1_msg`.
+**Mechanism:** Opcode-mode byte `param_1` gates conn-slot sync: `0` → BOS `field_0xf0` bit2, `1` → bit1, else always sync. Optional early-exit hook at `PTR_PTR_80064bdc`. Calls `and_merge_psm_qos_10byte_three_template_buffers`, logs via `possible_logging_function__var_args`, builds 5-byte eligibility stack buffer via `build_psm_qos_5byte_eligibility_bitmask_from_10byte_template`, and when gate set calls `sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask`. When global mode `*PTR_DAT_80064be8 == -1`, emits VSC 0xFC95 + LMP 0x268 (same uninitialized-mode triad as Pass 12cv). Sole caller: `multi_field_opcode_dispatcher_type1_msg`.
 
 **Confidence:** HIGH — full decompilation; PSM/QoS orchestrator sibling of finalize/sync fast-path cluster (Passes 12ep/12eq).
 

@@ -6362,8 +6362,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12es;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12et: decompile+rename
-          `FUN_80063f70` (10-byte AND-merge of three template buffers; callee of Pass 12er).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12et (2026-06-29): decompiled+
+          renamed `FUN_80063f70`→`and_merge_psm_qos_10byte_three_template_buffers`
+          (62B, HIGH, SIMPLE-tier). Optional-hook-gated triple AND-merge of three
+          10-byte PSM/QoS template buffers into output; callee of
+          `dispatch_psm_qos_opcode_mode_merge_bitmask_and_sync`. Region 47 unnamed
+          remain; live named 1303.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12et;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12eu: decompile+rename
+          `FUN_80064f60` (channel-slot iterator; callee of
+          `gate_psm_qos_dual_quantizer_or_iter_channel_slots`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
