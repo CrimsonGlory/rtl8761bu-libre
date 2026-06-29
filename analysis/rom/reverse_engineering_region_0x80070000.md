@@ -1319,5 +1319,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **172** (173 minus this rename).
 
-**Next:** Pass 12h — continue `FUN_80076f*` siblings (`FUN_80076f58`, `FUN_80076fa8`, `FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
+## Pass 12h (2026-06-29) — BB slot modulo timing flags `FUN_80076f58`
+
+Decompiled and renamed:
+**`FUN_80076f58` → `classify_bb_slot_modulo_timing_flags_and_offset`**
+(78B, HIGH) via `RenamePass12hRegion80070000Fun80076f58.java` (`renamed=1`, live-verified).
+
+**Mechanism:** On input instant already reduced mod `0x4e2` (1250): if value `> 0x270` (624), ORs bit 2 into status byte `*param_2`; computes offset `0x270 - (instant % 0x271)` into `*param_3`; if offset `< 0x138` (312), ORs bit 1 into status byte. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`), invoked immediately after `reset_bb_slot_instant_on_clock_wrap_guard` normalizes field `+0x16` and before `program_bb_link_param_regs_0x26e_0x274`.
+
+**Confidence:** HIGH — unambiguous modulo-threshold flag classification with explicit link-offset output; caller chain pins role in BB link-timing cluster (Passes 12f–12h).
+
+Region unnamed count after this pass: **171** (172 minus this rename).
+
+**Next:** Pass 12h cont — remaining `FUN_80076f*` siblings (`FUN_80076fa8`, `FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
 

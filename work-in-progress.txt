@@ -5248,8 +5248,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12g;
           rom_function_index.md; live named count 1162.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12h: FUN_80076f* cluster siblings
-          (FUN_80076f58, FUN_80076fa8, FUN_80076ce4, FUN_80076dc8, FUN_80076e58).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12h (2026-06-29): decompiled+
+          renamed `FUN_80076f58`→`classify_bb_slot_modulo_timing_flags_and_offset`
+          (78B, HIGH). Mod-0x4e2 timing flag classifier + link-offset writer;
+          sole caller FUN_8007718c. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12h; rom_function_index.md; live named count 1163.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12h cont: FUN_80076f* cluster siblings
+          (FUN_80076fa8, FUN_80076ce4, FUN_80076dc8, FUN_80076e58).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`
