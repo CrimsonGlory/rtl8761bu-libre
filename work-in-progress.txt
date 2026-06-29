@@ -5224,7 +5224,14 @@ sweep beyond enumeration and is the most out-of-date):
           hooks skip entire sequence. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12c; rom_function_index.md; live named count 1158.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12d: rename `FUN_80076c50` (34B, callee of init_bb_hw_registers).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12d (2026-06-29): decompiled+
+          renamed `FUN_80076c50`→`invoke_optional_patch_fptr_mid_bb_hw_init`
+          (34B, HIGH). Mid-sequence optional patch hook in BB HW init chain.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12d;
+          rom_function_index.md; live named count 1159.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12e: next high-xref unnamed
+          or SIMPLE-tier backlog (cold-triage Pass 11 re-rank).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`

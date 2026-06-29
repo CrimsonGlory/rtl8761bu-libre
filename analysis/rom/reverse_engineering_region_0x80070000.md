@@ -1271,5 +1271,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **176** (177 minus this rename).
 
-**Next:** Pass 12d — continue SIMPLE-tier backlog (`FUN_80076c50` callee, 34B) or next high-xref unnamed.
+**Next:** Pass 12e — continue SIMPLE-tier backlog or next high-xref unnamed.
+
+## Pass 12d (2026-06-29) — mid-BB-init optional patch hook `FUN_80076c50`
+
+Decompiled and renamed:
+**`FUN_80076c50` → `invoke_optional_patch_fptr_mid_bb_hw_init`**
+(34B, HIGH) via `RenamePass12dRegion80070000Fun80076c50.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Standard override+fallback wrapper idiom — loads optional patchable fptr from `PTR_DAT_80076c64` and calls it if non-null; no args, no return used. Called mid-sequence by `init_bb_hw_registers_via_mailbox_with_patch_hooks` after programming BB registers `0x14`…`0x70` and before the second optional hook branch (`PTR_PTR_800775f4` / VSC 0xFCA1 path).
+
+**Confidence:** HIGH — decompilation is unambiguous (single indirect call through a global fptr slot); caller context from Pass 12c pins it as a mid-init patch hook, same idiom as `poll_status_and_invoke_optional_fptr` in region `0x80000000`.
+
+Region unnamed count after this pass: **175** (176 minus this rename).
 
