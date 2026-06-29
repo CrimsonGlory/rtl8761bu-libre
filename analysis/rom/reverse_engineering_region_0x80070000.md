@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12ek — decompile+rename `FUN_80065d94` (PSM/QoS state-0x16 sub-state callee when retry counter `== 1`).
+**Next:** Pass 12el — decompile+rename `FUN_800640c4` (PSM/QoS state-0x16 sub-state callee when retry counter `== 0`).
+
+## Pass 12ek (2026-06-29) — PSM/QoS state-0x16 retry-1 bitpair walk `FUN_80065d94`
+
+Decompiled and renamed:
+**`FUN_80065d94` → `expand_psm_qos_state_0x16_retry1_random_bitpair_eligibility`**
+(338B, HIGH, MEDIUM-tier) via `RenamePass12ekRegion80070000Fun80065d94.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sole caller `run_psm_qos_state_0x16_eligibility_subdispatch` when per-channel retry counter `PTR_DAT_80066308[param_1]==1`. When per-channel flag `PTR_DAT_80065ef8[param_1]==0`: up to 10 random-index attempts via `FUN_80042934(0x4e)`, sets adjacent bit pairs in 10-byte output buffer `param_3` (special case index `0x4e` sets bit `0x40` on byte 9 only), records encoded index in `PTR_DAT_80065f00[param_1*6]`, bumps eligibility count `*param_2`. When flag `==1`: either calls `FUN_80065c84` (dual-buffer bitpair adjust) or adds `+10` to retry counter when global eligibility/popcount thresholds fail. Always increments per-channel retry `PTR_DAT_80065efc[param_1]` at tail.
+
+**Confidence:** HIGH — full decompilation; sibling of retry-0 `FUN_800640c4` and even-retry `FUN_800658f0` in Pass 12eg sub-state machine; calls already-named `FUN_80042934` PRNG helper.
+
+Live named **1294** (global; in-region unnamed **56**).
 
 ## Pass 12ej (2026-06-29) — PSM/QoS eligibility finalize helper `FUN_80065f0c`
 
@@ -2293,7 +2305,7 @@ Decompiled and renamed:
 **`FUN_800661b8` → `run_psm_qos_state_0x16_eligibility_subdispatch`**
 (322B, HIGH, MEDIUM-tier) via `RenamePass12egRegion80070000Fun800661b8.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Called from `dispatch_psm_qos_10byte_bitmask_by_channel_state` when per-channel state byte is `0x16`. Builds eligibility via `build_psm_qos_channel_eligibility_bitmask_0x50`, copies 10-byte result to per-index buffer `PTR_DAT_800662fc` and global template `PTR_DAT_80066300`. Optional hook at `PTR_DAT_80066304` (early exit on non-zero). Sub-state machine on retry counter `PTR_DAT_80066308[param_1]`: `0` → `FUN_800640c4`; `1` → `FUN_80065d94`; even → `FUN_800658f0`; odd → increment counter. AND-merge output with template `PTR_DAT_8006630c`, popcount set bits. When counter `>8`, reset state tables (`PTR_DAT_80066308`..`80066328`) to idle/`0x16`/`0x0a`. Finalize via `FUN_80065f0c`, copy merged bitmask back to global template and snapshot `PTR_DAT_8006632c`.
+**Mechanism:** Called from `dispatch_psm_qos_10byte_bitmask_by_channel_state` when per-channel state byte is `0x16`. Builds eligibility via `build_psm_qos_channel_eligibility_bitmask_0x50`, copies 10-byte result to per-index buffer `PTR_DAT_800662fc` and global template `PTR_DAT_80066300`. Optional hook at `PTR_DAT_80066304` (early exit on non-zero). Sub-state machine on retry counter `PTR_DAT_80066308[param_1]`: `0` → `FUN_800640c4`; `1` → `expand_psm_qos_state_0x16_retry1_random_bitpair_eligibility`; even → `FUN_800658f0`; odd → increment counter. AND-merge output with template `PTR_DAT_8006630c`, popcount set bits. When counter `>8`, reset state tables (`PTR_DAT_80066308`..`80066328`) to idle/`0x16`/`0x0a`. Finalize via `FUN_80065f0c`, copy merged bitmask back to global template and snapshot `PTR_DAT_8006632c`.
 
 **Confidence:** HIGH — full decompilation; calls already-named `build_psm_qos_channel_eligibility_bitmask_0x50`; sole caller is `dispatch_psm_qos_10byte_bitmask_by_channel_state`.
 
