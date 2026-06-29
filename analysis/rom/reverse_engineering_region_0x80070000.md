@@ -1631,13 +1631,13 @@ Decompiled and renamed:
 **`FUN_800747b0` → `parse_tlv_tag3_ushort_tag5_uint32_tag11_block_from_stream`**
 (390B, HIGH) via `RenamePass12bjRegion80070000Fun800747b0.java` (`renamed=1`, live-verified).
 
-**Mechanism:** TLV-style byte-stream walker over `param_1` with length `param_2`, optional first patchable hook at `PTR_DAT_80074938`. For each TLV entry: length byte at offset `uVar5` selects field-type bitmask `1<<n`; tag `3` appends a ushort to `param_3+4` array, tag `5` appends a uint32 to `param_3+8` array, tag `0x11` copies 16 bytes to `param_3+0x28`. On buffer overrun logs via `possible_logging_function__var_args(2,0x3c,0x31d,...)`. Callee of `FUN_80074940` (case 2 in LMP feature/parameter-negotiation response dispatcher) — receive-path sibling of Pass 12bd–12be `0x800791xx` codec/feature-page cluster and Pass 12aa–12ae serialize chain.
+**Mechanism:** TLV-style byte-stream walker over `param_1` with length `param_2`, optional first patchable hook at `PTR_DAT_80074938`. For each TLV entry: length byte at offset `uVar5` selects field-type bitmask `1<<n`; tag `3` appends a ushort to `param_3+4` array, tag `5` appends a uint32 to `param_3+8` array, tag `0x11` copies 16 bytes to `param_3+0x28`. On buffer overrun logs via `possible_logging_function__var_args(2,0x3c,0x31d,...)`. Callee of `dispatch_lmp_feature_page_response_by_bitmask` (case 2 in LMP feature/parameter-negotiation response dispatcher) — receive-path sibling of Pass 12bd–12be `0x800791xx` codec/feature-page cluster and Pass 12aa–12ae serialize chain.
 
-**Confidence:** HIGH — unambiguous tag-3/5/0x11 field extraction idiom; decompiled in Pass 8, rename closes long-standing `FUN_*` gap; caller chain from `FUN_80074940` pins LMP extended-feature-page TLV parse role.
+**Confidence:** HIGH — unambiguous tag-3/5/0x11 field extraction idiom; decompiled in Pass 8, rename closes long-standing `FUN_*` gap; caller chain from `dispatch_lmp_feature_page_response_by_bitmask` pins LMP extended-feature-page TLV parse role.
 
 Region unnamed count after this pass: **119** (120 minus this rename). Live named **1216**.
 
-**Next:** Pass 12bl — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80074940` LMP feature dispatcher rename, or `0x800791xx` TLV/codec cluster continuation).
+**Next:** Pass 12bm — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
 
 ## Pass 12bk (2026-06-29) — TLV tag-name table matcher `FUN_800745d8`
 
@@ -1651,7 +1651,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **118** (119 minus this rename). Live named **1217**.
 
-**Next:** Pass 12bl — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80074940` LMP feature dispatcher rename, or `0x800791xx` TLV/codec cluster continuation).
+**Next:** Pass 12bm — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
+
+## Pass 12bl (2026-06-29) — LMP feature-page response dispatcher `FUN_80074940`
+
+Decompiled and renamed:
+**`FUN_80074940` → `dispatch_lmp_feature_page_response_by_bitmask`**
+(672B, HIGH) via `RenamePass12blRegion80070000Fun80074940.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional pre-hook at `PTR_DAT_80074be0`; then iterates feature pages 1–4, gating each on bitmask byte at `PTR_DAT_80074be4+0x26a`. Case 1/2 call 5-entry dispatch table at `PTR_DAT_80074be8` (case 2 parses TLV via `parse_tlv_tag3_ushort_tag5_uint32_tag11_block_from_stream` when ACL nibble≠1); cases 3/4 require bit `0x40` on PDU. Post-handler at `PTR_DAT_80074bec`; on success may set per-page bits in `local_20` and update `0x1ac_struct_array` fields `+0x284`/`+0x28c` via default path or hook at `PTR_DAT_80074bf0`. Final BD_ADDR/link-record validation when `local_5b` set (`find_link_record_by_bdaddr_and_flag`, memcmp on feature bytes); optional tail hook at `PTR_DAT_80074c00`.
+
+**Confidence:** HIGH — closes long-standing Pass 8/9 MEDIUM-HIGH cluster anchor; callee chain to Pass 12bj TLV parser pins LMP extended-feature-page receive role; 5-case bitmask dispatch idiom unambiguous.
+
+Region unnamed count after this pass: **117** (118 minus this rename). Live named **1218**.
+
+**Next:** Pass 12bm — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation).
 
 ## Pass 12bh (2026-06-29) — codec serialize tail hook `FUN_80079634`
 
