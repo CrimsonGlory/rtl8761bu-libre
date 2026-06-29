@@ -1637,7 +1637,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **119** (120 minus this rename). Live named **1216**.
 
-**Next:** Pass 12bk — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation or TLV sibling `FUN_800745d8` / `FUN_80074940`).
+**Next:** Pass 12bl — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80074940` LMP feature dispatcher rename, or `0x800791xx` TLV/codec cluster continuation).
+
+## Pass 12bk (2026-06-29) — TLV tag-name table matcher `FUN_800745d8`
+
+Decompiled and renamed:
+**`FUN_800745d8` → `walk_tlv_stream_match_tag_name_in_indexed_table`**
+(308B, HIGH) via `RenamePass12bkRegion80070000Fun800745d8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** TLV-style byte-stream walker over `param_1` with length `param_2`, optional first patchable hook at `PTR_DAT_8007470c`. For each TLV entry (up to `0x101` iterations): validates tag byte and length bounds against an indexed name table at `PTR_DAT_80074710` (stride `param_3 * 0x24`), then `memcmp` on the tag's name string against table entry `+0x181b`. Returns `1` on first match, `0` otherwise; on walk failure logs via `possible_logging_function__var_args(2,0x3c,0x37c,...)`. Tag-matching sibling/variant of Pass 12bj `parse_tlv_tag3_ushort_tag5_uint32_tag11_block_from_stream` (same loop skeleton, but name-table match instead of field extraction).
+
+**Confidence:** HIGH — unambiguous memcmp tag-name match idiom; decompiled in Pass 8, rename closes long-standing `FUN_*` gap; structural sibling of Pass 12bj pins LMP extended-feature-page TLV receive path.
+
+Region unnamed count after this pass: **118** (119 minus this rename). Live named **1217**.
+
+**Next:** Pass 12bl — cold-triage rank-1 SIMPLE-tier unnamed (`FUN_80074940` LMP feature dispatcher rename, or `0x800791xx` TLV/codec cluster continuation).
 
 ## Pass 12bh (2026-06-29) — codec serialize tail hook `FUN_80079634`
 
