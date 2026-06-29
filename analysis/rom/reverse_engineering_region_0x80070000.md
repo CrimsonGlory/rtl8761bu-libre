@@ -1425,3 +1425,17 @@ Region unnamed count after this pass: **164** (165 minus this rename).
 
 **Next:** Pass 12p — cold-triage rank-1 unnamed from remaining 164.
 
+## Pass 12p (2026-06-29) — pool descriptor stack pop `FUN_80075b88`
+
+Decompiled and renamed:
+**`FUN_80075b88` → `pop_indexed_entry_from_pool_descriptor_stack`**
+(36B, HIGH) via `RenamePass12pRegion80070000Fun80075b88.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Validates non-null descriptor at `param_1` and out-pointer `param_2`, requires index at `+4 >= 0`. Pops: `*param_2 = data_array[index]` where `data_array` is at `+8`, then decrements index at `+4`. Returns `0` on success, `0xffffffff` on guard failure. Sole caller: `func4_that_uses_structs_at_0x80100000` (`0x80075650`) — pool-slot "close" op that pops an entry then decrements refcount byte at `+0x15` on the parent slot descriptor (func1–func8 `0x80100000` resource-pool family).
+
+**Confidence:** HIGH — unambiguous indexed-stack pop idiom; caller context from already-named `func4_that_uses_structs_at_0x80100000` pins role as pool close-path entry fetch.
+
+Region unnamed count after this pass: **163** (164 minus this rename).
+
+**Next:** Pass 12q — cold-triage rank-1 unnamed from remaining 163 (sibling `FUN_80075b50`/`FUN_80075c00` in same pool family).
+

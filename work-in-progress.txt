@@ -5295,8 +5295,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12o
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12p: cold-triage rank-1 unnamed
-          (164 remain after Pass 12o LMP-0x25B enqueue sibling).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12p: FUN_80075b88 (2026-06-29)
+          renamed→`pop_indexed_entry_from_pool_descriptor_stack` (36B, HIGH).
+          Indexed stack pop from pool descriptor (+4 index / +8 data array);
+          sole caller `func4_that_uses_structs_at_0x80100000` (func1–func8
+          resource-pool family). via RenamePass12pRegion80070000Fun80075b88.java
+          (renamed=1, live-verified). 163 unnamed remain; live named 1171.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12p
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12q: cold-triage rank-1 unnamed
+          (163 remain; pool-family siblings FUN_80075b50 / FUN_80075c00).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
