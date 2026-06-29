@@ -6269,9 +6269,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ei;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ej: decompile+rename
-          `FUN_80065f0c` (PSM/QoS eligibility finalize helper called by all
-          `run_psm_qos_state_*` sub-dispatchers).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ej (2026-06-29): decompiled+
+          renamed `FUN_80065f0c`→`finalize_psm_qos_eligibility_bitpair_expand_or_fail_channel`
+          (624B, HIGH, COMPLEX-tier). Shared PSM/QoS eligibility finalize tail:
+          optional hook, two-phase bit-pair expansion via index tables +
+          `FUN_80042934` random walk, per-channel retry/failure reset (`0xdd`);
+          callers all three `run_psm_qos_state_*` sub-dispatchers. via
+          RenamePass12ejRegion80070000Fun80065f0c.java (renamed=1, live-verified).
+          Region 57 unnamed remain; live named 1293.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ej;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ek: decompile+rename
+          `FUN_80065d94` (PSM/QoS state-0x16 sub-state callee when retry
+          counter `== 1`, sibling of `FUN_800640c4`/`FUN_800658f0`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

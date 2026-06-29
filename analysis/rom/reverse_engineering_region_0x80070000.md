@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12ej — decompile+rename `FUN_80065f0c` (PSM/QoS eligibility finalize helper called by all `run_psm_qos_state_*` sub-dispatchers).
+**Next:** Pass 12ek — decompile+rename `FUN_80065d94` (PSM/QoS state-0x16 sub-state callee when retry counter `== 1`).
+
+## Pass 12ej (2026-06-29) — PSM/QoS eligibility finalize helper `FUN_80065f0c`
+
+Decompiled and renamed:
+**`FUN_80065f0c` → `finalize_psm_qos_eligibility_bitpair_expand_or_fail_channel`**
+(624B, HIGH, COMPLEX-tier) via `RenamePass12ejRegion80070000Fun80065f0c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Shared tail called by all three `run_psm_qos_state_*` sub-dispatchers (`0x16`, `0x16` alternate, `0x0a`). Optional hook at `PTR_DAT_8006617c` (early exit on non-zero). If starting eligibility count `>0x13`, clears per-channel byte at `PTR_DAT_80066180[param_4]` and returns. Two-phase outer loop (`bVar15` 0→1): drains paired retry counters (`PTR_DAT_80066184`/`8006618c`), indexes channel slots via `PTR_DAT_80066188`/`80066190`, uses `FUN_80042934()` for pseudo-random start then sequential wrap (`+1`, mod 10), sets adjacent bit pairs in output buffer `param_3` (special case index `0x4e` sets single bit only). When counters exhaust, resets index tables to `0xff` for 10 entries. Inner two-round retry (`bVar15` 0→1): `FUN_80042934(0x27)` seeds walk of `PTR_DAT_80066198` occupancy table, marks slots and sets bit pairs until count `>0x13` or rounds complete. Increments per-channel retry `PTR_DAT_80066180[param_4]`; failure path when `param_2!=0` and (retry `>4` or global flag `PTR_DAT_80066194` set with count `<0x0f`): sets channel status `0xdd` at `PTR_DAT_8006619c` and clears related per-channel globals. Returns final eligibility count.
+
+**Confidence:** HIGH — full decompilation; 6 call sites from all three documented PSM/QoS sub-dispatchers; central finalize helper for the Pass 12eg–12ei cluster.
+
+Live named **1293** (global; in-region unnamed **57**).
 
 ## Pass 12ei (2026-06-29) — PSM/QoS state-0x16 alternate eligibility sub-dispatch `FUN_800666a0`
 
