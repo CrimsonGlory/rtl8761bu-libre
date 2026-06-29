@@ -5384,8 +5384,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12y
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12z: cold-triage rank-1 unnamed
-          from remaining 154.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12z (2026-06-29): decompiled+
+          renamed `FUN_800769b8`→`crypto_bignum_left_shift_words_into_dest`
+          (102B, HIGH). Left-shift u32 array into dest; rank-1 SIMPLE-tier (5 xrefs).
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12z;
+          rom_function_index.md; live named count 1181.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aa: cold-triage rank-1 unnamed
+          from remaining 153.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).

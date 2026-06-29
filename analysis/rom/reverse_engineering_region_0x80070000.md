@@ -1487,8 +1487,6 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **157** (158 minus this rename).
 
-**Next:** Pass 12z — cold-triage rank-1 unnamed from remaining 154.
-
 ## Pass 12y (2026-06-29) — VSC 0xFC95 triad mode setter `FUN_80073b08`
 
 Decompiled and renamed:
@@ -1500,6 +1498,20 @@ Decompiled and renamed:
 **Confidence:** HIGH — unambiguous IRQ-safe triad idiom with all four callees already named; `param_2` passed through to LMP-268 as delay/timeout (seen at `0x800798b0` escalation path).
 
 Region unnamed count after this pass: **154** (155 minus this rename).
+
+**Next:** Pass 12aa — cold-triage rank-1 unnamed from remaining 153.
+
+## Pass 12z (2026-06-29) — bignum left-shift word merge `FUN_800769b8`
+
+Decompiled and renamed:
+**`FUN_800769b8` → `crypto_bignum_left_shift_words_into_dest`**
+(102B, HIGH) via `RenamePass12zRegion80070000Fun800769b8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Left-shifts a `uint32` source array (`param_1`, length implied by trailing-zero scan from MSB) by `param_3` bits into destination array `param_4`, propagating carry across word boundaries (`dest[i] |= src[i] << shift`; `dest[i+1] = src[i] >> (32-shift)`). Cold-triage rank-1 SIMPLE-tier candidate (102B, **5 xref-in** — tied highest remaining in tier at Pass 11 re-run). Callers in region `0x8002xxxx` (`FUN_8002dffc`, `FUN_8002e55c`) — same SSP/ECDH bignum cluster as Pass 12t's `compare_uint32_arrays_lexicographic_msb_to_lsb` and Pass 12u's `crypto_bignum_sub_u32_arrays_with_borrow`.
+
+**Confidence:** HIGH — unambiguous multi-word left-shift idiom; crypto-cluster caller context pins domain.
+
+Region unnamed count after this pass: **153** (154 minus this rename).
 
 ## Pass 12x (2026-06-29) — eSCO packet-type pair lookup `FUN_800718d0`
 
