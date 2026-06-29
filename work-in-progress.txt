@@ -5938,8 +5938,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cv: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (94 in-region remain).
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cw: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (93 in-region remain).
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
+          (54B, HIGH, SIMPLE-tier). When global mode is `-1`, VSC 0xFC95 + LMP 0x268
+          with timer 0x2710, tail `FUN_80079934`; callers HCI reset + patch installer.
+          Region 93 unnamed remain; live named 1253.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cv;
+          rom_function_index.md; analysis/INDEX.md
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12ct (2026-06-29): decompiled+
           renamed rank-1 `FUN_8007159c`→`commit_pending_role_switch_emit_hci_or_lmp_slot_offset`

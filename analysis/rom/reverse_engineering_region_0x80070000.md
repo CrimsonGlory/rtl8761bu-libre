@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cv — cold-triage rank-1 SIMPLE-tier unnamed continuation (94 in-region remain).
+**Next:** Pass 12cw — cold-triage rank-1 SIMPLE-tier unnamed continuation (93 in-region remain).
+
+## Pass 12cv (2026-06-29) — HCI reset VSC FC95 init gateway `FUN_80078ca8`
+
+Decompiled and renamed:
+**`FUN_80078ca8` → `hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`**
+(54B, HIGH, SIMPLE-tier) via `RenamePass12cvRegion80070000Fun80078ca8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When global mode dword at `PTR_DAT_80078ce0` equals `-1` (uninitialized sentinel): calls `VSC_0xfc95_called2(1, …)` and on success invokes `LMP__268__most_common_for_VSCs2_checks_fptr_patch(mode, 0x2710)` (timer constant 10000 — sibling of `LMP__264__FUN_80071b50` defaults). Always tail-calls `FUN_80079934` (176B HANDLER-tier continuation). Cold-triage rank-1 SIMPLE-tier candidate (54B, **2 xref-in** — tied highest in tier at Pass 11 re-run). Callers `fHCI_Reset_0x03_full_subsystem_teardown` and patch installer `calls_to_0x8010a001_as_fptr_to_install_patches` — HCI-reset VSC 0xFC95 cluster sibling of Passes 12co–12cr.
+
+**Confidence:** HIGH — unambiguous `-1` sentinel gate + established VSC 0xFC95 / LMP 0x268 triad idiom; caller chain pins HCI-reset init sub-step role.
+
+Region unnamed count after this pass: **93** (94 minus this rename). Live named **1253**.
 
 ## Pass 12cu (2026-06-29) — link-loss teardown dispatch `FUN_800737f0`
 
