@@ -1355,5 +1355,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **169** (170 minus this rename).
 
-**Next:** Pass 12j cont — remaining `FUN_80076f*` siblings (`FUN_80076dc8`, `FUN_80076e58`).
+**Next:** Pass 12j cont — remaining `FUN_80076f*` siblings (`FUN_80076e58`).
+
+## Pass 12k (2026-06-29) — BB slot timing drift counter `FUN_80076dc8`
+
+Decompiled and renamed:
+**`FUN_80076dc8` → `accumulate_bb_slot_timing_drift_counters_or_set_mode`**
+(138B, HIGH) via `RenamePass12kRegion80070000Fun80076dc8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** When BB slot status byte `+0x28` low 3 bits are clear (idle mode), compares ushort fields `+0x14` (current) vs `+0x10` (reference) with wrap threshold `+0x1a`. If current lags reference inside the threshold window, increments early-drift byte `+0x26`; otherwise increments late-drift byte `+0x27`. When either counter exceeds threshold byte `+0x25`, sets mode bit 2 (`+0x26` path) or mode bit 1 (`+0x27` path) in `+0x28` and zeroes both counters — complementing Pass 12i's clear-on-match path in `commit_bb_slot_timing_flags_sync_and_tail_hook`. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`).
+
+**Confidence:** HIGH — unambiguous dual-counter threshold idiom chained to the already-named BB link-timing cluster (Passes 12g–12j); sole caller pins role as drift accumulator between compute and classify stages.
+
+Region unnamed count after this pass: **168** (169 minus this rename).
+
+**Next:** Pass 12j cont — remaining `FUN_80076f*` sibling (`FUN_80076e58`).
 
