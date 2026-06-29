@@ -1515,6 +1515,20 @@ Region unnamed count after this pass: **142** (143 minus this rename). Live name
 
 **Next:** Pass 12aq — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x80077988`).
 
+## Pass 12aq (2026-06-29) — int16 window mean scaler `FUN_80077988`
+
+Decompiled and renamed:
+**`FUN_80077988` → `mean_int16_window_divide_and_shift7`**
+(32B, HIGH) via `RenamePass12aqRegion80070000Fun80077988.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sums `int16` samples from `param_1` over window `[param_2 - param_3, param_2)`, divides by `param_3` (mean), returns `sum / count >> 7` (fixed-point scale-down). Shared helper in quantizer/PSM-or-QoS cluster alongside Pass 12ap's `moving_average_fir_smooth_int16_4tap` and Pass 12am/12ao quicksort pair; callers `FUN_80077bcc`, `PSM_or_QoS_packet_slot_optimizer` (`0x8007814c`), and patch `FUN_8010e350`.
+
+**Confidence:** HIGH — unambiguous sum/divide/shift idiom; caller cluster pins quantizer/threshold-search role.
+
+Region unnamed count after this pass: **137** (138 minus this rename). Live named **1198**.
+
+**Next:** Pass 12ar — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation, e.g. `0x80077928`).
+
 ## Pass 12ap (2026-06-29) — 4-tap FIR smoother `FUN_800779d0`
 
 Renamed (decompile from Pass 8 cross-confirm attempt; symbol still `FUN_*` until now):

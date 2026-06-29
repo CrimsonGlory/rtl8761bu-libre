@@ -5492,8 +5492,15 @@ sweep beyond enumeration and is the most out-of-date):
           remain; live named 1197. → analysis/rom/reverse_engineering_region_0x80070000.md
           Pass 12ap; rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aq: cold-triage rank-1 SIMPLE-tier
-          unnamed (quantizer/sort cluster continuation, e.g. `0x80077988`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12aq (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80077988`→`mean_int16_window_divide_and_shift7`
+          (32B, HIGH, SIMPLE-tier). Sums int16 window, divides by count, returns
+          mean>>7; quantizer cluster helper. Region 137 unnamed remain; live named 1198.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12aq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ar: cold-triage rank-1 SIMPLE-tier
+          unnamed (quantizer/sort cluster continuation, e.g. `0x80077928`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
           (remaining FUN_80076f* cluster sibling).
