@@ -5949,3 +5949,24 @@ Region unnamed count after this pass: **10** (11 minus this rename).
 
 **Next:** Pass 54at — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54at (2026-06-29) — cold-triage rank-1 rename (post-54as re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54as: **366 total**, **357 named**,
+**9 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005e174` → `commit_12byte_esco_crypto_band_regs_or_reject`**
+(190B, HIGH) via `RenamePass54atFun8005e174.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Logs current state via
+`possible_logging_function__var_args`. If pending-procedure bit 0 at `+0x4` is clear, rejects via
+`report_procedure_outcome_and_update_param_type_bitmask(rec, 4, 0x1a, 1)`. Otherwise copies
+8 bytes from `param_1+1` → `+0xce` and 4 bytes from `param_1+9` → `+0xda`, sets `+0x4` bit `0x80`,
+runs `hw_crypto_compute_8word_in_8word_out` on `+0xb6`/`+0xc6`/`+0xde`, sets substate `+0xee=1`,
+then calls `write_sco_esco_link_band_regs_with_retry(1, idx, +0xd6, +0xde)`.
+
+**Confidence:** HIGH — four already-named callees with unambiguous roles; eSCO crypto+band-reg
+commit family distinct from the 8-byte-only siblings at `0x8005e648`/`0x8005d078`.
+
+Region unnamed count after this pass: **9** (10 minus this rename).
+
+**Next:** Pass 54au — continue xrefs=0 tier (re-run cold-triage for next rank).
+
