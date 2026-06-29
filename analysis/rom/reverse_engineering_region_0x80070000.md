@@ -2019,6 +2019,20 @@ Region unnamed count unchanged (**107** — function lives in region `0x80030000
 
 **Next:** Pass 12cg — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain callee `FUN_800363a0` or `FUN_800333fc`).
 
+## Pass 12cg (2026-06-29) — setup-chain step 4 `FUN_800333fc` (cross-region `0x80030000`)
+
+Decompiled and renamed:
+**`FUN_800333fc` → `narrow_packet_type_bitmask_by_lmp_47e_hook_thresholds`**
+(156B, HIGH, SIMPLE-tier) via `RenamePass12cgCrossRegionFun800333fc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Fourth (final) step in the four-function setup chain inside `recompute_and_store_field_0x250_packet_type_on_conn_slot` (Pass 12cd). Loads global max-slot threshold bytes from `PTR_DAT_80033498`/`PTR_DAT_8003349c`, then calls `calls_fptr_down_LMP__47E_path` (same LMP 0x47E hook used by Pass 12ca selector). When the hook returns non-zero and the resolved max-slot byte is `0`, forces it to `1`; when resolved slot is `0xff`, substitutes conn-slot index `param_1`. If hook active and `byte_0xCC` matches between `param_1` and resolved slot, scales both thresholds by `max_slot*2 + global`. When hook status is below the (possibly scaled) high threshold, masks `*param_2 &= 0xfff`; when also below the low threshold, further masks `&= 0xff`. Follows Pass 12ce max-slot field narrow and precedes the `field_0x206`/`PTR_DAT_800364c4` commit in Pass 12cd.
+
+**Confidence:** HIGH — unambiguous `calls_fptr_down_LMP__47E_path` + dual-threshold bitmask narrow idiom; documented caller chain from Pass 12cd pins setup-chain step-4 role.
+
+Region unnamed count unchanged (**107** — function lives in region `0x80030000`). Live named **1238**.
+
+**Next:** Pass 12ch — cold-triage rank-1 SIMPLE-tier unnamed (setup-chain step 3 `FUN_800363a0`).
+
 ## Pass 12bw (2026-06-29) — LMP preferred-rate gate `FUN_80071ee0`
 
 Decompiled and renamed:

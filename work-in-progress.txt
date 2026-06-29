@@ -5825,8 +5825,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cf;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cg: cold-triage rank-1 SIMPLE-tier
-          unnamed (setup-chain callee FUN_800363a0 or FUN_800333fc).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cg (2026-06-29): decompiled+
+          renamed cross-region `FUN_800333fc`→`narrow_packet_type_bitmask_by_lmp_47e_hook_thresholds`
+          (156B, HIGH, SIMPLE-tier). Setup-chain step 4 in Pass 12cd packet-type commit:
+          LMP 0x47E hook dual-threshold narrow (`& 0xfff` / `& 0xff`). Region 0x80070000
+          unnamed unchanged (107); live named 1238.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ch: cold-triage rank-1 SIMPLE-tier
+          unnamed (setup-chain step 3 FUN_800363a0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
