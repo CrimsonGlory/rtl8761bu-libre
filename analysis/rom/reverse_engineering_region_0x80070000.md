@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dj — cold-triage rank-1 SIMPLE-tier unnamed continuation (80 in-region remain).
+**Next:** Pass 12dk — cold-triage rank-1 SIMPLE-tier unnamed continuation (79 in-region remain).
+
+## Pass 12dj (2026-06-29) — AFH LAP channel-map clear by offset group `FUN_80071a1c`
+
+Decompiled and renamed:
+**`FUN_80071a1c` → `clear_afh_lap_channel_map_for_matching_offset_group`**
+(94B, HIGH, SIMPLE-tier) via `RenamePass12djRegion80070000Fun80071a1c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80071a7c` — if installed and returns non-zero, skip default path. Loops 6 LAP table entries on `PTR_struct_of_at_least_0x300_size_80071a80`; when `_x142_LAP[uVar4+0x4f]` matches the selector ushort, clears channel-map bytes at offsets `+0x49/+0x4f/+0x55/+0x5b/+0x61/+0x67` to `0xff` and zeroes the dword pair at `+0x6e`. Cold-triage rank-1 SIMPLE-tier candidate (94B, **3 xref-in** — highest in tier at fresh Pass 11 re-run). Offset-key sibling of Pass 12v's `clear_afh_lap_channel_map_for_matching_group` (matches `+0x49` instead); callers `conn_class_mode_apply_and_log` + `conn_class_mode_apply_and_log_variant2` invoke on success path with `slot+0x10`, and `FUN_80041dac` in region `0x80040000`.
+
+**Confidence:** HIGH — unambiguous hook-or-default + 6-entry LAP clear idiom; structural twin of Pass 12v with different match offset; conn class-mode apply caller chain pins AFH/LAP domain.
+
+Region unnamed count after this pass: **79** (80 minus this rename). Live named **1267**.
 
 ## Pass 12di (2026-06-29) — resource pool 11-slot 12-byte table init `FUN_80075c68`
 

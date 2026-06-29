@@ -6044,8 +6044,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12di;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dj: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (80 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dj (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80071a1c`→`clear_afh_lap_channel_map_for_matching_offset_group`
+          (94B, HIGH, SIMPLE-tier). AFH LAP channel-map clear when `_x142_LAP[+0x4f]`
+          matches selector; offset-key sibling of Pass 12v; callers conn class-mode
+          apply paths + `FUN_80041dac`. Region 79 unnamed remain; live named 1267.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dk: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (79 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
