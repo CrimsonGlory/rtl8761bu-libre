@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fg — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fh — cold-triage rank-1 SIMPLE-tier continuation (3 remain: `FUN_80078de0`, `FUN_80076d90`, `FUN_80074244`).
+
+## Pass 12fg (2026-06-29) — BOS-slot LMP 0x2e broadcast sweep `FUN_800723cc`
+
+Decompiled and renamed:
+**`FUN_800723cc` → `sweep_bos_slots_and_send_lmp_max_slot_req_0x2e`**
+(52B, HIGH, SIMPLE-tier) via `RenamePass12fgRegion80070000Fun800723cc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loops 10 `big_ol_struct` entries (`uVar2` 0..9). When `_xb2_byte_minus_4_used_as_status_array_index != 0` for slot `uVar2`, calls `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state(uVar2, 0xff)` — auto-select max-slot payload per Pass 12bz sender. Cold-triage rank-1 SIMPLE-tier candidate (52B, **1 xref-in** — sole remaining xrefs≥1 in tier at Pass 12fg re-run). Broadcast sibling of Pass 12bz per-conn sender and Pass 12cb `LMP_unknown_else` sweep for opcode `0x2d`; completes the `0x800723xx` max-slot negotiation cluster's request side.
+
+**Confidence:** HIGH — unambiguous 10-slot sweep + callee to already-named LMP 0x2e sender; cluster context pins packet-type negotiation domain.
+
+Live named **1316** (global; in-region unnamed **35**; SIMPLE-tier unnamed **3**).
 
 ## Pass 12ff (2026-06-29) — 20-slot resource pool init `FUN_80073888`
 
