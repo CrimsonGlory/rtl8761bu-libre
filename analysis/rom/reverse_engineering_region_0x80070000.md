@@ -1611,7 +1611,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **121** (122 minus this rename). Live named **1214**.
 
-**Next:** Pass 12bi — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. slow-path hook `FUN_80079438`).
+**Next:** Pass 12bj — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation or TLV sibling `FUN_800747b0`).
+
+## Pass 12bi (2026-06-29) — codec parse slow-path hook slot `PTR_DAT_80079438`
+
+**Not a ROM function** — `DumpPtr80079438.java` confirms `FN_AT_SLOT=null` at `0x80079438` (4-byte gap before `send_evt_INVALID_opcode_0xFF` at `0x8007943c`).
+
+**Mechanism:** ROM patchable function-pointer slot `PTR_DAT_80079438`. When `parse_codec_page_bitfields_into_0x2c_descriptor` sees alternate type bits in page header byte `[0xf]` (`(byte & 0xe0) != 0`), it delegates descriptor fill to `(*(code *)PTR_DAT_80079438)(param_2+4, param_1[0xf])` instead of the inline nibble-packed fast path. Hook returns non-zero on success; zero triggers failure log (`possible_logging_function__var_args(2,0x8e,0x217,...)`). Default slot value in this GZF snapshot: **`0x80120b38`** (patch/RAM — no ROM function at target; vendor patch installs handler at runtime). Serialize-path analogue: `Ram80079610` (Pass 12ac).
+
+**Confidence:** HIGH — call site in decompiled parser is unambiguous; slot-vs-code distinction verified headless.
+
+Region unnamed count unchanged: **120**. Live named **1215** (documentation-only pass).
+
+**Next:** Pass 12bj — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation or TLV sibling `FUN_800747b0`).
 
 ## Pass 12bh (2026-06-29) — codec serialize tail hook `FUN_80079634`
 

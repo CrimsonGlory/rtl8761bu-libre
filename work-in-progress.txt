@@ -5626,8 +5626,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bi: cold-triage rank-1 SIMPLE-tier
-          unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. slow-path hook `FUN_80079438`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bi (2026-06-29): documented
+          `PTR_DAT_80079438` codec-page parse slow-path hook slot (NOT a function —
+          `FN_AT_SLOT=null`; default value `0x80120b38` RAM/patch target). Alternate
+          type-byte path in `parse_codec_page_bitfields_into_0x2c_descriptor`. Region
+          120 unnamed unchanged; live named 1215.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bi;
+          rom_function_index.md; analysis/INDEX.md; scripts/DumpPtr80079438.java
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bj: cold-triage rank-1 SIMPLE-tier
+          unnamed (`0x800791xx` TLV/codec cluster continuation or TLV sibling `FUN_800747b0`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
