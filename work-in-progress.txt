@@ -6010,8 +6010,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12de;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12df: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (84 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12df (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800752d0`→`bump_alloc_aligned_from_resource_pool_heap`
+          (72B, HIGH, SIMPLE-tier). Bump-heap alloc with 4-byte align + 0xc5d cap;
+          callee of Pass 12de scaled pool allocator. Region 83 unnamed remain;
+          live named 1263.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12df;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dg: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (83 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12df — cold-triage rank-1 SIMPLE-tier unnamed continuation (84 in-region remain).
+**Next:** Pass 12dg — cold-triage rank-1 SIMPLE-tier unnamed continuation (83 in-region remain).
+
+## Pass 12df (2026-06-29) — resource pool bump heap allocator `FUN_800752d0`
+
+Decompiled and renamed:
+**`FUN_800752d0` → `bump_alloc_aligned_from_resource_pool_heap`**
+(72B, HIGH, SIMPLE-tier) via `RenamePass12dfRegion80070000Fun800752d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns null when `param_1==0`. Reads bump offset ushort from `PTR_DAT_80075318`, rounds up to 4-byte alignment (`(offset+3)&0xfffc`), and when `aligned+param_1 < 0xc5d` returns pointer at `PTR_PTR_8007531c + aligned` while advancing the bump. On overflow logs via `possible_logging_function__var_args(2,0x3e,0x100,0x746,...)` and returns null. Sole callee from Pass 12de's `allocate_resource_pool_slot_with_scaled_buffer` (`param_1 << 4` request) — fixed-pool heap backing the `0x80100000` resource-pool / ISR-timer registration family (Passes 12cl–12de).
+
+**Confidence:** HIGH — unambiguous bump-heap align+guard idiom; direct caller chain from Pass 12de scaled allocator pins domain.
+
+Region unnamed count after this pass: **83** (84 minus this rename). Live named **1263**.
 
 ## Pass 12de (2026-06-29) — resource pool buffer allocator `FUN_80075a64`
 
@@ -2107,7 +2119,7 @@ Decompiled and renamed:
 **`FUN_80075a64` → `allocate_resource_pool_slot_with_scaled_buffer`**
 (126B, HIGH, SIMPLE-tier) via `RenamePass12deRegion80070000Fun80075a64.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Validates scale param in `1..100` and preferred type index `< 0xb`. When the 20-byte entry at `PTR_PTR_80075ae4 + type*0x14` has status word at `+0x10 == -1` (free), or after scanning types `0..0xa` for first free slot, stores scale at `[+0xc]`, allocates `param_1 << 4` bytes via `FUN_800752d0`, stores pointer at `[0]`, clears `[+4]`, increments live-count at `+0xdc`, returns type index. On alloc failure returns `0xffffffff`. Direct callee of Pass 12dd's `register_typed_resource_slot_if_index_free` — backing allocator for the `interesting_string_user_fptr_registration_function` / `0x80100000` resource-pool family (siblings Pass 12p–12s `pop_indexed_entry_from_pool_descriptor_stack`, `clear_pool_slot_descriptor_field8_if_set_or_invalid`, etc.).
+**Mechanism:** Validates scale param in `1..100` and preferred type index `< 0xb`. When the 20-byte entry at `PTR_PTR_80075ae4 + type*0x14` has status word at `+0x10 == -1` (free), or after scanning types `0..0xa` for first free slot, stores scale at `[+0xc]`, allocates `param_1 << 4` bytes via `bump_alloc_aligned_from_resource_pool_heap`, stores pointer at `[0]`, clears `[+4]`, increments live-count at `+0xdc`, returns type index. On alloc failure returns `0xffffffff`. Direct callee of Pass 12dd's `register_typed_resource_slot_if_index_free` — backing allocator for the `interesting_string_user_fptr_registration_function` / `0x80100000` resource-pool family (siblings Pass 12p–12s `pop_indexed_entry_from_pool_descriptor_stack`, `clear_pool_slot_descriptor_field8_if_set_or_invalid`, etc.).
 
 **Confidence:** HIGH — unambiguous bounds-checked pool-slot scan + scaled heap alloc idiom; established caller/callee chain with Pass 12dd registrar pins domain.
 
