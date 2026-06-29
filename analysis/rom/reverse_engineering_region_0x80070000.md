@@ -1343,5 +1343,17 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **170** (171 minus this rename).
 
-**Next:** Pass 12i cont — remaining `FUN_80076f*` siblings (`FUN_80076ce4`, `FUN_80076dc8`, `FUN_80076e58`).
+## Pass 12j (2026-06-29) — BB slot link timing offset compute `FUN_80076ce4`
+
+Decompiled and renamed:
+**`FUN_80076ce4` → `compute_bb_slot_link_timing_offsets_from_status_bits`**
+(158B, HIGH) via `RenamePass12jRegion80070000Fun80076ce4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional prelude hook via `PTR_DAT_80076d84`. Merges high nibble from `DAT_80076d88` into link-status dword at `PTR_DAT_80076d8c+4`. Reads low status nibbles into out-params `*param_3`/`*param_4`. Seeds four link-timing ushort fields on the BB slot struct using `0x271` (625 µs) step multiples and `0x270` (624) base offsets — same timing quantum as the Pass 12h classifier. Sole caller: `FUN_8007718c` (`eSCO_SCO_connection_slave_establishment_orchestrator`), early in the BB link-timing cluster before the wrap-guard/classify/commit chain (Passes 12g–12i).
+
+**Confidence:** HIGH — unambiguous 625 µs-step field init idiom; sole caller pins role as first compute stage in the `FUN_80076f*` sibling cluster.
+
+Region unnamed count after this pass: **169** (170 minus this rename).
+
+**Next:** Pass 12j cont — remaining `FUN_80076f*` siblings (`FUN_80076dc8`, `FUN_80076e58`).
 
