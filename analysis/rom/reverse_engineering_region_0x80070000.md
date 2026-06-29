@@ -2115,6 +2115,20 @@ Region unnamed count after this pass: **77** (78 minus this rename). Live named 
 
 **Next:** Pass 12dm — cold-triage rank-1 SIMPLE-tier unnamed continuation (76 in-region remain).
 
+## Pass 12dp (2026-06-29) — BB reg 0x1a6/0xf4 enable-disable writer `FUN_80078850`
+
+Decompiled and renamed:
+**`FUN_80078850` → `program_bb_regs_0x1a6_0xf4_enable_disable_via_patch_hook`**
+(130B, HIGH, SIMPLE-tier) via `RenamePass12dpRegion80070000Fun80078850.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Indirect BB-register writer via patch-hook fptr at `PTR_DAT_800788d4`. When `param_1==0` (disable path): writes BB reg `0x1a6=0` and `0xf4=0`. When `param_1!=0` (enable path): reads `config_base+0xe8/e9` as ushort for reg `0x1a6`, then writes `0x1b2=0xff`, `0xfa=0x32`, `0xf4=1`, `0x1aa=3`; when flag at `PTR_DAT_800788dc+0x10b==0`, logs via `possible_logging_function__var_args(1,0x7d,0xb7,0x992,0,…)`. Cold-triage rank-1 SIMPLE-tier candidate (130B, **1 xref-in** / **2 xref-out** per Pass 11 re-run). BB-register programming sibling of Pass 12cs `program_baseband_regs_0x23e_0x254_0x25e_via_patch_hook`, Pass 12cp `hci_reset_program_baseband_regs_via_patch_hook`, and Pass 12cy `write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook` in the `0x800788xx` HCI-reset cluster.
+
+**Confidence:** HIGH — unambiguous enable/disable branch on patch-hook BB-reg write idiom; register IDs and config_base ushort source match established HCI-reset BB-init patterns.
+
+Region unnamed count after this pass: **73** (74 minus this rename). Live named **1273**.
+
+**Next:** Pass 12dq — cold-triage rank-1 SIMPLE-tier unnamed continuation (73 in-region remain).
+
 ## Pass 12do (2026-06-29) — AFH quantizer history IIR blend `FUN_800786dc`
 
 Decompiled and renamed:
@@ -2126,8 +2140,6 @@ Decompiled and renamed:
 **Confidence:** HIGH — unambiguous optional-hook + first-sample memcpy vs IIR blend loop idiom; 0xa0/0x50 sizing matches established quantizer context layout; caller pins AFH channel-map domain.
 
 Region unnamed count after this pass: **74** (75 minus this rename). Live named **1272**.
-
-**Next:** Pass 12dp — cold-triage rank-1 SIMPLE-tier unnamed continuation (74 in-region remain).
 
 ## Pass 12dn (2026-06-29) — indexed 28-byte table type/key/range matcher `FUN_800743b4`
 

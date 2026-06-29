@@ -6092,8 +6092,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12do;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dp: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (74 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dp (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078850`→`program_bb_regs_0x1a6_0xf4_enable_disable_via_patch_hook`
+          (130B, HIGH, SIMPLE-tier). Patch-hook BB-reg enable/disable: `param_1==0` writes
+          `0x1a6/0xf4=0`, else config ushort at `+0xe8/e9` + `0x1b2/0xfa/0xf4/0x1aa` cluster;
+          HCI-reset BB-init sibling of Passes 12cp/12cs/12cy. Region 73 unnamed remain;
+          live named 1273.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dq: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (73 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
