@@ -1529,6 +1529,20 @@ Region unnamed count after this pass: **136** (137 minus this rename). Live name
 
 **Next:** Pass 12aw — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
+## Pass 12aw (2026-06-29) — VSC FCA1 BB reg 0x18 writer `FUN_800778d4`
+
+Decompiled and renamed:
+**`FUN_800778d4` → `write_bb_reg_0x18_when_status_mask_matches`**
+(70B, HIGH) via `RenamePass12awRegion80070000Fun800778d4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Reads BB status via `VSC_0xfca1_FUN_80077474(0x18)`. When `(status & DAT_8007791c) != 0`, commits `param_1 | exception_handler_ptr` to register offset `0x18` through `poll_bb_reg_ready_write_offset_value_poll_complete` (poll mode `0xf`). Returns `1` on skip-when-mask-clear or successful mailbox write; on poll failure logs via `possible_logging_function__var_args` and returns `0`. VSC 0xFCA1 / BB-init cluster sibling of Passes 12b (`poll_bb_reg_ready_write_offset_value_poll_complete`), 12w (`decode_vsc_fca1_bitfield_and_log_bb_status_flags`), and 12av (`log_vsc_fca1_decoded_bb_status_bit`).
+
+**Confidence:** HIGH — unambiguous mask-gate + mailbox-write idiom; callee chain pins VSC FCA1 HW-init role.
+
+Region unnamed count after this pass: **131** (132 minus this rename). Live named **1204**.
+
+**Next:** Pass 12ax — cold-triage rank-1 SIMPLE-tier unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
+
 ## Pass 12av (2026-06-29) — VSC FCA1 log thunk `FUN_800778aa`
 
 Decompiled and renamed:

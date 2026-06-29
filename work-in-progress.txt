@@ -5530,8 +5530,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12av;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aw: cold-triage rank-1 SIMPLE-tier
-          unnamed (quantizer/sort cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12aw (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800778d4`→`write_bb_reg_0x18_when_status_mask_matches`
+          (70B, HIGH, SIMPLE-tier). Mask-gated VSC FCA1 BB reg 0x18 mailbox writer;
+          VSC 0xFCA1 / BB-init cluster sibling of Passes 12b/12w/12av. Region 131
+          unnamed remain; live named 1204.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12aw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ax: cold-triage rank-1 SIMPLE-tier
+          unnamed (VSC FCA1 / crypto-bignum cluster continuation, e.g. `0x80076b7c`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
