@@ -5724,8 +5724,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bt;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bu: cold-triage rank-1 SIMPLE-tier
-          unnamed (feature-page fptr cluster continuation).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bu (2026-06-29): decompiled+
+          renamed `unknown_fptr_index1`→`invoke_crypto_state_machine_if_tag_200`
+          (22B, HIGH, SIMPLE-tier). Tag-200 fptr dispatch: when `param_1[4]==200`,
+          forwards conn index to `crypto_state_machine_loop_handler`. Region 114
+          unnamed unchanged; live named 1226.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bv: cold-triage rank-1 SIMPLE-tier
+          unnamed (crypto/SSP fptr cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

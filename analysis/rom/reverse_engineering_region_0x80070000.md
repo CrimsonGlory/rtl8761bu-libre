@@ -1891,7 +1891,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1225** (entry updated).
 
-**Next:** Pass 12bu — cold-triage rank-1 SIMPLE-tier unnamed (feature-page fptr cluster continuation).
+**Next:** Pass 12bv — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
+
+## Pass 12bu (2026-06-29) — crypto fptr dispatcher `unknown_fptr_index1`
+
+Decompiled and renamed:
+**`unknown_fptr_index1` → `invoke_crypto_state_machine_if_tag_200`**
+(22B, HIGH) via `RenamePass12buRegion80070000Fun8007666c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin fptr-dispatch entry in the `0x800766xx` crypto/SSP cluster: when `param_1[4]==200` (`0xC8`), forwards `*param_1` (conn/slot index) to `crypto_state_machine_loop_handler` (`0x800762f4`, 852B do-while state machine from Pass 3b). Otherwise no-op. Sibling of the `0x80074dxx` feature-page fptr cluster closed by Passes 12bq–12bt.
+
+**Confidence:** HIGH — unambiguous tag-gated forward idiom; callee already HIGH from batch pass 3b pins SSP/crypto state-machine role.
+
+Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1226** (entry updated).
+
+**Next:** Pass 12bv — cold-triage rank-1 SIMPLE-tier unnamed (crypto/SSP fptr cluster continuation).
 
 ## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
 
