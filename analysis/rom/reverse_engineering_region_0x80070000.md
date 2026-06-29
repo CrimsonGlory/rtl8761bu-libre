@@ -390,7 +390,7 @@ All 54 user-defined addresses extracted and logged:
 0x80073b74 (348B)  HCI_Disconnect_on_error
 0x80074c8c (232B)  LMP_CH__0x3ed__FUN_80074c8c [LMP channel sub-protocol]
 0x80074d84 (14B)   set_two_global_ptrs
-0x80074dfc (42B)   called_by_unknown_fptr_indexA_2
+0x80074dfc (42B)   invoke_feature_page_predicate_or_hook_fallback_0x385
 0x80074e38 (50B)   possible_logger_called_if_no_patch2
 0x80074e84 (38B)   called_by_unknown_fptr_indexA_1
 0x80074eb4 (42B)   unknown_fptr_indexA
@@ -1174,7 +1174,7 @@ no renames needed, no phantom/duplicate rows found (contrast with region
 | `0x8007243c` | 56B | `send_LMP_ACCEPTED` | Confirmed: builds the 3-byte LMP_ACCEPTED PDU (opcode 3) and calls `send_LMP_pkt`. |
 | `0x80072648` | 70B | `LMP_unknown_else` | Sweeps all 10 connection slots, invoking `FUN_8007259c`+`FUN_80036420` for any slot in status byte `0x03` — a catch-all/default-case cleanup pass, consistent with the name. |
 | `0x80074d84` | 14B | `set_two_global_ptrs` | Confirmed: stores `param_1`/`param_2` into two named globals and returns a label pointer. |
-| `0x80074dfc` | 42B | `called_by_unknown_fptr_indexA_2` | Calls a registered predicate fptr; on failure falls back to `FUN_80074dd4`, on success forwards to a second fptr with a 16-bit arg. |
+| `0x80074dfc` | 42B | `invoke_feature_page_predicate_or_hook_fallback_0x385` | Tag-0x385 predicate path: predicate fptr; on zero calls `invoke_feature_page_hook_fallback_with_log_0x385`, else success-hook with 16-bit arg. |
 | `0x80074e38` | 50B | `possible_logger_called_if_no_patch2` | Confirmed: conditional (`+0xd8 < +0xd4`) call into `possible_logger_called_if_no_patch3` with tag `900`. |
 | `0x80074e84` | 38B | `called_by_unknown_fptr_indexA_1` | Confirmed: config-flag-gated call to `FUN_8003229c`. |
 | `0x80074eb4` | 42B | `unknown_fptr_indexA` | Confirmed dispatcher: routes to `called_by_unknown_fptr_indexA_1` (tag 900) or `_2` (tag 0x385) by a 16-bit field. |
@@ -1871,13 +1871,27 @@ Decompiled and renamed:
 **`unknown_fptr_indexA` → `dispatch_feature_page_by_tag_900_or_0x385`**
 (42B, HIGH) via `RenamePass12bsRegion80070000Fun80074eb4.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Parent dispatcher in the `0x80074dxx` feature-page fptr cluster: reads 16-bit tag at `param_1+8`; tag `900` → `invoke_acl_ring_buffer_if_config_flag_0x40_and_index_valid` (Pass 12br); tag `0x385` → `called_by_unknown_fptr_indexA_2` (predicate path). Always returns `1`.
+**Mechanism:** Parent dispatcher in the `0x80074dxx` feature-page fptr cluster: reads 16-bit tag at `param_1+8`; tag `900` → `invoke_acl_ring_buffer_if_config_flag_0x40_and_index_valid` (Pass 12br); tag `0x385` → `invoke_feature_page_predicate_or_hook_fallback_0x385` (predicate path). Always returns `1`.
 
 **Confidence:** HIGH — unambiguous compare-dispatch idiom; both callees already HIGH from Passes 12br/12bq pin tag-900 ACL vs tag-0x385 hook paths.
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1224** (entry updated).
 
-**Next:** Pass 12bt — cold-triage rank-1 SIMPLE-tier unnamed (rename `called_by_unknown_fptr_indexA_2` predicate-or-fallback sibling).
+**Next:** Pass 12bu — cold-triage rank-1 SIMPLE-tier unnamed (feature-page fptr cluster continuation).
+
+## Pass 12bt (2026-06-29) — feature-page predicate-or-fallback `called_by_unknown_fptr_indexA_2`
+
+Decompiled and renamed:
+**`called_by_unknown_fptr_indexA_2` → `invoke_feature_page_predicate_or_hook_fallback_0x385`**
+(42B, HIGH) via `RenamePass12btRegion80070000Fun80074dfc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Tag-0x385 branch callee of `dispatch_feature_page_by_tag_900_or_0x385` (Pass 12bs): invokes registered predicate fptr at `PTR_set_in_set_two_global_ptrs2_80074e28`; on zero calls `invoke_feature_page_hook_fallback_with_log_0x385` (Pass 12bq), on non-zero forwards to success-hook fptr at `PTR_set_in_set_two_global_ptrs1_80074e30` with `PTR_DAT_80074e34` and 16-bit arg from `PTR_DAT_80074e2c`. Always returns `0`.
+
+**Confidence:** HIGH — unambiguous predicate-then-branch idiom; both callees already HIGH from Passes 12bq/12bs pin fallback vs success-hook paths.
+
+Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1225** (entry updated).
+
+**Next:** Pass 12bu — cold-triage rank-1 SIMPLE-tier unnamed (feature-page fptr cluster continuation).
 
 ## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
 
