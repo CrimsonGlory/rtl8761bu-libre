@@ -2099,7 +2099,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1256**.
 
-**Next:** Pass 12dk — cold-triage rank-1 SIMPLE-tier unnamed continuation (79 in-region remain).
+**Next:** Pass 12dl — cold-triage rank-1 SIMPLE-tier unnamed continuation (78 in-region remain).
+
+## Pass 12dk (2026-06-29) — PSM/QoS quantizer context reset `FUN_800786c4`
+
+Decompiled and renamed:
+**`FUN_800786c4` → `reset_psm_or_qos_quantizer_context_length_and_history`**
+(24B, HIGH, SIMPLE-tier) via `RenamePass12dkRegion80070000Fun800786c4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeros dword at `ctx+0x1c` (history-length field — when `< 9`, siblings `FUN_8007814c`/`FUN_80077bcc` take the default-bitmask early-exit path) and `memset(ctx+0x20, 0, 0xa0)` clearing the 160-byte int16 metric/history buffer those quantizers read via `param_1+0x20`. Quantizer/PSM-or-QoS cluster init helper alongside Passes 12ap–12ar smoothing/mean/adjust helpers and the two large channel-map packers `FUN_8007814c`/`FUN_80077bcc`.
+
+**Confidence:** HIGH — unambiguous length-zero + fixed-size history clear idiom; offset layout matches established quantizer context struct used by decompiled PSM/QoS packers.
+
+Region unnamed count after this pass: **78** (79 minus this rename). Live named **1268**.
 
 ## Pass 12dj (2026-06-29) — AFH LAP channel-map clear by offset group `FUN_80071a1c`
 

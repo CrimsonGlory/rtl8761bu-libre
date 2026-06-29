@@ -6052,8 +6052,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dk: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (79 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dk (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800786c4`→`reset_psm_or_qos_quantizer_context_length_and_history`
+          (24B, HIGH, SIMPLE-tier). Zeros `ctx+0x1c` length + memset 0xa0 history at `ctx+0x20`;
+          quantizer/PSM-or-QoS cluster init sibling of `FUN_8007814c`/`FUN_80077bcc`.
+          Region 78 unnamed remain; live named 1268.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dk;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dl: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (78 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
