@@ -1271,8 +1271,6 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **176** (177 minus this rename).
 
-**Next:** Pass 12e — continue SIMPLE-tier backlog or next high-xref unnamed.
-
 ## Pass 12d (2026-06-29) — mid-BB-init optional patch hook `FUN_80076c50`
 
 Decompiled and renamed:
@@ -1284,4 +1282,18 @@ Decompiled and renamed:
 **Confidence:** HIGH — decompilation is unambiguous (single indirect call through a global fptr slot); caller context from Pass 12c pins it as a mid-init patch hook, same idiom as `poll_status_and_invoke_optional_fptr` in region `0x80000000`.
 
 Region unnamed count after this pass: **175** (176 minus this rename).
+
+## Pass 12e (2026-06-29) — BB HW config struct defaults `FUN_80077130`
+
+Decompiled and renamed:
+**`FUN_80077130` → `init_bb_hw_config_struct_defaults`**
+(70B, HIGH) via `RenamePass12eRegion80070000Fun80077130.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Zeroes the 44-byte (`0x2c`) BB HW config struct at `PTR_DAT_80077178` via `memset`, then seeds default timing/count fields: `+0xc=0x270`, `+0x18=5`, `+0x1a=1000`, `+0x1c=10`, `+0x1e=0xffff`, `+0x20=500`, `+0x24=1`, `+0x25=10`. Sole caller is `call2funcs` (`0x80077620`), which invokes this immediately before `init_bb_hw_registers_via_mailbox_with_patch_hooks` — the prep step for the VSC 0xFCA1 BB HW init chain documented in Passes 12b–12d.
+
+**Confidence:** HIGH — unambiguous memset-plus-default-field idiom; caller chain from already-named `call2funcs` pins role as pre-init config bootstrap.
+
+Region unnamed count after this pass: **174** (175 minus this rename).
+
+**Next:** Pass 12f — continue SIMPLE-tier backlog or next high-xref unnamed in BB HW init cluster.
 

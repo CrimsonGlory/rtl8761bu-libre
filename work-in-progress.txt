@@ -5230,8 +5230,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12d;
           rom_function_index.md; live named count 1159.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12e: next high-xref unnamed
-          or SIMPLE-tier backlog (cold-triage Pass 11 re-rank).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12e (2026-06-29): decompiled+
+          renamed `FUN_80077130`→`init_bb_hw_config_struct_defaults`
+          (70B, HIGH). BB HW config struct memset+defaults before mailbox init;
+          sole caller `call2funcs`. → analysis/rom/reverse_engineering_region_0x80070000.md
+          Pass 12e; rom_function_index.md; live named count 1160.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12f: next high-xref unnamed
+          or SIMPLE-tier backlog (BB HW init cluster / cold-triage re-rank).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`
