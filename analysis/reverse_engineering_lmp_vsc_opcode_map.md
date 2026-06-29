@@ -99,7 +99,7 @@ Grouped by libre implementation requirement:
 | `0xFC67` | Invokes `LMP__25B` + `LMP__268` | ROM dispatches; **0x268 hits patch if installed** |
 | `0xFC68` | Writes `config_base+0x189` | ROM |
 | `0xFC8A`–`0xFC99` | AFH / coexistence cluster; includes `VSC_0xfc95` | ROM |
-| `0xFCA1`–`0xFCA2` | `VSC_0xfca1_FUN_80077474`, `FUN_800773d8` | ROM |
+| `0xFCA1`–`0xFCA2` | `VSC_0xfca1_FUN_80077474`, `poll_bb_reg_ready_write_offset_value_poll_complete` | ROM |
 
 #### Full opcode list (alphabetical)
 

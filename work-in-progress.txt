@@ -5212,7 +5212,13 @@ sweep beyond enumeration and is the most out-of-date):
           reverse_engineering_region_0x80070000.md Pass 12; rom_function_index.md; live named
           count 1156.
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12b: SIMPLE-tier high-xref rename (`FUN_800773d8`, 140B, 34 xrefs).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12b (2026-06-29): decompiled+
+          renamed `FUN_800773d8`→`poll_bb_reg_ready_write_offset_value_poll_complete`
+          (140B, HIGH, 34 xrefs). BB register mailbox poll-write-poll for VSC 0xFCA1 HW init.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12b;
+          rom_function_index.md; live named count 1157.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12c: rename `FUN_80077508` (230B, HW register init caller).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`

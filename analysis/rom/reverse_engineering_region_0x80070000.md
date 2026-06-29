@@ -817,7 +817,7 @@ policy (no opcode-literal or named-caller confirmation strong enough to clear th
   with SCO/eSCO link parameter programming but no opcode-literal confirmation. **MEDIUM**.
 - **0x80077508 (230B)** — HW register init sequence: writes register offsets
   `0x14, 0x38, 0x20, 0x50, 0x58, 0x5c, 0x60, 0x64, 0x68, 0x6c, 0x70` via
-  `FUN_800773d8(offset, value, 0xf)`; calls the already-named
+  `poll_bb_reg_ready_write_offset_value_poll_complete(offset, value, 0xf)`; calls the already-named
   `VSC_0xfca1_FUN_80077474` — confirms this is HCI VSC 0xFCA1-related hardware init.
   **MEDIUM-HIGH** (clear functional role via named callee, but no opcode-literal triple
   confirmation).
@@ -1247,5 +1247,17 @@ Decompiled and renamed rank-1 SIMPLE-tier high-xref candidate:
 
 Region unnamed count after this pass: **178** (179 minus this rename).
 
-**Next:** Pass 12b — continue SIMPLE-tier high-xref backlog (`FUN_800773d8`, 140B, 34 xrefs) or next bignum sibling.
+## Pass 12b (2026-06-29) — SIMPLE-tier high-xref `FUN_800773d8`
+
+Decompiled and renamed rank-1 SIMPLE-tier high-xref candidate from Pass 11 backlog:
+**`FUN_800773d8` → `poll_bb_reg_ready_write_offset_value_poll_complete`**
+(140B, HIGH, 34 xrefs in) via `RenamePass12bRegion80070000Fun800773d8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Baseband register mailbox writer. Polls status word at `DAT_80077468` until bit 29 set (ready); writes 32-bit value to `DAT_80077470`; commits 16-bit register offset (`param_1 & 0xffff`) into the status word preserving upper bits from `DAT_8007746c`; polls again until bit 29 set (complete) or ~200 iterations, logging via `possible_logging_function__var_args` on timeout (still returns success). Callers include VSC vendor path `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`, `multi_field_opcode_dispatcher_type1_msg`, and the documented HW-init sequence `FUN_80077508` (offsets `0x14`…`0x70`).
+
+**Confidence:** HIGH — unambiguous poll-write-poll MMIO idiom; role confirmed by named VSC 0xFCA1 callee chain and `vsc_param_apply_with_log_0x6b_0xce` at `0x80008eac`.
+
+Region unnamed count after this pass: **177** (178 minus this rename).
+
+**Next:** Pass 12c — rename `FUN_80077508` (230B) or continue SIMPLE-tier backlog.
 
