@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12eq — decompile+rename `FUN_80064444` (PSM/QoS eligibility bitmask sync callee when BOS `field_0xf0` bit0 set; called from Pass 12ep finalize path).
+**Next:** Pass 12er — decompile+rename `FUN_80064b08` (PSM/QoS path caller of Pass 12eq sync; sibling of finalize fast-path cluster).
+
+## Pass 12eq (2026-06-29) — PSM/QoS 5-byte eligibility conn-slot sync `FUN_80064444`
+
+Decompiled and renamed:
+**`FUN_80064444` → `sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask`**
+(314B, HIGH, MEDIUM-tier) via `RenamePass12eqRegion80070000Fun80064444.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional early-exit hook at `PTR_DAT_80064580`. Copies 5-byte eligibility bitmask from `param_1` into staging buffers (`PTR_base_of_0x1ac_struct_array_0xA_large2_0__field434_0x1bf_80064584`, `PTR_DAT_80064588`, and when BOS `field451_0x1d0 & 3 == 3` also `field456_0x1d5`). When that BOS state is `3`: iterates 8 channel-bit indices from `field453_0x1d2`/`field454_0x1d3`; for each set bit, loads conn record at index `*0x1ac` with flags `(byte[+3] & 5)==5`, computes timing delta via `wrapping_subtract_masked_by_shift(+0x28,+0xaa,0xc)`, and either calls `alloc_tag1_record_if_slot_state_0xb_else_set_fail_flag` on first match, sets conn `+0x8f` bit2 + logs on subsequent matches, or logs rejection when offset/`param_2` gates fail (`param_2==2` from `finalize_psm_qos_5byte_fastpath_staged_bitmask_commit`). Callers: that finalize path, `FUN_80049550`, `FUN_80064b08`, patch `FUN_8010fb08`.
+
+**Confidence:** HIGH — full decompilation; callee of Pass 12ep when BOS `field_0xf0` bit0 set; 5-byte sync sibling of 10-byte fast-path cluster.
+
+Live named **1300** (global; in-region unnamed **50**).
 
 ## Pass 12ep (2026-06-29) — PSM/QoS 5-byte fast-path staged bitmask commit `FUN_800645a0`
 
