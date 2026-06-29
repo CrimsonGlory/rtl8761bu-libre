@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12eh — decompile+rename `FUN_80066330` (PSM/QoS sub-dispatcher called when per-channel state byte is `0x0a` from `dispatch_psm_qos_10byte_bitmask_by_channel_state`).
+**Next:** Pass 12ei — decompile+rename `FUN_800666a0` (PSM/QoS sub-dispatcher called when per-channel state byte is `0x16` and `PTR_DAT_80066b0c` routes to alternate path from `dispatch_psm_qos_10byte_bitmask_by_channel_state`).
+
+## Pass 12eh (2026-06-29) — PSM/QoS state-0x0a tiered eligibility sub-dispatch `FUN_80066330`
+
+Decompiled and renamed:
+**`FUN_80066330` → `run_psm_qos_state_0x0a_tiered_eligibility_subdispatch`**
+(802B, HIGH, COMPLEX-tier) via `RenamePass12ehRegion80070000Fun80066330.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Called from `dispatch_psm_qos_10byte_bitmask_by_channel_state` when per-channel state byte is `0x0a`. Optional hook at `PTR_DAT_80066654` (early exit on non-zero). Builds eligibility via `build_psm_qos_channel_eligibility_bitmask_0x50`, copies 10-byte result to per-index buffer `PTR_DAT_80066658[param_1*10]`. Multi-tier branching on popcount `uVar16` against config thresholds (`PTR_DAT_8006665c`..`80066690`): each tier increments per-index retry counters on parallel byte arrays (`PTR_DAT_80066660`..`8006668c`) gated by config limits `field289_0x12d`..`field294_0x132`; on exhaustion resets per-channel state to `0x16` and clears counters. Finalize via `FUN_80065f0c`, snapshot merged bitmask to `PTR_DAT_80066694` and copy dword pair to `PTR_DAT_8006669c`.
+
+**Confidence:** HIGH — full decompilation; calls already-named `build_psm_qos_channel_eligibility_bitmask_0x50`; sibling structure to Pass 12eg `0x16` sub-dispatch; sole caller is `dispatch_psm_qos_10byte_bitmask_by_channel_state`.
+
+Live named **1291** (global; in-region unnamed **59**).
 
 ## Pass 12eg (2026-06-29) — PSM/QoS state-0x16 sub-dispatch `FUN_800661b8`
 
