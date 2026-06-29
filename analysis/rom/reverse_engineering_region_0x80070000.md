@@ -1499,7 +1499,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **154** (155 minus this rename).
 
-**Next:** Pass 12ak — cold-triage rank-1 SIMPLE-tier unnamed (post-12aj re-run).
+**Next:** Pass 12al — cold-triage rank-1 SIMPLE-tier unnamed (post-12aj re-run).
+
+## Pass 12al (2026-06-29) — LMP preferred-rate sender `FUN_8007223c`
+
+Decompiled and renamed:
+**`FUN_8007223c` → `maybe_send_lmp_preferred_rate_0x24_pdu`**
+(102B, HIGH) via `RenamePass12alRegion80070000Fun8007223c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional patchable hook at `PTR_DAT_800722a4` — if installed and returns non-zero, skip default path. Otherwise gates on conn-index `param_1`: requires feature-page bit `4` set in both `big_ol_struct[conn]._xe3_features_pages_array_0_[1]` and `some_feature_page_base[1]`, plus `field_0xcb≠0`. Calls `FUN_80071f60()` to compute the preferred-rate payload byte; when non-zero, builds 3-byte LMP PDU (opcode `0x24` = LMP_PREFERRED_RATE) and sends via `send_LMP_pkt(conn, buf, 3, 3, 100, 0)`. Sibling of Pass 12af's `send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template` in the `0x800722xx` LMP PDU sender cluster; callee `FUN_80071f60` encodes rate from `field_0xb7` mode + min(`field_0x24a`,`field_0x24b`) table lookup.
+
+**Confidence:** HIGH — unambiguous hook-gate + feature-bit checks + `send_LMP_pkt` opcode `0x24` idiom; sibling `LMP_PREFERRED_RATE_0x24` at `0x80069d9c` (region `0x80060000`) confirms opcode.
+
+Region unnamed count after this pass: **142** (143 minus this rename). Live named **1193**.
+
+**Next:** Pass 12am — cold-triage rank-1 SIMPLE-tier unnamed (`0x80077ac4` 64B / `0x80076974` 68B).
 
 ## Pass 12ak (2026-06-29) — feature-page IRQ hook `FUN_80079180`
 

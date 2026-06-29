@@ -5460,8 +5460,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ak;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12al: cold-triage rank-1 SIMPLE-tier
-          unnamed (next lead `0x8007223c` 102B / `0x80077ac4` 64B / `0x80076974` 68B).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12al (2026-06-29): decompiled+renamed
+          rank-1 `FUN_8007223c`→`maybe_send_lmp_preferred_rate_0x24_pdu`
+          (102B, HIGH, SIMPLE-tier). Region 142 unnamed remain; live named 1193.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12al;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12am: cold-triage rank-1 SIMPLE-tier
+          unnamed (next lead `0x80077ac4` 64B / `0x80076974` 68B).
 
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12j cont: FUN_80076e58
