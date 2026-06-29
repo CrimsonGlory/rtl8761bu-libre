@@ -1611,7 +1611,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **121** (122 minus this rename). Live named **1214**.
 
-**Next:** Pass 12bh — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. callee `FUN_80079634`).
+**Next:** Pass 12bi — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. slow-path hook `FUN_80079438`).
+
+## Pass 12bh (2026-06-29) — codec serialize tail hook `FUN_80079634`
+
+Decompiled and renamed:
+**`FUN_80079634` → `invoke_codec_serialize_tail_patch_hook_by_mode_count`**
+(32B, HIGH) via `RenamePass12bhRegion80070000Fun80079634.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional post-serialize tail hook in the `0x800791xx` TLV/codec cluster. When codec-ctx mode byte at `+8==1`, passes dword count from `+0x14` to `call_codec_patch_hook_and_spin_delay_for_counts` with `0xffffffff` and swap-order flag `1`; otherwise selects count from `+0x1c`. Sole caller `serialize_codec_context_lsb_with_pre_hook_and_optional_tail` (Pass 12ae) when ctx byte `+0xb` is set — tail sibling of Pass 12bg partial-byte flush and Pass 12aa–12ad LSB bit-stream chain.
+
+**Confidence:** HIGH — unambiguous mode-byte count select + patch-hook invoke idiom; caller chain pins optional serialize tail role.
+
+Region unnamed count after this pass: **120** (121 minus this rename). Live named **1215**.
+
+**Next:** Pass 12bi — cold-triage rank-1 SIMPLE-tier unnamed (`0x800791xx` TLV/codec cluster continuation, e.g. slow-path hook `FUN_80079438`).
 
 ## Pass 12bd (2026-06-29) — codec page bitfield parser `FUN_800791d0`
 
