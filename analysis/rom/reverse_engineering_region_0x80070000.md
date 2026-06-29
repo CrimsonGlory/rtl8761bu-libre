@@ -2101,6 +2101,20 @@ Region unnamed count after this pass: **90** (91 minus this rename). Live named 
 
 **Next:** Pass 12dl — cold-triage rank-1 SIMPLE-tier unnamed continuation (78 in-region remain).
 
+## Pass 12dl (2026-06-29) — LMP 0x268 multi-timer dispatch `FUN_80071bc8`
+
+Decompiled and renamed:
+**`FUN_80071bc8` → `dispatch_lmp_268_timers_with_hook_and_config_gates`**
+(130B, HIGH, SIMPLE-tier) via `RenamePass12dlRegion80070000Fun80071bc8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional first patchable hook at `PTR_DAT_80071c4c` — if installed, invoke hook and return. Otherwise chains multiple `LMP__268__most_common_for_VSCs2_checks_fptr_patch` calls with timer values from globals (`PTR_DAT_80071c50`/`80071c54`, then `PTR_DAT_80071c58` + `0x4e20` = 20000 ms). When `config_base[1].field0_0x0 != 0`, dispatches two more LMP-268 timers (`byte*1000` and `1000`). When `config_base->field208_0xd8 & DAT_80071c64`, tail-calls `hci_reset_invoke_lmp_268_with_param_block_dword` (Pass 12cr). Cold-triage rank-1 SIMPLE-tier candidate (130B, **2 xref-in** — highest in tier at fresh Pass 11 re-run). Sole caller `FUN_800366cc` (region `0x80030000`) when global flag bit `0x8` set during conn class-mode apply path (AFH LAP clear + role remap sibling).
+
+**Confidence:** HIGH — unambiguous LMP-268 multi-timer dispatch idiom with established callees; config-gated branches match HCI-reset/param-block patterns from Passes 12cm–12cr; caller context pins connection-setup timer role.
+
+Region unnamed count after this pass: **77** (78 minus this rename). Live named **1269**.
+
+**Next:** Pass 12dm — cold-triage rank-1 SIMPLE-tier unnamed continuation (77 in-region remain).
+
 ## Pass 12dk (2026-06-29) — PSM/QoS quantizer context reset `FUN_800786c4`
 
 Decompiled and renamed:

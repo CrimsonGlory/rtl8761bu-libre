@@ -6060,8 +6060,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dl: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (78 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12dl (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80071bc8`→`dispatch_lmp_268_timers_with_hook_and_config_gates`
+          (130B, HIGH, SIMPLE-tier). Optional hook + chained LMP-268 timers from globals/config
+          (`0x4e20`, byte*1000, 1000) + config-flag gate to `hci_reset_invoke_lmp_268_with_param_block_dword`;
+          caller `FUN_800366cc` when global bit 0x8. Region 77 unnamed remain; live named 1269.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dm: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (77 in-region remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
