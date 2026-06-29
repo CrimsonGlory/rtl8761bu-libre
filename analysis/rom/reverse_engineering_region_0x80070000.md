@@ -2127,8 +2127,6 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **73** (74 minus this rename). Live named **1273**.
 
-**Next:** Pass 12ds — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain).
-
 ## Pass 12dq (2026-06-29) — feature-page logger buffer `FUN_80074c04`
 
 Decompiled and renamed:
@@ -2141,7 +2139,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **72** (73 minus this rename). Live named **1274**.
 
-**Next:** Pass 12ds — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain).
+## Pass 12ds (2026-06-29) — resource pool index-stack tag push `FUN_800754e0`
+
+Decompiled and renamed:
+**`FUN_800754e0` → `push_incrementing_tags_to_resource_pool_stack_or_fail`**
+(90B, HIGH, SIMPLE-tier) via `RenamePass12dsRegion80070000Fun800754e0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Merges `param_2` byte mask into pool header dword `*param_1` (`~(param_2&0xff) & *param_1 + (param_2&0xff)`). When mode byte at `param_1+0x17` is `0` or `2`, ORs global mask `DAT_8007553c`. Loops up to max count (byte at `param_1+0x14`) calling `FUN_80075b64` (`param_1+4` index-stack descriptor) to push tag `uVar3`; on each success increments tag by `param_3` and retries. Returns `0` when all attempts succeed, `0xffffffff` if any push fails (`FUN_80075b64` returns `-1`). Cold-triage rank-1 SIMPLE-tier candidate (90B, **2 xref-in** / **1 xref-out** per Pass 11 re-run). Resource-pool cluster sibling of Pass 12p `pop_indexed_entry_from_pool_descriptor_stack` (`0x80075b88`) and Pass 12cl `init_isr_extended_and_crypto_timer_resources` setup chain — index-stack push with stepped tag retry before pool slot registration.
+
+**Confidence:** HIGH — unambiguous mask-merge + bounded retry loop into established index-stack push primitive; resource-pool cluster context pins role.
+
+Region unnamed count after this pass: **71** (72 minus this rename). Live named **1276**.
+
+**Next:** Pass 12dt — cold-triage rank-1 SIMPLE-tier unnamed continuation (71 in-region remain per Pass 11 re-run; 70 after this rename).
 
 ## Pass 12dr (2026-06-29) — packet-slot ring dequeue `FUN_800758e8`
 

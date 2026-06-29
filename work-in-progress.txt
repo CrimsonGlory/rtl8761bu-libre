@@ -6117,8 +6117,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12dr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ds: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (71 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ds (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800754e0`→`push_incrementing_tags_to_resource_pool_stack_or_fail`
+          (90B, HIGH, SIMPLE-tier). Mask-merge + stepped tag push into index stack via
+          `FUN_80075b64`; resource-pool cluster sibling of Pass 12p pop. Region 71 unnamed
+          remain per Pass 11 re-run; live named 1276.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ds;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12dt: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (71 in-region remain per Pass 11 re-run).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`
