@@ -5991,6 +5991,30 @@ Region unnamed count after this pass: **8** (9 minus this rename).
 
 **Next:** Pass 54ax — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54ax (2026-06-29) — cold-triage rank-1 rename (post-54aw re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54aw: **366 total**, **361 named**,
+**5 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005f0f0` → `handle_connection_ef_substate_2_or_3_advance_to_4_or_reject`**
+(170B, HIGH) via `RenamePass54axFun8005f0f0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection `0x1ac` record handler indexed by `param_3`. Gates on active-flag
+bit 0 at `+4`; if clear, rejects via `report_procedure_outcome_and_update_param_type_bitmask(rec,
+0xb, 0x1a, 1|2)` depending on bit 4 of `+3`. When active and `+3 & 4 == 0`: if substate `+0xef
+== 3`, advances `+0xef` to `4` and clears `+0xee`. When active and `+3 & 4 != 0`: if substate
+`+0xef == 2`, sets bit `0x80` on `+4`, allocs tag-0xb event via
+`alloc_event_record_and_log_tag_0xb`, assigns `+0x134`, advances to substate 4, allocs tag-3 via
+`alloc_tag3_record_and_copy_link_fields`, assigns `+0x134` again. Sibling of
+`handle_connection_substate_2_or_3_and_dispatch_lmp26f` (Pass 54al — uses `+0xee` substates
+instead of `+0xef`).
+
+**Confidence:** HIGH — four already-named callees plus established `+0xee`/`+0xef` substate field
+layout.
+
+Region unnamed count after this pass: **5** (6 minus this rename).
+
+**Next:** Pass 54ay — continue xrefs=0 tier (re-run cold-triage for next rank).
+
 ## Pass 54aw (2026-06-29) — cold-triage rank-1 rename (post-54av re-rank; xrefs=0 tier)
 
 Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54av: **366 total**, **360 named**,
