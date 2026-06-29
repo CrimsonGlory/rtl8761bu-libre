@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12en — decompile+rename `FUN_80065c84` (dual-buffer bitpair adjust helper; callee of retry-1 path in Pass 12ek).
+**Next:** Pass 12eo — decompile+rename `FUN_800646e8` (PSM/QoS fast-path 10-byte template memcpy; callee of Pass 12ef when enable + config gates pass).
+
+## Pass 12en (2026-06-29) — PSM/QoS retry-1 dual-buffer bitpair adjust `FUN_80065c84`
+
+Decompiled and renamed:
+**`FUN_80065c84` → `adjust_psm_qos_state_0x16_retry1_dual_buffer_bitpair_eligibility`**
+(258B, HIGH, MEDIUM-tier) via `RenamePass12enRegion80070000Fun80065c84.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sole caller `expand_psm_qos_state_0x16_retry1_random_bitpair_eligibility` when per-channel flag `PTR_DAT_80065ef8[param_1]==1`. Optional early-exit hook at `PTR_DAT_80065d88`. Per-channel 6-byte state at `PTR_DAT_80065d8c[param_1*6]`: direction byte `[+5]` selects primary buffer `param_3` (+2 adjust) vs secondary `param_4` (−3 adjust, `0x4e`→`0x4c` special case); first visit (`[5]==-1`) uses PRNG `FUN_80042934(99)` threshold `0x32` to pick initial direction. Encodes adjusted byte high/low nibbles into state `[0]`, applies `3<<(byte&6)` mask to output byte at `param_2+index`, compares against reference `PTR_DAT_80065d90` — bumps eligibility count `*param_6` by `+2` on mismatch. Sets state bytes `[+3]` and `[+4]` to `1`.
+
+**Confidence:** HIGH — full decompilation; adjust-path sibling of random-walk branch in Pass 12ek retry-1 sub-state machine.
+
+Live named **1297** (global; in-region unnamed **53**).
 
 ## Pass 12em (2026-06-29) — PSM/QoS state-0x16 even-retry bitpair adjust `FUN_800658f0`
 
@@ -2281,7 +2293,7 @@ Decompiled and renamed:
 **`FUN_80065d94` → `expand_psm_qos_state_0x16_retry1_random_bitpair_eligibility`**
 (338B, HIGH, MEDIUM-tier) via `RenamePass12ekRegion80070000Fun80065d94.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Sole caller `run_psm_qos_state_0x16_eligibility_subdispatch` when per-channel retry counter `PTR_DAT_80066308[param_1]==1`. When per-channel flag `PTR_DAT_80065ef8[param_1]==0`: up to 10 random-index attempts via `FUN_80042934(0x4e)`, sets adjacent bit pairs in 10-byte output buffer `param_3` (special case index `0x4e` sets bit `0x40` on byte 9 only), records encoded index in `PTR_DAT_80065f00[param_1*6]`, bumps eligibility count `*param_2`. When flag `==1`: either calls `FUN_80065c84` (dual-buffer bitpair adjust) or adds `+10` to retry counter when global eligibility/popcount thresholds fail. Always increments per-channel retry `PTR_DAT_80065efc[param_1]` at tail.
+**Mechanism:** Sole caller `run_psm_qos_state_0x16_eligibility_subdispatch` when per-channel retry counter `PTR_DAT_80066308[param_1]==1`. When per-channel flag `PTR_DAT_80065ef8[param_1]==0`: up to 10 random-index attempts via `FUN_80042934(0x4e)`, sets adjacent bit pairs in 10-byte output buffer `param_3` (special case index `0x4e` sets bit `0x40` on byte 9 only), records encoded index in `PTR_DAT_80065f00[param_1*6]`, bumps eligibility count `*param_2`. When flag `==1`: either calls `adjust_psm_qos_state_0x16_retry1_dual_buffer_bitpair_eligibility` (dual-buffer bitpair adjust) or adds `+10` to retry counter when global eligibility/popcount thresholds fail. Always increments per-channel retry `PTR_DAT_80065efc[param_1]` at tail.
 
 **Confidence:** HIGH — full decompilation; sibling of retry-0 `expand_psm_qos_state_0x16_retry0_sequential_channel_bitpair_eligibility` and even-retry `expand_psm_qos_state_0x16_even_retry_bitpair_adjust_eligibility` in Pass 12eg sub-state machine; calls already-named `FUN_80042934` PRNG helper.
 
