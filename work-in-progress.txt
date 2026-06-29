@@ -5906,8 +5906,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cq: cold-triage rank-1 SIMPLE-tier
-          unnamed continuation (99 in-region remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12cq (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80078bb4`→`hci_reset_invoke_lmp_25b_when_init_enabled`
+          (24B, HIGH, SIMPLE-tier). Gates `LMP__25B__most_common_for_VSCs1` on init flag
+          `!= -1`; first step of HCI-reset VSC 0xFC95 triad inside Pass 12co.
+          Region 98 unnamed remain; live named 1248.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12cq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12cr: cold-triage rank-1 SIMPLE-tier
+          unnamed continuation (98 in-region remain; HCI-reset triad sibling `FUN_80078b94`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`

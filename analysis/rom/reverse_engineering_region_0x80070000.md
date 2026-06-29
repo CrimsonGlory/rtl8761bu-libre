@@ -2085,7 +2085,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1246**.
 
-**Next:** Pass 12cq — cold-triage rank-1 SIMPLE-tier unnamed continuation (99 in-region remain).
+**Next:** Pass 12cr — cold-triage rank-1 SIMPLE-tier unnamed continuation (98 in-region remain; HCI-reset triad sibling `FUN_80078b94`).
+
+## Pass 12cq (2026-06-29) — HCI reset LMP 0x25B gateway `FUN_80078bb4`
+
+Decompiled and renamed:
+**`FUN_80078bb4` → `hci_reset_invoke_lmp_25b_when_init_enabled`**
+(24B, HIGH, SIMPLE-tier) via `RenamePass12cqRegion80070000Fun80078bb4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Gates `LMP__25B__most_common_for_VSCs1` on init flag at `PTR_DAT_80078bcc` (`!= -1`). First step of the HCI-reset `VSC_0xfc95` triad inside `hci_reset_invoke_vsc_fc95_lmp_triad` (Pass 12co) — the LMP 0x25B gateway before `VSC_0xfc95_called2`.
+
+**Confidence:** HIGH — unambiguous init-flag gate + established LMP 0x25B callee; caller chain from Pass 12co pins HCI-reset sub-step role.
+
+Region unnamed count after this pass: **98** (99 minus this rename). Live named **1248**.
 
 ## Pass 12cp (2026-06-29) — HCI reset BB register programming `FUN_80078b0c`
 
