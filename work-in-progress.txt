@@ -5201,12 +5201,18 @@ sweep beyond enumeration and is the most out-of-date):
           (124B, HIGH, xrefs=0 tier). Region 1 unnamed remain. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54bb; rom_function_index.md; live named count 1154.
 
-[NEXT]  Full RE: ROM region 0x80050000 — Pass 54bc: final xrefs=0 tier rename (`FUN_8005d1f4`, 110B).
-
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54bc (2026-06-29): decompiled+
           renamed final xrefs=0 tier `FUN_8005d1f4`→`insert_index_into_conn_field0x134_or_global_list_head_or_tail`
           (110B, HIGH). Region 0 unnamed — xrefs=0 sweep complete. → analysis/rom/reverse_engineering_region_0x80050000.md
           Pass 54bc; rom_function_index.md; live named count 1155.
+
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12 (2026-06-29): pivot from 0x80050000 sweep
+          complete; cold-triage Pass 11 (179 unnamed); decompiled+renamed `FUN_80076708`→
+          `crypto_bignum_add_u32_arrays_with_carry` (116B, HIGH, 47 xrefs). → analysis/rom/
+          reverse_engineering_region_0x80070000.md Pass 12; rom_function_index.md; live named
+          count 1156.
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12b: SIMPLE-tier high-xref rename (`FUN_800773d8`, 140B, 34 xrefs).
 
 [DONE]  Full RE: ROM region 0x80050000 — Pass 54aw (2026-06-29): decompiled+
           renamed rank-1 `FUN_8005fd0c`→`validate_and_commit_esco_packet_type_params_hook1_or_reject`

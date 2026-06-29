@@ -1233,3 +1233,19 @@ shows only 52/245 functions as named in this region (vs. the much larger set
 this doc and `rom_function_index.md` document by name), confirming the open
 wairz rename-persistence bug applies here too.
 
+## Pass 12 (2026-06-29) — pivot from region `0x80050000` xrefs=0 sweep complete
+
+Fresh `ColdTriageRegion80070000Pass11.java` re-run: **179 unnamed** (57 STUB / 77 SIMPLE / 32 HANDLER / 7 COMPLEX / 6 CRITICAL). Region `0x80050000` unnamed tier exhausted; resumed unnamed backlog here.
+
+Decompiled and renamed rank-1 SIMPLE-tier high-xref candidate:
+**`FUN_80076708` → `crypto_bignum_add_u32_arrays_with_carry`**
+(116B, HIGH, 47 xrefs in) via `RenamePass12Region80070000Fun80076708.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Two-phase multi-word add. Phase 1: for `i` in `0..count-1`, `dest[i] += src[i] + carry` with standard unsigned overflow carry tracking. Phase 2: while carry≠0 and `i < max_len`, propagate carry through remaining `dest` words. Pure arithmetic — no LMP/HCI logic. Structural sibling of Pass 8's `crypto_bignum_multiply_square_v1` (`0x80076a20`) and `crypto_bignum_multiply_variable_len` (`0x800767ec`) — completes the add/multiply primitive set for SSP/ECDH bignum math.
+
+**Confidence:** HIGH — unambiguous schoolbook multi-word add idiom plus 47 call sites and established bignum cluster naming.
+
+Region unnamed count after this pass: **178** (179 minus this rename).
+
+**Next:** Pass 12b — continue SIMPLE-tier high-xref backlog (`FUN_800773d8`, 140B, 34 xrefs) or next bignum sibling.
+
