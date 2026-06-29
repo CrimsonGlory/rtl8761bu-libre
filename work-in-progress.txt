@@ -6433,6 +6433,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fa;
           rom_function_index.md; analysis/INDEX.md
 
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fc (2026-06-29): decompiled+
+          renamed rank-1 `FUN_80073a5c`→`gate_lmp_power_req_when_all_bos_inactive_and_links_idle`
+          (150B, HIGH, SIMPLE-tier). LMP power-req readiness gate: idle links + all BOS
+          inactive; config-gated 0x1ac-slot mask. SIMPLE-tier unnamed 7 remain; live named 1312.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fd: cold-triage rank-1 SIMPLE-tier
+          continuation (decompile+rename top remaining unnamed candidate).
+
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fb (2026-06-29): decompiled+
           renamed rank-1 `FUN_80076270`→`pop_head_and_init_lmp_25b_pending_slot_with_params`
           (120B, HIGH, SIMPLE-tier). IRQ-masked head-pop from LMP-0x25B pending queue,
@@ -6440,9 +6450,6 @@ sweep beyond enumeration and is the most out-of-date):
           live named 1311.
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fb;
           rom_function_index.md; analysis/INDEX.md
-
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fc: cold-triage rank-1 SIMPLE-tier
-          continuation (decompile+rename top remaining unnamed candidate).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12cv (2026-06-29): decompiled+
           renamed rank-1 `FUN_80078ca8`→`hci_reset_vsc_fc95_lmp_268_if_mode_uninitialized`

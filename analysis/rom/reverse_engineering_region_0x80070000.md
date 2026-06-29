@@ -2309,7 +2309,19 @@ Decompiled and renamed:
 
 Live named **1309** (global; in-region unnamed **42**).
 
-**Next:** Pass 12fc — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+**Next:** Pass 12fd — cold-triage rank-1 SIMPLE-tier continuation (region `0x80070000`).
+
+## Pass 12fc (2026-06-29) — LMP power-req readiness gate `FUN_80073a5c`
+
+Decompiled and renamed:
+**`FUN_80073a5c` → `gate_lmp_power_req_when_all_bos_inactive_and_links_idle`**
+(150B, HIGH, SIMPLE-tier) via `RenamePass12fcRegion80070000Fun80073a5c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns `1` only when LMP power-request preconditions are met. If `config_base+0x7a` bit 1 set, scans up to 11 `0x1ac`-stride connection records for active slots with per-slot bit set in mask at `+0x1d2` (returns `0` if any). Scans 3 `0x88`-stride link records for state `5` with `+4==1` (returns `0`). Requires connection struct fields at `+8`, `+0x30`, `+0x58` all `!= 4`. Finally scans up to 10 `big_ol_struct` entries (`0x2b8` stride): returns `1` only when **no** entry has `bos_entry_valid==1`; returns `0` if any BOS slot is active.
+
+**Confidence:** HIGH — full decompilation; multi-stage idle/inactive predicate with config-gated LMP power path.
+
+Live named **1312** (global; in-region unnamed **39**; SIMPLE-tier unnamed **7**).
 
 ## Pass 12fb (2026-06-29) — LMP 0x25B pending slot head pop+init `FUN_80076270`
 
