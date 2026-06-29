@@ -5522,7 +5522,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12au;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12av: cold-triage rank-1 SIMPLE-tier
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12av (2026-06-29): decompiled+
+          renamed rank-1 `FUN_800778aa`→`log_vsc_fca1_decoded_bb_status_bit`
+          (20B, HIGH, SIMPLE-tier). Thin varargs log wrapper for VSC 0xFCA1
+          decode classes 1–3; callee of Pass 12w decode. Region 132 unnamed
+          remain; live named 1203.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12av;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12aw: cold-triage rank-1 SIMPLE-tier
           unnamed (quantizer/sort cluster continuation).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+

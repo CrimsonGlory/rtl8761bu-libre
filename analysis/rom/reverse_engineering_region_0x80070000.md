@@ -1527,7 +1527,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **136** (137 minus this rename). Live named **1199**.
 
-**Next:** Pass 12av — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+**Next:** Pass 12aw — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
+
+## Pass 12av (2026-06-29) — VSC FCA1 log thunk `FUN_800778aa`
+
+Decompiled and renamed:
+**`FUN_800778aa` → `log_vsc_fca1_decoded_bb_status_bit`**
+(20B, HIGH) via `RenamePass12avRegion80070000Fun800778aa.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin logging wrapper — sole body is `possible_logging_function__var_args()`. Callee of `decode_vsc_fca1_bitfield_and_log_bb_status_flags` (`0x80077638`) for decoded status-bit classes 1–3 (class 0 uses the varargs logger directly). VSC 0xFCA1 / BB-status decode cluster sibling of Pass 12w.
+
+**Confidence:** HIGH — unambiguous single-callee logging thunk; parent decode function already HIGH from Pass 12w pins role.
+
+Region unnamed count after this pass: **132** (133 minus this rename). Live named **1203**.
+
+**Next:** Pass 12aw — cold-triage rank-1 SIMPLE-tier unnamed (quantizer/sort cluster continuation).
 
 ## Pass 12au (2026-06-29) — bitmask unpacker `FUN_80077b2c`
 
