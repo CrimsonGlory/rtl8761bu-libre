@@ -5927,3 +5927,25 @@ Region unnamed count after this pass: **11** (12 minus this rename).
 
 **Next:** Pass 54as — continue xrefs=0 tier (re-run cold-triage for next rank).
 
+## Pass 54as (2026-06-29) — cold-triage rank-1 rename (post-54ar re-rank; xrefs=0 tier)
+
+Fresh `ColdTriageRegion80050000Pass54.java` re-run after Pass 54ar: **366 total**, **356 named**,
+**10 unnamed** (9 artifacts excluded). All remaining candidates are **xrefs=0**. Decompiled and
+renamed rank-1 **`FUN_8005d078` → `commit_8byte_link_params_hook10_and_send_meta_evt_0x04`**
+(204B, HIGH) via `RenamePass54asFun8005d078.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sibling of Pass 54ar's `commit_esco_sco_8byte_params_and_alloc_tag9_subrecord`
+(same 8-byte `optimized_memcpy` into the per-connection `0x1ac` sub-record at `+0x34`, same
+`+0x4`/`+0x6` status-bit derivation from copied bytes and global `field451_0x1d0`, same
+optional `clear_ext_adv_param_field0xf_bit13_for_instance` when `(+0x36 & 6)==0`), but
+dispatches hook mode `0x10` via `PTR_DAT_8005d150` instead of mode-5 + tag-9 alloc, and
+when `+0x60` bit 0 is set sends `send_evt_Meta_subevent_0x04` (LE Read Remote Features
+Complete per `ble_link_layer.md`) then clears that bit.
+
+**Confidence:** HIGH — four already-named callees with unambiguous roles; structural twin of
+the established eSCO/SCO 8-byte commit family with a distinct terminal meta-event path.
+
+Region unnamed count after this pass: **10** (11 minus this rename).
+
+**Next:** Pass 54at — continue xrefs=0 tier (re-run cold-triage for next rank).
+
