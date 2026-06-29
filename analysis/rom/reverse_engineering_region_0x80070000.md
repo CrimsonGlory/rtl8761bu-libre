@@ -2175,7 +2175,19 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **66** (67 minus this rename). Live named **1281**.
 
-**Next:** Pass 12dy — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_800789c0`, 126B, 1 xref-in).
+## Pass 12dy (2026-06-29) — event param-length lookup `FUN_800789c0`
+
+Decompiled and renamed:
+**`FUN_800789c0` → `lookup_event_param_len_via_hook_or_default_table`**
+(126B, HIGH, SIMPLE-tier) via `RenamePass12dyRegion80070000Fun800789c0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Returns a ushort buffer-length for an internal event/type code. First consults optional hook at `PTR_DAT_80078a40` — if non-null and the hook returns non-zero, returns the hook-written output. Fallback table: classic HCI codes `0x0f`→8, `0x11`/`0x13`→2, `0x19`→4, codes where `(code ^ 3)==0` (e.g. `0x03` Connection Complete)→8; extended codes `0x1003`→8, `0x1009`/`0x1015`→`0x108`, codes where `(code ^ 0x1001)==0`→8; unmatched codes return 0. Cold-triage rank-1 SIMPLE-tier candidate (126B, **1 xref-in** per `ListUnnamed80070000.java`). Sits adjacent to the `0x80078dxx` HCI-reset / TLV cluster (Pass 12dx TLV lookup, Pass 12cm–12cv reset chain).
+
+**Confidence:** HIGH — unambiguous hook-or-table dispatch with concrete HCI event code literals and consistent return sizes (2/4/8/0x108).
+
+Region unnamed count after this pass: **65** (66 minus this rename). Live named **1282**.
+
+**Next:** Pass 12dz — cold-triage rank-1 SIMPLE-tier unnamed continuation (`FUN_80077b8c`, 60B, 1 xref-in).
 
 ## Pass 12du (2026-06-29) — packet-slot ring fill-count read `FUN_800758cc`
 
