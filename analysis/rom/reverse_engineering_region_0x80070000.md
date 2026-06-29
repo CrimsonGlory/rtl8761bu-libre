@@ -2249,7 +2249,19 @@ Identified and renamed:
 
 Live named **1289** (global; in-region unnamed **61**).
 
-**Next:** Pass 12eo — decompile+rename `FUN_800646e8` (PSM/QoS fast-path 10-byte template memcpy; callee of Pass 12ef when enable + config gates pass).
+**Next:** Pass 12ep — decompile+rename `FUN_800645a0` (PSM/QoS fast-path tail callee when pre-hook returns 1; sibling of Pass 12eo).
+
+## Pass 12eo (2026-06-29) — PSM/QoS fast-path 10-byte template merge+copy `FUN_800646e8`
+
+Decompiled and renamed:
+**`FUN_800646e8` → `apply_psm_qos_10byte_fastpath_template_merge_and_copy`**
+(214B, HIGH, MEDIUM-tier) via `RenamePass12eoRegion80070000Fun800646e8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sole caller `dispatch_psm_qos_10byte_bitmask_by_channel_state` when field `0x181==1` and enable/config/status gates select the fast path. Optional pre-hook at `PTR_PTR_800647c0` (returns context `iVar6`) and post-gate hook at `PTR_PTR_800647c4` (early exit on non-zero). When idle flag `PTR_DAT_800647c8[0]==0`: copies 10-byte template from `PTR_DAT_800647cc` into work buffer at `PTR_DAT_800647d0+0x27c`, sets bytes at offsets 2 and 4 to `1`. Else: AND-merges work buffer with mask `PTR_DAT_800647d4` for 10 bytes, popcounts set bits in eligibility table `PTR_DAT_800647d8` over `0x4f` indices, and when count `<0x14` reloads first 10 bytes from `PTR_DAT_800647d4` into work buffer. `optimized_memcpy` copies 10 bytes from eligibility table to output `param_2`, sets idle flag to `1`; when pre-hook returned `1`, tail-calls `FUN_800645a0`.
+
+**Confidence:** HIGH — full decompilation; sole caller is already-named `dispatch_psm_qos_10byte_bitmask_by_channel_state`; fast-path sibling of the `0x16`/`0x0a` sub-dispatch cluster.
+
+Live named **1298** (global; in-region unnamed **52**).
 
 ## Pass 12en (2026-06-29) — PSM/QoS retry-1 dual-buffer bitpair adjust `FUN_80065c84`
 
@@ -2353,7 +2365,7 @@ Decompiled and renamed:
 **`FUN_80066914` → `dispatch_psm_qos_10byte_bitmask_by_channel_state`**
 (424B, HIGH, MEDIUM-tier) via `RenamePass12efRegion80070000Fun80066914.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Optional pre-hook at `PTR_DAT_80066abc` (early exit on non-zero). When init flag `PTR_DAT_80066ac0==0`, seeds per-channel state tables (`PTR_DAT_80066ac4`..`80066adc`) with `0xdd`/zeros for index `param_1&0xff`. Gated by `struct_of_at_least_0x300` field `0x181==1`: fast path via `FUN_800646e8` when enable byte + config `field285_0x129` bit 0 set and status byte `PTR_DAT_80066aec` has bit `0x80` (memcpy 10-byte stack buffer to `param_2`). Otherwise per-channel state machine on `PTR_DAT_80066ac4[param_1]`: `0xdd` → AND-merge two 10-byte templates + retry counter → LMP `0x268` via patch fptr when counter `>1`; `0x1e` → memcpy cached per-index buffer; `0x16` → `run_psm_qos_state_0x16_eligibility_subdispatch` or `run_psm_qos_state_0x16_alternate_eligibility_subdispatch` per `PTR_DAT_80066b0c`; `0x0a` → `run_psm_qos_state_0x0a_tiered_eligibility_subdispatch`. When field `0x181!=1`, memcpy default template `PTR_DAT_80066af0`. Post-hook at `PTR_DAT_80066b14`. Callers: `FUN_800639b4`, `FUN_80066c3c`, `LMP_CHANNEL_CLASSIFICATION_REQ_0x7F_10`. Top-level entry upstream of `build_psm_qos_channel_eligibility_bitmask_0x50` cluster.
+**Mechanism:** Optional pre-hook at `PTR_DAT_80066abc` (early exit on non-zero). When init flag `PTR_DAT_80066ac0==0`, seeds per-channel state tables (`PTR_DAT_80066ac4`..`80066adc`) with `0xdd`/zeros for index `param_1&0xff`. Gated by `struct_of_at_least_0x300` field `0x181==1`: fast path via `apply_psm_qos_10byte_fastpath_template_merge_and_copy` when enable byte + config `field285_0x129` bit 0 set and status byte `PTR_DAT_80066aec` has bit `0x80` (memcpy 10-byte stack buffer to `param_2`). Otherwise per-channel state machine on `PTR_DAT_80066ac4[param_1]`: `0xdd` → AND-merge two 10-byte templates + retry counter → LMP `0x268` via patch fptr when counter `>1`; `0x1e` → memcpy cached per-index buffer; `0x16` → `run_psm_qos_state_0x16_eligibility_subdispatch` or `run_psm_qos_state_0x16_alternate_eligibility_subdispatch` per `PTR_DAT_80066b0c`; `0x0a` → `run_psm_qos_state_0x0a_tiered_eligibility_subdispatch`. When field `0x181!=1`, memcpy default template `PTR_DAT_80066af0`. Post-hook at `PTR_DAT_80066b14`. Callers: `FUN_800639b4`, `FUN_80066c3c`, `LMP_CHANNEL_CLASSIFICATION_REQ_0x7F_10`. Top-level entry upstream of `build_psm_qos_channel_eligibility_bitmask_0x50` cluster.
 
 **Confidence:** HIGH — full decompilation; state-machine routes to three already-documented PSM/QoS sub-dispatchers; caller xrefs include LMP 0x7F handler.
 
