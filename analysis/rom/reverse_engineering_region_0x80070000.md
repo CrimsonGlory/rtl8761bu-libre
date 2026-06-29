@@ -1863,7 +1863,21 @@ Decompiled and renamed:
 
 Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1223** (entry updated).
 
-**Next:** Pass 12bs — cold-triage rank-1 SIMPLE-tier unnamed (rename `unknown_fptr_indexA` / `called_by_unknown_fptr_indexA_2` dispatcher siblings).
+**Next:** Pass 12bt — cold-triage rank-1 SIMPLE-tier unnamed (rename `called_by_unknown_fptr_indexA_2` predicate-or-fallback sibling).
+
+## Pass 12bs (2026-06-29) — feature-page tag dispatcher `unknown_fptr_indexA`
+
+Decompiled and renamed:
+**`unknown_fptr_indexA` → `dispatch_feature_page_by_tag_900_or_0x385`**
+(42B, HIGH) via `RenamePass12bsRegion80070000Fun80074eb4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Parent dispatcher in the `0x80074dxx` feature-page fptr cluster: reads 16-bit tag at `param_1+8`; tag `900` → `invoke_acl_ring_buffer_if_config_flag_0x40_and_index_valid` (Pass 12br); tag `0x385` → `called_by_unknown_fptr_indexA_2` (predicate path). Always returns `1`.
+
+**Confidence:** HIGH — unambiguous compare-dispatch idiom; both callees already HIGH from Passes 12br/12bq pin tag-900 ACL vs tag-0x385 hook paths.
+
+Region unnamed count after this pass: **114** unchanged (semantic rename of existing thin-named entry). Live named **1224** (entry updated).
+
+**Next:** Pass 12bt — cold-triage rank-1 SIMPLE-tier unnamed (rename `called_by_unknown_fptr_indexA_2` predicate-or-fallback sibling).
 
 ## Pass 12at (2026-06-29) — index-select bitmask packer `FUN_80077b04`
 

@@ -5708,9 +5708,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12br;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bs: cold-triage rank-1 SIMPLE-tier
-          unnamed (rename `unknown_fptr_indexA` / `called_by_unknown_fptr_indexA_2`
-          dispatcher siblings).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12bs (2026-06-29): decompiled+
+          renamed `unknown_fptr_indexA`→
+          `dispatch_feature_page_by_tag_900_or_0x385`
+          (42B, HIGH, feature-page tag dispatcher). Region 114 unnamed unchanged;
+          live named 1224.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12bs;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12bt: cold-triage rank-1 SIMPLE-tier
+          unnamed (rename `called_by_unknown_fptr_indexA_2` predicate-or-fallback sibling).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12at (2026-06-29): decompiled+
           renamed rank-1 `FUN_80077b04`→`pack_index_select_flags_into_bitmask_0x50`
