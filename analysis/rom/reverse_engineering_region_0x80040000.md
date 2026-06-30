@@ -7127,5 +7127,51 @@ registration).
 
 Post-rename: **80 unnamed** in-region (43 in 1-150B size≥20B tier); live named **1558**.
 
+**Next:** superseded by Pass 52gh below.
+
+## Pass 52gh (2026-06-30) — rank-1 bos[0xA] link-policy offset+dword commit HCI handler rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x800458dc` (124B,
+1 xref) — near-duplicate of Pass 52gg's `hci_link_policy_offset_dword_commit_send_cmd_complete`
+but targets `bos[0xA]` fields instead of `bos[0xb]`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800458dc` →
+`hci_link_policy_bos0a_offset_dword_commit_send_cmd_complete` (124B) via
+`RenamePass52ghRegion80040000Fun800458dc.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_link_policy_bos0a_offset_dword_commit_send_cmd_complete(short *hci_cmd)
+{
+  rec = PTR_base_of_0x1ac_struct_array_0xA_large2;
+  state = rec[0xb].field96_0x60;
+  if (state == 0)
+    rec[0xb].field96_0x60 = 1;
+  else if ((*PTR_DAT_8004595c & 0x10) && state != 1)
+    return 0xc;  // Command Disallowed
+  offset_byte = *(byte *)((int)hci_cmd + 3);
+  status = 0x12;
+  if (offset_byte < 0x20) {
+    rec->field54_0x36 = offset_byte;
+    status = 0;
+    if (offset_byte != 0)
+      optimized_memcpy(rec->field56_0x38..field59_0x3b, hci_cmd + 2, 4);
+  }
+  cmd_word = *hci_cmd;
+  hci_status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  hci_event_sender(0xe, {hci_status, cmd_lo, cmd_hi, status}, 4);
+  return status;
+}
+```
+
+Re-entrancy-gated HCI command handler: gates on `bos[0xb].field96_0x60` (same
+0→1 transition + `0xc` disallowed idiom as Pass 52gg) but commits offset byte
+`<0x20` to `bos[0xA].field54_0x36` and optional 4-byte dword to
+`field56_0x38..field59_0x3b` (vs Pass 52gg's `field55_0x37` /
+`field60_0x3c..field63_0x3f` on `bos[0xb]`). Same `field_0x165` HCI status
+idiom and 4-byte Command Complete. Link-policy cluster sibling of
+`hci_link_policy_offset_dword_commit_send_cmd_complete`.
+
+Post-rename: **79 unnamed** in-region (42 in 1-150B size≥20B tier); live named **1559**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
