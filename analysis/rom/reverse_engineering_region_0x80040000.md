@@ -6419,6 +6419,38 @@ and `hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete` at
 Post-rename: **98 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1540**.
 
+**Next:** superseded by Pass 52fp below.
+
+## Pass 52fp (2026-06-30) — >150B rank-1 LE ext-adv enable bit3 commit HCI handler rename
+
+**Cold-triage (refreshed):** 3 unnamed >150B remain. rank-1 `0x800462b0`
+(164B, 0 xrefs); rank-2 `0x80048e44` (158B); rank-3 `0x8004923c` (156B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_800462b0` →
+`hci_le_ext_adv_enable_bit3_commit_send_cmd_complete`
+(164B, 0 xrefs) via
+`RenamePass52fpRegion80040000Fun800462b0.java` (`renamed=1`, live-verified).
+
+164B HCI command handler in the LE extended-advertising cluster (sibling of
+Pass 52fa's `hci_le_ext_scan_rsp_data_pack_validate_commit_send_cmd_complete`
+at `0x8004635c` and Pass 52ez ext-adv data handlers):
+
+- **Handle validation:** HCI cmd handle at `+3` must be `< 0x1000`; failure →
+  `0x12`.
+- **Feature gate:** requires `bos[0xb].field333_0x15a & 4`; failure →
+  `0x11` (Command Disallowed).
+- **Conn lookup:** `query_config_struct_0x1ac_by_index()` using byte at `+5`;
+  record must have bit 0 of byte `+3` set else status `0x02`.
+- **State guards:** conn-record `+0x14c` bit2 must be set and `+0x122` bit2
+  must be clear; mismatch → `0x0c` (Command Disallowed).
+- **Enable commit:** sets/clears bit3 of conn-record `+0x14c` from byte at
+  `+5` bit0.
+- **Command Complete:** `hci_event_sender(0xe, &local_20, 4)` with
+  `field_0x165` status idiom.
+
+Post-rename: **97 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1541**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (3 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (2 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
