@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52de, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52df, 2026-06-30).
 
 ## Overview
 
@@ -258,7 +258,7 @@ first as instructed.
 |---|---|---|---|
 | `0x80043a60` | 358B | High xref count (15) for its size tier but decompile shows a fairly generic field-update/state-transition helper; no single confirmed call site distinguishes its purpose precisely. | MEDIUM |
 | `0x80040594` | 566B | `build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` — SCO/eSCO LMP PDU builder/submitter for conn-type nibble 1–2; see Pass 52de | HIGH |
-| `0x80041230` | 560B | Similar register-programming shape to neighboring lower-half functions; no distinguishing confirmation. | MEDIUM |
+| `0x80041230` | 560B | `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble` — IRQ-masked 16-slot conn-event ring dequeue + type-nibble LMP dispatch; see Pass 52df | HIGH |
 | `0x80042640` | 530B | Field-update logic operating on connection-record-shaped data; plausible LC-layer helper but unconfirmed. | MEDIUM |
 | `0x800401c4` | 426B | Compact dispatch-shaped function; case semantics not individually confirmed. | MEDIUM |
 | `0x80040e60` | 386B | Connection-record field manipulator; no cross-xref confirmation available (tooling gap, see below). | MEDIUM |
@@ -4509,5 +4509,26 @@ sibling of Pass 52dc baseband programmer.
 Post-rename: **160 unnamed** in-region (95 in 1-150B tier unchanged); **65** in
 >150B tier; live named **1478**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-25 `0x80041230`
-(560B).
+## Pass 52df (2026-06-30) — >150B rank-25 conn-event ring dequeue dispatcher rename
+
+**>150B rank-25 decompiled+renamed (HIGH):** `FUN_80041230` →
+`dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble` (560B) via
+`RenamePass52dfRegion80040000Fun80041230.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). IRQ-masked dequeue from 16-slot
+16-byte conn-event ring (`PTR_DAT_80041460`/`41464`): copies one entry, advances
+head mod 16, re-enables IRQs, parses handle (`local_3c & 0x3ff`), conn-type
+nibble (`local_3a >> 4`), role sub-index (`local_39 >> 3 & 7`), and flag bits.
+Early exits for LE/inquiry codec-match (`FUN_80015a68`), duplicate-codec reject
+(`FUN_800158f8`), and config-gated special path (`FUN_80015c98`). Main path
+filters via `FUN_80040384`, validates role via
+`lookup_codec_or_role_type_table_7x4`, then dispatches by conn-type nibble:
+nibble 2 → `FUN_800411a4`; nibble 3 (in `local_3c` byte-1 bits 4–5) →
+`FUN_80040494`; nibbles 1–2 → callee
+`build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` (Pass 52de). Logs on
+empty ring. SCO/eSCO conn-type cluster hub sibling of Pass 52de PDU builder.
+
+Post-rename: **159 unnamed** in-region (95 in 1-150B tier unchanged); **64** in
+>150B tier; live named **1479**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-26 `0x80042640`
+(530B).
