@@ -8904,7 +8904,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ha;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hb: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hb (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80048964`→`invoke_baseband_link_setup_packet_mode1_from_param_buffer`
+          (28B, HIGH). 6-byte param-buffer adapter sibling of Pass 52cc's
+          `invoke_baseband_link_setup_from_param_buffer`; hardcoded packet-mode 1;
+          sole caller `build_fixed_event_0x201e_and_send` (region `0x80000000`).
+          59 unnamed in-region; live named 1579.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hc: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

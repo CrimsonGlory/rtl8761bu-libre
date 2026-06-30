@@ -7916,5 +7916,40 @@ clears the flag. Sole caller `FUN_800408cc` — fptr `0x81` dispatch chain that
 
 Post-rename: **60 unnamed** in-region (23 in 1-150B size≥20B tier); live named **1578**.
 
+**Next:** superseded by Pass 52hb below.
+
+## Pass 52hb (2026-06-30) — rank-1 baseband link-setup packet-mode-1 adapter rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hb.java` — 60 unnamed,
+23 in 1-150B size≥20B tier; rank-1 `0x80048964` (28B, 1 xref) — thin wrapper in the
+`0x800483xx`/`0x800489xx` baseband link-setup neighborhood (16B above Pass 52cc's
+`invoke_baseband_link_setup_from_param_buffer` at `0x80048948`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80048964` →
+`invoke_baseband_link_setup_packet_mode1_from_param_buffer` (28B) via
+`RenamePass52hbRegion80040000Fun80048964.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_baseband_link_setup_packet_mode1_from_param_buffer(undefined2 *param_buffer)
+{
+  program_baseband_link_setup_slot10_and_send_hci_cmd_complete
+            (*param_buffer,
+             *(byte *)((int)param_buffer + 3),
+             *(byte *)(param_buffer + 2),
+             *(byte *)((int)param_buffer + 5),
+             1);
+}
+```
+
+Unpacks buffer layout `[0:2]` uint16 handle, `[3:5]` three byte params — then
+calls `program_baseband_link_setup_slot10_and_send_hci_cmd_complete` with
+hardcoded packet-mode `1`. Structural sibling of Pass 52cc's 7-byte adapter
+(which reads packet-mode from byte offset 6); suited for 6-byte buffers lacking
+an explicit mode byte. Sole caller `build_fixed_event_0x201e_and_send` (`0x8000ed04`,
+region `0x80000000`) — builds a 6-byte local buffer (`0x201e` prefix + 3 payload
+bytes) and dispatches through this adapter.
+
+Post-rename: **59 unnamed** in-region (22 in 1-150B size≥20B tier); live named **1579**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
