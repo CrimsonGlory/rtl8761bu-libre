@@ -5750,5 +5750,43 @@ of `hci_hw_reg_pool_entry_remove_handler_send_cmd_complete` at `0x8004993c`,
 Post-rename: **118 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1520**.
 
+**Next:** superseded by Pass 52ev below.
+
+## Pass 52ev (2026-06-30) — >150B rank-1 LE adv data HCI handler rename
+
+**Cold-triage (refreshed, from Pass 52eu):** **22** unnamed >150B remain.
+rank-1 `0x80048754` (478B); rank-2 `0x80046e40` (474B); rank-3
+`0x800451cc` (408B); rank-4 `0x80046798` (352B); rank-5 `0x8004635c`
+(320B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80045c70` →
+`hci_le_adv_data_pack_validate_commit_slot10_dispatch_meta_subevent_send_cmd_complete`
+(520B, 0 xrefs in cold-triage) via
+`RenamePass52evRegion80040000Fun80045c70.java` (`renamed=1`, live-verified).
+
+520B HCI command handler in the LE Meta Event cluster (`0x80045c00` LTK
+request sender neighbor, `0x80045e8c` Connection Complete sender neighbor):
+
+- **Disable path:** when param byte at `+6` (`local_28`) == 0, clears bit-7 of
+  conn-slot-10 `field249_0x100` (`&= 0x7f`).
+- **Enable/validate path:** operation type at `+7` (`bVar1`) must be 0–2;
+  `local_28` must be ≤ `0x14`. Type 0: subtype at `+8` must be 1 or 2; when
+  subtype==1 requires `field328_0x155 & 0x14`; data length at `+9` must be
+  2–75 with `length+7 == total_cmd_len`; packs payload bytes from `+10` with
+  nibble interleave into 38-byte (`0x26`) buffer, each byte ≤
+  `field329_0x156`; `optimized_memcpy` to `PTR_DAT_80045e7c`. Types 1/2: simpler
+  encoding (`uVar8` 2 or 3).
+- **Slot-10 commit:** writes `field256_0x107`, `field255_0x106`,
+  `field250_0x101` low nibble, `field249_0x100` (sets bit-7 `0x80`, bits 4–6
+  from subtype flag), `field257_0x108` (data length).
+- **Meta dispatch:** calls `send_evt_Meta_subevent_0_or_1` with handle + three
+  param bytes from cmd buffer offsets `+3`/`+2`/`+5`.
+- **Failure:** status `0x11` (disallowed state) or `0x12` (invalid parameters).
+- **Command Complete:** when validation fails (`local_28==0` after error),
+  4-byte `hci_event_sender(0xe,…)` with `field_0x165` status idiom.
+
+Post-rename: **117 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1521**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x80045c70`, 520B).
+unnamed >150B candidate (`0x80048754`, 478B).

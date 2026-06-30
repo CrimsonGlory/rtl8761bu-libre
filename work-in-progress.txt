@@ -8360,9 +8360,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ev: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ev (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80045c70`→
+          `hci_le_adv_data_pack_validate_commit_slot10_dispatch_meta_subevent_send_cmd_complete`
+          (520B, HIGH). LE adv-data HCI handler in Meta Event cluster: validates
+          operation type 0–2 + payload length, nibble-packs into 38B buffer,
+          commits conn-slot-10 fields, dispatches `send_evt_Meta_subevent_0_or_1`,
+          Command Complete via `hci_event_sender(0xe,…)`; >150B rank-1 from
+          cold-triage. 22 unnamed >150B; 117 unnamed in-region; live named 1521.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ev;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ew: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x80045c70`, 520B).
+          (`0x80048754`, 478B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
