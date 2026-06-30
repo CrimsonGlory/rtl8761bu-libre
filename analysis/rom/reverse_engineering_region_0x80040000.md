@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 116 functions in tier, 57 renamed HIGH (Passes 52–52bn). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bn, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 115 functions in tier, 58 renamed HIGH (Passes 52–52bo). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bo, 2026-06-30).
 
 ## Overview
 
@@ -3242,5 +3242,46 @@ found (function-pointer registration).
 
 Post-rename: **201 unnamed** in-region (115 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-69+
-substantive candidate; skip rank-1–68 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bn):** rank-69+ — completed Pass 52bo below.
+
+## Pass 52bo (2026-06-30) — rank-69 LE-cluster HCI status-echo handler rename
+
+**Refreshed cold-triage (ranks 1-68 skipped as artifacts, deferred, or already done):**
+rank-69 `0x800457cc` (118B, 0 xrefs in triage) — substantive HCI Command Complete
+sender in the LE Meta Event cluster (neighbor of `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb` at `0x8004574c`).
+
+**Rank-69 decompiled and renamed (HIGH):** `FUN_800457cc` →
+`hci_global_field_0x165_status_echo_send_cmd_complete` (118B) via
+`RenamePass52boRegion80040000Fun800457cc.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_global_field_0x165_status_echo_send_cmd_complete(short *hci_cmd)
+{
+  cmd_word = *hci_cmd;
+  if (cmd_word == 0)
+    status = 0;
+  else {
+    status = PTR_struct_of_at_least_0x300_size_80045850->field_0x165;
+    if (status == '\0') status = '\x01';
+  }
+  // Pack 12-byte Command Complete (0xe): status + echoed cmd-word bytes + opcode template
+  response[0] = status;
+  response[1] = (byte)cmd_word;
+  response[2] = (byte)(cmd_word >> 8);
+  response[3] = 0;
+  hci_event_sender(0xe, &response, 0xc);
+  return 0;
+}
+```
+
+HCI command handler: derives status from global `the_0x300` struct
+`field_0x165` (0 when cmd word==0, else field value defaulting to 1) — same
+idiom as `hci_hw_crypto_dual_block_digest_handler_send_cmd_complete` and
+`pack_lmp_response_header_status_and_handle`; echoes the first cmd-word bytes in
+the 12-byte Command Complete response. No direct callers found
+(function-pointer registration).
+
+Post-rename: **200 unnamed** in-region (114 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-70+
+substantive candidate; skip rank-1–69 artifacts, deferred, and already-done ranks.
