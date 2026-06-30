@@ -2167,4 +2167,37 @@ handlers.
 
 Region unnamed count after this pass: **262** (263 minus this rename). Live named **1659** global.
 
+**Next:** superseded by Pass 6 continuation (51).
+
+## Pass 6 continuation (51) (2026-06-30) — Master link key staging `FUN_80029eb0`
+
+Decompiled and renamed:
+**`FUN_80029eb0` → `stage_master_link_key_for_encrypted_connection_slot`**
+(182B, HIGH) via `RenamePass6Region80020000Fun80029eb0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (182B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=262` at pass start). Tied at 182B with
+`FUN_8002ae50` (already renamed Pass 50); selected as next rank-1. Callee of Pass 6
+cont. (18)'s `apply_hci_master_link_key_0x417_across_connections`.
+
+**Mechanism:** Per-connection-slot body for HCI Master Link Key (`0x0417`) key-material
+staging. Gates on `big_ol_struct[slot]`: non-random BD_ADDR, connection status
+`0x04`/`0x0f`, and crypto state byte `0x05`/`0x0c`. On pass: copies 16-byte key
+blocks from crypto struct offsets `+2`/`+0x27` into staging areas `+0x33`/`+0x44`,
+copies global template `PTR_DAT_80029f6c` to `+0x61`, sets `crypto+0x50=1`, emits
+two 0x12-byte HCI events via `FUN_80029e78` (event `0x0d`) and `FUN_80029e14`
+(BLAKE-hash XOR + event `0x0e`), calls `FUN_80025164`, sets link-key-type byte via
+`set_arg1_1_to_arg2` (`0x12` when `crypto+0x214==0`, else `5`), and advances
+encryption state via `FUN_80023fb8(crypto,3)`. Returns 1 on success, 0 when gated out.
+
+**Callers:** `apply_hci_master_link_key_0x417_across_connections` (`0x80029f70`) —
+invoked per eligible encrypted connection after master link key derivation.
+
+**Confidence:** HIGH — decompile confirms key-material memcpy cluster and encryption
+state transition matching HCI Master Link Key semantics; documented caller from Pass 6
+cont. (18); crypto state bytes `0x05`/`0x0c` match `fHCI_Set_Connection_Encryption`
+link-type validation.
+
+Region unnamed count after this pass: **261** (262 minus this rename). Live named **1660** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -9647,8 +9647,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (51): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (262 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (51) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80029eb0`→`stage_master_link_key_for_encrypted_connection_slot`
+          (182B, HIGH). HCI Master Link Key per-slot key-material staging: gates on
+          encrypted link types 0x05/0x0c, copies key blocks, emits HCI events 0x0d/0x0e,
+          advances encryption state; caller `apply_hci_master_link_key_0x417_across_connections`.
+          261 unnamed remain; live named 1660.
+          → analysis/rom/reverse_engineering_region_0x80020000.md;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (52): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (261 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
