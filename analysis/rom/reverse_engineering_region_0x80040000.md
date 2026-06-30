@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 17 renamed HIGH (Passes 52–52r). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52r, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 163 functions in tier, 18 renamed HIGH (Passes 52–52s). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52s, 2026-06-30).
 
 ## Overview
 
@@ -1332,5 +1332,43 @@ before writing the expected fragment length to `+0x2e`/`+0x2c`. Sits in the
 
 Post-rename: **249 unnamed** in-region (163 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-10+
-substantive candidate; skip rank-1/2/3/4/5/6/7/8/9 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-11+
+substantive candidate; skip rank-1–10 artifacts.
+
+## Pass 52s (2026-06-30) — rank-10 LMP procedure busy-probe rename
+
+**Refreshed cold-triage (rank-1–9 skipped as artifacts or already done):** rank-10
+`0x8004e4bc` (62B, 3 callers) — substantive global conn-table LMP procedure
+busy probe with link-mode mask.
+
+**Rank-10 decompiled and renamed (HIGH):** `FUN_8004e4bc` →
+`is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180` (62B) via
+`RenamePass52sRegion80040000Fun8004e4bc.java` (`renamed=1`, live-verified).
+
+```c
+int is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180(void)
+{
+  for (conn_idx = 0; conn_idx < conn_table_count; conn_idx++) {
+    conn_rec = conn_table[conn_idx];  // PTR_PTR_8004e4fc
+    if (conn_rec != 0
+        && (conn_rec+0x08 & 7) == 0      // pkt_modes low 3 bits clear
+        && (conn_rec+0x1d & 2) != 0      // procedure-active flag
+        && (conn_rec+0x1c & 0x180) != 0) // link-mode bits 0x80/0x100 set
+      return 1;
+  }
+  return 0;
+}
+```
+
+Boolean busy-procedure probe without index parameter: scans the global
+connection table (`PTR_PTR_8004e4fc`) for any active link with pkt_modes clear,
+procedure-active (`+0x1d` bit 2), and link-mode bits `0x180` set at `+0x1c`.
+Sibling of `is_any_conn_lmp_procedure_busy_by_index` (`0x8004e500`, which
+matches on `+0x20` low nibble instead). Used as stage-(b) busy gate in three
+HCI command handlers (`FUN_8004996a`, `FUN_80049a2c`, `FUN_80049b40`) —
+when non-zero, handlers return HCI status `0x0c` (Command Disallowed).
+
+Post-rename: **248 unnamed** in-region (162 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-11+
+substantive candidate; skip rank-1–10 artifacts.
