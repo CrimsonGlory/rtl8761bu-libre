@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fu COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**7** HANDLER-tier unnamed remain in-region; live named **1330** global). Latest: `release_resource_pool_chain_slot_by_type` (Pass 12fu), `append_quality_sample_to_rssi_batch_and_flush` (Pass 12ft). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java`. See Pass 12fu section below.
+**Status**: Pass 12fv COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**6** HANDLER-tier unnamed remain in-region; live named **1331** global). Latest: `dispatch_lmp_25c_multi_slot_emit_with_config_gates` (Pass 12fv), `release_resource_pool_chain_slot_by_type` (Pass 12fu). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800708bc`, 6 remain). See Pass 12fv section below.
 
 ## Overview
 
@@ -2415,7 +2415,32 @@ connection-record binding written by the alloc caller.
 
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate per `ListHandler80070000.java`.
+**Next:** superseded by Pass 12fv.
+
+## Pass 12fv (2026-06-30) — LMP 0x25C multi-slot emit fan-out `FUN_80071cbc`
+
+Decompiled and renamed:
+**`FUN_80071cbc` → `dispatch_lmp_25c_multi_slot_emit_with_config_gates`**
+(176B, HIGH, HANDLER-tier) via `RenamePass12fvFun80071cbc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional pre-hook at `PTR_DAT_80071d6c`, then a config-gated fan-out of
+`LMP__25C_called1(slot, 0)` across multiple connection indices from literal pools
+(`PTR_DAT_80071d70`, `80071d74`, `80071d7c`, and when `config_base[1]!=0` also
+`PTR_DAT_80071d84` twice). When `PTR_DAT_80071d78 != -1`, calls
+`LMP__25B__most_common_for_VSCs1()`. When `config_base+0xd8` matches mask
+`DAT_80071d88`, calls `FUN_80078b7c`. Final path: when `PTR_DAT_80071d8c` active and
+`config_base+0x129` bit0 set, emits another `LMP__25C_called1` then sets bytes at
+`PTR_DAT_80071d94` to `2,2`. Sibling cluster of Pass 12dm `emit_lmp_25c_and_clear_conn_pending_flags_d9_204`
+and Pass 12dl `dispatch_lmp_268_timers_with_hook_and_config_gates`.
+
+**Confidence:** HIGH — multiple explicit `LMP__25C_called1`/`LMP__25B` calls with
+config-flag gating; literal-pool slot indices and config-bit masks are all visible in
+decompile.
+
+Live named **1331** (global; in-region unnamed **21**; HANDLER-tier unnamed **6**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800708bc` per
+`ListHandler80070000.java`.
 
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 

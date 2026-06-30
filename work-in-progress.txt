@@ -6573,8 +6573,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fv: cold-triage next rank-1
-          HANDLER-tier candidate per `ListHandler80070000.java` (7 remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fv (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80071cbc`→`dispatch_lmp_25c_multi_slot_emit_with_config_gates`
+          (176B, HIGH, HANDLER-tier). Config-gated LMP 0x25C multi-slot emit fan-out:
+          optional hook, `LMP__25C_called1` across literal-pool indices, optional
+          `LMP__25B__most_common_for_VSCs1`, config-bit gates on `+0xd8/+0x129`, mode
+          bytes set at `PTR_DAT_80071d94`. HANDLER-tier unnamed 7→6 remain; live named 1331.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fw: cold-triage next rank-1
+          HANDLER-tier candidate `FUN_800708bc` per `ListHandler80070000.java` (6 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
