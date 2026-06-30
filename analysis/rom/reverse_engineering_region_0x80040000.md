@@ -263,7 +263,7 @@ first as instructed.
 | `0x800401c4` | 426B | `commit_dual_slot_lmp25c_role_record_state_and_chain_credits` — IRQ-off dual-slot LMP-25C role-record state commit; see Pass 52dh | HIGH |
 | `0x80040e60` | 386B | `accept_dual_slot_lmp_role_connection_and_program_baseband_regs` — IRQ-off dual-slot LMP role connection accept + baseband programmer; see Pass 52di | **HIGH** |
 | `0x80041900` | 376B | `program_page_train_baseband_regs_and_start_paging` — HCI Create Connection page-train BB programmer; see Pass 52dj | **HIGH** |
-| `0x80043c7c` | 372B | Small state-check/update helper; plausible but unconfirmed single purpose. | MEDIUM |
+| `0x80043c7c` | 372B | `compute_automatic_flush_timeout_ticks_by_connection_handle` — ACL automatic-flush-timeout tick calculator; see Pass 52dk | **HIGH** |
 | `0x80041a94` | 352B | Field manipulator, lower conn-type cluster. | MEDIUM |
 | `0x800435a8` | 338B | Field manipulator, lower conn-type cluster. | MEDIUM |
 | `0x80041028` | 336B | Field manipulator, lower conn-type cluster. | MEDIUM |
@@ -4621,5 +4621,28 @@ Pass 52di dual-slot role accept and Pass 52dc inquiry baseband programmer.
 Post-rename: **155 unnamed** in-region (95 in 1-150B tier unchanged); **60** in
 >150B tier; live named **1483**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-30 `0x80043c7c`
-(372B).
+## Pass 52dk (2026-06-30) — >150B rank-30 automatic-flush-timeout calculator rename
+
+**>150B rank-30 decompiled+renamed (HIGH):** `FUN_80043c7c` →
+`compute_automatic_flush_timeout_ticks_by_connection_handle` (372B) via
+`RenamePass52dkRegion80040000Fun80043c7c.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). HCI automatic-flush-timeout
+calculator gated on per-handle link-type byte `0x03` in `PTR_DAT_80043df0`:
+resolves connection via `lookup_up_to_3_bos_array_indices_by_connection_handle`;
+optional veto hook at `PTR_DAT_80043df4`; walks dual TX-buffer slots in
+`PTR_DAT_80043dfc` (0x84-stride per link-type row) weighting active ACL packet
+types (`ushort@+0x2c >> 12`) as +1/+2/+3 by 1-slot vs 2-slot vs 3-slot masks
+(`0x18`/`0x110` when `field_0xb7==2`); adds pending-queue counts from
+`FUN_8006ae48` + `FUN_800177f8`; scales sum by `param_3` defaulting to
+`config_base->field53_0x3b` and `param_2` defaulting to
+`config_base->field52_0x3a` low nibble; returns
+`((param_2 * sum) * 10) >> 3` slot ticks (or `0` on lookup/type mismatch).
+No direct xrefs (indirect dispatch). ACL/flush-timeout cluster sibling of Pass
+52dj page-train programmer and `OGC_3_OCF_2a` automatic-flush-timeout setter
+(region `0x80010000`).
+
+Post-rename: **154 unnamed** in-region (95 in 1-150B tier unchanged); **59** in
+>150B tier; live named **1484**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-31 `0x80043a60`
+(358B, xrefs:15).
