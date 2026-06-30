@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 124 functions in tier, 49 renamed HIGH (Passes 52–52bf). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bf, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 120 functions in tier, 53 renamed HIGH (Passes 52–52bi). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bi, 2026-06-30).
 
 ## Overview
 
@@ -2995,5 +2995,35 @@ activity.
 
 Post-rename: **207 unnamed** in-region (121 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-53+
-substantive candidate; skip rank-1–52 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-54+
+substantive candidate; skip rank-1–53 artifacts and already-done ranks.
+
+## Pass 52bi (2026-06-30) — rank-53 conn-record handle deregistration rename
+
+**Refreshed cold-triage (ranks 1-52 skipped as artifacts or already done):** rank-53
+`0x8004e2b8` (20B, 1 xref) — substantive sorted-index-table handle deregistration in the
+`0x8004e2xx` conn-record handle-table cluster (direct inverse of
+`set_link_record_index_and_register_in_table` at `0x8004e298`).
+
+**Rank-53 decompiled and renamed (HIGH):** `FUN_8004e2b8` →
+`deregister_link_record_handle_from_index_table` (20B) via
+`RenamePass52biRegion80040000Fun8004e2b8.java` (`renamed=1`, live-verified).
+
+```c
+void deregister_link_record_handle_from_index_table(int conn_rec)
+{
+  FUN_8004e154(PTR_PTR_8004e2cc, *(undefined1 *)(conn_rec + 0x10));
+}
+```
+
+Reads the LMP handle byte at `conn_rec[+0x10]` and removes it from the sorted
+conn_rec-pointer table at `PTR_PTR_8004e2cc` via sorted-array delete
+(`FUN_8004e154` → `binary_search_sorted_table_by_index_byte` + shift-left).
+Sole caller: `FUN_8004fcec` — conn-record free path after
+`is_conn_record_pkt_modes_cleared_for_free` gate and `FUN_8004e5ac` sub-object
+teardown, immediately before SCO sub-resource and main free-list push.
+
+Post-rename: **206 unnamed** in-region (120 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-54+
+substantive candidate; skip rank-1–53 artifacts and already-done ranks.
