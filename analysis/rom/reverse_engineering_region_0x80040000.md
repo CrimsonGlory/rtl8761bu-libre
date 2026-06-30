@@ -2921,3 +2921,41 @@ Post-rename: **209 unnamed** in-region (123 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-51+
 substantive candidate; skip rank-1–50 artifacts and already-done ranks.
+
+## Pass 52bg (2026-06-30) — rank-51 payload subrecord dual-list prepend rename
+
+**Refreshed cold-triage (ranks 1-50 skipped as artifacts or already done):** rank-51
+`0x8004e274` (28B, 1 xref) — substantive payload-subrecord list-registration helper in the
+`0x8004e2xx` record-pool / fragment-reassembly cluster (sibling of
+`set_link_record_index_and_register_in_table` and `free_list_lifo_push_0xfc_record_pool`).
+
+**Rank-51 decompiled and renamed (HIGH):** `FUN_8004e274` →
+`prepend_payload_subrecord_to_pending_lists_if_low3bits_set` (28B) via
+`RenamePass52bgRegion80040000Fun8004e274.java` (`renamed=1`, live-verified).
+
+```c
+void prepend_payload_subrecord_to_pending_lists_if_low3bits_set(undefined4 *node)
+{
+  if ((*(byte *)(node + 2) & 7) != 0) {
+    alt = (undefined4 *)node[5];           // +0x14
+    head = (undefined4 *)PTR_PTR_8004e290;
+    *alt = *head;
+    *head = alt;
+  }
+  head = (undefined4 *)PTR_PTR_8004e294;
+  *node = *head;
+  *head = node;
+}
+```
+
+When the subrecord's byte at `+0x08` has any of its low 3 bits set, LIFO-prepends the
+pointer stored at `+0x14` onto global list head `PTR_PTR_8004e290`; always LIFO-prepends
+`node` itself onto `PTR_PTR_8004e294`. Sole caller: `FUN_80047304` (780B fragment-reassembly
+handler) — when the per-connection expected-length field `+0x2e` reaches zero, walks the
+payload subrecord chain at `+0x20` and invokes this on each node to register completed
+fragments into the pending-completion queues.
+
+Post-rename: **208 unnamed** in-region (122 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-52+
+substantive candidate; skip rank-1–51 artifacts and already-done ranks.

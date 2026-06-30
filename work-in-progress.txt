@@ -7466,9 +7466,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bf;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bg: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-51+ substantive candidate;
-          skip rank-1–50 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bg (2026-06-30): decompiled+
+          renamed rank-51 `FUN_8004e274`→`prepend_payload_subrecord_to_pending_lists_if_low3bits_set`
+          (28B, HIGH). Conditional dual-list LIFO prepend for completed payload subrecords
+          when byte `+0x08` low 3 bits set; always prepends node to `PTR_PTR_8004e294`.
+          Sole caller `FUN_80047304` walks `+0x20` chain when reassembly length `+0x2e`==0.
+          208 unnamed in-region (122 in 1-150B tier); live named 1430.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bh: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-52+ substantive candidate;
+          skip rank-1–51 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
