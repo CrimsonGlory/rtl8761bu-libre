@@ -3860,5 +3860,38 @@ neighborhood of `is_any_conn_lmp_procedure_busy_by_index` (`0x8004e500`) and
 
 Post-rename: **185 unnamed** in-region (99 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-85+
-substantive candidate; skip rank-1–84 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52cd):** rank-85+ — completed Pass 52ce below.
+
+## Pass 52ce (2026-06-30) — rank-85 LE Meta subevent param-buffer adapter rename
+
+**Refreshed cold-triage (ranks 1-84 skipped as artifacts, deferred, or already done):**
+rank-85 `0x80044ef8` (24B, 0 xrefs in triage) — substantive thin adapter in the
+LE Meta Event cluster (`0x80044730`–`0x80046620` neighborhood); unpacks a 6-byte
+param buffer and delegates to `send_evt_Meta_subevent_0_or_1` (`0x80044c7c`).
+
+**Rank-85 decompiled and renamed (HIGH):** `FUN_80044ef8` →
+`invoke_send_evt_meta_subevent_0_or_1_from_param_buffer` (24B) via
+`RenamePass52ceRegion80040000Fun80044ef8.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_send_evt_meta_subevent_0_or_1_from_param_buffer(undefined2 *param_buffer)
+{
+  send_evt_Meta_subevent_0_or_1
+            (*param_buffer,
+             *(byte *)((int)param_buffer + 3),
+             *(byte *)(param_buffer + 2),
+             *(byte *)((int)param_buffer + 5));
+}
+```
+
+Unpacks buffer layout: `[0:2]` uint16 handle, `[3]` param2 byte, `[4]` param3 byte,
+`[5]` param4 byte — then calls `send_evt_Meta_subevent_0_or_1` (594B LE Meta
+subevent 0/1 dispatcher documented in `reverse_engineering_ble_link_layer.md`).
+Standard function-pointer-registration adapter pattern; sibling of
+`invoke_baseband_link_setup_from_param_buffer` (`0x80048948`, Pass 52cc). No
+direct callers found.
+
+Post-rename: **184 unnamed** in-region (98 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-86+
+substantive candidate; skip rank-1–85 artifacts, deferred, and already-done ranks.
