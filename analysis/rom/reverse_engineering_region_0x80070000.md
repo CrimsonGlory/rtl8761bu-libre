@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gz COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (8 STUB-tier unnamed remain). Latest: `log_vsc_fca1_decoded_bb_status_bit_0x175` (Pass 12gz). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1361** global; **10** in-region unnamed (8 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_8007717c`, 16B, xref_in=0). See Pass 12gz section below.
+**Status**: Pass 12ha COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (7 STUB-tier unnamed remain). Latest: `thunk_init_bb_hw_config_struct_defaults` (Pass 12ha). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1362** global; **9** in-region unnamed (7 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80076ee4`, 38B, xref_in=0). See Pass 12ha section below.
 
 ## Overview
 
@@ -2417,6 +2417,30 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12ha (2026-06-30) — BB HW config init thunk `FUN_8007717c`
+
+Decompiled and renamed:
+**`FUN_8007717c` → `thunk_init_bb_hw_config_struct_defaults`**
+(16B, HIGH, STUB-tier) via `RenamePass12haRegion80070000Fun8007717c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(16B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Trivial tail-call thunk to `init_bb_hw_config_struct_defaults`
+(`0x80077130`, Pass 12e) — sole callee, no arguments, no return value used.
+Sits immediately after the 70B struct-default initializer in the BB HW init
+cluster (`0x80077130`–`0x80077508`); sibling of `call2funcs` (`0x80077620`)
+which invokes the same callee as its first step. Likely an alternate entry point
+or patch-hook alias for the BB config struct memset path.
+
+**Confidence:** HIGH — unambiguous single-callee tail-call; callee already
+HIGH-named from Pass 12e; cluster placement confirmed by adjacent siblings.
+
+Live named **1362** (global; in-region unnamed **9**; STUB-tier unnamed **7**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80076ee4`, 38B, xref_in=0).
+
 ## Pass 12gz (2026-06-30) — VSC FCA1 log-only thin wrapper `FUN_800777e2`
 
 Decompiled and renamed:
@@ -2440,8 +2464,7 @@ cluster placement and callee chain pin role despite zero xref_in.
 
 Live named **1361** (global; in-region unnamed **10**; STUB-tier unnamed **8**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_8007717c`, 16B, xref_in=0).
+**Next:** superseded by Pass 12ha.
 
 ## Pass 12gy (2026-06-30) — patch-hook gap return-0xff stub `FUN_8007882c`
 

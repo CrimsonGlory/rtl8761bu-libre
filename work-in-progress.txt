@@ -6852,8 +6852,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ha: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_8007717c`, 16B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ha (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8007717c`→`thunk_init_bb_hw_config_struct_defaults`
+          (16B, HIGH, STUB-tier). Trivial tail-call thunk to
+          `init_bb_hw_config_struct_defaults` (`0x80077130`, Pass 12e); BB HW
+          init cluster alternate entry sibling of `call2funcs`. xref_in=0.
+          STUB-tier unnamed 7 remain; live named 1362.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ha;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hb: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80076ee4`, 38B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
