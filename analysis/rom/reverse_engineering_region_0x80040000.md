@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 160 functions in tier, 19 renamed HIGH (Passes 52–52u). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52u, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 159 functions in tier, 21 renamed HIGH (Passes 52–52w). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52w, 2026-06-30).
 
 ## Overview
 
@@ -1479,3 +1479,50 @@ Post-rename: **245 unnamed** in-region (159 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-17+
 substantive candidate; skip rank-1–16 artifacts.
+
+## Pass 52w (2026-06-30) — rank-17 HCI link-policy setup handler rename
+
+**Refreshed cold-triage (rank-1–16 skipped as artifacts or already done):** rank-17
+`0x80047174` (122B, 2 xrefs) — substantive HCI command handler in the
+link-policy/feature-toggle cluster (sibling of
+`process_link_feature_toggle_command_and_send_status_event`).
+
+**Rank-17 decompiled and renamed (HIGH):** `FUN_80047174` →
+`hci_link_policy_param_setup_handler_send_cmd_complete` (122B) via
+`RenamePass52wRegion80040000Fun80047174.java` (`renamed=1`, live-verified).
+
+```c
+uint hci_link_policy_param_setup_handler_send_cmd_complete(
+     short *hci_cmd, undefined4 unused, int payload_len)
+{
+  ctrl = PTR_base_of_0x1ac_struct_array[0xb];
+  state = ctrl.field96_0x60;
+  if (state == 0) {
+    ctrl.field96_0x60 = 2;
+    if (PTR_PTR_800471f8[4] == 0)
+      status = FUN_8004704c(hci_cmd, unused, payload_len - 0x7c);
+    else
+      status = 0xc;
+  } else if ((*PTR_DAT_800471f4 & 0x10) == 0 || state == 2)
+    status = FUN_8004704c(hci_cmd, unused, payload_len - 0x7c);
+  else
+    status = 0xc;  // Command Disallowed
+  // Pack Command Complete (0xe) response: handle bytes + status
+  hci_event_sender(0xe, &response, 4);
+  return status;
+}
+```
+
+Re-entrancy-gated HCI command handler on global control record `bos[0xb]`:
+uses the same `field96_0x60` state byte as
+`process_link_feature_toggle_command_and_send_status_event` (0→2 transition,
+`0xc` when disallowed). Delegates parameter parsing/commit to still-unnamed
+`FUN_8004704c` (bitmask iteration over link slots, per-link interval pairs,
+tag-5 subrecord alloc via `lazy_alloc_tag5_singleton_and_encode_lowbit_index`).
+Always terminates via `hci_event_sender(0xe, …)` (Command Complete). No direct
+callers found (function-pointer registration).
+
+Post-rename: **244 unnamed** in-region (158 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-18+
+substantive candidate; skip rank-1–17 artifacts.

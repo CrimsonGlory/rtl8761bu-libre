@@ -7155,9 +7155,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52v
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52w: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-17+ substantive candidate;
-          skip rank-1–16 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52w (2026-06-30): decompiled+
+          renamed rank-17 substantive `FUN_80047174`→
+          `hci_link_policy_param_setup_handler_send_cmd_complete`
+          (122B, HIGH). Re-entrancy-gated HCI handler on bos[0xb].field96_0x60;
+          delegates to FUN_8004704c; sends Command Complete (0xe). Sibling of
+          `process_link_feature_toggle_command_and_send_status_event`. 244 unnamed
+          remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52w
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52x: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-18+ substantive candidate;
+          skip rank-1–17 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
