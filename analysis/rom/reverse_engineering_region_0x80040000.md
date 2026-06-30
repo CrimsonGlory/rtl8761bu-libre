@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 141 functions in tier, 37 renamed HIGH (Passes 52–52an). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52an, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 141 functions in tier, 38 renamed HIGH (Passes 52–52ao). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ao, 2026-06-30).
 
 ## Overview
 
@@ -2218,5 +2218,45 @@ index 0 only. 1 xref (function-pointer registration).
 
 Post-rename: **227 unnamed** in-region (141 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-33+
-substantive candidate; skip rank-1–32 artifacts and already-done ranks.
+## Pass 52ao (2026-06-30) — rank-33 list-A tail append rename
+
+**Refreshed cold-triage (ranks 1-32 skipped as artifacts or already done):** rank-33
+`0x8004b0f8` (110B, 1 xref) — substantive IRQ-masked list-A byte enqueue in the
+`0x8004b4xx` TX fragmentation scheduler cluster (callee of `FUN_8004b468`; sibling of
+`insert_byte_into_per_connection_singly_linked_list_head_or_tail` and Pass 52am's
+`atomically_take_conn_list_a_collect_overflow_and_schedule_tx`).
+
+**Rank-33 decompiled and renamed (HIGH):** `FUN_8004b0f8` →
+`irq_masked_append_byte_to_conn_list_a_tail` (110B) via
+`RenamePass52aoRegion80040000Fun8004b0f8.java` (`renamed=1`, live-verified).
+
+```c
+void irq_masked_append_byte_to_conn_list_a_tail(byte value, uint conn_idx)
+{
+  conn_idx = conn_idx & 0xff;
+  if (value != '\n') {  // 0x0a empty-list sentinel
+    saved = disable_interrupts__clear_LSBit_of_CP0_Status_Register_();
+    ctx = PTR_base_of_0x1ac_struct_array;
+    if (ctx[conn_idx].field307_0x140 == '\n')
+      ctx[conn_idx].field307_0x140 = value;           // init head
+    else
+      node_pool[(byte)ctx[conn_idx].field308_0x141 * 0xc + 0xb] = value;  // append via tail index
+    ctx[conn_idx].field308_0x141 = value;             // update tail
+    ctx[conn_idx].field309_0x142++;                   // increment count
+    enable_interrupts__set_CP0_Status_to_arg_(saved);
+  }
+}
+```
+
+When `value` is not the empty-list sentinel `0x0a`, IRQ-disabled critical section appends
+`value` to per-connection list-A at `conn+0x140` (head index), `+0x141` (tail index),
+`+0x142` (count): if head is empty (`== 0x0a`), sets head directly; else chains through
+the shared `0xc`-byte node pool at `PTR_PTR_8004b16c` indexed by current tail. Same
+sentinel and field layout as `insert_byte_into_per_connection_singly_linked_list_head_or_tail`
+and `atomically_take_conn_list_a_collect_overflow_and_schedule_tx`. Callee of the 624B TX
+fragmentation scheduler `FUN_8004b468`. 1 xref.
+
+Post-rename: **226 unnamed** in-region (140 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-34+
+substantive candidate; skip rank-1–33 artifacts and already-done ranks.
