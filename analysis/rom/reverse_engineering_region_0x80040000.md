@@ -4263,7 +4263,8 @@ link-timing fields from global ctx `PTR_PTR_8004ecac` (offsets
 packed register; conditional OR-flag set at `DAT_8004ece8` when 2-bit sub-field
 from ctx byte 5 exceeds 1. Full register-block writer — callee of twin link-setup
 PDU handlers `0x80051c60`/`0x80051f14` (region `0x80050000`), paired with smaller
-sibling `FUN_8004ea2c` (220B, still unnamed).
+sibling `write_compact_link_setup_timing_to_baseband_hw_regs` (`0x8004ea2c`, renamed
+Pass 52cx).
 
 Post-rename: **169 unnamed** in-region (95 in 1-150B tier unchanged); **74** in
 >150B tier.
@@ -4333,5 +4334,23 @@ live-verified.
 Post-rename: **167 unnamed** in-region (95 in 1-150B tier unchanged); **72** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-17 `0x8004ea2c`
-(220B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cx below.
+
+## Pass 52cx (2026-06-30) — >150B rank-17 compact link-timing baseband writer
+
+**>150B rank-17 decompiled+renamed (HIGH):** `FUN_8004ea2c` →
+`write_compact_link_setup_timing_to_baseband_hw_regs` (220B, 2 confirmed
+callers) via `RenamePass52cxRegion80040000Fun8004ea2c.java` (`renamed=1`,
+live-verified). Upgraded from MEDIUM (Pass 6, 2026-06-23). Compact 3-register
+sibling of `write_link_setup_timing_params_to_baseband_register_block`
+(`0x8004eb18`): packs global-ctx byte 5 sub-fields from `PTR_PTR_8004eb0c`
+with `param_2` LSB and `param_3` low 3 bits into `DAT_8004eb08`/`DAT_8004eb10`/
+`DAT_8004eb14`; conditional OR-flags `0x2000`/`0x4000` when 2-bit sub-fields
+exceed 1. Callees: `program_hw_channel_and_slot_params` (`0x80052008`, region
+`0x80050000`) and twin link-setup PDU handlers `0x80051c60`/`0x80051f14`.
+
+Post-rename: **166 unnamed** in-region (95 in 1-150B tier unchanged); **71** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-18 `0x8004c940`
+(194B, 2 xrefs).
