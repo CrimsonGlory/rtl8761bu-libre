@@ -1870,5 +1870,46 @@ Structural sibling of `link_0x54_record_pool_into_free_list_by_config_count` and
 
 Post-rename: **235 unnamed** in-region (149 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-18+
-substantive candidate; skip rank-1–17 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-19+
+substantive candidate; skip rank-1–18 artifacts and already-done ranks.
+
+## Pass 52ag (2026-06-30) — rank-18 TX reassembly buffer segment walker rename
+
+**Refreshed cold-triage (ranks 1-17 skipped as artifacts or already done):** rank-18
+`0x8004a5ac` (68B, 2 xrefs) — substantive TX reassembly buffer walker in the
+connection/feature dispatch cluster (`FUN_8004ce70`, 908B).
+
+**Rank-18 decompiled and renamed (HIGH):** `FUN_8004a5ac` →
+`walk_tx_reassembly_buffer_consuming_length_prefixed_segments` (68B) via
+`RenamePass52agRegion80040000Fun8004a5ac.java` (`renamed=1`, live-verified).
+
+```c
+/* returns total bytes consumed (v0) */
+int walk_tx_reassembly_buffer_consuming_length_prefixed_segments(byte *buf, uint budget)
+{
+  uint offset = 0;
+  while (budget != 0) {
+    byte len_byte = buf[offset + 1];
+    byte adjusted = len_byte + 2;
+    if ((len_byte + 2U & 1) != 0) adjusted = len_byte + 3;  /* align to even */
+    uint seg_len = *PTR_DAT_8004a5f0 * 2 + 6 + adjusted;
+    if (budget < seg_len) break;
+    budget -= seg_len;
+    offset += seg_len;
+  }
+  return offset;
+}
+```
+
+Walks a TX reassembly staging buffer (`PTR_DAT_8004d20c` in caller), consuming
+variable-length segments whose size derives from each segment's length byte at
+`buf[offset+1]`, a global scale factor at `PTR_DAT_8004a5f0`, and a fixed +6
+overhead. Called from `FUN_8004ce70` during type-0 multi-chunk TX reassembly
+after each `FUN_8002b558` HW-TX submit — return value subtracted from remaining
+buffer budget before `FUN_8004ae74` finalizes the fragment. Connection/feature
+dispatch cluster sibling of `FUN_8004a730` (adjacent segment parser).
+
+Post-rename: **234 unnamed** in-region (148 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-19+
+substantive candidate; skip rank-1–18 artifacts and already-done ranks.

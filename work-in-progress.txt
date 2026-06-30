@@ -7244,9 +7244,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52af;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ag: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-18+ substantive candidate;
-          skip rank-1–17 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ag (2026-06-30): decompiled+
+          renamed rank-18 `FUN_8004a5ac`→`walk_tx_reassembly_buffer_consuming_length_prefixed_segments`
+          (68B, HIGH). TX reassembly buffer walker; consumes length-prefixed
+          segments from global staging buffer; callee of `FUN_8004ce70` type-0
+          multi-chunk TX path. Region 234 unnamed remain (148 in 1-150B tier).
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ag;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ah: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-19+ substantive candidate;
+          skip rank-1–18 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
