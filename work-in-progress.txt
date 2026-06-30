@@ -8173,7 +8173,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ec: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ec (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004ab64`→`gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97`
+          (414B, HIGH) — per-link ext-adv param bitfield gate; validates param
+          dword subfields against conn-record status bytes, commits power-state
+          via `commit_link_power_state_bits_to_hw_register_with_retry`, applies
+          via `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` sub-id
+          `0xe`.
+          136 unnamed in-region; live named 1502.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ec;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ed: continue refreshed >150B
           cold-triage — refresh rank list and decompile+rename next rank-1
           unnamed >150B candidate.
 

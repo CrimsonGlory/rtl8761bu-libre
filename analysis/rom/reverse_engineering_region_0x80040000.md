@@ -217,6 +217,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `walk_conn_tx_segments_dispatch_by_packet_type_nibble`; type-1 single-chunk + clock-offset check; type-4 LE accumulate via `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count`; see Pass 52dx/52ea/52eb | HIGH |
 | `0x8004a730` | 456B | `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` — type-4 LE TX segment consumer; walks length-prefixed segments, validates slot-10 clock-offset fields, returns segment count; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52ea | HIGH |
 | `0x8004ae74` | 452B | `walk_conn_tx_segments_dispatch_by_packet_type_nibble` — type-0 multi-chunk TX segment walker; dispatches each segment by packet-type nibble via `PTR_PTR_8004b044` table, fallback to `compute_length_prefixed_segment_advance_clamped_to_remainder`; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52eb | HIGH |
+| `0x8004ab64` | 414B | `gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97` — validates ext-adv param dword bitfields against per-link status bytes, commits power-state via `commit_link_power_state_bits_to_hw_register_with_retry`, applies via `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` sub-id `0xe`; see Pass 52ec | HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
 confidence (`init_global_connection_table_and_bt_state`,
@@ -5136,6 +5137,37 @@ accumulate path).
 
 Post-rename: **137 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1501**.
+
+## Pass 52ec (2026-06-30) — >150B rank-1 ext-adv param gate rename
+
+**Cold-triage refresh:** `ColdTriageRegion80040000Pass52ec.java` — 42 unnamed
+>150B; rank-1 `0x8004ab64` (414B, 1 xref).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004ab64` →
+`gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97` (414B, 1 xref in
+cold-triage) via `RenamePass52ecRegion80040000Fun8004ab64.java` (`renamed=1`,
+live-verified).
+
+Per-link extended-advertising parameter gate on conn-record slot
+`param_1` (`0x1ac` struct array at `PTR_base_of_0x1ac_struct_array_*`):
+
+- When `field274_0x119 & 1`: clears bit 0, calls
+  `commit_link_power_state_bits_to_hw_register_with_retry`, ORs `0xf` into
+  `field273_0x118` low nibble.
+- Validates 2-bit subfields from `param_2` at bits `[14:13]` and `[12:11]`
+  against per-link status bytes `field283_0x122` / `field284_0x123` (bit masks
+  `1`/`2`/`4` per subfield value).
+- When `field283_0x122 & 4` and power-mode nibble mismatches, adjusts `param_2`
+  with `0x4000`/`0x6000` power-state bits before apply.
+- On success calls `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2
+  (link_idx, 0xe, param_2)`; diagnostic logging via
+  `possible_logging_function__var_args`.
+
+LE extended-advertising cluster sibling of rank-2 `FUN_8004c2f0` (414B, type-1
+TX payload dispatcher in connection TX path).
+
+Post-rename: **136 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1502**.
 
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
 decompile+rename next rank-1 unnamed >150B candidate.
