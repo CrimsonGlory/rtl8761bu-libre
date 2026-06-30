@@ -6811,8 +6811,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gv: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80078838`, 4B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gv (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078838`→`noop_unused_patch_hook_slot_before_vsc_fc13_stub_gap`
+          (4B, HIGH, STUB-tier). Trivial `return;` noop stub in `0x800788xx`
+          patch-hook cluster before Pass 12gu stub-gap noop;
+          xref_in=0. STUB-tier unnamed 12 remain; live named 1357.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gw: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80078834`, 4B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
