@@ -448,7 +448,7 @@ purpose unclear)`, not medium, so it's out of scope for this ticket.
 | `0x80021c9c` | 28B | `calls_interesting_string_user_FUN_80021c9c` | Master init wrapper: calls `calls_reg_multiple_dptrs__FUN_80021ba0`, `interesting_string_user_FUN_80021ab0`, `initialize_some_global_struct_FUN_80021924` in sequence. |
 | `0x80025cb4` | 118B | `LMP__271__FUN_80025cb4` | Keyed by the literal `0x271` passed to `possible_logger_called_if_no_patch3`. Checks a crypto-struct flag at offset +0x50; on set, dispatches to `derive_dhkey_check_and_send_lmp_0x41` and uses status 0x3a, else status 0x3c, written via `set_arg1_1_to_arg2`. Otherwise (flag at +0xb9 set) logs and marks +0xba. |
 | `0x800281c4` | 160B | `LMP_NOT_ACCEPTED_0x04` | LMP_not_accepted (opcode 4) handler. Dispatches by the rejected-opcode byte (`param+5`) to 11 distinct per-opcode error-recovery handlers (subcodes 0x8, 0x9, 0xb-0xd, 0xf, 0x10, 0x32, 0x3f, 0x40, 0x41). |
-| `0x80029830` | 156B | `LMP_TEMP_KEY_0x0E` | LMP_temp_key (opcode 0xe) legacy-authentication handler. Validates connection state, XORs a 16-byte key buffer (`FUN_8002cf24` + `FUN_80025634`), sets status via `set_arg1_1_to_arg2`; on validation failure replies `wrap_send_LMP_NOT_ACCEPTED(handle, 0xe, ...)`. |
+| `0x80029830` | 156B | `LMP_TEMP_KEY_0x0E` | LMP_temp_key (opcode 0xe) legacy-authentication handler. Validates connection state, XORs a 16-byte key buffer (`pad_concat_safer_plus_encrypt_16byte_key_block` + `FUN_80025634`), sets status via `set_arg1_1_to_arg2`; on validation failure replies `wrap_send_LMP_NOT_ACCEPTED(handle, 0xe, ...)`. |
 | `0x8002fee0` | 186B | `VSC_0xfc20__download_patch__FUN_8002fee0` | **Project-relevant**: core of the VSC 0xFC20 patch-download mechanism (the same VSC the Linux `btrtl` driver uses to load `rtl8761bu_fw.bin`, see `CLAUDE.md`). Copies each download fragment into the patch buffer (default location `0x8010a000`, restored by `PTR_FUN_8002ffa4` when the fragment-index byte is `0x7f` or larger); on the final fragment (high bit of the fragment-count byte set) sets completion/flag state and jumps into the now-installed patch code — Ghidra renders this jump as a "do-nothing infinite loop" because it's an unresolved indirect/computed jump, not actually an infinite loop at runtime. |
 
 **Confidence**: all 7 upgraded **medium → HIGH** in `rom_function_index.md`. No
@@ -3363,5 +3363,33 @@ filter (`0x0c`/`0x16`), 72-tick stall threshold, and callee chain into documente
 SSP DHKey-check nonce sender + encryption-state advance table.
 
 Region unnamed count after this pass: **224** (225 minus this rename). Live named **1697** global.
+
+**Next:** superseded by Pass 6 continuation (89).
+
+## Pass 6 continuation (89) (2026-06-30) — SAFER+ padded key-block mixer `FUN_8002cf24`
+
+Decompiled and renamed:
+**`FUN_8002cf24` → `pad_concat_safer_plus_encrypt_16byte_key_block`**
+(134B, HIGH) via `RenamePass6Region80020000Fun8002cf24.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (134B, xref_in=5) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=224` at pass start).
+
+**Mechanism:** Legacy-auth/encryption key-mixing helper in the SAFER+ cluster. Copies
+16B from `param_1` into output buffer `param_5`, builds a 16B stack block from
+`param_2[0..param_3)` (length capped to byte), pads with up to 6 bytes from
+`param_4`, wraps remaining bytes circularly to fill the block, XORs the final
+length into `param_5[0xf]`, then runs one `safer_plus_block_encrypt` round
+(stack_block, param_5, 1).
+
+**Callers:** `LMP_TEMP_KEY_0x0E` (legacy temp-key: mixes `crypto+2` into
+`crypto+0x61` before XOR with incoming LMP payload); `apply_hci_master_link_key_0x417_across_connections`
+(confirmed via `find_callers`).
+
+**Confidence:** HIGH — decompile confirms padded 16B block assembly + single-round
+`safer_plus_block_encrypt`; direct callee of documented `LMP_TEMP_KEY_0x0E`
+legacy-authentication handler; lives adjacent to `safer_plus_block_encrypt` cluster.
+
+Region unnamed count after this pass: **223** (224 minus this rename). Live named **1698** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
