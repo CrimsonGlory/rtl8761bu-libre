@@ -4311,5 +4311,27 @@ live-verified.
 Post-rename: **168 unnamed** in-region (95 in 1-150B tier unchanged); **73** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-16 `0x800442bc`
-(222B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cw below.
+
+## Pass 52cw (2026-06-30) — >150B rank-16 conn subsystem global reset
+
+**>150B rank-16 decompiled+renamed (HIGH):** `FUN_800442bc` →
+`reset_conn_subsystem_global_state_and_reinit_slot_entries` (222B) — upgraded
+from MEDIUM-HIGH (Pass 6, 2026-06-23). Sets sentinel `0xff`, clears
+`the_0x300->int_0x10`, calls `reset_four_conn_lap_and_dual_slot_role_records`,
+zeros ~20 link-manager globals, loops 12 iterations calling `FUN_800425e0` per
+index while clearing parallel per-slot byte/dword arrays, conditionally invokes
+`LMP__25B__most_common_for_VSCs1()` when pending-VSC sentinel `!= -1`, then
+IRQ-off clears a 10-entry ushort/byte table before final global field zeroing.
+Subsystem-wide connection-state teardown/reset routine — structural sibling of
+`global_link_state_reset_dispatcher` (`0x8001347c`, region `0x80010000`) and the
+codec/role-switch gate-byte sweeps at `0x8004326c`/`0x800431a0`. Cold-triage
+listed 2 xrefs; live `find_callers`/`xrefs_to` returned 0 (likely fn-ptr
+registration). Via `RenamePass52cwRegion80040000Fun800442bc.java`, `renamed=1`,
+live-verified.
+
+Post-rename: **167 unnamed** in-region (95 in 1-150B tier unchanged); **72** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-17 `0x8004ea2c`
+(220B, 2 xrefs).

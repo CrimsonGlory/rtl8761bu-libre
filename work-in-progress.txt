@@ -7862,8 +7862,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cw: continue >150B cold-triage
-          — decompile+rename rank-16 `0x800442bc` (222B, 2 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cw (2026-06-30): decompiled+
+          renamed rank-16 `FUN_800442bc`→
+          `reset_conn_subsystem_global_state_and_reinit_slot_entries`
+          (222B, HIGH) — subsystem-wide conn-state reset: clears
+          `the_0x300->int_0x10`, reinit 12 slot entries via `FUN_800425e0`,
+          conditional `LMP__25B__most_common_for_VSCs1`; 167 unnamed in-region
+          (72 in >150B tier); live named 1471.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cx: continue >150B cold-triage
+          — decompile+rename rank-17 `0x8004ea2c` (220B, 2 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
