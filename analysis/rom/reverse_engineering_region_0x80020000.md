@@ -2331,4 +2331,36 @@ encryption-key programmers; mode-byte `+0x1f1==8` gate consistent with
 
 Region unnamed count after this pass: **257** (258 minus this rename). Live named **1664** global.
 
+**Next:** superseded by Pass 6 continuation (56).
+
+## Pass 6 continuation (56) (2026-06-30) — HCI PIN Code Request Reply `FUN_8002309c`
+
+Decompiled and renamed:
+**`FUN_8002309c` → `fHCI_PIN_Code_Request_Reply_0xd`**
+(176B, HIGH) via `RenamePass6Region80020000Fun8002309c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (176B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=257` at pass start). Sole remaining
+176B-tier function after Pass 6 cont. (55) renamed the tied `FUN_8002d1f0`.
+
+**Mechanism:** HCI PIN Code Request Reply handler (OGF1 OCF 0x0d / opcode `0x40d`),
+dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` opcode switch case `0x40d`.
+Resolves connection via `FUN_80023008` with validator callbacks at `PTR_LAB_80022640`
+and `PTR_LAB_80022654`. Copies PIN length from cmd byte `+9` to `crypto+0xde` and
+16-byte PIN material from `+10` to `crypto+0xce` via `optimized_memcpy`. When conn
+sub-state `+1 != 0x17`: if no pending LMP at `+0x1e8`, calls `FUN_80025410` (AU_RAND
+LMP send) + `set_arg1_1_to_arg2(0xb)`; else when pending-LMP type bit `>>1 != 8`,
+either rejects via `wrap_send_LMP_NOT_ACCEPTED(0x8, reason 0x23)` or sets `+0x50=3`
+before `FUN_80025474` pairing continuation. Always clears pending via `FUN_80025634`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (`0x800234d4`, opcode `0x40d` branch).
+
+**Confidence:** HIGH — decompile confirms PIN-length/PIN-data staging idiom matching
+documented link-key/PIN HCI reply cluster (`FUN_80023180` at `0x40b`,
+`FUN_80023154` at `0x40c`, `FUN_80023070` at `0x40e`); caller decompile shows
+direct opcode-dispatch; pairing-state transitions via `set_arg1_1_to_arg2`/`FUN_80025474`
+consistent with `apply_link_key_and_dispatch_auth_pairing_flow` cluster.
+
+Region unnamed count after this pass: **256** (257 minus this rename). Live named **1665** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

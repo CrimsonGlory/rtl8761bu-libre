@@ -9691,8 +9691,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (55);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (56): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (257 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (56) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002309c`→`fHCI_PIN_Code_Request_Reply_0xd`
+          (176B, HIGH). HCI PIN Code Request Reply (opcode 0x40d): copies PIN
+          length/bytes to crypto+0xde/+0xce, AU_RAND/LMP-NOT-ACCEPTED/pairing
+          continuation branches; caller `HCI_Write_Simple_Pairing_Debug_Mode`.
+          256 unnamed remain; live named 1665.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (56);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (57): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (256 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
