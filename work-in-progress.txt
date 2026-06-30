@@ -8913,7 +8913,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hc: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hc (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800408cc`→`dispatch_inquiry_lifecycle_fptr_0x81_and_clear_notify_flag`
+          (26B, HIGH). Dispatches fptr `0x81` at `PTR_DAT_800408e8`, then chains
+          `clear_inquiry_pending_notify_flag_and_wrap_buffer`; sole caller
+          `dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize`. Inquiry-lifecycle
+          cluster `0x800408xx`. 58 unnamed in-region (21 in 1-150B size≥20B tier);
+          live named 1580.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hd: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

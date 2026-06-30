@@ -7951,5 +7951,38 @@ bytes) and dispatches through this adapter.
 
 Post-rename: **59 unnamed** in-region (22 in 1-150B size≥20B tier); live named **1579**.
 
+**Next:** superseded by Pass 52hc below.
+
+## Pass 52hc (2026-06-30) — rank-1 inquiry fptr 0x81 dispatch rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hc.java` — 59 unnamed,
+22 in 1-150B size≥20B tier; rank-1 `0x800408cc` (26B, 1 xref) — inquiry-lifecycle
+fptr `0x81` dispatch chain (28B below Pass 52ha's `clear_inquiry_pending_notify_flag_and_wrap_buffer`
+at `0x800408a4`; 28B above Pass 52fs's `dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize`
+at `0x800408ec`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800408cc` →
+`dispatch_inquiry_lifecycle_fptr_0x81_and_clear_notify_flag` (26B) via
+`RenamePass52hcRegion80040000Fun800408cc.java` (`renamed=1`, live-verified).
+
+```c
+void dispatch_inquiry_lifecycle_fptr_0x81_and_clear_notify_flag(void)
+{
+  (*(code *)PTR_DAT_800408e8)(0, 0x81);
+  clear_inquiry_pending_notify_flag_and_wrap_buffer();
+}
+```
+
+Dispatches registered hook at `PTR_DAT_800408e8` with opcode `0x81`, then chains
+into Pass 52ha's `clear_inquiry_pending_notify_flag_and_wrap_buffer`. Completes
+the inquiry-lifecycle finalize sequence begun by Pass 52fs's
+`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize` (which dispatches
+opcode `0x8e` then calls this function). Sole caller
+`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize` — shared teardown
+helper invoked from `fHCI_inquiry_cancel`, `fHCI_Exit_Periodic_Inquiry_Mode_0x04`,
+and `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp`.
+
+Post-rename: **58 unnamed** in-region (21 in 1-150B size≥20B tier); live named **1580**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
