@@ -4644,5 +4644,30 @@ No direct xrefs (indirect dispatch). ACL/flush-timeout cluster sibling of Pass
 Post-rename: **154 unnamed** in-region (95 in 1-150B tier unchanged); **59** in
 >150B tier; live named **1484**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-31 `0x80043a60`
-(358B, xrefs:15).
+**Next:** continue >150B cold-triage — decompile+rename rank-32 `0x8004a9e4`
+(152B, xrefs:1).
+
+## Pass 52dl (2026-06-30) — >150B rank-31 list-A slot-chain overflow collect rename
+
+**Stale pointer resolved:** rank-31 candidate `0x80043a60` was already renamed in Pass
+52ci (`remote_name_request_feature_apply_orchestrator`). Refreshed cold-triage
+(`ColdTriageRegion80040000Pass52dl.java`) shows actual rank-31 is `0x8004b29c`.
+
+**>150B rank-31 decompiled+renamed (HIGH):** `FUN_8004b29c` →
+`walk_conn_list_a_slot_chain_collect_overflow_records` (162B, 1 xref) via
+`RenamePass52dlRegion80040000Fun8004b29c.java` (`renamed=1`, live-verified).
+Walks the list-A slot-table chain at `PTR_PTR_8004b340` starting from saved head
+index `param_2` until sentinel `10`: for each 0xc-stride table entry iterates
+8-byte slot records, deduplicates against output tail `param_1[1]`, clears link
+bytes at record `+0x100..+0x103`, appends to 3-word output list (`head`/`tail`/
+`count`), copies metadata byte to `+0x106`, zeroes `+0x107`, advances chain via
+`FUN_8004b170` + next-index byte at entry `+0xb`. Sole caller
+`atomically_take_conn_list_a_collect_overflow_and_schedule_tx` (`0x8004b6ec`);
+list-A twin of still-unnamed `FUN_8004b1d0` (list-B quota-overflow walk used by
+`atomically_take_conn_list_b_and_apply_quota_overflow`).
+
+Post-rename: **153 unnamed** in-region (95 in 1-150B tier unchanged); **58** in
+>150B tier; live named **1485**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-32 `0x8004a9e4`
+(152B, xrefs:1).
