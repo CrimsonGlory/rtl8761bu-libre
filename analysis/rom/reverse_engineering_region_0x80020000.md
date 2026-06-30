@@ -3170,4 +3170,36 @@ caller linkage through established pause-encryption handler.
 
 Region unnamed count after this pass: **230** (231 minus this rename). Live named **1691** global.
 
+**Next:** superseded by Pass 6 continuation (83).
+
+## Pass 6 continuation (83) (2026-06-30) — mode-6 encryption key derivation `FUN_8002d3d8`
+
+Decompiled and renamed:
+**`FUN_8002d3d8` → `derive_encryption_key_material_safer_plus_mode6`**
+(138B, HIGH) via `RenamePass6Region80020000Fun8002d3d8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (138B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=230` at pass start). Tied at 138B with
+`FUN_80028e30` and `FUN_80028d04` (xref_in=1 each); selected for highest xref_in and
+encryption-cluster centrality.
+
+**Mechanism:** Mode-6 encryption key-material derivation helper selected when crypto struct
+`+0x214==0` (classic encryption path in `LMP_START_ENCRYPTION_REQ_0x11`). Copies 16B key
+block (`param_1`), 16B PDU/aux (`param_2`), and 12B mixing block (`param_3`) into stack;
+runs two-pass `safer_plus_block_encrypt` with XOR/add byte-mixing loop and
+`apply_safer_plus_bias1_constants` between rounds; finishes via `FUN_8002d378` curve-constant
+subtraction indexed by key-size byte `param_5` (`crypto+0x23`). Sibling of
+`derive_encryption_key_material_hmac_mode8_bdaddr_mix` (mode 8 / `+0x214!=0` path).
+
+**Callers:** `LMP_START_ENCRYPTION_REQ_0x11` (Pass 6 cont. 13) and
+`program_encryption_key_and_send_lmp_start_encryption_req` (Pass 6 cont. 34) — both
+encryption-procedure kickoff paths that select this helper vs mode-8 HMAC based on
+`crypto+0x214` and mode byte `+0x1f1`.
+
+**Confidence:** HIGH — decompile confirms SAFER+ double-encrypt idiom matching E1/E21
+wrappers; `FUN_8002d378` curve-subtraction tail matches documented SSP bignum helpers;
+callers already named and documented as encryption-key programmers.
+
+Region unnamed count after this pass: **229** (230 minus this rename). Live named **1692** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
