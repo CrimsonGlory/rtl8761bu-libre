@@ -7573,9 +7573,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52br: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-72+ substantive candidate;
-          skip rank-1–71 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52br (2026-06-30): decompiled+
+          renamed rank-72 `FUN_8004b7d8`→`irq_safe_stage_conn10_diagnostic_dword_pair_and_incr_count`
+          (96B, HIGH). IRQ-masked conn-record slot-10 diagnostic dword-pair stager:
+          gated on count byte; inline dword at +0xd0 or via *ptr+0x104; second dword
+          at +0xd4; accumulates count into +0xd8. Conn-slot-10 maintenance cluster
+          sibling of `set_hw_ctrl_bits_and_update_conn10_0x154`. 0 xrefs (function-
+          pointer registration). 197 unnamed in-region (111 in 1-150B tier); live
+          named 1441.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52br;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bs: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-73+ substantive candidate;
+          skip rank-1–72 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

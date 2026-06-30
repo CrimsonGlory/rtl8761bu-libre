@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 115 functions in tier, 58 renamed HIGH (Passes 52–52bo). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bo, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 115 functions in tier, 59 renamed HIGH (Passes 52–52br). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52br, 2026-06-30).
 
 ## Overview
 
@@ -3364,5 +3364,48 @@ status + echoed cmd-word bytes + gate-result byte + global ushort template at
 
 Post-rename: **198 unnamed** in-region (112 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-72+
-substantive candidate; skip rank-1–71 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bq):** rank-72+ — completed Pass 52br below.
+
+## Pass 52br (2026-06-30) — rank-72 conn[10] diagnostic dword-pair stager rename
+
+**Refreshed cold-triage (ranks 1-71 skipped as artifacts, deferred, or already done):**
+rank-72 `0x8004b7d8` (96B, 0 xrefs in triage) — substantive IRQ-masked
+conn-record slot-10 diagnostic staging helper; sibling neighborhood of
+`set_hw_ctrl_bits_and_update_conn10_0x154` and `0x8004b898` per-connection
+parameter setter.
+
+**Rank-72 decompiled and renamed (HIGH):** `FUN_8004b7d8` →
+`irq_safe_stage_conn10_diagnostic_dword_pair_and_incr_count` (96B) via
+`RenamePass52brRegion80040000Fun8004b7d8.java` (`renamed=1`, live-verified).
+
+```c
+void irq_safe_stage_conn10_diagnostic_dword_pair_and_incr_count(uint *entry)
+{
+  if ((char)entry[2] == 0) return;
+
+  irq = disable_interrupts();
+  rec = PTR_base_of_0x1ac_struct_array[10];
+  if (rec.field_0xd0_dword == 0)
+    rec.field_0xd0_dword = entry[0];
+  else {
+    ptr = rec.field_0xd4_ptr;
+    *(uint *)(ptr + 0x104) = entry[0];
+  }
+  rec.field_0xd4_dword = entry[1];
+  rec.field_0xd8_count += (byte)entry[2];
+  enable_interrupts(irq);
+}
+```
+
+IRQ-masked diagnostic accumulator on fixed connection-record slot 10
+(local-device / special slot): gated on nonzero count byte at `entry+8`;
+when inline dword at `+0xd0` is zero stores first dword inline, else writes
+to `*ptr_at_0xd4 + 0x104`; stores second dword at `+0xd4` and accumulates
+count byte into `+0xd8`. No direct callers found (function-pointer
+registration). Sibling of conn-slot-10 maintenance functions in region
+`0x80050000` (`0x8005d154` linked-list drain at `+0xdc`).
+
+Post-rename: **197 unnamed** in-region (111 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-73+
+substantive candidate; skip rank-1–72 artifacts, deferred, and already-done ranks.
