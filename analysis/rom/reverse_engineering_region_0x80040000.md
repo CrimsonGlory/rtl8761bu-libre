@@ -8882,5 +8882,39 @@ indirect fptr-table registration).
 
 Post-rename: **33 unnamed** in-region (33 in 1-19B tier); live named **1605**.
 
-**Next:** continue 1-19B cold-triage — skip rank-1–13 artifacts; refresh ranks via
-`ColdTriageRegion80040000Pass52ib.java`.
+**Next:** superseded by Pass 52ic below.
+
+## Pass 52ic (2026-06-30) — ranks 14–24 artifact triage; rank-25 conn-record pool noop rename
+
+**Cold-triage (refreshed):** full 33-entry 1-19B tier via
+`ColdTriageRegion80040000Pass52ib.java`. Ranks 1–13 unchanged (`halt_baddata`
+artifacts). Ranks 14–15 (`0x8004a2e8`, `0x8004e3e0`, 8B, 1 xref each) reconfirmed
+`halt_baddata` artifacts — skipped. Rank-16 `0x8004a444` (4B, 1 xref) remains
+deferred mis-bound overlap with
+`hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete`
+(`0x8004a464`, Pass 52bt). Ranks 17–24 (1B, 1 xref each) confirmed
+`halt_baddata` artifacts via sample decompile of rank-17 `0x80044ad4` — skipped.
+Ranks 26–33 are 1–4B 0-xref stub tail (rank-26 `0x8004f370` already documented
+as artifact in Pass 52ci).
+
+**Rank-25 decompiled+renamed (HIGH):** `FUN_8004e81c` →
+`noop_return_stub_conn_record_pool` (4B) via
+`RenamePass52icRegion80040000Fun8004e81c.java` (`renamed=1`, live-verified).
+
+```c
+void noop_return_stub_conn_record_pool(void)
+{
+  return;
+}
+```
+
+4B empty-return noop in the `0x8004e8xx` conn-record pool cluster (between
+`free_list_lifo_push` at `0x8004e808` and
+`get_or_alloc_conn_negotiation_state` at `0x8004e820`). 0 xrefs — likely
+function-pointer table placeholder. Distinct from `noop_handler_stub`
+(`0x80056200`, region `0x80050000`) which has live callers.
+
+Post-rename: **32 unnamed** in-region (32 in 1-19B tier); live named **1606**.
+
+**Next:** continue 1-19B cold-triage — skip rank-1–26 artifacts/deferred; refresh
+ranks via `ColdTriageRegion80040000Pass52ib.java`.
