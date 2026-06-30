@@ -214,7 +214,8 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
 | `0x80041dac` | 876B | `teardown_inquiry_lap_slot_baseband_cleanup_and_release` — inquiry/LAP slot teardown orchestrator on `param_1`-indexed `big_ol_struct`; IRQ-off baseband register teardown, clears role-switch hook, releases inquiry LAP pending bitmask, clears AFH channel map, bitmask cleanup; callers `fHCI_conn_req_cancel` + `connection_teardown_HCI_event_finalizer`. Renamed Pass 52dd. | HIGH |
 | `0x8004d294` | 1280B | `init_or_reset_sco_esco_hw_registers_and_link_slots` — SCO/eSCO HW register init/reset blob; dual-mode on `param_1` (full config-driven programming + 64+64 link-register-B clears + 11 eSCO slot clears when zero); see Pass 52dw | HIGH |
-| `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `FUN_8004ae74`; type-1 single-chunk + clock-offset check; type-4 LE accumulate; see Pass 52dx | HIGH |
+| `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `FUN_8004ae74`; type-1 single-chunk + clock-offset check; type-4 LE accumulate via `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count`; see Pass 52dx/52ea | HIGH |
+| `0x8004a730` | 456B | `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` — type-4 LE TX segment consumer; walks length-prefixed segments, validates slot-10 clock-offset fields, returns segment count; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52ea | HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
 confidence (`init_global_connection_table_and_bt_state`,
@@ -1908,7 +1909,7 @@ variable-length segments whose size derives from each segment's length byte at
 overhead. Called from `FUN_8004ce70` during type-0 multi-chunk TX reassembly
 after each `FUN_8002b558` HW-TX submit — return value subtracted from remaining
 buffer budget before `FUN_8004ae74` finalizes the fragment. Connection/feature
-dispatch cluster sibling of `FUN_8004a730` (adjacent segment parser).
+dispatch cluster sibling of `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` (adjacent segment parser).
 
 Post-rename: **234 unnamed** in-region (148 in 1-150B tier).
 
@@ -5008,8 +5009,9 @@ type nibble:
   `atomic_saturating_byte_decrement` on mismatch, optional timing diagnostic via
   hook at `PTR_DAT_8004d21c`; clears conn `+0x90` bit3 and may call
   `initiate_pending_procedure_or_defer`.
-- **Type 4** — LE accumulate path: `FUN_8004a730` consume + adds to global BT-state
-  field at `+0xf8`.
+- **Type 4** — LE accumulate path:
+  `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` consume +
+  adds to global BT-state field at `+0xf8`.
 - **Other** — `FUN_80014524(uVar15,1)` release + diagnostic log.
 
 0 xrefs (indirect fptr registration). Callee cluster for Pass 52ag/52dm TX
@@ -5073,5 +5075,34 @@ Upgraded from MEDIUM-HIGH (Pass 3).
 Post-rename: **139 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1499**.
 
+## Pass 52ea (2026-06-30) — >150B rank-1 LE TX segment consumer rename
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004a730` →
+`walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` (456B, 1 xref
+in cold-triage) via `RenamePass52eaRegion80040000Fun8004a730.java` (`renamed=1`,
+live-verified).
+
+Type-4 LE accumulate callee of
+`dispatch_conn_tx_by_packet_type_nibble_with_reassembly` (Pass 52dx). Optional
+pre-hook at `PTR_DAT_8004a8f8`. Walks length-prefixed segments in TX buffer
+(`param_1`, length `param_2`):
+
+- Parses per-segment header: bit `0x20` = extended header with clock-offset
+  sizing; length byte at `buf[offset+1]`.
+- Indexes conn-record slot 10 in the `0x1ac` struct array
+  (`PTR_base_of_0x1ac_struct_array_0xA_large2_8004a8fc`); on clock-offset
+  mismatch vs `+0x106`/`+0x101` low nibble, increments diagnostic counter at
+  `+0xfc` and logs via `possible_logging_function__var_args`.
+- Segment size uses global scale `*PTR_DAT_8004a904 * 2 + 6 + adjusted payload`
+  (same family as `walk_tx_reassembly_buffer_consuming_length_prefixed_segments`).
+- Returns accumulated segment count (`local_30[0]`); caller adds to global
+  BT-state field at `+0xf8`.
+
+Connection TX dispatch cluster sibling of `FUN_8004ae74` (452B, adjacent segment
+finalizer).
+
+Post-rename: **138 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1500**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename rank-1
-`0x8004a730` (456B, xrefs:1).
+`0x8004ae74` (452B, xrefs:1).

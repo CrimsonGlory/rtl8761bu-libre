@@ -8154,8 +8154,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ea: continue refreshed >150B
-          cold-triage — decompile+rename rank-1 `0x8004a730` (456B, xrefs:1).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ea (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004a730`→`walk_le_tx_segments_validate_slot10_clock_offset_and_return_count`
+          (456B, HIGH) — type-4 LE TX segment consumer; walks length-prefixed
+          segments, validates slot-10 clock-offset fields, returns segment count;
+          callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`.
+          138 unnamed in-region; live named 1500.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ea;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eb: continue refreshed >150B
+          cold-triage — decompile+rename rank-1 `0x8004ae74` (452B, xrefs:1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
