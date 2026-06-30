@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 111 functions in tier, 60 renamed HIGH (Passes 52–52bs). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bs, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 110 functions in tier, 61 renamed HIGH (Passes 52–52bt). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bt, 2026-06-30).
 
 ## Overview
 
@@ -3444,5 +3444,45 @@ found (function-pointer registration).
 
 Post-rename: **196 unnamed** in-region (110 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-74+
-substantive candidate; skip rank-1–73 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bs):** rank-74+ — completed Pass 52bt below.
+
+## Pass 52bt (2026-06-30) — rank-74 conn-struct HW-reg HCI status-echo handler rename
+
+**Refreshed cold-triage (ranks 1-73 skipped as artifacts, deferred, or already done):**
+rank-74 `0x8004a464` (80B, 0 xrefs in triage) — substantive HCI Command Complete
+sender in the `0x8004a4xx` LMP-check/teardown neighborhood; copies 6 bytes from
+HCI params into conn-struct `+0x1c` staging area, programs baseband via
+`write_connection_struct_fields_1c_1e_20_to_hw_regs`, then emits status echo.
+
+**Rank-74 decompiled and renamed (HIGH):** `FUN_8004a464` →
+`hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete` (80B) via
+`RenamePass52btRegion80040000Fun8004a464.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete(short *hci_cmd)
+{
+  cmd_word = *hci_cmd;
+  optimized_memcpy(conn_struct_1c_staging, hci_cmd + 3, 6);
+  write_connection_struct_fields_1c_1e_20_to_hw_regs();
+  status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  hci_event_sender(0xe, {status, cmd_lo, cmd_hi, 0}, 4);
+  return 0;
+}
+```
+
+HCI command handler: copies 6 bytes from HCI command params at offset +3 into
+the per-connection `0x1ac` struct staging area at `+0x1c` (via
+`PTR_base_of_0x1ac_struct_array_0xA_large2_0__field28_0x1c_8004a4b4`), then calls
+`write_connection_struct_fields_1c_1e_20_to_hw_regs` to program MMIO from struct
+fields `+0x1c`/`+0x1e`/`+0x20`. Derives status from global `the_0x300` struct
+`field_0x165` (0 when cmd word==0, else field value defaulting to 1) — same
+idiom as `hci_global_field_0x165_status_echo_send_cmd_complete`. Echoes cmd-word
+bytes; packs 4-byte Command Complete (`hci_event_sender(0xe,…)`). Neighbor of
+`invoke_teardown_hook_triplet_with_lmp_power_gate` (`0x8004a4bc`) and
+`clear_lmp_precheck_entry_and_arm_connection_active_bitmask` (`0x8004a6ec`).
+No direct callers found (function-pointer registration).
+
+Post-rename: **195 unnamed** in-region (109 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-75+
+substantive candidate; skip rank-1–74 artifacts, deferred, and already-done ranks.
