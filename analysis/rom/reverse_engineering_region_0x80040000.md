@@ -5201,7 +5201,8 @@ Type-1/2 connection TX payload dispatcher — callee target of
 - **Active link**: allocates TX buffer via
   `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`, packs 4-byte
   header (conn handle, type flag in bit4, payload length) + memcpy payload,
-  enqueues via `FUN_8004b83c` into conn-slot-10 linked list at `+0xd0`/`+0xd4`.
+  enqueues via `irq_guarded_append_to_conn_slot10_0x1ac_linked_list` into
+  conn-slot-10 linked list at `+0xd0`/`+0xd4`.
 
 Connection TX dispatch cluster sibling of
 `gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97` (Pass 52ec).
@@ -7391,6 +7392,52 @@ sibling of `irq_guarded_append_slot_to_conn_list_chain` (different list
 structure).
 
 Post-rename: **74 unnamed** in-region (37 in 1-150B size≥20B tier); live named **1564**.
+
+**Next:** superseded by Pass 52gn below.
+
+## Pass 52gn (2026-06-30) — rank-1 conn-slot-10 0x1ac linked-list append rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gn.java` — 74 unnamed,
+37 in 1-150B size≥20B tier; rank-1 `0x8004b83c` (88B, 1 xref) — IRQ-guarded
+append to fixed conn-slot-10 linked list in the `0x1ac` struct array; callee of
+`dispatch_type12_conn_tx_payload_enqueue_slot10_or_teardown_inactive_link`
+(Pass 52ed).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004b83c` →
+`irq_guarded_append_to_conn_slot10_0x1ac_linked_list` (88B) via
+`RenamePass52gnRegion80040000Fun8004b83c.java` (`renamed=1`, live-verified).
+
+```c
+void irq_guarded_append_to_conn_slot10_0x1ac_linked_list(int node)
+{
+  if (node == 0) return;
+  irq = disable_interrupts();
+  base = PTR_base_of_0x1ac_struct_array_0xA_large2_8004b894;
+  // fixed element [10]: head +0xd0, tail +0xd4, count +0xd8
+  if (base[10].head == 0)
+    base[10].head = node;
+  else {
+    tail = base[10].tail;
+    *(tail+0x104..0x107) = node;   // 4×sb link tail→node
+  }
+  base[10].tail = node;
+  base[10].count++;
+  enable_interrupts(irq);
+}
+```
+
+IRQ-guarded intrusive-list append on fixed conn-record slot 10 of the
+`0x1ac`-stride struct array (`PTR_DAT_8004b894`): head at `+0xd0`, tail at
+`+0xd4`, count at `+0xd8` within element `[10]`. When the list is empty, sets
+head; otherwise links the previous tail's `+0x104` field to the new node via
+4-byte unaligned store, then advances tail and increments count. Enqueue path
+used by `dispatch_type12_conn_tx_payload_enqueue_slot10_or_teardown_inactive_link`
+after building the TX buffer. Fixed-slot sibling of
+`irq_guarded_append_to_0x1ac_per_index_linked_list` (Pass 52gm, parameterized
+index with head/tail/count at `+0x128`/`+0x12c`/`+0x130`). Conn TX dispatch
+cluster.
+
+Post-rename: **73 unnamed** in-region (36 in 1-150B size≥20B tier); live named **1565**.
 
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

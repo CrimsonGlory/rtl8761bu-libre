@@ -8773,7 +8773,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gn: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gn (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004b83c`→`irq_guarded_append_to_conn_slot10_0x1ac_linked_list`
+          (88B, HIGH). IRQ-guarded intrusive-list append on fixed conn-slot-10
+          in `0x1ac` struct array (head `+0xd0`, tail `+0xd4`, count `+0xd8`);
+          callee of `dispatch_type12_conn_tx_payload_enqueue_slot10_or_teardown_inactive_link`.
+          73 unnamed remain; live named 1565.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52go: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
