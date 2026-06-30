@@ -1671,4 +1671,36 @@ cont. 28); success path reuses Pass 6 cont. 34's `program_encryption_key_and_sen
 
 Region unnamed count after this pass: **277** (278 minus this rename). Live named **1644** global.
 
+**Next:** superseded by Pass 6 continuation (36).
+
+## Pass 6 continuation (36) (2026-06-30) — LC TX logger-hook subcase dispatcher `FUN_8002ef48`
+
+Decompiled and renamed:
+**`FUN_8002ef48` → `dispatch_lc_tx_logger_hook_subcases_with_pending_queue`**
+(234B, HIGH) via `RenamePass6Region80020000Fun8002ef48.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (234B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=277` at pass start).
+
+**Mechanism:** Multi-case LC TX hook dispatcher keyed on `param_1` subcase id. Invokes
+`possible_logger_called_if_no_patch3` with documented LC TX opcodes **0x300** (subcase 1),
+**0x320** (subcase 2), **0x323** (subcase 3), and **0x32f** (subcase 5). When global mode
+byte `field_0x179==1`, subcases 2/3 delegate to `FUN_8002ef18`/`FUN_8002ee54` (HCI Number
+of Completed Packets emit + secondary hook). Subcase 2 otherwise invokes hook at
+`PTR_DAT_8002f038` and stores result to `param_2+0x40c`. Subcase 5 enqueues `param_2` into
+the global intrusive linked list at `PTR_DAT_8002f040`/`PTR_DAT_8002f044` (4×sb link at
+`+0x100`), later drained by `LC_event_TX_dispatcher` case **0x32f** via
+`gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback`. Patch twin `FUN_8010c7b4`
+installed at `0x8010e338` mirrors this ROM function.
+
+**Callers:** patch `FUN_8010c7b4` (1 COMPUTED_CALL site at `0x8010c828`); also invoked
+indirectly via fptr from `gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback`
+(subcase 5 failure path).
+
+**Confidence:** HIGH — unambiguous LC TX opcode literals matching `assoc_w_tLC_TX` dispatch
+table; linked-list enqueue matches documented 0x32f teardown loop; patch replacement confirms
+purpose.
+
+Region unnamed count after this pass: **276** (277 minus this rename). Live named **1645** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
