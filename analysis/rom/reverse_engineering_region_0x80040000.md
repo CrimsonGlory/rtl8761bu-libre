@@ -8409,5 +8409,42 @@ Baseband link-setup cluster sibling of
 
 Post-rename: **47 unnamed** in-region (10 in 1-150B size≥20B tier); live named **1591**.
 
+**Next:** superseded by Pass 52ho below.
+
+## Pass 52ho (2026-06-30) — rank-1 LE Meta Event two-global-byte Command Complete rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52ho.java` — 47 unnamed,
+10 in 1-150B size≥20B tier; rank-1 `0x80044b3c` (70B, 0 xrefs) — largest
+remaining 1-150B candidate in the LE Meta Event cluster (`0x80044bxx` neighborhood);
+sibling of `hci_reentry_gate_field_0x165_global_byte_send_cmd_complete`
+at `0x80044b90` and `hci_field_0x165_bos0b_field5c_4byte_send_cmd_complete`
+at `0x80044adc`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044b3c` →
+`hci_field_0x165_cmd_echo_two_global_bytes_send_cmd_complete` (70B) via
+`RenamePass52hoRegion80040000Fun80044b3c.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_field_0x165_cmd_echo_two_global_bytes_send_cmd_complete(short *param_1)
+{
+  /* status from field_0x165 (0 when cmd word==0, else default 1) */
+  /* echo cmd-word bytes; gate byte 0 */
+  /* append two global bytes from PTR_DAT_80044b84 / PTR_DAT_80044b88 */
+  hci_event_sender(0xe, &status, 6);
+  return 0;
+}
+```
+
+70B HCI command handler in the `0x80044bxx` LE Meta Event cluster:
+status from global `field_0x165` (0 when cmd word==0, else default 1); echoes
+cmd-word bytes; packs 6-byte Command Complete (`hci_event_sender(0xe,…)`) with
+status + cmd echo + zero gate byte + two global bytes at `PTR_DAT_80044b84`/
+`PTR_DAT_80044b88`. Ungated sibling of
+`hci_reentry_gate_field_0x165_global_byte_send_cmd_complete` (reentry-gated
+5-byte variant) and `hci_field_0x165_bos0b_field5c_4byte_send_cmd_complete`
+(8-byte bos snapshot variant). No direct callers found (indirect HCI router).
+
+Post-rename: **46 unnamed** in-region (9 in 1-150B size≥20B tier); live named **1592**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
