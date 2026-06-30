@@ -9177,9 +9177,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ic;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52id: continue 1-19B cold-triage
-          — skip rank-1–26 artifacts/deferred; refresh ranks via
-          `ColdTriageRegion80040000Pass52ib.java`.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52id (2026-06-30): decompiled+
+          renamed rank-25 `FUN_8004f370`→`noop_return_stub_event_queue_cluster`
+          (4B, HIGH). Ranks 26–32 confirmed halt_baddata artifact tail. 31 unnamed
+          in-region (31 in 1-19B artifact/deferred tail); live named 1607.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52id;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ie: document 1-19B tier
+          COMPLETE; pivot >150B unnamed cold-triage rank-1.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

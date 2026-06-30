@@ -8916,5 +8916,42 @@ function-pointer table placeholder. Distinct from `noop_handler_stub`
 
 Post-rename: **32 unnamed** in-region (32 in 1-19B tier); live named **1606**.
 
-**Next:** continue 1-19B cold-triage — skip rank-1–26 artifacts/deferred; refresh
-ranks via `ColdTriageRegion80040000Pass52ib.java`.
+**Next:** superseded by Pass 52id below.
+
+## Pass 52id (2026-06-30) — rank-25 event-queue noop rename; ranks 26–32 artifact tail triaged
+
+**Cold-triage (refreshed):** full 32-entry 1-19B tier via
+`ColdTriageRegion80040000Pass52ib.java` (post-Pass-52ic rename). Ranks 1–24
+unchanged (halt_baddata artifacts + rank-16 deferred mis-bound overlap
+`0x8004a444`). Rank-25 promoted to `0x8004f370` (4B, 0 xrefs) after
+`noop_return_stub_conn_record_pool` rename removed rank-25 from queue.
+
+**Ranks 26–32 artifact tail (skipped):** rank-26 `0x80049926` (2B) =
+`halt_baddata`; ranks 27–32 (`0x8004498d`…`0x80049155`, 1B each, 0 xrefs) =
+`halt_baddata` mis-disassembly stubs (sample-decompiled rank-27
+`0x8004498d`). No substantive rename candidates remain in 1-19B tier beyond
+rank-25.
+
+**Rank-25 decompiled+renamed (HIGH):** `FUN_8004f370` →
+`noop_return_stub_event_queue_cluster` (4B) via
+`RenamePass52idRegion80040000Fun8004f370.java` (`renamed=1`, live-verified).
+
+```c
+void noop_return_stub_event_queue_cluster(void)
+{
+  return;
+}
+```
+
+4B empty-return noop in `0x8004f3xx` timer/event-queue cluster (neighbor of
+`esco_sco_negotiation_diagnostic_logger` at `0x8004f374` and
+`set_primary_schedule_ctx_flag_bit0x10_when_both_byte4_zero` at `0x8004f140`).
+0 xrefs — function-pointer table placeholder (documented as artifact in Pass
+52ci, now formally named).
+
+Post-rename: **31 unnamed** in-region (31 in 1-19B artifact/deferred tail);
+live named **1607**. **1-19B substantive cold-triage queue exhausted** — only
+halt_baddata stubs + one deferred mis-bound overlap remain.
+
+**Next:** document 1-19B tier COMPLETE; pivot to >150B unnamed cold-triage
+(see Pass 52ci).
