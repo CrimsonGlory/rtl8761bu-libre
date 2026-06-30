@@ -8657,5 +8657,46 @@ Pass 52er's `pack_lmp_power_clk_adj_fallback_opcode_response_params` case
 
 Post-rename: **40 unnamed** in-region (3 in 1-150B size≥20B tier); live named **1598**.
 
+**Next:** superseded by Pass 52hv below.
+
+## Pass 52hv (2026-06-30) — rank-1 conn negotiation slot transfer + LIFO-return old rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hv.java` — 40 unnamed,
+3 in 1-150B size≥20B tier; rank-1 `0x8004e858` (28B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x8004e8xx` conn-record pool cluster;
+sibling of `get_or_alloc_conn_negotiation_state` (`0x8004e820`, alloc from
+`PTR_PTR_8004e854`) and `free_list_lifo_pop_conn_record_set_state_and_clear_if_zero`
+(`0x8004e7e4`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004e858` →
+`transfer_conn_negotiation_slot_free_old_lifo_push` (28B) via
+`RenamePass52hvRegion80040000Fun8004e858.java` (`renamed=1`, live-verified).
+
+```c
+void transfer_conn_negotiation_slot_free_old_lifo_push(int dst_conn, int src_conn)
+{
+  int *old_slot;
+  if ((dst_conn != 0) && (src_conn != 0)) {
+    old_slot = *(int **)(dst_conn + 0x14);
+    if (old_slot != (int *)0x0) {
+      *old_slot = *PTR_PTR_8004e874;
+      *PTR_PTR_8004e874 = (int)old_slot;
+    }
+    *(undefined4 *)(dst_conn + 0x14) = *(undefined4 *)(src_conn + 0x14);
+    *(undefined4 *)(src_conn + 0x14) = 0;
+  }
+  return;
+}
+```
+
+28B conn-negotiation slot mover in the `0x8004e8xx` pool cluster: when both
+conn records are non-NULL, LIFO-prepends any existing negotiation subrecord at
+`dst_conn+0x14` onto free-list head `PTR_PTR_8004e874`, then transfers
+`src_conn+0x14` into `dst_conn+0x14` and clears the source slot. Complements
+`get_or_alloc_conn_negotiation_state` (lazy alloc from `PTR_PTR_8004e854`).
+No direct callers found (function-pointer registration).
+
+Post-rename: **39 unnamed** in-region (2 in 1-150B size≥20B tier); live named **1599**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
