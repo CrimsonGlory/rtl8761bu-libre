@@ -8609,11 +8609,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fv: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fv (2026-06-30): decompiled+
+          renamed rank-6 `FUN_8004b170`→`irq_guarded_append_slot_to_conn_list_chain`
+          (88B, HIGH) — IRQ-guarded conn-list chain slot append via next-index
+          byte at entry+0xb; sentinel 10; 3 xrefs (list-A/B walkers + TX fragment
+          recycle). 91 unnamed in-region; live named 1547.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fw: continue 1-150B cold-triage
           — decompile+rename next substantive unnamed 1-150B candidate (run
-          ColdTriageRegion80040000Pass52ft.java or successor for fresh rank;
+          ColdTriageRegion80040000Pass52fv.java or successor for fresh rank;
           skip rank-1–3 artifacts `0x8004a2e4`/`0x80045b94`/`0x80048934` and
-          rank-5 `0x8004701c` 1B artifact; next lead rank-6 `0x8004b170` 88B).
+          rank-5 `0x8004701c` 1B artifact).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

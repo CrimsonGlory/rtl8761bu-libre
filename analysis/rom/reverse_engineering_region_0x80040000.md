@@ -6626,5 +6626,51 @@ layer doc.
 
 Post-rename: **92 unnamed** in-region (92 in 1-150B tier); live named **1546**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename next substantive
-candidate (rank-6 `0x8004b170` 88B; skip rank-5 `0x8004701c` 1B artifact).
+**Next:** superseded by Pass 52fv below.
+
+## Pass 52fv (2026-06-30) — 1-150B rank-6 conn-list chain slot append rename
+
+**Cold-triage (refreshed):** 92 unnamed 1-150B remain. rank-1 `0x8004a2e4`
+(10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B — artifact);
+rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x80043038`
+(4 xrefs, 50B — done Pass 52fu); rank-5 `0x8004701c` (4 xrefs, 1B — likely
+artifact); rank-6 `0x8004b170` (3 xrefs, 88B).
+
+**Rank-1–3 triaged (non-function artifacts):** unchanged from Pass 52fu.
+
+**1-150B rank-6 decompiled+renamed (HIGH):** `FUN_8004b170` →
+`irq_guarded_append_slot_to_conn_list_chain`
+(88B, 3 xrefs) via
+`RenamePass52fvRegion80040000Fun8004b170.java` (`renamed=1`, live-verified).
+
+```c
+void irq_guarded_append_slot_to_conn_list_chain(byte slot_index)
+{
+  irq = disable_interrupts();
+  if ((slot_index < 10) && (chain_head[2] < 10)) {
+    if (chain_head[0] == 10) {          // sentinel = empty list
+      chain_head[0] = slot_index;
+    } else {
+      table[chain_head[1] * 0xc + 0xb] = slot_index;  // link tail next-index
+    }
+    chain_head[1] = slot_index;         // update tail
+    table[slot_index * 0xc + 0xb] = 10; // mark new tail sentinel
+    chain_head[2]++;                    // increment count
+  }
+  enable_interrupts(irq);
+}
+```
+
+IRQ-guarded append of a slot index into the 0xc-stride conn-list chain table
+(`PTR_PTR_8004b1cc` / `PTR_DAT_8004b1c8` for list-B; list-A uses parallel
+pointers `PTR_PTR_8004b340`). Sentinel value `10` marks chain end. Next-index
+byte at table entry offset `+0xb` links slots; count capped at 10. Called from
+`walk_conn_list_a_slot_chain_collect_overflow_records`,
+`walk_conn_list_b_slot_chain_collect_quota_overflow_records`, and
+`fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` (slot
+recycle path). Sibling of `irq_masked_append_byte_to_conn_list_a_tail`.
+
+Post-rename: **91 unnamed** in-region (91 in 1-150B tier); live named **1547**.
+
+**Next:** continue 1-150B cold-triage — run fresh cold-triage for next substantive
+candidate (skip rank-1–3 artifacts and rank-5 `0x8004701c` 1B artifact).
