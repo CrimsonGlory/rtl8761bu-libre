@@ -6959,8 +6959,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52b: decompile+rename rank-2
-          `0x80043158` (AND-mask HW-channel dispatch twin, 27 xrefs, 64B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52b (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80043158`→
+          `and_mask_hw_channel_table_entry_and_indexed_dispatch` (64B, HIGH, 27 xrefs).
+          IRQ-disabled AND-mask indexed HW-channel param dispatch: `mask & table[index]`
+          then fptr dispatch via `DAT_80043198`/`PTR_DAT_8004319c`. AND-variant twin of
+          Pass 52's OR-merge and `FUN_800430ac` mask-merge in SCO/eSCO channel-commit cluster.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52b;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52c: decompile+rename rank-3
+          `0x8004ce44` (16 xrefs, 38B, 1-50B tier).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

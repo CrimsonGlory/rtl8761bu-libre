@@ -792,9 +792,36 @@ void or_merge_hw_channel_table_entry_and_indexed_dispatch(uint index, ushort mas
 IRQ-disabled indexed dispatch: OR-merges `mask` onto the per-index ushort HW-channel parameter
 table entry at `DAT_80043150`, then calls through the function-pointer table at `PTR_DAT_80043154`.
 Structural OR-variant twin of the already-documented `FUN_800430ac` (mask-merge:
-`(table & ~mask3) | (mask3 & value)`) and rank-2 `FUN_80043158` (AND-mask: `value & table[index]`)
+`(table & ~mask3) | (mask3 & value)`) and Pass 52b's
+`and_mask_hw_channel_table_entry_and_indexed_dispatch` (AND-mask: `value & table[index]`)
 in the SCO/eSCO HW channel parameter-commit cluster (`init_or_clear_sco_hw_channel_subsystem` in
-region `0x80030000` iterates channel slots via `FUN_800430ac`, finishes with `FUN_80043158`).
+region `0x80030000` iterates channel slots via `FUN_800430ac`, finishes with
+`and_mask_hw_channel_table_entry_and_indexed_dispatch`).
 
-**Next:** decompile+rename rank-2 `0x80043158` (AND-mask twin, 27 xrefs); then continue down the
+## Pass 52b (2026-06-30) — rank-2 AND-mask twin rename
+
+**Rank-2 decompiled and renamed (HIGH):** `FUN_80043158` →
+`and_mask_hw_channel_table_entry_and_indexed_dispatch` (64B) via
+`RenamePass52bRegion80040000Fun80043158.java` (`renamed=1`, live-verified).
+
+```c
+void and_mask_hw_channel_table_entry_and_indexed_dispatch(uint index, ushort mask)
+{
+  irq = disable_interrupts();
+  table = DAT_80043198;
+  fptr_table = PTR_DAT_8004319c;
+  (*fptr_table)(index & 0xffff, mask & table[index]);
+  enable_interrupts(irq);
+}
+```
+
+IRQ-disabled indexed dispatch: AND-masks `mask` with the per-index ushort HW-channel parameter
+table entry at `DAT_80043198`, then calls through the function-pointer table at `PTR_DAT_8004319c`.
+Structural AND-variant twin of Pass 52's `or_merge_hw_channel_table_entry_and_indexed_dispatch`
+(OR-merge on `DAT_80043150`/`PTR_DAT_80043154`) and `FUN_800430ac` (mask-merge:
+`(table & ~mask3) | (mask3 & value)`) in the SCO/eSCO HW channel parameter-commit cluster
+(`init_or_clear_sco_hw_channel_subsystem` in region `0x80030000` iterates channel slots via
+`FUN_800430ac`, finishes with `and_mask_hw_channel_table_entry_and_indexed_dispatch`).
+
+**Next:** decompile+rename rank-3 `0x8004ce44` (16 xrefs, 38B); then continue down the
 Pass 52 ranked list.
