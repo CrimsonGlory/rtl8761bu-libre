@@ -5788,5 +5788,48 @@ request sender neighbor, `0x80045e8c` Connection Complete sender neighbor):
 Post-rename: **117 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1521**.
 
+**Next:** superseded by Pass 52ew below.
+
+## Pass 52ew (2026-06-30) — >150B rank-1 LE adv data baseband-setup variant rename
+
+**Cold-triage (refreshed, from Pass 52ev):** **21** unnamed >150B remain.
+rank-1 `0x80046e40` (474B); rank-2 `0x800451cc` (408B); rank-3
+`0x80046798` (352B); rank-4 `0x8004635c` (320B); rank-5 `0x80046a00`
+(318B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80048754` →
+`hci_le_adv_data_pack_validate_commit_slot10_program_baseband_setup_send_cmd_complete`
+(478B, 0 xrefs in cold-triage) via
+`RenamePass52ewRegion80040000Fun80048754.java` (`renamed=1`, live-verified).
+
+478B HCI command handler — structural twin of Pass 52ev's
+`hci_le_adv_data_pack_validate_commit_slot10_dispatch_meta_subevent_send_cmd_complete`
+in the `0x800483xx` baseband link-setup neighborhood (`program_baseband_link_setup_slot10`
+at `0x800483c0`, thin wrapper `invoke_baseband_link_setup_from_param_buffer` at
+`0x80048948`):
+
+- **Disable path:** when param byte at `+7` (`local_24`) == 0, clears bit-7 of
+  conn-slot-10 `field249_0x100` (`&= 0x7f`).
+- **Enable/validate path:** operation type at `+8` (`bVar1`) must be 0–2;
+  `local_24` must be ≤ `0x14`. Type 0: subtype at `+8` must be 1 or 2; when
+  subtype==1 requires `field328_0x155 & 0x14`; data length at `+9` must be
+  2–75 with `length+7 == total_cmd_len`; packs payload bytes from `+10` with
+  nibble interleave into 38-byte (`0x26`) buffer, each byte ≤
+  `field329_0x156`; `optimized_memcpy` to `PTR_DAT_80048938`. Types 1/2: simpler
+  encoding (`cVar11` 2 or 3).
+- **Slot-10 commit:** writes `field256_0x107`, `field255_0x106`,
+  `field250_0x101` low nibble, `field249_0x100` (sets bit-7 `0x80`, bits 4–6
+  from subtype flag), `field257_0x108` (data length).
+- **Success terminus:** calls
+  `program_baseband_link_setup_slot10_and_send_hci_cmd_complete` (which itself
+  emits HCI Command Complete) instead of Pass 52ev's
+  `send_evt_Meta_subevent_0_or_1`.
+- **Failure:** status `0x11` (disallowed state) or `0x12` (invalid parameters);
+  logs via `possible_logging_function__var_args`, then 4-byte
+  `hci_event_sender(0xe,…)` with `field_0x165` status idiom.
+
+Post-rename: **116 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1522**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x80048754`, 478B).
+unnamed >150B candidate (`0x80046e40`, 474B).

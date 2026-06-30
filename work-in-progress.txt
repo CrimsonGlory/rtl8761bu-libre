@@ -8371,9 +8371,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ev;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ew: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ew (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80048754`→
+          `hci_le_adv_data_pack_validate_commit_slot10_program_baseband_setup_send_cmd_complete`
+          (478B, HIGH). LE adv-data HCI handler baseband-setup variant: same
+          validate/pack/commit as Pass 52ev but success path calls
+          `program_baseband_link_setup_slot10_and_send_hci_cmd_complete`;
+          >150B rank-1 from cold-triage. 21 unnamed >150B; 116 unnamed
+          in-region; live named 1522.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ew;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ex: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x80048754`, 478B).
+          (`0x80046e40`, 474B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
