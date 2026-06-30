@@ -8434,9 +8434,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fc: continue refreshed >150B
-          cold-triage — decompile+rename next rank-2 unnamed >150B candidate
-          (`0x80049a2c`, 254B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fc (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80049a2c`→`hci_hw_reg_pool_entry_add_gated_handler_send_cmd_complete`
+          (254B, HIGH). HW-reg pool entry add HCI handler; index `0xff` sets bit-6
+          of pool state, else link lookup + `conn_slot_alloc_and_commit_dispatch`;
+          LMP-busy + conn-array state guards. 15 unnamed >150B; 110 unnamed
+          in-region; live named 1528.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fd: continue refreshed >150B
+          cold-triage — decompile+rename next rank-3 unnamed >150B candidate
+          (`0x80049c10`, 248B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

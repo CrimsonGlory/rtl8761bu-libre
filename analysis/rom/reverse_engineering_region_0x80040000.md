@@ -6026,5 +6026,36 @@ Pass 52fa scan-rsp data and Pass 52ez ext-adv data handlers):
 Post-rename: **111 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1527**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
-unnamed >150B candidate (`0x80049a2c`, 254B).
+**Next:** superseded by Pass 52fc below.
+
+## Pass 52fc (2026-06-30) — >150B rank-2 HW-reg pool entry add HCI handler rename
+
+**>150B rank-2 decompiled+renamed (HIGH):** `FUN_80049a2c` →
+`hci_hw_reg_pool_entry_add_gated_handler_send_cmd_complete`
+(254B, 0 xrefs in cold-triage) via
+`RenamePass52fcRegion80040000Fun80049a2c.java` (`renamed=1`, live-verified).
+
+254B HCI command handler in the HW-reg pool entry cluster (sibling of
+`hci_hw_reg_pool_entry_remove_gated_handler_send_cmd_complete` at `0x8004996a`,
+`hci_hw_reg_pool_entry_remove_handler_send_cmd_complete` at `0x8004993c`, and
+`FUN_80049b40` flush handler):
+
+- **Param validation:** pool-index byte at `+3` must be in range `2..0xfe`
+  (else HCI status `0x12` Invalid HCI Command Parameters).
+- **State guards:** conn-array `field40_0x28`/`field68_0x44`/`field407_0x1a4`
+  plus bytes at `PTR_PTR_80049b34`/`PTR_PTR_80049b38` — failure → status
+  `0x0c` (Command Disallowed); when `PTR_DAT_80049b30` bit0 set, also requires
+  `is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180()` to return 0.
+- **Index `0xff`:** sets bit-6 (`0x40`) of `PTR_PTR_80049b34[5]` — inverse
+  of remove handler's bit-6 clear.
+- **Otherwise:** `find_link_record_by_bdaddr_and_flag(0, index, bdaddr)`; when
+  index `>0x1f`, `conn_slot_alloc_and_commit_dispatch(0, index, bdaddr, 0, 0)`
+  with status `7` on alloc failure (`0x20`).
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom (same pattern as Pass 52eu remove sibling).
+
+Post-rename: **110 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1528**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
+unnamed >150B candidate (`0x80049c10`, 248B).
