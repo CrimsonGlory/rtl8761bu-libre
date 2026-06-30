@@ -8267,9 +8267,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ek;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52el: continue refreshed >150B
-          cold-triage — decompile+rename next rank-2 unnamed >150B candidate
-          (`0x80040384`, 254B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52el (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80040384`→`gate_conn_event_ring_dequeue_by_sco_esco_type_flags`
+          (254B, HIGH). Conn-event ring entry gate on 16-byte dequeued record;
+          SCO/eSCO type-flag evaluation; returns 0=continue dispatch / 1=skip;
+          filter callee of `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`.
+          127 unnamed in-region; live named 1511.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52el;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52em: continue refreshed >150B
+          cold-triage — decompile+rename next rank-3 unnamed >150B candidate
+          (`0x80049550`, 252B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

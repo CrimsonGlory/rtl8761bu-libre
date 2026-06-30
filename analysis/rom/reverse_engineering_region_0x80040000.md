@@ -4530,7 +4530,7 @@ head mod 16, re-enables IRQs, parses handle (`local_3c & 0x3ff`), conn-type
 nibble (`local_3a >> 4`), role sub-index (`local_39 >> 3 & 7`), and flag bits.
 Early exits for LE/inquiry codec-match (`FUN_80015a68`), duplicate-codec reject
 (`FUN_800158f8`), and config-gated special path (`FUN_80015c98`). Main path
-filters via `FUN_80040384`, validates role via
+filters via `gate_conn_event_ring_dequeue_by_sco_esco_type_flags`, validates role via
 `lookup_codec_or_role_type_table_7x4`, then dispatches by conn-type nibble:
 nibble 2 → `FUN_800411a4`; nibble 3 (in `local_3c` byte-1 bits 4–5) →
 `FUN_80040494`; nibbles 1–2 → callee
@@ -5495,5 +5495,29 @@ teardown and Pass 52eg periodic-inquiry configure.
 Post-rename: **128 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1510**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
-unnamed >150B candidate (`0x80040384`, 254B).
+**Next:** superseded by Pass 52el below.
+
+## Pass 52el (2026-06-30) — >150B rank-2 conn-event ring gate rename
+
+**>150B rank-2 decompiled+renamed (HIGH):** `FUN_80040384` →
+`gate_conn_event_ring_dequeue_by_sco_esco_type_flags` (254B, 1 xref from
+`dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`) via
+`RenamePass52elRegion80040000Fun80040384.java` (`renamed=1`, live-verified).
+
+Conn-event ring entry gate on the 16-byte dequeued record (`ushort *param_1`):
+evaluates SCO/eSCO type-flag bits in `param_1[1]` (bit2 `0x4`, nibble `0xf0`,
+bit1 `0x2`) and handle flag `param_1[0] & 0x800`. Uses scratch struct
+`PTR_DAT_80040484` (+0x18 handle byte, +0xb status bitmask). On qualifying
+type-2 paths with byte3 bits `0x38` clear, calls `FUN_800145e8` (LMP 0x25C
+family) with handle `param_1[0] & 0x3ff` and sets scratch +0x18. Logs via
+`possible_logging_function__var_args` on reject paths. Returns **0** = allow
+caller to continue dispatch (`lookup_codec_or_role_type_table_7x4` path);
+returns **1** = skip further dispatch (caller early-exits). Clears
+`*PTR_DAT_80040484` on exit. SCO/eSCO conn-type cluster filter sibling of Pass
+52df ring hub.
+
+Post-rename: **127 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1511**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
+unnamed >150B candidate (`0x80049550`, 252B).
