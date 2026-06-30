@@ -859,4 +859,37 @@ validation plus X³ vs Y² equality test using the documented SSP/ECDH bignum cl
 
 Region unnamed count after this pass: **303** (304 minus this rename). Live named **1618** global.
 
+**Next:** superseded by Pass 6 continuation (10).
+
+## Pass 6 continuation (10) (2026-06-30) — SCO HW link descriptor release `FUN_8002a868`
+
+Decompiled and renamed:
+**`FUN_8002a868` → `release_sco_hw_link_descriptor_slot`**
+(492B, HIGH) via `RenamePass6Region80020000Fun8002a868.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (492B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=303` at pass start). Callers:
+`release_SCO_connection_resources` (`0x8003edd0`, region `0x80030000`) and
+`connection_state_manager` (`0x8003d762`, disconnect/abort path).
+
+**Mechanism:** Teardown counterpart to Pass 6 continuation (7)'s
+`allocate_sco_hw_link_descriptor_slot`. Params: connection handle (`param_1`) and
+`big_ol_struct` link index (`param_2`, low byte must not be `0xff`). Early exit
+returns `0xff` on invalid handle/pool-empty. Selects one of three 52-byte SCO HW
+link-descriptor slots by matching handle at `+0x18`/`+0x4c`/`+0x80` in the
+3-slot table. Under interrupt disable: marks slot free (`+0x18 = 0xffff`), clears
+timing/link-mode fields, decrements live-count at `PTR_DAT_8002aa54`, walks two
+callback linked-lists at `+0x20`/`+0x28` invoking teardown hook at `PTR_DAT_8002aa70`
+with arg `3`, splices list tails via `PTR_PTR_8002aa74`, optionally clears
+per-slot register-bank buffers when `big_ol_struct[slot].field_0xc3` link-mode
+bits indicate active SCO routing, invokes slot-release hook at `PTR_DAT_8002aa84`,
+logs via `possible_logging_function__var_args`. Returns `0` on success.
+
+**Confidence:** HIGH — explicit allocator/teardown pair with
+`allocate_sco_hw_link_descriptor_slot`; primary caller is documented
+`release_SCO_connection_resources` in the SCO/eSCO connection-lifecycle pair;
+same 3-slot × 52-byte table layout and `big_ol_struct` index parameterization.
+
+Region unnamed count after this pass: **302** (303 minus this rename). Live named **1619** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
