@@ -8822,5 +8822,33 @@ check before `FUN_8006f994` applies role `0x35`. Inquiry/LAP/role-switch cluster
 
 Post-rename: **35 unnamed** in-region (35 in 1-19B tier); live named **1603**.
 
+**Next:** superseded by Pass 52ia below.
+
+## Pass 52ia (2026-06-30) — rank-14 credit-scheduler context byte writer rename
+
+**Cold-triage (refreshed):** ranks 1–13 are 1–4B `halt_baddata` artifacts (unchanged
+since Pass 52hz). Next substantive candidate (overall rank-14, 10B, 1 xref):
+`0x8004f24c`.
+
+**Rank-14 decompiled+renamed (HIGH):** `FUN_8004f24c` →
+`store_byte_at_credit_scheduler_global_context_offset_0x21` (10B) via
+`RenamePass52iaRegion80040000Fun8004f24c.java` (`renamed=1`, live-verified).
+
+```c
+void store_byte_at_credit_scheduler_global_context_offset_0x21(byte value)
+{
+  PTR_DAT_8004f258[0x21] = value;
+}
+```
+
+10B global-context byte writer: stores caller byte at offset `+0x21` of the
+credit-scheduler global state block at `PTR_DAT_8004f258`. Sibling of
+`get_credit_scheduler_context_active_entry_ptr` (`0x8004f240`, Pass 52l) and
+`invoke_armed_one_shot_callback_if_byte_0x20_set` (`0x8004f214`, Pass 52bf) in
+the `0x8004f2xx` credit-scheduler / cmd-type-0xb dispatch cluster. 1 xref
+(likely indirect fptr-table reference).
+
+Post-rename: **34 unnamed** in-region (34 in 1-19B tier); live named **1604**.
+
 **Next:** continue 1-19B cold-triage — skip rank-1–13 artifacts; refresh ranks via
 `ColdTriageRegion80040000Pass52hy2.java`.

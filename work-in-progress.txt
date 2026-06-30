@@ -9151,7 +9151,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ia: continue 1-19B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ia (2026-06-30): decompiled+
+          renamed rank-14 `FUN_8004f24c`→`store_byte_at_credit_scheduler_global_context_offset_0x21`
+          (10B, HIGH) — stores caller byte at `PTR_DAT_8004f258+0x21`;
+          credit-scheduler global-context writer in `0x8004f2xx` cluster. 34 unnamed
+          in-region (34 in 1-19B tier); live named 1604.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ia;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ib: continue 1-19B cold-triage
           — skip rank-1–13 artifacts; refresh ranks via
           `ColdTriageRegion80040000Pass52hy2.java`.
 
