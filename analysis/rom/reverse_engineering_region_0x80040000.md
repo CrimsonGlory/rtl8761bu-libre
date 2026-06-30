@@ -3025,5 +3025,35 @@ teardown, immediately before SCO sub-resource and main free-list push.
 
 Post-rename: **206 unnamed** in-region (120 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-54+
-substantive candidate; skip rank-1–53 artifacts and already-done ranks.
+**Next (at Pass 52bi):** rank-54 — completed Pass 52bj below.
+
+## Pass 52bj (2026-06-30) — rank-54 active-link mask bit-four predicate rename
+
+**Refreshed cold-triage (ranks 1-53 skipped as artifacts or already done):** rank-54
+`0x8004e96c` (14B, 1 xref) — substantive byte-equality predicate in the
+`0x8004e9xx` active-link-mask cluster (sibling of Pass 52h's
+`scan_active_link_mask_for_slot_status_flag` and still-unnamed `FUN_8004e9a8`
+lookup-table accessor).
+
+**Rank-54 decompiled and renamed (HIGH):** `FUN_8004e96c` →
+`is_active_link_mask_bit_four` (14B) via
+`RenamePass52bjRegion80040000Fun8004e96c.java` (`renamed=1`, live-verified).
+
+```c
+bool is_active_link_mask_bit_four(char param_1)
+{
+  return param_1 == '\x04';
+}
+```
+
+Returns true when the isolated active-link bitmask bit equals 4. Sole caller
+`FUN_8004704c` (HCI link policy param setup body, delegate of
+`hci_link_policy_param_setup_handler_send_cmd_complete`) uses the return value as
+an offset bias: `status_byte_addr = global_ctx + is_active_link_mask_bit_four(bit) + 0x22`,
+selecting `+0x22` (default) vs `+0x23` (when bit==4) — the same `(bit == 4) + 0x22`
+idiom documented in Pass 52h's mask scanner.
+
+Post-rename: **205 unnamed** in-region (119 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-55+
+substantive candidate; skip rank-1–54 artifacts and already-done ranks.
