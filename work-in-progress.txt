@@ -8850,7 +8850,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gv: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gv (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004fd30`→`sweep_conn_record_table_releasing_cleared_pkt_modes`
+          (56B, HIGH). Walks `PTR_PTR_8004fd68` conn-record table, releases entries
+          with cleared `pkt_modes` via `release_conn_record_to_free_pool`; sole caller
+          `hci_conn_diag_batch_gate_field_0x165_send_cmd_complete` diagnostic-batch
+          HCI prelude. 65 unnamed in-region; live named 1573.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gw: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

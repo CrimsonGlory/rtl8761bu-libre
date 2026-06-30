@@ -7712,5 +7712,39 @@ timing instant re-arm walk.
 
 Post-rename: **66 unnamed** in-region (29 in 1-150B size≥20B tier); live named **1572**.
 
+**Next:** superseded by Pass 52gv below.
+
+## Pass 52gv (2026-06-30) — rank-1 conn-record table sweep releasing cleared pkt_modes rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gv.java` — 66 unnamed,
+29 in 1-150B size≥20B tier; rank-1 `0x8004fd30` (56B, 1 xref) — conn-record table
+sweep prelude to diagnostic-batch HCI handler (caller
+`hci_conn_diag_batch_gate_field_0x165_send_cmd_complete`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004fd30` →
+`sweep_conn_record_table_releasing_cleared_pkt_modes` (56B) via
+`RenamePass52gvRegion80040000Fun8004fd30.java` (`renamed=1`, live-verified).
+
+```c
+void sweep_conn_record_table_releasing_cleared_pkt_modes(void)
+{
+  table = PTR_PTR_8004fd68;
+  for (i = 0; i < table[2]; i++) {
+    conn_rec = *(int *)(*table + i * 4);
+    if ((conn_rec != 0) && ((*(byte *)(conn_rec + 8) & 7) == 0))
+      release_conn_record_to_free_pool(conn_rec);
+  }
+}
+```
+
+Walks conn-record pointer table at `PTR_PTR_8004fd68` (`[0]` = pointer array,
+`[2]` = count); for each non-null entry whose `+0x08` low 3-bit `pkt_modes`
+are zero (same free precondition as `is_conn_record_pkt_modes_cleared_for_free`,
+Pass 52m), calls `release_conn_record_to_free_pool` (Pass 52fx). Sole caller
+`hci_conn_diag_batch_gate_field_0x165_send_cmd_complete` (`0x80047200`, Pass 52bp):
+diagnostic-batch HCI prelude cleanup before `conn_diagnostic_batch_dump`.
+
+Post-rename: **65 unnamed** in-region (28 in 1-150B size≥20B tier); live named **1573**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
