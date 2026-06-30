@@ -2098,4 +2098,38 @@ SSP cluster handlers.
 
 Region unnamed count after this pass: **264** (265 minus this rename). Live named **1657** global.
 
+**Next:** superseded by Pass 6 continuation (49).
+
+## Pass 6 continuation (49) (2026-06-30) — role-index gate + slot reuse `FUN_8002bb50`
+
+Decompiled and renamed:
+**`FUN_8002bb50` → `role_index_remap_gate_invoke_connection_slot_reuse`**
+(182B, HIGH) via `RenamePass6Region80020000Fun8002bb50.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (182B, xref_in=16) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=264` at pass start). Highest xref_in at
+this size tier — heavily referenced across link-quality, role-switch, and connection-
+teardown paths documented in regions `0x80000000`/`0x80030000`/`0x80070000`.
+
+**Mechanism:** IRQ-masked gate on mode index `param_1` (0–13). Early exit when mode >13
+or mode-enable bit clear in `PTR_DAT_8002bc1c+0x9c`. Per-mode 0xc-stride config table at
+`PTR_DAT_8002bc1c`: modes 2–5 XOR-remap `param_2` (role index) against expected 3-bit
+role field at `table[mode*0xc+9]`; modes 1/9 compare `param_3` against role subfield at
+`table[mode*0xc+4]>>6`. On role match (`param_2==0` after remap): clear pending bit in
+`DAT_8002bc20` dword array (mask with `DAT_8002bc24` when MSB set), invoke
+`FUN_8002bae0(mode)` for connection-slot reuse/teardown; return 0. On mismatch: return 1
+(skip). Typical caller pattern `role_index_remap_gate_invoke_connection_slot_reuse(2,
+role_subfield, 0)` drives link-quality packet-type downgrade in `0x800021c0`.
+
+**Callers:** 16 xref_in (cross-region): `link_quality_mode3_packet_type_reprogram`,
+`role_switch_esco_mode_dispatch_gate`, `conn_state2_packet_type_reprogram_or_credit_dispatch`,
+`LMP_SWITCH_REQ_completion_or_ACL_finalize_handler`, `connection_teardown_finalize_and_reset`,
+and others per prior triage in `region_0x80000000`/`0x80030000`/`0x80070000`.
+
+**Confidence:** HIGH — decompile confirms IRQ-gated per-mode role remap + conditional
+`FUN_8002bae0` dispatch; 16 inbound refs and cross-region caller documentation align with
+role-switch / SCO slot-reuse semantics.
+
+Region unnamed count after this pass: **263** (264 minus this rename). Live named **1658** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
