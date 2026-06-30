@@ -6230,6 +6230,38 @@ live named **1533**.
 Post-rename: **104 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1534**.
 
+**Next:** superseded by Pass 52fj below.
+
+## Pass 52fj (2026-06-30) — >150B rank-1 eSCO packet-type broadcast HCI handler rename
+
+**Cold-triage (refreshed):** 9 unnamed >150B remain. rank-1 `0x80047fb4`
+(238B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80047fb4` →
+`hci_esco_packet_type_broadcast_validate_and_commit_send_cmd_complete`
+(238B, 0 xrefs) via
+`RenamePass52fjRegion80040000Fun80047fb4.java` (`renamed=1`, live-verified).
+
+238B HCI command handler in the `0x80047fxx`/`0x800480xx` SCO/eSCO cluster
+(sibling of `validate_and_stage_sco_air_mode_change_from_hci_command` at
+`0x800480b0` and `validate_and_stage_sco_packet_type_table_from_hci_params` at
+`0x80046900`):
+
+- **Param extract:** three bytes from HCI command buffer at `param+2/+3/+5`.
+- **Validate:** `select_override_or_default_byte_pair_and_log` then
+  `validate_esco_packet_type_params_with_hook` — reject → status `0x12`.
+- **Global commit:** on success writes the three bytes to master struct at
+  `_FUN_800480a4` (`+0x1475..+0x1477`).
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+- **Broadcast path** (success only): walks 11-slot active-link bitmask at
+  `+0x1d2` on master struct; for each set bit updates the corresponding
+  `0x1ac`-stride config record at `+0x115..+0x117` (raw bytes) and
+  `+0x11a/+0x11b` (validated pair).
+
+Post-rename: **103 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1535**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (9 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (8 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).

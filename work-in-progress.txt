@@ -8498,9 +8498,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fi;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fj: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fj (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80047fb4`→`hci_esco_packet_type_broadcast_validate_and_commit_send_cmd_complete`
+          (238B, HIGH). eSCO packet-type broadcast HCI handler;
+          `select_override_or_default_byte_pair_and_log` +
+          `validate_esco_packet_type_params_with_hook`; global commit to master
+          struct + 11-slot bitmap broadcast to `0x1ac` records; 4-byte Command
+          Complete. 8 unnamed >150B; 103 unnamed in-region; live named 1535.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fk: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (9 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+          (8 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
