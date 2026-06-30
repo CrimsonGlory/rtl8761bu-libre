@@ -7348,5 +7348,49 @@ Hardware-hook architecture cluster.
 
 Post-rename: **75 unnamed** in-region (38 in 1-150B size≥20B tier); live named **1563**.
 
+**Next:** superseded by Pass 52gm below.
+
+## Pass 52gm (2026-06-30) — rank-1 0x1ac per-index linked-list append rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x8004b76c` (104B,
+1 xref) — IRQ-guarded append to per-index intrusive linked list in the
+`0x1ac`-stride struct array; callee of
+`gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback` (Pass 52ep).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004b76c` →
+`irq_guarded_append_to_0x1ac_per_index_linked_list` (104B) via
+`RenamePass52gmRegion80040000Fun8004b76c.java` (`renamed=1`, live-verified).
+
+```c
+void irq_guarded_append_to_0x1ac_per_index_linked_list(int node, uint index)
+{
+  index &= 0xff;
+  if (node == 0) return;
+  irq = disable_interrupts();
+  base = PTR_base_of_0x1ac_struct_array_...;
+  if (base[index*0x1ac + 0x128] == 0)
+    base[index*0x1ac + 0x128] = node;          // init head
+  else {
+    tail = base[index*0x1ac + 0x12c];
+    *(tail+0x100..0x103) = node;               // 4×sb link tail→node
+  }
+  base[index*0x1ac + 0x12c] = node;            // advance tail
+  base[index*0x1ac + 0x130]++;                 // increment count
+  enable_interrupts(irq);
+}
+```
+
+IRQ-guarded intrusive-list append on the per-index `0x1ac`-stride struct array
+(`PTR_DAT_8004b7d4`): head at `+0x128`, tail at `+0x12c`, count at `+0x130`.
+When the list is empty, sets head; otherwise links the previous tail's `+0x100`
+field to the new node via 4-byte unaligned store, then advances tail and
+increments count. Enqueue path used by
+`gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback` after clearing
+8 bytes at `param+0x100`. LC TX conn-event / per-conn list infra cluster;
+sibling of `irq_guarded_append_slot_to_conn_list_chain` (different list
+structure).
+
+Post-rename: **74 unnamed** in-region (37 in 1-150B size≥20B tier); live named **1564**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
