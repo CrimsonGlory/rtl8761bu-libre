@@ -5171,3 +5171,38 @@ live named **1502**.
 
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
 decompile+rename next rank-1 unnamed >150B candidate.
+
+## Pass 52ed (2026-06-30) — >150B rank-1 type-12 TX payload dispatcher rename
+
+**Cold-triage refresh:** `ColdTriageRegion80040000Pass52ed.java` — 41 unnamed
+>150B; rank-1 `0x8004c2f0` (414B, 1 xref).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004c2f0` →
+`dispatch_type12_conn_tx_payload_enqueue_slot10_or_teardown_inactive_link` (414B,
+1 xref in cold-triage) via `RenamePass52edRegion80040000Fun8004c2f0.java`
+(`renamed=1`, live-verified).
+
+Type-1/2 connection TX payload dispatcher — callee target of
+`walk_conn_tx_single_chunk_segments_dispatch_payload_by_type` (Pass 52dy):
+
+- Optional pre-hook at `PTR_DAT_8004c490`; early return when hook vetoes.
+- `param_4 < 0xb` conn-index bound; indexes `0x1ac` conn-record array.
+- **Inactive link** (`field4_0x4 < 0`): state-machine on `field231_0xee` /
+  `field232_0xef` — when `ee==1 && ef==4` emits `hci_event_sender` notification
+  and clears param `0x3d` via `set_feature_mask_gated_conn_param_0x91_with_hw_hook_notify`;
+  when `ee==0 && ef==4` invokes hook at `PTR_DAT_8004c49c`; always
+  `atomic_saturating_byte_decrement_by1_cnt1` + diagnostic log.
+- **Active link**: allocates TX buffer via
+  `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`, packs 4-byte
+  header (conn handle, type flag in bit4, payload length) + memcpy payload,
+  enqueues via `FUN_8004b83c` into conn-slot-10 linked list at `+0xd0`/`+0xd4`.
+
+Connection TX dispatch cluster sibling of
+`gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97` (Pass 52ec).
+
+Post-rename: **135 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1503**.
+
+**Next:** continue refreshed >150B cold-triage — refresh rank list and
+decompile+rename next rank-1 unnamed >150B candidate (rank-2 `0x80047980`,
+380B).

@@ -8184,9 +8184,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ec;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ed: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ed (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004c2f0`→`dispatch_type12_conn_tx_payload_enqueue_slot10_or_teardown_inactive_link`
+          (414B, HIGH) — type-1/2 conn TX payload dispatcher; inactive-link
+          teardown via `field231`/`field232` state bytes + param-0x3d clear, or
+          active-link TX buffer build+enqueue into conn-slot-10 list via
+          `FUN_8004b83c`; callee of
+          `walk_conn_tx_single_chunk_segments_dispatch_payload_by_type`.
+          135 unnamed in-region; live named 1503.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ed;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ee: continue refreshed >150B
           cold-triage — refresh rank list and decompile+rename next rank-1
-          unnamed >150B candidate.
+          unnamed >150B candidate (rank-2 `0x80047980`, 380B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
