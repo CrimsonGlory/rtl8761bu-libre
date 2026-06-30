@@ -7201,9 +7201,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aa
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ab: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-22+ substantive candidate;
-          skip rank-1–21 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ab (2026-06-30): decompiled+
+          renamed rank-22 `FUN_8004ee50`→`try_reschedule_timer_queue_entry_deadline_within_budget`
+          (60B, HIGH). Budget-gated wraparound deadline reschedule for timer/event-queue
+          entries; returns 0 in-budget / 1 triggers snap+reinsert via
+          `sorted_event_list_insert_by_relative_key`; callee of `FUN_8004ef08`.
+          239 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ab
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ac: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-23+ substantive candidate;
+          skip rank-1–22 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

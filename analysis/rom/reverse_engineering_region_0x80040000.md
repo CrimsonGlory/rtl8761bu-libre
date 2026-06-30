@@ -1684,3 +1684,43 @@ Post-rename: **240 unnamed** in-region (154 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-22+
 substantive candidate; skip rank-1–21 artifacts.
+
+## Pass 52ab (2026-06-30) — rank-22 timer-queue deadline reschedule rename
+
+**Refreshed cold-triage (rank-1–21 skipped as artifacts or already done):** rank-22
+`0x8004ee50` (60B, 2 xrefs) — substantive budget-gated deadline reschedule helper in
+the timer/event-queue cluster (sibling of `sorted_event_list_insert_by_relative_key`
+`0x8004ee94` and dispatch routine `FUN_8004ef08`).
+
+**Rank-22 decompiled and renamed (HIGH):** `FUN_8004ee50` →
+`try_reschedule_timer_queue_entry_deadline_within_budget` (60B) via
+`RenamePass52abRegion80040000Fun8004ee50.java` (`renamed=1`, live-verified).
+
+```c
+uint try_reschedule_timer_queue_entry_deadline_within_budget(int *entry, uint now_half)
+{
+  anchor = (now_half + 2) & wrap_mask;
+  budget = ((entry->deadline + entry->delta) & wrap_mask) - anchor & wrap_mask;
+  if (((budget & threshold_mask) == 0) && (budget != 0)) {
+    if ((entry->deadline - anchor & threshold_mask) != 0) {
+      entry->deadline = anchor;
+      entry->delta = (short)budget;
+    }
+    return 0;  // in-budget: keep in queue
+  }
+  FUN_8004ee0c(entry, now_half);  // snap deadline forward
+  return 1;  // out-of-budget: caller unlinks/requeues
+}
+```
+
+Wraparound-masked deadline arithmetic on queue entry fields `+0xc` (deadline) and
+`+0x1c` (short delta); masks `DAT_8004ee8c`/`DAT_8004ee90`. Returns 0 when the
+entry can stay in-place, 1 when `FUN_8004ee0c` must snap the deadline and the caller
+(`FUN_8004ef08`) unlinks/reinserts via `sorted_event_list_insert_by_relative_key`.
+Pure internal scheduler infra — same evidentiary class as the already-HIGH
+`0x8004ee94` insert primitive.
+
+Post-rename: **239 unnamed** in-region (153 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-23+
+substantive candidate; skip rank-1–22 artifacts.
