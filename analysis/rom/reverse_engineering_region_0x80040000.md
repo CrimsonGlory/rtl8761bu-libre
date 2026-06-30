@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 89 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fx, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 88 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fy, 2026-06-30).
 
 ## Overview
 
@@ -6759,5 +6759,45 @@ Post-rename cold-triage (`ColdTriageRegion80040000Pass52fx.java`): **89 unnamed*
 in-region (89 in 1-150B tier); live named **1549**. Next substantive rank-5:
 `0x80044588` (40B, 3 xrefs).
 
-**Next:** continue 1-150B cold-triage — decompile+rename rank-5 `0x80044588`
-(skip rank-1–4 artifacts).
+**Next:** superseded by Pass 52fy below.
+
+## Pass 52fy (2026-06-30) — 1-150B rank-7 control-record state-byte reentry gate rename
+
+**Cold-triage (refreshed):** 89 unnamed 1-150B remain (pre-rename). rank-1
+`0x8004a2e4` (10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B —
+artifact); rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x8004701c`
+(4 xrefs, 1B — artifact); rank-5 `0x8004ad0c` (3 xrefs, 84B — done Pass 52fw);
+rank-6 `0x8004fcec` (3 xrefs, 60B — done Pass 52fx); rank-7 `0x80044588` (3
+xrefs, 40B).
+
+**Rank-1–4 triaged (non-function artifacts):** unchanged from Pass 52fx.
+
+**1-150B rank-7 decompiled+renamed (HIGH):** `FUN_80044588` →
+`gate_control_record_state_byte_init_or_match`
+(40B, 3 xrefs) via
+`RenamePass52fyRegion80040000Fun80044588.java` (`renamed=1`, live-verified).
+
+```c
+bool gate_control_record_state_byte_init_or_match(uint desired_state)
+{
+  ctrl = PTR_base_of_0x1ac_struct_array_0xA_large2_800445b0;
+  state = (uint)(byte)ctrl[0xb].field96_0x60;
+  if (state == 0) {
+    ctrl[0xb].field96_0x60 = (byte)desired_state;
+    return true;
+  }
+  return (*PTR_DAT_800445b4 & 0x10) == 0 || state == desired_state;
+}
+```
+
+40B reusable re-entrancy gate on global control record `bos[0xb]` (`field96_0x60`
+state byte): first caller sets state from `desired_state` and proceeds; later
+callers allowed when global flag bit `0x10` clear or state already matches
+`desired_state`. Same gate idiom as `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`
+and LE scan/adv HCI handlers in this region. No direct callers found (function-pointer
+invocation).
+
+Post-rename: **88 unnamed** in-region (88 in 1-150B tier); live named **1550**.
+
+**Next:** continue 1-150B cold-triage — re-rank and decompile+rename next
+rank-8+ candidate (skip rank-1–4 artifacts).
