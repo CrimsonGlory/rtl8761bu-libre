@@ -269,7 +269,7 @@ first as instructed.
 | `0x80041900` | 376B | `program_page_train_baseband_regs_and_start_paging` — HCI Create Connection page-train BB programmer; see Pass 52dj | **HIGH** |
 | `0x80043c7c` | 372B | `compute_automatic_flush_timeout_ticks_by_connection_handle` — ACL automatic-flush-timeout tick calculator; see Pass 52dk | **HIGH** |
 | `0x80041a94` | 352B | `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` — HCI Periodic Inquiry Mode configure handler; programs LAP/min/max delays, access-code sync word, baseband regs, LMP 0x25B/0x268; see Pass 52eg | HIGH |
-| `0x800435a8` | 338B | Field manipulator, lower conn-type cluster. | MEDIUM |
+| `0x800435a8` | 338B | `reassign_inquiry_lap_slot_refcount_pending_and_program_channel` — IRQ-off LAP slot transition; decrements old-slot `_x142_LAP[slot+0x45]` refcount, releases pending bitmask, optional HW teardown; increments new-slot refcount, arms pending bitmask per `bdaddr_random_`, programs HW channel table; see Pass 52eh | HIGH |
 | `0x80041028` | 336B | Field manipulator, lower conn-type cluster. | MEDIUM |
 
 **Net effect (lower half)**: no renames this pass — all 11 stay at MEDIUM,
@@ -1223,7 +1223,8 @@ the release function): `+0` active, `+1` refcount, `+2` active_slot, `+3` 4-bit
 mask, `+4[slot]` status (bit0 primary, bit1 pending). When `is_primary==1`, marks
 slot as primary and sets active; otherwise clears primary bit, bumps refcount, and
 ORs slot into the active mask. Always sets the pending bit before return. 2
-confirmed callers via `xrefs_to`: `FUN_800435a8` and
+confirmed callers via `xrefs_to`:
+`reassign_inquiry_lap_slot_refcount_pending_and_program_channel` and
 `role_switch_completion_or_abort_handler`.
 
 Post-rename: **252 unnamed** in-region (166 in 1-150B tier).
@@ -2085,8 +2086,9 @@ Post-rename: **230 unnamed** in-region (144 in 1-150B tier).
 
 **Refreshed cold-triage (ranks 1-29 skipped as artifacts or already done):** rank-30
 `0x80043508` (128B, 1 xref) — substantive dual-slot buffer ushort probe in the
-`0x800435xx` inquiry/LAP / role-switch cluster (sibling of `FUN_800435a8` field
-manipulator and `dual_slot_buffer_reassignment_on_role_switch` in region `0x80030000`).
+`0x800435xx` inquiry/LAP / role-switch cluster (sibling of
+`reassign_inquiry_lap_slot_refcount_pending_and_program_channel` and
+`dual_slot_buffer_reassignment_on_role_switch` in region `0x80030000`).
 
 **Rank-30 decompiled and renamed (HIGH):** `FUN_80043508` →
 `is_indexed_dual_slot_ushort_match_context_and_log` (128B) via
@@ -5333,5 +5335,47 @@ Post-rename: **132 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1506**.
 
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
-decompile+rename next rank-1 unnamed >150B candidate (rank-3 `0x800435a8`,
-338B).
+decompile+rename next rank-1 unnamed >150B candidate (rank-1 `0x80041028`,
+336B).
+
+## Pass 52eh (2026-06-30) — >150B rank-3 inquiry LAP slot reassignment rename
+
+**Cold-triage (refreshed):** 37 unnamed >150B remain. rank-1 `0x80041028`
+(336B); rank-2 `0x8004704c` (296B); rank-3 `0x80043a60` (358B, 15 xrefs);
+rank-4 `0x8004c4a8` (894B); rank-5 `0x8004704c` (296B).
+
+**>150B rank-3 decompiled+renamed (HIGH):** `FUN_800435a8` →
+`reassign_inquiry_lap_slot_refcount_pending_and_program_channel` (338B, 1 xref)
+via `RenamePass52ehRegion80040000Fun800435a8.java` (`renamed=1`,
+live-verified).
+
+Inquiry/LAP slot transition handler — sole xref from `FUN_8003fcc8`
+(`0x8003fd9c`, region `0x80030000`):
+
+- **Slot context:** reads active LAP slot (`PTR_DAT_800436fc[0]`), pending new
+  slot (`[2]`), and subfield at `[0xf]`; both slots must be `<4` or logs error
+  `0xbf2`/`0xc19`.
+- **Old-slot teardown (IRQ-off):** decrements `_x142_LAP[old+0x45]` refcount;
+  when slot changes calls
+  `triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear`; calls
+  `release_inquiry_lap_slot_pending_bitmask`; when refcount hits zero clears
+  HW channel table entry via
+  `and_mask_hw_channel_table_entry_indexed_dispatch_noirq` and dispatches
+  teardown hook `(0, 5)`.
+- **New-slot arm:** increments `_x142_LAP[new+0x45]` refcount; branches on
+  `big_ol_struct[conn_index].bdaddr_random_`: public-address path calls
+  `set_inquiry_lap_slot_pending_bitmask(1, …)` and ORs bit0 into channel-table
+  ushort; random-address path calls
+  `set_inquiry_lap_slot_pending_bitmask(0x21, …)` and merges low-3-bit field
+  from context `[0xf]` into channel-table ushort; programs HW via shared fptr at
+  `PTR_DAT_8004370c`.
+
+Inquiry/LAP cluster sibling of `set_inquiry_lap_slot_pending_bitmask` (Pass 52o),
+`release_inquiry_lap_slot_pending_bitmask` (Pass 52n), and
+`teardown_inquiry_lap_slot_baseband_cleanup_and_release` (Pass 52dd).
+
+Post-rename: **131 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1507**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (`0x80041028`, 336B).

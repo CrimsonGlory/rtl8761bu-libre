@@ -8227,9 +8227,18 @@ sweep beyond enumeration and is the most out-of-date):
           1506. → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eh: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52eh (2026-06-30): decompiled+
+          renamed rank-3 `FUN_800435a8`→`reassign_inquiry_lap_slot_refcount_
+          pending_and_program_channel` (338B, HIGH, 1 xref). IRQ-off inquiry
+          LAP slot transition; old-slot refcount/pending/HW teardown, new-slot
+          refcount/pending bitmask + channel-table program; callee from
+          `FUN_8003fcc8`. 131 unnamed in-region; live named 1507.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ei: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (rank-3 `0x800435a8`, 338B).
+          (`0x80041028`, 336B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
