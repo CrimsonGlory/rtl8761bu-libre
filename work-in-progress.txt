@@ -9005,7 +9005,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hk: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hk (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80048980`→`hci_stage_8byte_param_log_0x26f_send_cmd_status`
+          (90B, HIGH). Immediate HCI Command Status OK; copies 8-byte payload from
+          `param+3` to staging buffer `PTR_DAT_800489dc`; logs conn-state event
+          `0x26f` via `possible_logger_called_if_no_patch3` (mask `DAT_800489e0 & 8`).
+          `0x800489xx` AFH/link-slot cluster sibling of
+          `hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete`. 0 xrefs.
+          50 unnamed in-region (13 in 1-150B size≥20B tier); live named 1588.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hk;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hl: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 

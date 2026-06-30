@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 52 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52hi, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 50 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52hk, 2026-06-30).
 
 ## Overview
 
@@ -8253,6 +8253,47 @@ and `hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete` (conn-slot-1
 bit-2 gate byte).
 
 Post-rename: **51 unnamed** in-region (14 in 1-150B size≥20B tier); live named **1587**.
+
+**Next:** superseded by Pass 52hk below.
+
+## Pass 52hk (2026-06-30) — rank-1 AFH/link-cluster HCI param-staging handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hk.java` — 51 unnamed,
+14 in 1-150B size≥20B tier; rank-1 `0x80048980` (90B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x800489xx` AFH/link-slot cluster
+(sibling of `hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete`
+at `0x800489e8` and `invoke_baseband_link_setup_packet_mode1_from_param_buffer`
+at `0x80048964`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80048980` →
+`hci_stage_8byte_param_log_0x26f_send_cmd_status` (90B) via
+`RenamePass52hkRegion80040000Fun80048980.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_stage_8byte_param_log_0x26f_send_cmd_status(undefined2 *param_1)
+{
+  /* immediate HCI Command Status OK via send_evt_HCI_Command_Status(*param_1, 0) */
+  /* copy 8 bytes from param+3 to staging buffer PTR_DAT_800489dc */
+  /* log conn-state event 0x26f via possible_logger_called_if_no_patch3 */
+  /*   (mask DAT_800489e0 & 8, slot ptr PTR_DAT_800489e4) */
+  return 0;
+}
+```
+
+90B HCI command handler in the `0x800489xx` AFH/link-slot cluster: immediately
+acknowledges with `send_evt_HCI_Command_Status` status `0`, copies 8-byte payload
+from HCI command offset `+3` into staging buffer `PTR_DAT_800489dc`, then logs
+connection-state change event `0x26f` via `possible_logger_called_if_no_patch3`
+(mask `DAT_800489e0 & 8`, slot context at `PTR_DAT_800489e4`) — same
+`send_evt_HCI_Command_Status` + `0x26f` logging idiom as
+`validate_and_stage_sco_air_mode_change_from_hci_command` no-change path.
+No direct callers found (indirect HCI router).
+
+AFH/link-slot cluster sibling of
+`hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete` and
+`invoke_baseband_link_setup_packet_mode1_from_param_buffer`.
+
+Post-rename: **50 unnamed** in-region (13 in 1-150B size≥20B tier); live named **1588**.
 
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
