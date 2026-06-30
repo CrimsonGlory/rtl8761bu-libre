@@ -7813,5 +7813,41 @@ extract of the four-iteration loop body in Pass 52aq.
 
 Post-rename: **63 unnamed** in-region (26 in 1-150B size≥20B tier); live named **1575**.
 
+**Next:** superseded by Pass 52gy below.
+
+## Pass 52gy (2026-06-30) — rank-1 slot-timing reprogram fan-out for conn 8-10 rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gy.java` — 63 unnamed,
+26 in 1-150B size≥20B tier; rank-1 `0x8004a6b8` (46B, 1 xref) — feature-gated
+fan-out to `dispatch_slot_timing_reprogram_if_pending_and_ready` for connection
+indices 8/9/10 in the `0x8004a6xx` slot-timing cluster (neighbor of Pass 52bd's
+`clear_lmp_precheck_entry_and_arm_connection_active_bitmask` at `0x8004a6ec`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004a6b8` →
+`dispatch_slot_timing_reprogram_conn8_9_10_if_feature_bits_0x801` (46B) via
+`RenamePass52gyRegion80040000Fun8004a6b8.java` (`renamed=1`, live-verified).
+
+```c
+void dispatch_slot_timing_reprogram_conn8_9_10_if_feature_bits_0x801(void)
+{
+  hdr = PTR_base_of_0x1ac_struct_array_0xA_large2_8004a6e8;
+  if ((ushort)(hdr->field451_0x1d0 | (hdr->field452_0x1d1 << 8)) & 0x801) == 0x801) {
+    dispatch_slot_timing_reprogram_if_pending_and_ready(8);
+    dispatch_slot_timing_reprogram_if_pending_and_ready(9);
+    dispatch_slot_timing_reprogram_if_pending_and_ready(10);
+  }
+}
+```
+
+When the 0x1ac struct-array header at `PTR_base_of_0x1ac_struct_array_0xA_large2`
+has feature bytes `+0x1d0` bit0 and `+0x1d1` bit3 both set (combined mask
+`0x801`), sequentially dispatches slot-timing reprogram checks for connection
+indices 8, 9, and 10 via the established
+`dispatch_slot_timing_reprogram_if_pending_and_ready` helper (Pass 47). Sole
+caller `FUN_80010814` — periodic main-loop dispatcher in region `0x80010000`
+that also runs VSC `0xfc11` polling and connection-state transitions.
+
+Post-rename: **62 unnamed** in-region (25 in 1-150B size≥20B tier); live named **1576**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
