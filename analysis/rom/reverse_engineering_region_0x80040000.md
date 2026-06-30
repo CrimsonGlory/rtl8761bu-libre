@@ -4164,5 +4164,27 @@ siblings in the LMP-25C busy-wait / slot-timing-reprogram cluster.
 Post-rename: **174 unnamed** in-region (95 in 1-150B tier unchanged); **79** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-9 `0x8004326c`
-(166B, 4 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cp below.
+
+## Pass 52cp (2026-06-30) — >150B rank-9 conn-table eSCO packet-type sweep rename
+
+**>150B rank-9 decompiled and renamed (HIGH):** `FUN_8004326c` →
+`sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes` (166B, 4 xrefs)
+via `RenamePass52cpRegion80040000Fun8004326c.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 5, 2026-06-23). Sweeps all 10 `big_ol_struct`
+connection slots (skipping `param_1`): for valid entries reads `byte_0xCC`
+(role-switch hook index) and `bos_connection__array_index`, remaps index `+8`
+into eSCO range when gate-table bit1 set and bit0 clear, and when secondary gate
+byte is `1` calls `FUN_80014450()` then `FUN_80034c5c(0x1c00, 0xc000, codec_idx)`
+— programming eSCO (`0x1c00`)/max-rate-SCO (`0xc000`) packet types using the same
+constant pair as `apply_codec_type_and_role_switch_hook_dispatch` — then IRQ-
+disables and clears per-index gate bytes at `PTR_DAT_80043324`/`PTR_DAT_80043328`
+to `0xff`. Post-apply housekeeping callee in the codec-type/role-switch cluster;
+structural sibling of `sweep_conn_table_clear_esco_gate_bytes_and_apply_codec_config`
+(`0x800431a0`, Pass 52cl).
+
+Post-rename: **173 unnamed** in-region (95 in 1-150B tier unchanged); **78** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-10 `0x8004b3c0`
+(162B, 4 xrefs).

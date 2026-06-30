@@ -7800,8 +7800,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52co;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cp: continue >150B cold-triage
-          — decompile+rename rank-9 `0x8004326c` (166B, 4 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cp (2026-06-30): decompiled+
+          renamed rank-9 `FUN_8004326c`→`sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
+          (166B, HIGH). Conn-table-wide sweep (skip one slot): remaps role-switch
+          hook index to eSCO range, programs packet type `0x1c00`/`0xc000` via
+          `FUN_80034c5c`, clears gate bytes; sibling of Pass 52cl sweep.
+          173 unnamed in-region (78 in >150B tier); live named 1465.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cq: continue >150B cold-triage
+          — decompile+rename rank-10 `0x8004b3c0` (162B, 4 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
