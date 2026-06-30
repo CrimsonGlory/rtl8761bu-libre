@@ -5018,5 +5018,33 @@ reassembly helpers.
 Post-rename: **141 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1497**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-38
-`0x8004c4a8` (894B, xrefs:0, type-1 callee of this dispatcher).
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-39
+`0x800483c0` (866B, xrefs:0, likely HCI VSC/command handler per Pass 3).
+
+## Pass 52dy (2026-06-30) — >150B rank-38 conn TX single-chunk segment walker rename
+
+**>150B rank-38 decompiled+renamed (HIGH):** `FUN_8004c4a8` →
+`walk_conn_tx_single_chunk_segments_dispatch_payload_by_type` (894B, 0 xrefs) via
+`RenamePass52dyRegion80040000Fun8004c4a8.java` (`renamed=1`, live-verified).
+
+Type-1 single-chunk callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`
+(Pass 52dx). Optional pre-hook at `PTR_DAT_8004c828`. Walks length-prefixed segments in
+the TX buffer (`param_1`, length `param_2`, conn index `param_3`):
+
+- Parses per-segment header byte: low 2 bits = payload dispatch type; bit `0x20` =
+  extended header with extra length/flag bytes and clock-offset field sizing.
+- Indexes per-connection `0x1ac` struct at `local_5c * 0x1ac`; stores RSSI-derived
+  value at `+0x5e` from trailer words.
+- Calls `update_rssi_iir_filtered_for_connection` per segment.
+- On success path (conn `+5` bit2 clear, segment fits budget): emits
+  `send_evt_Meta_subevent_0x16` (LE Data Length Change) and dispatches payload —
+  type 1/2 → `FUN_8004c2f0`, type 3+ → hook at `PTR_DAT_8004c83c` +
+  `atomic_saturating_byte_decrement_by1_cnt1`.
+- Error/overflow paths: `atomic_saturating_byte_decrement_by1_cnt1` + diagnostic log;
+  tail diagnostic counter via `possible_logger_called_if_no_patch3`.
+
+0 xrefs (indirect fptr registration). Connection TX dispatch cluster sibling of
+`walk_tx_reassembly_buffer_consuming_length_prefixed_segments`.
+
+Post-rename: **140 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1498**.

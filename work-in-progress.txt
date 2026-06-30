@@ -8133,8 +8133,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dx;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dy: continue >150B cold-triage
-          — decompile+rename refreshed rank-38 `0x8004c4a8` (894B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dy (2026-06-30): decompiled+
+          renamed rank-38 `FUN_8004c4a8`→`walk_conn_tx_single_chunk_segments_dispatch_payload_by_type`
+          (894B, HIGH) — type-1 single-chunk TX segment walker; parses length-prefixed
+          segments, RSSI IIR update, `send_evt_Meta_subevent_0x16`, payload dispatch by
+          low-2-bit type; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`;
+          upgraded from MEDIUM (Pass 3). 0 xrefs (indirect fptr registration). 140 unnamed
+          in-region; live named 1498.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dy;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dz: continue >150B cold-triage
+          — decompile+rename refreshed rank-39 `0x800483c0` (866B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
