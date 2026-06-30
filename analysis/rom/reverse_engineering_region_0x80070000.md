@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hb COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (6 STUB-tier unnamed remain). Latest: `sync_bb_slot_current_instant_to_reference_clear_timing_flags` (Pass 12hb). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1363** global; **8** in-region unnamed (6 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80076c68`, 36B, xref_in=0). See Pass 12hb section below.
+**Status**: Pass 12hc COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (5 STUB-tier unnamed remain). Latest: `set_bb_slot_status_mode_bits_clear_drift_counters` (Pass 12hc). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1364** global; **7** in-region unnamed (5 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80075fd0`, 34B, xref_in=0). See Pass 12hc section below.
 
 ## Overview
 
@@ -2416,6 +2416,33 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12hc (2026-06-30) — BB slot mode-bits setter stub `FUN_80076c68`
+
+Decompiled and renamed:
+**`FUN_80076c68` → `set_bb_slot_status_mode_bits_clear_drift_counters`**
+(36B, HIGH, STUB-tier) via `RenamePass12hcRegion80070000Fun80076c68.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(36B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** On BB slot struct `PTR_DAT_80076c8c`: merges low 3 mode bits from
+`param_1` into status byte `+0x28` (preserving high nibble via `& 0xf8 | param_1 & 7`),
+zeroes link-timing drift bytes `+0x26`/`+0x27`. Complements
+`accumulate_bb_slot_timing_drift_counters_or_set_mode` (Pass 12k), which sets mode
+bits when drift counters exceed threshold, and
+`sync_bb_slot_current_instant_to_reference_clear_timing_flags` (Pass 12hb), which
+clears mode bits entirely. BB link-timing cluster sibling of Passes 12f–12i
+(`0x80076f*` family); sits adjacent to `invoke_optional_patch_fptr_mid_bb_hw_init`
+(Pass 12d) in the `0x80076c*` address range.
+
+**Confidence:** HIGH — unambiguous struct field ops; offset layout matches the
+already-named BB slot helpers.
+
+Live named **1364** (global; in-region unnamed **7**; STUB-tier unnamed **5**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80075fd0`, 34B, xref_in=0).
 
 ## Pass 12hb (2026-06-30) — BB slot instant sync stub `FUN_80076ee4`
 

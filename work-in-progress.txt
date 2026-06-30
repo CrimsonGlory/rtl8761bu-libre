@@ -6870,8 +6870,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hc: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80076c68`, 36B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hc (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80076c68`→`set_bb_slot_status_mode_bits_clear_drift_counters`
+          (36B, HIGH, STUB-tier). BB slot struct `PTR_DAT_80076c8c`: merge low 3
+          mode bits from `param_1` into `+0x28`, clear drift bytes `+0x26`/`+0x27`;
+          BB link-timing cluster sibling of Passes 12f–12i. xref_in=0.
+          STUB-tier unnamed 5 remain; live named 1364.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hd: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80075fd0`, 34B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
