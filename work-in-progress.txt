@@ -6728,7 +6728,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gm: cold-triage next rank-1
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gm (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80075bac`→`search_pool_descriptor_index_table_set_found_flag`
+          (40B, HIGH, STUB-tier). Pool-descriptor index-table linear search: count
+          at +0x4, int-array at +0x8, writes found-byte at *param_3; sole caller
+          `uninteresting_if_0x80100000_conditional` at 0x800755dc. STUB-tier
+          unnamed 21 remain; live named 1348.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gn: cold-triage next rank-1
           STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gl COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (22 STUB-tier unnamed remain). Latest: `VSC_0xfc13_return_one_default_stub` (Pass 12gl). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1347** global; **24** in-region unnamed (22 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gl section below.
+**Status**: Pass 12gm COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (21 STUB-tier unnamed remain). Latest: `search_pool_descriptor_index_table_set_found_flag` (Pass 12gm). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1348** global; **23** in-region unnamed (21 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gm section below.
 
 ## Overview
 
@@ -2416,6 +2416,31 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gm (2026-06-30) — pool descriptor index membership search `FUN_80075bac`
+
+Decompiled and renamed:
+**`FUN_80075bac` → `search_pool_descriptor_index_table_set_found_flag`**
+(40B, HIGH, STUB-tier) via `RenamePass12gmRegion80070000Fun80075bac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(40B, xref_in=1 — `FindCallers80075bac.java` confirms 1 call site from
+`uninteresting_if_0x80100000_conditional` at `0x800755dc`; MCP `xrefs_to`
+returns empty against this GZF, known gap).
+
+**Mechanism:** Linear search of a pool-descriptor index table: given descriptor
+`param_1` with count at `+0x4` and int-array pointer at `+0x8`, walks entries
+comparing each dword to `param_2`; writes `*param_3 = 1` on match or `0` when
+exhausted, returns `0` (or `-1` if `param_1 == 0`). Sole caller uses it as a
+membership pre-check before `push_tag_to_pool_descriptor_index_stack_or_fail` in
+the `0x800755xx` RAM-0x80100000 config-validator cluster.
+
+**Confidence:** HIGH — unambiguous search loop; sole caller and sibling push
+function confirm pool-descriptor index-table semantics.
+
+Live named **1348** (global; in-region unnamed **23**; STUB-tier unnamed **21**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gl (2026-06-30) — VSC 0xFC13 default return-one stub `FUN_80078828`
 
