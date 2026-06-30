@@ -3484,5 +3484,41 @@ No direct callers found (function-pointer registration).
 
 Post-rename: **195 unnamed** in-region (109 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-75+
-substantive candidate; skip rank-1–74 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bt):** rank-75+ — completed Pass 52bu below.
+
+## Pass 52bu (2026-06-30) — rank-75 conn-struct field4 HCI status-echo handler rename
+
+**Refreshed cold-triage (ranks 1-74 skipped as artifacts, deferred, or already done):**
+rank-75 `0x80045454` (74B, 0 xrefs in triage) — substantive HCI Command Complete
+sender in the LE Meta Event / OGF8-stub neighborhood (`0x800454a8`); copies 8 bytes
+from HCI params into conn-struct `+0x4` staging, then emits status echo.
+
+**Rank-75 decompiled and renamed (HIGH):** `FUN_80045454` →
+`hci_copy_conn_struct_field4_8byte_field_0x165_send_cmd_complete` (74B) via
+`RenamePass52buRegion80040000Fun80045454.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_copy_conn_struct_field4_8byte_field_0x165_send_cmd_complete(short *hci_cmd)
+{
+  cmd_word = *hci_cmd;
+  optimized_memcpy(conn_struct_field4_staging, hci_cmd + 3, 8);
+  status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  hci_event_sender(0xe, {status, cmd_lo, cmd_hi, 0}, 4);
+  return 0;
+}
+```
+
+HCI command handler: copies 8 bytes from HCI command params at offset +3 into
+the per-connection `0x1ac` struct staging area at `+0x4` (via
+`PTR_base_of_0x1ac_struct_array_0xA_large2_0__field4_0x4_800454a0`). Derives
+status from global `the_0x300` struct `field_0x165` (0 when cmd word==0, else
+field value defaulting to 1) — same idiom as
+`hci_global_field_0x165_status_echo_send_cmd_complete`. Echoes cmd-word bytes;
+packs 4-byte Command Complete (`hci_event_sender(0xe,…)`). Sits immediately
+before `FUN_800454a8` (OGF8 command-status stub) in the LE Meta Event cluster
+address range. No direct callers found (function-pointer registration).
+
+Post-rename: **194 unnamed** in-region (108 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-76+
+substantive candidate; skip rank-1–75 artifacts, deferred, and already-done ranks.
