@@ -1097,4 +1097,33 @@ command entry points.
 
 Region unnamed count after this pass: **296** (297 minus this rename). Live named **1625** global.
 
+**Next:** superseded by Pass 6 continuation (17).
+
+## Pass 6 continuation (17) (2026-06-30) — LMP ext IO cap req `FUN_800293f0`
+
+Decompiled and renamed:
+**`FUN_800293f0` → `handle_lmp_ext_io_capability_req_subopcode_0x19`**
+(396B, HIGH) via `RenamePass6Region80020000Fun800293f0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (396B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=296` at pass start). Caller:
+`LMP_encryption_opcode_handlers` (LMP opcode `0x7F` extended, sub-opcode `0x19` via
+`switch(*(param_1+5)-2)` case `0x17`).
+
+**Mechanism:** Simple Pairing LMP-extended IO Capability Request handler gated on
+per-connection crypto sub-state `+1`. Primary success path when state `== 0x1d`:
+copies IO-cap bytes from PDU offset `+6` into crypto struct `+0x1e1` via
+`FUN_800257f0`, emits `send_evt_HCI_IO_Capability_Response`, runs SSP helper
+`FUN_80025910`, then arms pairing-template staging via `FUN_80025b68(role_bit)`.
+Alternate path when state `== 0x14` delegates to `FUN_8002403c`/`some_case_0x2d`.
+Error paths validate link/crypto preconditions (`FUN_8002403c`, `FUN_80023fdc`) and
+reply `FUN_800243b8(conn, 0x7f, 0x19, role_bit, reason)` (LMP ext NOT_ACCEPTED).
+Sibling `FUN_80029364` handles sub-opcode `0x1a` at state `0x15`.
+
+**Confidence:** HIGH — direct dispatch from documented `LMP_encryption_opcode_handlers`
+0x7F switch; HCI IO-cap event senders already Pass-5 HIGH; `FUN_80025b68` pairing-
+template path documented in `reverse_engineering_hardware_layer.md` call chain.
+
+Region unnamed count after this pass: **295** (296 minus this rename). Live named **1626** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
