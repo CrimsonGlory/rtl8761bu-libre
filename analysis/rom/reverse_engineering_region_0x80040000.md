@@ -7598,5 +7598,46 @@ in HCI sync-conn param commit path.
 
 Post-rename: **69 unnamed** in-region (32 in 1-150B size≥20B tier); live named **1569**.
 
+**Next:** superseded by Pass 52gs below.
+
+## Pass 52gs (2026-06-30) — rank-1 link-globals slot-index rewire rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gs.java` — 69 unnamed,
+32 in 1-150B size≥20B tier; rank-1 `0x8004e900` (68B, 1 xref) — substantive
+non-alloc rewire of `0x14`-byte slot index table in link globals (structural twin
+of `alloc_and_wire_0x14_slot_index_table_in_link_globals`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004e900` →
+`rewire_0x14_slot_index_table_in_link_globals` (68B) via
+`RenamePass52gsRegion80040000Fun8004e900.java` (`renamed=1`, live-verified).
+
+```c
+void rewire_0x14_slot_index_table_in_link_globals(void)
+{
+  ctx = PTR_PTR_8004e944;
+  count = *(uint *)(ctx + 0x234);
+  base = *(int *)(ctx + 0x22c);
+  for (idx = 0; idx < count; idx++)
+    *(uint *)(base + idx * 4) = base + count * 4 + idx * 0x14;
+  ctx = PTR_PTR_8004e944;
+  *(uint *)(ctx + 0x234) = count;
+  *(undefined4 *)(ctx + 0x238) = 0;
+  *(undefined4 *)(ctx + 0x23c) = 0;
+  *(int *)(ctx + 0x230) = base;
+  *(undefined **)(ctx + 0x240) = PTR_DAT_8004e948;
+}
+```
+
+Rebuilds dword pointer index into pre-allocated `0x14`-byte slot records without
+allocating: layout `[count×4B ptr table][count×0x14B records]`, each
+`ptr_table[i] = base + count*4 + i*0x14`. Clears global-ctx u32 slots `+0x238`
+and `+0x23c`, binds default template `PTR_DAT_8004e948` at `+0x240`. Non-alloc
+structural twin of `alloc_and_wire_0x14_slot_index_table_in_link_globals`
+(`0x800523bc`, region `0x80050000` Pass 54l). Sole caller
+`teardown_links_and_reinit_default_subrecord` (`0x800522bc`): re-establishes
+pointer wiring after link-global teardown/reinit.
+
+Post-rename: **68 unnamed** in-region (31 in 1-150B size≥20B tier); live named **1570**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

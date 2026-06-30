@@ -8819,7 +8819,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gs: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gs (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004e900`→`rewire_0x14_slot_index_table_in_link_globals`
+          (68B, HIGH). Non-alloc rewire of `0x14`-byte slot index table in link
+          globals; clears `+0x238`/`+0x23c`, binds `PTR_DAT_8004e948` at `+0x240`;
+          structural twin of `alloc_and_wire_0x14_slot_index_table_in_link_globals`;
+          sole caller `teardown_links_and_reinit_default_subrecord`. 68 unnamed
+          in-region; live named 1570.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gs;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gt: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
