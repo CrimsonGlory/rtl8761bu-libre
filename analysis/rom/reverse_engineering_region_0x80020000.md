@@ -3038,4 +3038,39 @@ Pass 6 cont. (52)/(77) SSP crypto-struct layout.
 
 Region unnamed count after this pass: **234** (235 minus this rename). Live named **1687** global.
 
+**Next:** superseded by Pass 6 continuation (79).
+
+## Pass 6 continuation (79) (2026-06-30) — SSP confirm sender `FUN_800259c8`
+
+Decompiled and renamed:
+**`FUN_800259c8` → `derive_simple_pairing_confirm_and_send_lmp_0x3f`**
+(142B, HIGH) via `RenamePass6Region80020000Fun800259c8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (142B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=234` at pass start). Sits in the
+`0x800259xx` SSP confirm cluster between `derive_dhkey_check_and_send_lmp_0x41`
+(`0x80025a60`) and the passkey/numeric-comparison dispatch wrappers.
+
+**Mechanism:** SSP Simple Pairing Confirm (LMP **0x3f**) value generator and sender.
+Reads curve-width byte `crypto+0x1f1` to select SA lookup-table offset from
+`PTR_DAT_80025a58[0x47]` (`×0x30` when `0x06`/P-256, else `×0x40+0x90`), then
+invokes variable-length HMAC helper `FUN_8002c7d0` over table entry +
+DHKey blocks at `+0x17e`/`+0xe8` with caller-supplied mode/flag byte `param_3`.
+Byte-swaps 16B output and transmits via `FUN_80024470` → `send_LMP_pkt` with
+payload opcode `0x3f`, length `0x12` (18 bytes).
+
+**Callers:** `FUN_80025dd8` at `0x80025e12` (passkey bit-extraction path: primes
+`FUN_8002c838`, extracts confirm bit from `+0x138`/`+0x13c`, increments bit index)
+and `FUN_80025fb4` at `0x80025fe6` (numeric-comparison path from
+`dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` classifier result `0`:
+when `crypto+0x50 != 1`, sends confirm then arms state `0x2f`, else state `0x2a`)
+— xref_in=2, confirmed via `ListXrefsTo800259c8.java`.
+
+**Confidence:** HIGH — LMP opcode `0x3f` and `send_LMP_pkt` callee chain match
+documented SSP confirm cluster; variable-length HMAC idiom parallels
+`assemble_63byte_hmac_and_compute_safer_hash`/`FUN_8002c7d0` siblings; both
+callers sit on established SSP pairing-method dispatch paths (Pass 6 cont. 30/48).
+
+Region unnamed count after this pass: **233** (234 minus this rename). Live named **1688** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
