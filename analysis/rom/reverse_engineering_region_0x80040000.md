@@ -4000,3 +4000,60 @@ Post-rename: **181 unnamed** in-region (95 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-89+
 substantive candidate; skip rank-1–88 artifacts, deferred, and already-done ranks.
+
+## Pass 52ci (2026-06-30) — 1-150B tail artifact triage + >150B rank-1 orchestrator rename
+
+**Refreshed cold-triage (ranks 1-87 already done; rank-88+ tail is artifact-only):**
+ranks 88-95 in the refreshed 1-150B queue are all 1-4B stubs with 0 xrefs —
+non-substantive mis-disassembly artifacts, not rename candidates:
+
+| Rank | Address | Size | Notes |
+|------|---------|------|-------|
+| 88 | `0x8004f370` | 4B | decompile = empty `return;` |
+| 89 | `0x80049926` | 2B | stub |
+| 90-95 | `0x8004498d`…`0x80049155` | 1B each | stubs |
+
+**1-150B substantive cold-triage queue exhausted** (95 entries total; ranks 1-87
+renamed HIGH, ranks 88-95 artifact tail). Pivot to >150B tier (86 unnamed functions).
+
+**>150B rank-1 decompiled and renamed (HIGH):** `FUN_80043a60` →
+`remote_name_request_feature_apply_orchestrator` (358B, 15 xrefs) via
+`RenamePass52ciRegion80040000Fun80043a60.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3 continuation 2026-06-23) — structural parent of
+already-HIGH siblings `remote_name_request_feature_apply_4` (`0x80043984`) and
+`remote_name_request_feature_apply_8` (`0x80043884`): identical gating on
+`the_0x300`/`config_struct` fields (`field208_0xd8`, `byte_0x16a`/`int_0x10`,
+`field_0x171`/`field_0x173`, `ushort_0x24`/`byte_0x16f`), clears `+0x164` bit
+mask, then dispatches to `FUN_8003c94c` (apply_4 path) or `FUN_8003ca28`
+(apply_8 path) writing timing offset into global struct `+0x11c`. Called from
+inquiry-cancel, periodic-inquiry-exit, role-switch-completion, and ACL-finalize
+handlers.
+
+Post-rename: **180 unnamed** in-region (95 in 1-150B tier unchanged); **85** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-3 `0x8004f580`
+(314B, 7 xrefs).
+
+## Pass 52cj (2026-06-30) — >150B rank-2 BD_ADDR slot reconcile + LMP 0x259 dispatch
+
+**>150B rank-2 decompiled and renamed (HIGH):** `FUN_8004090c` →
+`reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259` (246B, 11 xrefs) via
+`RenamePass52cjRegion80040000Fun8004090c.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 4, 2026-06-23). IRQ-disabled BD_ADDR slot
+reconciliation handler gated on `the_0x300->int_0x10==2` and a pending byte at
+`PTR_DAT_80040a0c != 0xff`: builds BD_ADDR from `PTR_another_bdaddr_80040a10`,
+calls `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`, reads
+per-slot `byte_0xCC` from `big_ol_struct`, calls
+`and_mask_hw_channel_table_entry_and_indexed_dispatch` (AND-mask=0) to clear the
+HW-channel table entry, clears the pending byte to `0xff`, then dispatches
+`LMP_259_opcode_handler`. Secondary path when `int_0x10==1` emits event 600 via
+`possible_logger_called_if_no_patch3`. Optional pre-hook at `PTR_DAT_80040a04`
+can short-circuit. Called from the shared connect-procedure dispatcher
+(`called_by_fHCI_Remote_Name_Request_5`).
+
+Post-rename: **179 unnamed** in-region (95 in 1-150B tier unchanged); **84** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-3 `0x8004f580`
+(314B, 7 xrefs).

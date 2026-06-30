@@ -7730,9 +7730,27 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ch;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ci: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-89+ substantive candidate;
-          skip rank-1–88 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ci (2026-06-30): 1-150B tail
+          artifact triage (ranks 88-95 all 1-4B stubs, queue exhausted); pivot
+          to >150B tier — decompiled+renamed rank-1 `FUN_80043a60`→
+          `remote_name_request_feature_apply_orchestrator` (358B, HIGH, 15 xrefs).
+          Parent orchestrator of `remote_name_request_feature_apply_4/8`. 180
+          unnamed in-region; live named 1458.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ci;
+          rom_function_index.md; analysis/INDEX.md
+
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cj (2026-06-30): decompiled+
+          renamed rank-2 `FUN_8004090c`→
+          `reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259` (246B, HIGH,
+          11 xrefs). BD_ADDR slot reconcile: IRQ-off scan via
+          `look_for_non_matching_bdaddr_bos_index`, AND-mask HW-channel clear,
+          `LMP_259_opcode_handler` dispatch; event-600 log when `int_0x10==1`.
+          179 unnamed in-region; live named 1459.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cj;
+          rom_function_index.md; analysis/INDEX.md
+
+[TODO]  Full RE: ROM region 0x80040000 — Pass 52ck: continue >150B cold-triage
+          — decompile+rename rank-3 `0x8004f580` (314B, 7 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
