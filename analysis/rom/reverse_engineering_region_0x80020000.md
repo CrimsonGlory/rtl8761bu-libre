@@ -1306,4 +1306,32 @@ dispatch match prior RE.
 
 Region unnamed count after this pass: **289** (290 minus this rename). Live named **1632** global.
 
+**Next:** superseded by Pass 6 continuation (24).
+
+## Pass 6 continuation (24) (2026-06-30) — SSP OOB confirmation verifier `FUN_800262b8`
+
+Decompiled and renamed:
+**`FUN_800262b8` → `verify_ssp_oob_confirmation_hash`**
+(294B, HIGH) via `RenamePass6Region80020000Fun800262b8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (294B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=289` at pass start).
+
+**Mechanism:** SSP Out-of-Band confirmation verifier on the per-connection
+`_x58_crypto_struct` (`param_1`). Computes a 16-byte confirmation hash via
+`FUN_8002c7d0` from pairing state at `+0x17e` (keyed by byte at `+0x1f1`),
+`memcmp`s against caller-supplied expected hash (`param_2`), logs success/failure
+via `possible_logging_function__var_args`, and on match stores the 16-byte OOB
+response at `+0x118` from `param_3`. Returns bool (match).
+
+**Callers:** `fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` (twice — legacy
+and P-256 extended OOB pairs) and `FUN_800236cc` (sibling HCI OOB reply handler
+in the SSP pairing path).
+
+**Confidence:** HIGH — decompile confirms hash-then-compare-then-store pattern;
+callers and cross-region doc (`region_0x80010000` Pass 4fHCI) already identified
+this as the OOB confirmation verifier for `HCI_Remote_OOB_Extended_Data_Request_Reply`.
+
+Region unnamed count after this pass: **288** (289 minus this rename). Live named **1633** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
