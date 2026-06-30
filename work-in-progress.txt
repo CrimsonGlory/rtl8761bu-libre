@@ -8934,9 +8934,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52he: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52he (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800464a4`→`hci_read_conn_tx_rx_phy_send_cmd_complete`
+          (148B, HIGH). LE conn TX/RX PHY read HCI handler: handle at `param+3`,
+          `query_config_struct_0x1ac_by_index`, PHY bytes via
+          `query_current_PHY_by_connection_index` at conn `+0x122/+0x123`;
+          Command Complete via `hci_event_sender(0xe,…)`; `0x800464xx` cluster
+          sibling of Pass 52fk. xrefs≥1 tier exhausted — rank-1 by size (0 xrefs).
+          56 unnamed in-region (19 in 1-150B size≥20B tier); live named 1582.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52he;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hf: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
-          decompile+rename next candidate (size≥20B, xrefs≥1).
+          decompile+rename next candidate (size≥20B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

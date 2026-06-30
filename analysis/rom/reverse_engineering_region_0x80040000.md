@@ -8020,5 +8020,40 @@ running minimum slot-timing field. Overlaps the 4B Ghidra body at `0x8004e9a4`
 
 Post-rename: **57 unnamed** in-region (20 in 1-150B size≥20B tier); live named **1581**.
 
+**Next:** superseded by Pass 52he below.
+
+## Pass 52he (2026-06-30) — rank-1 LE PHY read HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52he.java` — 57 unnamed,
+20 in 1-150B size≥20B tier; rank-1 `0x800464a4` (148B, 0 xrefs) — xrefs≥1
+tier exhausted; largest remaining 1-150B candidate in the `0x800464xx` LE
+Meta Event / link-timing cluster (sibling of Pass 52fk's
+`hci_read_sco_esco_link_reg_pair_snapshot_send_cmd_complete` at `0x8004653c`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800464a4` →
+`hci_read_conn_tx_rx_phy_send_cmd_complete` (148B) via
+`RenamePass52heRegion80040000Fun800464a4.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_read_conn_tx_rx_phy_send_cmd_complete(short *param_1)
+{
+  /* handle at param+3; reject >=0x1000 → status 0x12 */
+  /* query_config_struct_0x1ac_by_index; null → status 2 */
+  /* query_current_PHY_by_connection_index(conn+0x122/+0x123) → TX/RX PHY */
+  /* hci_event_sender(0xe, …, 4 or 8) Command Complete with field_0x165 idiom */
+}
+```
+
+148B HCI command handler: extracts connection handle from `param+3`; rejects
+`≥0x1000` (status `0x12`); looks up conn record via
+`query_config_struct_0x1ac_by_index` (null → status `2`); on success queries
+TX/RX PHY bytes at conn-record offsets `+0x122`/`+0x123` via
+`query_current_PHY_by_connection_index`; terminates via 4- or 8-byte HCI
+Command Complete (`hci_event_sender(0xe,…)`) with `field_0x165` status idiom,
+echoed command word, handle, and PHY pair on success. No direct callers found
+(indirect HCI router).
+
+Post-rename: **56 unnamed** in-region (19 in 1-150B size≥20B tier); live named **1582**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
-(size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
+(size≥20B; refresh cold-triage ranks).
