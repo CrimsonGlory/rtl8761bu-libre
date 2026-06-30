@@ -1911,5 +1911,37 @@ dispatch cluster sibling of `FUN_8004a730` (adjacent segment parser).
 
 Post-rename: **234 unnamed** in-region (148 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-19+
-substantive candidate; skip rank-1–18 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-20+
+substantive candidate; skip rank-1–19 artifacts and already-done ranks.
+
+## Pass 52ah (2026-06-30) — rank-19 BOS-slot pending-queue purge wrapper rename
+
+**Refreshed cold-triage (ranks 1-18 skipped as artifacts or already done):** rank-19
+`0x800443fc` (46B, 2 xrefs) — substantive thin wrapper indexing `big_ol_struct[conn_idx]`
+and dispatching pending-queue node purge via `FUN_8006aee4`.
+
+**Rank-19 decompiled and renamed (HIGH):** `FUN_800443fc` →
+`purge_pending_queue_nodes_for_bos_slot` (46B) via
+`RenamePass52ahRegion80040000Fun800443fc.java` (`renamed=1`, live-verified).
+
+```c
+void purge_pending_queue_nodes_for_bos_slot(uint conn_idx, byte force_purge)
+{
+  slot = big_ol_struct[conn_idx & 0xffff];
+  FUN_8006aee4(slot.bos_connection__array_index, slot.byte_0xCC, force_purge);
+}
+```
+
+Indexes `big_ol_struct` by connection index, passes `bos_connection__array_index`,
+`byte_0xCC` (slot/sub-index), and `force_purge` to `FUN_8006aee4` — which walks the
+linked pending-queue at `PTR_DAT_8006af60`, matching nodes on `+0x19`/`+0x1a` and
+optionally forcing purge when `force_purge==1` even if `+0x1b` is set. Callers:
+`dual_slot_buffer_reassignment_on_role_switch` (force_purge=1 during IRQ-masked role-
+switch buffer reassignment) and `possible_LMP_DETACH_handler` (force_purge=0 on LMP
+detach teardown when pending counter hits zero). Connection-teardown cluster sibling
+in the `0x800443xx`/`0x800445xx` SCO/eSCO slot path.
+
+Post-rename: **233 unnamed** in-region (147 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-20+
+substantive candidate; skip rank-1–19 artifacts and already-done ranks.
