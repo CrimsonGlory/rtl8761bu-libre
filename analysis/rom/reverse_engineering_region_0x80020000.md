@@ -984,7 +984,7 @@ Success path: programs encryption key material via `FUN_8002d3d8` (when `+0x214=
 or `FUN_8002d1f0` (alternate path when `+0x214!=0` and `field_0x2b2` unset), sends
 `wrap_send_LMP_ACCEPTED_and_some_other_things(handle,0x11,role)`, calls
 `finalize_encryption_procedure_and_notify_hci(handle,0)`, and arms link via
-`FUN_80022210`. Failure/reject paths send `wrap_send_LMP_NOT_ACCEPTED(handle,0x11,...)`.
+`arm_link_encryption_post_key_program`. Failure/reject paths send `wrap_send_LMP_NOT_ACCEPTED(handle,0x11,...)`.
 Special sub-path when stored opcode byte is `0x11` or `0x1e` with public BD_ADDR:
 may invoke `FUN_8002408c`, set crypto flags, and recursively re-enter this handler.
 
@@ -1632,7 +1632,7 @@ copies canned keys from `PTR_DAT_80025154`/`PTR_DAT_80025158` when first PDU byt
 `-0x14` indexes a nonzero slot in `PTR_DAT_80025150`; otherwise derives via
 `FUN_8002d3d8` (mode byte `+0x1f1==6`) or `FUN_8002d1f0` (mode `+0x1f1==8` with
 BD_ADDR mixing when `field_0x2b2` unset). Sends LMP opcode **0x11** (Start Encryption)
-via `FUN_80024470`, arms link via `FUN_80022210`, sets `field_0x2b0=1`.
+via `FUN_80024470`, arms link via `arm_link_encryption_post_key_program`, sets `field_0x2b0=1`.
 
 **Callers:** `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` (1 site, post-accept random-addr branch).
 
@@ -2653,5 +2653,35 @@ pending-LMP forward to documented IO-cap req handler; SSP-complete fallback matc
 cluster handlers at `0x800236cc`/`0x80023878`.
 
 Region unnamed count after this pass: **246** (247 minus this rename). Live named **1675** global.
+
+**Next:** superseded by Pass 6 continuation (67).
+
+## Pass 6 continuation (67) (2026-06-30) — link encryption arm `FUN_80022210`
+
+Decompiled and renamed:
+**`FUN_80022210` → `arm_link_encryption_post_key_program`**
+(154B, HIGH) via `RenamePass6Region80020000Fun80022210.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (154B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=246` at pass start). Tied at 154B with
+`FUN_8002d0b0`/`FUN_800260f4` (xref_in=1 each); selected for higher xref count.
+
+**Mechanism:** Post-key-program link encryption arming helper on `big_ol_struct[slot]`.
+When crypto `+0x214==0` (debug/unprogrammed path): calls `FUN_80014770` on connection
+index. Otherwise: applies programmed 16-byte key at crypto `+0x13` via `FUN_80014ba8`;
+when `+0x212!=0`, selects public (`+0x20a`) vs random (`+0x1fa`) address block and
+invokes `FUN_80014b30`. Optional `param_2` flag triggers
+`sometimes_called_with_0_3_0(...,3)` (mode-3 encryption VSC pair arm). On public
+BD_ADDR links, `FUN_80024020` gate may invoke `FUN_800221f0` on key block `+0x13`.
+
+**Callers:** `LMP_START_ENCRYPTION_REQ_0x11` (success path after key program + LMP
+0x11 accept) and `program_encryption_key_and_send_lmp_start_encryption_req` (random-addr
+key-size-accept branch) — documented in Pass 6 cont. (13)/(34).
+
+**Confidence:** HIGH — decompile confirms key-at-`+0x13` programming idiom shared with
+encryption kickoff helpers; both callers already named in encryption procedure cluster;
+optional mode-3 VSC arm matches `start_encryption_vsc_pair_on_mode3_enable` dispatch chain.
+
+Region unnamed count after this pass: **245** (246 minus this rename). Live named **1676** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
