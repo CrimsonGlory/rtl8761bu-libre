@@ -7379,9 +7379,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52av;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52aw: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-41+ substantive candidate;
-          skip rank-1–40 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52aw (2026-06-30): decompiled+
+          renamed rank-41 `FUN_8004f9d8`→`purge_le_chan_sel_pending_list_by_conn_index_byte`
+          (70B, HIGH, 1 xref). Walks LE chan-sel pending list at `PTR_DAT_8004fa20+0xc`,
+          unlinks nodes whose parent conn-index byte matches via
+          `resolve_parent_context_by_role`; caller
+          `conditional_dispatch_LE_channel_selection_algorithm`. 218 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ax: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-42+ substantive candidate;
+          skip rank-1–41 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

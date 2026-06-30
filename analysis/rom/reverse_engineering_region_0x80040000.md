@@ -2524,5 +2524,45 @@ invokes Pass 12cy's `write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook` 
 
 Post-rename: **219 unnamed** in-region (133 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-41+
-substantive candidate; skip rank-1–40 artifacts and already-done ranks.
+## Pass 52aw (2026-06-30) — rank-41 LE chan-sel pending-list purge rename
+
+**Refreshed cold-triage (ranks 1-40 skipped as artifacts or already done):** rank-41
+`0x8004f9d8` (70B, 1 xref) — substantive LE channel-selection pending-list purge in
+the `resolve_parent_context_by_role` / conn-index-byte cluster (sibling of Pass 52as's
+`arm_lmp_procedure_slot_pending_by_active_link_count` callee `FUN_8004e2f4`).
+
+**Rank-41 decompiled and renamed (HIGH):** `FUN_8004f9d8` →
+`purge_le_chan_sel_pending_list_by_conn_index_byte` (70B) via
+`RenamePass52awRegion80040000Fun8004f9d8.java` (`renamed=1`, live-verified).
+
+```c
+void purge_le_chan_sel_pending_list_by_conn_index_byte(int conn_rec)
+{
+  idx_byte = *(char *)(conn_rec + 0x10);
+  list = *(int **)(PTR_DAT_8004fa20 + 0xc);
+  while (node = list, node != NULL) {
+    list = (int *)*node;
+    parent = resolve_parent_context_by_role(node);
+    if (*(char *)(parent + 0x10) == idx_byte) {
+      if (*node == 0)
+        *(int *)(PTR_DAT_8004fa20 + 0x10) = node[1];
+      else
+        *(int *)(*node + 4) = node[1];
+      *(int *)node[1] = *node;
+    }
+  }
+}
+```
+
+Walks the doubly-linked pending list at `PTR_DAT_8004fa20+0xc`, resolves each node's
+effective connection context via the already-named `resolve_parent_context_by_role`,
+and unlinks nodes whose parent `+0x10` conn-index byte matches `conn_rec+0x10`. Sole
+caller `conditional_dispatch_LE_channel_selection_algorithm` (`0x80055320`, region
+`0x80050000` Pass 24): when the active connection at `puVar2+8` differs from `param_1`,
+purges stale pending entries before dispatching
+`le_channel_selection_algorithm_event_dispatch(0x44, param_1, 0)`.
+
+Post-rename: **218 unnamed** in-region (132 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-42+
+substantive candidate; skip rank-1–41 artifacts and already-done ranks.
