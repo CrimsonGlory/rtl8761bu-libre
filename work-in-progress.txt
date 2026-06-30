@@ -7406,9 +7406,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ay;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52az: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-44+ substantive candidate;
-          skip rank-1–43 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52az (2026-06-30): decompiled+
+          renamed rank-44 `FUN_80042ee0`→`fill_lmp_pdu_staging_slot_params_from_txn_mode`
+          (56B, HIGH, SIMPLE-tier). LMP PDU staging ushort-pair loader keyed by
+          transaction-mode byte at +0x11; modes 8-11 use ushort tables, modes 0-11
+          use byte tables; sole caller `FUN_8006fd20` role-switch handler. 215
+          unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52az;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ba: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-45+ substantive candidate;
+          skip rank-1–44 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -2648,3 +2648,50 @@ Post-rename: **216 unnamed** in-region (130 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-44+
 substantive candidate; skip rank-1–43 artifacts and already-done ranks.
+
+## Pass 52az (2026-06-30) — rank-44 LMP PDU staging slot-param filler rename
+
+**Refreshed cold-triage (ranks 1-43 skipped as artifacts or already done):** rank-44
+`0x80042ee0` (56B, 1 xref) — substantive LMP PDU staging ushort-pair loader in the
+role-switch / transaction-mode cluster (callee chain after Pass 52at's
+`map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random` in `FUN_8006fd20`).
+
+**Rank-44 decompiled and renamed (HIGH):** `FUN_80042ee0` →
+`fill_lmp_pdu_staging_slot_params_from_txn_mode` (56B) via
+`RenamePass52azRegion80040000Fun80042ee0.java` (`renamed=1`, live-verified).
+
+```c
+void fill_lmp_pdu_staging_slot_params_from_txn_mode(void)
+{
+  staging = PTR_DAT_80042f18;
+  txn_mode = (uint)(byte)staging[0x11];
+  mode_idx = txn_mode - 8 & 0xff;
+  if (mode_idx < 4) {
+    idx = mode_idx * 2;
+    val_a = *(ushort *)(PTR_DAT_80042f1c + idx);
+    val_b = *(ushort *)(PTR_DAT_80042f20 + idx);
+  }
+  else {
+    if (0xb < txn_mode) return;
+    val_a = (ushort)(byte)PTR_DAT_80042f24[txn_mode];
+    val_b = (ushort)(byte)PTR_DAT_80042f28[txn_mode];
+  }
+  *(ushort *)(staging + 8) = val_a;
+  *(ushort *)(staging + 10) = val_b;
+}
+```
+
+Reads the LMP transaction-mode byte at staging struct `+0x11` (written by
+`map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random` on the role-switch path).
+For modes 8–11 (`txn_mode-8 < 4`), loads a ushort pair from ushort lookup tables
+`PTR_DAT_80042f1c`/`PTR_DAT_80042f20`; for modes 0–11, loads from byte tables
+`PTR_DAT_80042f24`/`PTR_DAT_80042f28` expanded to ushort. Writes the pair to
+staging `+8` and `+10` before the `FUN_8006f994` continuation in
+`FUN_8006fd20`. Sole caller `FUN_8006fd20` (role-switch/LMP slot-offset
+completion handler, region `0x80070000`). Pairs with Pass 52at's txn-mode mapper
+and Pass 52ai's `resolve_bos_subindex_byte_for_connection_index`.
+
+Post-rename: **215 unnamed** in-region (129 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-45+
+substantive candidate; skip rank-1–44 artifacts and already-done ranks.
