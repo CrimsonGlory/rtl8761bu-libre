@@ -2232,4 +2232,37 @@ caller linkage and status-byte semantics documented in prior upgrade pass.
 
 Region unnamed count after this pass: **260** (261 minus this rename). Live named **1661** global.
 
+**Next:** superseded by Pass 6 continuation (53).
+
+## Pass 6 continuation (53) (2026-06-30) — AFH host channel class validator `FUN_80021310`
+
+Decompiled and renamed:
+**`FUN_80021310` → `validate_afh_host_channel_class_params_and_store_weight`**
+(180B, HIGH) via `RenamePass6Region80020000Fun80021310.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (180B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=260` at pass start). Deferred lead from
+Pass 6 continuation (52) (tied at 180B with `FUN_80025a60` but lower xref_in).
+
+**Mechanism:** Per-connection HCI parameter-block validator for AFH host channel
+classification. Takes `param_1` (ushort fields at `+2/+4/+6/+8`) and connection slot
+`param_2`. Validates range/order/bit-flag constraints (`+2` ≥ 6, `+4` ≥ 2, `+6` ≠ 0,
+`+2` ≥ `+4`, neither `+2` nor `+4` has bits 15/0 set, `+2` ≥ (`+6`+`+8`)*2), and when
+`field_0x74` is active checks the proposed weight does not overlap the
+`field90_0x82`..`field_0x74` window. On success writes ushort at `+2` into
+`field106_0x94` (connection weight) and returns `0`; on failure returns `0x12`; when
+calibration global `PTR_DAT_800213c8==1` and `struct_of_at_least_0x300_size.ushort_0x24==0x20`
+returns `0x11` without storing.
+
+**Callers:** `FUN_8001b01c` (`0x8001b084`) — AFH host-channel-classification HCI handler
+(feature-page bit `0x80` + `field89_0x80` bit 4 gate): validates via this helper, then
+registers AFH LAP group slot (`register_afh_lap_group_slot_with_*`), and sends LMP `0x17`
+via `send_LMP_pkt`.
+
+**Confidence:** HIGH — decompile confirms field106_0x94 weight staging idiom matching
+documented connection-selection/AFH cluster; caller decompile shows full
+register_afh_lap_group_slot + LMP 0x17 dispatch chain.
+
+Region unnamed count after this pass: **259** (260 minus this rename). Live named **1662** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
