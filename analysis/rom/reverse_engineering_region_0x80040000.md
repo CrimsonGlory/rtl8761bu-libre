@@ -7849,5 +7849,38 @@ that also runs VSC `0xfc11` polling and connection-state transitions.
 
 Post-rename: **62 unnamed** in-region (25 in 1-150B size≥20B tier); live named **1576**.
 
+**Next:** superseded by Pass 52gz below.
+
+## Pass 52gz (2026-06-30) — rank-1 conn-index active-bit test in field4_0x4 bitmask rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gz.java` — 62 unnamed,
+25 in 1-150B size≥20B tier; rank-1 `0x80044648` (40B, 1 xref) — 1-based
+conn-index bit-test in the `0x1ac` struct-array header's `field4_0x4` byte
+bitmask; neighbor of `HCI_CMD_OGF_08__LE_Commands__big_switch` (`0x80044674`)
+in the LE command/event cluster.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044648` →
+`is_conn_index_active_in_field4_0x4_bitmask` (40B) via
+`RenamePass52gzRegion80040000Fun80044648.java` (`renamed=1`, live-verified).
+
+```c
+bool is_conn_index_active_in_field4_0x4_bitmask(uint conn_index)
+{
+  idx = (conn_index & 0xff) - 1;
+  hdr = PTR_base_of_0x1ac_struct_array_0xA_large2_80044670;
+  return (1 << (idx & 7) & (uint)(byte)(&hdr->field4_0x4)[(int)idx >> 3]) != 0;
+}
+```
+
+Tests whether the 1-based connection index has its bit set in the
+`field4_0x4` active-link bitmask at the `0x1ac` struct-array header (same
+field used elsewhere as the per-connection active-flag byte array). Sole
+caller `hci_event_sender` (`0x8001d070`) — when config flag
+`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit1 is set and the outgoing
+event opcode is `0x3E` (LE Meta Event), requires the first payload byte
+(conn index) to pass this active-bit test before allowing event delivery.
+
+Post-rename: **61 unnamed** in-region (24 in 1-150B size≥20B tier); live named **1577**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
