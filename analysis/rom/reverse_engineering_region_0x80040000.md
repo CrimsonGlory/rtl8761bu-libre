@@ -7882,5 +7882,39 @@ event opcode is `0x3E` (LE Meta Event), requires the first payload byte
 
 Post-rename: **61 unnamed** in-region (24 in 1-150B size≥20B tier); live named **1577**.
 
+**Next:** superseded by Pass 52ha below.
+
+## Pass 52ha (2026-06-30) — rank-1 inquiry pending-notify flag clear rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52ha.java` — 61 unnamed,
+24 in 1-150B size≥20B tier; rank-1 `0x800408a4` (32B, 1 xref) — inquiry-lifecycle
+cluster tail helper in the `0x800408xx` fptr-dispatch chain (sibling of Pass 52fs's
+`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize` at `0x800408ec` and
+unnamed `FUN_800408cc` at rank-3).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800408a4` →
+`clear_inquiry_pending_notify_flag_and_wrap_buffer` (32B) via
+`RenamePass52haRegion80040000Fun800408a4.java` (`renamed=1`, live-verified).
+
+```c
+void clear_inquiry_pending_notify_flag_and_wrap_buffer(void)
+{
+  pending = PTR_DAT_800408c4;
+  if (*pending != 0) {
+    wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests(*PTR_DAT_800408c8);
+    *pending = 0;
+  }
+}
+```
+
+When the inquiry pending-notify flag at `PTR_DAT_800408c4` is set, dispatches the
+registered notify buffer at `PTR_DAT_800408c8` through the standard
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests` wrapper, then
+clears the flag. Sole caller `FUN_800408cc` — fptr `0x81` dispatch chain that
+`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize` invokes after the
+`0x8e` teardown hook at `PTR_DAT_80040908`.
+
+Post-rename: **60 unnamed** in-region (23 in 1-150B size≥20B tier); live named **1578**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
