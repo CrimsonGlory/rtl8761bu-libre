@@ -1890,4 +1890,39 @@ call chain.
 
 Region unnamed count after this pass: **270** (271 minus this rename). Live named **1651** global.
 
+**Next:** superseded by Pass 6 continuation (43).
+
+## Pass 6 continuation (43) (2026-06-30) — link-register subslot quota step `FUN_8002b2b8`
+
+Decompiled and renamed:
+**`FUN_8002b2b8` → `advance_or_restore_link_register_subslot_quota_step`**
+(206B, HIGH) via `RenamePass6Region80020000Fun8002b2b8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (206B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=270` at pass start). Sibling of
+`apply_per_slot_quota_delta_and_validate_link_register` and
+`program_or_restore_sco_esco_link_register_slot_banks` in the `0x8002b3xx` SCO/eSCO
+link-register slot-table cluster.
+
+**Mechanism:** Single-step per-slot link-register subslot quota helper (`param_1` = slot
+index with bit 3 selecting SCO `+0x440` vs eSCO `+0x464` availability-bank dword).
+Operates on 12-byte entries at `PTR_PTR_8002b388` (byte `+8` lower/upper nibbles hold
+subslot index; byte `+9` lower 5 bits hold quota counter). Guard: only runs while
+`(entry[+9] & 0x1f) != *PTR_DAT_8002b38c`. When `param_2==0` (advance): if the
+availability bitmask at `DAT_8002b390+bank` has the current subslot bit set, increments
+the lower nibble of `+8`, resets `+9` quota to `(*PTR_DAT_8002b38c - 1) & 0x1f`, and
+sets the bitmask dword to `1 << subslot_index`. When `param_2!=0` (restore): copies
+upper nibble of `+8` into lower nibble, restores `+9` from `*PTR_DAT_8002b38c`, and
+clears the bitmask dword to 0.
+
+**Caller:** `drain_and_dispatch_conn_event_ring_by_kind_then_reinit` (`0x8005c73e`,
+region `0x80050000`) — connection-event ring drain path that steps or rolls back
+link-register subslot quota during event dispatch/reinit.
+
+**Confidence:** HIGH — unambiguous bitmask + 12-byte slot-table counter update idiom;
+`+0x440`/`+0x464` bank layout matches Pass 54c quota validator and Pass 6 cont. (6)
+slot-bank programmer; sole caller identified via `ListXrefsTo8002b2b8.java`.
+
+Region unnamed count after this pass: **269** (270 minus this rename). Live named **1652** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
