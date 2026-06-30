@@ -5948,5 +5948,46 @@ Pass 52ev/52ew adv-data handlers and Pass 52ec's
 Post-rename: **113 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1525**.
 
+**Next:** superseded by Pass 52fa below.
+
+## Pass 52fa (2026-06-30) — >150B rank-1 LE ext scan-rsp data HCI handler rename
+
+**Cold-triage (refreshed, from Pass 52ez):** **17** unnamed >150B remain.
+rank-1 `0x80046a00` (318B); rank-2 `0x8004ab64` (414B); rank-3
+`0x8004c2f0` (414B); rank-4 `0x80046ce8` (316B); rank-5 `0x8004c844`
+(310B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004635c` →
+`hci_le_ext_scan_rsp_data_pack_validate_commit_send_cmd_complete`
+(320B, 0 xrefs in cold-triage) via
+`RenamePass52faRegion80040000Fun8004635c.java` (`renamed=1`, live-verified).
+
+320B HCI command handler in the LE extended-advertising cluster (sibling of
+Pass 52ez's `hci_le_ext_adv_data_pack_validate_commit_apply_vsc_0xfc97_send_cmd_complete`
+and Pass 52ev/52ew adv-data handlers):
+
+- **Feature gate:** requires `bos[0xb].field333_0x15a & 4`; failure →
+  `0x11` (Command Disallowed).
+- **Handle validation:** HCI cmd handle at `+3` must be `< 0x1000`; lookup via
+  `query_config_struct_0x1ac_by_index()`; record must have bit 0 of byte `+3`
+  set else status `0x02`.
+- **Pending-state guard:** bitmask at conn-record `+0x14c` must not include
+  pending flag `8`; when set → `0x0c` (Command Disallowed).
+- **Operation-byte validation:** byte at `+5` — when bit 1 (`0x02`) set
+  requires `field328_0x155 & 10`; when bits 1+2 (`0x06`) set requires
+  `field333_0x15a & 0x20`; mismatch → `0x11`.
+- **Payload validation:** data length at `+6` must be 2–74 with
+  `length + 4 == total_cmd_len`; each payload byte at `+7..` must be
+  `≤ field329_0x156`.
+- **Nibble-pack + commit:** packs payload into 38-byte (`0x26`) buffer,
+  `optimized_memcpy` to conn-record `+0x17a`; stores operation byte to
+  `+0x151`, length to `+0x153`.
+- **Pending flag:** sets bit 2 (`0x04`) of conn-record `+0x14c` on success.
+- **Command Complete:** `hci_event_sender(0xe, &local_48, 4)` with
+  `field_0x165` status idiom (no VSC apply — commit-only variant).
+
+Post-rename: **112 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1526**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x8004635c`, 320B).
+unnamed >150B candidate (`0x80046a00`, 318B).
