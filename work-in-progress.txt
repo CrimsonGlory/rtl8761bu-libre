@@ -6896,8 +6896,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12he;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hf: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_8007585c`, 46B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hf (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8007585c`→`reset_packet_slot_descriptor_and_decrement_active_count`
+          (46B, HIGH, STUB-tier). Bounds-checked full reset of 20-byte packet-slot
+          descriptor at `PTR_PTR_8007588c`: zeroes `+0`/`+4`/`+8`, marks fill-count
+          `+0x10` invalid (`0xffffffff`), decrements active count at `+0xdc`;
+          release complement of `clear_packet_slot_descriptor_fields`. xref_in=0.
+          STUB-tier unnamed 2 remain; live named 1367.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hg: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80071b1c`, 44B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

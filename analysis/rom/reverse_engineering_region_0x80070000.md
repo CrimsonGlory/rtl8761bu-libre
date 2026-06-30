@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12he COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (3 STUB-tier unnamed remain). Latest: `is_pool_descriptor_stack_index_negative` (Pass 12he). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1366** global; **5** in-region unnamed (3 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_8007585c`, 46B, xref_in=0). See Pass 12he section below.
+**Status**: Pass 12hf COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (2 STUB-tier unnamed remain). Latest: `reset_packet_slot_descriptor_and_decrement_active_count` (Pass 12hf). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1367** global; **4** in-region unnamed (2 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80071b1c`, 44B, xref_in=0). See Pass 12hf section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hf (2026-06-30) — packet-slot descriptor reset stub `FUN_8007585c`
+
+Decompiled and renamed:
+**`FUN_8007585c` → `reset_packet_slot_descriptor_and_decrement_active_count`**
+(46B, HIGH, STUB-tier) via `RenamePass12hfRegion80070000Fun8007585c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(46B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Bounds-checked slot reset on the 20-byte (`0x14`) per-slot packet
+descriptor table at `PTR_PTR_8007588c`: when index `param_1 > 10`, returns
+`0xffffffff`; otherwise zeroes dword fields at offsets `+0`/`+4`/`+8`, marks
+fill-count at `+0x10` invalid with `0xffffffff`, and decrements the active-slot
+counter at table-base `+0xdc`. Full-reset/release complement of
+`clear_packet_slot_descriptor_fields` (`0x80075890`, which only zeroes `+4`/`+8`/`+0x10`
+on sibling table `PTR_PTR_800758b0` without the invalid marker or counter decrement).
+
+**Confidence:** HIGH — unambiguous bounds-checked 0x14-stride table accessor matching
+the established max-11-slots packet-slot cluster idiom; field layout aligns with
+Pass 12du/12dv/12dr fill-count at `+0x10`.
+
+Live named **1367** (global; in-region unnamed **4**; STUB-tier unnamed **2**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80071b1c`, 44B, xref_in=0).
+
 ## Pass 12he (2026-06-30) — pool descriptor index sign-bit stub `FUN_80075bd4`
 
 Decompiled and renamed:
@@ -2439,8 +2465,7 @@ index field used by the already-named push/pop pair.
 
 Live named **1366** (global; in-region unnamed **5**; STUB-tier unnamed **3**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_8007585c`, 46B, xref_in=0).
+**Next:** superseded by Pass 12hf.
 
 ## Pass 12hd (2026-06-30) — resource pool freelist pop stub `FUN_80075fd0`
 
