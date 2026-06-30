@@ -7028,5 +7028,54 @@ staging into pending LMP PDU struct `+0x11`.
 
 Post-rename: **82 unnamed** in-region (45 in 1-150B size≥20B tier); live named **1556**.
 
+**Next:** superseded by Pass 52gf below.
+
+## Pass 52gf (2026-06-30) — rank-2 conn-type-nibble-2 LMP role-connection setup rename
+
+**Cold-triage (continued):** size≥20B, xrefs≥1 tier; rank-2 `0x800411a4` (132B,
+1 xref) — substantive conn-type-nibble-2 LMP role-connection setup coordinator,
+sole callee of `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`
+when conn-type nibble == 2.
+
+**Rank-2 decompiled+renamed (HIGH):** `FUN_800411a4` →
+`allocate_conn_record_and_dispatch_lmp_role_connection_setup` (132B) via
+`RenamePass52gfRegion80040000Fun800411a4.java` (`renamed=1`, live-verified).
+
+```c
+void allocate_conn_record_and_dispatch_lmp_role_connection_setup(
+    conn_event_t *event, byte role_subindex, uint flags, int event_update_only)
+{
+  if (alloc_conn_record_via_fptr(PTR_DAT_80041228, &record) == 0) {
+    init_conn_record_field(record + 4, 0x12, 1);
+    if (event_update_only == 1)
+      update_conn_record_from_incoming_event_with_rssi_and_flag4_deferral(record, event);
+    else {
+      role = *(byte *)(record + 0x12) & 7;
+      *(byte *)(record + 0x16) = role;
+      if (role_subindex == 0)
+        accept_dual_slot_lmp_role_connection_and_program_baseband_regs(record, role, flags & 0xff);
+      else
+        accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu();
+    }
+  } else {
+    release_conn_record(0x12, 0);
+    possible_logging_function__var_args(...);
+  }
+}
+```
+
+Allocates a conn record via fptr `PTR_DAT_80041228`, initializes type `0x12`
+at `record+4`, then branches: when `event_update_only==1` (outer `param_1` to
+the ring dispatcher) updates RSSI/deferred fields only; otherwise extracts
+role index from `record+0x12` bits 0–2 into `record+0x16` and dispatches
+`accept_dual_slot_lmp_role_connection_and_program_baseband_regs` when
+`role_subindex==0` (dual-slot path) or
+`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` for non-zero
+role sub-index (single-slot PDU-unpack path). Error path logs on allocation
+failure. SCO/eSCO conn-type cluster hub sibling of Pass 52df ring dispatcher,
+Pass 52di dual-slot accept, and Pass 52dn event updater.
+
+Post-rename: **81 unnamed** in-region (44 in 1-150B size≥20B tier); live named **1557**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
-(size≥20B; xrefs≥1 tier; rank-2 `0x800411a4` 132B).
+(size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

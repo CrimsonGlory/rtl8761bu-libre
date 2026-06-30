@@ -8696,8 +8696,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ge;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gf: continue 1-150B cold-triage
-          — decompile+rename next candidate (size≥20B, xrefs≥1; rank-2 `0x800411a4`).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gf (2026-06-30): decompiled+
+          renamed rank-2 `FUN_800411a4`→`allocate_conn_record_and_dispatch_lmp_role_connection_setup`
+          (132B, HIGH). Conn-type-nibble-2 LMP role-connection setup coordinator:
+          alloc via `PTR_DAT_80041228`, role-subindex 0→dual-slot accept else
+          single-slot PDU unpack; event-update path when outer `param_4==1`;
+          sole caller `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`.
+          81 unnamed in-region; live named 1557.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gg: continue 1-150B cold-triage
+          — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
+          decompile+rename next candidate (size≥20B, xrefs≥1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
