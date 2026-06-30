@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 175 functions in tier, 6 renamed HIGH (Passes 52–52f). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52f, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 175 functions in tier, 7 renamed HIGH (Passes 52–52g). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52g, 2026-06-30).
 
 ## Overview
 
@@ -929,5 +929,35 @@ Refreshed rank-1 is `0x8004a2e4` (10 xrefs, 1B — likely artifact); rank-3
 `0x800430ac` (8 xrefs, 88B) is the mask-merge SCO/eSCO HW-channel sibling
 already referenced in Pass 52.
 
-**Next:** decompile+rename rank-3 `0x800430ac` (8 xrefs, 88B, mask-merge HW-channel
-dispatch); then continue down refreshed Pass 52 ranked list.
+## Pass 52g (2026-06-30) — rank-3 mask-merge HW-channel dispatch rename
+
+**Rank-3 decompiled and renamed (HIGH):** `FUN_800430ac` →
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch` (88B) via
+`RenamePass52gRegion80040000Fun800430ac.java` (`renamed=1`, live-verified).
+
+```c
+void mask_merge_hw_channel_table_entry_and_indexed_dispatch(uint index, ushort value, ushort mask)
+{
+  irq = disable_interrupts();
+  table = DAT_80043104;
+  fptr_table = PTR_DAT_80043108;
+  (*fptr_table)(index & 0xffff,
+                table[index] & ~mask | mask & value);
+  enable_interrupts(irq);
+}
+```
+
+IRQ-disabled indexed dispatch: mask-merges `value`/`mask` onto the per-index
+ushort HW-channel parameter table entry at `DAT_80043104` via
+`(table & ~mask) | (mask & value)`, then calls through the function-pointer
+table at `PTR_DAT_80043108`. Primary channel-commit helper in the SCO/eSCO HW
+cluster — iterated by `init_or_clear_sco_hw_channel_subsystem` (region
+`0x80030000`) before the Pass 52b AND-mask finisher. Completes the OR/AND/mask
+trio with Pass 52's `or_merge_hw_channel_table_entry_and_indexed_dispatch` and
+Pass 52b's `and_mask_hw_channel_table_entry_and_indexed_dispatch`. 8 xrefs.
+
+Post-rename: **260 unnamed** in-region. Refreshed rank-1 remains `0x8004a2e4`
+(10 xrefs, 1B — likely artifact).
+
+**Next:** triage refreshed rank-1 `0x8004a2e4` (1B artifact) or decompile next
+substantive candidate from refreshed Pass 52 ranked list.

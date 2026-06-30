@@ -7000,9 +7000,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52f;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52g: decompile+rename refreshed
-          rank-3 `0x800430ac` (8 xrefs, 88B, mask-merge HW-channel dispatch;
-          SCO/eSCO channel-commit cluster sibling of Passes 52/52b).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52g (2026-06-30): decompiled+
+          renamed refreshed rank-3 `FUN_800430ac`→
+          `mask_merge_hw_channel_table_entry_and_indexed_dispatch`
+          (88B, HIGH). IRQ-disabled mask-merge indexed HW-channel dispatch:
+          `(table & ~mask) | (mask & value)` on `DAT_80043104`, dispatch via
+          `PTR_DAT_80043108`; primary SCO/eSCO channel-commit helper iterated by
+          `init_or_clear_sco_hw_channel_subsystem`. Completes OR/AND/mask trio
+          with Passes 52/52b. 260 unnamed remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52g;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52h: triage refreshed rank-1
+          `0x8004a2e4` (10 xrefs, 1B — likely artifact) or decompile next
+          substantive unnamed from refreshed 1-150B cold-triage list.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
