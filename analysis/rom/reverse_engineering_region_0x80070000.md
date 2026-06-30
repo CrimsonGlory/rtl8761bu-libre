@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gc COMPLETE (2026-06-30) — SIMPLE-tier cold-triage sweep **COMPLETE** (**0** SIMPLE-tier unnamed remain; pivoted to STUB tier). Latest: `advance_lcg_prng_state_and_return_high_byte` (Pass 12gc). HANDLER-tier sweep also complete (0 remain). Live named **1338** global; **33** in-region unnamed (31 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gc section below.
+**Status**: Pass 12gd COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (30 STUB-tier unnamed remain). Latest: `allocate_first_free_bit_in_16bit_pool_mask` (Pass 12gd). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1339** global; **32** in-region unnamed (30 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gd section below.
 
 ## Overview
 
@@ -2416,6 +2416,28 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gd (2026-06-30) — 16-bit pool mask bit allocator `FUN_80078a44`
+
+Decompiled and renamed:
+**`FUN_80078a44` → `allocate_first_free_bit_in_16bit_pool_mask`**
+(44B, HIGH, STUB-tier) via `RenamePass12gdRegion80070000Fun80078a44.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per prior `ListStub80070000.java` listing
+(44B, xref_in=2 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Scans the 16-bit allocation mask at `PTR_DAT_80078a70 + 0x40` for the
+first clear bit (indices 0–15). Sets that bit via OR and returns the index. Returns
+`0x10` when all 16 bits are already set (pool full). Unambiguous bit-scan-and-set
+allocator idiom. Sits in the `0x80078axx` HCI-reset/param-block cluster adjacent to
+Pass 12cn `hci_reset_memset_and_seed_default_param_block` (`0x80078a78`) and Pass 12dy
+`lookup_event_param_len_via_hook_or_default_table` (`0x800789c0`).
+
+**Confidence:** HIGH — unambiguous first-free-bit scan + mask-update + sentinel return.
+
+Live named **1339** (global; in-region unnamed **32**; STUB-tier unnamed **30**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gc (2026-06-30) — LCG prng state advance `FUN_80071948`
 

@@ -6649,7 +6649,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gd: cold-triage next rank-1
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gd (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078a44`→`allocate_first_free_bit_in_16bit_pool_mask`
+          (44B, HIGH, STUB-tier). Scans `PTR_DAT_80078a70+0x40` 16-bit mask for first
+          clear bit, sets it, returns index 0–15 or `0x10` if full; HCI-reset cluster
+          neighbor of Pass 12cn. STUB-tier unnamed 30 remain; live named 1339.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ge: cold-triage next rank-1
           STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
