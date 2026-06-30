@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gi COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (25 STUB-tier unnamed remain). Latest: `thunk_send_evt_HCI_Number_Of_Completed_Packets` (Pass 12gi). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1344** global; **27** in-region unnamed (25 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078b7c`, 20B, xref_in=1). See Pass 12gi section below.
+**Status**: Pass 12gj COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (24 STUB-tier unnamed remain). Latest: `emit_lmp_25c_via_ptr_dat_80078b90` (Pass 12gj). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1345** global; **26** in-region unnamed (24 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078848`, 4B, xref_in=1). See Pass 12gj section below.
 
 ## Overview
 
@@ -2417,6 +2417,29 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gj (2026-06-30) — LMP 0x25C slot emit stub `FUN_80078b7c`
+
+Decompiled and renamed:
+**`FUN_80078b7c` → `emit_lmp_25c_via_ptr_dat_80078b90`**
+(20B, HIGH, STUB-tier) via `RenamePass12gjRegion80070000Fun80078b7c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(20B, xref_in=1 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Config-gated LMP 0x25C emit helper — loads connection-slot index from
+`PTR_DAT_80078b90` and calls `LMP__25C_called1(*slot, 0)`. Sole documented caller is
+Pass 12fv `dispatch_lmp_25c_multi_slot_emit_with_config_gates`, which invokes this stub
+when `config_base+0xd8` matches mask `DAT_80071d88` (sibling of the multi-slot literal-pool
+fan-out paths at `PTR_DAT_80071d70`/`74`/`7c`/`84`).
+
+**Confidence:** HIGH — unambiguous single-callee decompile; caller context and config-bit
+gate already documented at HIGH in Pass 12fv; `LMP__25C_called1` callee already named.
+
+Live named **1345** (global; in-region unnamed **26**; STUB-tier unnamed **24**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
+(top remaining: `FUN_80078848`, 4B, xref_in=1).
+
 ## Pass 12gi (2026-06-30) — HCI completed-packets thunk `FUN_80070444`
 
 Decompiled and renamed:
@@ -2438,8 +2461,7 @@ HIGH confidence in region `0x80010000`.
 
 Live named **1344** (global; in-region unnamed **27**; STUB-tier unnamed **25**).
 
-**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
-(top remaining: `FUN_80078b7c`, 20B, xref_in=1).
+**Next:** superseded by Pass 12gj.
 
 ## Pass 12gh (2026-06-30) — AFH LAP slot-pair compare stub `FUN_8007196c`
 
@@ -2728,7 +2750,7 @@ Decompiled and renamed:
 (`PTR_DAT_80071d70`, `80071d74`, `80071d7c`, and when `config_base[1]!=0` also
 `PTR_DAT_80071d84` twice). When `PTR_DAT_80071d78 != -1`, calls
 `LMP__25B__most_common_for_VSCs1()`. When `config_base+0xd8` matches mask
-`DAT_80071d88`, calls `FUN_80078b7c`. Final path: when `PTR_DAT_80071d8c` active and
+`DAT_80071d88`, calls `emit_lmp_25c_via_ptr_dat_80078b90`. Final path: when `PTR_DAT_80071d8c` active and
 `config_base+0x129` bit0 set, emits another `LMP__25C_called1` then sets bytes at
 `PTR_DAT_80071d94` to `2,2`. Sibling cluster of Pass 12dm `emit_lmp_25c_and_clear_conn_pending_flags_d9_204`
 and Pass 12dl `dispatch_lmp_268_timers_with_hook_and_config_gates`.
