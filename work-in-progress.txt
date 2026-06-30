@@ -7328,9 +7328,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ap;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52aq: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-35+ substantive candidate;
-          skip rank-1–34 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52aq (2026-06-30): decompiled+
+          renamed rank-35 `FUN_80043bfc`→`reset_four_conn_lap_and_dual_slot_role_records`
+          (104B, HIGH) — clears 4 LAP entries at `big_ol_struct+0x142`, resets
+          0x84-stride dual-slot role records (`entry[0]&=0xfc`, `entry[1]=2`,
+          clears `+0x32`/`+0x72`); inquiry/LAP/role-switch cluster sibling of
+          `is_indexed_dual_slot_ushort_match_context_and_log`. 224 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ar: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-36+ substantive candidate;
+          skip rank-1–35 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 140 functions in tier, 39 renamed HIGH (Passes 52–52ap). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ap, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 139 functions in tier, 40 renamed HIGH (Passes 52–52aq). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aq, 2026-06-30).
 
 ## Overview
 
@@ -2292,5 +2292,41 @@ clock bit-2 toggles) inside interrupt-bracketed `apply_SCO_connection_params_to_
 
 Post-rename: **225 unnamed** in-region (139 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-35+
-substantive candidate; skip rank-1–34 artifacts and already-done ranks.
+## Pass 52aq (2026-06-30) — rank-35 LAP/role-record reset rename
+
+**Refreshed cold-triage (ranks 1-34 skipped as artifacts or already done):** rank-35
+`0x80043bfc` (104B, 1 xref) — substantive 4-connection LAP + dual-slot role-record
+initializer in the inquiry/LAP/role-switch cluster (`0x800435xx` siblings).
+
+**Rank-35 decompiled and renamed (HIGH):** `FUN_80043bfc` →
+`reset_four_conn_lap_and_dual_slot_role_records` (104B) via
+`RenamePass52aqRegion80040000Fun80043bfc.java` (`renamed=1`, live-verified).
+
+```c
+void reset_four_conn_lap_and_dual_slot_role_records(void)
+{
+  *global_flag_dword = 0;
+  *global_mode_byte = 0xff;
+  for (conn_idx = 0; conn_idx < 4; conn_idx++) {
+    big_ol_struct->_x142_LAP[conn_idx + 0x45] = 0;
+    entry = role_table + conn_idx * 0x84;
+    entry[0] &= 0xfc;          // keep slot-selector bits 0-1
+    entry[1] = 2;              // default role/type byte
+    entry[2] = entry[3] = 0;
+    entry[0x32] = entry[0x72] = 0;
+    per_conn_flag[conn_idx] = 0;
+  }
+  memset(aux_8byte_buf, 0, 8);
+}
+```
+
+Clears two globals, zeroes four LAP entries at `big_ol_struct+0x142`, resets each
+0x84-stride dual-slot role record (slot selector in `entry[0]&3`, type byte `+1`=2,
+clears `+0x32`/`+0x72` per-slot fields matching `is_indexed_dual_slot_ushort_match_context_and_log`
+layout), clears per-connection flag bytes, then zeroes an 8-byte auxiliary buffer.
+1 xref.
+
+Post-rename: **224 unnamed** in-region (138 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-36+
+substantive candidate; skip rank-1–35 artifacts and already-done ranks.
