@@ -5630,5 +5630,29 @@ Sibling of conn-event-ring LMP builders (`build_and_submit_sco_esco_lmp_pdu_for_
 Post-rename: **123 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1515**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
-unnamed >150B candidate (`0x8004fbc0`, 216B).
+**Next:** superseded by Pass 52eq below.
+
+## Pass 52eq (2026-06-30) — >150B rank-2 conn-slot timing re-arm rename
+
+**>150B rank-2 decompiled+renamed (HIGH):** `FUN_8004fbc0` →
+`rearm_conn_slot_timing_instant_to_target_and_walk_linked_windows` (216B) via
+`RenamePass52eqRegion80040000Fun8004fbc0.java` (`renamed=1`, live-verified).
+
+Conn-slot timing instant re-arm helper on per-connection context `param_1`:
+computes wraparound step from masked `+0x14` and advances `+0xc` clock toward
+`param_2` target instant using global wrap masks (`DAT_8004fc98`/`fca0`/`fca4`).
+When diagnostic gate `PTR_DAT_8004fc9c[1]` bit3 clear and timing gap exceeds
+`step*10`, optional hook at `PTR_DAT_8004fca8` + diagnostic log, then bumps
+target by +10. Sets global `DAT_8004fcb0 = 5`, commits new instant
+`+0xc += aligned_target + (DAT_8004fcb4 & 0xf)`, then when masked `+0x18` exceeds
+masked `+0x14` walks linked slot windows via `FUN_8004fa24` (clock-in-window
+probe on singly-linked list at `PTR_DAT_8004fa60`) incrementing `+0xc` until
+match fails. Callee of `le_channel_selection_algorithm_periodic_timing_check`
+(`0x800553dc`, region `0x80050000`) for LE channel-selection re-arm path;
+sibling of `dispatch_slot_timing_reprogram_if_feature_enabled_and_ready` cluster.
+
+Post-rename: **122 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1516**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
+unnamed >150B candidate (`0x80044490`, 202B).
