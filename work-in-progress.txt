@@ -7912,8 +7912,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52da;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52db: continue >150B cold-triage
-          — decompile+rename rank-21 `0x80040a24` (988B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52db (2026-06-30): decompiled+
+          renamed rank-21 `FUN_80040a24`→`process_dual_slot_lmp25c_role_record_packet_completion`
+          (988B, HIGH) — dual-slot role-record LMP-25C packet completion handler on
+          0x84-stride table; credit increment, eSCO remap, timing reschedule, RX/TX
+          paths, role-switch HW programming, chains to credit programmer; upgraded
+          from MEDIUM (Pass 3). 163 unnamed in-region; live named 1475.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52db;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dc: continue >150B cold-triage
+          — decompile+rename rank-22 `0x8004147c` (934B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

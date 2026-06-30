@@ -210,7 +210,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004d8b8` | 1898B | Global BT-state/connection-table initializer: `memset`s the entire `PTR_base_of_0x1ac_struct_array_0xA_large2` array (the project's established 11-entry `big_ol_struct` connection-record array), then loops `uVar14 < 0xb` setting default LST `0xa0a` (same constant `init_connection_record`/0x8005b9d8 uses), default poll intervals, BD_ADDR/feature fields from `config_struct`, and calls sub-initializers `init_0x58_stride_conn_record_ptr_table_11_slots`, `FUN_80058a34`, `FUN_80009774`, `FUN_8005c988`. Structurally the top-level/global counterpart to the already-named per-record `init_connection_record`. | **HIGH** — renamed `init_global_connection_table_and_bt_state` |
 | `0x80049d20` | 1476B | Validates a packed parameter block (bandwidth/packet-type/retransmission-window fields with explicit range checks matching SCO/eSCO bounds, e.g. `0x3ffd`/`0xc7b`/`0xc77` window checks), writes results into `big_ol_struct` SCO/eSCO fields at offsets `+0x1a6..+0x1ce`, and terminates with `send_evt_HCI_Command_Status(*param_1, status)` — the canonical "this is an HCI command handler" signature. Parameter shape matches HCI Setup/Accept Synchronous Connection. | **HIGH** — renamed `HCI_Setup_Synchronous_Connection_handler` |
 | `0x80043e04` | 1168B | `program_dual_slot_lmp25c_packet_credits_by_conn_index` — IRQ-off dual-slot LMP-25C packet-credit programmer on 0x84-stride role records; see Pass 52da | **HIGH** |
-| `0x80040a24` | 988B | Large dispatcher-shaped function in the lower-half conn-type cluster; switch-like structure but case semantics not yet individually confirmed. | MEDIUM |
+| `0x80040a24` | 988B | `process_dual_slot_lmp25c_role_record_packet_completion` — dual-slot role-record LMP-25C packet completion handler; see Pass 52db | **HIGH** |
 | `0x8004147c` | 934B | Already partially documented in `reverse_engineering_lc_lmp_state_machine.md` (referenced via `fptr_DAT_80036f5c` for HCI_Inquiry/0x419/0x43f) as "inquiry-train baseband programming / role-related setup" — dense register-programming, consistent with that prior note. Left unrenamed pending a more specific single-purpose confirmation. | MEDIUM-HIGH |
 | `0x80041dac` | 876B | `void FUN_80041dac(uint param_1)` — connection-teardown/cleanup-shaped handler operating on a `param_1`-indexed record; clears multiple fields consistent with link release. No confirmed cross-xref yet. | MEDIUM |
 | `0x8004d294` | 1280B | Large upper-half handler adjacent to the LE Meta Event cluster; plausible event-assembly routine but case/field semantics not individually confirmed this pass. | MEDIUM |
@@ -4419,3 +4419,31 @@ Inquiry/LAP/role-switch cluster sibling of
 
 Post-rename: **164 unnamed** in-region (95 in 1-150B tier unchanged); **69** in
 >150B tier; live named **1474**.
+
+## Pass 52db (2026-06-30) — >150B rank-21 dual-slot LMP-25C role-record packet completion
+
+**>150B rank-21 decompiled+renamed (HIGH):** `FUN_80040a24` →
+`process_dual_slot_lmp25c_role_record_packet_completion` (988B) via
+`RenamePass52dbRegion80040000Fun80040a24.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). Per-slot (`param_1`) +
+per-conn-index (`param_2`) completion handler on the 0x84-stride dual-slot role
+table at `PTR_DAT_80040e00`: increments credit byte `entry[1]` (caps at 2),
+maps conn-array index from `entry[0x30]`, calls
+`remap_role_index_to_esco_slot_if_pending` and optionally
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type` when timing
+window empty. Three state paths on `entry[+0x33]`: (0x02) TX/restart via
+`FUN_8001840c` or error-log when `FUN_8001772c` fails; (0x01) RX completion
+decodes LMP opcode from `(packet[+4]>>1)` — role-switch opcode 3 triggers HW
+channel table programming (`or_merge`/`and_mask` on indices `0x5e`/`0xac`),
+`FUN_800348c0`/`FUN_8003491c` role-switch dispatch,
+`reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259`, and
+`test_pattern_buffer_fill_or_hw_mode_select`; config-gated BB register write at
+`0xd8` when `field_0x179` is 3 or 4. Always terminates by calling
+`program_dual_slot_lmp25c_packet_credits_by_conn_index` — the credit-chain
+successor to Pass 52da's programmer. Inquiry/LAP/role-switch cluster sibling.
+
+Post-rename: **163 unnamed** in-region (95 in 1-150B tier unchanged); **68** in
+>150B tier; live named **1475**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-22 `0x8004147c`
+(934B).
