@@ -4671,3 +4671,37 @@ Post-rename: **153 unnamed** in-region (95 in 1-150B tier unchanged); **58** in
 
 **Next:** continue >150B cold-triage — decompile+rename rank-32 `0x8004a9e4`
 (152B, xrefs:1).
+
+## Pass 52dm (2026-06-30) — >150B rank-32 TX segment advance clamp helper rename
+
+**>150B rank-32 decompiled+renamed (HIGH):** `FUN_8004a9e4` →
+`compute_length_prefixed_segment_advance_clamped_to_remainder` (152B, 1 xref) via
+`RenamePass52dmRegion80040000Fun8004a9e4.java` (`renamed=1`, live-verified).
+
+```c
+ushort compute_length_prefixed_segment_advance_clamped_to_remainder(byte *buf, ushort remain)
+{
+  byte len_byte = buf[1];
+  byte adjusted = len_byte + 2;
+  if ((len_byte + 2U & 1) != 0) adjusted = len_byte + 3;  /* align to even */
+  ushort seg_len = *PTR_DAT_8004aa7c * 2 + 6 + adjusted;
+  /* diagnostic logs on buf[0] low nibble + seg_len; clamp if remain < seg_len */
+  return (remain < seg_len) ? remain : seg_len;
+}
+```
+
+Single-segment variant of Pass 52ag's
+`walk_tx_reassembly_buffer_consuming_length_prefixed_segments` formula
+(`*scale * 2 + 6 + adjusted_len_byte`). Sole caller `FUN_8004ae74` (452B TX
+fragment type-nibble dispatcher): invoked as fallback when packet-type nibble
+`>= 9` or when LE type `4` bypasses the primary dispatch table
+(`PTR_PTR_8004b044`); return value advances the reassembly buffer offset.
+Connection/feature dispatch cluster sibling of `walk_tx_reassembly_buffer_*`
+and `FUN_8004ce70` type-0 multi-chunk TX path.
+
+Post-rename cold-triage (`ColdTriageRegion80040000Pass52dm.java`): **57**
+unnamed in >150B tier; **152 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1486**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
+`0x800407e8` (168B, xrefs:1).

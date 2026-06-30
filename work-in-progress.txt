@@ -8013,8 +8013,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dm: continue >150B cold-triage
-          — decompile+rename rank-32 `0x8004a9e4` (152B, xrefs:1).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dm (2026-06-30): decompiled+
+          renamed rank-32 `FUN_8004a9e4`→`compute_length_prefixed_segment_advance_clamped_to_remainder`
+          (152B, HIGH). Single-segment length-prefixed TX advance clamped to buffer
+          remainder; same formula as `walk_tx_reassembly_buffer_consuming_length_prefixed_segments`;
+          fallback in `FUN_8004ae74` when packet-type nibble >=9 or LE type-4 bypass.
+          152 unnamed in-region; live named 1486.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dn: continue >150B cold-triage
+          — decompile+rename refreshed rank-30 `0x800407e8` (168B, xrefs:1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
