@@ -5519,5 +5519,30 @@ returns **1** = skip further dispatch (caller early-exits). Clears
 Post-rename: **127 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1511**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
-unnamed >150B candidate (`0x80049550`, 252B).
+**Next:** superseded by Pass 52em below.
+
+## Pass 52em (2026-06-30) — >150B rank-3 PSM/QoS bitmask commit rename
+
+**>150B rank-3 decompiled+renamed (HIGH):** `FUN_80049550` →
+`commit_psm_qos_5byte_bitmask_and_send_hci_cmd_complete_and_sync` (252B) via
+`RenamePass52emRegion80040000Fun80049550.java` (`renamed=1`, live-verified).
+
+PSM/QoS 5-byte eligibility bitmask commit handler on `short *param_1` (37-bit
+bitmask at offset +3): gates on `DAT_80049650 & *PTR_DAT_8004964c`; when byte+7
+high nibble clear (`& 0xe0 == 0`), popcounts set bits across 37 indices; when
+count >1 calls `FUN_80064360` to build eligibility mask, ANDs into five bitmask
+bytes, `optimized_memcpy` copies 5 bytes to four staging buffers (BOS
+`field16_0x10`, `field456_0x1d5`, `PTR_DAT_8004965c`, `field434_0x1bf`).
+Returns status **0** (success), **0xc** (gate fail), or **0x12** (single-bit /
+nibble reject). Always emits 4-byte HCI Command Complete via
+`hci_event_sender(0xe,…)` with status + echoed cmd word from `*param_1`. On
+success when BOS `field_0xf0 & 4`, calls
+`sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask(param_1+3,0)`.
+PSM/QoS cluster sibling of region `0x80070000` Pass 12eq/12ep finalize/sync
+paths.
+
+Post-rename: **126 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1512**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
+unnamed >150B candidate (`0x8004ad68`, 244B).

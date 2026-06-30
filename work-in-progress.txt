@@ -8276,9 +8276,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52el;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52em: continue refreshed >150B
-          cold-triage — decompile+rename next rank-3 unnamed >150B candidate
-          (`0x80049550`, 252B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52em (2026-06-30): decompiled+
+          renamed rank-3 `FUN_80049550`→`commit_psm_qos_5byte_bitmask_and_send_hci_cmd_complete_and_sync`
+          (252B, HIGH). PSM/QoS 5-byte bitmask commit; popcount gate, eligibility
+          mask AND, 4 staging buffers, HCI Command Complete, optional conn-slot
+          sync via `sync_psm_qos_5byte_eligibility_to_conn_slots_by_channel_bitmask`.
+          126 unnamed in-region; live named 1512.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52em;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52en: continue refreshed >150B
+          cold-triage — decompile+rename next rank-4 unnamed >150B candidate
+          (`0x8004ad68`, 244B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
