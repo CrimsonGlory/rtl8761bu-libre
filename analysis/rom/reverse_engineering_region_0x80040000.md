@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 159 functions in tier, 21 renamed HIGH (Passes 52–52w). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52w, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 158 functions in tier, 22 renamed HIGH (Passes 52–52x). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52x, 2026-06-30).
 
 ## Overview
 
@@ -1526,3 +1526,46 @@ Post-rename: **244 unnamed** in-region (158 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-18+
 substantive candidate; skip rank-1–17 artifacts.
+
+## Pass 52x (2026-06-30) — rank-18 LAP-slot triple inverted-mask HW dispatch rename
+
+**Refreshed cold-triage (rank-1–17 skipped as artifacts or already done):** rank-18
+`0x80042f74` (118B, 2 xrefs) — substantive LAP-slot gated triple inverted-mask
+HW dispatch in the AFH/LAP cluster.
+
+**Rank-18 decompiled and renamed (HIGH):** `FUN_80042f74` →
+`triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear` (118B) via
+`RenamePass52xRegion80040000Fun80042f74.java` (`renamed=1`, live-verified).
+
+```c
+void triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear(uint lap_slot)
+{
+  lap_slot = lap_slot & 0xff;
+  if ((lap_slot < 4) &&
+      (struct_of_at_least_0x300_size->_x142_LAP[lap_slot + 0x45] == 0))
+  {
+    idx = lap_slot * 2;
+    // Read three per-slot ushort table entries
+    val_a = table_a[idx];
+    val_b = table_b[idx];
+    val_c = table_c[idx];
+    // Triple fptr dispatch: (value, ~lookup_table[value])
+    fptr(val_a, ~lookup[val_a]);
+    fptr(val_c, ~lookup[val_c]);
+    fptr(val_b, ~lookup[val_b]);
+  }
+}
+```
+
+When LAP slot index 0–3 has its `_x142_LAP[slot+0x45]` byte clear (inactive slot),
+reads three per-slot ushort parameter-table entries and calls the shared HW-write
+function pointer at `PTR_DAT_80043000` three times with the inverted-mask idiom
+`(value, ~lookup_table[value])` used throughout the SCO/eSCO HW-channel commit
+cluster. AFH/LAP sibling of `set_inquiry_lap_slot_pending_bitmask` /
+`release_inquiry_lap_slot_pending_bitmask` and the OR/AND/mask HW-channel dispatch
+trio. 2 xrefs.
+
+Post-rename: **243 unnamed** in-region (157 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-19+
+substantive candidate; skip rank-1–18 artifacts.

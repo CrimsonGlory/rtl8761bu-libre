@@ -7165,9 +7165,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52w
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52x: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-18+ substantive candidate;
-          skip rank-1–17 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52x (2026-06-30): decompiled+
+          renamed rank-18 `FUN_80042f74`→`triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear`
+          (118B, HIGH). LAP-slot gated triple inverted-mask HW dispatch when
+          `_x142_LAP[slot+0x45]==0`; reads three per-slot ushort table entries,
+          calls fptr thrice with `(value,~lookup[value])`; AFH/LAP cluster sibling.
+          243 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52x
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52y: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-19+ substantive candidate;
+          skip rank-1–18 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
