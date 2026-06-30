@@ -6199,6 +6199,37 @@ live named **1532**.
 Post-rename: **105 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1533**.
 
+**Next:** superseded by Pass 52fi below.
+
+## Pass 52fi (2026-06-30) — >150B rank-1 link-slot alloc/commit HCI handler rename
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80048fb8` →
+`hci_link_slot_alloc_and_commit_gated_handler_send_cmd_complete`
+(240B, 0 xrefs in cold-triage) via
+`RenamePass52fiRegion80040000Fun80048fb8.java` (`renamed=1`, live-verified).
+
+240B HCI command handler in the `0x80048fxx`/`0x800490xx` link-slot cluster
+(sibling of `hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete` at
+`0x80048d6c` and bitmap-pool handlers at `0x80048exx`):
+
+- **AFH gate:** `field327_0x154` bit2 set (else status `0x1a`).
+- **Index validation:** pool-index byte at `param+3` must be `<2`; when
+  index==1, byte at `param+9` bits 6:7 must be `0xc0` (else `0x12`).
+- **State gates:** when `field327_0x154` bit1 set, conn-array fields at
+  `+0x28`/`+0x44`/`+0x1a4`, `PTR_DAT_800490ac` bit0, and
+  `PTR_PTR_800490b0`/`PTR_PTR_800490b4` pool-state bytes — any failure →
+  status `0x0c`.
+- **Lookup path:** `find_link_record_by_bdaddr_and_flag(2, index, bdaddr@+2)`.
+- **Alloc path:** when slot index `>=` threshold at `PTR_DAT_800490b8`, calls
+  `conn_slot_alloc_and_commit_dispatch(2, index, bdaddr, keys@+0x1a,
+  keys@+0xa)` — alloc failure → status `7`.
+- **Success path:** status `0` + `noop_handler_stub()`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **104 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1534**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (10 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (9 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
