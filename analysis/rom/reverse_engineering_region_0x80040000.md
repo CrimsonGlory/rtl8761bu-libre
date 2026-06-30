@@ -8212,5 +8212,47 @@ LE Meta Event / conn-slot-10 cluster sibling of
 
 Post-rename: **52 unnamed** in-region (15 in 1-150B size≥20B tier); live named **1586**.
 
+**Next:** superseded by Pass 52hj below.
+
+## Pass 52hj (2026-06-30) — rank-1 reentry-gated global-byte HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hj.java` — 52 unnamed,
+15 in 1-150B size≥20B tier; rank-1 `0x80044b90` (100B, 0 xrefs) — largest
+remaining 1-150B candidate in the LE Meta Event cluster (`0x80044bxx` neighborhood);
+re-entrancy-gated sibling of `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`
+at `0x80044c04` (6-byte u16 template variant).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044b90` →
+`hci_reentry_gate_field_0x165_global_byte_send_cmd_complete` (100B) via
+`RenamePass52hjRegion80040000Fun80044b90.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_reentry_gate_field_0x165_global_byte_send_cmd_complete(short *param_1)
+{
+  /* re-entrancy gate on bos[0xb].field96_0x60 — 0→2 in-progress */
+  /* PTR_DAT_80044bf8 bit 0x10 + state≠2 → gate_result 0xc */
+  /* status: param[0]==0 → 0, else field_0x165 defaulting to 1 */
+  /* 5-byte Command Complete via hci_event_sender(0xe,…): */
+  /*   status + cmd_lo + cmd_hi + gate_result + global_byte at PTR_DAT_80044c00 */
+  return gate_result;
+}
+```
+
+100B HCI command handler: re-entrancy-gated on global control record `bos[0xb]`
+(`field96_0x60` state byte 0→2, gate-result `0xc` when disallowed) — same gate
+idiom as `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete` and
+`hci_link_policy_settings_read_send_cmd_complete`. Derives status from global
+`the_0x300` struct `field_0x165` (0 when cmd word==0, else field value defaulting
+to 1); packs 5-byte Command Complete (`hci_event_sender(0xe,…)`) with status +
+echoed cmd-word bytes + gate-result byte + global byte at `PTR_DAT_80044c00`.
+No direct callers found (indirect HCI router).
+
+LE Meta Event cluster sibling of
+`hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete` (6-byte u16 template)
+and `hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete` (conn-slot-10
+bit-2 gate byte).
+
+Post-rename: **51 unnamed** in-region (14 in 1-150B size≥20B tier); live named **1587**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

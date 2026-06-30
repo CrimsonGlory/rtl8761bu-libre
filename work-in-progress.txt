@@ -8995,7 +8995,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hi;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hj: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hj (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80044b90`→`hci_reentry_gate_field_0x165_global_byte_send_cmd_complete`
+          (100B, HIGH). Re-entrancy-gated HCI handler on `bos[0xb].field96_0x60`;
+          status from `field_0x165`; 5-byte Command Complete via `hci_event_sender(0xe,…)`
+          with gate-result + global byte at `PTR_DAT_80044c00`. LE Meta Event cluster
+          sibling of `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`.
+          0 xrefs. 51 unnamed in-region (14 in 1-150B size≥20B tier); live named 1587.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hk: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
