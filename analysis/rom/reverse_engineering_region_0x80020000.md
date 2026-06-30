@@ -3105,4 +3105,38 @@ E1 derivation path reuses documented `derive_e1_aco_and_sres_via_safer_plus`; si
 
 Region unnamed count after this pass: **232** (233 minus this rename). Live named **1689** global.
 
+**Next:** superseded by Pass 6 continuation (81).
+
+## Pass 6 continuation (81) (2026-06-30) — HCI event 0x453 logger-hook relay `FUN_8002ee84`
+
+Decompiled and renamed:
+**`FUN_8002ee84` → `clone_hci_evt_buffer_and_dispatch_hci_evt_0x453_logger_hook`**
+(140B, HIGH) via `RenamePass6Region80020000Fun8002ee84.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (140B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=232` at pass start). Sits in the
+`0x8002eexx` LC TX logger-hook cluster adjacent to
+`dispatch_lc_tx_logger_hook_subcases_with_pending_queue` (`0x8002ef48`) and
+`invoke_lc_tx_hook_with_hci_evt_payload_when_sco_active` (`0x8002f254`).
+
+**Mechanism:** HCI event buffer clone + patch-hook logger dispatch. Allocates working
+buffer via optional hook at `PTR_DAT_8002ef10+0xc`
+(`call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`). Merges header fields
+from source `param_1` (connection-handle low 12 bits via `& 0xfff`, byte-1 flag bits
+preserved/merged), copies payload via `optimized_memcpy(local+2, param+2, param[1])`,
+then dispatches through `possible_logger_called_if_no_patch3` with hook fptr at
+`PTR_DAT_8002ef14` and logger tag **0x453** (listed in `assoc_w_tHCI_EVT` dispatch
+table alongside `0x452`/`0x454`/`0x455`).
+
+**Callers:** sole direct caller `FUN_8002ef18` at `0x8002ef1e` — LC TX subcase-2 helper
+invoked from `dispatch_lc_tx_logger_hook_subcases_with_pending_queue` when global mode
+byte `field_0x179==1`; that path also emits `send_evt_HCI_Number_Of_Completed_Packets`
+and invokes secondary hook at `PTR_DAT_8002ef44`.
+
+**Confidence:** HIGH — unambiguous buffer-clone + `possible_logger_called_if_no_patch3`
+idiom with literal tag `0x453` matching documented `assoc_w_tHCI_EVT` opcode; caller
+chain through established LC TX logger-hook dispatcher (Pass 6 cont. 36).
+
+Region unnamed count after this pass: **231** (232 minus this rename). Live named **1690** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
