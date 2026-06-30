@@ -6934,8 +6934,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hi;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hj: cold-triage remaining CRITICAL-tier
-          unnamed `FUN_80072bac` (814B, xref_in=7).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hj (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80072bac`→`register_afh_lap_group_slot_with_peer_channel_merge`
+          (814B, HIGH, CRITICAL-tier). 6-param extended AFH/LAP group-slot registrar:
+          peer-map merge via `merge_afh_lap_peer_channel_maps_and_find_free_channel`,
+          remote-feature stride adjust at `remote_features+0xd0`, collision detection;
+          extended sibling of Pass 12hi's `register_afh_lap_group_slot_with_collision_check`.
+          CRITICAL-tier sweep **COMPLETE** (0 remain); in-region unnamed **0**; live named 1371.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hk: re-run
+          `ListRegion0x80070000_Fixed.java` cold-triage to enumerate remaining unnamed
+          and stage rank-1 target for next rename pass.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

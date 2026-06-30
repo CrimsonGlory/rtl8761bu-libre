@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hi COMPLETE (2026-06-30) — CRITICAL-tier cold-triage in progress (1 remain: `FUN_80072bac`). Latest: `register_afh_lap_group_slot_with_collision_check` (Pass 12hi). STUB/SIMPLE/HANDLER-tier sweeps complete (0 remain). Live named **1370** global; **1** in-region unnamed (1 CRITICAL). **[NEXT]** cold-triage remaining CRITICAL-tier `FUN_80072bac` (814B, xref_in=7). See Pass 12hi section below.
+**Status**: Pass 12hj COMPLETE (2026-06-30) — **CRITICAL-tier sweep COMPLETE** (0 remain). Latest: `register_afh_lap_group_slot_with_peer_channel_merge` (Pass 12hj). All tier sweeps complete (STUB/SIMPLE/HANDLER/CRITICAL: 0 remain). Live named **1371** global; **0** in-region unnamed. **[NEXT]** re-run `ListRegion0x80070000_Fixed.java` cold-triage to stage next unnamed targets outside this region's tier queues. See Pass 12hj section below.
 
 ## Overview
 
@@ -2416,6 +2416,40 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12hj (2026-06-30) — AFH/LAP extended group slot registrar `FUN_80072bac`
+
+Decompiled and renamed:
+**`FUN_80072bac` → `register_afh_lap_group_slot_with_peer_channel_merge`**
+(814B, HIGH, CRITICAL-tier) via `RenamePass12hjRegion80070000Fun80072bac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Last remaining CRITICAL-tier unnamed per Pass 12hi queue
+(814B, xref_in=7).
+
+**Mechanism:** 6-parameter extended AFH/LAP group-slot registration on global
+`struct_of_at_least_0x300_size` (`_x142_LAP[6]` table). Optional first patchable hook at
+`PTR_DAT_80072edc`. Calls `find_free_afh_lap_group_index_after_map_clear` (Pass 12cj) to
+acquire a free group index, then builds a 36-byte occupancy bitmap by walking all six LAP
+entries — for handles `<0x10`, invokes `merge_afh_lap_peer_channel_maps_and_find_free_channel`
+(Pass 12ck) to merge peer channel maps before marking slots occupied. When conn-index
+`<0x10`, reads `remote_features_field_0x0+0xd0` to adjust slot-period stride for remote
+feature negotiation. Performs modulo-based collision detection with a config-flag gate
+(`PTR_DAT_80072ee8` bit3) for cross-handle interference checks. On success writes
+group-byte/`+0x4f` handle/`+0x55` period/`+0x5b` offset/`+0x61` slot/`+0x67` stride/`+0x6e`
+timing word into the free slot; when conn-index `<0x10`, aligns final slot via
+`compute_afh_lap_slot_offset_from_conn_cc_and_timing_base` (Pass 12ci). Returns computed
+slot byte or `0x24` on collision/all-slots-full. Extended 6-param sibling of Pass 12hi's
+`register_afh_lap_group_slot_with_collision_check` (5-param, no peer-map merge path).
+Callers include `LMP_SCO_LINK_REQ_0x17_handler`, `compute_esco_timing_offset_and_dispatch`
+(region `0x80050000`), and AFH periodic re-evaluation at `0x8005aba8`.
+
+**Confidence:** HIGH — AFH/LAP cluster now fully named end-to-end; peer-map merge callee
+chain, remote-feature stride adjustment, and collision-return semantics unambiguous from
+live decompile plus Pass 12hi sibling structural match.
+
+Live named **1371** (global; in-region unnamed **0**; CRITICAL-tier unnamed **0**).
+
+**Next:** re-run region cold-triage listing to stage next targets.
 
 ## Pass 12hi (2026-06-30) — AFH/LAP group slot registrar `FUN_80072924`
 
