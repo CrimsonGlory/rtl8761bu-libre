@@ -2425,4 +2425,35 @@ length and `+0x48` state machine; scan/arm pattern mirrors documented phase-2 si
 
 Region unnamed count after this pass: **254** (255 minus this rename). Live named **1667** global.
 
+**Next:** superseded by Pass 6 continuation (59).
+
+## Pass 6 continuation (59) (2026-06-30) — HCI role-switch feasibility `FUN_8002143c`
+
+Decompiled and renamed:
+**`FUN_8002143c` → `validate_hci_role_switch_feasibility_for_bdaddr_and_role`**
+(172B, HIGH) via `RenamePass6Region80020000Fun8002143c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (172B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=254` at pass start). Next after
+`start_hci_master_link_key_0x417_phase1_across_connections` (same 172B tier, tied
+by list order).
+
+**Mechanism:** HCI Link Policy role-switch feasibility validator. Input is a 7-byte
+BD_ADDR+role block (`param_1`): rejects invalid role byte (`& 0xfe != 0` → `0x12`),
+resolves connection slot via `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`,
+checks local feature page bit `0x20` (role-switch capability), remote feature page bit
+`0x20` on the matched `big_ol_struct` slot, requires connection status index `4`
+(steady-state connected), then validates role vs `bdaddr_random_` consistency or falls
+through to `LMP_features_validator()`. Returns standard HCI error codes (`0x02`, `0x0c`,
+`0x11`, `0x1a`, `0x21`) or feature-check pass-through on success.
+
+**Callers:** `FUN_8001acd8` (`0x8001ace4`) — role-switch slot lookup + commit wrapper;
+part of the Link Policy validation chain documented in
+`reverse_engineering_lmp_version_conn_setup.md` §5.
+
+**Confidence:** HIGH — prior partial analysis in `reverse_engineering_lmp_version_conn_setup.md`
+confirmed; this pass decompiled via `batch_decompile_functions` and persisted rename.
+
+Region unnamed count after this pass: **253** (254 minus this rename). Live named **1668** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
