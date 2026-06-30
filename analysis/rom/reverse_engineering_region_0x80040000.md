@@ -8446,5 +8446,42 @@ status + cmd echo + zero gate byte + two global bytes at `PTR_DAT_80044b84`/
 
 Post-rename: **46 unnamed** in-region (9 in 1-150B size≥20B tier); live named **1592**.
 
+**Next:** superseded by Pass 52hp below.
+
+## Pass 52hp (2026-06-30) — rank-1 LE Meta Event eight-global-byte Command Complete rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hp.java` — 46 unnamed,
+9 in 1-150B size≥20B tier; rank-1 `0x80045bb4` (68B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x80045bxx` LE Meta Event neighborhood;
+sibling of `hci_field_0x165_cmd_echo_two_global_dwords_send_cmd_complete`
+at `0x80045770` (two-dword variant) and `hci_field_0x165_cmd_echo_two_global_bytes_send_cmd_complete`
+at `0x80044b3c` (two-byte variant).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80045bb4` →
+`hci_field_0x165_cmd_echo_eight_global_bytes_send_cmd_complete` (68B) via
+`RenamePass52hpRegion80040000Fun80045bb4.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_field_0x165_cmd_echo_eight_global_bytes_send_cmd_complete(short *param_1)
+{
+  /* status from field_0x165 (0 when cmd word==0, else default 1) */
+  /* echo cmd-word bytes; gate byte 0 */
+  /* append eight global bytes from PTR_DAT_80045bfc */
+  hci_event_sender(0xe, &status, 0xc);
+  return 0;
+}
+```
+
+68B HCI command handler in the `0x80045bxx` LE Meta Event cluster:
+status from global `field_0x165` (0 when cmd word==0, else default 1); echoes
+cmd-word bytes; packs 12-byte Command Complete (`hci_event_sender(0xe,…)`) with
+status + cmd echo + zero gate byte + eight contiguous global bytes copied from
+`PTR_DAT_80045bfc` via `optimized_memcpy`. Ungated sibling of
+`hci_field_0x165_cmd_echo_two_global_dwords_send_cmd_complete` (two separate
+4-byte dword snapshots) and `hci_field_0x165_cmd_echo_two_global_bytes_send_cmd_complete`
+(6-byte two-byte variant). No direct callers found (indirect HCI router).
+
+Post-rename: **45 unnamed** in-region (8 in 1-150B size≥20B tier); live named **1593**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
