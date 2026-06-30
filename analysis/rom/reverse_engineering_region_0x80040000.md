@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 50 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52hk, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier exhausted Pass 52hl–52hk (2026-06-30); 1-19B substantive queue exhausted Pass 52id (2026-06-30). **FORMAL PARK Pass 52ie (2026-06-30):** 30 unnamed artifact tail remain (halt_baddata 1–8B stubs); all substantive tiers confirmed empty via refreshed cold-triage. See bottom of file for latest (PASS 52ie, 2026-06-30).
 
 ## Overview
 
@@ -8953,5 +8953,35 @@ Post-rename: **31 unnamed** in-region (31 in 1-19B artifact/deferred tail);
 live named **1607**. **1-19B substantive cold-triage queue exhausted** — only
 halt_baddata stubs + one deferred mis-bound overlap remain.
 
-**Next:** document 1-19B tier COMPLETE; pivot to >150B unnamed cold-triage
-(see Pass 52ci).
+**Next:** superseded by Pass 52ie below.
+
+## Pass 52ie (2026-06-30) — 1-19B tier COMPLETE; >150B pivot confirms exhaustion; deferred overlap rename
+
+**1-19B tier COMPLETE:** Pass 52id exhausted substantive 1-19B cold-triage (ranks
+26–32 `halt_baddata` artifact tail; rank-25 noop renamed). No substantive
+rename candidates remain in 1-19B tier.
+
+**>150B pivot (refreshed):** `ColdTriageRegion80040000Pass52ie.java` —
+**0 unnamed >150B** remain in-region (tier fully exhausted since Pass 52fr).
+Refreshed 1-150B size≥20B tier also **0 unnamed** (`Pass52ie2.java`).
+
+**Remaining unnamed inventory:** `ListUnnamed80040000Pass52ie.java` — **30**
+unnamed in-region, all 1–8B `halt_baddata` mis-disassembly stubs (no substantive
+candidates). Region ready for formal park.
+
+**Deferred rank-16 overlap resolved (HIGH):** `FUN_8004a444` →
+`misbound_overlap_hci_copy_conn_struct_1c_6byte_send_cmd_complete` (4B listed,
+decompile body matches 80B neighbor) via
+`RenamePass52ieRegion80040000Fun8004a444.java` (`renamed=1`, live-verified).
+
+Ghidra listed a 4B function at `0x8004a444` (1 xref) overlapping the body of
+`hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete`
+(`0x8004a464`, Pass 52bt). Decompile at `0x8004a444` recovers the full HCI
+handler: 6-byte param copy to conn-struct `+0x1c` staging,
+`write_connection_struct_fields_1c_1e_20_to_hw_regs`, `field_0x165` status
+derivation, 4-byte Command Complete via `hci_event_sender(0xe,…)`.
+
+Post-rename: **30 unnamed** in-region (30 artifact tail); live named **1608**.
+
+**Next:** formal park — region `0x80040000` substantive sweep complete; optional
+artifact-tail batch naming only.

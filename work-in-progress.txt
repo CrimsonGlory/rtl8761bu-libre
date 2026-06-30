@@ -9184,8 +9184,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52id;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ie: document 1-19B tier
-          COMPLETE; pivot >150B unnamed cold-triage rank-1.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ie (2026-06-30): documented
+          1-19B tier COMPLETE; >150B pivot confirms 0 unnamed (tier exhausted);
+          deferred rank-16 `FUN_8004a444`→
+          `misbound_overlap_hci_copy_conn_struct_1c_6byte_send_cmd_complete`
+          (4B, HIGH) — mis-bound overlap with `0x8004a464`. FORMAL PARK: 30
+          artifact-tail halt_baddata stubs remain. 30 unnamed in-region; live
+          named 1608.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ie;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fq: continue HANDLER-tier
+          cold-triage rank-1 (13 unnamed HANDLER-tier remain per Pass 12fp).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
