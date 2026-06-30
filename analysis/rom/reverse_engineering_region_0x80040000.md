@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 158 functions in tier, 22 renamed HIGH (Passes 52–52x). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52x, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 157 functions in tier, 23 renamed HIGH (Passes 52–52y). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52y, 2026-06-30).
 
 ## Overview
 
@@ -1569,3 +1569,41 @@ Post-rename: **243 unnamed** in-region (157 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-19+
 substantive candidate; skip rank-1–18 artifacts.
+
+## Pass 52y (2026-06-30) — rank-19 per-connection HW-state word init rename
+
+**Refreshed cold-triage (rank-1–18 skipped as artifacts or already done):** rank-19
+`0x8004f898` (98B, 2 xrefs) — substantive per-connection HW-state word initializer
+in the SCO/eSCO slot-register programming cluster.
+
+**Rank-19 decompiled and renamed (HIGH):** `FUN_8004f898` →
+`init_per_connection_hw_state_word` (98B) via
+`RenamePass52yRegion80040000Fun8004f898.java` (`renamed=1`, live-verified).
+
+```c
+void init_per_connection_hw_state_word(uint conn_idx)
+{
+  word_ptr = per_conn_table[(conn_idx & 0xff) * 4];
+  old_val = *word_ptr;
+  if ((old_val >> 0x18 & 0xffffff80) != 0) {
+    possible_logging_function__var_args(..., conn_idx, old_val);
+  }
+  *word_ptr = (old_val & mask)
+            | ((config_struct[0xa8] & 3) << 0x16)
+            | (uint)exception_handler_fptr;
+}
+```
+
+Per-connection indexed `uint` word init: reads current value at
+`base + (conn_idx * 4)`, logs if high-byte guard bits set, writes back masked
+value packing a 2-bit type code from struct `+0xa8` at bits [23:22] and an
+exception-handler function pointer in the low bits. Called from
+`program_esco_hw_slot_registers_with_secondary_record` and
+`program_sco_hw_slot_registers_from_conn_record` — SCO/eSCO HW slot register
+programming path. Sibling of the queue-scheduler helper trio in region
+`0x80050000`.
+
+Post-rename: **242 unnamed** in-region (156 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-20+
+substantive candidate; skip rank-1–19 artifacts.

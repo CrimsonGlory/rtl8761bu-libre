@@ -7174,9 +7174,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52x
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52y: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-19+ substantive candidate;
-          skip rank-1–18 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52y (2026-06-30): decompiled+
+          renamed rank-19 `FUN_8004f898`→`init_per_connection_hw_state_word`
+          (98B, HIGH). Per-connection HW-state word init packing 2-bit type from
+          struct+0xa8 at bits[23:22] + exception-handler fptr in low bits;
+          callers `program_esco_hw_slot_registers_with_secondary_record` +
+          `program_sco_hw_slot_registers_from_conn_record`. 242 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52y
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52z: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-20+ substantive candidate;
+          skip rank-1–19 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
