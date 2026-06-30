@@ -1504,7 +1504,7 @@ slot index at crypto struct `+0x213`. Classifies IO-capability pairing method vi
 `0x06` (P-256) or `0x08` (P-192), `memcmp` on DHKey buffer at `+0x17e` against
 reference tables may normalize `+0x1e5` to `3`. Dispatches by classifier result:
 - `0` → numeric-comparison path (`FUN_80025fb4` — HCI events `0x2a`/`0x2f`)
-- `1` → passkey path (`FUN_800260f4` — User Passkey Request/Notification)
+- `1` → passkey path (`dispatch_ssp_user_passkey_request_or_notification` — User Passkey Request/Notification)
 - `2` → OOB path (`FUN_800263e4` — Remote OOB Data Request)
 
 **Callers:** 2 sites at `0x800266ea` and `0x80026804` in Ghidra-unbounded code
@@ -2712,5 +2712,34 @@ idiom; sole caller already named in E1/E22 SRES dispatcher cluster; pairs with P
 cont. (62) E22 16B-block derivation wrapper.
 
 Region unnamed count after this pass: **244** (245 minus this rename). Live named **1677** global.
+
+**Next:** superseded by Pass 6 continuation (69).
+
+## Pass 6 continuation (69) (2026-06-30) — SSP passkey HCI dispatcher `FUN_800260f4`
+
+Decompiled and renamed:
+**`FUN_800260f4` → `dispatch_ssp_user_passkey_request_or_notification`**
+(154B, HIGH) via `RenamePass6Region80020000Fun800260f4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (154B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=244` at pass start). Deferred tie with
+`FUN_8002d0b0` in Pass 6 cont. (68); now first-listed at 154B.
+
+**Mechanism:** SSP passkey-entry HCI event dispatcher (pairing-method classifier result
+`1` from `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook`). Clears crypto struct
+pending flag at `+0x13c`. Branches on `+0x50` (display/input capability) and `+0x1de`
+(IO-cap pairing method): either `send_evt_HCI_User_Passkey_Request` or derives passkey
+via `FUN_800260b8` then `send_evt_HCI_User_Passkey_Notification`; display-yes-no path
+also calls `FUN_80025dd8`. Arms next SSP step via `set_arg1_1_to_arg2` with opcodes
+`0x31`/`0x33`/`0x35`/`0x37`.
+
+**Callers:** `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` (passkey path when
+IO-cap classifier returns `1`) — documented in Pass 6 cont. (30).
+
+**Confidence:** HIGH — decompile confirms named HCI User Passkey Request/Notification
+senders; caller already named in SSP pairing-method dispatch cluster; opcode arm
+pattern matches sibling SSP HCI dispatchers.
+
+Region unnamed count after this pass: **243** (244 minus this rename). Live named **1678** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
