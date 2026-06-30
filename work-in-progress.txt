@@ -7894,8 +7894,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cz: continue >150B cold-triage
-          — decompile+rename rank-19 `0x8004f25c` (186B, 2 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cz (2026-06-30): live-decompiled+
+          verified rank-19 `FUN_8004f25c`→`pending_negotiation_hash_pop_by_distance`
+          (186B, HIGH). 2-bucket hash pop by wraparound-masked distance + optional
+          12-bit secondary match; eSCO negotiation pool primitive; rename predated
+          Pass 12 (alreadyOk=1). 165 unnamed in-region unchanged; live named 1473.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52da: continue >150B cold-triage
+          — decompile+rename rank-20 `0x80043e04` (1168B, 6 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -4371,5 +4371,27 @@ pipeline).
 Post-rename: **165 unnamed** in-region (95 in 1-150B tier unchanged); **70** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-19 `0x8004f25c`
-(186B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cz below.
+
+## Pass 52cz (2026-06-30) — >150B rank-19 pending-negotiation hash pop verify
+
+**>150B rank-19 live-decompiled+verified (HIGH):** `FUN_8004f25c` →
+`pending_negotiation_hash_pop_by_distance` (186B, 2 xrefs) via
+`RenamePass52czRegion80040000Fun8004f25c.java` (`renamed=0 alreadyOk=1`,
+live-verified). Upgraded from MEDIUM-HIGH (Pass 6, 2026-06-23); name first
+assigned Pass 12 region `0x80050000` (2026-06-27). Two-bucket hash-table
+lookup-and-remove: walks list heads at `PTR_DAT_8004f318`/`PTR_DAT_8004f31c`,
+compares wraparound-masked signed distance `(key - node[3]) & DAT_8004f324`
+against threshold byte at `PTR_DAT_8004f320+0x21`, optional 12-bit secondary
+match on packed ushort from child record fields `+0xb`/`+0xc`; unlinks and
+returns matching node. Pop counterpart to
+`dual_list_sorted_event_insert_with_overlap_pushback` /
+`dispatch_inflight_timer_queue_drain_pending_and_promote_next` timer-queue
+cluster; callee of `lmp_esco_sco_negotiation_packet_handler` (pending-negotiation
+refcounted object pool).
+
+Post-verify: **165 unnamed** in-region unchanged (name predated this pass);
+**70** in >150B tier; live named **1473** unchanged.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-20 `0x80043e04`
+(1168B, 6 xrefs).
