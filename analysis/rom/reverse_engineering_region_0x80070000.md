@@ -2334,6 +2334,20 @@ This is the top-level periodic-tick fan-out that Pass 12fn's flush function and 
 
 Live named **1325** (global; in-region unnamed **27**; HANDLER-tier unnamed **13**, since `FUN_80073f5c` discovered along the way remains unnamed).
 
+## Pass 12fr (2026-06-30) — packet-slot ring dequeue/dispatch loop `FUN_80075ca8`
+
+Decompiled and renamed:
+**`FUN_80075ca8` → `packet_slot_ring_dequeue_and_dispatch_loop`**
+(222B, HIGH, HANDLER-tier) via `RenamePass12frFun80075ca8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Infinite-loop background service for the packet-slot ring cluster (sibling of Pass 12du/12dr `read_packet_slot_ring_fill_count_or_invalid` + `irq_safe_dequeue_16byte_from_packet_slot_ring_buffer`). Each iteration: resets the selected-slot index at `PTR_DAT_80075d88` to `-1`; walks the dispatch table at `PTR_PTR_80075d8c` (0xc-stride entries, slot count at `+0x84`) and picks the first slot whose enable dword (`entry[+8]`) is set and whose ring fill-count is nonzero; when the config-struct dword mask at `PTR_config_base_80075d98` fields `+0xe4..+0xe7` intersects `DAT_80075d9c`, programs an alternate callback pointer at `DAT_80075da0`. When both idle markers (`PTR_DAT_80075da4 == -1` and `PTR_DAT_80075da8 == 0`), calls `FUN_800135bc()` (likely scheduler yield). If no slot is selected (`*PTR_DAT_80075d88 == -1`), invokes the optional idle callback at `PTR_DAT_80075dac` when set; otherwise IRQ-dequeues one 16-byte packet via `irq_safe_dequeue_16byte_from_packet_slot_ring_buffer` from the selected slot's ring-buffer pointer (`entry[+4]`), sets a pass-through context dword/handle at `PTR_DAT_80075db0`/`PTR_DAT_80075db4`, dispatches the slot's handler function pointer (`entry[0]`) with the dequeued buffer, then clears the handle. 1 confirmed caller via `FindCallers80075ca8.java`: `calls_to_0x8010a001_as_fptr_to_install_patches` @ `0x80010d30` — the patch installer registers this loop as a background task function pointer.
+
+**Confidence:** HIGH — straightforward decompile; slot-table walk, fill-count probe, IRQ dequeue, and per-slot fn-ptr dispatch all directly readable and consistent with the Pass 12du/12dr packet-slot accessor cluster.
+
+Live named **1327** (global; in-region unnamed **25**; HANDLER-tier unnamed **10**).
+
+**Next:** cold-triage next HANDLER-tier candidate (`FUN_8007442c` rank-1 tied at xref_in=1, per `ListHandler80070000.java`).
+
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 
 Decompiled and renamed:
@@ -2363,7 +2377,7 @@ both directly readable from the decompilation.
 Live named **1326** (global; in-region unnamed **26**; HANDLER-tier unnamed **13**, no change —
 this function was tracked separately from the HANDLER-tier cold-triage list).
 
-**Next:** cold-triage next HANDLER-tier candidate (13 remain).
+**Next:** superseded by Pass 12fr.
 
 **Tool note (2026-06-29):** `run_ghidra_headless(use_saved_project=true, script_file_id=<uuid>)` failed 5/5 times this pass with `Script not found: /tmp/ghidra_script_*/...\.java` (Ghidra's headless `compileScripts` looking for the script before/without it landing in the temp dir) — reproduced across both a brand-new `save_ghidra_script` UUID and a pre-existing one from an earlier successful pass, so it's not file-specific. `script_name` + `use_saved_project=true` against an on-disk script in `/root/wairz/ghidra/scripts/` (written directly via the `Write` tool, bypassing `save_ghidra_script` entirely) worked first try. See `wairz_requested_changes.txt` for the full repro and the standing workaround.
 

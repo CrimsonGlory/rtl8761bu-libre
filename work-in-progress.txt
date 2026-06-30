@@ -6533,8 +6533,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fr: cold-triage next HANDLER-tier
-          candidate (13 remain, per `ListHandler80070000.java`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fr (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80075ca8`→`packet_slot_ring_dequeue_and_dispatch_loop`
+          (222B, HIGH, HANDLER-tier). Infinite-loop packet-slot ring service: walks
+          0xc-stride dispatch table, probes fill-count, IRQ-dequeues 16-byte packets,
+          dispatches per-slot fn-ptr; idle/yield via `FUN_800135bc` + optional callback.
+          1 caller `calls_to_0x8010a001_as_fptr_to_install_patches` (patch installer
+          background-task fptr). HANDLER-tier unnamed 10 remain; live named 1327.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fr;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fs: cold-triage next HANDLER-tier
+          candidate (`FUN_8007442c` rank-1 tied at xref_in=1, 10 remain per
+          `ListHandler80070000.java`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
