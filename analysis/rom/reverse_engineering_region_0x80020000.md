@@ -2509,4 +2509,29 @@ mode byte `+0x1f1 == 0x06`; second xref_in=2 caller per encryption-engine cluste
 
 Region unnamed count after this pass: **251** (252 minus this rename). Live named **1670** global.
 
+**Next:** superseded by Pass 6 continuation (62).
+
+## Pass 6 continuation (62) (2026-06-30) — E21/E22 derivation `FUN_8002d14c`
+
+Decompiled and renamed:
+**`FUN_8002d14c` → `derive_e21_or_e22_16byte_block_via_hmac_driver`**
+(162B, HIGH) via `RenamePass6Region80020000Fun8002d14c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (162B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=251` at pass start). Already analyzed
+at HIGH confidence in `reverse_engineering_encryption_engine.md` §E21/E22-shaped but still
+carried `FUN_*` name.
+
+**Mechanism:** Bluetooth spec **E21/E22** wrapper: byte-swaps 16B key + 6B BD_ADDR + 4B
+PIN/key operand via `swap_byte_order`, packs 16B derived input, invokes
+`FUN_8002c62c` HMAC-style 2-pass driver → 16B output block.
+
+**Callers:** `derive_sres_e1_or_e22_and_send_lmp_response` when mode byte `+0x1f1 == 0x08`
+(E22 path, paired with `FUN_8002d0b0`).
+
+**Confidence:** HIGH — decompile matches E21/E22 structure documented in
+`reverse_engineering_encryption_engine.md` §E21/E22-shaped.
+
+Region unnamed count after this pass: **250** (251 minus this rename). Live named **1671** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
