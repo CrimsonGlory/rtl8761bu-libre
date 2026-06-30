@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12ft COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**8** HANDLER-tier unnamed remain in-region; live named **1329** global). Latest: `append_quality_sample_to_rssi_batch_and_flush` (Pass 12ft), `rebuild_fc35_config_entry_to_connection_bitmaps` (Pass 12fs). **[NEXT]** `FUN_800739ac` (rank-1 HANDLER-tier tied at xref_in=1). See Pass 12ft section below.
+**Status**: Pass 12fu COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**7** HANDLER-tier unnamed remain in-region; live named **1330** global). Latest: `release_resource_pool_chain_slot_by_type` (Pass 12fu), `append_quality_sample_to_rssi_batch_and_flush` (Pass 12ft). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java`. See Pass 12fu section below.
 
 ## Overview
 
@@ -2389,8 +2389,33 @@ decompiled body (`retry_ext_feature_page_req_and_flush_quality_average_sample` a
 
 Live named **1329** (global; in-region unnamed **23**; HANDLER-tier unnamed **8**).
 
-**Next:** cold-triage next HANDLER-tier candidate (`FUN_800739ac` rank-1 tied at xref_in=1, per
-`ListHandler80070000.java`).
+**Next:** superseded by Pass 12fu.
+
+## Pass 12fu (2026-06-30) — resource-pool chain release `FUN_800739ac`
+
+Decompiled and renamed:
+**`FUN_800739ac` → `release_resource_pool_chain_slot_by_type`**
+(172B, HIGH, HANDLER-tier) via `RenamePass12fuFun800739ac.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Deallocate counterpart to Pass 12fl's `allocate_resource_pool_chain_slots_by_type`
+on the same Pass 12ff 20-slot resource pool (`PTR_DAT_80073a58`, `0x24` stride, next-link byte at
+`+0x1814`, terminator `0x14`). Validates resource type `param_1` in `1..4` and takes starting
+slot index `param_2`. Walks the chain from that slot until the link byte equals `0x14`, counting
+released slots; tail-appends the chain back into the freelist via head byte `+0x26c` or tail link
+at `+0x26d`, updates tail index `+0x26d` and increments available count `+0x26e`. Clears the
+slot's bit in the global active bitmask at `+0x270` and the per-type bitmask at
+`(0x9c+type)*4`, decrements active-allocation counter `+0x26b`, clears low two bits of the bound
+`0x1ac`-struct entry at `slot*0x114+0x284` (`&= 0xfc`), and when the pre-decrement
+`+0x26b` was `1`, clears type flag byte `+0x26a`. Completes the alloc/release pair used by
+`FUN_800305f4` (HCI extended-inquiry / feature-page record staging) for types 1–4.
+
+**Confidence:** HIGH — chain-walk + freelist restore + bitmask clears mirror Pass 12fl allocate
+logic exactly on the same pool layout; `0x114`-stride `+0x284` flag clear ties release to the
+connection-record binding written by the alloc caller.
+
+Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate per `ListHandler80070000.java`.
 
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 

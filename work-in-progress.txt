@@ -6563,9 +6563,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ft;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fu: cold-triage next HANDLER-tier
-          candidate (`FUN_800739ac` rank-1 tied at xref_in=1, 8 remain per
-          `ListHandler80070000.java`).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fu (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800739ac`→`release_resource_pool_chain_slot_by_type`
+          (172B, HIGH, HANDLER-tier). Dealloc counterpart to Pass 12fl allocate on
+          Pass 12ff 20-slot pool: chain-walk to terminator `0x14`, freelist restore,
+          bitmask clears at `+0x270`/per-type, decrements `+0x26b`, clears `0x1ac`
+          entry `+0x284` flags. 1 xref-in per listing (`find_callers` empty).
+          HANDLER-tier unnamed 7 remain; live named 1330.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fv: cold-triage next rank-1
+          HANDLER-tier candidate per `ListHandler80070000.java` (7 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
