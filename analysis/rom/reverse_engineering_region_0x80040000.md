@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 142 functions in tier, 36 renamed HIGH (Passes 52–52am). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52am, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 141 functions in tier, 37 renamed HIGH (Passes 52–52an). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52an, 2026-06-30).
 
 ## Overview
 
@@ -2169,5 +2169,54 @@ List-A twin of `atomically_take_conn_list_b_and_apply_quota_overflow` (which use
 
 Post-rename: **228 unnamed** in-region (142 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-32+
-substantive candidate; skip rank-1–31 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-33+
+substantive candidate; skip rank-1–32 artifacts and already-done ranks.
+
+## Pass 52an (2026-06-30) — rank-32 LMP/VSC eSCO recovery dispatch rename
+
+**Refreshed cold-triage (ranks 1-31 skipped as artifacts or already done):** rank-32
+`0x80048b80` (118B, 1 xref) — substantive VSC 0xFC95 / LMP 0x268 eSCO recovery
+orchestrator in the `0x80048bxx` cluster (sibling of `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
+and HCI VSC 0xFC67 bridge documented in `reverse_engineering_lmp_vsc_opcode_map.md`).
+
+**Rank-32 decompiled and renamed (HIGH):** `FUN_80048b80` →
+`dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery` (118B) via
+`RenamePass52anRegion80040000Fun80048b80.java` (`renamed=1`, live-verified).
+
+```c
+void dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery(byte enable_fc95_268)
+{
+  conn = PTR_base_of_0x1ac_struct_array;  // index-0 conn record
+  if (*(int *)&conn->field24_0x18 != -1) {
+    LMP__25C_called1(*(int *)&conn->field24_0x18, 0);
+    LMP__25B__most_common_for_VSCs1(conn->field24_0x18);
+  }
+  if (enable_fc95_268 != 0) {
+    delay = *(ushort *)&conn->field22_0x16;
+    if (delay < 0x65) {
+      VSC_0xfc95_called2(1, conn->field24_0x18, PTR_LAB_80048cf4_1, 0, 0);
+      LMP__268__most_common_for_VSCs2_checks_fptr_patch(
+          **(int **)&conn->field24_0x18, (uint)delay * 1000);
+    } else {
+      *PTR_DAT_80048bfc = (uint)delay;
+      VSC_0xfc95_called2(0, conn->field24_0x18, PTR_LAB_80048d04_1, 0, 0);
+      LMP__268__most_common_for_VSCs2_checks_fptr_patch(
+          **(int **)&conn->field24_0x18, DAT_80048c04);
+    }
+  }
+}
+```
+
+When conn handle at `+0x18` is valid (`!= -1`), always fires `LMP__25C_called1` then
+`LMP__25B__most_common_for_VSCs1`. When `enable_fc95_268` is set, branches on ushort
+delay/count at `conn+0x16`: if `< 0x65` (101), calls `VSC_0xfc95_called2(1, …)` then
+`LMP__268` with timeout `field22*1000` ms; else stores delay to `PTR_DAT_80048bfc`,
+calls `VSC_0xfc95_called2(0, …)`, then `LMP__268` with constant `DAT_80048c04`. Same
+established VSC 0xFC95 triad idiom as `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
+and HCI VSC 0xFC67 (`LMP__25B` + `LMP__268(conn, delay×100)`). Operates on conn-array
+index 0 only. 1 xref (function-pointer registration).
+
+Post-rename: **227 unnamed** in-region (141 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-33+
+substantive candidate; skip rank-1–32 artifacts and already-done ranks.
