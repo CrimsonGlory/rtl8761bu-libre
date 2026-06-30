@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gf COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (28 STUB-tier unnamed remain). Latest: `invoke_feature_page_hook_with_log_0x64` (Pass 12gf). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1341** global; **30** in-region unnamed (28 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gf section below.
+**Status**: Pass 12gg COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (27 STUB-tier unnamed remain). Latest: `esco_link_setup_gate_default_return_zero` (Pass 12gg). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1342** global; **29** in-region unnamed (27 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gg section below.
 
 ## Overview
 
@@ -2416,6 +2416,31 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gg (2026-06-30) — eSCO link-setup gate default stub `FUN_80071bc4`
+
+Decompiled and renamed:
+**`FUN_80071bc4` → `esco_link_setup_gate_default_return_zero`**
+(4B, HIGH, STUB-tier) via `RenamePass12ggRegion80070000Fun80071bc4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(4B, xref_in=2 — `find_callers` confirms 2 call sites; MCP `xrefs_to` returns empty against
+this GZF, known gap).
+
+**Mechanism:** Trivial `return 0` gate stub — default ROM implementation allowing eSCO link
+slot allocation to proceed. Callers gate on zero vs non-zero: `LMP_eSCO_LINK_REQ_0x7F_0C`
+continues new-link setup only when return is 0 (and conn status `0x04`/`0x0f` plus
+`field_0x171 < 3`); `FUN_800192c4` (region `0x80010000` eSCO setup path) aborts with
+error code when return is non-zero. Sits immediately before Pass 12dl's
+`dispatch_lmp_268_timers_with_hook_and_config_gates` at `0x80071bc8` in the
+`0x80071bxx` LMP/eSCO cluster.
+
+**Confidence:** HIGH — unambiguous trivial return-zero; caller guard semantics confirmed via
+`find_callers` decompile of both call sites.
+
+Live named **1342** (global; in-region unnamed **29**; STUB-tier unnamed **27**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gf (2026-06-30) — feature-page hook+log stub tag 0x64 `FUN_80074da0`
 

@@ -6674,7 +6674,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gf;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gg: cold-triage next rank-1
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gg (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80071bc4`→`esco_link_setup_gate_default_return_zero`
+          (4B, HIGH, STUB-tier). Trivial `return 0` gate stub — default ROM path
+          allowing eSCO link slot alloc; callers `LMP_eSCO_LINK_REQ_0x7F_0C` +
+          `FUN_800192c4` gate on zero vs non-zero. STUB-tier unnamed 27 remain;
+          live named 1342.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gh: cold-triage next rank-1
           STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
