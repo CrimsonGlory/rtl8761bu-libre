@@ -7337,9 +7337,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ar: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-36+ substantive candidate;
-          skip rank-1–35 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ar (2026-06-30): decompiled+
+          renamed rank-36 `FUN_8004d220`→`release_all_conn_records_and_invoke_teardown_chain`
+          (90B, HIGH). HCI Reset body: releases all 11 conn records via
+          `release_connection_record`, optional LMP 0x25B, teardown fptr chain;
+          sole caller `fHCI_Reset_0x03_full_subsystem_teardown`. 223 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ar;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52as: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-37+ substantive candidate;
+          skip rank-1–36 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

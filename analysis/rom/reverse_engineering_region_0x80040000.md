@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 139 functions in tier, 40 renamed HIGH (Passes 52–52aq). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aq, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 137 functions in tier, 41 renamed HIGH (Passes 52–52ar). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ar, 2026-06-30).
 
 ## Overview
 
@@ -2328,5 +2328,41 @@ layout), clears per-connection flag bytes, then zeroes an 8-byte auxiliary buffe
 
 Post-rename: **224 unnamed** in-region (138 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-36+
-substantive candidate; skip rank-1–35 artifacts and already-done ranks.
+## Pass 52ar (2026-06-30) — rank-36 HCI Reset teardown chain rename
+
+**Refreshed cold-triage (ranks 1-35 skipped as artifacts or already done):** rank-36
+`0x8004d220` (90B, 1 xref) — HCI Reset body releasing all connection records and
+dispatching teardown function-pointer chain.
+
+**Rank-36 decompiled and renamed (HIGH):** `FUN_8004d220` →
+`release_all_conn_records_and_invoke_teardown_chain` (90B) via
+`RenamePass52arRegion80040000Fun8004d220.java` (`renamed=1`, live-verified).
+
+```c
+void release_all_conn_records_and_invoke_teardown_chain(void)
+{
+  for (conn_idx = 0; conn_idx < 0xb; conn_idx++)
+    release_connection_record(conn_idx, 1);
+  if (*PTR_DAT_8004d27c != -1)
+    LMP__25B__most_common_for_VSCs1();
+  conn_array->field24_0x18 = PTR_DAT_8004d27c;
+  (*(code *)*PTR_PTR_8004d284)();
+  if ((config_base->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 0x10) != 0)
+    (*(code *)*PTR_DAT_8004d28c)();
+  (*(code *)*PTR_DAT_8004d290)(0);
+}
+```
+
+Releases all 11 connection records (indices 0–10) via the already-HIGH
+`release_connection_record`, optionally triggers `LMP__25B__most_common_for_VSCs1`
+when a global flag dword is not `0xffffffff`, rebinds the `0x1ac` struct-array
+`+0x18` pointer, then invokes three registered teardown hooks (middle hook
+config-gated on `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 0x10`). Sole caller
+`fHCI_Reset_0x03_full_subsystem_teardown` (`0x8001f408`); downstream callee
+`FUN_8004d294` (1280B SCO/eSCO HW init blob) documented in region `0x80050000`
+Pass 49.
+
+Post-rename: **223 unnamed** in-region (137 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-37+
+substantive candidate; skip rank-1–36 artifacts and already-done ranks.

@@ -1,0 +1,35 @@
+// Pass 52ar (region 0x80040000): rank-36 substantive from refreshed 1-150B cold-triage
+// HCI Reset body: release all 11 conn records + teardown fptr chain.
+// @category Analysis
+import ghidra.app.script.GhidraScript;
+import ghidra.program.model.listing.*;
+import ghidra.program.model.address.*;
+
+public class RenamePass52arRegion80040000Fun8004d220 extends GhidraScript {
+
+    static final Object[][] RENAMES = {
+        { 0x8004d220L, "release_all_conn_records_and_invoke_teardown_chain" },
+    };
+
+    public void run() throws Exception {
+        FunctionManager fm = currentProgram.getFunctionManager();
+        int renamed = 0, alreadyOk = 0, missing = 0, failed = 0;
+        for (Object[] row : RENAMES) {
+            long addr = (Long) row[0];
+            String newName = (String) row[1];
+            Address a = currentProgram.getAddressFactory().getAddress(String.format("0x%08x", addr));
+            Function f = fm.getFunctionAt(a);
+            if (f == null) { missing++; println("MISSING: " + a); continue; }
+            if (f.getName().equals(newName)) { alreadyOk++; continue; }
+            try {
+                f.setName(newName, ghidra.program.model.symbol.SourceType.USER_DEFINED);
+                renamed++;
+                println("RENAMED: " + a + " -> " + newName);
+            } catch (Exception e) {
+                failed++;
+                println("FAILED: " + a + " : " + e.getMessage());
+            }
+        }
+        println(String.format("renamed=%d alreadyOk=%d missing=%d failed=%d", renamed, alreadyOk, missing, failed));
+    }
+}
