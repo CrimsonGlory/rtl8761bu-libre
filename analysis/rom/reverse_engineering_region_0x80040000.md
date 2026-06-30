@@ -4186,5 +4186,26 @@ structural sibling of `sweep_conn_table_clear_esco_gate_bytes_and_apply_codec_co
 Post-rename: **173 unnamed** in-region (95 in 1-150B tier unchanged); **78** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-10 `0x8004b3c0`
-(162B, 4 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cq below.
+
+## Pass 52cq (2026-06-30) — >150B rank-10 overflow-record list splice rename
+
+**>150B rank-10 decompiled and renamed (HIGH):** `FUN_8004b3c0` →
+`splice_overflow_record_into_conn_list_a_or_b` (162B, 4 xrefs) via
+`RenamePass52cqRegion80040000Fun8004b3c0.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 5, 2026-06-23). IRQ-locked intrusive-list splice
+helper gated on nonzero byte-count at `param_1[2]`: selects per-connection
+list-A (`field289_0x128`, `param_4==0`) or list-B (`field403_0x1a0`,
+`param_4!=0`) on the `0x1ac`-strided connection-record array; when
+`param_3==0` appends the 3-word overflow record onto the list tail (unaligned
+4-byte link store at `+0x100..0x103`), else prepends at head, then accumulates
+the list byte-count field. Shared post-drain step in the quota/pending-event
+pipeline — callee of `atomically_take_conn_list_a_collect_overflow_and_schedule_tx`
+(list-A/`+0x128`) and `atomically_take_conn_list_b_and_apply_quota_overflow`
+(list-B/`+0x1a0`).
+
+Post-rename: **172 unnamed** in-region (95 in 1-150B tier unchanged); **77** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-11 `0x8004fd6c`
+(226B, 3 xrefs).

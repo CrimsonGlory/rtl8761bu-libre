@@ -7809,8 +7809,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cq: continue >150B cold-triage
-          — decompile+rename rank-10 `0x8004b3c0` (162B, 4 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cq (2026-06-30): decompiled+
+          renamed rank-10 `FUN_8004b3c0`→`splice_overflow_record_into_conn_list_a_or_b`
+          (162B, HIGH). IRQ-locked intrusive-list splice of 3-word overflow record
+          into per-conn list-A (`+0x128`) or list-B (`+0x1a0`) with head/tail
+          select; callee of quota-overflow pipeline.
+          172 unnamed in-region (77 in >150B tier); live named 1466.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cr: continue >150B cold-triage
+          — decompile+rename rank-11 `0x8004fd6c` (226B, 3 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
