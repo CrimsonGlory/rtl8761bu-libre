@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gj COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (24 STUB-tier unnamed remain). Latest: `emit_lmp_25c_via_ptr_dat_80078b90` (Pass 12gj). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1345** global; **26** in-region unnamed (24 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078848`, 4B, xref_in=1). See Pass 12gj section below.
+**Status**: Pass 12gk COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (23 STUB-tier unnamed remain). Latest: `noop_role_switch_completion_tail_hook` (Pass 12gk). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1346** global; **25** in-region unnamed (23 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078828`, 4B, xref_in=1). See Pass 12gk section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gk (2026-06-30) — role-switch completion tail noop hook `FUN_80078848`
+
+Decompiled and renamed:
+**`FUN_80078848` → `noop_role_switch_completion_tail_hook`**
+(4B, HIGH, STUB-tier) via `RenamePass12gkRegion80070000Fun80078848.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(4B, xref_in=1 — `FindCallers80078848.java` confirms 1 call site from
+`LMP_role_switch_completion_handler` at `0x80070212`; MCP `xrefs_to` returns empty
+against this GZF, known gap).
+
+**Mechanism:** Trivial `return;` noop hook stub — default ROM tail implementation at the
+end of `LMP_role_switch_completion_handler` (after clearing `field_0x48` to `0xffffffff`
+and optional logger dispatch). Sits immediately before Pass 12dp's
+`program_bb_regs_0x1a6_0xf4_enable_disable_via_patch_hook` at `0x80078850` in the
+`0x800788xx` HCI-reset / patch-hook cluster; patch firmware may replace this slot with
+non-noop behavior.
+
+**Confidence:** HIGH — unambiguous trivial return; sole caller and tail-hook placement
+confirmed via `FindCallers80078848.java` + caller decompile.
+
+Live named **1346** (global; in-region unnamed **25**; STUB-tier unnamed **23**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
+(top remaining: `FUN_80078828`, 4B, xref_in=1).
+
 ## Pass 12gj (2026-06-30) — LMP 0x25C slot emit stub `FUN_80078b7c`
 
 Decompiled and renamed:
@@ -2437,8 +2463,7 @@ gate already documented at HIGH in Pass 12fv; `LMP__25C_called1` callee already 
 
 Live named **1345** (global; in-region unnamed **26**; STUB-tier unnamed **24**).
 
-**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
-(top remaining: `FUN_80078848`, 4B, xref_in=1).
+**Next:** superseded by Pass 12gk.
 
 ## Pass 12gi (2026-06-30) — HCI completed-packets thunk `FUN_80070444`
 

@@ -6710,8 +6710,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gk: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078848`, 4B, xref_in=1).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gk (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078848`→`noop_role_switch_completion_tail_hook`
+          (4B, HIGH, STUB-tier). Trivial `return;` noop tail-hook stub; sole caller
+          `LMP_role_switch_completion_handler` at `0x80070212` (after clearing
+          `field_0x48`); `0x800788xx` HCI-reset cluster sibling of Pass 12dp.
+          STUB-tier unnamed 23 remain; live named 1346.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gk;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gl: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078828`, 4B, xref_in=1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
