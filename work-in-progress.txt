@@ -8043,8 +8043,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52do;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dp: continue >150B cold-triage
-          — decompile+rename refreshed rank-30 `0x80047304` (780B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dp (2026-06-30): decompiled+
+          renamed rank-30 `FUN_80047304`→`reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear`
+          (780B, HIGH). HCI/LMP fragment-reassembly handler (role-bit-clear variant): conn
+          `+0x1d` bit-1 gate; `+0x2c` length accumulator; nested-chain append via
+          `find_tail_of_payload_subrecord_chain_at_field0x50_0x24`; overflow via
+          `setup_type3_esco_sco_conn_record_with_role_bit_clear`; completion walks `+0x20`
+          chain via `prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; terminates
+          `hci_event_sender(0xe,...)`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`.
+          149 unnamed in-region; live named 1489.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dq: continue >150B cold-triage
+          — decompile+rename refreshed rank-30 `0x8004cb48` (722B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

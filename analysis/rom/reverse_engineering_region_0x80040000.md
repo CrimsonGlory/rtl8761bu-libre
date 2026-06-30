@@ -280,8 +280,8 @@ each other on content alone).
 |---|---|---|---|
 | `0x8004c4a8` | 894B | Large handler, shape and field-touches not yet isolated to one specific purpose. | MEDIUM |
 | `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
-| `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `FUN_80047304`. See Pass 52do | HIGH |
-| `0x80047304` | 780B | Sibling of `0x80047628` (see above). **Pass 53 update:** same mechanism, paired with `setup_type3_esco_sco_conn_record_with_role_bit_clear` + `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` (the nested-chain variant) instead. Stays MEDIUM-HIGH. | MEDIUM-HIGH |
+| `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear`. See Pass 52do | HIGH |
+| `0x80047304` | 780B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear` — HCI/LMP fragment-reassembly handler (role-bit-clear variant); conn `+0x2c` accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` + `setup_type3_esco_sco_conn_record_with_role_bit_clear`; completion walks `+0x20` chain via `prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`. See Pass 52dp | HIGH |
 | `0x8004cb48` | 722B | Calls the known eSCO table processor `FUN_80044730` twice — strong structural link to the eSCO cluster. | MEDIUM-HIGH |
 | `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
@@ -4776,4 +4776,30 @@ unnamed in >150B tier; **150 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1488**.
 
 **Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
-`0x80047304` (780B, xrefs:0) — role-bit-clear sibling.
+`0x8004cb48` (722B, xrefs:0).
+
+## Pass 52dp (2026-06-30) — >150B rank-30 LMP PDU fragment reassembly (role-bit-clear) rename
+
+**>150B rank-30 decompiled+renamed (HIGH):** `FUN_80047304` →
+`reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear` (780B, 0 xrefs) via
+`RenamePass52dpRegion80040000Fun80047304.java` (`renamed=1`, live-verified).
+
+HCI/LMP variable-length fragment-reassembly handler (role-bit-clear variant, sibling of
+`reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`): resolves connection by
+handle via `conn_record_get_4byte_field_by_handle`; gates on conn `+0x1d` bit 1 (role-bit-clear
+axis); validates fragment-phase byte at `param+4` (0/2=continue, 1/3=start); payload length at
+`param+6`; accumulates running total in conn `+0x2c`; appends bytes into nested payload subrecord
+chain via `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` (`+0x11` used-count,
+`+0x14` buffer ptr); on overflow allocates fresh subrecord via
+`setup_type3_esco_sco_conn_record_with_role_bit_clear`; initial setup via
+`setup_type2_esco_sco_conn_record_for_multilink`; new-sequence paths call
+`poll_hw_slot_counter_into_conn_record_field0x3e` (phase 1/3); optional hook at
+`PTR_PTR_80047618`; on completion (`+0x2e`==0) walks `+0x20` chain calling
+`prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; terminates with
+`hci_event_sender(0xe,...)` Command Complete + status byte.
+
+Post-rename: **149 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1489**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
+`0x8004cb48` (722B, xrefs:0).
