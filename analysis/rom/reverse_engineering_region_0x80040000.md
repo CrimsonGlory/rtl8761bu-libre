@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 10 renamed HIGH (Passes 52–52j). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52j, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 11 renamed HIGH (Passes 52–52k). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52k, 2026-06-30).
 
 ## Overview
 
@@ -1049,5 +1049,38 @@ xrefs.
 
 Post-rename: **257 unnamed** in-region.
 
-**Next:** continue refreshed 1-150B cold-triage — rank-4 `0x8004e3ec` (124B,
-6 xrefs) or triage rank-3 `0x8004f240` (6B, likely artifact).
+## Pass 52k (2026-06-30) — rank-4 AFH channel index selector rename
+
+**Refreshed rank-4 decompiled and renamed (HIGH):** `FUN_8004e3ec` →
+`select_available_afh_channel_index_for_conn_record` (124B) via
+`RenamePass52kRegion80040000Fun8004e3ec.java` (`renamed=1`, live-verified).
+
+```c
+void select_available_afh_channel_index_for_conn_record(conn_rec *rec)
+{
+  if (hook == NULL || hook() == 0) {
+    for (i = 0; i < 0x65; i++) {
+      *DAT_8004e46c = 5;
+      index = *DAT_8004e470 % 0x25;   // 0-36 AFH channel range
+      table = (config->field285_0x129 & 1)
+            ? PTR_base_of_0x1ac_struct_array_..._field456_0x1d5
+            : PTR_DAT_8004e478;
+      if (table[index >> 3] >> (index & 7) & 1) break;
+    }
+    rec->field_at_0x10 = rec->field_at_0x10 & 0xc0 | (byte)index;
+  }
+}
+```
+
+Optional hook gate at `PTR_DAT_8004e468`; when absent or returns zero, loops up
+to 101 iterations: writes trigger `5` to `DAT_8004e46c`, reads pseudo-random
+index `ushort % 37`, probes AFH channel availability bitmask (config bit
+`field285_0x129` selects between two tables), breaks on first set bit, stores
+selected channel index in low 6 bits of conn record `+0x10` (preserving top 2
+bits `0xc0`). LMP/AFH cluster neighbor of Pass 52d's
+`is_any_conn_lmp_procedure_busy_by_index`. 6 xrefs.
+
+Post-rename: **256 unnamed** in-region.
+
+**Next:** continue refreshed 1-150B cold-triage — triage rank-3 `0x8004f240`
+(6B, likely artifact) or next substantive rank-4+ candidate.

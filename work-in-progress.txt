@@ -7036,8 +7036,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52j;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52k: decompile rank-4 `0x8004e3ec`
-          (124B, 6 xrefs) or triage rank-3 `0x8004f240` (6B, likely artifact).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52k (2026-06-30): decompiled+
+          renamed rank-4 `0x8004e3ec`→`select_available_afh_channel_index_for_conn_record`
+          (124B, HIGH, 6 xrefs) — optional hook gate; up to 101 iterations probe AFH
+          channel bitmask (`index % 37`), store index in conn record +0x10 low 6 bits.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52k
+          → analysis/rom/rom_function_index.md
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52l: triage rank-3 `0x8004f240`
+          (6B, likely artifact) or next substantive rank-4+ candidate.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
