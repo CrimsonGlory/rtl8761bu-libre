@@ -1451,4 +1451,35 @@ dispatch; sole caller is documented `LMP_NOT_ACCEPTED_0x04` handler; siblings
 
 Region unnamed count after this pass: **284** (285 minus this rename). Live named **1637** global.
 
+**Next:** superseded by Pass 6 continuation (29).
+
+## Pass 6 continuation (29) (2026-06-30) — LC TX hook relay for SCO-active HCI events `FUN_8002f254`
+
+Decompiled and renamed:
+**`FUN_8002f254` → `invoke_lc_tx_hook_with_hci_evt_payload_when_sco_active`**
+(262B, HIGH) via `RenamePass6Region80020000Fun8002f254.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (262B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=284` at pass start).
+
+**Mechanism:** HCI-event payload relay gated on SCO-active connections. Sole caller
+`assoc_w_tHCI_EVT` (`0x80020d66`). Resolves connection handle at `param+1` via
+`called_by_fHCI_Read_LMP_Handle_3` + `lookup_some_sort_of_connection_struct_index_by_connection_handle`.
+When global mode byte `field_0x179` is 3 or 4 and slot index `<3`, requires
+`big_ol_struct[slot].field310_0x278 == 3` (SCO-active). Allocates buffer via optional
+hook at `PTR_DAT_8002f368+0x14`, copies HCI event bytes (`optimized_memcpy`, length
+`param[3]+3`), builds length word `(len<<16)|0x323`, and dispatches through
+`possible_logger_called_if_no_patch3` with LC TX opcode **0x323** (listed in
+`assoc_w_tLC_TX` dispatch table). Failure path logs via
+`possible_logging_function__var_args` (tag `0x192`) without relay. Sibling of
+`invoke_lmp_tx_hook_with_length_word_from_pdu_buffer` (`0x8002f220`, opcode `0x190`).
+
+**Callers:** `assoc_w_tHCI_EVT` (1 site).
+
+**Confidence:** HIGH — unambiguous hook-dispatch idiom with documented LC TX opcode;
+SCO-active gate (`field310_0x278==3`) matches established connection-type semantics;
+sole caller is the documented HCI event dispatcher.
+
+Region unnamed count after this pass: **283** (284 minus this rename). Live named **1638** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
