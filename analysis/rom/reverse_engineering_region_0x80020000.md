@@ -2829,4 +2829,39 @@ documented in Pass 6 continuation (30) pairing-method dispatch cluster.
 
 Region unnamed count after this pass: **240** (241 minus this rename). Live named **1681** global.
 
+**Next:** superseded by Pass 6 continuation (73).
+
+## Pass 6 continuation (73) (2026-06-30) — LMP NOT ACCEPTED alt recovery dispatch `FUN_80027d4c`
+
+Decompiled and renamed:
+**`FUN_80027d4c` → `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`**
+(148B, HIGH) via `RenamePass6Region80020000Fun80027d4c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (148B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=240` at pass start). Distinct from
+Kovah-named `LMP_NOT_ACCEPTED_0x04` at `0x800281c4` (160B) — this alt dispatcher
+routes overlapping but non-identical rejected-opcode recovery handlers.
+
+**Mechanism:** LMP NOT ACCEPTED (opcode 0x04) rejected-opcode byte dispatch at
+`param+5`:
+- `0x08` → `FUN_80027300` (IN_RAND alt recovery)
+- `0x0f` → `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
+- `0x10` → `FUN_80027ccc` (encryption key size req recovery)
+- `0x11` → `FUN_80027b28` (start encryption recovery)
+- `0x12` → `FUN_80027b9c` (stop encryption recovery)
+- `0x32` → `FUN_80029784`
+- `0x3f` → no-op (return 1)
+- `0x40` → `handle_lmp_simple_pairing_number_not_accepted`
+- `0x41` → `FUN_80028634` (SSP confirm recovery)
+
+**Callers:** xref_in=1 (single indirect/LMP-router site; distinct from
+`LMP_NOT_ACCEPTED_0x04` at `0x800281c4`).
+
+**Confidence:** HIGH — decompile confirms rejected-opcode switch idiom matching the
+established `LMP_NOT_ACCEPTED_0x04` cluster; callees include already-HIGH siblings
+(`handle_lmp_simple_pairing_number_not_accepted`,
+`dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`).
+
+Region unnamed count after this pass: **239** (240 minus this rename). Live named **1682** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
