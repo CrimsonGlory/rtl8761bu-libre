@@ -9700,8 +9700,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (56);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (57): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (256 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (57) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80024154`→`start_encryption_vsc_pair_on_mode3_enable`
+          (174B, HIGH). Encryption-start VSC pair arm when mode==3: LMP 25B + VSC 0xfc95
+          + LMP 268 on `field_0x2a8`/`0x2ac`; caller `sometimes_called_with_0_3_0`.
+          255 unnamed remain; live named 1666.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (57);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (58): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (255 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -2363,4 +2363,34 @@ consistent with `apply_link_key_and_dispatch_auth_pairing_flow` cluster.
 
 Region unnamed count after this pass: **256** (257 minus this rename). Live named **1665** global.
 
+**Next:** superseded by Pass 6 continuation (57).
+
+## Pass 6 continuation (57) (2026-06-30) — encryption VSC pair arm `FUN_80024154`
+
+Decompiled and renamed:
+**`FUN_80024154` → `start_encryption_vsc_pair_on_mode3_enable`**
+(174B, HIGH) via `RenamePass6Region80020000Fun80024154.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (174B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=256` at pass start).
+
+**Mechanism:** Encryption-start companion to sibling `FUN_80024114` (stop path via
+`LMP__25C_called1(...,0)`). Invoked from `sometimes_called_with_0_3_0` when
+`param_3==3` and per-connection crypto flag `crypto+0x214` is set. Gated on feature-page
+bit2 in both `big_ol_struct[slot]._xf3_features_pages_array_2_[1]` and global
+`some_feature_page_base+0x11`, plus optional validator callback at `PTR_DAT_80024204`.
+For each active pending-LMP slot at `field_0x2a8` and `field_0x2ac`: calls
+`LMP__25B__most_common_for_VSCs1`, programs slot via `VSC_0xfc95_called2` with
+dispatch tables `PTR_LAB_800243a0` / `PTR_LAB_80024248`, then runs
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` with multipliers `*5` and `*10`
+from `field_0x2a6`.
+
+**Callers:** `sometimes_called_with_0_3_0` (`0x80014a44`, encryption-mode==3 branch).
+
+**Confidence:** HIGH — decompile confirms symmetric start/stop pair with `FUN_80024114`;
+caller decompile shows direct `param_3==3` branch; VSC 0xfc95 + LMP 25B/268 idiom
+matches documented encryption-procedure cluster.
+
+Region unnamed count after this pass: **255** (256 minus this rename). Live named **1666** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
