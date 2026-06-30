@@ -1482,4 +1482,38 @@ sole caller is the documented HCI event dispatcher.
 
 Region unnamed count after this pass: **283** (284 minus this rename). Live named **1638** global.
 
+**Next:** superseded by Pass 6 continuation (30).
+
+## Pass 6 continuation (30) (2026-06-30) — SSP pairing-method dispatch via LMP 0x266 DHKey hook `FUN_80026460`
+
+Decompiled and renamed:
+**`FUN_80026460` → `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook`**
+(250B, HIGH) via `RenamePass6Region80020000Fun80026460.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (250B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=283` at pass start).
+
+**Mechanism:** SSP pairing-method selector after DHKey material is ready. Optionally
+calls `LMP__268__most_common_for_VSCs2_checks_fptr_patch` when crypto struct pending
+procedure dword at `+0x1ec != -1`. Invokes LMP vendor opcode **0x266** through
+`possible_logger_called_if_no_patch3`, which routes to `LMP__266__FUN_80022030`
+(DHKey copy via `FUN_8002c928` / `get_DHKey_to_3rd_param_`). Sets connection
+`field_0xb9 = 1` (same flag later checked by `LMP__271__FUN_80025cb4`) and stores
+slot index at crypto struct `+0x213`. Classifies IO-capability pairing method via
+`FUN_80025800` on bytes at `+0x1de`/`+0x1e1`/`+0x1e5`. For curve width `+0x1f1`
+`0x06` (P-256) or `0x08` (P-192), `memcmp` on DHKey buffer at `+0x17e` against
+reference tables may normalize `+0x1e5` to `3`. Dispatches by classifier result:
+- `0` → numeric-comparison path (`FUN_80025fb4` — HCI events `0x2a`/`0x2f`)
+- `1` → passkey path (`FUN_800260f4` — User Passkey Request/Notification)
+- `2` → OOB path (`FUN_800263e4` — Remote OOB Data Request)
+
+**Callers:** 2 sites at `0x800266ea` and `0x80026804` in Ghidra-unbounded code
+immediately after `call_send_evt_HCI_Simple_Pairing_Complete` (SSP-complete cluster).
+
+**Confidence:** HIGH — unambiguous LMP 0x266 hook dispatch tied to documented
+`LMP__266__FUN_80022030` leaf; IO-cap classifier and three established SSP HCI
+event dispatchers; sets `field_0xb9` consistent with LMP 0x271 opcode map.
+
+Region unnamed count after this pass: **282** (283 minus this rename). Live named **1639** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
