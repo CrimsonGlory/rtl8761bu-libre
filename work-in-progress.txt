@@ -8112,8 +8112,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dw: continue >150B cold-triage
-          — decompile+rename refreshed rank-36 `0x8004d294` (1280B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dw (2026-06-30): decompiled+
+          renamed rank-36 `FUN_8004d294`→`init_or_reset_sco_esco_hw_registers_and_link_slots`
+          (1280B, HIGH). SCO/eSCO HW register init/reset blob; dual-mode on `param_1`
+          (full config-driven programming + 128 link-register-B clears + 11 eSCO slot
+          clears when zero); programs ~40 HW globals; calls
+          `set_masked_nibble_field_on_sco_esco_hw_register(7,7)` + `set_hw_control_flag_bit6(1)`;
+          reached from HCI-Reset teardown chain, link-loss SCO reset, teardown hook triplet;
+          upgraded from MEDIUM (Pass 3). 0 xrefs (indirect fptr registration). 142 unnamed
+          in-region; live named 1496.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dx: continue >150B cold-triage
+          — decompile+rename refreshed rank-37 `0x8004ce70` (908B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

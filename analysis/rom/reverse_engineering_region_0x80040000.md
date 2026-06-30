@@ -213,7 +213,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x80040a24` | 988B | `process_dual_slot_lmp25c_role_record_packet_completion` — dual-slot role-record LMP-25C packet completion handler; see Pass 52db | **HIGH** |
 | `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
 | `0x80041dac` | 876B | `teardown_inquiry_lap_slot_baseband_cleanup_and_release` — inquiry/LAP slot teardown orchestrator on `param_1`-indexed `big_ol_struct`; IRQ-off baseband register teardown, clears role-switch hook, releases inquiry LAP pending bitmask, clears AFH channel map, bitmask cleanup; callers `fHCI_conn_req_cancel` + `connection_teardown_HCI_event_finalizer`. Renamed Pass 52dd. | HIGH |
-| `0x8004d294` | 1280B | Large upper-half handler adjacent to the LE Meta Event cluster; plausible event-assembly routine but case/field semantics not individually confirmed this pass. | MEDIUM |
+| `0x8004d294` | 1280B | `init_or_reset_sco_esco_hw_registers_and_link_slots` — SCO/eSCO HW register init/reset blob; dual-mode on `param_1` (full config-driven programming + 64+64 link-register-B clears + 11 eSCO slot clears when zero); see Pass 52dw | HIGH |
 | `0x8004ce70` | 908B | Already appears (unnamed) in `reverse_engineering_conn_feature_dispatch.md`'s xref list alongside `assoc_w_tLC_RX`/`FUN_80051368`/`FUN_80052f8c` — confirmed participant in the connection/feature dispatch graph, but specific behavior not yet isolated to a single clear purpose. | MEDIUM-HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
@@ -289,6 +289,7 @@ each other on content alone).
 | `0x800480b0` | 682B | `validate_and_stage_sco_air_mode_change_from_hci_command` — HCI SCO air-mode change validator+stager; see Pass 52dt | HIGH |
 | `0x8004b468` | 624B | `fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` — IRQ-off snapshot of overflow queue at `conn+0x128..0x131`, walks `+0x100` chain, allocates HW descriptor slots, fragments TX bytes within budget, recycles or enqueues via list-A; see Pass 52du | HIGH |
 | `0x80045964` | 560B | `validate_and_commit_hci_scan_activity_params_from_command` — HCI scan-activity interval/window validator+committer; bounds `0x1f..0x4000`, bit-packs into global BT-state `+0x28..0x2f`, `hci_event_sender(0xe,...)` Command Complete; see Pass 52dv | HIGH |
+| `0x8004d294` | 1280B | `init_or_reset_sco_esco_hw_registers_and_link_slots` — SCO/eSCO HW register init/reset blob; programs ~40 HW globals, calls `set_masked_nibble_field_on_sco_esco_hw_register(7,7)` + `set_hw_control_flag_bit6(1)`; full-reset path (`param_1==0`) copies config into BT-state, clears 128 link-register-B slots + 11 eSCO nibbles; callee of HCI-Reset teardown chain; see Pass 52dw | HIGH |
 
 **Net effect (upper half)**: 1 of 11 renamed to HIGH confidence
 (`HCI_Accept_Synchronous_Connection_Request_handler`, sibling to the
@@ -4956,5 +4957,35 @@ without confirming xref); named generically per Pass 3 precedent. 0 xrefs
 Post-rename: **143 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1495**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-36
-`0x8004d294` (1280B, xrefs:0).
+## Pass 52dw (2026-06-30) — >150B rank-36 SCO/eSCO HW init blob rename
+
+**>150B rank-36 decompiled+renamed (HIGH):** `FUN_8004d294` →
+`init_or_reset_sco_esco_hw_registers_and_link_slots` (1280B, 0 xrefs) via
+`RenamePass52dwRegion80040000Fun8004d294.java` (`renamed=1`, live-verified).
+
+SCO/eSCO HW register init/reset blob (upgraded from MEDIUM, Pass 3 — prior
+"LE Meta Event cluster adjacent" label was incorrect). Dual-mode on `param_1`:
+baseline path always programs ~40 HW register globals via literal-pool
+addresses, resets timing counters to `0xffff`, sets control/status flag bits,
+calls `set_masked_nibble_field_on_sco_esco_hw_register(7,7)` and
+`set_hw_control_flag_bit6(1)`. When `param_1==0` (full reset): derives
+timing from `PTR_config_base_8004d794`, copies config fields into global
+BT-state `+0x28..0x2f` and per-connection struct fields from
+`PTR_base_of_0x1ac_struct_array_0xA_large2`, calls `FUN_8004a908` with
+packed timing, caps channel-map index at 5 and builds enable bitmask,
+optionally invokes feature-gated hook at `PTR_DAT_8004d86c`, clears 64
+indexed link-register-B slots (`0xa0..0xdf`) plus 64 more (`0xe0..0x11f`)
+via `write_indexed_link_register_b_with_slot_check`, and clears 11 eSCO link
+register high nibbles via `write_esco_link_register_high_nibble_field_with_retry`.
+Terminates with final timing copy from per-connection struct and completion
+hook at `PTR_DAT_8004d8b4(0)`. Reached from HCI-Reset teardown chain
+(`release_all_conn_records_and_invoke_teardown_chain`), link-loss SCO reset
+(`reset_sco_esco_hw_subsystem_on_link_loss`), and teardown hook triplet
+(`invoke_teardown_hook_triplet_with_lmp_power_gate` hook-3 with arg 0). 0 xrefs
+(indirect fptr registration).
+
+Post-rename: **142 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1496**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-37
+`0x8004ce70` (908B, xrefs:0, Pass 3 connection/feature-dispatch holdover).
