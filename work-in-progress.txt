@@ -9016,7 +9016,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hl: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hl (2026-06-30): cold-triage
+          refreshed via `ColdTriageRegion80040000Pass52hl.java`; decompiled+
+          renamed rank-1 `FUN_80044adc`→`hci_field_0x165_bos0b_field5c_4byte_send_cmd_complete`
+          (86B, HIGH) — field_0x165 status + bos[0xb] field5c-5f 4-byte snapshot
+          in 8-byte Command Complete; `0x80044axx` LE Meta Event cluster.
+          49 unnamed in-region (12 in 1-150B size≥20B tier); live named 1589.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hm: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 

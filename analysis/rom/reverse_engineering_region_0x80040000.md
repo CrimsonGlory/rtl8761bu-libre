@@ -8295,5 +8295,42 @@ AFH/link-slot cluster sibling of
 
 Post-rename: **50 unnamed** in-region (13 in 1-150B size≥20B tier); live named **1588**.
 
+**Next:** superseded by Pass 52hl below.
+
+## Pass 52hl (2026-06-30) — rank-1 bos[0xb] field5c snapshot HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hl.java` — 50 unnamed,
+13 in 1-150B size≥20B tier; rank-1 `0x80044adc` (86B, 0 xrefs) — largest
+remaining 1-150B candidate in the LE Meta Event cluster (`0x80044axx` neighborhood);
+ungated sibling of `hci_reentry_gate_field_0x165_global_byte_send_cmd_complete`
+at `0x80044b90` (reentry-gated 5-byte global-byte variant).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044adc` →
+`hci_field_0x165_bos0b_field5c_4byte_send_cmd_complete` (86B) via
+`RenamePass52hlRegion80040000Fun80044adc.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_field_0x165_bos0b_field5c_4byte_send_cmd_complete(short *param_1)
+{
+  /* status: param[0]==0 → 0, else field_0x165 defaulting to 1 */
+  /* 8-byte Command Complete via hci_event_sender(0xe,…): */
+  /*   status + cmd_lo + cmd_hi + gate_byte(0) + bos[0xb] field92..field95 (0x5c..0x5f) */
+  return 0;
+}
+```
+
+86B HCI command handler: derives status from global `the_0x300` struct `field_0x165`
+(0 when cmd word==0, else field value defaulting to 1); packs 8-byte Command
+Complete (`hci_event_sender(0xe,…)`) with status + echoed cmd-word bytes + zero
+gate byte + 4-byte snapshot of `bos[0xb]` fields `field92_0x5c` through
+`field95_0x5f`. No re-entrancy gate (unlike `hci_reentry_gate_field_0x165_global_byte_send_cmd_complete`).
+No direct callers found (indirect HCI router).
+
+LE Meta Event cluster sibling of
+`hci_reentry_gate_field_0x165_global_byte_send_cmd_complete` (reentry-gated 5-byte
+global-byte variant) and `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`.
+
+Post-rename: **49 unnamed** in-region (12 in 1-150B size≥20B tier); live named **1589**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
