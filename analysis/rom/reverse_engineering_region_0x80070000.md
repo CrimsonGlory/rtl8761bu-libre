@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gb COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep **COMPLETE** (**0** HANDLER-tier unnamed remain in-region; live named **1337** global). Latest: `match_feature_page_slot_by_short_uint32_or_blob_field_update_tlv` (Pass 12gb), `match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (Pass 12ga). **[NEXT]** cold-triage next rank-1 SIMPLE-tier unnamed per `ListRegion0x80070000.java`. See Pass 12gb section below.
+**Status**: Pass 12gc COMPLETE (2026-06-30) — SIMPLE-tier cold-triage sweep **COMPLETE** (**0** SIMPLE-tier unnamed remain; pivoted to STUB tier). Latest: `advance_lcg_prng_state_and_return_high_byte` (Pass 12gc). HANDLER-tier sweep also complete (0 remain). Live named **1338** global; **33** in-region unnamed (31 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gc section below.
 
 ## Overview
 
@@ -2416,6 +2416,29 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gc (2026-06-30) — LCG prng state advance `FUN_80071948`
+
+Decompiled and renamed:
+**`FUN_80071948` → `advance_lcg_prng_state_and_return_high_byte`**
+(24B, HIGH, STUB-tier) via `RenamePass12gcRegion80070000Fun80071948.java` (`renamed=1`, live-verified).
+
+**Triage note:** Pass 12gc opened with `ColdTriageRegion80070000Pass11.java` re-run — SIMPLE tier
+(51–150B) is **exhausted** (0 `FUN_*` remain). Pivoted to rank-1 STUB-tier candidate from new
+`ListStub80070000.java` (32 STUB-tier `FUN_*` remain).
+
+**Mechanism:** Linear congruential generator step on global state at `PTR_DAT_80071960`:
+`*state = DAT_80071964 * *state + DAT_80071968`, then returns high byte `(*state >> 24)`.
+Unambiguous LCG idiom. Sits in the `0x800719xx` AFH/LAP cluster adjacent to Pass 12v
+`clear_afh_lap_channel_map_for_matching_group` (`0x800719a0`) and Pass 12cj
+`find_free_afh_lap_group_index_after_map_clear` (`0x80071a84`). Ghidra listing reports
+xref_in=3 (no direct call xrefs via MCP `xrefs_to` — likely data/fptr references).
+
+**Confidence:** HIGH — unambiguous `a*state+c` LCG advance + top-byte return idiom.
+
+Live named **1338** (global; in-region unnamed **33**; SIMPLE-tier unnamed **0** — sweep complete).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gb (2026-06-30) — type-field feature-page slot matcher `FUN_800742d0`
 

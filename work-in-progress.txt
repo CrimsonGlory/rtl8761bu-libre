@@ -6641,8 +6641,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gc: cold-triage next rank-1
-          SIMPLE-tier unnamed per `ListRegion0x80070000.java`.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gc (2026-06-30): SIMPLE tier
+          exhausted (0 remain); pivoted to rank-1 STUB-tier `FUN_80071948`→
+          `advance_lcg_prng_state_and_return_high_byte` (24B, HIGH). LCG
+          `state=a*state+c` via `PTR_DAT_80071960`, returns high byte. Live named
+          1338; 33 in-region unnamed (31 STUB + 2 CRITICAL).
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gd: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
