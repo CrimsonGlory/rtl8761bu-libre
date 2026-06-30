@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 141 functions in tier, 38 renamed HIGH (Passes 52–52ao). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ao, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 140 functions in tier, 39 renamed HIGH (Passes 52–52ap). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ap, 2026-06-30).
 
 ## Overview
 
@@ -2258,5 +2258,39 @@ fragmentation scheduler `FUN_8004b468`. 1 xref.
 
 Post-rename: **226 unnamed** in-region (140 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-34+
-substantive candidate; skip rank-1–33 artifacts and already-done ranks.
+## Pass 52ap (2026-06-30) — rank-34 SCO slot offset delta rename
+
+**Refreshed cold-triage (ranks 1-33 skipped as artifacts or already done):** rank-34
+`0x80043438` (106B, 1 xref) — substantive SCO slot timing offset calculator in the
+`0x800434xx` cluster (callee of `apply_SCO_connection_params_to_hw` alongside
+still-unnamed `FUN_80043400` clock-phase spin-wait).
+
+**Rank-34 decompiled and renamed (HIGH):** `FUN_80043438` →
+`compute_sco_slot_offset_delta_from_hw_clock` (106B) via
+`RenamePass52apRegion80040000Fun80043438.java` (`renamed=1`, live-verified).
+
+```c
+uint compute_sco_slot_offset_delta_from_hw_clock(
+    ushort slot_period, ushort target_offset, uint flags, byte conn_idx, ushort *out_delta)
+{
+  FUN_80034a24(&clock_raw, conn_idx);
+  if ((flags & 2) != 0) clock_raw ^= DAT_800434a8;
+  phase = (clock_raw >> 1) & DAT_800434a4;
+  remainder = phase % slot_period;
+  if (remainder == target_offset) *out_delta = slot_period;
+  else if (remainder < target_offset) *out_delta = target_offset - remainder;
+  else *out_delta = (target_offset + slot_period) - remainder;
+  return phase;
+}
+```
+
+Reads HW clock via `FUN_80034a24` (conn-indexed BOS subindex reader), optionally XOR-adjusts
+when `flags&2`, masks to slot phase, computes modulo `slot_period`, then writes wrapped
+delta slots until `target_offset` into `*out_delta`. Paired with `FUN_80043400` (spin until
+clock bit-2 toggles) inside interrupt-bracketed `apply_SCO_connection_params_to_hw`.
+1 xref (direct call from `0x8003d7bc`).
+
+Post-rename: **225 unnamed** in-region (139 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-35+
+substantive candidate; skip rank-1–34 artifacts and already-done ranks.
