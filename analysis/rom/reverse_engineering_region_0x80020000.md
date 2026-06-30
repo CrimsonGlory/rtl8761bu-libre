@@ -2064,4 +2064,38 @@ cluster handlers in this region.
 
 Region unnamed count after this pass: **265** (266 minus this rename). Live named **1656** global.
 
+**Next:** superseded by Pass 6 continuation (48).
+
+## Pass 6 continuation (48) (2026-06-30) — legacy SSP OOB negative reply `FUN_80023878`
+
+Decompiled and renamed:
+**`FUN_80023878` → `fHCI_Remote_OOB_Data_Request_Negative_Reply_0x2e`**
+(192B, HIGH) via `RenamePass6Region80020000Fun80023878.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (192B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=265` at pass start). Sits in the
+`0x800238xx` SSP OOB reply cluster adjacent to
+`fHCI_Remote_OOB_Data_Request_Reply_0x30` (Pass 6 cont. 32).
+
+**Mechanism:** Legacy SSP Remote OOB Data Request **Negative** Reply handler,
+dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` opcode switch case **0x42e**
+(OCF 0x2e). Resolves connection via `FUN_80023008`, clears crypto struct `+0x13c`,
+assembles 4 bytes from cmd buffer `+9`..`+0xc` into `crypto+0x138`. When no pending
+LMP at `+0x1e8`: if crypto sub-state `+1 == 0x35` sets state `0x37` via
+`set_arg1_1_to_arg2`, else calls `FUN_80025dd8` and sets state `0x33`. When pending
+LMP opcode is **0x3f** (Simple Pairing Confirm), sets state `0x37` and invokes
+`LMP_SIMPLE_PAIRING_CONFIRM_0x3F`. When pending LMP is **0x7f** sub-opcode **0x1c**,
+clears via `FUN_80025634` and emits `call_send_evt_HCI_Simple_Pairing_Complete` with
+status `5` (Authentication Failure). Otherwise clears pending via `FUN_80025634`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (1 site at `0x80023504`, opcode
+`0x42e` branch).
+
+**Confidence:** HIGH — router opcode `0x042e` = HCI_Remote_OOB_Data_Request_Negative_Reply;
+negative-reply pairing idiom mirrors positive-reply sibling at `0x430`; LMP 0x3f/0x7f
+dispatch and `call_send_evt_HCI_Simple_Pairing_Complete` failure path match documented
+SSP cluster handlers.
+
+Region unnamed count after this pass: **264** (265 minus this rename). Live named **1657** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
