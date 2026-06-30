@@ -7527,5 +7527,39 @@ sub-record pool cluster at region boundary (`0x8004ffc4`).
 
 Post-rename: **71 unnamed** in-region (34 in 1-150B size≥20B tier); live named **1567**.
 
+**Next:** superseded by Pass 52gq below.
+
+## Pass 52gq (2026-06-30) — rank-1 dual global conn-record diagnostic log rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gq.java` — 71 unnamed,
+34 in 1-150B size≥20B tier; rank-1 `0x8004f6d4` (78B, 1 xref) — thin diagnostic
+log wrapper in the `0x8004f5xx` timer/event-queue cluster (sibling of
+`FUN_8004f580` insert / `FUN_8004ef08` dequeue / `FUN_8004f25c` keyed-remove).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004f6d4` →
+`log_dual_global_conn_record_mode_and_handle_diagnostic` (78B) via
+`RenamePass52gqRegion80040000Fun8004f6d4.java` (`renamed=1`, live-verified).
+
+```c
+void log_dual_global_conn_record_mode_and_handle_diagnostic(void)
+{
+  rec_a = *PTR_PTR_8004f724;
+  rec_b = *PTR_PTR_8004f728;
+  possible_logging_function__var_args(
+      6, 0xd2, &DAT_00001bbe, 0xd53, 8, PTR_unknown_dat_ref_by_logger_8004f72c,
+      (char)PTR_PTR_8004f728[1], rec_b[+0x24], rec_b[+0x18], rec_b[+0x1a],
+      (char)PTR_PTR_8004f724[1], rec_a[+0x5e], rec_a[+0x18], rec_a[+0x1a]);
+}
+```
+
+Reads two global conn-record pointers at `PTR_PTR_8004f724`/`PTR_PTR_8004f728`,
+logs per-record mode bytes (`ptr[1]`), handle shorts at `+0x18`/`+0x1a`, plus
+`rec_a[+0x5e]` and `rec_b[+0x24]` via `possible_logging_function__var_args`
+(format `0xd2`, tag `0x1bbe`/`0xd53`). Sole xref from `0x80011302` (ROM
+`0x80011xxx` HW-register helper cluster — likely indirect registration path).
+Pure diagnostic; no control-flow side effects.
+
+Post-rename: **70 unnamed** in-region (33 in 1-150B size≥20B tier); live named **1568**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
