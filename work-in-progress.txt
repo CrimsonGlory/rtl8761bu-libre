@@ -7562,9 +7562,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bq: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-71+ substantive candidate;
-          skip rank-1–70 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bq (2026-06-30): decompiled+
+          renamed rank-71 `FUN_80044c04`→`hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`
+          (104B, HIGH). Re-entrancy-gated HCI Command Complete sender: status from
+          global `field_0x165` (0 when cmd word==0, else default 1); packs 6-byte
+          response with echoed cmd-word bytes + gate-result + global ushort template.
+          LE Meta Event cluster neighbor of `hci_global_field_0x165_status_echo_send_cmd_complete`.
+          0 xrefs (function-pointer registration). 198 unnamed in-region (112 in
+          1-150B tier); live named 1440.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52br: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-72+ substantive candidate;
+          skip rank-1–71 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
