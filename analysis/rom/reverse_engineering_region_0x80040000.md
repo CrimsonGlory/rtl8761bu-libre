@@ -8623,5 +8623,39 @@ bit0 clear (pending-only, mirrors the eSCO-remap gate in
 
 Post-rename: **41 unnamed** in-region (4 in 1-150B size≥20B tier); live named **1597**.
 
+**Next:** superseded by Pass 52hu below.
+
+## Pass 52hu (2026-06-30) — rank-1 link-slot opcode-0x202f cmd-complete success wrapper rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hu.java` — 41 unnamed,
+4 in 1-150B size≥20B tier; rank-1 `0x800490c0` (30B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x800490xx` link-slot cluster; sibling of
+`hci_link_slot_alloc_and_commit_gated_handler_send_cmd_complete` at `0x80048fb8`
+and `hci_validate_and_commit_esco_timing_pair_hook1_or_pending_masks` at
+`0x80049158` (opcode `0x2022` terminus).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800490c0` →
+`invoke_ogc3_tons_cmd_complete_success_opcode_0x202f` (30B) via
+`RenamePass52huRegion80040000Fun800490c0.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 invoke_ogc3_tons_cmd_complete_success_opcode_0x202f(void)
+{
+  OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10
+            (0x202f, 0, 0, 0, 0);
+  return 0;
+}
+```
+
+30B thin HCI command-handler terminus in the `0x800490xx` link-slot cluster:
+unconditionally dispatches shared sink
+`OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` with
+opcode `0x202f` and success status `0` (CLK_ADJ timing-pair response opcode per
+Pass 52er's `pack_lmp_power_clk_adj_fallback_opcode_response_params` case
+`0x202f`). Success-only wrapper sibling of gated alloc/commit handlers at
+`0x80048fb8`/`0x800489e8`. No direct callers found (indirect HCI router).
+
+Post-rename: **40 unnamed** in-region (3 in 1-150B size≥20B tier); live named **1598**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

@@ -9099,7 +9099,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ht;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hu: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hu (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800490c0`→`invoke_ogc3_tons_cmd_complete_success_opcode_0x202f`
+          (30B, HIGH) — thin HCI cmd-complete success wrapper via
+          `OGC_3_OCF_TONS_...` opcode `0x202f`; `0x800490xx` link-slot cluster.
+          0 xrefs. 40 unnamed in-region (3 in 1-150B size≥20B tier); live named 1598.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hv: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
