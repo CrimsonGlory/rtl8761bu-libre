@@ -8731,5 +8731,39 @@ direct callers found.
 
 Post-rename: **38 unnamed** in-region (1 in 1-150B size≥20B tier); live named **1600**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename next candidate
-(size≥20B; refresh cold-triage ranks).
+**Next:** superseded by Pass 52hx below.
+
+## Pass 52hx (2026-06-30) — rank-1 timer-schedule ctx flag-bit rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hx.java` — 38 unnamed,
+1 in 1-150B size≥20B tier; rank-1 `0x8004f140` (24B, 0 xrefs) — thin flag setter in
+the `0x8004f1xx` timer/event-queue cluster (`PTR_DAT_8004f118` neighborhood); sibling of
+`advance_periodic_schedule_boundary_by_slot_multiple` (`0x8004f160`, region `0x80050000`
+Pass 45) and `dispatch_inflight_timer_queue_drain_pending_and_promote_next`
+(`0x8004ef08`, Pass 52cm).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004f140` →
+`set_primary_schedule_ctx_flag_bit0x10_when_both_byte4_zero` (24B) via
+`RenamePass52hxRegion80040000Fun8004f140.java` (`renamed=1`, live-verified).
+
+```c
+void set_primary_schedule_ctx_flag_bit0x10_when_both_byte4_zero(void)
+{
+  primary = PTR_PTR_8004f158;
+  if ((primary[4] == '\0') && (secondary = PTR_PTR_8004f15c, secondary[4] == '\0')) {
+    primary[6] = primary[6] | 0x10;
+  }
+  return;
+}
+```
+
+24B thin gate: when both schedule-context structs (`PTR_PTR_8004f158`,
+`PTR_PTR_8004f15c`) have status byte `+4` clear, ORs bit `0x10` into the primary
+context's flags byte `+6` (same `+6` byte family as the busy-bit at bit0 documented in
+region `0x80050000` Pass 44's `apply_or_revert_slot_timing_and_set_recompute_flag`
+controller). Standard function-pointer-registration adapter; no direct callers found.
+
+Post-rename: **37 unnamed** in-region (0 in 1-150B size≥20B tier); live named **1601**.
+
+**Next:** continue 1-150B cold-triage — refresh ranks when new size≥20B candidates
+appear; otherwise pivot to next tier or adjacent region.

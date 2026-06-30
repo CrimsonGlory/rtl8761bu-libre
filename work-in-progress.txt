@@ -9125,9 +9125,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hx: continue 1-150B cold-triage
-          — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
-          decompile+rename next candidate (size≥20B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hx (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004f140`→`set_primary_schedule_ctx_flag_bit0x10_when_both_byte4_zero`
+          (24B, HIGH) — dual-status gate: when both `PTR_PTR_8004f158` and
+          `PTR_PTR_8004f15c` have byte `+4` clear, OR bit `0x10` into primary `+6`;
+          `0x8004f1xx` timer/event-queue cluster. 0 xrefs.
+          37 unnamed in-region (0 in 1-150B size≥20B tier); live named 1601.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hy: continue 1-150B cold-triage
+          — refresh ranks via `ColdTriageRegion80040000Pass52*.java`; pivot to
+          next tier or adjacent region if no size≥20B candidates remain.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
