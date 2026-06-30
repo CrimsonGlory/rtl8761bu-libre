@@ -8064,8 +8064,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dr: continue >150B cold-triage
-          — decompile+rename refreshed rank-31 `0x80047c50` (700B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dr (2026-06-30): decompiled+
+          renamed rank-31 `FUN_80047c50`→`parse_validate_and_commit_esco_sco_config_pdu_to_conn_record`
+          (700B, HIGH). 28-byte eSCO/SCO config PDU validator+committer; LMP VSC 0x268
+          pool slot `0x8010bc64`; `alloc_link_record_and_register_by_index` +
+          `dispatch_hw_hook_for_main_and_substates`. 0 xrefs (indirect dispatch).
+          147 unnamed in-region; live named 1491.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dr;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ds: continue >150B cold-triage
+          — decompile+rename refreshed rank-32 `0x80046900` (682B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

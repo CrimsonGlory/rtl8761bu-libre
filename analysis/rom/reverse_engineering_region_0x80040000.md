@@ -283,7 +283,7 @@ each other on content alone).
 | `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear`. See Pass 52do | HIGH |
 | `0x80047304` | 780B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear` — HCI/LMP fragment-reassembly handler (role-bit-clear variant); conn `+0x2c` accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` + `setup_type3_esco_sco_conn_record_with_role_bit_clear`; completion walks `+0x20` chain via `prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`. See Pass 52dp | HIGH |
 | `0x8004cb48` | 722B | `program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f` — eSCO slot programmer for LMP PDU type `0x22`; `esco_sco_param_negotiate_and_stage` + 0x1ac-stride field writes; LMP `0x26f` emit + VSC fc95 trigger. See Pass 52dq | HIGH |
-| `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
+| `0x80047c50` | 700B | `parse_validate_and_commit_esco_sco_config_pdu_to_conn_record` — 28-byte eSCO/SCO config PDU validator+committer; LMP VSC 0x268 pool slot `0x8010bc64`; `alloc_link_record_and_register_by_index` + `dispatch_hw_hook_for_main_and_substates`. See Pass 52dr | HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
 | `0x80046900` | 682B | Validates packet-type/role bitmask fields; plausible HCI command parameter validator for a multi-entry SCO/eSCO table, not individually confirmed beyond shape. | MEDIUM-HIGH |
 | `0x800480b0` | 682B | Validates connection params via `get_0x1ac_struct_ptr_by_index`, checks a bitmask with sub-cases 0/1/2, conditionally calls `FUN_8005fe90`, terminates exclusively via `send_evt_HCI_Command_Status` on every path — shape consistent with an HCI command handler toggling a per-connection link-policy/mode flag (e.g. Sniff/Hold/Park-style), but no definitive single name confirmed. | MEDIUM-HIGH |
@@ -4827,3 +4827,29 @@ live named **1490**.
 
 **Next:** continue >150B cold-triage — decompile+rename refreshed rank-31
 `0x80047c50` (700B, xrefs:0).
+
+## Pass 52dr (2026-06-30) — >150B rank-31 eSCO/SCO config PDU validator+committer rename
+
+**>150B rank-31 decompiled+renamed (HIGH):** `FUN_80047c50` →
+`parse_validate_and_commit_esco_sco_config_pdu_to_conn_record` (700B, 0 xrefs) via
+`RenamePass52drRegion80040000Fun80047c50.java` (`renamed=1`, live-verified).
+
+28-byte eSCO/SCO configuration PDU parser, validator, and connection-record committer
+(documented in depth at `reverse_engineering_vsc_dispatcher.md`). Reached via patch
+gateway pool `DAT_8010bc64` on the LMP VSC 0x268 path through `FUN_8010bba4` — not
+dynamically installed by the patch installer. Parses PDU bytes at offsets 3–27 (handle,
+flags word, bandwidth triplets, packet-type/retransmission fields); validates against
+range constraints (returns `0x12` on failure); looks up or allocates a link record via
+`conn_record_get_4byte_field_by_handle` / `alloc_link_record_and_register_by_index`;
+writes ~15 conn-record fields (`+0x10` index, `+0x14`/`+0x18` bandwidth masks,
+`+0x20` flags, `+0x1c`/`+0x1d` codec/mode nibbles, `+0x3d` power level, etc.);
+on eSCO-flag path calls `esco_packet_type_validate_and_set_air_mode`; optional hook at
+`PTR_DAT_80047f18`; non-eSCO path dispatches `dispatch_hw_hook_for_main_and_substates`
+with teardown via `FUN_8004fcec` on alloc failure. Returns `0x00` OK, `0x07` alloc fail,
+`0x0c` busy (record `+0x1d` bit 1), `0x12` invalid param.
+
+Post-rename: **147 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1491**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-32
+`0x80046900` (682B, xrefs:0).
