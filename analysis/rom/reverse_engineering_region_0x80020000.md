@@ -3392,4 +3392,39 @@ legacy-authentication handler; lives adjacent to `safer_plus_block_encrypt` clus
 
 Region unnamed count after this pass: **223** (224 minus this rename). Live named **1698** global.
 
+**Next:** superseded by Pass 6 continuation (90).
+
+## Pass 6 continuation (90) (2026-06-30) — SSP pairing continuation `FUN_80023940`
+
+Decompiled and renamed:
+**`FUN_80023940` → `dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41`**
+(134B, HIGH) via `RenamePass6Region80020000Fun80023940.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (134B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=223` at pass start). Sits in the
+`0x800239xx` SSP pairing-continuation cluster alongside
+`handle_lmp_ext_subopcode_0x1b_by_ssp_state` (Pass 6 cont. 84) and
+`dispatch_pairing_continuation_by_crypto_state_and_pending_lmp` (Pass 6 cont. 75).
+
+**Mechanism:** Per-connection SSP pairing continuation keyed on pending LMP at
+`crypto+0x1e8` and crypto sub-state byte `+1`:
+- No pending LMP (`+0x1e8==0`): when sub-state `0x2d` (`'-'`) advance to `0x2e` (`'.'`)
+  via `set_arg1_1_to_arg2` and return (defer); else send LMP-ext `0x7f`/`0x1b` via
+  `FUN_800258a0`, then `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)` (auth failure).
+- Pending opcode `0x7F` extended sub-opcode `0x1b`: clear pending via `FUN_80025634`,
+  emit `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)`.
+- Pending opcode `0x41` (DHKey Check): set sub-state `0x2e`, invoke
+  `LMP_DHKEY_CHECK_0x41`; always clear pending via `FUN_80025634` on exit paths.
+
+**Callers:** `many_sub_if_else_cases_on_param2` at `0x80022f36` (internal opcode `0x33`);
+thin wrapper `FUN_800239cc` at `0x800239e4` (conn-resolve via `FUN_80023008` then
+tail-call) invoked from `HCI_Write_Simple_Pairing_Debug_Mode` at `0x800234fc` — confirmed
+via `ListXrefsTo80023940.java` / `ListXrefsTo800239cc.java`.
+
+**Confidence:** HIGH — callee cluster matches documented SSP Simple Pairing Complete
+sender and DHKey-check path (`LMP_DHKEY_CHECK_0x41`); LMP-ext `0x7f`/`0x1b` send/receive
+idiom parallels Pass 6 cont. (84)'s receiver-side handler; both callers confirmed.
+
+Region unnamed count after this pass: **222** (223 minus this rename). Live named **1699** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

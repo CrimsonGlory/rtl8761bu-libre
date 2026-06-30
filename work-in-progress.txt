@@ -9991,8 +9991,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (89);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (90): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (223 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (90) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80023940`→`dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41`
+          (134B, HIGH). SSP pairing continuation: LMP-ext 0x7f/0x1b auth-failure path +
+          DHKey-check 0x41 dispatch; callers `many_sub_if_else_cases_on_param2` (opcode 0x33) +
+          `FUN_800239cc`←`HCI_Write_Simple_Pairing_Debug_Mode`; xref_in=2. 222 unnamed
+          remain; live named 1699.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (90);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (91): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (222 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
