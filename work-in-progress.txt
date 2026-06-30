@@ -6755,8 +6755,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12go;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gp: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80078bd0`, 22B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gp (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078bd0`→`hci_reset_memset_seed_and_invoke_lmp_25b`
+          (22B, HIGH, STUB-tier). Thin two-step HCI-reset subchain: chains
+          Pass 12cn memset+seed param block then Pass 12cq LMP 0x25B gateway;
+          omits VSC-FC95 middle step and LMP 0x268 tail from Pass 12co full
+          triad. No direct callers (xref_in=0). STUB-tier unnamed 18 remain;
+          live named 1351.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gq: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80078914`, 34B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

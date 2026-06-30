@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12go COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (19 STUB-tier unnamed remain). Latest: `classify_hci_conn_packet_type_max_slot_requirement` (Pass 12go). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1350** global; **21** in-region unnamed (19 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078bd0`, 22B, xref_in=0). See Pass 12go section below.
+**Status**: Pass 12gp COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (18 STUB-tier unnamed remain). Latest: `hci_reset_memset_seed_and_invoke_lmp_25b` (Pass 12gp). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1351** global; **20** in-region unnamed (18 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078914`, 34B, xref_in=0). See Pass 12gp section below.
 
 ## Overview
 
@@ -2417,6 +2417,34 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gp (2026-06-30) — HCI reset memset+LMP-25B subchain stub `FUN_80078bd0`
+
+Decompiled and renamed:
+**`FUN_80078bd0` → `hci_reset_memset_seed_and_invoke_lmp_25b`**
+(22B, HIGH, STUB-tier) via `RenamePass12gpRegion80070000Fun80078bd0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(22B, xref_in=0 — no direct callers found; MCP `xrefs_to` returns empty against
+this GZF, known gap).
+
+**Mechanism:** Thin two-step HCI-reset subchain stub: chains
+`hci_reset_memset_and_seed_default_param_block` (Pass 12cn — memset 0x48-byte
+param block + seed defaults) then `hci_reset_invoke_lmp_25b_when_init_enabled`
+(Pass 12cq — LMP 0x25B gateway when init flag `!= -1`). Omits the middle
+`VSC_0xfc95_called2` step and tail `hci_reset_invoke_lmp_268_with_param_block_dword`
+present in Pass 12co's full `hci_reset_invoke_vsc_fc95_lmp_triad` — a truncated
+alternate entry into the `0x80078axx` HCI-reset cluster, likely dead code or
+indirect-only dispatch target.
+
+**Confidence:** HIGH — unambiguous two-callee chain with both callees already
+named and documented in Passes 12cn/12cq; structural role clear from
+decompilation alone.
+
+Live named **1351** (global; in-region unnamed **20**; STUB-tier unnamed **18**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80078914`, 34B, xref_in=0).
+
 ## Pass 12go (2026-06-30) — HCI packet-type max-slot classifier `FUN_80071ae8`
 
 Decompiled and renamed:
@@ -2444,8 +2472,7 @@ confirmed via caller decompile.
 
 Live named **1350** (global; in-region unnamed **21**; STUB-tier unnamed **19**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80078bd0`, 22B, xref_in=0).
+**Next:** superseded by Pass 12gp.
 
 ## Pass 12gn (2026-06-30) — link-loss teardown event-0x268 logger hook `FUN_80072094`
 
