@@ -5454,5 +5454,46 @@ Sibling of `hci_link_policy_settings_read_send_cmd_complete` (read-only path).
 Post-rename: **129 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1509**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x8004c4a8`, 894B).
+**Next:** superseded by Pass 52ek cold-triage refresh (stale target `0x8004c4a8`
+was already renamed Pass 52dy).
+
+## Pass 52ek (2026-06-30) — >150B rank-1 inquiry/LAP slot completion rename
+
+**Note:** Prior [NEXT] targeted `0x8004c4a8` (894B) but that function was already
+renamed in Pass 52dy (`walk_conn_tx_single_chunk_segments_dispatch_payload_by_type`).
+Fresh cold-triage (`ColdTriageRegion80040000Pass52ek.java`) reports **34** unnamed
+>150B remain. rank-1 `0x80041c70` (288B); rank-2 `0x80040384` (254B); rank-3
+`0x80049550` (252B); rank-4 `0x8004ad68` (244B); rank-5 `0x80040494` (238B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80041c70` →
+`complete_inquiry_lap_slot_apply_lmp268_remote_name_and_arm_timer` (288B, 0 xrefs
+in cold-triage) via `RenamePass52ekRegion80040000Fun80041c70.java` (`renamed=1`,
+live-verified).
+
+Inquiry/LAP slot completion handler — success-path counterpart to
+`teardown_inquiry_lap_slot_baseband_cleanup_and_release` (Pass 52dd, which
+*terminates* `FUN_800362b4`). Takes role index + sub-index bytes:
+
+- **Lookup:** `lookup_codec_or_role_type_table_7x4` — on failure logs diagnostic
+  and returns.
+- **LMP 0x268 gate:** when global mode/feature bytes differ from the resolved
+  table index and `big_ol_struct[+0x74]` non-zero, calls
+  `LMP__268__most_common_for_VSCs2_checks_fptr_patch` with timer `0x280`.
+- **Slot commit:** sets `big_ol_struct[table_idx].field_0xd9 = 1` (active flag).
+- **Feature apply:** `remote_name_request_feature_apply_orchestrator()` (Pass 52ci
+  structural parent).
+- **Timer arm:** `FUN_800362b4()` — page/inquiry watchdog arm (sibling of Pass
+  52dc/52dj success paths).
+- **Diagnostic log:** emits BD_ADDR + LAP slot refcount via
+  `possible_logging_function__var_args`.
+- **Pending clear:** `remap_role_index_to_esco_slot_if_pending` then zeroes
+  `PTR_DAT_80041da8[remapped_index]`.
+
+0 xrefs (indirect fptr registration). Inquiry/LAP cluster sibling of Pass 52dd
+teardown and Pass 52eg periodic-inquiry configure.
+
+Post-rename: **128 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1510**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
+unnamed >150B candidate (`0x80040384`, 254B).

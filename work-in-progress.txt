@@ -8257,9 +8257,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ej;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ek: continue refreshed >150B
-          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x8004c4a8`, 894B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ek (2026-06-30): stale [NEXT]
+          `0x8004c4a8` skipped (already Pass 52dy); fresh cold-triage rank-1
+          `FUN_80041c70`→`complete_inquiry_lap_slot_apply_lmp268_remote_name_and_arm_timer`
+          (288B, HIGH). Inquiry/LAP slot completion: codec-role lookup, conditional
+          LMP 0x268, `remote_name_request_feature_apply_orchestrator`, arms
+          `FUN_800362b4`, clears pending via `remap_role_index_to_esco_slot_if_pending`.
+          128 unnamed in-region; live named 1510.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ek;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52el: continue refreshed >150B
+          cold-triage — decompile+rename next rank-2 unnamed >150B candidate
+          (`0x80040384`, 254B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
