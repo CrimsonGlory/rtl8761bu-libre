@@ -1184,4 +1184,38 @@ into per-connection hardware buffer queue.
 
 Region unnamed count after this pass: **293** (294 minus this rename). Live named **1628** global.
 
+**Next:** superseded by Pass 6 continuation (20).
+
+## Pass 6 continuation (20) (2026-06-30) — LMP pairing continuation `FUN_80027994`
+
+Decompiled and renamed:
+**`FUN_80027994` → `dispatch_lmp_pairing_continuation_by_crypto_state`**
+(324B, HIGH) via `RenamePass6Region80020000Fun80027994.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (324B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=293` at pass start). Sits in the
+`0x80027xxx` LMP auth/pairing cluster adjacent to `LMP_AU_RAND_0x0B`/`LMP_SRES_0x0C`.
+
+**Mechanism:** Per-connection LMP pairing-continuation router keyed on crypto sub-state
+byte `+1`. Indexes `big_ol_struct` by connection handle (`param_2 & 0xffff`), sets
+`*param_3 = 1` ack flag. Gates on `FUN_8002403c` role/capability check unless global
+`PTR_DAT_80027adc+2` bit `0x80` set. Dispatches:
+- state `0x08`: invokes `LMP_AU_RAND_0x0B` then `FUN_80025634`;
+- state `0x07`: on PDU byte `+6 == 0x23` sets crypto `+0x50=3` and state `0x11`; on
+  `+6 == 6` runs `FUN_80023fdc` gate then `send_evt_HCI_PIN_Code_Request` + state `10`;
+  else defers to SSP state machine;
+- state `0x09`: inspects pending LMP opcode at `*(+0x1e8)+4 >> 1` — `8` triggers PIN
+  request + state `10`, `0x19` triggers `send_evt_HCI_IO_Capability_Request` + state
+  `0x14`;
+- state `0x1c`: SSP post-complete path via
+  `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`.
+All exit paths update pairing state via `set_arg1_1_to_arg2`.
+
+**Confidence:** HIGH — mechanism parallels sibling
+`apply_link_key_and_dispatch_auth_pairing_flow` (Pass 6 cont. 16); reuses documented
+`FUN_8002403c` gate, HCI PIN/IO-cap event senders, and SSP state-machine updater; state
+values `7/8/9/0x1c` match documented crypto-struct pairing modes.
+
+Region unnamed count after this pass: **292** (293 minus this rename). Live named **1629** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
