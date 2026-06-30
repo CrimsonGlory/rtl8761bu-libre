@@ -6992,8 +6992,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52e;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52f: decompile+rename refreshed
-          rank-1 `0x80042934` (10 xrefs, 62B, 51-150B tier).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52f (2026-06-30): decompiled+
+          renamed refreshed rank-1 `FUN_80042934`→`lcg_prng_bounded_modulo`
+          (62B, HIGH). LCG PRNG: advances seed at PTR_DAT_80042978, returns
+          (state>>22) % min(param,max)+1; shared by PSM/QoS bitpair walkers in
+          region 0x80070000. 261 unnamed remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52f;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52g: decompile+rename refreshed
+          rank-3 `0x800430ac` (8 xrefs, 88B, mask-merge HW-channel dispatch;
+          SCO/eSCO channel-commit cluster sibling of Passes 52/52b).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

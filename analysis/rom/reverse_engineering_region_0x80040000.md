@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 181 functions ranked, rank-1 renamed HIGH. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 175 functions in tier, 6 renamed HIGH (Passes 52–52f). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52f, 2026-06-30).
 
 ## Overview
 
@@ -899,5 +899,35 @@ from the cached local address — otherwise the ROM uses fixed default sync-word
 constants (`0x6e1e`/`0x88d6`). 10 xrefs; sibling cluster to the
 SCO/eSCO HW-channel indexed-dispatch trio from Passes 52–52b.
 
-**Next:** decompile+rename refreshed rank-1 `0x80042934` (10 xrefs, 62B); then
-continue down the Pass 52 ranked list (262 unnamed remain in-region).
+## Pass 52f (2026-06-30) — refreshed rank-1 LCG PRNG rename
+
+**Refreshed rank-1 decompiled and renamed (HIGH):** `FUN_80042934` →
+`lcg_prng_bounded_modulo` (62B) via `RenamePass52fRegion80040000Fun80042934.java`
+(`renamed=1`, live-verified).
+
+```c
+uint lcg_prng_bounded_modulo(uint max_inclusive)
+{
+  bound = min(max_inclusive, *PTR_DAT_80042974);
+  state = *PTR_DAT_80042978;
+  state = state * DAT_8004297c + DAT_80042980;  // LCG advance
+  *PTR_DAT_80042978 = state;
+  return (state >> 0x16) % (bound + 1);
+}
+```
+
+Linear-congruential PRNG: advances global seed at `PTR_DAT_80042978`, returns
+`(state >> 22) % (min(param, max_bound)+1)`. Shared utility called from PSM/QoS
+bitpair-eligibility walkers in region `0x80070000` (e.g.
+`expand_psm_qos_state_0x16_retry1_random_bitpair_eligibility` passes `0x4e`;
+`finalize_psm_qos_eligibility_bitpair_expand_or_fail_channel` passes `0x27`).
+Sibling of `advance_lcg_prng_state_and_return_high_byte` (`0x80071948`) in the
+AFH/LAP cluster — same LCG pattern, different output extraction. 10 xrefs.
+
+Post-rename cold-triage refresh: **261 unnamed** in-region (175 in 1-150B tier).
+Refreshed rank-1 is `0x8004a2e4` (10 xrefs, 1B — likely artifact); rank-3
+`0x800430ac` (8 xrefs, 88B) is the mask-merge SCO/eSCO HW-channel sibling
+already referenced in Pass 52.
+
+**Next:** decompile+rename rank-3 `0x800430ac` (8 xrefs, 88B, mask-merge HW-channel
+dispatch); then continue down refreshed Pass 52 ranked list.
