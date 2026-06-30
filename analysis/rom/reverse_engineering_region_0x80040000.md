@@ -6354,6 +6354,41 @@ live named **1537**.
 Post-rename: **100 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1538**.
 
+**Next:** superseded by Pass 52fn below.
+
+## Pass 52fn (2026-06-30) — >150B rank-1 HCI sync-conn param dispatch wrapper rename
+
+**Cold-triage (refreshed):** 5 unnamed >150B remain. rank-1 `0x80047b10`
+(182B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80047b10` →
+`hci_sync_conn_param_commit_or_le_channel_scan_send_cmd_complete`
+(182B, 0 xrefs) via
+`RenamePass52fnRegion80040000Fun80047b10.java` (`renamed=1`, live-verified).
+
+182B HCI command handler in the `0x80047bxx` SCO/eSCO sync-connection cluster
+(outer wrapper for `validate_unique_handles_and_commit_sync_conn_params` at
+`0x80047980`, Pass 52ee):
+
+- **State init:** when master struct byte at `+0x15dc` is zero, sets it to `2`;
+  else gates on `PTR_DAT_80047bcc` bit4 and state `0x02` (else status `0x0c`).
+- **Zero-param path:** when bytes at `param+2`/`param+3` are both zero, calls
+  `scan_indexed_link_slots_le_channel_select_and_lmp_vsc_dispatch()`.
+- **Commit path:** else calls
+  `validate_unique_handles_and_commit_sync_conn_params(cVar2, param+5)` with
+  index bound at `PTR_DAT_80047bd0`; on success probes
+  `is_any_conn_lmp_procedure_busy()` and sets/clears bit0 of
+  `PTR_DAT_80047bd4`, copying timing words into master struct on busy.
+- **Terminus:** `conn_diagnostic_batch_dump()` then 4-byte HCI Command Complete
+  via `hci_event_sender(0xe,…)` with `field_0x165` status idiom.
+
+SCO/eSCO connection-setup cluster sibling of
+`HCI_Setup_Synchronous_Connection_handler` /
+`HCI_Accept_Synchronous_Connection_Request_handler`.
+
+Post-rename: **99 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1539**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (5 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (4 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).

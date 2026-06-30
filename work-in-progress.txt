@@ -8536,9 +8536,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fn: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fn (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80047b10`→`hci_sync_conn_param_commit_or_le_channel_scan_send_cmd_complete`
+          (182B, HIGH). HCI sync-conn param commit or LE-channel-scan dispatch
+          wrapper; zero-param path calls
+          `scan_indexed_link_slots_le_channel_select_and_lmp_vsc_dispatch`, else
+          `validate_unique_handles_and_commit_sync_conn_params`; LMP-busy flag +
+          Command Complete.
+          4 unnamed >150B; 99 unnamed in-region; live named 1539.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fo: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (5 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+          (4 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
