@@ -2265,4 +2265,37 @@ register_afh_lap_group_slot + LMP 0x17 dispatch chain.
 
 Region unnamed count after this pass: **259** (260 minus this rename). Live named **1662** global.
 
+**Next:** superseded by Pass 6 continuation (54).
+
+## Pass 6 continuation (54) (2026-06-30) — credit-scheduler HW arm `FUN_8002ba10`
+
+Decompiled and renamed:
+**`FUN_8002ba10` → `commit_credit_scheduler_slot_hw_arm_descriptor`**
+(176B, HIGH) via `RenamePass6Region80020000Fun8002ba10.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (176B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=259` at pass start). Highest xref_in at
+this size tier (tied at 176B with `FUN_8002d1f0` xref_in=2 and `FUN_8002309c` xref_in=1).
+
+**Mechanism:** Credit-scheduler slot commit/arm helper. Takes slot index `param_1`
+(0–255). When slot==1: IRQ-masked HW register `0xe0` write via hook at
+`PTR_DAT_8002bac4` (toggle `0x200` bit then restore). Reads per-slot pending dword from
+`DAT_8002bac8` (backwards index `slot*4`); logs event `0x22a` reason `0xbd8` when MSB
+already set. Merges descriptor-derived flags from 0xc-stride table `PTR_DAT_8002bad0`:
+bit at `+7>>3` → pending bit 0x15, bit at `+4>>6` → pending bit 0x1b; masks with
+`DAT_8002bad4`/`DAT_8002bad8` and ORs `PTR_exception_handler_save_regs_and_dispatch`.
+Complement of `FUN_8002bae0` (slot reuse/teardown) on the success path after descriptor
+programming.
+
+**Callers:** `sco_esco_packet_credit_scheduler` (`0x80000fb8`, region `0x80000000`) —
+called after packet-length descriptor table commit when credits allocated;
+`FUN_80016e68` (`0x80016e68`, region `0x80010000`) — SCO sync setup path arms slot
+`0xb` after descriptor programming.
+
+**Confidence:** HIGH — decompile confirms 0xc-stride credit-scheduler table idiom matching
+`alloc_credit_scheduler_slot_0xd`/`sco_esco_packet_credit_scheduler`; both callers
+program descriptors then invoke this helper on success vs `FUN_8002bae0` on alternate path.
+
+Region unnamed count after this pass: **258** (259 minus this rename). Live named **1663** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
