@@ -486,7 +486,7 @@ bug in the table**, documented below.
 | `0x8002a334` | 156B | `HCI_EVT_0x1fd_FUN_8002a334` | Ring-buffer drain loop: pops queued buffers (4-bit index/count fields in a fixed-size descriptor table) and forwards each via `FUN_8002ed9c`, advancing a 2-slot round-robin cursor (`%2` via `puVar3[0xcd]`). |
 | `0x8002c338` | 602B | `thing_that_uses_SHA_and_BLAKE` | Confirmed: a from-scratch SHA-256/SHACAL2-style compression-function implementation (BLAKE2 IV constants + SHACAL2 round constants table, full message-schedule + 64-round compression loop, big-endian digest output). |
 | `0x8002c59c` | 144B | `reverse_path_to_thing_that_uses_SHA_and_BLAKE__1` | Assembles a message block from 4 input buffers (two N-word values + two 16-byte values) and calls `thing_that_uses_SHA_and_BLAKE`, extracting a little-endian 32-bit digest prefix — a P-192/256-style key-derivation helper. |
-| `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `crypto_ec_validate_affine_point_on_curve_mod_prime` (point-on-curve check) and on success runs the full DHKey derivation (`FUN_8002eb94`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `FUN_8002eb94`. |
+| `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `crypto_ec_validate_affine_point_on_curve_mod_prime` (point-on-curve check) and on success runs the full DHKey derivation (`crypto_ec_dhkey_montgomery_ladder_init`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `crypto_ec_dhkey_montgomery_ladder_init`. |
 | `0x8002eae0` | 168B | `LMP__26E__FUN_8002eae0` | Per-connection cleanup/retry-countdown loop keyed by event `0x26e`; decrements per-slot countdown fields and calls `FUN_8002db50`/`crypto_ec_jacobian_point_add_mod_curve_prime` as needed, logging via `possible_logger_called_if_no_patch3` on the final iteration. |
 | `0x8002f518` | 962B | `assoc_w_tHCI_TD_FUN_8002f518` | Confirmed: large opcode-dispatch handler for the `tHCI_TD` (HCI test-data / transport-data) log-tagged subsystem — branches on a 16-bit sub-opcode (0x190–0x4ed range) into encryption-mode toggles, SCO/eSCO config validation, link-key/baseband event triggers, and a final `UNRECOVERED_JUMPTABLE` indirect dispatch Ghidra couldn't resolve statically. |
 | `0x8002fae0` | 84B | `VSC_0xfc93_FUN_8002fae0` | VSC 0xFC93 handler: on subcommand byte `0x09`, copies 6 packed fields from the VSC payload into 6 separate config globals (frequency/channel-map-style fields); returns `0x12` (invalid-params) otherwise. |
@@ -926,5 +926,37 @@ standard HCI encryption/key-refresh/link-key events; sits in the documented
 the SSP state-machine sibling at `0x80024ca4`.
 
 Region unnamed count after this pass: **301** (302 minus this rename). Live named **1620** global.
+
+**Next:** superseded by Pass 6 continuation (12).
+
+## Pass 6 continuation (12) (2026-06-30) — ECDH DHKey Montgomery ladder init `FUN_8002eb94`
+
+Decompiled and renamed:
+**`FUN_8002eb94` → `crypto_ec_dhkey_montgomery_ladder_init`**
+(462B, HIGH) via `RenamePass6Region80020000Fun8002eb94.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (462B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=301` at pass start). Callers:
+`get_DHKey_to_3rd_param?` (`0x8002c90e`) and `FUN_8002c928` (`0x8002c9ae`).
+
+**Mechanism:** SSP/ECDH DHKey derivation Montgomery-ladder initializer on the dual-slot
+316-byte (`0x13c` stride) EC work struct at `PTR_DAT_8002ed64`, indexed by toggle byte
+at `+0x278`. Copies three bignum operands (scalar/private key, peer public X, peer
+public Y) into the active slot, zeroes Jacobian accumulator limbs, then scans the
+private scalar from MSB downward. On the first set bit: adds operand arrays via
+`crypto_bignum_add_u32_arrays_with_carry`, seeds ladder state (`+0x22=1`, bit-position
+fields at `+0x132`/`+0x4d`), and calls `crypto_ec_affine_to_jacobian_mod_curve_prime`.
+Schedules continuation via `LMP__26E__FUN_8002eae0` (event `0x26e` retry path) or
+`possible_logger_called_if_no_patch3` when `param_9==1`, then toggles slot index
+`+0x278` modulo 2. Completes the DHKey path invoked from
+`get_DHKey_to_3rd_param?` after `crypto_ec_validate_affine_point_on_curve_mod_prime`
+passes.
+
+**Confidence:** HIGH — unambiguous Montgomery-ladder MSB scan + affine→Jacobian kickoff
+in the documented SSP/ECDH bignum cluster; already cited as "full DHKey derivation" in
+the 2026-06-26 low→high pass for `get_DHKey_to_3rd_param?`; decompile confirms operand
+layout, bit-scan loop, and `LMP__26E__FUN_8002eae0` scheduling sibling.
+
+Region unnamed count after this pass: **300** (301 minus this rename). Live named **1621** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

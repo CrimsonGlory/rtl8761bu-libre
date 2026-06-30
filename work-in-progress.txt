@@ -9298,8 +9298,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (11);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (12): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (301 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (12) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002eb94`→`crypto_ec_dhkey_montgomery_ladder_init`
+          (462B, HIGH). SSP/ECDH DHKey Montgomery-ladder initializer; callers
+          `get_DHKey_to_3rd_param?`/`FUN_8002c928`. 300 unnamed in-region; live named 1621.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (12);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (13): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (300 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
