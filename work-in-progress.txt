@@ -7685,9 +7685,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cd: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-84+ substantive candidate;
-          skip rank-1–83 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cd (2026-06-30): decompiled+
+          renamed rank-84 `FUN_8004e584`→`copy_param_buffer_u16_triplet_to_global_slots`
+          (26B, HIGH, SIMPLE-tier). Copies uint16 triplet at param-buffer
+          +0x40/+0x42/+0x44 into three global slot pointers; `0x8004e5xx`
+          conn-record neighborhood. 185 unnamed in-region (99 in 1-150B tier);
+          live named 1453.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ce: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-85+ substantive candidate;
+          skip rank-1–84 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

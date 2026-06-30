@@ -3829,5 +3829,36 @@ callers found.
 
 Post-rename: **186 unnamed** in-region (100 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-84+
-substantive candidate; skip rank-1–83 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52cc):** rank-84+ — completed Pass 52cd below.
+
+## Pass 52cd (2026-06-30) — rank-84 param-buffer u16 triplet global-store rename
+
+**Refreshed cold-triage (ranks 1-83 skipped as artifacts, deferred, or already done):**
+rank-84 `0x8004e584` (26B, 0 xrefs in triage) — substantive thin adapter in the
+`0x8004e5xx` conn-record / LMP-procedure neighborhood; copies three consecutive
+uint16 fields from a param buffer into three global slot pointers.
+
+**Rank-84 decompiled and renamed (HIGH):** `FUN_8004e584` →
+`copy_param_buffer_u16_triplet_to_global_slots` (26B) via
+`RenamePass52cdRegion80040000Fun8004e584.java` (`renamed=1`, live-verified).
+
+```c
+void copy_param_buffer_u16_triplet_to_global_slots(int param_buffer)
+{
+  *PTR_DAT_8004e5a0 = *(ushort *)(param_buffer + 0x40);
+  *PTR_DAT_8004e5a4 = *(ushort *)(param_buffer + 0x42);
+  *PTR_DAT_8004e5a8 = *(ushort *)(param_buffer + 0x44);
+  return;
+}
+```
+
+Copies three consecutive uint16 fields at offsets `+0x40`/`+0x42`/`+0x44` from
+caller param buffer into global slot pointers `PTR_DAT_8004e5a0`/`a4`/`a8`.
+Standard function-pointer-registration data-persistence adapter; sibling
+neighborhood of `is_any_conn_lmp_procedure_busy_by_index` (`0x8004e500`) and
+`FUN_8004e5ac` hardware sub-object teardown. No direct callers found.
+
+Post-rename: **185 unnamed** in-region (99 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-85+
+substantive candidate; skip rank-1–84 artifacts, deferred, and already-done ranks.
