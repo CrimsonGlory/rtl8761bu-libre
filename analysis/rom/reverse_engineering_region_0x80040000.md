@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tiers (206 functions) remain as low-priority future work per diminishing-returns policy. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 51, 2026-06-28, 12 HIGH renames).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 181 functions ranked, rank-1 renamed HIGH. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52, 2026-06-30).
 
 ## Overview
 
@@ -756,3 +756,45 @@ Adjacent at `0x8004ca7c` is the already-HIGH `conn_link_quality_history_reset_an
 
 **Next:** run `ColdTriageRegion80050000Pass54.java` for the deferred Pass 54 general cold-triage
 re-rank (region `0x80050000`).
+
+## Pass 52 (2026-06-30) — 1-150B tier cold-triage + rank-1 rename
+
+`ColdTriageRegion80040000Pass52.java` ranked all unnamed `FUN_*` in the 1-150B tier by xref
+count then size. Live ground truth: **267 unnamed** in-region (336 total functions); **181** in
+the 1-150B combined tier (83 in 1-50B, 98 in 51-150B) — down from Pass 7's parked count of 206
+due to opportunistic renames since then.
+
+**Top-5 staged candidates:**
+
+| Rank | Address | xrefs | Size | Tier |
+|------|---------|-------|------|------|
+| 1 | `0x8004310c` | 30 | 68B | 51-150B |
+| 2 | `0x80043158` | 27 | 64B | 51-150B |
+| 3 | `0x8004ce44` | 16 | 38B | 1-50B |
+| 4 | `0x8004e500` | 15 | 118B | 51-150B |
+| 5 | `0x8004287c` | 10 | 88B | 51-150B |
+
+**Rank-1 decompiled and renamed (HIGH):** `FUN_8004310c` →
+`or_merge_hw_channel_table_entry_and_indexed_dispatch` (68B) via
+`RenamePass52Region80040000Fun8004310c.java` (`renamed=1`, live-verified).
+
+```c
+void or_merge_hw_channel_table_entry_and_indexed_dispatch(uint index, ushort mask)
+{
+  irq = disable_interrupts();
+  table = DAT_80043150;
+  fptr_table = PTR_DAT_80043154;
+  (*fptr_table)(index & 0xffff, table[index] | mask);
+  enable_interrupts(irq);
+}
+```
+
+IRQ-disabled indexed dispatch: OR-merges `mask` onto the per-index ushort HW-channel parameter
+table entry at `DAT_80043150`, then calls through the function-pointer table at `PTR_DAT_80043154`.
+Structural OR-variant twin of the already-documented `FUN_800430ac` (mask-merge:
+`(table & ~mask3) | (mask3 & value)`) and rank-2 `FUN_80043158` (AND-mask: `value & table[index]`)
+in the SCO/eSCO HW channel parameter-commit cluster (`init_or_clear_sco_hw_channel_subsystem` in
+region `0x80030000` iterates channel slots via `FUN_800430ac`, finishes with `FUN_80043158`).
+
+**Next:** decompile+rename rank-2 `0x80043158` (AND-mask twin, 27 xrefs); then continue down the
+Pass 52 ranked list.
