@@ -7432,9 +7432,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bc: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-47+ substantive candidate;
-          skip rank-1–46 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bc (2026-06-30): decompiled+
+          renamed rank-47 `FUN_8004a4bc`→`invoke_teardown_hook_triplet_with_lmp_power_gate`
+          (46B, HIGH, 1-150B tier). Config-gated teardown fptr-hook triplet: hook-1
+          always, hook-2 gated on `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ&0x10`,
+          hook-3 with arg 0 (likely `FUN_8004d294(0)`). Hook-only slice of Pass 52ar's
+          `release_all_conn_records_and_invoke_teardown_chain` tail; indirect fptr
+          registration, no static callers. 212 unnamed remain; 126 in 1-150B tier.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bd: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-48+ substantive candidate;
+          skip rank-1–47 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

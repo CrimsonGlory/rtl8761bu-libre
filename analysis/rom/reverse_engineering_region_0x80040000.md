@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 132 functions in tier, 45 renamed HIGH (Passes 52–52ax). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ax, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 127 functions in tier, 46 renamed HIGH (Passes 52–52bc). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bc, 2026-06-30).
 
 ## Overview
 
@@ -2771,3 +2771,46 @@ Post-rename: **213 unnamed** in-region (127 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-47+
 substantive candidate; skip rank-1–46 artifacts and already-done ranks.
+
+## Pass 52bc (2026-06-30) — rank-47 teardown hook-triplet rename
+
+**Refreshed cold-triage (ranks 1-46 skipped as artifacts or already done):** rank-47
+`0x8004a4bc` (46B, 1 xref) — substantive config-gated teardown fptr-hook triplet in the
+HCI Reset / SCO/eSCO HW-reset cluster (hook-only slice of Pass 52ar's
+`release_all_conn_records_and_invoke_teardown_chain` tail; one of three callers of
+unnamed `FUN_8004d294` per region `0x80050000` Pass 54 cross-region lead).
+
+**Rank-47 decompiled and renamed (HIGH):** `FUN_8004a4bc` →
+`invoke_teardown_hook_triplet_with_lmp_power_gate` (46B) via
+`RenamePass52bcRegion80040000Fun8004a4bc.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_teardown_hook_triplet_with_lmp_power_gate(void)
+{
+  puVar1 = (undefined4 *)PTR_PTR_8004a4ec;
+  (*(code *)*puVar1)();
+  pcVar2 = PTR_config_base_8004a4f0;
+  if ((pcVar2->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 0x10) != 0) {
+    puVar1 = (undefined4 *)PTR_DAT_8004a4f4;
+    (*(code *)*puVar1)();
+  }
+  puVar1 = (undefined4 *)PTR_DAT_8004a4f8;
+  (*(code *)*puVar1)(0);
+}
+```
+
+Invokes three registered teardown fptr hooks in sequence: hook-1 always (via
+`PTR_PTR_8004a4ec`); hook-2 gated on config bit `0x10` of
+`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` (via `PTR_DAT_8004a4f4`); hook-3 always
+with literal arg `0` (via `PTR_DAT_8004a4f8`, likely `FUN_8004d294(0)` SCO/eSCO HW
+subsystem init). Structurally identical to the tail of
+`release_all_conn_records_and_invoke_teardown_chain` (`0x8004d220`, Pass 52ar) minus
+the conn-record release preamble — intended for indirect fptr-table registration when
+records are already released elsewhere. No static callers (consistent with
+fptr-registration pattern); `find_callers` on downstream `FUN_8004d294` lists this
+address as a caller (region `0x80050000` Pass 54 lead).
+
+Post-rename: **212 unnamed** in-region (126 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-48+
+substantive candidate; skip rank-1–47 artifacts and already-done ranks.
