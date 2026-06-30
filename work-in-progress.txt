@@ -6620,8 +6620,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ga: cold-triage next rank-1
-          HANDLER-tier candidate `FUN_80074518` per `ListHandler80070000.java` (2 remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ga (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80074518`→`match_feature_page_slot_by_hw_crypto_prefix_update_tlv`
+          (170B, HIGH, HANDLER-tier). Feature-page pool bitmask walk: per active slot runs
+          `hw_crypto_compute_8word_in_8word_out` on 16-byte key vs payload bytes +5..+7,
+          3-byte prefix memcmp at param+2; on match calls
+          `update_feature_page_slot_record_from_tlv_payload`. Crypto-prefix lookup sibling
+          of Pass 12fj BDADDR/page matcher and Pass 12bm TLV-tag matcher. Caller
+          `FUN_800492d8`. HANDLER-tier unnamed 2→1 remain; live named 1335→1336.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ga;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gb: cold-triage next rank-1
+          HANDLER-tier candidate `FUN_800742d0` per `ListHandler80070000.java` (224B, 1 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

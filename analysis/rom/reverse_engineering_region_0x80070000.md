@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fz COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**2** HANDLER-tier unnamed remain in-region; live named **1335** global). Latest: `emit_patch_absent_a5_diag_packet_via_logger1` (Pass 12fz), `apply_vsc_fca1_status_bitmask_arm_sticky_flags_and_log` (Pass 12fy). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_80074518`, 2 remain). See Pass 12fz section below.
+**Status**: Pass 12ga COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**1** HANDLER-tier unnamed remain in-region; live named **1336** global). Latest: `match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (Pass 12ga), `emit_patch_absent_a5_diag_packet_via_logger1` (Pass 12fz). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800742d0`, 224B, 1 remain). See Pass 12ga section below.
 
 ## Overview
 
@@ -2416,6 +2416,30 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12ga (2026-06-30) — hw-crypto feature-page slot matcher `FUN_80074518`
+
+Decompiled and renamed:
+**`FUN_80074518` → `match_feature_page_slot_by_hw_crypto_prefix_update_tlv`**
+(170B, HIGH, HANDLER-tier) via `RenamePass12gaFun80074518.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks active-slot bitmask at `PTR_DAT_800745d0 + 0x27c`. For each set bit in
+slots `0..0x13` (20 entries, `0x24` stride at `PTR_DAT_800745d4`), copies 16-byte slot key
+material, runs `hw_crypto_compute_8word_in_8word_out` with bytes from payload `param_1+5..+7`,
+and compares the 3-byte prefix at `param_1+2` against the crypto output via `memcmp`. On first
+match calls `update_feature_page_slot_record_from_tlv_payload(slot_index, param_1, param_2)`
+(Pass 12bn), returns 1; else 0. Writes matched slot index to `*param_3`. Crypto-prefix lookup
+sibling of Pass 12fj `match_active_resource_pool_slot_by_bdaddr_page_update_tlv` (BDADDR/page
+match) and Pass 12bm `match_feature_page_tlv_tag_for_bitmask_bits_and_update_slot` (TLV tag
+match) in the `0x800745xx` feature-page pool cluster. Caller `FUN_800492d8` (region `0x80040000`).
+
+**Confidence:** HIGH — unambiguous bitmask walk + named hw-crypto callee + 3-byte prefix compare
++ callee chain to Pass 12bn updater; same 20-slot/`0x24`-stride pool layout as Pass 12fj.
+
+Live named **1336** (global; in-region unnamed **16**; HANDLER-tier unnamed **1**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800742d0` per
+`ListHandler80070000.java` (224B, xref_in=0).
 
 ## Pass 12fz (2026-06-30) — patch-absent A5 diag packet emitter `FUN_8007522c`
 
