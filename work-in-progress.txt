@@ -8236,9 +8236,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ei: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ei (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80041028`→`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu`
+          (336B, HIGH). IRQ-masked single-slot LMP connection-setup BB programmer:
+          AND-masks channel table, stores role byte, `FUN_800607dc` state update,
+          unpacks PDU 6-byte field, programs BB regs + access-code sync word via
+          `compute_access_code_sync_word_from_bdaddr`, `FUN_80013c64` finalize.
+          Connection-setup cluster sibling of Pass 52di dual-slot accept. 0 direct
+          callers (indirect dispatch). 130 unnamed in-region; live named 1508.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ei;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ej: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x80041028`, 336B).
+          (`0x8004704c`, 296B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -270,7 +270,7 @@ first as instructed.
 | `0x80043c7c` | 372B | `compute_automatic_flush_timeout_ticks_by_connection_handle` — ACL automatic-flush-timeout tick calculator; see Pass 52dk | **HIGH** |
 | `0x80041a94` | 352B | `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` — HCI Periodic Inquiry Mode configure handler; programs LAP/min/max delays, access-code sync word, baseband regs, LMP 0x25B/0x268; see Pass 52eg | HIGH |
 | `0x800435a8` | 338B | `reassign_inquiry_lap_slot_refcount_pending_and_program_channel` — IRQ-off LAP slot transition; decrements old-slot `_x142_LAP[slot+0x45]` refcount, releases pending bitmask, optional HW teardown; increments new-slot refcount, arms pending bitmask per `bdaddr_random_`, programs HW channel table; see Pass 52eh | HIGH |
-| `0x80041028` | 336B | Field manipulator, lower conn-type cluster. | MEDIUM |
+| `0x80041028` | 336B | `accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` — IRQ-masked LMP connection-setup BB programmer; unpacks PDU 6-byte field, programs BB regs + access-code sync word; see Pass 52ei | HIGH |
 
 **Net effect (lower half)**: no renames this pass — all 11 stay at MEDIUM,
 documented above for a future targeted pass (likely needs working
@@ -5378,4 +5378,45 @@ Post-rename: **131 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1507**.
 
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x80041028`, 336B).
+unnamed >150B candidate (`0x8004704c`, 296B).
+
+## Pass 52ei (2026-06-30) — >150B rank-1 LMP connection-setup BB programmer rename
+
+**Cold-triage (refreshed):** 37 unnamed >150B remain. rank-1 `0x80041028`
+(336B); rank-2 `0x8004704c` (296B); rank-3 `0x80043a60` (358B, 15 xrefs);
+rank-4 `0x8004c4a8` (894B); rank-5 `0x8004704c` (296B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80041028` →
+`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` (336B, 0 xrefs)
+via `RenamePass52eiRegion80040000Fun80041028.java` (`renamed=1`,
+live-verified). Upgraded from MEDIUM (Pass 3, 2026-06-23).
+
+IRQ-masked single-slot LMP connection-setup baseband programmer:
+
+- **Guard:** logs via `possible_logging_function__var_args` when
+  `PTR_DAT_80041178` flag zero; advances flag to `0x02` when non-zero.
+- **IRQ-off setup:** AND-masks HW channel table entry (`0xfeff`) via
+  `and_mask_hw_channel_table_entry_indexed_dispatch_noirq`; calls
+  `FUN_800429ac` with `0x100`; stores role/conn-type byte (`param_2`) at
+  context `+0xf`; calls `FUN_800607dc` for connection-state update.
+- **BB reg programming:** indirect fptr `PTR_DAT_80041184` writes
+  bit-packed `(slot << 0xb | role << 5)` then opcode `0`; indexes per-slot
+  tables at `PTR_DAT_80041188`…`80041198` by conn index `puVar3[2]`.
+- **PDU unpack:** `unpack_lmp_pdu_packed_6byte_field_from_offset4` on
+  `param_1+4`; feeds unpacked bytes through fptr BB writes; derives
+  access-code sync word via `compute_access_code_sync_word_from_bdaddr`;
+  stores sync-word halves to `PTR_DAT_8004119c`.
+- **Finalize:** `FUN_80013c64` with sub-opcode byte; restores IRQs; calls
+  `wraps_uninteresting_if_0x80100000…` wrapper on PDU buffer.
+
+No direct callers found (consistent with indirect conn-event-ring dispatch).
+Connection-setup cluster sibling of Pass 52di
+`accept_dual_slot_lmp_role_connection_and_program_baseband_regs` and region
+`0x80070000` `LMP_accept_or_mirror_connection_handler` (both call the same
+`unpack_lmp_pdu_packed_6byte_field_from_offset4` helper).
+
+Post-rename: **130 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1508**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (`0x8004704c`, 296B).
