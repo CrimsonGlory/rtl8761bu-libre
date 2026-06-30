@@ -1442,3 +1442,40 @@ Post-rename: **246 unnamed** in-region (160 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-13+
 substantive candidate; skip rank-1–12 artifacts.
+
+## Pass 52v (2026-06-30) — rank-16 conn-slot timing-window sweep rename
+
+**Refreshed cold-triage (rank-1–12 skipped as artifacts or already done; ranks
+13–15 are 1B artifacts):** rank-16 `0x8004012c` (144B, 2 xrefs) — substantive
+linked conn-slot timing-window sweep/reschedule walker.
+
+**Rank-16 decompiled and renamed (HIGH):** `FUN_8004012c` →
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type` (144B) via
+`RenamePass52vRegion80040000Fun8004012c.java` (`renamed=1`, live-verified).
+
+```c
+void sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type(
+     char type_byte, uint conn_index)
+{
+  // Walk singly-linked list at PTR_DAT_800401c0 (next at +0x408)
+  // Match subrecord at node+0x40c: +0xd == big_ol_struct[conn_index].bos_connection__array_index
+  //                                    +0xf == type_byte
+  // Gate on FUN_80040060 (LMP-25C scheduling-readiness check)
+  // If +0x10 == 0 and (+6 + +4) <= +10: set +0xe pending, call FUN_8001840c; restart on success
+  // If +0x10 == 1: clear +0x11 and +0x10
+}
+```
+
+Walks the per-connection linked slot list, matching entries by connection-array
+index and type byte, gating on the LMP-25C scheduling-readiness probe
+(`FUN_80040060`). When the accumulated timing window (`ushort+6` + `ushort+4`)
+has elapsed relative to the deadline at `ushort+10`, sets a pending flag at
+`+0xe` and invokes `FUN_8001840c` to reschedule; on success restarts from list
+head. Alternate path clears state bytes `+0x11`/`+0x10` when mode byte `+0x10`
+is set. Sibling cluster to `dispatch_slot_timing_reprogram_if_pending_and_ready`
+and the LMP-25C busy-wait gate family.
+
+Post-rename: **245 unnamed** in-region (159 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-17+
+substantive candidate; skip rank-1–16 artifacts.
