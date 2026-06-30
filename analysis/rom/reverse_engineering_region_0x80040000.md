@@ -285,7 +285,7 @@ each other on content alone).
 | `0x8004cb48` | 722B | `program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f` — eSCO slot programmer for LMP PDU type `0x22`; `esco_sco_param_negotiate_and_stage` + 0x1ac-stride field writes; LMP `0x26f` emit + VSC fc95 trigger. See Pass 52dq | HIGH |
 | `0x80047c50` | 700B | `parse_validate_and_commit_esco_sco_config_pdu_to_conn_record` — 28-byte eSCO/SCO config PDU validator+committer; LMP VSC 0x268 pool slot `0x8010bc64`; `alloc_link_record_and_register_by_index` + `dispatch_hw_hook_for_main_and_substates`. See Pass 52dr | HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
-| `0x80046900` | 682B | Validates packet-type/role bitmask fields; plausible HCI command parameter validator for a multi-entry SCO/eSCO table, not individually confirmed beyond shape. | MEDIUM-HIGH |
+| `0x80046900` | 682B | `validate_and_stage_sco_packet_type_table_from_hci_params` — multi-entry SCO packet-type table HCI param validator; 3-bit packet-type mask; `lazy_alloc_tag9_singleton_and_encode_lowbit_index` + `align_sco_slots_and_derive_retx_buffer_dims` per entry. See Pass 52ds | HIGH |
 | `0x800480b0` | 682B | Validates connection params via `get_0x1ac_struct_ptr_by_index`, checks a bitmask with sub-cases 0/1/2, conditionally calls `FUN_8005fe90`, terminates exclusively via `send_evt_HCI_Command_Status` on every path — shape consistent with an HCI command handler toggling a per-connection link-policy/mode flag (e.g. Sniff/Hold/Park-style), but no definitive single name confirmed. | MEDIUM-HIGH |
 | `0x8004b468` | 624B | No HCI event/status sender at all — pure internal queue/scheduler logic over `0x1ac`-strided struct array entries via `FUN_8004b344`/`FUN_8004b170`/`FUN_8004b0f8`/`FUN_8004b3c0`; disables/enables interrupts around a critical section; manages a linked list with byte-budget accounting. Likely the TX/scheduling fragmentation engine for per-connection ACL/SCO data queues — internal infra, not an HCI command handler. | MEDIUM |
 | `0x80045964` | 560B | Validates page-scan/inquiry-scan-style window/interval parameter pairs (bounded `0x1f..0x4000`), bit-packs results into a `the_0x300`-sized struct's offset `0x28-0x2f` region, terminates via `hci_event_sender(0xe,...)` (Command Complete). Strong shape match to HCI_Write_Page_Scan_Activity / HCI_Write_Inquiry_Scan_Activity, but two near-identical HCI commands share this exact bounds pattern in the spec — can't be distinguished to HIGH without a confirming xref. | MEDIUM-HIGH |
@@ -2484,8 +2484,9 @@ of `PTR_DAT_8004a2fc` / `align_sco_packet_slots_to_max_interval_mod6_or_mod3`) w
 `(max_interval, packet_slots)` from the 0x14-byte per-entry struct at offsets `+0x22`/
 `+0x24`, stores aligned slot count at `+0x26`, then fills derived retransmission-buffer
 dimensions: `+0x28` default `(slots-1)*2`, `+0x2a` cap copy, `+0x2c` min of the two,
-`+0x32` slots/2, `+0x34` min(slots-1, 8). Sole caller `FUN_80046900` (682B HCI sync-
-connection packet-type table validator): called once per enabled packet-type entry after
+`+0x32` slots/2, `+0x34` min(slots-1, 8). Sole caller
+`validate_and_stage_sco_packet_type_table_from_hci_params` (`0x80046900`, Pass 52ds):
+called once per enabled packet-type entry after
 copying interval/latency fields into the 0x14-stride allocation block.
 
 Post-rename: **220 unnamed** in-region (134 in 1-150B tier).
@@ -4851,5 +4852,34 @@ with teardown via `FUN_8004fcec` on alloc failure. Returns `0x00` OK, `0x07` all
 Post-rename: **147 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1491**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-32
-`0x80046900` (682B, xrefs:0).
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-33
+`0x800480b0` (682B, xrefs:0).
+
+## Pass 52ds (2026-06-30) — >150B rank-32 HCI SCO packet-type table validator+stager rename
+
+**>150B rank-32 decompiled+renamed (HIGH):** `FUN_80046900` →
+`validate_and_stage_sco_packet_type_table_from_hci_params` (682B, 0 xrefs) via
+`RenamePass52dsRegion80040000Fun80046900.java` (`renamed=1`, live-verified).
+
+HCI synchronous-connection parameter validator for a multi-entry SCO packet-type
+table (sibling cluster to `HCI_Setup_Synchronous_Connection_handler` /
+`HCI_Accept_Synchronous_Connection_Request_handler`). Parses command bytes at
+`param+3..+5` (role/mode nibbles) and `param+0xc` (3-bit packet-type enable mask,
+upper bits must be zero); validates total length `param+2 == enabled_count*16+10`.
+Allocates a tag-9 singleton via `lazy_alloc_tag9_singleton_and_encode_lowbit_index`
+for the bitmask; builds per-type index map for enabled packet types 0–2. For each
+enabled 16-byte entry block: validates SCO/eSCO interval/latency/retransmission-window
+bounds (same family as Setup/Accept handlers — max interval 6..0xc80, retrans latency
+≤499, retrans window 10..0xc80, buffer-dimension cross-checks); writes validated
+fields into the global staging block at `Ram80046bac` (`0x14` stride per type,
+offsets `+0x22..+0x34`); calls `align_sco_slots_and_derive_retx_buffer_dims` per
+entry. Copies all enabled entries to the first slot's staging area, updates global
+timing fields on the tag-9 record (`+0xc/+0xd/+0xe`), merges mode nibbles into
+`Ram80046bac+5`, and copies 6 bytes to `Ram80046bb4`. Returns `0x00` OK,
+`0x12` invalid parameter, `0x43` alloc failure. 0 xrefs (indirect HCI dispatch).
+
+Post-rename: **146 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1492**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-33
+`0x800480b0` (682B, xrefs:0).

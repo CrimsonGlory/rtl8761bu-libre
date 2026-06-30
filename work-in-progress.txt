@@ -8073,8 +8073,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ds: continue >150B cold-triage
-          — decompile+rename refreshed rank-32 `0x80046900` (682B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ds (2026-06-30): decompiled+
+          renamed rank-32 `FUN_80046900`→`validate_and_stage_sco_packet_type_table_from_hci_params`
+          (682B, HIGH). Multi-entry SCO packet-type table HCI param validator; 3-bit
+          packet-type mask; `lazy_alloc_tag9_singleton_and_encode_lowbit_index` +
+          `align_sco_slots_and_derive_retx_buffer_dims` per entry. 0 xrefs (indirect
+          HCI dispatch). 146 unnamed in-region; live named 1492.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ds;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dt: continue >150B cold-triage
+          — decompile+rename refreshed rank-33 `0x800480b0` (682B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
