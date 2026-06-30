@@ -4076,4 +4076,31 @@ can short-circuit. Called from the shared connect-procedure dispatcher
 Post-rename: **179 unnamed** in-region (95 in 1-150B tier unchanged); **84** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — completed Pass 52ck below.
+**Next:** continue >150B cold-triage — completed Pass 52cl below.
+
+## Pass 52cl (2026-06-30) — >150B rank-4 verify + rank-5 conn-table gate sweep rename
+
+**>150B rank-4 already resolved (Pass 51, live-verified):** `0x8004bde8` →
+`esco_sco_lmp_pdu_validate_negotiate_and_dispatch` (354B, 6 xrefs). Cold-triage
+rank-4 was formally closed this pass — function was opportunistically renamed in
+Pass 51 (2026-06-28); live decompile confirms name persisted in Ghidra.
+
+**>150B rank-5 decompiled and renamed (HIGH):** `FUN_800431a0` →
+`sweep_conn_table_clear_esco_gate_bytes_and_apply_codec_config` (184B, 5 xrefs)
+via `RenamePass52clRegion80040000Fun800431a0.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 4/5, 2026-06-23). Sweeps all 10
+`big_ol_struct` connection slots: for valid entries reads `byte_0xCC` (role-switch
+hook index) and `bos_connection__array_index`, remaps index `+8` into eSCO range
+when gate-table bit1 set and bit0 clear (`PTR_DAT_8004325c`), IRQ-disables and
+clears per-index gate bytes at `PTR_DAT_80043260`/`PTR_DAT_80043264`, then when
+`field200_0x206==0`, secondary gate byte clear, role-switch hook bit1 armed, and
+status-array index not 1/5 — calls `FUN_80014dac` (codec-config apply). Post-
+apply housekeeping callee of `apply_codec_type_and_role_switch_hook_dispatch`
+(region `0x80000000`); structural sibling of `FUN_8004326c` (Pass 5 per-slot
+packet-type sweep).
+
+Post-rename: **177 unnamed** in-region (95 in 1-150B tier unchanged); **82** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-6 `0x8004ef08`
+(526B, 4 xrefs).
