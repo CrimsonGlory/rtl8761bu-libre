@@ -1418,4 +1418,37 @@ callers are Kovah-named LMP auth handlers; consistent with `encryption_engine.md
 
 Region unnamed count after this pass: **285** (286 minus this rename). Live named **1636** global.
 
+**Next:** superseded by Pass 6 continuation (28).
+
+## Pass 6 continuation (28) (2026-06-30) — encryption-mode-req NOT ACCEPTED recovery `FUN_800280ac`
+
+Decompiled and renamed:
+**`FUN_800280ac` → `handle_lmp_encryption_mode_req_not_accepted`**
+(272B, HIGH) via `RenamePass6Region80020000Fun800280ac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (272B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=285` at pass start).
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcode **0x0F**
+(Encryption Mode Req). Sole caller `LMP_NOT_ACCEPTED_0x04` when rejected-opcode
+byte at `param+5` is `0x0F`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. Gated by
+`ret_bool_based_on_crypto_struct_0x50` and optional `FUN_8002403c` capability
+check unless global bypass flag `PTR_DAT_800281c0[2]&0x80` is set. Dispatches on
+crypto sub-state byte at `+1`:
+- `0x48`: `finalize_encryption_procedure_and_notify_hci`
+- `0x40`: `finalize_stop_encryption_procedure_and_notify_hci`
+- `0x44`: set status `0x3f`, retry via `LMP_STOP_ENCRYPTION_REQ_0x12`
+- `0x4c`: set status `0x47`, retry via `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10`
+Always calls `FUN_80025634` on retry paths.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site, rejected-opcode `0x0F` branch).
+
+**Confidence:** HIGH — decompile confirms encryption-procedure finalizer/retry
+dispatch; sole caller is documented `LMP_NOT_ACCEPTED_0x04` handler; siblings
+`finalize_encryption_procedure_and_notify_hci` and
+`finalize_stop_encryption_procedure_and_notify_hci` already named in this region.
+
+Region unnamed count after this pass: **284** (285 minus this rename). Live named **1637** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
