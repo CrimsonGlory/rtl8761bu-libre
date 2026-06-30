@@ -8576,10 +8576,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fr: continue refreshed >150B
-          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (1 remain: 0x8004923c; run ColdTriageRegion80040000Pass52eu.java
-          for fresh rank).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fr (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004923c`→`hci_conn_pending_ee_flag_param6_commit_or_reject_send_cmd_complete`
+          (156B, HIGH). Conn pending-flag param6 commit HCI handler in SCO/eSCO
+          cluster; `+0xee` gate, substate `+0xef==4` → param6 commit else
+          procedure reject; 6-byte Command Complete. Last >150B unnamed (>150B
+          tier exhausted). 0 unnamed >150B; 95 unnamed in-region; live named 1543.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fr;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fs: resume 1-150B cold-triage
+          — decompile+rename next rank-1 unnamed 1-150B candidate (run
+          ColdTriageRegion80040000Pass52.java or successor for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

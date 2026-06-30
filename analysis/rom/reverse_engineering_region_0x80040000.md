@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52eb, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 95 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fr, 2026-06-30).
 
 ## Overview
 
@@ -6481,6 +6481,37 @@ and parallel to `hci_hw_reg_pool_flush_gated_handler_send_cmd_complete` at
 Post-rename: **96 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1542**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (1 remains: `0x8004923c`; run
-`ColdTriageRegion80040000Pass52eu.java` for fresh rank list).
+**Next:** superseded by Pass 52fr below.
+
+## Pass 52fr (2026-06-30) — >150B rank-1 conn pending-flag param6 commit HCI handler rename
+
+**Cold-triage (refreshed):** 1 unnamed >150B remain. rank-1 `0x8004923c`
+(156B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004923c` →
+`hci_conn_pending_ee_flag_param6_commit_or_reject_send_cmd_complete`
+(156B, 0 xrefs) via
+`RenamePass52frRegion80040000Fun8004923c.java` (`renamed=1`, live-verified).
+
+156B HCI command handler in the `0x800491xx`/`0x800492xx` SCO/eSCO cluster
+(sibling of `hci_validate_and_commit_esco_timing_pair_hook1_or_pending_masks`
+at `0x80049158` and `hci_hw_crypto_dual_block_digest_handler_send_cmd_complete`
+at `0x800492d8`):
+
+- **Conn lookup:** `query_config_struct_0x1ac_by_index(handle@+3)` — handle
+  `>=0x1000` → status `0x12`; lookup failure → `2`.
+- **Pending gate:** requires byte at `+0xee == 1` (else status unchanged from
+  lookup).
+- **Commit path:** when substate `+0xef == 4`, calls
+  `set_feature_mask_gated_conn_param_0x91_with_hw_hook_notify(handle, 6, 0)`;
+  else `report_procedure_outcome_and_update_param_type_bitmask(rec, 3, 6, 2)`.
+- **Cleanup:** clears `+0xee` pending byte; success → status `0`.
+- **Terminus:** 6-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **0 unnamed >150B** (tier exhausted); **95 unnamed** in-region
+(95 in 1-150B tier unchanged); live named **1543**.
+
+**Next:** resume 1-150B cold-triage — decompile+rename next rank-1 unnamed
+1-150B candidate (run `ColdTriageRegion80040000Pass52.java` or successor for
+fresh rank list).
