@@ -8666,9 +8666,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gb;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gc: continue 1-150B cold-triage
-          — decompile+rename rank-10 `0x80042d34` (60B) or next substantive candidate
-          (skip rank-1–7 artifacts).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gc (2026-06-30): decompiled+
+          renamed rank-10 `FUN_80042d34`→`count_consecutive_inquiry_lap_pending_slot_flags`
+          (60B, HIGH, SIMPLE-tier). Counts consecutive inquiry/LAP pending flags
+          (bit1 at +4..+7) in `PTR_DAT_80042d70`; returns 0–4. Callers
+          `FUN_8003c94c` + `FUN_800161e4` use count as HW-channel table index.
+          Inquiry/LAP cluster sibling of Pass 52n/52o. 2 xrefs.
+          84 unnamed in-region; live named 1554.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gc;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gd: continue 1-150B cold-triage
+          — decompile+rename next rank-11+ substantive candidate (skip rank-1–7
+          artifacts).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

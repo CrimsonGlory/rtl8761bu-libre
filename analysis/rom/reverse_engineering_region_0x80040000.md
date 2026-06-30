@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 86 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ga, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 84 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52gc, 2026-06-30).
 
 ## Overview
 
@@ -6914,5 +6914,42 @@ of Pass 52g's OR/AND/mask trio and Pass 52ga's status-byte commit path
 
 Post-rename: **85 unnamed** in-region (85 in 1-150B tier); live named **1553**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename rank-10
-`0x80042d34` (60B) or next substantive candidate; skip rank-1–7 artifacts.
+**Next:** superseded by Pass 52gc below.
+
+## Pass 52gc (2026-06-30) — rank-10 inquiry/LAP pending-slot counter rename
+
+**1-150B rank-10 decompiled+renamed (HIGH):** `FUN_80042d34` →
+`count_consecutive_inquiry_lap_pending_slot_flags`
+(60B, 2 xrefs) via
+`RenamePass52gcRegion80040000Fun80042d34.java` (`renamed=1`, live-verified).
+
+```c
+int count_consecutive_inquiry_lap_pending_slot_flags(void)
+{
+  ctx = PTR_DAT_80042d70;
+  count = 0;
+  if ((ctx[4] >> 1 & 1) != 0) {
+    count = 1;
+    if ((ctx[5] >> 1 & 1) != 0) {
+      count = 2;
+      if ((ctx[6] >> 1 & 1) != 0)
+        count = 4 - (uint)((ctx[7] >> 1 & 1) == 0);
+    }
+  }
+  return count;
+}
+```
+
+Counts consecutive inquiry/LAP slot pending flags (bit1 at `+4`..`+7`) in
+global context `PTR_DAT_80042d70`; returns 0–4. Same bit1=pending semantics
+as Pass 52n's `release_inquiry_lap_slot_pending_bitmask` (`PTR_DAT_80042d2c`).
+Callers use the count as an index into ushort lookup tables for HW-channel
+programming: `FUN_8003c94c` (remote-name-request feature apply_4 path,
+region `0x80030000`) and `FUN_800161e4` (CPB/page-receive setup,
+region `0x80010000`). Inquiry/LAP slot-state cluster sibling of Pass 52n/52o
+(`0x80042cxx`–`0x80042dxx`).
+
+Post-rename: **84 unnamed** in-region (84 in 1-150B tier); live named **1554**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename next rank-11+
+substantive candidate; skip rank-1–7 artifacts.
