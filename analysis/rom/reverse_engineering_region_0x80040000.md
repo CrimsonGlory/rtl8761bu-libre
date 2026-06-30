@@ -1786,7 +1786,7 @@ void free_list_lifo_push_0xfc_record_pool(undefined4 *node)
 
 Trivial singly-linked-list LIFO push onto the 0xfc-record-pool free-list head at
 `PTR_PTR_8004e21c` — same idiom as `free_list_lifo_push` (`0x8004e808`, head at
-`PTR_PTR_8004e818`) but without a NULL guard. Consumed by `FUN_8004e1c4` (64B),
+`PTR_PTR_8004e818`) but without a NULL guard. Consumed by `link_0xfc_record_pool_into_free_list_by_config_count` (`0x8004e1c4`, 64B),
 which loops over config-counted `0xfc`-byte records and prepends each via this
 helper — structural parallel to `link_0x54_record_pool_into_free_list_by_config_count`
 (`0x8004e220`) and region-`0x80050000`'s `alloc_and_link_0xfc_record_pool`.
@@ -3601,5 +3601,42 @@ response. Sits immediately before the conn-struct `+0x4` copy handler at
 
 Post-rename: **192 unnamed** in-region (106 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-78+
-substantive candidate; skip rank-1–77 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bw):** rank-78+ — completed Pass 52bx below.
+
+## Pass 52bx (2026-06-30) — rank-78 0xfc record-pool free-list linker rename
+
+**Refreshed cold-triage (ranks 1-77 skipped as artifacts, deferred, or already done):**
+rank-78 `0x8004e1c4` (64B, 0 xrefs in triage) — substantive 0xfc-record-pool
+free-list linker in the conn-record allocator cluster (sibling of
+`link_0x54_record_pool_into_free_list_by_config_count` and callee consumer of
+`free_list_lifo_push_0xfc_record_pool`).
+
+**Rank-78 decompiled and renamed (HIGH):** `FUN_8004e1c4` →
+`link_0xfc_record_pool_into_free_list_by_config_count` (64B) via
+`RenamePass52bxRegion80040000Fun8004e1c4.java` (`renamed=1`, live-verified).
+
+```c
+void link_0xfc_record_pool_into_free_list_by_config_count(void)
+{
+  PTR_PTR_80124e7c = 0;
+  count = (config_byte_0x251 & 3) << 3 | (config_byte_0x250 >> 5);
+  for (i = 0; i < count; i++) {
+    record = pool_base + i * 0xfc;   // PTR_PTR_8004e208
+    *record = *free_list_head;       // chain next pointer
+    free_list_head = record;         // via free_list_lifo_push_0xfc_record_pool
+  }
+}
+```
+
+Links pre-allocated `0xfc`-byte records into the singly-linked free list headed
+at `PTR_PTR_8004e21c`; record count derived from config bytes
+`DAT_80120251 & 3` and `DAT_80120250 >> 5` (same config-field family as
+`link_0x54_record_pool_into_free_list_by_config_count` and region-`0x80050000`'s
+`alloc_and_link_0xfc_record_pool`). Clears `PTR_PTR_80124e7c` before wiring.
+Each iteration prepends one record via `free_list_lifo_push_0xfc_record_pool`
+(Pass 52ad). No direct callers found (function-pointer registration).
+
+Post-rename: **191 unnamed** in-region (105 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-79+
+substantive candidate; skip rank-1–78 artifacts, deferred, and already-done ranks.
