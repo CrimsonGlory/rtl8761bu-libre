@@ -8321,9 +8321,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52er: continue refreshed >150B
-          cold-triage — decompile+rename next rank-3 unnamed >150B candidate
-          (`0x80044490`, 202B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52er (2026-06-30): decompiled+
+          renamed rank-3 `FUN_80044490`→`pack_lmp_power_clk_adj_fallback_opcode_response_params`
+          (202B, HIGH). Feature-gated HCI response param packer for opcodes
+          0xc6c/0xc6d/0x2022/0x2024/0x202f when config bit2 set; sole caller
+          `OGF1_3_extended_OCF_0x51_0x5b_fallback_handler`. 121 unnamed in-region;
+          live named 1517.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52er;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52es: continue refreshed >150B
+          cold-triage — decompile+rename next rank-4 unnamed >150B candidate
+          (`0x8004b1d0`, 200B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

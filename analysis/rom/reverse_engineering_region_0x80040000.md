@@ -5654,5 +5654,30 @@ sibling of `dispatch_slot_timing_reprogram_if_feature_enabled_and_ready` cluster
 Post-rename: **122 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1516**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
-unnamed >150B candidate (`0x80044490`, 202B).
+**Next:** superseded by Pass 52er below.
+
+## Pass 52er (2026-06-30) — >150B rank-3 LMP power/CLK_ADJ opcode param packer rename
+
+**>150B rank-3 decompiled+renamed (HIGH):** `FUN_80044490` →
+`pack_lmp_power_clk_adj_fallback_opcode_response_params` (202B) via
+`RenamePass52erRegion80040000Fun80044490.java` (`renamed=1`, live-verified).
+
+Feature-gated opcode-specific HCI response param packer reached from
+`OGF1_3_extended_OCF_0x51_0x5b_fallback_handler` when
+`config->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit2 is set (third handler
+in the 4-function chain after `FUN_8001fb70`/`FUN_8001c9d4`). Returns `-1` when
+opcode not handled; otherwise returns `payload_len - 4` for caller to add base
+header offset. Opcode cases:
+- `0x2022`: writes 2-byte `param_3` to output `+4/+5` (returns 2)
+- `0xc6c`: reads feature-page byte+8 bits 1–2 into `+4/+5` (returns 2)
+- `0xc6d`: no payload write (returns 0) — RX-side complement of neighbor
+  `LMP_PDU_0xc6d_feature_page_bit_toggle` (`0x80044430`)
+- `0x2024`: copies 4 bytes from BOS `+0x1f0..+0x1f3` (returns 4)
+- `0x202f`: packs dual CLK_ADJ timing pairs from BOS `+0x1d0` bit0x40 gate
+  (`0x1b/0x148` vs `0xfb/0x4290`) into 8 output bytes (returns 8)
+
+Post-rename: **121 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1517**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
+unnamed >150B candidate (`0x8004b1d0`, 200B).
