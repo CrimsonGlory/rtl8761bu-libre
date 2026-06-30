@@ -6672,5 +6672,43 @@ recycle path). Sibling of `irq_masked_append_byte_to_conn_list_a_tail`.
 
 Post-rename: **91 unnamed** in-region (91 in 1-150B tier); live named **1547**.
 
+**Next:** superseded by Pass 52fw below.
+
+## Pass 52fw (2026-06-30) — 1-150B rank-5 LMP 0x26f conn-slot word logger rename
+
+**Cold-triage (refreshed):** 91 unnamed 1-150B remain. rank-1 `0x8004a2e4`
+(10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B — artifact);
+rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x8004701c`
+(4 xrefs, 1B — artifact); rank-5 `0x8004ad0c` (3 xrefs, 84B); rank-6
+`0x8004fcec` (3 xrefs, 60B); rank-7 `0x80044588` (3 xrefs, 40B).
+
+**Rank-1–4 triaged (non-function artifacts):** unchanged from Pass 52fv.
+
+**1-150B rank-5 decompiled+renamed (HIGH):** `FUN_8004ad0c` →
+`pack_and_log_conn_slot_word_0x26f`
+(84B, 3 xrefs) via
+`RenamePass52fwRegion80040000Fun8004ad0c.java` (`renamed=1`, live-verified).
+
+```c
+void pack_and_log_conn_slot_word_0x26f(ushort slot_index, uint subcode)
+{
+  word = ((slot_index & 0xf) << 5) | 9;
+  word &= DAT_8004ad60;
+  word |= (subcode & 0xff) << 0xb;
+  possible_logger_called_if_no_patch3(*PTR_DAT_8004ad64, word, 0, 0x26f);
+}
+```
+
+Thin LMP `0x26f` status-word pack+log wrapper: packs conn-slot index low
+nibble into bits 5–8 with base status nibble `9`, merges `subcode` low byte
+into bits 11+, ANDs with `DAT_8004ad60` mask, emits via patch-hook fptr at
+`PTR_DAT_8004ad64`. Sibling of `log_conn_slot_status_word_0x26f_after_connection_init`
+(`0x8004ad68`, Pass 52en) and region-`0x80050000`
+`pack_and_log_param_pair_0x26f`. Callers include
+`conn_field_swap_and_notify_dispatcher_3_4` (field-swap changed path, subcode
+`0`) and `finalize_esco_link_mode_and_dispatch_code_0xb` (pending-bit-3 path).
+
+Post-rename: **90 unnamed** in-region (90 in 1-150B tier); live named **1548**.
+
 **Next:** continue 1-150B cold-triage — run fresh cold-triage for next substantive
-candidate (skip rank-1–3 artifacts and rank-5 `0x8004701c` 1B artifact).
+candidate (skip rank-1–4 artifacts).
