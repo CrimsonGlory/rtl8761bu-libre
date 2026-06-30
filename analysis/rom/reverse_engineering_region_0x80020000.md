@@ -3202,4 +3202,35 @@ callers already named and documented as encryption-key programmers.
 
 Region unnamed count after this pass: **229** (230 minus this rename). Live named **1692** global.
 
+**Next:** superseded by Pass 6 continuation (84).
+
+## Pass 6 continuation (84) (2026-06-30) — LMP ext sub0x1b SSP state handler `FUN_80028e30`
+
+Decompiled and renamed:
+**`FUN_80028e30` → `handle_lmp_ext_subopcode_0x1b_by_ssp_state`**
+(138B, HIGH) via `RenamePass6Region80020000Fun80028e30.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (138B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=229` at pass start). Tied at 138B with
+`FUN_80028d04` (xref_in=1); selected as first rank-1 entry in the `0x80028xxx` SSP
+encryption-opcode cluster adjacent to Pass 6 cont. (76)'s `handle_lmp_ext_dhkey_check_subopcode_0x1d_by_ssp_state`.
+
+**Mechanism:** LMP extended (0x7F) sub-opcode **0x1b** handler gated on role bit
+`param_1+4&1` vs `ret_bool_based_on_crypto_struct_0x50`, with bypass when global
+`PTR_DAT_80028ec0[2]&0x80`:
+- Crypto sub-state `0x2e` (`'.'`) or `0x3c` (`<`): emit
+  `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5, param_3)`.
+- State `0x2d` (`-`) with no pending LMP (`+0x1e8==0`): `some_case_0x2d` then return
+  (defer accept — differs from 0x1d handler which sends accept LMP in this branch).
+- Default / role mismatch: `FUN_800243b8(conn, 0x7f, 0x1b, role_bit, 0x24)` (reject).
+
+**Caller:** `LMP_encryption_opcode_handlers` at `0x8002847c` (xref_in=1, confirmed via
+`ListXrefsTo80028e30.java`).
+
+**Confidence:** HIGH — structural sibling of Pass 6 cont. (76)'s 0x1d DHKey-check handler
+(same role gate, same SSP-complete sender, same `FUN_800243b8` NOT_ACCEPTED idiom with
+sub-opcode in arg3); caller confirmed in encryption-opcode dispatch table.
+
+Region unnamed count after this pass: **228** (229 minus this rename). Live named **1693** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
