@@ -328,7 +328,7 @@ above for the shared evidence pattern per cluster.
 |---------|----------|---------------------|
 | `0x80002974` | `encryption_key_teardown_notifier` | 246B. Clears a connection's crypto "key valid" flag (`_x58_crypto_struct...[0x214]`-adjacent field, sets `[0x215]=0`), logs twice around `FUN_80037804`/`FUN_8003fcc8` calls, calls `possible_logger_called_if_no_patch3`. Encryption-key/connection-teardown notification path. |
 | `0x80002a8c` | `conditional_debug_logger_0x2be` | 198B. Feature-bit-gated conditional check (several link-mode bits) that decides whether to log a `0x2be`-tagged debug event via `possible_logger_called_if_no_patch3`; no other side effects. Debug instrumentation wrapper, not a protocol-significant function. |
-| `0x80002b60` | `role_switch_confirmation_matcher` | 318B. Reads a 16-byte parameter block's role-confirmation byte, compares/rewrites it against a per-slot stored value (table at `PTR_DAT_80002ca4`, 0x10-byte rows), calls `FUN_80042e10`/`FUN_800384ac`. Confirmed as a **role-switch confirmation/ack matcher** against a small per-connection table; exact LMP PDU still not pinned (see open questions). |
+| `0x80002b60` | `role_switch_confirmation_matcher` | 318B. Reads a 16-byte parameter block's role-confirmation byte, compares/rewrites it against a per-slot stored value (table at `PTR_DAT_80002ca4`, 0x10-byte rows), calls `is_armed_conn_slot_status_lsb_clear`/`FUN_800384ac`. Confirmed as a **role-switch confirmation/ack matcher** against a small per-connection table; exact LMP PDU still not pinned (see open questions). |
 
 **Pool-init cluster (pass-2 carryover, 3) — pool identity now confirmed:**
 
@@ -860,7 +860,7 @@ functions from pass 2, are listed here:
   "0x2be"-tagged event based on several link-mode bits) — likely a debug
   instrumentation wrapper, low value to name precisely. `0x80002b60` reads
   and conditionally rewrites a 16-byte parameter block's role-confirmation
-  byte against a per-slot stored value, calling `FUN_80042e10`/
+  byte against a per-slot stored value, calling `is_armed_conn_slot_status_lsb_clear`/
   `FUN_800384ac` — shape matches a **role-switch confirmation/ack matcher**
   but wasn't pinned down to a specific LMP PDU this pass.
 - **`0x8000a4ac`**, **`0x8000a4f8`**, **`0x8000a570`** — **pass-2

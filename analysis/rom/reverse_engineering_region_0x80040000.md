@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 125 functions in tier, 47 renamed HIGH (Passes 52–52bd). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bd, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 125 functions in tier, 48 renamed HIGH (Passes 52–52be). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52be, 2026-06-30).
 
 ## Overview
 
@@ -2851,3 +2851,39 @@ Post-rename: **211 unnamed** in-region (125 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-49+
 substantive candidate; skip rank-1–48 artifacts and already-done ranks.
+
+## Pass 52be (2026-06-30) — rank-49 armed conn-slot status LSB query rename
+
+**Refreshed cold-triage (ranks 1-48 skipped as artifacts or already done):** rank-49
+`0x80042e10` (36B, 1 xref) — substantive armed-connection-slot status query in the
+`0x80042exx` inquiry/LAP/role-switch cluster (sibling of Pass 52ai's
+`resolve_bos_subindex_byte_for_connection_index` and Pass 52az's
+`fill_lmp_pdu_staging_slot_params_from_txn_mode`).
+
+**Rank-49 decompiled and renamed (HIGH):** `FUN_80042e10` →
+`is_armed_conn_slot_status_lsb_clear` (36B) via
+`RenamePass52beRegion80040000Fun80042e10.java` (`renamed=1`, live-verified).
+
+```c
+byte is_armed_conn_slot_status_lsb_clear(uint conn_index)
+{
+  if (((conn_index & 0xff) < 4) &&
+     (slot_byte = PTR_DAT_80042e34[(conn_index & 0xff) + 4],
+      ((slot_byte >> 1) & 1) != 0)) {
+    return (slot_byte & 1) ^ 1;
+  }
+  return 0;
+}
+```
+
+For connection indices 0–3, probes per-slot byte at `PTR_DAT_80042e34 + index + 4`.
+When bit 1 is set (armed slot), returns inverted bit 0 (1 when LSB clear, 0 when set);
+otherwise returns 0. Called from `role_switch_confirmation_matcher` (`0x80002b60`) when
+the incoming parameter block's header field at `+3` bits 3–5 are zero — return value 1
+selects the alternate per-connection table offset (`conn_index*8+2`) instead of the
+default (`conn_index*8+1`) on the role-switch confirmation commit path.
+
+Post-rename: **210 unnamed** in-region (124 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-50+
+substantive candidate; skip rank-1–49 artifacts and already-done ranks.

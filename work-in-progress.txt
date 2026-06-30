@@ -7450,9 +7450,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52be: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-49+ substantive candidate;
-          skip rank-1–48 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52be (2026-06-30): decompiled+
+          renamed rank-49 `FUN_80042e10`→`is_armed_conn_slot_status_lsb_clear`
+          (36B, HIGH). Armed conn-slot status LSB query for indices 0-3; gates
+          alternate per-conn table offset in `role_switch_confirmation_matcher`.
+          210 unnamed in-region (124 in 1-150B tier); live named 1428.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52be;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bf: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-50+ substantive candidate;
+          skip rank-1–49 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
