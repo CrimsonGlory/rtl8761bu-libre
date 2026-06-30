@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gy COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (9 STUB-tier unnamed remain). Latest: `noop_unused_patch_hook_slot_vsc_fc13_stub_gap_head_return_ff` (Pass 12gy). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1360** global; **11** in-region unnamed (9 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_800777e2`, 20B, xref_in=0). See Pass 12gy section below.
+**Status**: Pass 12gz COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (8 STUB-tier unnamed remain). Latest: `log_vsc_fca1_decoded_bb_status_bit_0x175` (Pass 12gz). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1361** global; **10** in-region unnamed (8 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_8007717c`, 16B, xref_in=0). See Pass 12gz section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gz (2026-06-30) — VSC FCA1 log-only thin wrapper `FUN_800777e2`
+
+Decompiled and renamed:
+**`FUN_800777e2` → `log_vsc_fca1_decoded_bb_status_bit_0x175`**
+(20B, HIGH, STUB-tier) via `RenamePass12gzRegion80070000Fun800777e2.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(20B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Thin log-only wrapper immediately before
+`dispatch_vsc_fca1_bb_reg_offset_write_subcases` at `0x800777f6`: sole callee
+`log_vsc_fca1_decoded_bb_status_bit(4, 0x71, 0x175)`. Event code `0x175` precedes
+the dispatcher's inline subcase event codes (`0x183`–`0x19e`), suggesting a
+separate VSC 0xFCA1 fptr-registration path rather than an inlined subcase arm.
+VSC FCA1 / BB-init cluster sibling of Passes 12av (`log_vsc_fca1_decoded_bb_status_bit`),
+12fx (`dispatch_vsc_fca1_bb_reg_offset_write_subcases`), and 12w
+(`decode_vsc_fca1_bitfield_and_log_bb_status_flags`).
+
+**Confidence:** HIGH — unambiguous single-callee log wrapper with fixed event literal;
+cluster placement and callee chain pin role despite zero xref_in.
+
+Live named **1361** (global; in-region unnamed **10**; STUB-tier unnamed **8**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_8007717c`, 16B, xref_in=0).
+
 ## Pass 12gy (2026-06-30) — patch-hook gap return-0xff stub `FUN_8007882c`
 
 Decompiled and renamed:
@@ -2440,8 +2466,7 @@ by adjacent named siblings; zero xref_in consistent with dead/unused hook slot.
 
 Live named **1360** (global; in-region unnamed **11**; STUB-tier unnamed **9**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_800777e2`, 20B, xref_in=0).
+**Next:** superseded by Pass 12gz.
 
 ## Pass 12gx (2026-06-30) — patch-hook gap return-zero stub `FUN_80078830`
 

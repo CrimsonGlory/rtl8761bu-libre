@@ -6843,8 +6843,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gz: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_800777e2`, 20B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gz (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800777e2`→`log_vsc_fca1_decoded_bb_status_bit_0x175`
+          (20B, HIGH, STUB-tier). Thin log-only wrapper:
+          `log_vsc_fca1_decoded_bb_status_bit(4,0x71,0x175)` immediately before
+          `dispatch_vsc_fca1_bb_reg_offset_write_subcases`; xref_in=0. STUB-tier
+          unnamed 8 remain; live named 1361.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ha: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_8007717c`, 16B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
