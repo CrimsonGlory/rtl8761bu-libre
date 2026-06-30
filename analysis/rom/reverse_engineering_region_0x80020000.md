@@ -1766,4 +1766,34 @@ decompile confirms HW descriptor programming via already-named
 
 Region unnamed count after this pass: **274** (275 minus this rename). Live named **1647** global.
 
+**Next:** superseded by Pass 6 continuation (39).
+
+## Pass 6 continuation (39) (2026-06-30) — SSP/ECDH byte bignum subtract `FUN_8002d2a0`
+
+Decompiled and renamed:
+**`FUN_8002d2a0` → `crypto_bignum_sub_u8_byte_arrays_in_place`**
+(216B, HIGH) via `RenamePass6Region80020000Fun8002d2a0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (216B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=274` at pass start).
+
+**Mechanism:** In-place big-endian byte-array subtraction primitive in the SSP/ECDH
+`0x8002d3xx` curve-constant cluster. MSB-first lexicographic compare of `param_1`
+(dest) vs `param_2` (subtrahend) over `param_3` bytes: if dest `<` subtrahend, no-op
+return; if equal, `memset(dest,0,len)`; if dest `>` subtrahend, iterative bit-aligned
+subtract loop using `FUN_8002cc40` (effective bit-length of byte array) and
+`FUN_8002cbc8` (right-shift byte array by N bits), XOR-ing aligned chunks into dest.
+Byte-width sibling of region `0x80070000`'s `crypto_bignum_sub_u32_arrays_with_borrow`
+and `crypto_bignum_add_u8_arrays_with_carry`.
+
+**Callers:** `FUN_8002d378` (unnamed, 2026-06-30) — indexed curve-constant dispatcher:
+when index `< 0x10`, copies two 16-byte constants from `PTR_DAT_8002d3d0`/`d3d4` tables
+then calls this subtract followed by `FUN_8002ccac` on the second constant.
+
+**Confidence:** HIGH — unambiguous MSB-compare + bit-aligned subtract idiom; sole caller
+sits in established SSP/ECDH curve-constant table cluster adjacent to
+`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`.
+
+Region unnamed count after this pass: **273** (274 minus this rename). Live named **1648** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
