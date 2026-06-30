@@ -2864,4 +2864,37 @@ established `LMP_NOT_ACCEPTED_0x04` cluster; callees include already-HIGH siblin
 
 Region unnamed count after this pass: **239** (240 minus this rename). Live named **1682** global.
 
+**Next:** superseded by Pass 6 continuation (74).
+
+## Pass 6 continuation (74) (2026-06-30) — crypto key-material update `FUN_80024c08`
+
+Decompiled and renamed:
+**`FUN_80024c08` → `update_crypto_struct_key_material_xor_or_copy_by_type`**
+(148B, HIGH) via `RenamePass6Region80020000Fun80024c08.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (148B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=239` at pass start). Sits in the
+`0x80024xxx` crypto-struct cluster alongside `copy_fields_within_crypto_struct` and
+SSP state-machine sibling at `0x80024ca4`.
+
+**Mechanism:** Per-connection `_x58_crypto_struct` key-block updater keyed by two
+type bytes (`param_3`/`param_5`, matching LMP link-key-type values `0x09` COMB_KEY
+and `0x0a` unit-key paths seen in caller `FUN_800254b0`):
+- Both `0x09`: XOR-combine 16B incoming `param_4` with existing block at `+0xa9`
+  into destination `+0x61`; set `+0xb9=0`, or `+0xb9=6` when global
+  `PTR_DAT_80024c9c+0x46` set and crypto mode byte `*param_2` is `7` or `0xd`.
+- `param_3==0x0a`: unit-key/AU_RAND branch — set `+0xb9=1` when `param_5!=0x0a`
+  or `big_ol_struct[slot].bdaddr_random_` set; else memcpy from `+0xa9`.
+- Default: `optimized_memcpy` 16B `param_4` → `+0x61`, `+0xb9=2`.
+
+**Callers:** sole xref from `FUN_800254b0` at `0x80025510` — that wrapper XORs
+incoming LMP payload with crypto `+0x51`, optionally mixes BD_ADDR via
+`FUN_8002cfac` on COMB_KEY (`payload[4]>>1 == 9`), then invokes this helper.
+
+**Confidence:** HIGH — offset usage (`+0x61`/`+0xa9`/`+0xb9`) matches documented
+crypto-struct layout; type-byte semantics align with `LMP_COMB_KEY_0x09` cluster;
+`field_0xb9` ties to `LMP__271__FUN_80025cb4` and SSP pairing state machine.
+
+Region unnamed count after this pass: **238** (239 minus this rename). Live named **1683** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
