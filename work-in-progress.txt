@@ -6719,8 +6719,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gl: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078828`, 4B, xref_in=1).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gl (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078828`→`VSC_0xfc13_return_one_default_stub`
+          (4B, HIGH, STUB-tier). Trivial `return 1;` default ROM handler for VSC
+          opcode `0xFC13`; sole caller `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`
+          at `0x80031c2e` (payload byte ignored); `0x800788xx` patch-hook cluster
+          sibling of Pass 12gk. STUB-tier unnamed 22 remain; live named 1347.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gm: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

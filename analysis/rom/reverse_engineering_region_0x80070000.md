@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gk COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (23 STUB-tier unnamed remain). Latest: `noop_role_switch_completion_tail_hook` (Pass 12gk). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1346** global; **25** in-region unnamed (23 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078828`, 4B, xref_in=1). See Pass 12gk section below.
+**Status**: Pass 12gl COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (22 STUB-tier unnamed remain). Latest: `VSC_0xfc13_return_one_default_stub` (Pass 12gl). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1347** global; **24** in-region unnamed (22 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gl section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gl (2026-06-30) — VSC 0xFC13 default return-one stub `FUN_80078828`
+
+Decompiled and renamed:
+**`FUN_80078828` → `VSC_0xfc13_return_one_default_stub`**
+(4B, HIGH, STUB-tier) via `RenamePass12glRegion80070000Fun80078828.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(4B, xref_in=1 — `FindCallers80078828.java` confirms 1 call site from
+`HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` at `0x80031c2e`; MCP `xrefs_to`
+returns empty against this GZF, known gap).
+
+**Mechanism:** Trivial `return 1;` default ROM handler for vendor-specific HCI command
+opcode `0xFC13` — the VSC dispatcher calls this with `(int)param_1 + 3` (first payload
+byte pointer) when opcode matches, sets `local_37 = 0` (no async completion), and
+falls through to the common exit path. Payload byte is ignored by the stub. Sits at
+`0x80078828` in the `0x800788xx` patch-hook cluster (4 bytes before Pass 12gk's
+`noop_role_switch_completion_tail_hook` at `0x80078848`); patch firmware may replace
+with non-trivial behavior.
+
+**Confidence:** HIGH — unambiguous constant return; sole caller and VSC 0xFC13 dispatch
+case confirmed via `FindCallers80078828.java` + caller decompile.
+
+Live named **1347** (global; in-region unnamed **24**; STUB-tier unnamed **22**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
+
 ## Pass 12gk (2026-06-30) — role-switch completion tail noop hook `FUN_80078848`
 
 Decompiled and renamed:
@@ -2440,8 +2466,7 @@ confirmed via `FindCallers80078848.java` + caller decompile.
 
 Live named **1346** (global; in-region unnamed **25**; STUB-tier unnamed **23**).
 
-**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
-(top remaining: `FUN_80078828`, 4B, xref_in=1).
+**Next:** superseded by Pass 12gl.
 
 ## Pass 12gj (2026-06-30) — LMP 0x25C slot emit stub `FUN_80078b7c`
 
