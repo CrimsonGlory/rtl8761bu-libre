@@ -2605,5 +2605,46 @@ Sole caller `conn_param_revalidate_if_dirty` (region `0x80050000`, also reached 
 
 Post-rename: **217 unnamed** in-region (131 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-43+
-substantive candidate; skip rank-1–42 artifacts and already-done ranks.
+## Pass 52ay (2026-06-30) — rank-43 timer-queue deadline snap rename
+
+**Refreshed cold-triage (ranks 1-42 skipped as artifacts or already done):** rank-43
+`0x8004ee0c` (60B, 1 xref) — substantive out-of-budget deadline snap helper in the
+timer/event-queue cluster (callee of `try_reschedule_timer_queue_entry_deadline_within_budget`
+`0x8004ee50`, sibling of `sorted_event_list_insert_by_relative_key` `0x8004ee94`).
+
+**Rank-43 decompiled and renamed (HIGH):** `FUN_8004ee0c` →
+`snap_timer_queue_entry_deadline_to_next_period` (60B) via
+`RenamePass52ayRegion80040000Fun8004ee0c.java` (`renamed=1`, live-verified).
+
+```c
+void snap_timer_queue_entry_deadline_to_next_period(int entry, int now_half)
+{
+  period = *(ushort *)(entry + 0x18);
+  wrap_mask = DAT_8004ee4c;
+  threshold_mask = DAT_8004ee48;
+  deadline = (period + *(ushort *)(entry + 0x1c) + *(uint *)(entry + 0xc))
+             - *(ushort *)(entry + 0x1a) & wrap_mask;
+  delta_from_now = deadline - now_half & wrap_mask;
+  if ((threshold_mask & delta_from_now) != 0) {
+    if (period == 0) trap(7);
+    slots = ((period - 1) + (-delta_from_now & wrap_mask)) / period;
+    deadline = slots * period + deadline & wrap_mask;
+  }
+  *(uint *)(entry + 0xc) = deadline;
+  *(ushort *)(entry + 0x1c) = *(ushort *)(entry + 0x1a);
+}
+```
+
+Wraparound-masked deadline snap on queue entry fields `+0xc` (deadline uint),
+`+0x18` (period ushort), `+0x1a` (anchor ushort copied to `+0x1c` delta), and
+`+0x1c` (short delta). When `delta_from_now` crosses the threshold mask relative
+to `now_half`, rounds the deadline forward to the next `period` boundary via integer
+division; traps if period is zero. Sole caller
+`try_reschedule_timer_queue_entry_deadline_within_budget` (`0x8004ee50`, Pass 52ab):
+invoked on the out-of-budget path before returning 1 so the caller (`FUN_8004ef08`)
+can unlink/reinsert via `sorted_event_list_insert_by_relative_key`.
+
+Post-rename: **216 unnamed** in-region (130 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-44+
+substantive candidate; skip rank-1–43 artifacts and already-done ranks.
