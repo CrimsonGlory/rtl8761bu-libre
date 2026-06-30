@@ -262,7 +262,7 @@ first as instructed.
 | `0x80042640` | 530B | `select_sco_esco_packet_type_and_cap_window_by_conn_index` — SCO/eSCO packet-type selector from `field273_0x250` feature flags + window threshold; see Pass 52dg | HIGH |
 | `0x800401c4` | 426B | `commit_dual_slot_lmp25c_role_record_state_and_chain_credits` — IRQ-off dual-slot LMP-25C role-record state commit; see Pass 52dh | HIGH |
 | `0x80040e60` | 386B | `accept_dual_slot_lmp_role_connection_and_program_baseband_regs` — IRQ-off dual-slot LMP role connection accept + baseband programmer; see Pass 52di | **HIGH** |
-| `0x80041900` | 376B | Similar shape to other lower-half record-field helpers. | MEDIUM |
+| `0x80041900` | 376B | `program_page_train_baseband_regs_and_start_paging` — HCI Create Connection page-train BB programmer; see Pass 52dj | **HIGH** |
 | `0x80043c7c` | 372B | Small state-check/update helper; plausible but unconfirmed single purpose. | MEDIUM |
 | `0x80041a94` | 352B | Field manipulator, lower conn-type cluster. | MEDIUM |
 | `0x800435a8` | 338B | Field manipulator, lower conn-type cluster. | MEDIUM |
@@ -4598,5 +4598,28 @@ Inquiry/LAP/role-switch cluster sibling of Pass 52dh role-record commit and Pass
 Post-rename: **156 unnamed** in-region (95 in 1-150B tier unchanged); **61** in
 >150B tier; live named **1482**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-29 `0x80041900`
-(376B).
+## Pass 52dj (2026-06-30) — >150B rank-29 HCI Create Connection page-train programmer rename
+
+**>150B rank-29 decompiled+renamed (HIGH):** `FUN_80041900` →
+`program_page_train_baseband_regs_and_start_paging` (376B) via
+`RenamePass52djRegion80040000Fun80041900.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). HCI `Create_Connection` (opcode `0x405`)
+page-train baseband programmer: calls `FUN_8003785c` pre-page setup; programs peer
+BD_ADDR halves into HW reg `0x14`/`0x16`; when peer BD_ADDR low-24 matches cached
+local `DAT_80041a80` uses default sync-word constants, else derives access-code via
+`compute_access_code_sync_word_from_bdaddr`; programs clock-offset high bits to reg
+`0x2e`; busy/abort guard when `the_0x300->ushort_0x24==0x20` and
+`byte_0x16f!=0` returns `0xc`; scans up to 3 conn slots for status==4 collision
+with `bdaddr_random==0` and bumps `byte_0x16f` to 2; selects page-timeout class
+(`0x100`/`0x200`/`0x300`) from `(byte_0x16f + field_0x171)` sum; optional veto
+hook at `PTR_DAT_80041a90`; writes `1` to HW reg `0` (start paging), sets
+`the_0x300->int_0x10=1` busy flag, arms watchdog via `FUN_800362b4`. Dispatched
+from `fptr_DAT_80036f54` for HCI opcode `0x405` (see
+`reverse_engineering_lc_lmp_state_machine.md` §3). Paging/LC cluster sibling of
+Pass 52di dual-slot role accept and Pass 52dc inquiry baseband programmer.
+
+Post-rename: **155 unnamed** in-region (95 in 1-150B tier unchanged); **60** in
+>150B tier; live named **1483**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-30 `0x80043c7c`
+(372B).
