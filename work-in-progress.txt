@@ -7611,9 +7611,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bu;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bv: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-76+ substantive candidate;
-          skip rank-1–75 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bv (2026-06-30): decompiled+
+          renamed rank-76 `FUN_800428ec`→`compute_access_code_sync_word_xor_fixed_mask_from_bdaddr`
+          (72B, HIGH). Thin wrapper calling `compute_access_code_sync_word_from_bdaddr`
+          then XOR-masking 5-byte output with fixed constants; access-code sync-word
+          cluster. 0 xrefs (function-pointer registration). 193 unnamed in-region
+          (107 in 1-150B tier); live named 1445.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bw: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-77+ substantive candidate;
+          skip rank-1–76 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -3520,5 +3520,39 @@ address range. No direct callers found (function-pointer registration).
 
 Post-rename: **194 unnamed** in-region (108 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-76+
-substantive candidate; skip rank-1–75 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bu):** rank-76+ — completed Pass 52bv below.
+
+## Pass 52bv (2026-06-30) — rank-76 access-code sync-word XOR-mask wrapper rename
+
+**Refreshed cold-triage (ranks 1-75 skipped as artifacts, deferred, or already done):**
+rank-76 `0x800428ec` (72B, 0 xrefs in triage) — substantive thin wrapper in the
+`0x800428xx` access-code sync-word cluster immediately following
+`compute_access_code_sync_word_from_bdaddr` (`0x8004287c`).
+
+**Rank-76 decompiled and renamed (HIGH):** `FUN_800428ec` →
+`compute_access_code_sync_word_xor_fixed_mask_from_bdaddr` (72B) via
+`RenamePass52bvRegion80040000Fun800428ec.java` (`renamed=1`, live-verified).
+
+```c
+void compute_access_code_sync_word_xor_fixed_mask_from_bdaddr(uint bdaddr_low24, byte *out_buf)
+{
+  compute_access_code_sync_word_from_bdaddr(bdaddr_low24, out_buf);
+  out_buf[0] ^= 0xfc;
+  out_buf[1] ^= 0x54;
+  out_buf[2] ^= 0xcc;
+  out_buf[3] ^= 0xbb;
+  out_buf[4] ^= 0x02;
+}
+```
+
+Thin wrapper: delegates to `compute_access_code_sync_word_from_bdaddr` to derive
+the 5-byte Bluetooth access-code sync word from BD_ADDR low-24, then XOR-masks
+each output byte with fixed constants `{0xfc, 0x54, 0xcc, 0xbb, 0x02}`. Sits
+immediately after the core LFSR compute function in the page-train baseband
+programming cluster (`0x80041900` neighborhood). No direct callers found
+(function-pointer registration).
+
+Post-rename: **193 unnamed** in-region (107 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-77+
+substantive candidate; skip rank-1–76 artifacts, deferred, and already-done ranks.
