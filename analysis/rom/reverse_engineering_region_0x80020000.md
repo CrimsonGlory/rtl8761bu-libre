@@ -1703,4 +1703,34 @@ purpose.
 
 Region unnamed count after this pass: **276** (277 minus this rename). Live named **1645** global.
 
+**Next:** superseded by Pass 6 continuation (37).
+
+## Pass 6 continuation (37) (2026-06-30) — SCO HW channel init with saved reg restore `FUN_8002fb54`
+
+Decompiled and renamed:
+**`FUN_8002fb54` → `init_sco_hw_channel_disable_be_c0_restore_saved_bb_regs`**
+(232B, HIGH) via `RenamePass6Region80020000Fun8002fb54.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (232B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=276` at pass start).
+
+**Mechanism:** SCO HW channel subsystem init helper in the `0x8002fbxx` cluster (adjacent to
+`init_or_reset_sco_hw_slot_table`/`program_or_restore_sco_esco_link_register_slot_banks`).
+Logs diagnostic status via `possible_logging_function__var_args` (tag 6, format `0x22`) with
+ten `big_ol_struct` status-array indices. Disables BB registers **0xbe** and **0xc0** via
+HW-write fptr at `PTR_DAT_8002fc48` (value `0xffff`, same disable idiom as
+`reset_sco_esco_hw_subsystem_on_link_loss`). Calls `init_or_clear_sco_hw_channel_subsystem(0)`
+(full init path, region `0x80030000` Pass 42). Restores four saved 16-bit values from
+`DAT_8002fc50`/`54`/`58`/`5c` into BB registers **0x11c**, **0x11e**, **0x120**, and **0x298**
+via the same fptr — register set matches `config_triplet_hw_register_init_with_power_gate` plus
+`release_SCO_connection_resources` teardown writes.
+
+**Callers:** none found (`find_callers` empty; likely indirect/fptr invocation).
+
+**Confidence:** HIGH — sole documented callee is already-named `init_or_clear_sco_hw_channel_subsystem`;
+BB-register disable/restore pattern matches documented SCO teardown/init family; 0x11c/0x11e/0x120/0x298
+triplet is established SCO/eSCO timing/packet-type register cluster.
+
+Region unnamed count after this pass: **275** (276 minus this rename). Live named **1646** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

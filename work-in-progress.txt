@@ -9511,8 +9511,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (36);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (37): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (276 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (37) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002fb54`→
+          `init_sco_hw_channel_disable_be_c0_restore_saved_bb_regs` (232B, HIGH).
+          SCO HW channel init: diagnostic log, disable BB regs 0xbe/0xc0,
+          `init_or_clear_sco_hw_channel_subsystem(0)`, restore saved values to
+          0x11c/0x11e/0x120/0x298. No direct callers (fptr/indirect).
+          275 unnamed remain; live named 1646.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (37);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (38): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (275 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
