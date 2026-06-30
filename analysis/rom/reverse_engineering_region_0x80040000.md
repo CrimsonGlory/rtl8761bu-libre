@@ -5601,5 +5601,34 @@ byte-1 bits 4–5 encode conn-type `3` with handle `param_1`, role sub-index
 Post-rename: **124 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1514**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x8004c844`, 234B).
+**Next:** superseded by Pass 52ep below.
+
+## Pass 52ep (2026-06-30) — >150B rank-1 LC TX conn-event gate+enqueue rename
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004c844` →
+`gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback` (234B, 1 xref from
+`LC_event_TX_dispatcher` @ `0x80042530`) via
+`RenamePass52epRegion80040000Fun8004c844.java` (`renamed=1`, live-verified).
+
+LC TX conn-event handler for conn-type nibbles 0–1 (byte-1 bits 4–5) when role
+bits (byte-1 >> 6) are clear. Parses connection handle from bytes 0–1, looks up
+`query_config_struct_0x1ac_by_index`, and gates on config byte `+3` bitmask:
+
+- **Success path:** clears 8 bytes at `param+0x100`, IRQ-masked enqueue via
+  `FUN_8004b76c` into per-conn `0x1ac` struct-array linked list (index from
+  config byte `+2`), then
+  `dispatch_slot_timing_reprogram_if_feature_enabled_and_ready`.
+- **Failure path:** patch-hook at `PTR_DAT_8004c930`, diagnostic log
+  (`0xc9`/`0xb12`/`0xcaf`), optional LMP TX fallback via
+  `invoke_lmp_tx_hook_with_length_word_from_pdu_buffer` with bytes
+  `{0x10,0x01,0x02}` when `PTR_DAT_8004c938` bit0 set.
+
+Sibling of conn-event-ring LMP builders (`build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2`,
+`build_and_submit_lmp_0x480_for_conn_type_3`) but on the LC TX dispatch side via
+`LC_event_TX_dispatcher`.
+
+Post-rename: **123 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1515**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
+unnamed >150B candidate (`0x8004fbc0`, 216B).

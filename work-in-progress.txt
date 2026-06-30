@@ -8303,9 +8303,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eo;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ep: continue refreshed >150B
-          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x8004c844`, 234B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ep (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004c844`→`gate_lc_tx_conn_event_types_0_1_enqueue_or_emit_lmp_fallback`
+          (234B, HIGH). LC TX conn-event gate for conn-type nibbles 0–1; config-
+          struct bitmask gate, `FUN_8004b76c` enqueue + timing reprogram or LMP
+          fallback `{0x10,0x01,0x02}`; sole caller `LC_event_TX_dispatcher`.
+          123 unnamed in-region; live named 1515.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ep;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eq: continue refreshed >150B
+          cold-triage — decompile+rename next rank-2 unnamed >150B candidate
+          (`0x8004fbc0`, 216B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
