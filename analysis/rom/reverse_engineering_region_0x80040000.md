@@ -6088,6 +6088,36 @@ remove handlers at `0x8004993c`/`0x8004996a`, and `FUN_80049b40` flush handler):
 Post-rename: **109 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1529**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
-unnamed >150B candidate (14 remain; run `ColdTriageRegion80040000Pass52eu.java`
+**Next:** superseded by Pass 52fe below.
+
+## Pass 52fe (2026-06-30) — >150B rank-4 eSCO timing-pair HCI handler rename
+
+**>150B rank-4 decompiled+renamed (HIGH):** `FUN_80049158` →
+`hci_validate_and_commit_esco_timing_pair_hook1_or_pending_masks`
+(222B, 0 xrefs in cold-triage) via
+`RenamePass52feRegion80040000Fun80049158.java` (`renamed=1`, live-verified).
+
+222B HCI command handler in the `0x800491xx`/`0x800494xx` SCO/eSCO handler
+cluster (sibling of `validate_conn_and_start_lmp_power_clk_adj_if_enabled` at
+`0x800494b0` and `validate_conn_copy_sync_params_and_alloc_tag3_dispatch` at
+`0x80049420`). Terminates via
+`OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` with
+opcode `0x2022`:
+
+- **Conn lookup:** `query_config_struct_0x1ac_by_index(handle@+3)` — failure
+  returns `2`.
+- **State gate:** requires conn `+6` bit0 set (else status `0x1a`).
+- **Validation:** `validate_value_pair_within_threshold_range(pair1@+5,
+  pair2@+7, handle)` — failure returns `0x12` (Invalid HCI Command Parameters).
+- **Pending-mask path:** when `+0x7c` or `+0x78` nonzero, commits pair to
+  `+0x10a`/`+0x10c` and sets `+0x90` bit4 (defer while pending procedures
+  active).
+- **Active path:** when stored `+0xf0`/`+0xf8` differ from cmd pair, commits
+  and dispatches hook at `PTR_DAT_80049238(rec, 1)`.
+
+Post-rename: **108 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1530**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
+unnamed >150B candidate (13 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).

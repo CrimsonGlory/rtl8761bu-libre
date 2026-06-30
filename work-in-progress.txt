@@ -8452,9 +8452,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fe: continue refreshed >150B
-          cold-triage — decompile+rename next rank-4 unnamed >150B candidate
-          (14 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fe (2026-06-30): decompiled+
+          renamed rank-4 `FUN_80049158`→`hci_validate_and_commit_esco_timing_pair_hook1_or_pending_masks`
+          (222B, HIGH). eSCO timing-pair HCI handler; threshold validation,
+          pending-mask defer or hook1 dispatch; opcode `0x2022` terminus. 13 unnamed
+          >150B; 108 unnamed in-region; live named 1530.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fe;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ff: continue refreshed >150B
+          cold-triage — decompile+rename next rank-5 unnamed >150B candidate
+          (13 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
