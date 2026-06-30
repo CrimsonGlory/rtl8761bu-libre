@@ -1126,4 +1126,33 @@ template path documented in `reverse_engineering_hardware_layer.md` call chain.
 
 Region unnamed count after this pass: **295** (296 minus this rename). Live named **1626** global.
 
+**Next:** superseded by Pass 6 continuation (18).
+
+## Pass 6 continuation (18) (2026-06-30) — HCI Master Link Key `FUN_80029f70`
+
+Decompiled and renamed:
+**`FUN_80029f70` → `apply_hci_master_link_key_0x417_across_connections`**
+(356B, HIGH) via `RenamePass6Region80020000Fun80029f70.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (356B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=295` at pass start). Caller:
+`FUN_8002a0f4` (HCI Master Link Key `0x0417` phase-2 body), itself dispatched from
+`HCI_Write_Simple_Pairing_Debug_Mode` opcode switch case `0x417`.
+
+**Mechanism:** HCI Master Link Key command body. Scans 10 `big_ol_struct` slots for
+active encrypted links (status `0x04`/`0x0f`, crypto state byte `< 0x21`), classifying
+each by bitmask `DAT_8002a0d8` and pairing-mode flag `crypto+0x214`. On success sends
+`send_evt_HCI_Command_Status`. Single eligible connection →
+`send_evt_HCI_Link_Key_Type_Changed_0x0A`. Multiple pending → derives master link key
+via SHA/BLAKE hash chain (`FUN_8002c838`/`FUN_8002cf24`/`FUN_8002d3d8`), then calls
+`FUN_80029eb0` per slot with crypto state `0x05`/`0x0c` to stage per-connection key
+material and advance the link-key-type state machine (`PTR_DAT_8002a0dc+0x48` counter).
+Returns `0x0c` when no eligible connections.
+
+**Confidence:** HIGH — opcode `0x0417` = HCI_Master_Link_Key; callee cluster matches
+documented link-key-type-changed event senders (`0x80029a50`/`0x80029a98`); hash helpers
+are Pass-5 HIGH `thing_that_uses_SHA_and_BLAKE` family.
+
+Region unnamed count after this pass: **294** (295 minus this rename). Live named **1627** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
