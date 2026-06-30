@@ -4926,7 +4926,7 @@ live named **1493**.
 IRQ-off snapshot of per-connection overflow queue head/count at `field289_0x128` /
 `field293_0x12c` / `field297_0x130` / `field298_0x131` on the `0x1ac`-strided conn array,
 then clears those fields. Walks the overflow record linked list via `+0x100` chain links.
-For each record: allocates a HW descriptor slot index via `FUN_8004b344` (returns `0x0a` on
+For each record: allocates a HW descriptor slot index via `irq_guarded_pop_hw_tx_descriptor_slot_from_free_pool` (returns `0x0a` on
 pool exhaustion — then splices back via `splice_overflow_record_into_conn_list_a_or_b` and
 returns); builds 8-byte TX fragment descriptors in the per-slot table at `PTR_PTR_8004b6dc`
 within the byte budget (`param_2`); advances record offset at `+0x106`; on completion either
@@ -7264,6 +7264,48 @@ param (`delta-8` or `delta-0x18`). SCO/eSCO HW-channel cluster sibling of
 `reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch`.
 
 Post-rename: **77 unnamed** in-region (40 in 1-150B size≥20B tier); live named **1561**.
+
+**Next:** superseded by Pass 52gk below.
+
+## Pass 52gk (2026-06-30) — rank-1 HW TX descriptor slot pop rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x8004b344` (110B,
+1 xref) — IRQ-guarded HW TX descriptor slot allocator; callee of
+`fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` (Pass 52du).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004b344` →
+`irq_guarded_pop_hw_tx_descriptor_slot_from_free_pool` (110B) via
+`RenamePass52gkRegion80040000Fun8004b344.java` (`renamed=1`, live-verified).
+
+```c
+uint irq_guarded_pop_hw_tx_descriptor_slot_from_free_pool(void)
+{
+  irq = disable_interrupts();
+  slot = pool_head[0];                    // PTR_DAT_8004b3b4
+  if (slot != 10) {
+    next = table[slot * 0xc + 0xb];       // PTR_PTR_8004b3b8
+    if (next == 10)
+      pool_head[1] = 10;                  // mark tail exhausted
+    pool_head[0] = next;                  // advance head
+    pool_head[2]--;                       // decrement count
+    table[slot * 0xc + 0xb] = 10;         // mark popped slot chain end
+  }
+  enable_interrupts(irq);
+  if (slot == 10)
+    possible_logging_function__var_args(5, 0xc9, 0x7ee, 0xd21, 0, ...);
+  return slot;                            // 10 = pool exhausted
+}
+```
+
+IRQ-guarded pop of a HW TX descriptor slot index from the list-A free-pool
+(`PTR_DAT_8004b3b4` head/tail/count, `PTR_PTR_8004b3b8` 0xc-stride table with
+next-index byte at `+0xb`, sentinel `10`). Returns the popped slot index; on
+exhaustion returns `10` and logs. Alloc path used by
+`fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget`; recycle
+path uses sibling `irq_guarded_append_slot_to_conn_list_chain` (Pass 52fv). TX
+fragmentation scheduler cluster.
+
+Post-rename: **76 unnamed** in-region (39 in 1-150B size≥20B tier); live named **1562**.
 
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
