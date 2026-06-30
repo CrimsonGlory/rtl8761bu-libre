@@ -218,6 +218,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004a730` | 456B | `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` — type-4 LE TX segment consumer; walks length-prefixed segments, validates slot-10 clock-offset fields, returns segment count; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52ea | HIGH |
 | `0x8004ae74` | 452B | `walk_conn_tx_segments_dispatch_by_packet_type_nibble` — type-0 multi-chunk TX segment walker; dispatches each segment by packet-type nibble via `PTR_PTR_8004b044` table, fallback to `compute_length_prefixed_segment_advance_clamped_to_remainder`; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52eb | HIGH |
 | `0x8004ab64` | 414B | `gate_ext_adv_param_bitfields_and_apply_via_vsc_0xfc97` — validates ext-adv param dword bitfields against per-link status bytes, commits power-state via `commit_link_power_state_bits_to_hw_register_with_retry`, applies via `VSC_0xfc97_Set_Extended_Advertising_Parameters_variant_2` sub-id `0xe`; see Pass 52ec | HIGH |
+| `0x80045000` | 358B | `hci_finalize_conn_type_timing_delta_send_cmd_complete` — conn-type timing-counter finalize + 6-byte HCI Command Complete; computes `field241`−`field245` delta (type≠2) or overflow check (type 2); clears `_x02_byte_0x1ac_index` + global HW status bitfields; see Pass 52ef | HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
 confidence (`init_global_connection_table_and_bt_state`,
@@ -5248,4 +5249,45 @@ Post-rename: **134 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1504**.
 
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
-decompile+rename next rank-1 unnamed >150B candidate.
+decompile+rename next rank-1 unnamed >150B candidate (rank-2 `0x80041a94`,
+352B).
+
+## Pass 52ef (2026-06-30) — >150B rank-1 conn-type timing finalize rename
+
+**Cold-triage (refreshed):** 39 unnamed >150B remain. rank-1 `0x80045000`
+(358B, 1 xref); rank-2 `0x80041a94` (352B); rank-3 `0x800435a8` (338B);
+rank-4 `0x80041028` (336B); rank-5 `0x8004704c` (296B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80045000` →
+`hci_finalize_conn_type_timing_delta_send_cmd_complete` (358B, 1 xref) via
+`RenamePass52efRegion80040000Fun80045000.java` (`renamed=1`, live-verified).
+
+HCI command handler in the connection-type dispatch upper half
+(`0x80045000` boundary) — sole xref from `0x8000ecc0` (function-pointer
+registration, no enclosing function):
+
+- **Timing delta:** reads conn-type index from
+  `PTR_base_of_0x1ac_struct_array_0xA_large2->_x02_byte_0x1ac_index`.
+  When index≠2: computes `field241_0xf8/field242_0xf9 −
+  field245_0xfc/field246_0xfd` (directional timing-counter delta, same field
+  family as `bump_retry_or_timeout_counter_and_log`). When index==2: reads
+  `DAT_80045170`, checks `field248_0xff` bit0, tests sign of counter at
+  `DAT_80045174` for overflow diagnostic.
+- **State cleanup:** clears conn-type index to 0; AND-masks global HW status
+  words at `DAT_80045168`/`DAT_8004517c`/`DAT_80045180`; diagnostic log via
+  `possible_logging_function__var_args`.
+- **Command Complete:** derives status from `the_0x300->field_0x165`
+  (0 when cmd word==0, else field defaulting to 1); packs 6-byte
+  `hci_event_sender(0xe,…)` with status + echoed cmd-word bytes + timing
+  delta u16.
+
+LE Meta Event / connection-type dispatch cluster sibling of
+`hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete` (Pass 52bq) and
+`validate_unique_handles_and_commit_sync_conn_params` (Pass 52ee).
+
+Post-rename: **133 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1505**.
+
+**Next:** continue refreshed >150B cold-triage — refresh rank list and
+decompile+rename next rank-1 unnamed >150B candidate (rank-2 `0x80041a94`,
+352B).

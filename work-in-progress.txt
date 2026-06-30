@@ -8207,9 +8207,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ee;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ef: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ef (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80045000`→`hci_finalize_conn_type_timing_delta_send_cmd_complete`
+          (358B, HIGH) — conn-type timing-counter finalize; computes
+          field241−field245 delta (type≠2) or type-2 overflow check; clears
+          conn-type index + global HW status bitfields; 6-byte HCI Command
+          Complete with status from field_0x165 + cmd echo + delta; 1 xref
+          from fptr registration at `0x8000ecc0`.
+          133 unnamed in-region; live named 1505.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ef;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eg: continue refreshed >150B
           cold-triage — refresh rank list and decompile+rename next rank-1
-          unnamed >150B candidate.
+          unnamed >150B candidate (rank-2 `0x80041a94`, 352B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
