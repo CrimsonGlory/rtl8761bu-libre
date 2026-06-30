@@ -6262,6 +6262,37 @@ live named **1534**.
 Post-rename: **103 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1535**.
 
+**Next:** superseded by Pass 52fk below.
+
+## Pass 52fk (2026-06-30) — >150B rank-1 SCO/eSCO link-reg pair snapshot HCI handler rename
+
+**Cold-triage (refreshed):** 8 unnamed >150B remain. rank-1 `0x8004653c`
+(224B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004653c` →
+`hci_read_sco_esco_link_reg_pair_snapshot_send_cmd_complete`
+(224B, 0 xrefs) via
+`RenamePass52fkRegion80040000Fun8004653c.java` (`renamed=1`, live-verified).
+
+224B HCI command handler in the `0x800465xx` LE/link-timing cluster (sibling
+of Pass 52fa scan-rsp data handler at `0x8004635c` and Pass 52ez ext-adv data
+handler at `0x80046798`):
+
+- **Handle extract:** ushort at `param+3`; reject `≥0x1000` → status `0x12`.
+- **Conn lookup:** `query_config_struct_0x1ac_by_index(handle)`; null →
+  status `2` (Unknown Connection Identifier).
+- **HW read path:** branch on conn-record `+3` bit4 (SCO vs eSCO): SCO uses
+  `read_indexed_link_register((slot-8)*0x1e+3/+4)`; eSCO uses
+  `read_indexed_esco_link_register(slot*0x14+3/+4)`; masks second register
+  to `0x1f`.
+- **Commit:** copies 5-byte pair snapshot to conn-record `+0x54`.
+- **Terminus:** 11-byte HCI Command Complete via `hci_event_sender(0xe,…)`
+  with `field_0x165` status idiom + echoed handle + 5-byte snapshot on
+  success.
+
+Post-rename: **102 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1536**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (8 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (7 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
