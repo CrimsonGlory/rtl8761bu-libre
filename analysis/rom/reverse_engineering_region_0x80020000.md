@@ -1244,4 +1244,34 @@ SAFER+ spec, cross-confirmed in `reverse_engineering_encryption_engine.md` Pass 
 
 Region unnamed count after this pass: **291** (292 minus this rename). Live named **1630** global.
 
+**Next:** superseded by Pass 6 continuation (22).
+
+## Pass 6 continuation (22) (2026-06-30) — QoS poll interval `FUN_80021614`
+
+Decompiled and renamed:
+**`FUN_80021614` → `compute_and_store_connection_qos_poll_interval`**
+(302B, HIGH) via `RenamePass6Region80020000Fun80021614.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (302B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=291` at pass start). Sits in the
+`0x80021xxx` connection/QoS cluster near `send_evt_0x0D_HCI_QoS_Setup_Complete`
+siblings in region `0x80010000`.
+
+**Mechanism:** Per-connection QoS poll-interval calculator keyed on connection index
+(`param_1 & 0xffff`) and mode selector `param_2` (`0`/`1`/`2`). Reads
+`big_ol_struct[conn]._x10_int_Latency` and
+`_x04_int_HCI_QoS_Setup_Complete_Token_Rate`, derives candidate interval from
+`latency/0x4e2` or `DAT_8002174c/token_rate`, clamps to `[6, 0x1000]`, and writes
+the result to one of three per-connection poll-interval ushort fields
+(`field_0x66`, `field_0x64`, or `_x60_ushort_QoS_Poll_Interval`) per mode.
+Caps against existing `field_0x74 >> 3`; rounds up to even, re-clamps. On invalid
+latency/token-rate, logs via `FUN_800215a4`/`FUN_800215e0` (HCI events `0x1f9`/`0x1f8`,
+reason `0x2d`) and returns `0xff`.
+
+**Confidence:** HIGH — Ghidra struct field names (`_x60_ushort_QoS_Poll_Interval`,
+`_x04_int_HCI_QoS_Setup_Complete_Token_Rate`) match Bluetooth QoS semantics; clamp
+range and three-mode field dispatch are unambiguous.
+
+Region unnamed count after this pass: **290** (291 minus this rename). Live named **1631** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
