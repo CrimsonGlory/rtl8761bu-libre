@@ -287,7 +287,7 @@ each other on content alone).
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
 | `0x80046900` | 682B | `validate_and_stage_sco_packet_type_table_from_hci_params` — multi-entry SCO packet-type table HCI param validator; 3-bit packet-type mask; `lazy_alloc_tag9_singleton_and_encode_lowbit_index` + `align_sco_slots_and_derive_retx_buffer_dims` per entry. See Pass 52ds | HIGH |
 | `0x800480b0` | 682B | `validate_and_stage_sco_air_mode_change_from_hci_command` — HCI SCO air-mode change validator+stager; see Pass 52dt | HIGH |
-| `0x8004b468` | 624B | No HCI event/status sender at all — pure internal queue/scheduler logic over `0x1ac`-strided struct array entries via `FUN_8004b344`/`FUN_8004b170`/`FUN_8004b0f8`/`FUN_8004b3c0`; disables/enables interrupts around a critical section; manages a linked list with byte-budget accounting. Likely the TX/scheduling fragmentation engine for per-connection ACL/SCO data queues — internal infra, not an HCI command handler. | MEDIUM |
+| `0x8004b468` | 624B | `fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` — IRQ-off snapshot of overflow queue at `conn+0x128..0x131`, walks `+0x100` chain, allocates HW descriptor slots, fragments TX bytes within budget, recycles or enqueues via list-A; see Pass 52du | HIGH |
 | `0x80045964` | 560B | Validates page-scan/inquiry-scan-style window/interval parameter pairs (bounded `0x1f..0x4000`), bit-packs results into a `the_0x300`-sized struct's offset `0x28-0x2f` region, terminates via `hci_event_sender(0xe,...)` (Command Complete). Strong shape match to HCI_Write_Page_Scan_Activity / HCI_Write_Inquiry_Scan_Activity, but two near-identical HCI commands share this exact bounds pattern in the spec — can't be distinguished to HIGH without a confirming xref. | MEDIUM-HIGH |
 
 **Net effect (upper half)**: 1 of 11 renamed to HIGH confidence
@@ -4907,5 +4907,28 @@ path when `+0x90` bit 2 clear and `+0x114` low nibble idle: stages new bytes at
 Post-rename: **145 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1493**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-34
-`0x8004b468` (624B, xrefs:0).
+## Pass 52du (2026-06-30) — >150B rank-34 TX fragmentation scheduler rename
+
+**>150B rank-34 decompiled+renamed (HIGH):** `FUN_8004b468` →
+`fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` (624B, 0 xrefs) via
+`RenamePass52duRegion80040000Fun8004b468.java` (`renamed=1`, live-verified).
+
+IRQ-off snapshot of per-connection overflow queue head/count at `field289_0x128` /
+`field293_0x12c` / `field297_0x130` / `field298_0x131` on the `0x1ac`-strided conn array,
+then clears those fields. Walks the overflow record linked list via `+0x100` chain links.
+For each record: allocates a HW descriptor slot index via `FUN_8004b344` (returns `0x0a` on
+pool exhaustion — then splices back via `splice_overflow_record_into_conn_list_a_or_b` and
+returns); builds 8-byte TX fragment descriptors in the per-slot table at `PTR_PTR_8004b6dc`
+within the byte budget (`param_2`); advances record offset at `+0x106`; on completion either
+returns the slot to the free pool via `FUN_8004b170` or enqueues the slot index to list-A
+via `irq_masked_append_byte_to_conn_list_a_tail`. Sets descriptor termination flags (`0x80`
+on last fragment, `local_18` bit7 for special-case records where type byte `+1` bits `0x30`
+clear and offset `+0x106` zero). Core TX fragmentation scheduler invoked by
+`atomically_take_conn_list_a_collect_overflow_and_schedule_tx` and the list-B quota path.
+Upgraded from MEDIUM (Pass 3). 0 xrefs (indirect function-pointer registration).
+
+Post-rename: **144 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1494**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-35
+`0x80045964` (560B, xrefs:0).

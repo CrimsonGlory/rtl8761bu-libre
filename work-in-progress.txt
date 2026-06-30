@@ -8092,8 +8092,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dt;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52du: continue >150B cold-triage
-          — decompile+rename refreshed rank-34 `0x8004b468` (624B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52du (2026-06-30): decompiled+
+          renamed rank-34 `FUN_8004b468`→`fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget`
+          (624B, HIGH). IRQ-off overflow-queue snapshot at `conn+0x128..0x131`, walks `+0x100`
+          chain, allocates HW descriptor slots, fragments TX bytes within budget, recycles or
+          enqueues via list-A; callee of `atomically_take_conn_list_a_collect_overflow_and_schedule_tx`;
+          upgraded from MEDIUM (Pass 3). 0 xrefs (indirect dispatch). 144 unnamed in-region;
+          live named 1494.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52du;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dv: continue >150B cold-triage
+          — decompile+rename refreshed rank-35 `0x80045964` (560B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
