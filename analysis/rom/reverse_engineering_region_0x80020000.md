@@ -2527,7 +2527,7 @@ PIN/key operand via `swap_byte_order`, packs 16B derived input, invokes
 `FUN_8002c62c` HMAC-style 2-pass driver → 16B output block.
 
 **Callers:** `derive_sres_e1_or_e22_and_send_lmp_response` when mode byte `+0x1f1 == 0x08`
-(E22 path, paired with `FUN_8002d0b0`).
+(E22 path, paired with `derive_e22_aco_and_sres_via_hmac_safer`).
 
 **Confidence:** HIGH — decompile matches E21/E22 structure documented in
 `reverse_engineering_encryption_engine.md` §E21/E22-shaped.
@@ -2683,5 +2683,34 @@ encryption kickoff helpers; both callers already named in encryption procedure c
 optional mode-3 VSC arm matches `start_encryption_vsc_pair_on_mode3_enable` dispatch chain.
 
 Region unnamed count after this pass: **245** (246 minus this rename). Live named **1676** global.
+
+**Next:** superseded by Pass 6 continuation (68).
+
+## Pass 6 continuation (68) (2026-06-30) — E22 ACO+SRES `FUN_8002d0b0`
+
+Decompiled and renamed:
+**`FUN_8002d0b0` → `derive_e22_aco_and_sres_via_hmac_safer`**
+(154B, HIGH) via `RenamePass6Region80020000Fun8002d0b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (154B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=245` at pass start). Tied at 154B with
+`FUN_800260f4` (xref_in=1); selected first-listed address.
+
+**Mechanism:** Bluetooth E22 authentication response formatter (companion to Pass 6 cont.
+(62)'s `derive_e21_or_e22_16byte_block_via_hmac_driver`). Byte-swaps two 16B operands,
+concatenates into 32B HMAC message, invokes `hmac_ipad_opad_2pass_safer_hash_driver`,
+splits 16B digest into 4B ACO + 4B + 8B SRES components (param_4/5/6), byte-swaps the
+two 4B outputs — mirrors E1 path's `derive_e1_aco_and_sres_via_safer_plus` layout but
+via HMAC/SAFER+ driver instead of direct two-pass SAFER+.
+
+**Callers:** `derive_sres_e1_or_e22_and_send_lmp_response` (E22 branch when mode
+`+0x1f1==0x08`, paired with `derive_e21_or_e22_16byte_block_via_hmac_driver`) —
+documented in Pass 6 cont. (27)/(62).
+
+**Confidence:** HIGH — decompile confirms HMAC driver + byte-swap + 4+4+8 output split
+idiom; sole caller already named in E1/E22 SRES dispatcher cluster; pairs with Pass 6
+cont. (62) E22 16B-block derivation wrapper.
+
+Region unnamed count after this pass: **244** (245 minus this rename). Live named **1677** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
