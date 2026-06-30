@@ -4287,5 +4287,29 @@ low 6 bits — header fields, up to four sub-record pointers from `param_2[0..4]
 Post-rename: **169 unnamed** in-region (95 in 1-150B tier unchanged); **74** in
 >150B tier (no count change — name predated this pass).
 
-**Next:** continue >150B cold-triage — decompile+rename rank-15 `0x8004f730`
-(230B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cv below.
+
+## Pass 52cv (2026-06-30) — >150B rank-15 bitmasked timing subfield sync
+
+**>150B rank-15 decompiled+renamed (HIGH):** `FUN_8004f730` →
+`sync_bitmasked_timing_subfields_from_active_conn_buffer` (230B, 1 caller via
+`find_callers`) — upgraded from MEDIUM (Pass 6, 2026-06-23). Optional early-exit
+hook at `PTR_DAT_8004f818`; when hook absent or returns 0, scans bits 0–4 of
+`param_1+0xb` and for each set bit copies the low 6 bits of
+`*(byte*)(active+0x10)` into destination bytes (preserving high 2 bits via
+`& 0xc0 | & 0x3f`), advancing destination offset via stride table
+`PTR_DAT_8004f820`. Type selector `param_1+8 & 7` picks active/destination
+pointer pair: type 0 → `+0x4c`/`+0x50` (+ extra `+0x34`/`+0x38` byte-pointer
+writes on bit 4); types 1–3 → `+0x18`/`+0x20`; types ≥4 → `+0x4c`/`+0x50` with
+diagnostic log (`0xd39`). Sole caller `LE_connection_channel_update_timing_handler`
+(`0x800555bc`, region `0x80050000`) — invoked after
+`propagate_timing_offset_to_peer_record_by_type` /
+`assemble_role_bitmask_param_fields` on the LE channel-update / AFH timing
+propagation path. Via `RenamePass52cvRegion80040000Fun8004f730.java`, `renamed=1`,
+live-verified.
+
+Post-rename: **168 unnamed** in-region (95 in 1-150B tier unchanged); **73** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-16 `0x800442bc`
+(222B, 2 xrefs).
