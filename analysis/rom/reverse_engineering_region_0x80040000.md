@@ -5989,5 +5989,42 @@ and Pass 52ev/52ew adv-data handlers):
 Post-rename: **112 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1526**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x80046a00`, 318B).
+**Next:** superseded by Pass 52fb below.
+
+## Pass 52fb (2026-06-30) — >150B rank-1 LE periodic adv interval HCI handler rename
+
+**Stale-target note:** prior rank list listed `0x80046a00` (318B) as rank-1;
+live Ghidra shows that address is mid-instruction inside already-named
+`validate_and_stage_sco_packet_type_table_from_hci_params` (`0x80046900`, 682B,
+Pass 52ds) — not a function entry. Fresh `ColdTriageRegion80040000Pass52eu.java`
+run: **16** unnamed >150B remain; rank-1 `0x80046ce8` (316B); rank-2
+`0x80049a2c` (254B); rank-3 `0x80049c10` (248B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80046ce8` →
+`hci_le_periodic_adv_interval_params_validate_commit_send_cmd_complete`
+(316B, 0 xrefs in cold-triage) via
+`RenamePass52fbRegion80040000Fun80046ce8.java` (`renamed=1`, live-verified).
+
+316B HCI command handler in the LE extended-advertising cluster (sibling of
+Pass 52fa scan-rsp data and Pass 52ez ext-adv data handlers):
+
+- **Init gate:** when bos[0xb].field96_0x60 is zero, sets to `2`; when
+  non-zero requires `PTR_DAT_80046e28` bit `0x10` clear or mode already `2`.
+- **Param validation:** operation byte at `+3` must be `≤2`; mode byte at `+4`
+  must be `≤2`; when mode==2 both interval words must be non-zero and satisfy
+  `max_interval << 7 > min_interval`.
+- **Feature gate:** when operation byte non-zero, requires
+  `check_feature_permission_by_category_and_index(2, scan_active_link_mask())`.
+- **Commit:** stores mode low-2-bits to global struct byte `+5`; min interval
+  `*10` to `+0xc`; max interval `*0x500` to `+0x10`.
+- **Apply path:** disable (`operation==0`) invokes runtime hook with `0` +
+  `flush_pending_hw_writes_or_dispatch_mode1` for modes 0/1; enable invokes
+  hook with `1` and copies bos timing fields `field76/78` → `field77/79`.
+- **Command Complete:** `hci_event_sender(0xe, &local_20, 4)` with
+  `field_0x165` status idiom; status `0x0c`/`0x12` on validation failure.
+
+Post-rename: **111 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1527**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-2
+unnamed >150B candidate (`0x80049a2c`, 254B).

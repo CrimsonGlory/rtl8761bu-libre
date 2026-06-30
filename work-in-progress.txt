@@ -8425,9 +8425,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fa;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fb: continue refreshed >150B
-          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x80046a00`, 318B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fb (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80046ce8`→`hci_le_periodic_adv_interval_params_validate_commit_send_cmd_complete`
+          (316B, HIGH). Stale target `0x80046a00` corrected — mid-instruction inside
+          already-named `validate_and_stage_sco_packet_type_table_from_hci_params`;
+          fresh cold-triage rank-1 `0x80046ce8`. LE periodic-adv interval HCI handler.
+          16 unnamed >150B; 111 unnamed in-region; live named 1527.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fc: continue refreshed >150B
+          cold-triage — decompile+rename next rank-2 unnamed >150B candidate
+          (`0x80049a2c`, 254B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
