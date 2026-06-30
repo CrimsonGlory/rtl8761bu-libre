@@ -640,5 +640,38 @@ and mod-p conditional-add pattern as the doubling sibling; directly readable fro
 
 Region unnamed count after this pass: **310** (311 minus this rename). Live named **1611** global.
 
-**Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java` (top by size:
-`FUN_8002a3d8` 1100B xref_in=4).
+**Next:** superseded by Pass 6 continuation (3).
+
+## Pass 6 continuation (3) (2026-06-30) — HCI ACL data fragment assembler `FUN_8002a3d8`
+
+Decompiled and renamed:
+**`FUN_8002a3d8` → `hci_acl_data_fragment_assembler_and_enqueue`**
+(1100B, HIGH) via `RenamePass6Region80020000Fun8002a3d8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (1100B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=310` at pass start). Callers:
+`LC_event_RX_dispatcher` (LC RX event `0x2c5`), `FUN_8003d354` (ACL fragment
+start/continuation/flush), `FUN_8003d2f8`.
+
+**Mechanism:** Per-connection ACL data fragment reassembler with three 52-byte
+per-handle state slots (`PTR_DAT_8002a830` + index×0x34). Params: connection handle
+(`param_1`), ACL type byte (`param_3`), fragment length (`param_4`), fragment mode
+(`param_5`: 0=continuation, 1=start, 2=abort, 3=flush). Accumulates payload into an
+allocated buffer (via `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`
+or `memset`/`FUN_8001465c` decrypt-copy path) until reaching packet size
+(`PTR_DAT_8002a840`, 24-byte ACL payload unit). On complete: writes HCI ACL header
+(handle in bits 8–19, PB flag in byte+2 bits 4–5), enqueues buffer pointer into the
+16-entry ring at `PTR_DAT_8002a864` (same descriptor table drained by
+`HCI_EVT_0x1fd_FUN_8002a334`), then triggers that drain when any packet completes.
+Alternate fast-path when `field_0x179==2`: `lookup_conn_record_by_lt_addr` +
+`FUN_8002b020` single-packet direct TX. Optional pre/post hooks at
+`PTR_DAT_8002a824`/`PTR_DAT_8002a85c`.
+
+**Confidence:** HIGH — unambiguous ACL fragment state machine; callers in LC RX
+dispatcher and ACL continuation handler; ring-buffer enqueue matches sibling
+`HCI_EVT_0x1fd` drain and region `0x80030000`
+`ACL_fragment_dequeue_and_credit_consumer` dequeue path.
+
+Region unnamed count after this pass: **309** (310 minus this rename). Live named **1612** global.
+
+**Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
