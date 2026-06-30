@@ -737,4 +737,33 @@ opcode cases map cleanly to BT spec OGF1/OGF3 commands; three documented callers
 
 Region unnamed count after this pass: **307** (308 minus this rename). Live named **1614** global.
 
+**Next:** superseded by Pass 6 continuation (6).
+
+## Pass 6 continuation (6) (2026-06-30) — SCO/eSCO link-register slot banks `FUN_8002bd04`
+
+Decompiled and renamed:
+**`FUN_8002bd04` → `program_or_restore_sco_esco_link_register_slot_banks`**
+(698B, HIGH) via `RenamePass6Region80020000Fun8002bd04.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (698B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=307` at pass start). Caller:
+`init_or_reset_sco_hw_slot_table` (mid-init stage after per-slot HW register programming).
+
+**Mechanism:** Dual-mode SCO/eSCO HW link-register slot-bank programmer (`param_1`:
+0=full init, non-zero=restore). Init path: allocates descriptor buffer via
+`func1_structs_at_0x80100000`, builds timing/pointer descriptor tables from config
+bytes at `PTR_DAT_8002bfc0`/`bfc4`/`bfc8`, programs `PTR_DAT_8002bfd8` ring state.
+Both paths: writes three HW globals at `DAT_8002bfe4`, masks/merges controller
+config into `DAT_8002bff0` via `config_struct+0xdc`, sets bit `0x200` on
+`DAT_8002c004`. Slot banks: when `param_1==0` clears per-slot counters at
+`DAT_8002c00c+0x440`/`+0x464` (SCO vs eSCO bank selected by slot bit 3, same layout
+as `apply_per_slot_quota_delta_and_validate_link_register`); when non-zero walks
+`0x1ac` struct array and restores counters from `PTR_DAT_8002c010`.
+
+**Confidence:** HIGH — sole documented caller is already-named SCO slot-table init;
+0x440/0x464 bank layout matches Pass 54c quota validator; dual init/restore
+pattern mirrors parent `init_or_reset_sco_hw_slot_table`.
+
+Region unnamed count after this pass: **306** (307 minus this rename). Live named **1615** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

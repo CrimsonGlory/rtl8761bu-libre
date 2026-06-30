@@ -9252,8 +9252,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (5);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (6): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (307 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (6) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8002bd04`→`program_or_restore_sco_esco_link_register_slot_banks`
+          (698B, HIGH). Dual-mode SCO/eSCO link-register slot-bank programmer; caller
+          `init_or_reset_sco_hw_slot_table`. 306 unnamed in-region; live named 1615.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (6);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (7): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (306 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
