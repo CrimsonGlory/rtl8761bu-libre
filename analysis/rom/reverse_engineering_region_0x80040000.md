@@ -3283,5 +3283,46 @@ the 12-byte Command Complete response. No direct callers found
 
 Post-rename: **200 unnamed** in-region (114 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-70+
-substantive candidate; skip rank-1–69 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bo):** rank-70+ — completed Pass 52bp below.
+
+## Pass 52bp (2026-06-30) — rank-70 conn-diag-batch-gated HCI handler rename
+
+**Refreshed cold-triage (ranks 1-69 skipped as artifacts, deferred, or already done):**
+rank-70 `0x80047200` (110B, 0 xrefs in triage) — substantive HCI Command Complete
+sender with conn-diagnostic-batch prelude and re-entrancy gate; sibling cluster of
+`hci_link_policy_settings_read_send_cmd_complete` and
+`hci_global_field_0x165_status_echo_send_cmd_complete`.
+
+**Rank-70 decompiled and renamed (HIGH):** `FUN_80047200` →
+`hci_conn_diag_batch_gate_field_0x165_send_cmd_complete` (110B) via
+`RenamePass52bpRegion80040000Fun80047200.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_conn_diag_batch_gate_field_0x165_send_cmd_complete(short *hci_cmd)
+{
+  // Re-entrancy gate on global state byte at +0x15dc (0→2, or return 0xc if bit 0x10 set)
+  if (gate_byte == 0) gate_byte = 2;
+  else if ((flag_byte & 0x10) && gate_byte != 2) return 0xc;
+
+  FUN_8004fd30();
+  conn_diagnostic_batch_dump();
+
+  cmd_word = *hci_cmd;
+  status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  hci_event_sender(0xe, {status, cmd_lo, cmd_hi, gate_result}, 4);
+  return gate_result;
+}
+```
+
+HCI command handler: re-entrancy-gated prelude calls `FUN_8004fd30` +
+`conn_diagnostic_batch_dump` (same diagnostic family as
+`schedule_conn_diagnostic_dump_if_idle`); derives status from global `the_0x300`
+struct `field_0x165` (0 when cmd word==0, else field value defaulting to 1);
+packs 4-byte Command Complete (`hci_event_sender(0xe,…)`) with status + echoed
+cmd-word bytes + gate-result byte. No direct callers found (function-pointer
+registration).
+
+Post-rename: **199 unnamed** in-region (113 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-71+
+substantive candidate; skip rank-1–70 artifacts, deferred, and already-done ranks.
