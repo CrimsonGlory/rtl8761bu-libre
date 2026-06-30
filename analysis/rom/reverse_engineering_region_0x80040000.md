@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 110 functions in tier, 63 renamed HIGH (Passes 52–52by). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52by, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 101 functions in tier, 82 renamed HIGH (Passes 52–52cb). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cb, 2026-06-30).
 
 ## Overview
 
@@ -3753,5 +3753,49 @@ found (function-pointer registration or inlined-duplicate pattern).
 
 Post-rename: **188 unnamed** in-region (102 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-82+
-substantive candidate; skip rank-1–81 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52ca):** rank-82+ — completed Pass 52cb below.
+
+## Pass 52cb (2026-06-30) — rank-82 conn-record free-list pop rename
+
+**Refreshed cold-triage (ranks 1-81 skipped as artifacts, deferred, or already done):**
+rank-82 `0x8004e7e4` (32B, 0 xrefs in triage) — substantive conn-record
+free-list LIFO pop; pop counterpart to `free_list_lifo_push` (`0x8004e808`) with
+head at `PTR_PTR_8004e804`; sibling of rank-81
+`compute_weighted_bit_checksum_field_0xb_store_at_0x9` in the `0x8004e7xx`
+conn-record pool neighborhood.
+
+**Rank-82 decompiled and renamed (HIGH):** `FUN_8004e7e4` →
+`free_list_lifo_pop_conn_record_set_state_and_clear_if_zero` (32B) via
+`RenamePass52cbRegion80040000Fun8004e7e4.java` (`renamed=1`, live-verified).
+
+```c
+void free_list_lifo_pop_conn_record_set_state_and_clear_if_zero(byte state)
+{
+  head = PTR_PTR_8004e804;
+  node = *head;
+  if (node != NULL) {
+    *head = *node;                    /* LIFO pop */
+    node->byte0 = state;
+    if (state == 0) {
+      node->field_0x2 = 0;
+      node->field_0xb = 0;
+      node->field_0xe = 0;
+      node->field_0x1c = 0;
+      node->field_0x20 = 0;
+    }
+  }
+}
+```
+
+Pops the head node from the singly-linked conn-record free list at
+`PTR_PTR_8004e804` (adjacent to `free_list_lifo_push` at `0x8004e808`), writes
+`state` to byte 0, and when `state==0` clears key conn-record fields at offsets
+`+0x2`, `+0xb`, `+0xe`, `+0x1c`, `+0x20` (partial fresh-record init). Pop
+counterpart to the push primitives documented in Pass 52ad (`0x8004e204`) and
+`free_list_lifo_push` (`0x8004e808`). No direct callers found (function-pointer
+registration).
+
+Post-rename: **187 unnamed** in-region (101 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-83+
+substantive candidate; skip rank-1–82 artifacts, deferred, and already-done ranks.
