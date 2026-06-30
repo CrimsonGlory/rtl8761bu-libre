@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 115 functions in tier, 59 renamed HIGH (Passes 52–52br). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52br, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 111 functions in tier, 60 renamed HIGH (Passes 52–52bs). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bs, 2026-06-30).
 
 ## Overview
 
@@ -3407,5 +3407,42 @@ registration). Sibling of conn-slot-10 maintenance functions in region
 
 Post-rename: **197 unnamed** in-region (111 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-73+
-substantive candidate; skip rank-1–72 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52br):** rank-73+ — completed Pass 52bs below.
+
+## Pass 52bs (2026-06-30) — rank-73 conn10-flag HCI status-echo handler rename
+
+**Refreshed cold-triage (ranks 1-72 skipped as artifacts, deferred, or already done):**
+rank-73 `0x80044f9c` (88B, 0 xrefs in triage) — substantive HCI Command Complete
+sender in the LE Meta Event cluster; conn-slot-10 `+0x154` bit-2 gate byte sibling of
+`hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete` and
+`hci_global_field_0x165_status_echo_send_cmd_complete`.
+
+**Rank-73 decompiled and renamed (HIGH):** `FUN_80044f9c` →
+`hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete` (88B) via
+`RenamePass52bsRegion80040000Fun80044f9c.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete(short *hci_cmd)
+{
+  cmd_word = *hci_cmd;
+  status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  flag_byte = (conn_table[10].field_0x154 & 2) ? 0 : 0x1a;
+  global_byte = *PTR_DAT_80044ffc;
+  hci_event_sender(0xe, {status, cmd_lo, cmd_hi, flag_byte, global_byte}, 5);
+  return 0;
+}
+```
+
+HCI command handler: derives status from global `the_0x300` struct `field_0x165`
+(0 when cmd word==0, else field value defaulting to 1) — same idiom as
+`hci_global_field_0x165_status_echo_send_cmd_complete`. Echoes cmd-word bytes;
+packs 5-byte Command Complete (`hci_event_sender(0xe,…)`) with status + echoed
+cmd-word bytes + conn-slot-10 `+0x154` bit-2 gate byte (`0x1a` when bit 2 clear,
+0 when set) + global byte at `PTR_DAT_80044ffc`. No re-entrancy gate (unlike
+`hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_complete`). No direct callers
+found (function-pointer registration).
+
+Post-rename: **196 unnamed** in-region (110 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-74+
+substantive candidate; skip rank-1–73 artifacts, deferred, and already-done ranks.
