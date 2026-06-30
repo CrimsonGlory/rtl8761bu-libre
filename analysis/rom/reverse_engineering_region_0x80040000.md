@@ -4123,5 +4123,25 @@ insert primitive and Pass 52ab/52ay deadline-reschedule siblings.
 Post-rename: **176 unnamed** in-region (95 in 1-150B tier unchanged); **81** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-7 `0x8004e5ac`
-(188B, 4 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cn below.
+
+## Pass 52cn (2026-06-30) — >150B rank-7 conn hw sub-object hierarchy teardown rename
+
+**>150B rank-7 decompiled and renamed (HIGH):** `FUN_8004e5ac` →
+`teardown_conn_hw_resource_subobject_tree_and_free_to_pools` (188B, 4 xrefs)
+via `RenamePass52cnRegion80040000Fun8004e5ac.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 5, 2026-06-23) — formalizes prior analysis in
+`reverse_engineering_conn_record_subsystem.md` §11. Releases the 3-level hardware
+sub-object tree rooted at `conn_rec[+0x50]`: walks up to 11 nodes each on
+`hw_resource[+0x20]` and `[+0x24]` sub-chains, LIFO-pushes SCO sub-resources
+(when type bits `[+0x08]&7` nonzero) to `PTR_PTR_8004e668` and all nodes to
+`PTR_PTR_8004e66c`, clears `conn_rec[+0x50]`. Conn-record free-path callee
+alongside `is_conn_record_pkt_modes_cleared_for_free` gate; neighborhood sibling
+of `is_any_conn_lmp_procedure_busy_by_index` (`0x8004e500`) and
+`copy_param_buffer_u16_triplet_to_global_slots` (`0x8004e584`).
+
+Post-rename: **175 unnamed** in-region (95 in 1-150B tier unchanged); **80** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-8 `0x80040060`
+(184B, 4 xrefs).
