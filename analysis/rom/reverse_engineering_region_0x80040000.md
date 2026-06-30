@@ -6451,6 +6451,36 @@ at `0x8004635c` and Pass 52ez ext-adv data handlers):
 Post-rename: **97 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1541**.
 
+**Next:** superseded by Pass 52fq below.
+
+## Pass 52fq (2026-06-30) — >150B rank-1 bitmap-pool flush HCI handler rename
+
+**Cold-triage (refreshed):** 2 unnamed >150B remain. rank-1 `0x80048e44`
+(158B, 0 xrefs); rank-2 `0x8004923c` (156B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80048e44` →
+`hci_bitmap_pool_flush_gated_handler_send_cmd_complete`
+(158B, 0 xrefs) via
+`RenamePass52fqRegion80040000Fun80048e44.java` (`renamed=1`, live-verified).
+
+158B HCI command handler in the `0x80048exx` bitmap-pool cluster (sibling of
+`hci_bitmap_pool_entry_remove_gated_handler_send_cmd_complete` at `0x80048ef8`
+and parallel to `hci_hw_reg_pool_flush_gated_handler_send_cmd_complete` at
+`0x80049b40`, but targets connection type 2):
+
+- **AFH gate:** `field327_0x154` bit2 set (else status `0x1a`).
+- **State gates:** when `field327_0x154` bit1 set, conn-array fields at
+  `+0x28`/`+0x44`/`+0x1a4`, `PTR_DAT_80048ee8` bit0, and
+  `PTR_PTR_80048eec`/`PTR_PTR_80048ef0` pool-state bytes — any failure →
+  status `0x0c`.
+- **Flush path:** on success calls `flush_hw_pending_slots_by_connection_type(2)`
+  then `noop_handler_stub()`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **96 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1542**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (2 remain; run `ColdTriageRegion80040000Pass52eu.java`
-for fresh rank list).
+unnamed >150B candidate (1 remains: `0x8004923c`; run
+`ColdTriageRegion80040000Pass52eu.java` for fresh rank list).
