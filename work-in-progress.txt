@@ -9259,8 +9259,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (6);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (7): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (306 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (7) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8002aa8c`→`allocate_sco_hw_link_descriptor_slot`
+          (630B, HIGH). 3-slot SCO HW link-descriptor allocator; copies link-mode
+          bits from `big_ol_struct`, programs BB regs `0xe0`/`0xee`/`0x1fc`;
+          callers `apply_SCO_connection_params_to_hw`/`FUN_8003ef10`. 305 unnamed
+          in-region; live named 1616.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (7);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (8): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (305 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

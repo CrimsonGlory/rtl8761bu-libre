@@ -766,4 +766,36 @@ pattern mirrors parent `init_or_reset_sco_hw_slot_table`.
 
 Region unnamed count after this pass: **306** (307 minus this rename). Live named **1615** global.
 
+**Next:** superseded by Pass 6 continuation (7).
+
+## Pass 6 continuation (7) (2026-06-30) — SCO HW link descriptor slot `FUN_8002aa8c`
+
+Decompiled and renamed:
+**`FUN_8002aa8c` → `allocate_sco_hw_link_descriptor_slot`**
+(630B, HIGH) via `RenamePass6Region80020000Fun8002aa8c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (630B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=306` at pass start). Callers:
+`apply_SCO_connection_params_to_hw` (`0x8003dc4e`, region `0x80030000`) and
+`FUN_8003ef10` (`0x8003eff6`, alternate SCO setup path).
+
+**Mechanism:** Allocates a free entry in the 3-slot × 52-byte (`0x34` stride) SCO HW
+link-descriptor table at `PTR_DAT_8002ad14` (free when `+0x18 == 0xffff`). Params:
+connection handle (`param_1`) and `big_ol_struct` link index (`param_2`, must be `<10`).
+On first allocation (`PTR_DAT_8002ad04 == 0`), primes BB regs `0xa0`/`0xc0`/`0xe0` via
+HW-write fptr at `PTR_DAT_8002ad10`. Under interrupt disable: zeroes slot fields, stores
+handle at `+0x18`, copies packet-type/link-mode bits from `big_ol_struct[param_2].field_0xc3`
+and `field_0xc4` into byte `+0x1a`, increments live-count at `PTR_DAT_8002ad04`, programs
+BB regs `0x1fc`/`0xee`, invokes tail hook at `PTR_DAT_8002ad28`, logs via
+`possible_logging_function__var_args`. Returns pointer to allocated slot (or NULL if pool
+full or params invalid). Caller `apply_SCO_connection_params_to_hw` then writes slot timing
+at `+0x1c` from computed SCO slot offset.
+
+**Confidence:** HIGH — sole purpose is SCO HW descriptor allocation; both callers are in
+the documented SCO/eSCO connection-lifecycle pair (`apply_SCO_connection_params_to_hw` /
+`release_SCO_connection_resources`); BB-reg cluster (`0xe0`/`0xee`/`0x1fc`) matches
+region `0x80030000` Pass 5 SCO setup/teardown family.
+
+Region unnamed count after this pass: **305** (306 minus this rename). Live named **1616** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
