@@ -7482,5 +7482,50 @@ after `FUN_80043594` slot-offset check passes. Sibling of
 
 Post-rename: **72 unnamed** in-region (35 in 1-150B size≥20B tier); live named **1566**.
 
+**Next:** superseded by Pass 52gp below.
+
+## Pass 52gp (2026-06-30) — rank-1 conn-negotiation state pool pop rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gp.java` — 72 unnamed,
+35 in 1-150B size≥20B tier; rank-1 `0x8004ffc4` (82B, 1 xref) — intrusive-list
+pool pop from `PTR_PTR_80050018` + template memcpy for conn-negotiation sub-record
+nodes; alloc path callee of `transfer_or_emit_conn_negotiation_state_at_field0x14`
+(Pass 54d, region `0x80050000`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004ffc4` →
+`pop_conn_negotiation_state_node_init_from_template` (82B) via
+`RenamePass52gpRegion80040000Fun8004ffc4.java` (`renamed=1`, live-verified).
+
+```c
+char * pop_conn_negotiation_state_node_init_from_template(char *template)
+{
+  if (template == NULL) return NULL;
+  head = PTR_PTR_80050018;
+  node = *head;                         // pop intrusive-list head
+  if (node == NULL) return NULL;
+  *head = *(char **)node;               // advance free-list
+  *node = *template;                    // copy type byte
+  if (*template == 0) {
+    clear node fields at +2,+3,+0xb,+0xe,+0xf,+0x1c,+0x1d,+0x20;
+    memcpy(node+2, template+2, template[0x20]+0x1f);
+  } else if (*template == 1) {
+    memcpy(node+2, template+2, template[7]+6);
+  }
+  return node;
+}
+```
+
+Intrusive free-list pop from `PTR_PTR_80050018` (next pointer in first dword),
+initializes the popped negotiation sub-record node from `template`: type byte at
+`+0` drives memcpy length — type `0` clears housekeeping bytes then copies
+`template[0x20]+0x1f` bytes from `+2`; type `1` copies `template[7]+6` bytes from
+`+2`. Returns the initialized node or NULL on empty pool / NULL template. Alloc
+path used by `transfer_or_emit_conn_negotiation_state_at_field0x14` when merging
+negotiation state between two connection records on the central/peripheral mismatch
+path; recycle path uses sibling free-list at `PTR_PTR_80052800`. Conn-negotiation
+sub-record pool cluster at region boundary (`0x8004ffc4`).
+
+Post-rename: **71 unnamed** in-region (34 in 1-150B size≥20B tier); live named **1567**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

@@ -8791,7 +8791,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52go;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gp: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gp (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004ffc4`→`pop_conn_negotiation_state_node_init_from_template`
+          (82B, HIGH). Conn-negotiation sub-record pool pop from `PTR_PTR_80050018`
+          + template memcpy (type-0/type-1 length variants); callee of
+          `transfer_or_emit_conn_negotiation_state_at_field0x14`. 71 unnamed in-region;
+          live named 1567.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gp;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gq: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
