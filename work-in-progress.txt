@@ -7019,9 +7019,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52h;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52i: decompile refreshed rank-2
-          `0x80042da0` (9 xrefs, 18B — sum-of-two-byte threshold probe) or next
-          substantive unnamed from refreshed 1-150B cold-triage list.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52i (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80042da0`→`is_two_byte_counter_sum_above_one`
+          (18B, HIGH). Reads two bytes via `PTR_DAT_80042db4`; returns true when
+          sum > 1. Packet-type narrowing threshold probe in
+          `recompute_and_store_field_0x250_packet_type_on_conn_slot`; 5 callers.
+          258 unnamed remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52i;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52j: continue refreshed 1-150B
+          cold-triage — decompile next substantive unnamed candidate.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

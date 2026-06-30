@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 174 functions in tier, 8 renamed HIGH (Passes 52–52h). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52h, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 174 functions in tier, 9 renamed HIGH (Passes 52–52i). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52i, 2026-06-30).
 
 ## Overview
 
@@ -990,7 +990,31 @@ checks status byte at `+0x22` (default) or `+0x23` (when isolated bit == 4); ret
 bit-scan family in region `0x80050000` (`find_and_clear_pending_bit_for_index_and_dispatch`).
 8 xrefs.
 
-Post-rename: **259 unnamed** in-region. Refreshed substantive rank-2 is `0x80042da0`
-(9 xrefs, 18B — sum-of-two-byte threshold probe).
+Post-rename: **259 unnamed** in-region. Refreshed substantive rank-2 was `0x80042da0`
+(9 xrefs, 18B — sum-of-two-byte threshold probe) — completed Pass 52i.
 
-**Next:** decompile refreshed rank-2 `0x80042da0` or next substantive 1-150B candidate.
+## Pass 52i (2026-06-30) — rank-2 two-byte counter threshold probe rename
+
+**Refreshed rank-2 decompiled and renamed (HIGH):** `FUN_80042da0` →
+`is_two_byte_counter_sum_above_one` (18B) via
+`RenamePass52iRegion80040000Fun80042da0.java` (`renamed=1`, live-verified).
+
+```c
+bool is_two_byte_counter_sum_above_one(void)
+{
+  byte *pbVar1;
+  pbVar1 = PTR_DAT_80042db4;
+  return 1 < (uint)pbVar1[1] + (uint)*pbVar1;
+}
+```
+
+Reads two bytes via `PTR_DAT_80042db4`; returns true when `byte[0]+byte[1] > 1`.
+Threshold probe used by packet-type narrowing in
+`recompute_and_store_field_0x250_packet_type_on_conn_slot` (region `0x80070000`,
+Pass 12cd): when false and `ushort_0x24==0x80`, narrows mask to `0xfff`. 5
+confirmed callers (`FUN_8006b5f4`, `FUN_8006bdf8`, `FUN_8006c470`, `FUN_8006d33c`,
+`FUN_8006d8f8`).
+
+Post-rename: **258 unnamed** in-region.
+
+**Next:** continue refreshed 1-150B cold-triage — next substantive unnamed candidate.
