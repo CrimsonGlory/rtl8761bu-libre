@@ -5679,5 +5679,26 @@ header offset. Opcode cases:
 Post-rename: **121 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1517**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
-unnamed >150B candidate (`0x8004b1d0`, 200B).
+**Next:** superseded by Pass 52es below.
+
+## Pass 52es (2026-06-30) — >150B rank-4 list-B quota-overflow walk rename
+
+**>150B rank-4 decompiled+renamed (HIGH):** `FUN_8004b1d0` →
+`walk_conn_list_b_slot_chain_collect_quota_overflow_records` (200B) via
+`RenamePass52esRegion80040000Fun8004b1d0.java` (`renamed=1`, live-verified).
+
+List-B quota-overflow slot-chain walker at `PTR_PTR_8004b298` — list-B twin of
+Pass 52dl's `walk_conn_list_a_slot_chain_collect_overflow_records`. Clears
+3-word output list (`head`/`tail`/`count`), walks saved head index `param_2`
+until sentinel `10`: for each 0xc-stride table entry iterates 8-byte slot
+records, increments per-record quota counter at `+0x104` by increment byte at
+slot `+5`, and when counter reaches threshold at `+2` clears link bytes
+`+0x100..+0x103` and appends record to output list; advances chain via
+`FUN_8004b170` + next-index byte at entry `+0xb`. Sole caller
+`atomically_take_conn_list_b_and_apply_quota_overflow` (`0x8004ca10`).
+
+Post-rename: **120 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1518**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
+unnamed >150B candidate (`0x8004a908`, 186B).

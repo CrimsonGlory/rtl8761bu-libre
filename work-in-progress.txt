@@ -8330,9 +8330,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52er;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52es: continue refreshed >150B
-          cold-triage — decompile+rename next rank-4 unnamed >150B candidate
-          (`0x8004b1d0`, 200B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52es (2026-06-30): decompiled+
+          renamed rank-4 `FUN_8004b1d0`→`walk_conn_list_b_slot_chain_collect_quota_overflow_records`
+          (200B, HIGH). List-B quota-overflow slot-chain walker at `PTR_PTR_8004b298`;
+          increments per-record quota at +0x104, collects threshold-crossed records
+          into 3-word output list; sole caller `atomically_take_conn_list_b_and_apply_quota_overflow`.
+          List-B twin of Pass 52dl's list-A overflow walk. 120 unnamed in-region;
+          live named 1518.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52es;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52et: continue refreshed >150B
+          cold-triage — decompile+rename next rank-5 unnamed >150B candidate
+          (`0x8004a908`, 186B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
