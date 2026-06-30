@@ -7648,9 +7648,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52by;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bz: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-80+ substantive candidate;
-          skip rank-1–79 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bz (2026-06-30): decompiled+
+          renamed rank-80 `FUN_8004993c`→`hci_hw_reg_pool_entry_remove_handler_send_cmd_complete`
+          (46B, HIGH). Re-entrancy-gated HCI Command Complete handler: pool-index at
+          params+3; index 0xff clears sentinel flag else
+          `remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(0,…)`; `field_0x165`
+          status idiom. 0 xrefs (indirect HCI router). 189 unnamed in-region
+          (103 in 1-150B tier); live named 1449.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ca: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-81+ substantive candidate;
+          skip rank-1–80 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

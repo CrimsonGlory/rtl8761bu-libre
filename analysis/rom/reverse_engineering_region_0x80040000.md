@@ -3673,5 +3673,48 @@ OR/AND/mask trio. No direct callers found (function-pointer registration).
 
 Post-rename: **190 unnamed** in-region (104 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-80+
-substantive candidate; skip rank-1–79 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52by):** rank-80+ — completed Pass 52bz below.
+
+## Pass 52bz (2026-06-30) — rank-80 HCI hw-reg pool remove handler rename
+
+**Refreshed cold-triage (ranks 1-79 skipped as artifacts, deferred, or already done):**
+rank-80 `0x8004993c` (46B, 0 xrefs in triage) — substantive HCI Command Complete
+handler for HW-reg pool entry removal; sibling of other `hci_*_send_cmd_complete`
+handlers in the LE Meta / OGF8 neighborhood and consumer of region-`0x80050000`'s
+`remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot` (pool 0).
+
+**Rank-80 decompiled and renamed (HIGH):** `FUN_8004993c` →
+`hci_hw_reg_pool_entry_remove_handler_send_cmd_complete` (46B) via
+`RenamePass52bzRegion80040000Fun8004993c.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_hw_reg_pool_entry_remove_handler_send_cmd_complete(short *param_1)
+{
+  index = *(char *)((int)param_1 + 3);
+  if (0xfc < (byte)(index - 2U)) return send_cmd_complete(param_1, 0x12); /* invalid */
+  /* gate on conn-array state + is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180 */
+  if (index == -1) {
+    PTR_PTR_80049a20[5] &= 0xbf;  /* clear bit-6 sentinel path */
+    status = 0;
+  } else {
+    remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(0, index, param_1 + 2);
+    status = 0;
+  }
+  /* status from field_0x165 when cmd word nonzero; hci_event_sender(0xe, …, 4) */
+}
+```
+
+Re-entrancy-gated HCI command handler: validates pool-index byte at params+3 (range
+2..0xfe or 0xff sentinel); gates on per-connection state fields in the `0x1ac` struct
+array plus `is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180`. Index `0xff`:
+clears bit-6 of global byte at `PTR_PTR_80049a20[5]`. Otherwise calls
+`remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(0, index, bdaddr at
+params+4)` — pool-0 HW-reg-base `0xa0` remove-by-key path documented in region
+`0x80050000` Pass 47. Always terminates via 4-byte Command Complete
+(`hci_event_sender(0xe,…)`) with `field_0x165` status idiom shared across the HCI
+handler cluster. No direct callers found (indirect HCI router).
+
+Post-rename: **189 unnamed** in-region (103 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-81+
+substantive candidate; skip rank-1–80 artifacts, deferred, and already-done ranks.
