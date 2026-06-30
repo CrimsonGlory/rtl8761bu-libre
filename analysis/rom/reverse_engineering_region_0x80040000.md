@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 15 renamed HIGH (Passes 52–52p). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52p, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 16 renamed HIGH (Passes 52–52q). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52q, 2026-06-30).
 
 ## Overview
 
@@ -1256,5 +1256,43 @@ LMP switch PDU bytes. 4 confirmed callers via `find_callers`: `LMP_SWITCH_REQ_0x
 
 Post-rename: **251 unnamed** in-region (165 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-8+
-substantive candidate or skip rank-1/2/3/4 artifacts.
+## Pass 52q (2026-06-30) — rank-8 per-slot IIR RSSI sample updater rename
+
+**Refreshed cold-triage (rank-1–7 skipped as artifacts or already done):** rank-8
+`0x80042b80` (132B, 3 xrefs) — substantive per-connection-slot IIR RSSI accumulator
+in the `return_RSSI_value` / `big_ol_struct` cluster (sibling of region `0x80050000`'s
+`apply_iir_filter_to_rssi_and_store`).
+
+**Rank-8 decompiled and renamed (HIGH):** `FUN_80042b80` →
+`apply_iir_filter_to_rssi_on_big_ol_struct_slot` (132B) via
+`RenamePass52qRegion80040000Fun80042b80.java` (`renamed=1`, live-verified).
+
+```c
+void apply_iir_filter_to_rssi_on_big_ol_struct_slot(ushort sample, uint slot)
+{
+  if ((slot & 0xffff) == 0xff) return;
+  big_ol_struct[slot].field_0x86 = sample;
+  big_ol_struct[slot].field_0x84++;          // sample counter
+  rssi = return_RSSI_value();
+  if (big_ol_struct[slot].unknown2_0x88 == 0x7fff)
+    big_ol_struct[slot].unknown2_0x88 = (short)(rssi * 0x10);
+  else {
+    coef = (*(code *)PTR_DAT_80042c08)(slot, 0);
+    big_ol_struct[slot].unknown2_0x88 =
+         (short)(((0x10 - coef) * old + coef * rssi * 0x10) / 0x10);
+  }
+}
+```
+
+Per-slot IIR-filtered RSSI sample updater on `big_ol_struct[slot]`: stores caller
+`sample` at `+0x86`, increments counter at `+0x84`, reads live RSSI via named
+`return_RSSI_value`, initializes filtered value at `+0x88` from `rssi*16` when
+sentinel `0x7fff`, else blends with coefficient from optional hook at
+`PTR_DAT_80042c08(slot,0)` — same IIR arithmetic as
+`apply_iir_filter_to_rssi_and_store` (`0x80059de4`). Sole caller via `find_callers`:
+`lmp_pdu_received_top_level_processor`.
+
+Post-rename: **250 unnamed** in-region (164 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-9+
+substantive candidate; skip rank-1/2/3/4/5/6/7 artifacts.
