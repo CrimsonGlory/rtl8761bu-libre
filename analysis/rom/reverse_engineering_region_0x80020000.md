@@ -665,7 +665,7 @@ or `memset`/`FUN_8001465c` decrypt-copy path) until reaching packet size
 16-entry ring at `PTR_DAT_8002a864` (same descriptor table drained by
 `HCI_EVT_0x1fd_FUN_8002a334`), then triggers that drain when any packet completes.
 Alternate fast-path when `field_0x179==2`: `lookup_conn_record_by_lt_addr` +
-`FUN_8002b020` single-packet direct TX. Optional pre/post hooks at
+`transmit_acl_single_packet_direct_via_hw_tx_descriptor` single-packet direct TX. Optional pre/post hooks at
 `PTR_DAT_8002a824`/`PTR_DAT_8002a85c`.
 
 **Confidence:** HIGH — unambiguous ACL fragment state machine; callers in LC RX
@@ -1732,5 +1732,38 @@ BB-register disable/restore pattern matches documented SCO teardown/init family;
 triplet is established SCO/eSCO timing/packet-type register cluster.
 
 Region unnamed count after this pass: **275** (276 minus this rename). Live named **1646** global.
+
+**Next:** superseded by Pass 6 continuation (38).
+
+## Pass 6 continuation (38) (2026-06-30) — ACL single-packet direct TX `FUN_8002b020`
+
+Decompiled and renamed:
+**`FUN_8002b020` → `transmit_acl_single_packet_direct_via_hw_tx_descriptor`**
+(228B, HIGH) via `RenamePass6Region80020000Fun8002b020.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (228B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=275` at pass start).
+
+**Mechanism:** ACL single-packet direct TX fast-path in the `0x8002b0xx` TX-descriptor
+cluster (sibling of `program_active_tx_descriptor_slots_to_hw_registers`). Optional
+pre-hook at `PTR_DAT_8002b104` allocates TX buffer via
+`call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`; on failure invokes
+error hook at `PTR_DAT_8002b108` with tag `0xc0` and returns 0. Builds one HW TX
+descriptor from payload length (`param_3`) and packet-size field (`param_2`), doubling
+`param_2` when conn-record byte `+0x1a` has bit `0x20` set and bit `0x8` clear
+(3-slot vs 1-slot packet-type flag). Programs descriptor via
+`program_active_tx_descriptor_slots_to_hw_registers` (1 slot, type bits from conn
+record `+0x1a` low 2 bits). Resolves LMP handle via `called_by_fHCI_Read_LMP_Handle_3`;
+if absent calls `FUN_8003e0d4` to enqueue, else `FUN_8002af48` completion check then
+buffer cleanup via `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`.
+
+**Callers:** `hci_acl_data_fragment_assembler_and_enqueue` (`0x8002a3d8`, Pass 6 cont. 3)
+— alternate fast-path when `field_0x179==2` bypasses multi-fragment reassembly.
+
+**Confidence:** HIGH — caller already documented this function as "single-packet direct TX";
+decompile confirms HW descriptor programming via already-named
+`program_active_tx_descriptor_slots_to_hw_registers`; sits in established ACL TX cluster.
+
+Region unnamed count after this pass: **274** (275 minus this rename). Live named **1647** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

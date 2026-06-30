@@ -9521,8 +9521,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (37);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (38): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (275 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (38) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002b020`→
+          `transmit_acl_single_packet_direct_via_hw_tx_descriptor`
+          (228B, HIGH). ACL single-packet direct TX fast-path: optional pre-hook
+          allocates buffer, builds one HW TX descriptor, programs via
+          `program_active_tx_descriptor_slots_to_hw_registers`, LMP-handle
+          dispatch; caller `hci_acl_data_fragment_assembler_and_enqueue`.
+          274 unnamed remain; live named 1647.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (38);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (39): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (274 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
