@@ -282,7 +282,7 @@ each other on content alone).
 | `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
 | `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear`. See Pass 52do | HIGH |
 | `0x80047304` | 780B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear` — HCI/LMP fragment-reassembly handler (role-bit-clear variant); conn `+0x2c` accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` + `setup_type3_esco_sco_conn_record_with_role_bit_clear`; completion walks `+0x20` chain via `prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`. See Pass 52dp | HIGH |
-| `0x8004cb48` | 722B | Calls the known eSCO table processor `FUN_80044730` twice — strong structural link to the eSCO cluster. | MEDIUM-HIGH |
+| `0x8004cb48` | 722B | `program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f` — eSCO slot programmer for LMP PDU type `0x22`; `esco_sco_param_negotiate_and_stage` + 0x1ac-stride field writes; LMP `0x26f` emit + VSC fc95 trigger. See Pass 52dq | HIGH |
 | `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
 | `0x80046900` | 682B | Validates packet-type/role bitmask fields; plausible HCI command parameter validator for a multi-entry SCO/eSCO table, not individually confirmed beyond shape. | MEDIUM-HIGH |
@@ -4801,5 +4801,29 @@ chain via `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` (`+0x11` used
 Post-rename: **149 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1489**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
-`0x8004cb48` (722B, xrefs:0).
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-31
+`0x80047c50` (700B, xrefs:0).
+
+## Pass 52dq (2026-06-30) — >150B rank-30 eSCO slot programmer from LMP 0x22 PDU rename
+
+**>150B rank-30 decompiled+renamed (HIGH):** `FUN_8004cb48` →
+`program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f` (722B, 0 xrefs) via
+`RenamePass52dqRegion80040000Fun8004cb48.java` (`renamed=1`, live-verified).
+
+eSCO/SCO LMP PDU processor for length-type `0x22` (34-byte payload): validates buffer budget
+against computed header+payload size; resolves SCO link-type from role context via
+`resolve_parent_context_by_role` + `map_sco_link_type_to_hw_register_code`; IRQ-off sets
+pending bit 2 on the `0x1ac`-stride slot struct entry; stages negotiated params via
+`esco_sco_param_negotiate_and_stage`; copies TX/RX window/packet-type fields from staged
+negotiation table or direct PDU bytes into slot fields `+0x2d..+0x32`/`+0x22..+0x2a`; on
+active-slot path (`field3_0x3` bit 1) emits LMP status `0x26f` via
+`possible_logger_called_if_no_patch3` and triggers
+`conn_link_quality_history_reset_and_vsc_0xfc95_trigger`. Returns consumed byte count.
+Sibling of `esco_sco_lmp_pdu_validate_negotiate_and_dispatch` and the eSCO cluster around
+`esco_packet_type_validate_and_set_air_mode`.
+
+Post-rename: **148 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1490**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-31
+`0x80047c50` (700B, xrefs:0).

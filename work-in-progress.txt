@@ -8055,8 +8055,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dq: continue >150B cold-triage
-          — decompile+rename refreshed rank-30 `0x8004cb48` (722B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dq (2026-06-30): decompiled+
+          renamed rank-30 `FUN_8004cb48`→`program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f`
+          (722B, HIGH). eSCO slot programmer for LMP PDU type `0x22`; validates buffer
+          budget; `esco_sco_param_negotiate_and_stage` + 0x1ac-stride field writes; LMP
+          `0x26f` emit + `conn_link_quality_history_reset_and_vsc_0xfc95_trigger` on
+          active path. 0 xrefs (indirect dispatch). 148 unnamed in-region; live named 1490.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dr: continue >150B cold-triage
+          — decompile+rename refreshed rank-31 `0x80047c50` (700B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
