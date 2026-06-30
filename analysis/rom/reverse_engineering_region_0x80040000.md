@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 125 functions in tier, 48 renamed HIGH (Passes 52–52be). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52be, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 124 functions in tier, 49 renamed HIGH (Passes 52–52bf). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bf, 2026-06-30).
 
 ## Overview
 
@@ -2887,3 +2887,37 @@ Post-rename: **210 unnamed** in-region (124 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-50+
 substantive candidate; skip rank-1–49 artifacts and already-done ranks.
+
+## Pass 52bf (2026-06-30) — rank-50 one-shot armed callback dispatch rename
+
+**Refreshed cold-triage (ranks 1-49 skipped as artifacts or already done):** rank-50
+`0x8004f214` (36B, 1 xref) — substantive one-shot armed callback dispatcher in the
+`0x8004f2xx` credit-scheduler / cmd-type-0xb dispatch cluster (sibling of Pass 52l's
+`get_credit_scheduler_context_active_entry_ptr` and Pass 52bc's teardown-hook triplet).
+
+**Rank-50 decompiled and renamed (HIGH):** `FUN_8004f214` →
+`invoke_armed_one_shot_callback_if_byte_0x20_set` (36B) via
+`RenamePass52bfRegion80040000Fun8004f214.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_armed_one_shot_callback_if_byte_0x20_set(void)
+{
+  puVar1 = PTR_DAT_8004f238;
+  if (puVar1[0x20] != '\0') {
+    puVar2 = (undefined4 *)PTR_DAT_8004f23c;
+    (*(code *)*puVar2)();
+    puVar1[0x20] = 0;
+  }
+}
+```
+
+When byte `+0x20` of global state at `PTR_DAT_8004f238` is armed, invokes the registered
+one-shot callback fptr at `PTR_DAT_8004f23c` and clears the flag. Sole caller:
+`unknown_fptr_index0` case `0xb` (cmd type 111) — runs immediately before that case
+fans out pending callback bits in `PTR_PTR_80013bac[7]` (low 2 bits → `PTR_DAT_80013bbc`,
+bit 2 → `PTR_DAT_80013bb0`). Deferred-callback prelude in the fptr-index-0 dispatch table.
+
+Post-rename: **209 unnamed** in-region (123 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-51+
+substantive candidate; skip rank-1–50 artifacts and already-done ranks.

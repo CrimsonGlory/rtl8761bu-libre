@@ -7458,9 +7458,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52be;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bf: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-50+ substantive candidate;
-          skip rank-1–49 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bf (2026-06-30): decompiled+
+          renamed rank-50 `FUN_8004f214`→`invoke_armed_one_shot_callback_if_byte_0x20_set`
+          (36B, HIGH). One-shot armed callback dispatch when global state byte `+0x20`
+          set; caller `unknown_fptr_index0` case 0xb before pending-bit fan-out.
+          209 unnamed in-region (123 in 1-150B tier); live named 1429.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bg: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-51+ substantive candidate;
+          skip rank-1–50 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
