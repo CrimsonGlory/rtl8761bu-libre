@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 94 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fs, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 93 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ft, 2026-06-30).
 
 ## Overview
 
@@ -6546,5 +6546,47 @@ Dispatches the registered teardown hook at `PTR_DAT_80040908` with opcode
 
 Post-rename: **94 unnamed** in-region (94 in 1-150B tier); live named **1544**.
 
+**Next:** superseded by Pass 52ft below.
+
+## Pass 52ft (2026-06-30) — 1-150B rank-1–3 artifact triage + rank-4 subopcode descriptor init rename
+
+**Cold-triage (refreshed):** 94 unnamed 1-150B remain. rank-1 `0x8004a2e4`
+(10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B — artifact);
+rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x800425e0`
+(4 xrefs, 76B); rank-5 `0x80043038` (4 xrefs, 50B).
+
+**Rank-1–3 triaged (non-function artifacts):** `0x8004a2e4`, `0x80045b94`,
+`0x80048934` — all 1B mis-disassembly artifacts (`halt_baddata()`).
+Substantive work at rank-4.
+
+**1-150B rank-4 decompiled+renamed (HIGH):** `FUN_800425e0` →
+`init_conn_subopcode_slot_descriptor_from_timing_templates`
+(76B, 4 xrefs) via
+`RenamePass52ftRegion80040000Fun800425e0.java` (`renamed=1`, live-verified).
+
+```c
+void init_conn_subopcode_slot_descriptor_from_timing_templates(uint index)
+{
+  if (index < 0xc) {
+    desc = PTR_DAT_8004262c + index * 8;
+    desc[1] = 2;
+    desc[2] = 2;
+    desc[4..6] = timing from PTR_DAT_80042630/34 (index 8-11)
+                 or PTR_DAT_80042638/3c (index 0-7);
+    desc[3] = 0xff;   // caller overwrites with BOS conn slot index
+    desc[0] = 1;      // active/initialized
+  }
+}
+```
+
+Per-subopcode 8-byte slot-descriptor initializer for indices 0–11. Populates
+status bytes and timing fields from four template tables; leaves byte `+3` as
+`0xff` sentinel for `init_subopcode_slot_descriptor_and_assign_conn_index`
+(`0x80036370`) to overwrite with the BOS connection slot index. Also called
+in a 12-iteration loop from
+`reset_conn_subsystem_global_state_and_reinit_slot_entries` (`0x800442bc`).
+
+Post-rename: **93 unnamed** in-region (93 in 1-150B tier); live named **1545**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next substantive
-candidate (rank-3 `0x80045b94` if artifact, else rank-5 `0x800425e0` 76B).
+candidate (rank-5 `0x80043038` 50B or rank-7 `0x8004b170` 88B).

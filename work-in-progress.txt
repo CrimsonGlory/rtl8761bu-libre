@@ -8593,10 +8593,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fs;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ft: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ft (2026-06-30): triaged rank-1–3
+          as 1B artifacts; decompiled+renamed rank-4
+          `FUN_800425e0`→`init_conn_subopcode_slot_descriptor_from_timing_templates`
+          (76B, HIGH). Per-subopcode 8-byte slot descriptor init from timing
+          templates; 4 xrefs. 93 unnamed in-region; live named 1545.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ft;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fu: continue 1-150B cold-triage
           — decompile+rename next substantive unnamed 1-150B candidate (run
-          ColdTriageRegion80040000Pass52fs.java or successor for fresh rank;
-          skip rank-1 artifact `0x8004a2e4`).
+          ColdTriageRegion80040000Pass52ft.java or successor for fresh rank;
+          skip rank-1–3 artifacts `0x8004a2e4`/`0x80045b94`/`0x80048934`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
