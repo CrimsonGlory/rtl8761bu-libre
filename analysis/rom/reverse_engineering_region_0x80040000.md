@@ -4207,5 +4207,26 @@ pipeline — callee of `atomically_take_conn_list_a_collect_overflow_and_schedul
 Post-rename: **172 unnamed** in-region (95 in 1-150B tier unchanged); **77** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-11 `0x8004fd6c`
-(226B, 3 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cr below.
+
+## Pass 52cr (2026-06-30) — >150B rank-11 channel-slot enable/refcount setter rename
+
+**>150B rank-11 decompiled and renamed (HIGH):** `FUN_8004fd6c` →
+`set_channel_slot_enable_refcount_and_conn_record_mode` (226B, 3 xrefs) via
+`RenamePass52crRegion80040000Fun8004fd6c.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 5, 2026-06-23). Gated by
+`is_conn_record_pkt_modes_cleared_for_free(param_3)`; for slot index `param_1<4`
+switches on operation code `param_2-1` over global 4-entry × 7-byte-stride table
+`PTR_DAT_8004fe60`: op 1 programs 2-bit mode nibbles into conn-record `+0x1e`
+and sets enable bit 1; ops 2/4 clear enable bit; ops 5/6 set/clear refcount bit
+2 with shared counter increment/decrement at `puVar1[1]`; invalid index logs
+error `0xd2`. Per-channel-slot enable/ref-count state-machine setter — callee of
+`arm_lmp_procedure_slot_pending_by_active_link_count` caller chain (HCI sync-conn
+param commit) and `le_channel_selection_algorithm_event_dispatch` (region
+`0x80050000`).
+
+Post-rename: **171 unnamed** in-region (95 in 1-150B tier unchanged); **76** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-12 `0x8004b898`
+(194B, 3 xrefs).
