@@ -6171,6 +6171,34 @@ live named **1531**.
 Post-rename: **106 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1532**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-7
-unnamed >150B candidate (11 remain; run `ColdTriageRegion80040000Pass52eu.java`
+**Next:** superseded by Pass 52fh below.
+
+## Pass 52fh (2026-06-30) — >150B rank-7 bitmap-pool entry remove HCI handler rename
+
+**>150B rank-7 decompiled+renamed (HIGH):** `FUN_80048ef8` →
+`hci_bitmap_pool_entry_remove_gated_handler_send_cmd_complete`
+(172B, 0 xrefs in cold-triage) via
+`RenamePass52fhRegion80040000Fun80048ef8.java` (`renamed=1`, live-verified).
+
+172B HCI command handler in the `0x80048exx`/`0x80048fxx` bitmap-pool cluster
+(sibling of HW-reg pool handlers at `0x800499xx`, but targets pool type 2 per
+`remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot`):
+
+- **Re-entrancy gate:** bit-2 of pool state at `_FUN_80048fa4+0x14dc` set →
+  status `0x12`.
+- **Index validation:** pool-index byte at `param+3` must be `< 2`.
+- **State gates:** conn-array fields at `_FUN_80048fa4+0x28`/`+0x44`/`+0x1a4`,
+  `PTR_DAT_80048fa8` bit0, `PTR_PTR_80048fac`/`PTR_PTR_80048fb0` pool-state
+  bytes — any failure → status `0x0c`.
+- **Remove path:** on success calls
+  `remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(2, index, bdaddr)`
+  then `noop_handler_stub()`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **105 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1533**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (10 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).

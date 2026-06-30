@@ -8478,9 +8478,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fh: continue refreshed >150B
-          cold-triage — decompile+rename next rank-7 unnamed >150B candidate
-          (11 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fh (2026-06-30): decompiled+
+          renamed rank-7 `FUN_80048ef8`→`hci_bitmap_pool_entry_remove_gated_handler_send_cmd_complete`
+          (172B, HIGH). Bitmap-pool (type-2) entry remove HCI handler; re-entrancy
+          gate (bit-2 pool state → status `0x12`), index byte `<2`, conn-array/
+          pool-state guards (failure → `0x0c`), `remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(2,…)`
+          + `noop_handler_stub()`; 4-byte Command Complete. 10 unnamed >150B;
+          105 unnamed in-region; live named 1533.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fi: continue refreshed >150B
+          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
+          (10 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
