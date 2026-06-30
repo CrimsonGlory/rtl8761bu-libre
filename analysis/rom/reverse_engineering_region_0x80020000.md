@@ -2560,4 +2560,38 @@ match the documented SSP Number / DHkey Check pairing cluster.
 
 Region unnamed count after this pass: **249** (250 minus this rename). Live named **1672** global.
 
+**Next:** superseded by Pass 6 continuation (64).
+
+## Pass 6 continuation (64) (2026-06-30) — HCI Authentication Requested `FUN_80023340`
+
+Decompiled and renamed:
+**`FUN_80023340` → `fHCI_Authentication_Requested_0x11`**
+(160B, HIGH) via `RenamePass6Region80020000Fun80023340.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (160B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=249` at pass start).
+
+**Mechanism:** HCI Authentication Requested (OGF1 OCF 0x11 / opcode `0x0411`) command
+handler, dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` case `0x411`. Resolves
+connection slot via `FUN_800231bc`; on failure returns `2` (router emits Command Status
+with error). On success emits `send_evt_HCI_Command_Status` with status `0`. Gates on
+link-type byte `*crypto < 0x17`; invalid types emit
+`send_evt_HCI_Authentication_Complete_0x06` with error `0x0c`.
+- Link types `0x02`/`0x05`/`0x0c` (mask `0x1022`): set `crypto+0x50=1`, delegate to
+  `FUN_80022f9c` (link-key lookup → `apply_link_key_and_dispatch_auth_pairing_flow` or
+  `send_evt_HCI_Link_Key_Request`).
+- Other types with `DAT_800233e4` bit set: set `crypto+0x50=1`, copy 16B `crypto+2` →
+  `crypto+0x61`, call `FUN_80025164` (AU_RAND/E1 path), `set_arg1_1_to_arg2(crypto,7)`.
+- Other types without bit: auth-complete error `0x0c`.
+Always finishes via `FUN_80023fb8(crypto, 0)`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (1 site at `0x80023534`, opcode
+`0x411` branch).
+
+**Confidence:** HIGH — router decompile confirms opcode `0x411`; auth-cluster callees
+(`FUN_80022f9c`, `FUN_80025164`, `FUN_80023fb8`, `send_evt_HCI_Authentication_Complete_0x06`)
+match documented link-key/encryption HCI handlers in `0x80023xxx`.
+
+Region unnamed count after this pass: **248** (249 minus this rename). Live named **1673** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

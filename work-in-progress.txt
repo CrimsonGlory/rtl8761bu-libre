@@ -9757,8 +9757,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (63);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (64): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (249 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (64) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80023340`→`fHCI_Authentication_Requested_0x11`
+          (160B, HIGH) — HCI Authentication Requested 0x0411; link-type branches to
+          link-key lookup or AU_RAND/E1 path; caller `HCI_Write_Simple_Pairing_Debug_Mode`;
+          248 unnamed remain; live named 1673.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (64);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (65): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (248 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
