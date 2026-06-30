@@ -1754,7 +1754,8 @@ descriptor from payload length (`param_3`) and packet-size field (`param_2`), do
 (3-slot vs 1-slot packet-type flag). Programs descriptor via
 `program_active_tx_descriptor_slots_to_hw_registers` (1 slot, type bits from conn
 record `+0x1a` low 2 bits). Resolves LMP handle via `called_by_fHCI_Read_LMP_Handle_3`;
-if absent calls `FUN_8003e0d4` to enqueue, else `FUN_8002af48` completion check then
+if absent calls `FUN_8003e0d4` to enqueue, else
+`enqueue_acl_tx_descriptor_to_per_handle_pending_queue` completion check then
 buffer cleanup via `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`.
 
 **Callers:** `hci_acl_data_fragment_assembler_and_enqueue` (`0x8002a3d8`, Pass 6 cont. 3)
@@ -1963,5 +1964,41 @@ dispatcher; crypto sub-state values `0x0b`/`0x0c`/`0x19` align with AU_RAND/SRES
 pairing cluster documented in Pass 2/3.
 
 Region unnamed count after this pass: **268** (269 minus this rename). Live named **1653** global.
+
+**Next:** superseded by Pass 6 continuation (45).
+
+## Pass 6 continuation (45) (2026-06-30) — ACL TX descriptor per-handle enqueue `FUN_8002af48`
+
+Decompiled and renamed:
+**`FUN_8002af48` → `enqueue_acl_tx_descriptor_to_per_handle_pending_queue`**
+(200B, HIGH) via `RenamePass6Region80020000Fun8002af48.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (200B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=268` at pass start). Tied at 200B with
+`FUN_80022450`; selected `FUN_8002af48` first by sort order. Sibling in the
+`0x8002b0xx` ACL TX-descriptor cluster alongside
+`transmit_acl_single_packet_direct_via_hw_tx_descriptor` (Pass 6 cont. 38).
+
+**Mechanism:** Enqueues a built HW TX descriptor buffer into one of three per-active-handle
+pending singly-linked queues. Extracts 12-bit connection handle from descriptor dword
+`*param_1 >> 8 & 0xfff`, maps it to slot index 0/1/2 by matching against the three
+active-handle ushorts at `PTR_DAT_8002b010+0x18`/`+0x4c`/`+0x80` (same 3-slot ×0x34
+stride pattern as `hci_acl_data_fragment_assembler_and_enqueue`'s
+`PTR_DAT_8002a830`). Allocates a queue node from free-pool `PTR_PTR_8002b01c`,
+links descriptor pointer into per-slot queue at `PTR_DAT_8002b014 + index×0x34`
+(head/tail/count at `+0x0`/`+0x4`/`+0x12`), under IRQ disable/enable. Returns 1 on
+success, 0 on invalid handle/empty pool (logs via `possible_logging_function__var_args`).
+
+**Callers:** `transmit_acl_single_packet_direct_via_hw_tx_descriptor` — after
+`called_by_fHCI_Read_LMP_Handle_3` succeeds and HW descriptor is programmed, this
+enqueue is the LMP-handle-present completion path (alternate when handle lookup fails:
+`FUN_8003e0d4`). Second caller xref_in=2 not individually resolved this pass.
+
+**Confidence:** HIGH — decompile confirms standard linked-list enqueue idiom with
+3-handle-slot dispatch matching ACL assembler cluster; documented caller path in
+`transmit_acl_single_packet_direct_via_hw_tx_descriptor` decompile; sits at expected
+offset between HW descriptor builder and buffer cleanup.
+
+Region unnamed count after this pass: **267** (268 minus this rename). Live named **1654** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
