@@ -2001,4 +2001,36 @@ offset between HW descriptor builder and buffer cleanup.
 
 Region unnamed count after this pass: **267** (268 minus this rename). Live named **1654** global.
 
+**Next:** superseded by Pass 6 continuation (46).
+
+## Pass 6 continuation (46) (2026-06-30) — per-connection crypto struct init `FUN_80022450`
+
+Decompiled and renamed:
+**`FUN_80022450` → `init_per_connection_crypto_struct_for_bos_slot`**
+(200B, HIGH) via `RenamePass6Region80020000Fun80022450.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (200B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=267` at pass start). Was tied at 200B with
+`FUN_8002af48` (renamed Pass 6 cont. 45); now first by sort order. Sits in the
+`0x80022xxx` connection/crypto-init cluster alongside encryption finalizers and
+`apply_link_key_and_dispatch_auth_pairing_flow`.
+
+**Mechanism:** Zero-initializes a 536-byte (`0x218`) per-connection crypto record and binds
+it to `big_ol_struct[slot]._x58_crypto_struct_at_least_0x27_big`. Slot 0 uses base pointer
+`PTR_DAT_80022518`; slots ≥1 index into `PTR_DAT_8002251c + (slot−1)×0x218`. Sets sentinel
+bytes at `+0x1ec..+0x1ef` to `0xff`, clears `+0x1f0`. When link-type byte `*record` is in
+ACL range (`(*byte − 9) < 0x18`), consults feature bitmasks `DAT_80022524`/`DAT_80022528`
+and may call `FUN_80029b64` (HCI Link Key Type Changed notifier when `bdaddr_random` set)
+with mode 1/2/3. Clears pending callback at `+0x1e8` via `FUN_80025634` if non-zero.
+Defaults `+0x24/+0x25` to `0xff`, copies config byte from `PTR_DAT_8002252c[2]` into `+0x23`.
+
+**Callers:** xref_in=2; individual callers not resolved this pass (project lock race on
+`ListXrefsTo80022450.java`).
+
+**Confidence:** HIGH — decompile confirms standard memset+bind idiom for `_x58_crypto_struct`
+pool, feature-bit dispatch to `FUN_80029b64`, and `FUN_80025634` pairing-continuation
+teardown hook consistent with sibling encryption/pairing handlers in this cluster.
+
+Region unnamed count after this pass: **266** (267 minus this rename). Live named **1655** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
