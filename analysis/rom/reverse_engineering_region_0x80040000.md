@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 146 functions in tier, 33 renamed HIGH (Passes 52–52aj). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aj, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 145 functions in tier, 34 renamed HIGH (Passes 52–52ak). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ak, 2026-06-30).
 
 ## Overview
 
@@ -2038,5 +2038,43 @@ function-pointer registration).
 
 Post-rename: **231 unnamed** in-region (145 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-29+
-substantive candidate; skip rank-1–28 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-30+
+substantive candidate; skip rank-1–29 artifacts and already-done ranks.
+
+## Pass 52ak (2026-06-30) — rank-29 HW-crypto digest HCI handler rename
+
+**Refreshed cold-triage (ranks 1-28 skipped as artifacts or already done):** rank-29
+`0x800492d8` (132B, 1 xref) — substantive HCI command handler in the upper-half
+`0x80049xxx` cluster (direct caller of `hw_crypto_compute_8word_in_8word_out`).
+
+**Rank-29 decompiled and renamed (HIGH):** `FUN_800492d8` →
+`hci_hw_crypto_dual_block_digest_handler_send_cmd_complete` (132B) via
+`RenamePass52akRegion80040000Fun800492d8.java` (`renamed=1`, live-verified).
+
+```c
+uint hci_hw_crypto_dual_block_digest_handler_send_cmd_complete(short *hci_cmd)
+{
+  optimized_memcpy(buf_a, hci_cmd + 3, 0x10);
+  optimized_memcpy(buf_b, hci_cmd + 0x13, 0x10);
+  hw_crypto_compute_8word_in_8word_out(buf_a, buf_b, digest_out);
+  status_byte = (*hci_cmd == 0) ? 0 : global.field_0x165 ? global.field_0x165 : 1;
+  pack_cmd_complete_response(status_byte, *hci_cmd, digest_out);
+  hci_event_sender(0xe, &response, 0x14);
+  return 0;
+}
+```
+
+HCI command handler: copies two 16-byte input blocks from the command payload at
+`+3` and `+0x13`, runs `hw_crypto_compute_8word_in_8word_out`, packs a 20-byte
+Command Complete (event `0xe`) response with status bytes derived from the first
+command word and `PTR_struct_of_at_least_0x300_size_8004935c.field_0x165`, plus
+the 16-byte HW-crypto digest. Direct caller of `hw_crypto_compute_8word_in_8word_out`
+(documented in region `0x80050000` Pass 35) — not a caller of
+`match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (Pass 12ga doc error
+corrected). Sibling pattern of `hci_link_policy_param_setup_handler_send_cmd_complete`
+(Pass 52w). No direct callers found (function-pointer registration).
+
+Post-rename: **230 unnamed** in-region (144 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-30+
+substantive candidate; skip rank-1–29 artifacts and already-done ranks.

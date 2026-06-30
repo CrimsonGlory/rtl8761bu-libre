@@ -7277,9 +7277,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aj;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ak: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-29+ substantive candidate;
-          skip rank-1–28 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ak (2026-06-30): decompiled+
+          renamed rank-29 `FUN_800492d8`→`hci_hw_crypto_dual_block_digest_handler_send_cmd_complete`
+          (132B, HIGH) — HCI handler copying two 16-byte cmd blocks, running
+          `hw_crypto_compute_8word_in_8word_out`, packing 20-byte Command Complete
+          (0xe) with status + digest; direct hw-crypto caller (not Pass 12ga's
+          misattributed callee of feature-page matcher). 230 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ak;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52al: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-30+ substantive candidate;
+          skip rank-1–29 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
