@@ -7769,8 +7769,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cm: continue >150B cold-triage
-          — decompile+rename rank-6 `0x8004ef08` (526B, 4 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cm (2026-06-30): decompiled+
+          renamed rank-6 `FUN_8004ef08`→`dispatch_inflight_timer_queue_drain_pending_and_promote_next`
+          (526B, HIGH, 4 xrefs). Dual-list timer/event-queue dispatch over
+          in-flight/pending/active list heads at `PTR_DAT_8004f118`; dequeue
+          counterpart to Pass 52ck's `dual_list_sorted_event_insert_with_overlap_pushback`.
+          176 unnamed in-region (81 in >150B tier); live named 1462.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cn: continue >150B cold-triage
+          — decompile+rename rank-7 `0x8004e5ac` (188B, 4 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

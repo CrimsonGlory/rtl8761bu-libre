@@ -4102,5 +4102,26 @@ packet-type sweep).
 Post-rename: **177 unnamed** in-region (95 in 1-150B tier unchanged); **82** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-6 `0x8004ef08`
-(526B, 4 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cm below.
+
+## Pass 52cm (2026-06-30) — >150B rank-6 dual-list timer queue dispatch rename
+
+**>150B rank-6 decompiled and renamed (HIGH):** `FUN_8004ef08` →
+`dispatch_inflight_timer_queue_drain_pending_and_promote_next` (526B, 4 xrefs)
+via `RenamePass52cmRegion80040000Fun8004ef08.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 4/5, 2026-06-23). Timer/event-queue dispatch
+over three list heads at `PTR_DAT_8004f118` (`+4` in-flight, `+8` pending,
+`+0x10` active): dispatches in-flight entry via `PTR_DAT_8004f128` callback after
+budget check (`try_reschedule_timer_queue_entry_deadline_within_budget`), drains
+pending list entries that exceed budget (unlink + dispatch), moves active-list
+entries back into sorted pending via `sorted_event_list_insert_by_relative_key`
+while wraparound-masked delta `DAT_8004f12c` budget remains, then promotes next
+entry to in-flight (`+4`) via `PTR_DAT_8004f13c` arm callback. Dequeue/dispatch
+counterpart to Pass 52ck's `dual_list_sorted_event_insert_with_overlap_pushback`
+insert primitive and Pass 52ab/52ay deadline-reschedule siblings.
+
+Post-rename: **176 unnamed** in-region (95 in 1-150B tier unchanged); **81** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-7 `0x8004e5ac`
+(188B, 4 xrefs).
