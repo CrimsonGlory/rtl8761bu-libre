@@ -2534,4 +2534,30 @@ PIN/key operand via `swap_byte_order`, packs 16B derived input, invokes
 
 Region unnamed count after this pass: **250** (251 minus this rename). Live named **1671** global.
 
+**Next:** superseded by Pass 6 continuation (63).
+
+## Pass 6 continuation (63) (2026-06-30) — SSP pending-LMP dispatcher `FUN_80027c20`
+
+Decompiled and renamed:
+**`FUN_80027c20` → `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`**
+(162B, HIGH) via `RenamePass6Region80020000Fun80027c20.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (162B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=250` at pass start).
+
+**Mechanism:** Per-connection SSP pairing continuation gate keyed on pending LMP opcode
+byte at `crypto_struct+1`. Early-outs unless global `PTR_DAT_80027cc8[2]&0x80` is set or
+`ret_bool_based_on_crypto_struct_0x50` XOR-matches the role bit from `param_1+4`.
+- Pending **`0x40`** (SSP Number): public BD_ADDR (`bdaddr_random_==0`) → pairing state
+  `0x3f` via `set_arg1_1_to_arg2`; random BD_ADDR → `FUN_800245fc` encryption-on toggle.
+- Pending **`0x48`** (DHkey Check): random BD_ADDR → `FUN_80024050` stores byte at
+  `crypto+0x23` then `FUN_80024560`; public BD_ADDR → pairing state `0x47`.
+
+**Callers:** `FUN_80027d4c` (sole xref from `0x80027da6`).
+
+**Confidence:** HIGH — decompiled; pending-LMP byte values and bdaddr-random branches
+match the documented SSP Number / DHkey Check pairing cluster.
+
+Region unnamed count after this pass: **249** (250 minus this rename). Live named **1672** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
