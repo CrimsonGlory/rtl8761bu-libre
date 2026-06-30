@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 95 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fr, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 94 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fs, 2026-06-30).
 
 ## Overview
 
@@ -6512,6 +6512,39 @@ at `0x800492d8`):
 Post-rename: **0 unnamed >150B** (tier exhausted); **95 unnamed** in-region
 (95 in 1-150B tier unchanged); live named **1543**.
 
-**Next:** resume 1-150B cold-triage — decompile+rename next rank-1 unnamed
-1-150B candidate (run `ColdTriageRegion80040000Pass52.java` or successor for
-fresh rank list).
+**Next:** superseded by Pass 52fs below.
+
+## Pass 52fs (2026-06-30) — 1-150B rank-1 artifact triage + rank-2 inquiry teardown rename
+
+**Cold-triage (refreshed):** 95 unnamed 1-150B remain. rank-1 `0x8004a2e4`
+(10 xrefs, 1B — artifact, unchanged from Pass 52h); rank-2 `0x800408ec`
+(6 xrefs, 26B); rank-3 `0x80045b94` (6 xrefs, 1B — likely artifact).
+
+**Rank-1 triaged (non-function artifact):** `0x8004a2e4` — decompile returns
+`halt_baddata()`; 1-byte mis-disassembly artifact. Substantive work skips to
+rank-2.
+
+**1-150B rank-2 decompiled+renamed (HIGH):** `FUN_800408ec` →
+`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize`
+(26B, 6 xrefs) via
+`RenamePass52fsRegion80040000Fun800408ec.java` (`renamed=1`, live-verified).
+
+```c
+void dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize(void)
+{
+  (*(code *)*PTR_DAT_80040908)(0, 0x8e);
+  FUN_800408cc();   // dispatches fptr 0x81 chain
+}
+```
+
+Shared inquiry-lifecycle teardown helper invoked from both inquiry-entry and
+inquiry-exit HCI paths — e.g. `fHCI_inquiry_cancel` (`0x80036d44`),
+`fHCI_Exit_Periodic_Inquiry_Mode_0x04` (`0x80041c18`), and
+`configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` (Pass 52eg).
+Dispatches the registered teardown hook at `PTR_DAT_80040908` with opcode
+`0x8e`, then chains into `FUN_800408cc` (fptr `0x81` + further finalize).
+
+Post-rename: **94 unnamed** in-region (94 in 1-150B tier); live named **1544**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename next substantive
+candidate (rank-3 `0x80045b94` if artifact, else rank-5 `0x800425e0` 76B).

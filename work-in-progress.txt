@@ -8585,9 +8585,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fs: resume 1-150B cold-triage
-          — decompile+rename next rank-1 unnamed 1-150B candidate (run
-          ColdTriageRegion80040000Pass52.java or successor for fresh rank).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fs (2026-06-30): triaged rank-1
+          `0x8004a2e4` as 1B artifact; decompiled+renamed rank-2
+          `FUN_800408ec`→`dispatch_inquiry_lifecycle_teardown_fptr_0x8e_and_finalize`
+          (26B, HIGH). Shared inquiry teardown fptr 0x8e + finalize chain; 6
+          xrefs. 94 unnamed in-region; live named 1544.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fs;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ft: continue 1-150B cold-triage
+          — decompile+rename next substantive unnamed 1-150B candidate (run
+          ColdTriageRegion80040000Pass52fs.java or successor for fresh rank;
+          skip rank-1 artifact `0x8004a2e4`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
