@@ -280,7 +280,7 @@ each other on content alone).
 |---|---|---|---|
 | `0x8004c4a8` | 894B | Large handler, shape and field-touches not yet isolated to one specific purpose. | MEDIUM |
 | `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
-| `0x80047628` | 832B | Near-identical sibling shape to `0x80047304` — likely a paired HCI command for chunked variable-length data (e.g. a read/write variant pair). **Pass 53 update (region `0x80050000`'s Pass 53):** mechanism now confirmed — an HCI-command/LMP-PDU fragment-reassembly handler: looks up a connection by handle, validates a role/type byte + length field, copies received payload bytes into a per-connection sub-record buffer (allocating a fresh sub-record via `setup_type3_esco_sco_conn_record_with_role_bit_set` + the newly-named `find_tail_of_payload_subrecord_chain_at_field0x50` when the current one fills), terminates via `hci_event_sender(0xe,...)` (Command Complete). Exact opcode/command identity still not pinned down — stays MEDIUM-HIGH. | MEDIUM-HIGH |
+| `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `FUN_80047304`. See Pass 52do | HIGH |
 | `0x80047304` | 780B | Sibling of `0x80047628` (see above). **Pass 53 update:** same mechanism, paired with `setup_type3_esco_sco_conn_record_with_role_bit_clear` + `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` (the nested-chain variant) instead. Stays MEDIUM-HIGH. | MEDIUM-HIGH |
 | `0x8004cb48` | 722B | Calls the known eSCO table processor `FUN_80044730` twice — strong structural link to the eSCO cluster. | MEDIUM-HIGH |
 | `0x80047c50` | 700B | Calls `FUN_80044730` (eSCO table processor) — same cluster as `0x8004cb48`. | MEDIUM-HIGH |
@@ -4751,3 +4751,29 @@ live named **1487**.
 
 **Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
 `0x80047628` (832B, xrefs:0).
+
+## Pass 52do (2026-06-30) — >150B rank-30 LMP PDU fragment reassembly (role-bit-set) rename
+
+**>150B rank-30 decompiled+renamed (HIGH):** `FUN_80047628` →
+`reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` (832B, 0 xrefs) via
+`RenamePass52doRegion80040000Fun80047628.java` (`renamed=1`, live-verified).
+
+HCI/LMP variable-length fragment-reassembly handler (role-bit-set variant, sibling of
+`FUN_80047304`): resolves connection by handle via `conn_record_get_4byte_field_by_handle`;
+validates fragment-phase byte at `param+4` (0/2=continue, 1/3=start, 4=start+poll); payload
+length at `param+6`; accumulates running total in conn `+0x2c`; appends bytes into payload
+subrecord chain at conn `+0x50` via `find_tail_of_payload_subrecord_chain_at_field0x50`
+(`+0x11` used-count, `+0x14` buffer ptr); on overflow allocates fresh subrecord via
+`setup_type3_esco_sco_conn_record_with_role_bit_set`; new-sequence paths call
+`poll_hw_slot_counter_into_conn_record_field0x3e` (phase 1/3/4); optional hook at
+`PTR_DAT_80047970`; completion teardown via `teardown_conn_hw_resource_subobject_tree_and_free_to_pools`;
+terminates with `hci_event_sender(0xe,...)` Command Complete + status byte; calls
+`conn_diagnostic_batch_dump` before event emit. Exact HCI/LMP opcode identity still not pinned
+(role-bit-set vs role-bit-clear pairing is the distinguishing axis).
+
+Post-rename cold-triage (`ColdTriageRegion80040000Pass52do.java`): **55**
+unnamed in >150B tier; **150 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1488**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
+`0x80047304` (780B, xrefs:0) — role-bit-clear sibling.
