@@ -7658,9 +7658,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bz;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ca: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-81+ substantive candidate;
-          skip rank-1–80 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ca (2026-06-30): decompiled+
+          renamed rank-81 `FUN_8004e7b4`→`compute_weighted_bit_checksum_field_0xb_store_at_0x9`
+          (42B, HIGH, SIMPLE-tier). Weighted-bit checksum over conn-record
+          `field_0xb`→`field_0x9`; standalone variant of logic inlined in
+          `conn_type_dispatch_hook`. 0 xrefs (function-pointer registration).
+          188 unnamed in-region (102 in 1-150B tier); live named 1450.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ca;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cb: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-82+ substantive candidate;
+          skip rank-1–81 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

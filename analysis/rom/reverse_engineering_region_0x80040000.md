@@ -3716,5 +3716,42 @@ handler cluster. No direct callers found (indirect HCI router).
 
 Post-rename: **189 unnamed** in-region (103 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-81+
-substantive candidate; skip rank-1–80 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bz):** rank-81+ — completed Pass 52ca below.
+
+## Pass 52ca (2026-06-30) — rank-81 weighted-bit checksum utility rename
+
+**Refreshed cold-triage (ranks 1-80 skipped as artifacts, deferred, or already done):**
+rank-81 `0x8004e7b4` (42B, 0 xrefs in triage) — substantive weighted-bit
+checksum utility over conn-record `field_0xb` → `field_0x9`; standalone extracted
+variant of the post-dispatch checksum inlined in `conn_type_dispatch_hook`
+(`0x80050810`, uses lookup table `PTR_DAT_800508f4` instead of `PTR_DAT_8004e7e0`).
+Sits in the `0x8004e7xx` conn-record pool allocator neighborhood adjacent to
+rank-83 `FUN_8004e7e4` (free-list pop).
+
+**Rank-81 decompiled and renamed (HIGH):** `FUN_8004e7b4` →
+`compute_weighted_bit_checksum_field_0xb_store_at_0x9` (42B) via
+`RenamePass52caRegion80040000Fun8004e7b4.java` (`renamed=1`, live-verified).
+
+```c
+void compute_weighted_bit_checksum_field_0xb_store_at_0x9(int conn_record)
+{
+  checksum = 1;
+  for (bit = 0; bit < 7; bit++) {
+    if (conn_record->field_0xb & (1 << bit))
+      checksum += PTR_DAT_8004e7e0[bit];
+  }
+  conn_record->field_0x9 = checksum;
+}
+```
+
+Iterates bits 0–6 of flag byte `+0xb`; for each set bit adds the corresponding
+entry from 7-byte lookup table `PTR_DAT_8004e7e0` to a running sum starting at 1;
+stores result at `+0x9`. Same algorithm as the tail of `conn_type_dispatch_hook`
+(documented in `reverse_engineering_conn_type_dispatch_and_esco.md`) but factored
+into a standalone callable with a region-local weight table. No direct callers
+found (function-pointer registration or inlined-duplicate pattern).
+
+Post-rename: **188 unnamed** in-region (102 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-82+
+substantive candidate; skip rank-1–81 artifacts, deferred, and already-done ranks.
