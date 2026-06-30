@@ -1788,7 +1788,7 @@ and `crypto_bignum_add_u8_arrays_with_carry`.
 
 **Callers:** `FUN_8002d378` (unnamed, 2026-06-30) — indexed curve-constant dispatcher:
 when index `< 0x10`, copies two 16-byte constants from `PTR_DAT_8002d3d0`/`d3d4` tables
-then calls this subtract followed by `FUN_8002ccac` on the second constant.
+then calls this subtract followed by `crypto_bignum_sub_u8_byte_arrays_to_dest` on the second constant.
 
 **Confidence:** HIGH — unambiguous MSB-compare + bit-aligned subtract idiom; sole caller
 sits in established SSP/ECDH curve-constant table cluster adjacent to
@@ -1826,5 +1826,35 @@ policy globals `PTR_config_base_80021744`/`PTR_big_ol_struct_80021748`; used at
 connection-setup decision points across LMP and HCI inquiry paths.
 
 Region unnamed count after this pass: **272** (273 minus this rename). Live named **1649** global.
+
+**Next:** superseded by Pass 6 continuation (41).
+
+## Pass 6 continuation (41) (2026-06-30) — SSP/ECDH byte bignum subtract-to-dest `FUN_8002ccac`
+
+Decompiled and renamed:
+**`FUN_8002ccac` → `crypto_bignum_sub_u8_byte_arrays_to_dest`**
+(212B, HIGH) via `RenamePass6Region80020000Fun8002ccac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (212B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=272` at pass start).
+
+**Mechanism:** Big-endian byte-array subtract-to-dest primitive in the SSP/ECDH
+`0x8002ccxx` curve-constant cluster. MSB-first lexicographic compare of `param_1`
+(dest) vs `param_2` (subtrahend) over `param_3` bytes; swaps larger/smaller into
+local buffers, zeros dest, then iterative bit-aligned subtract loop using
+`FUN_8002cc40` (effective bit-length) and `FUN_8002cbc8` (right-shift by N bits),
+XOR-ing aligned chunks into dest. Writes (larger − smaller) unconditionally to
+dest — complement of Pass 6 continuation (39)'s
+`crypto_bignum_sub_u8_byte_arrays_in_place` which no-ops when dest `<` subtrahend.
+
+**Callers:** `FUN_8002d378` (unnamed curve-constant dispatcher) — after
+`crypto_bignum_sub_u8_byte_arrays_in_place(dest, first_constant, 0x10)`, calls
+this with second constant from `PTR_DAT_8002d3d4` table.
+
+**Confidence:** HIGH — unambiguous MSB-compare + bit-aligned subtract idiom shared
+with named in-place sibling; sole caller in established SSP/ECDH curve-constant
+table cluster adjacent to `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`.
+
+Region unnamed count after this pass: **271** (272 minus this rename). Live named **1650** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
