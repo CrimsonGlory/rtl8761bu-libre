@@ -1110,5 +1110,32 @@ Post-rename cold-triage refresh: **255 unnamed** in-region (169 in 1-150B tier).
 Refreshed rank-1 remains `0x8004a2e4` (10 xrefs, 1B — artifact); rank-4
 substantive lead is `0x8004fcb8` (46B, 5 xrefs).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile rank-4
-`0x8004fcb8` (46B, 5 xrefs) or skip rank-1/2/3 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile rank-5
+substantive candidate or skip rank-1/2/3 artifacts.
+
+## Pass 52m (2026-06-30) — rank-4 conn-record free precondition rename
+
+**Refreshed rank-4 decompiled and renamed (HIGH):** `FUN_8004fcb8` →
+`is_conn_record_pkt_modes_cleared_for_free` (46B) via
+`RenamePass52mRegion80040000Fun8004fcb8.java` (`renamed=1`, live-verified).
+
+```c
+bool is_conn_record_pkt_modes_cleared_for_free(conn_rec *rec)
+{
+  bool ok = (rec->field_at_0x08 & 7) == 0;
+  if (!ok)
+    possible_logging_function__var_args(2, 0xd2, 0x1ed, 0xd39, 1,
+                                        PTR_unknown_dat_ref_by_logger_8004fce8,
+                                        rec->field_at_0x08 & 7);
+  return ok;
+}
+```
+
+Returns true only when conn record `+0x08` low 3 bits (`pkt_modes`) are zero —
+the free precondition gate before `FUN_8004fcec` releases the slot back to the
+free pool. Logs error code `0xd2` on failure. Gated callers include
+`FUN_8004fd6c` (SCO/eSCO channel-slot state-machine setter) and
+`conditional_dispatch_LE_channel_selection_algorithm` (region `0x80050000`).
+Documented in `reverse_engineering_conn_record_subsystem.md` §10. 5 xrefs.
+
+Post-rename: **254 unnamed** in-region.
