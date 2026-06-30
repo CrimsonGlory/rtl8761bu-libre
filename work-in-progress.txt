@@ -7704,9 +7704,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ce;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cf: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-86+ substantive candidate;
-          skip rank-1–85 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52cf (2026-06-30): decompiled+
+          renamed rank-86 `FUN_8004e39c`→
+          `store_param_buffer_slot_ptr_with_context_backref`
+          (22B, HIGH, SIMPLE-tier). Thin adapter: when param-buffer context is 0
+          writes slot ptr to `PTR_DAT_8004e3b4+0x10`, else to `context+4`; always
+          backrefs context into value ptr. LMP procedure permission-gate cluster.
+          183 unnamed in-region (97 in 1-150B tier); live named 1455.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cg: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-87+ substantive candidate;
+          skip rank-1–86 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

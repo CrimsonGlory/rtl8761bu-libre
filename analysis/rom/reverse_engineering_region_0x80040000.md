@@ -3893,5 +3893,42 @@ direct callers found.
 
 Post-rename: **184 unnamed** in-region (98 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-86+
-substantive candidate; skip rank-1–85 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52ce):** rank-86+ — completed Pass 52cf below.
+
+## Pass 52cf (2026-06-30) — rank-86 LMP procedure slot ptr-store adapter rename
+
+**Refreshed cold-triage (ranks 1-85 skipped as artifacts, deferred, or already done):**
+rank-86 `0x8004e39c` (22B, 0 xrefs in triage) — substantive thin adapter in the
+LMP procedure permission-gate cluster (`0x8004e2xx`–`0x8004e3xx` neighborhood);
+stores param-buffer slot pointer to global context `PTR_DAT_8004e3b4+0x10` or
+per-context record `+0x4`, then back-references context into the value pointer.
+
+**Rank-86 decompiled and renamed (HIGH):** `FUN_8004e39c` →
+`store_param_buffer_slot_ptr_with_context_backref` (22B) via
+`RenamePass52cfRegion80040000Fun8004e39c.java` (`renamed=1`, live-verified).
+
+```c
+void store_param_buffer_slot_ptr_with_context_backref(int *param_buffer)
+{
+  if (*param_buffer == 0) {
+    *(int *)(PTR_DAT_8004e3b4 + 0x10) = param_buffer[1];
+  }
+  else {
+    *(int *)(*param_buffer + 4) = param_buffer[1];
+  }
+  *(int *)param_buffer[1] = *param_buffer;
+}
+```
+
+Param-buffer layout: `[0]` context pointer (0 selects global `PTR_DAT_8004e3b4`),
+`[1]` slot/value pointer. When context is zero, writes `param_buffer[1]` to
+global+0x10; otherwise writes to `context+4`. Always stores context back into
+`*param_buffer[1]`. Standard function-pointer-registration adapter pattern;
+sibling of `arm_lmp_procedure_slot_pending_by_active_link_count` (`0x8004e340`,
+Pass 52as) and `copy_param_buffer_u16_triplet_to_global_slots` (`0x8004e584`,
+Pass 52cd). No direct callers found.
+
+Post-rename: **183 unnamed** in-region (97 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-87+
+substantive candidate; skip rank-1–86 artifacts, deferred, and already-done ranks.
