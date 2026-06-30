@@ -2483,4 +2483,30 @@ before `FUN_8002cb2c`'s per-round loop; callee of E1/E21/E22 auth wrappers via
 
 Region unnamed count after this pass: **252** (253 minus this rename). Live named **1669** global.
 
+**Next:** superseded by Pass 6 continuation (61).
+
+## Pass 6 continuation (61) (2026-06-30) — E1 derivation `FUN_8002d00c`
+
+Decompiled and renamed:
+**`FUN_8002d00c` → `derive_e1_aco_and_sres_via_safer_plus`**
+(162B, HIGH) via `RenamePass6Region80020000Fun8002d00c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (162B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=252` at pass start). Already analyzed
+at HIGH confidence in `reverse_engineering_encryption_engine.md` §E1 but still carried
+`FUN_*` name.
+
+**Mechanism:** Bluetooth spec **E1** function: two-pass SAFER+ with intermediate
+feedforward/whitening XOR+ADD over 16-byte RAND block using BD_ADDR-derived 6-byte
+padding, `apply_safer_plus_bias1_constants` between passes, output split 4B ACO +
+12B SRES. Calls `safer_plus_block_encrypt` (rounds 0 then 1).
+
+**Callers:** `derive_sres_e1_or_e22_and_send_lmp_response` (`FUN_800251f8`) when
+mode byte `+0x1f1 == 0x06`; second xref_in=2 caller per encryption-engine cluster.
+
+**Confidence:** HIGH — decompile matches E1 structure documented in
+`reverse_engineering_encryption_engine.md` §E1-shaped.
+
+Region unnamed count after this pass: **251** (252 minus this rename). Live named **1670** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
