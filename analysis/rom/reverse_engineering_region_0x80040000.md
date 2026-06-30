@@ -211,7 +211,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x80049d20` | 1476B | Validates a packed parameter block (bandwidth/packet-type/retransmission-window fields with explicit range checks matching SCO/eSCO bounds, e.g. `0x3ffd`/`0xc7b`/`0xc77` window checks), writes results into `big_ol_struct` SCO/eSCO fields at offsets `+0x1a6..+0x1ce`, and terminates with `send_evt_HCI_Command_Status(*param_1, status)` — the canonical "this is an HCI command handler" signature. Parameter shape matches HCI Setup/Accept Synchronous Connection. | **HIGH** — renamed `HCI_Setup_Synchronous_Connection_handler` |
 | `0x80043e04` | 1168B | `program_dual_slot_lmp25c_packet_credits_by_conn_index` — IRQ-off dual-slot LMP-25C packet-credit programmer on 0x84-stride role records; see Pass 52da | **HIGH** |
 | `0x80040a24` | 988B | `process_dual_slot_lmp25c_role_record_packet_completion` — dual-slot role-record LMP-25C packet completion handler; see Pass 52db | **HIGH** |
-| `0x8004147c` | 934B | Already partially documented in `reverse_engineering_lc_lmp_state_machine.md` (referenced via `fptr_DAT_80036f5c` for HCI_Inquiry/0x419/0x43f) as "inquiry-train baseband programming / role-related setup" — dense register-programming, consistent with that prior note. Left unrenamed pending a more specific single-purpose confirmation. | MEDIUM-HIGH |
+| `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
 | `0x80041dac` | 876B | `void FUN_80041dac(uint param_1)` — connection-teardown/cleanup-shaped handler operating on a `param_1`-indexed record; clears multiple fields consistent with link release. No confirmed cross-xref yet. | MEDIUM |
 | `0x8004d294` | 1280B | Large upper-half handler adjacent to the LE Meta Event cluster; plausible event-assembly routine but case/field semantics not individually confirmed this pass. | MEDIUM |
 | `0x8004ce70` | 908B | Already appears (unnamed) in `reverse_engineering_conn_feature_dispatch.md`'s xref list alongside `assoc_w_tLC_RX`/`FUN_80051368`/`FUN_80052f8c` — confirmed participant in the connection/feature dispatch graph, but specific behavior not yet isolated to a single clear purpose. | MEDIUM-HIGH |
@@ -4445,5 +4445,26 @@ successor to Pass 52da's programmer. Inquiry/LAP/role-switch cluster sibling.
 Post-rename: **163 unnamed** in-region (95 in 1-150B tier unchanged); **68** in
 >150B tier; live named **1475**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-22 `0x8004147c`
-(934B).
+## Pass 52dc (2026-06-30) — >150B rank-22 inquiry/esco baseband programmer rename
+
+**>150B rank-22 decompiled+renamed (HIGH):** `FUN_8004147c` →
+`program_inquiry_or_esco_baseband_from_hci_command` (934B) via
+`RenamePass52dcRegion80040000Fun8004147c.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 3, 2026-06-23). HCI command-parameter baseband
+programmer reached via `fptr_DAT_80036f5c` for opcodes `0x401` (Inquiry),
+`0x419` (Create_Connection_Cancel), and `0x43f` (Setup_Synchronous_Connection)
+per `reverse_engineering_lc_lmp_state_machine.md`. IRQ-off path: feature-index
+selector, BOS slot lookup, programs BD_ADDR halves + access-code sync word +
+clock offset via `PTR_DAT_80041838` HW-write vtable (~15 registers incl.
+role/AM_ADDR encode at `0xaa` with `0x2000` bit set when opcode `0x43f`),
+clears role-switch hook via `clear_bos_e4_role_switch_hook_bit`, programs
+channel-table via `or_merge_hw_channel_table_entry_and_indexed_dispatch`,
+optional veto at `PTR_DAT_8004187c`; success arms BB reg `0` value `3`, sets
+`the_0x300->int_0x10=2`, calls `FUN_800362b4`. Inquiry/LAP/role-switch cluster
+sibling of Pass 52da/52db dual-slot LMP-25C programmers.
+
+Post-rename: **162 unnamed** in-region (95 in 1-150B tier unchanged); **67** in
+>150B tier; live named **1476**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-23 `0x80041dac`
+(876B).
