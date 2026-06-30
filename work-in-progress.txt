@@ -6591,8 +6591,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fx: cold-triage next rank-1
-          HANDLER-tier candidate `FUN_800777f6` per `ListHandler80070000.java` (5 remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fx (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800777f6`→`dispatch_vsc_fca1_bb_reg_offset_write_subcases`
+          (168B, HIGH, HANDLER-tier). VSC 0xFCA1 subcase dispatcher: subcases 0–3
+          poll-write BB regs `0x80`/`0x88`/`0x84`/`0x8c` via
+          `poll_bb_reg_ready_write_offset_value_poll_complete` then
+          `log_vsc_fca1_decoded_bb_status_bit`; subcases 4–5 log-only; no direct
+          callers (indirect VSC dispatch). HANDLER-tier unnamed 5→4 remain; live named 1333.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fy: cold-triage next rank-1
+          HANDLER-tier candidate `FUN_800776c8` per `ListHandler80070000.java` (4 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

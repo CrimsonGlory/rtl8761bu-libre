@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fw COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**5** HANDLER-tier unnamed remain in-region; live named **1332** global). Latest: `handle_lmp_489_subcase7_conn_substate_emit_25c_268` (Pass 12fw), `dispatch_lmp_25c_multi_slot_emit_with_config_gates` (Pass 12fv). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800777f6`, 5 remain). See Pass 12fw section below.
+**Status**: Pass 12fx COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**4** HANDLER-tier unnamed remain in-region; live named **1333** global). Latest: `dispatch_vsc_fca1_bb_reg_offset_write_subcases` (Pass 12fx), `handle_lmp_489_subcase7_conn_substate_emit_25c_268` (Pass 12fw). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800776c8`, 4 remain). See Pass 12fx section below.
 
 ## Overview
 
@@ -2417,6 +2417,29 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12fx (2026-06-30) — VSC FCA1 BB reg offset write subcase dispatch `FUN_800777f6`
+
+Decompiled and renamed:
+**`FUN_800777f6` → `dispatch_vsc_fca1_bb_reg_offset_write_subcases`**
+(168B, HIGH, HANDLER-tier) via `RenamePass12fxFun800777f6.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Packed-parameter subcase dispatcher (high byte = subcase 0–5, low byte = write
+value). Subcases 0–3 each call `poll_bb_reg_ready_write_offset_value_poll_complete` at BB register
+offsets `0x80`/`0x88`/`0x84`/`0x8c` respectively (poll mode `0xf`, value from low byte), then
+`log_vsc_fca1_decoded_bb_status_bit(4, 0x71, event_code)`. Subcase 4 logs only (event `0x19e`);
+subcase 5 logs via `possible_logging_function__var_args` with `&DAT_0000465c`. VSC 0xFCA1 /
+BB-init cluster sibling of Passes 12b (`poll_bb_reg_ready_write_offset_value_poll_complete`),
+12av (`log_vsc_fca1_decoded_bb_status_bit`), and 12w (`decode_vsc_fca1_bitfield_and_log_bb_status_flags`).
+
+**Confidence:** HIGH — unambiguous switch-dispatch over named VSC FCA1 mailbox-write + logging
+callees; register-offset mapping is explicit in decompile. No direct callers found via
+`find_callers` (consistent with indirect VSC dispatch / fptr registration).
+
+Live named **1333** (global; in-region unnamed **19**; HANDLER-tier unnamed **4**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800776c8` per
+`ListHandler80070000.java`.
+
 ## Pass 12fw (2026-06-30) — LMP 0x489 subcase-7 conn substate emit `FUN_800708bc`
 
 Decompiled and renamed:
@@ -2437,8 +2460,7 @@ branch; multiple named LMP 0x25C/0x268 emit calls with visible conn-record field
 
 Live named **1332** (global; in-region unnamed **20**; HANDLER-tier unnamed **5**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800777f6` per
-`ListHandler80070000.java`.
+**Next:** superseded by Pass 12fx.
 
 ## Pass 12fv (2026-06-30) — LMP 0x25C multi-slot emit fan-out `FUN_80071cbc`
 
