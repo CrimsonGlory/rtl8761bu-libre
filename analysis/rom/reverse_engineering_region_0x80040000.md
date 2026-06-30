@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 127 functions in tier, 46 renamed HIGH (Passes 52–52bc). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bc, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 125 functions in tier, 47 renamed HIGH (Passes 52–52bd). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bd, 2026-06-30).
 
 ## Overview
 
@@ -2814,3 +2814,40 @@ Post-rename: **212 unnamed** in-region (126 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-48+
 substantive candidate; skip rank-1–47 artifacts and already-done ranks.
+
+## Pass 52bd (2026-06-30) — rank-48 LMP pre-check entry clear + bitmask arm rename
+
+**Refreshed cold-triage (ranks 1-47 skipped as artifacts or already done):** rank-48
+`0x8004a6ec` (42B, 1 xref) — substantive per-connection LMP pre-check table entry
+clear + active/inactive bitmask update in the conn-index status cluster (callee of
+`conn_index_status_bit_apply_and_log` in region `0x80000000`; sibling of Pass 52av's
+`hci_reset_clear_lmp_check_buf_set_flag_and_program_bb_regs` and Pass 52bc's teardown
+hook triplet in the `0x8004a4xx`/`0x8004a6xx` LMP-check buffer neighborhood).
+
+**Rank-48 decompiled and renamed (HIGH):** `FUN_8004a6ec` →
+`clear_lmp_precheck_entry_and_arm_connection_active_bitmask` (42B) via
+`RenamePass52bdRegion80040000Fun8004a6ec.java` (`renamed=1`, live-verified).
+
+```c
+void clear_lmp_precheck_entry_and_arm_connection_active_bitmask(uint conn_index)
+{
+  buf = PTR_check_before_call_LMP_func_8004a718;
+  *(ushort *)(buf + (conn_index & 0xff) * 2) = 0;
+  bit = (ushort)(1 << (conn_index & 0x1f));
+  *(ushort *)(buf + 0x16) = *(ushort *)(buf + 0x16) | bit;
+  *(ushort *)(buf + 0x18) = ~bit & *(ushort *)(buf + 0x18);
+}
+```
+
+Clears the per-connection ushort entry in the LMP pre-call check buffer at
+`PTR_check_before_call_LMP_func_8004a718`, then arms the connection in the dual
+bitmask pair at `+0x16` (set) / `+0x18` (clear complement). Invoked from
+`conn_index_status_bit_apply_and_log` (`0x80007330`) on the validated-connection
+commit path after LMP-procedure-pending and slot-budget checks pass — marks the
+connection index active in the global check-buffer state before downstream
+`lmp_packet_completion_event_drain_dispatch` work.
+
+Post-rename: **211 unnamed** in-region (125 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-49+
+substantive candidate; skip rank-1–48 artifacts and already-done ranks.

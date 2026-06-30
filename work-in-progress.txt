@@ -7442,9 +7442,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bd: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-48+ substantive candidate;
-          skip rank-1–47 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bd (2026-06-30): decompiled+
+          renamed rank-48 `FUN_8004a6ec`→`clear_lmp_precheck_entry_and_arm_connection_active_bitmask`
+          (42B, HIGH). Clears per-conn LMP pre-check table entry, arms active/inactive
+          bitmasks; caller `conn_index_status_bit_apply_and_log`. 211 unnamed in-region
+          (125 in 1-150B tier); live named 1427.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52be: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-49+ substantive candidate;
+          skip rank-1–48 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
