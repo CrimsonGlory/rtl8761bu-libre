@@ -260,7 +260,7 @@ first as instructed.
 | `0x80040594` | 566B | `build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` — SCO/eSCO LMP PDU builder/submitter for conn-type nibble 1–2; see Pass 52de | HIGH |
 | `0x80041230` | 560B | `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble` — IRQ-masked 16-slot conn-event ring dequeue + type-nibble LMP dispatch; see Pass 52df | HIGH |
 | `0x80042640` | 530B | `select_sco_esco_packet_type_and_cap_window_by_conn_index` — SCO/eSCO packet-type selector from `field273_0x250` feature flags + window threshold; see Pass 52dg | HIGH |
-| `0x800401c4` | 426B | Compact dispatch-shaped function; case semantics not individually confirmed. | MEDIUM |
+| `0x800401c4` | 426B | `commit_dual_slot_lmp25c_role_record_state_and_chain_credits` — IRQ-off dual-slot LMP-25C role-record state commit; see Pass 52dh | HIGH |
 | `0x80040e60` | 386B | Connection-record field manipulator; no cross-xref confirmation available (tooling gap, see below). | MEDIUM |
 | `0x80041900` | 376B | Similar shape to other lower-half record-field helpers. | MEDIUM |
 | `0x80043c7c` | 372B | Small state-check/update helper; plausible but unconfirmed single purpose. | MEDIUM |
@@ -4549,5 +4549,29 @@ PDU builder and conn-event ring dispatcher.
 Post-rename: **158 unnamed** in-region (95 in 1-150B tier unchanged); **63** in
 >150B tier; live named **1480**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-27 `0x800401c4`
-(426B).
+## Pass 52dh (2026-06-30) — >150B rank-27 dual-slot LMP-25C role-record commit rename
+
+**>150B rank-27 decompiled+renamed (HIGH):** `FUN_800401c4` →
+`commit_dual_slot_lmp25c_role_record_state_and_chain_credits` (426B) via
+`RenamePass52dhRegion80040000Fun800401c4.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). IRQ-masked per-conn-index
+(`param_1`) + role/type index (`param_2`) commit handler on the 0x84-stride
+dual-slot role table at `PTR_DAT_80040370`: gates on active-slot state byte
+`+0x32` being 2 or 3; calls `FUN_8002bb50` for role remap; when `+0x2e` flag
+set dispatches via `FUN_800177a4` or `FUN_8006aedc` (when `+0x2f==1`);
+when `+0x32` pending dispatches via `FUN_800179bc`/`FUN_80017c5c` or
+`FUN_8006af6c`, updating `big_ol_struct` conn entry `field154_0xc7` and
+per-conn byte at `PTR_DAT_8004037c`; increments credit byte `entry[1]` (caps
+at 2), toggles dual-slot selector `entry[0]^=1`, clears pending flags.
+Re-enables IRQs, optionally calls
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type` when
+`PTR_DAT_80040380` entry clear, then chains to
+`program_dual_slot_lmp25c_packet_credits_by_conn_index`. Error path logs when
+state not 2–3. Inquiry/LAP/role-switch cluster sibling of Pass 52db packet
+completion handler (simpler commit path without packet decode).
+
+Post-rename: **157 unnamed** in-region (95 in 1-150B tier unchanged); **62** in
+>150B tier; live named **1481**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-28 `0x80040e60`
+(386B).

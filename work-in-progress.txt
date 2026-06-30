@@ -7966,8 +7966,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dh: continue >150B cold-triage
-          — decompile+rename rank-27 `0x800401c4` (426B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dh (2026-06-30): decompiled+
+          renamed rank-27 `FUN_800401c4`→`commit_dual_slot_lmp25c_role_record_state_and_chain_credits`
+          (426B, HIGH). IRQ-off dual-slot LMP-25C role-record state commit on
+          `PTR_DAT_80040370`; credit increment + slot toggle; chains to
+          `program_dual_slot_lmp25c_packet_credits_by_conn_index`. Upgraded from
+          MEDIUM (Pass 3). 157 unnamed in-region; live named 1481.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52di: continue >150B cold-triage
+          — decompile+rename rank-28 `0x80040e60` (386B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
