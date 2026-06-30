@@ -7639,5 +7639,42 @@ pointer wiring after link-global teardown/reinit.
 
 Post-rename: **68 unnamed** in-region (31 in 1-150B size≥20B tier); live named **1570**.
 
+**Next:** superseded by Pass 52gt below.
+
+## Pass 52gt (2026-06-30) — rank-1 sorted-index-table remove rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gt.java` — 68 unnamed,
+31 in 1-150B size≥20B tier; rank-1 `0x8004e154` (58B, 1 xref) — sorted-array
+delete companion of `insert_record_into_sorted_index_table_if_absent`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004e154` →
+`remove_record_from_sorted_index_table` (58B) via
+`RenamePass52gtRegion80040000Fun8004e154.java` (`renamed=1`, live-verified).
+
+```c
+void remove_record_from_sorted_index_table(int *table, undefined1 index_byte)
+{
+  uint found_idx;
+  if (binary_search_sorted_table_by_index_byte(table, index_byte, &found_idx)) {
+    while (found_idx < table[2] - 1U) {
+      *(undefined4 *)(*table + found_idx * 4) =
+           *(undefined4 *)(*table + (found_idx + 1) * 4);
+      found_idx++;
+    }
+    table[2] = table[2] - 1U;
+  }
+}
+```
+
+Remove companion of `insert_record_into_sorted_index_table_if_absent`
+(`0x8004e100`): binary-searches via `binary_search_sorted_table_by_index_byte`,
+then shift-left from match index and decrement count. Structural twin of
+`remove_entry_from_sorted_8byte_key_table` (region `0x80050000` Pass 24).
+Sole caller `deregister_link_record_handle_from_index_table` (`0x8004e2b8`):
+reads `conn_rec[+0x10]` handle byte and removes from sorted table at
+`PTR_PTR_8004e2cc` on conn-record free path.
+
+Post-rename: **67 unnamed** in-region (30 in 1-150B size≥20B tier); live named **1571**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

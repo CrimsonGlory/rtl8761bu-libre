@@ -8829,7 +8829,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gs;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gt: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gt (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004e154`→`remove_record_from_sorted_index_table`
+          (58B, HIGH). Sorted-array delete companion of
+          `insert_record_into_sorted_index_table_if_absent`; calls
+          `binary_search_sorted_table_by_index_byte`, shift-left + count--;
+          structural twin of `remove_entry_from_sorted_8byte_key_table`; sole
+          caller `deregister_link_record_handle_from_index_table`. 67 unnamed
+          in-region; live named 1571.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gt;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gu: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
