@@ -446,7 +446,7 @@ purpose unclear)`, not medium, so it's out of scope for this ticket.
 | `0x80021924` | 76B | `initialize_some_global_struct_FUN_80021924` | Copies 8 constant `DAT_*` values into two 8-word (32-byte) global struct arrays. |
 | `0x80021ab0` | 154B | `interesting_string_user_FUN_80021ab0` | Registers 7 debug-log category tags via `interesting_string_user_fptr_registration_function` — reveals the names of the firmware's log subsystems: `tHCI_TD`, `tHCI_CMD`, `tHCI_EVT`, `tLMP`, `tLC_TX`, `tLC_RX`, `tLMP_CH`. Useful reference for any future log-string-based investigation. |
 | `0x80021c9c` | 28B | `calls_interesting_string_user_FUN_80021c9c` | Master init wrapper: calls `calls_reg_multiple_dptrs__FUN_80021ba0`, `interesting_string_user_FUN_80021ab0`, `initialize_some_global_struct_FUN_80021924` in sequence. |
-| `0x80025cb4` | 118B | `LMP__271__FUN_80025cb4` | Keyed by the literal `0x271` passed to `possible_logger_called_if_no_patch3`. Checks a crypto-struct flag at offset +0x50; on set, dispatches to `FUN_80025a60` and uses status 0x3a, else status 0x3c, written via `set_arg1_1_to_arg2`. Otherwise (flag at +0xb9 set) logs and marks +0xba. |
+| `0x80025cb4` | 118B | `LMP__271__FUN_80025cb4` | Keyed by the literal `0x271` passed to `possible_logger_called_if_no_patch3`. Checks a crypto-struct flag at offset +0x50; on set, dispatches to `derive_dhkey_check_and_send_lmp_0x41` and uses status 0x3a, else status 0x3c, written via `set_arg1_1_to_arg2`. Otherwise (flag at +0xb9 set) logs and marks +0xba. |
 | `0x800281c4` | 160B | `LMP_NOT_ACCEPTED_0x04` | LMP_not_accepted (opcode 4) handler. Dispatches by the rejected-opcode byte (`param+5`) to 11 distinct per-opcode error-recovery handlers (subcodes 0x8, 0x9, 0xb-0xd, 0xf, 0x10, 0x32, 0x3f, 0x40, 0x41). |
 | `0x80029830` | 156B | `LMP_TEMP_KEY_0x0E` | LMP_temp_key (opcode 0xe) legacy-authentication handler. Validates connection state, XORs a 16-byte key buffer (`FUN_8002cf24` + `FUN_80025634`), sets status via `set_arg1_1_to_arg2`; on validation failure replies `wrap_send_LMP_NOT_ACCEPTED(handle, 0xe, ...)`. |
 | `0x8002fee0` | 186B | `VSC_0xfc20__download_patch__FUN_8002fee0` | **Project-relevant**: core of the VSC 0xFC20 patch-download mechanism (the same VSC the Linux `btrtl` driver uses to load `rtl8761bu_fw.bin`, see `CLAUDE.md`). Copies each download fragment into the patch buffer (default location `0x8010a000`, restored by `PTR_FUN_8002ffa4` when the fragment-index byte is `0x7f` or larger); on the final fragment (high bit of the fragment-count byte set) sets completion/flag state and jumps into the now-installed patch code — Ghidra renders this jump as a "do-nothing infinite loop" because it's an unresolved indirect/computed jump, not actually an infinite loop at runtime. |
@@ -2199,5 +2199,37 @@ cont. (18); crypto state bytes `0x05`/`0x0c` match `fHCI_Set_Connection_Encrypti
 link-type validation.
 
 Region unnamed count after this pass: **261** (262 minus this rename). Live named **1660** global.
+
+**Next:** superseded by Pass 6 continuation (52).
+
+## Pass 6 continuation (52) (2026-06-30) — DHKey check HMAC `FUN_80025a60`
+
+Decompiled and renamed:
+**`FUN_80025a60` → `derive_dhkey_check_and_send_lmp_0x41`**
+(180B, HIGH) via `RenamePass6Region80020000Fun80025a60.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (180B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=261` at pass start). Tied at 180B with
+`FUN_80021310` (xref_in=1); selected `FUN_80025a60` first by higher xref_in. Callee of
+`LMP__271__FUN_80025cb4` in the SSP DHKey-check cluster alongside
+`LMP_DHKEY_CHECK_0x41`/`wraps_LMP_DHKEY_CHECK_0x41`.
+
+**Mechanism:** Per-connection DHKey-check responder. Reads 3-byte nonce from crypto
+struct `+0x1de/+0x1df/+0x1e0`, byte-swaps config BD_ADDR (`PTR_DAT_80025b14`) and
+connection BD_ADDR from `big_ol_struct[slot]`, assembles crypto key blocks at
+`+0x1be/+0xe8/+0xf8/+0x118`, and computes 16-byte HMAC via `FUN_8002c6c8` (same
+BLAKE2/SHACAL2 primitive as passkey verification at `0x80025d34`). Byte-swaps the
+hash output and sends LMP opcode `0x41` (DHKey Check) via `FUN_80024470` with 0x12-byte
+payload. Caller `LMP__271__FUN_80025cb4` gates on `crypto+0x50` and sets status `0x3a`
+(success path) or `0x3c` (alternate) via `set_arg1_1_to_arg2`.
+
+**Callers:** `LMP__271__FUN_80025cb4` (`0x80025cb4`) — LMP extended opcode 0x271
+continuation when crypto-struct flag `+0x50` is set.
+
+**Confidence:** HIGH — decompile confirms HMAC assembly idiom matching documented
+passkey/DHKey verification cluster; LMP 0x41 send via standard `FUN_80024470` path;
+caller linkage and status-byte semantics documented in prior upgrade pass.
+
+Region unnamed count after this pass: **260** (261 minus this rename). Live named **1661** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -9656,8 +9656,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (52): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (261 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (52) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80025a60`→`derive_dhkey_check_and_send_lmp_0x41`
+          (180B, HIGH). SSP DHKey-check HMAC responder: assembles crypto key blocks +
+          BD_ADDRs, computes 16-byte check via `FUN_8002c6c8`, sends LMP 0x41 via
+          `FUN_80024470`; caller `LMP__271__FUN_80025cb4` when `crypto+0x50` set.
+          260 unnamed remain; live named 1661.
+          → analysis/rom/reverse_engineering_region_0x80020000.md;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (53): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (260 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
