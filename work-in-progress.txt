@@ -7521,9 +7521,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bm: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-67+ substantive candidate;
-          skip rank-1–66 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bm (2026-06-30): decompiled+
+          renamed rank-67 `FUN_80049420`→`validate_conn_copy_sync_params_and_alloc_tag3_dispatch`
+          (140B, HIGH) — HCI command handler copying 26-byte sync params to
+          conn `+0xac`, dispatching `alloc_tag3_or_tag0xa_record_and_dispatch_by_flag_bit1`
+          or deferring via `+0x8f` bit4; SCO/eSCO handler cluster sibling of
+          `validate_conn_and_start_lmp_power_clk_adj_if_enabled`. 202 unnamed
+          in-region (116 in 1-150B tier); live named 1436.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bn: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-68+ substantive candidate;
+          skip rank-1–67 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 117 functions in tier, 55 renamed HIGH (Passes 52–52bl). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bl, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 116 functions in tier, 56 renamed HIGH (Passes 52–52bm). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bm, 2026-06-30).
 
 ## Overview
 
@@ -3145,5 +3145,56 @@ every path); exact HCI opcode not pinned (indirect router dispatch).
 
 Post-rename: **203 unnamed** in-region (117 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-67+
-substantive candidate; skip rank-1–66 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bl):** rank-67+ — completed Pass 52bm below.
+
+## Pass 52bm (2026-06-30) — rank-67 sync-params HCI handler rename
+
+**Refreshed cold-triage (ranks 1-66 skipped as artifacts, deferred, or already done):**
+rank-67 `0x80049420` (140B, 0 xrefs in triage) — substantive HCI command
+handler in the `0x800494xx` SCO/eSCO handler cluster (sibling of
+`validate_conn_and_start_lmp_power_clk_adj_if_enabled` at `0x800494b0`).
+
+**Rank-67 decompiled and renamed (HIGH):** `FUN_80049420` →
+`validate_conn_copy_sync_params_and_alloc_tag3_dispatch` (140B) via
+`RenamePass52bmRegion80040000Fun80049420.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 validate_conn_copy_sync_params_and_alloc_tag3_dispatch(undefined2 *param_1)
+{
+  if (*(ushort *)((int)param_1 + 3) >= 0x1000) {
+    send_evt_HCI_Command_Status(*param_1, 0x12);
+    return 0x12;
+  }
+  conn = query_config_struct_0x1ac_by_index();
+  if (conn == 0) {
+    send_evt_HCI_Command_Status(*param_1, 2);
+    return 2;
+  }
+  if ((bos[+0x1d0] & 1) && (conn[+3] & 4)) {
+    send_evt_HCI_Command_Status(*param_1, 0);
+    optimized_memcpy(conn + 0xac, (int)param_1 + 5, 0x1a);
+    if ((conn[+0x7c] == 0) && (conn[+0x78] == 0))
+      alloc_tag3_or_tag0xa_record_and_dispatch_by_flag_bit1(conn);
+    else
+      conn[+0x8f] |= 4;
+    return 0;
+  }
+  send_evt_HCI_Command_Status(*param_1, 0xc);
+  return 0xc;
+}
+```
+
+Validates conn handle (`+3` < `0x1000`), looks up `0x1ac` conn record,
+gates on BOS `+0x1d0` bit0 and conn `+3` bit2 (same gate as sibling
+`validate_conn_and_start_lmp_power_clk_adj_if_enabled` but without the
+`config->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` check). On success:
+HCI Command Status 0 (pending), copies 26-byte sync-param block from cmd
+payload `+5` into conn `+0xac`, and either calls
+`alloc_tag3_or_tag0xa_record_and_dispatch_by_flag_bit1` or defers via
+`+0x8f` bit4. Errors: `0x12` invalid params, `0x2` unknown connection,
+`0xc` command disallowed.
+
+Post-rename: **202 unnamed** in-region (116 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-68+
+substantive candidate; skip rank-1–67 artifacts, deferred, and already-done ranks.
