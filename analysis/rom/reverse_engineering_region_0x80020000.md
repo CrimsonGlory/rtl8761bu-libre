@@ -487,7 +487,7 @@ bug in the table**, documented below.
 | `0x8002c338` | 602B | `thing_that_uses_SHA_and_BLAKE` | Confirmed: a from-scratch SHA-256/SHACAL2-style compression-function implementation (BLAKE2 IV constants + SHACAL2 round constants table, full message-schedule + 64-round compression loop, big-endian digest output). |
 | `0x8002c59c` | 144B | `reverse_path_to_thing_that_uses_SHA_and_BLAKE__1` | Assembles a message block from 4 input buffers (two N-word values + two 16-byte values) and calls `thing_that_uses_SHA_and_BLAKE`, extracting a little-endian 32-bit digest prefix — a P-192/256-style key-derivation helper. |
 | `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `FUN_8002dda4` (point-on-curve check) and on success runs the full DHKey derivation (`FUN_8002eb94`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `FUN_8002eb94`. |
-| `0x8002eae0` | 168B | `LMP__26E__FUN_8002eae0` | Per-connection cleanup/retry-countdown loop keyed by event `0x26e`; decrements per-slot countdown fields and calls `FUN_8002db50`/`FUN_8002dffc` as needed, logging via `possible_logger_called_if_no_patch3` on the final iteration. |
+| `0x8002eae0` | 168B | `LMP__26E__FUN_8002eae0` | Per-connection cleanup/retry-countdown loop keyed by event `0x26e`; decrements per-slot countdown fields and calls `FUN_8002db50`/`crypto_ec_jacobian_point_add_mod_curve_prime` as needed, logging via `possible_logger_called_if_no_patch3` on the final iteration. |
 | `0x8002f518` | 962B | `assoc_w_tHCI_TD_FUN_8002f518` | Confirmed: large opcode-dispatch handler for the `tHCI_TD` (HCI test-data / transport-data) log-tagged subsystem — branches on a 16-bit sub-opcode (0x190–0x4ed range) into encryption-mode toggles, SCO/eSCO config validation, link-key/baseband event triggers, and a final `UNRECOVERED_JUMPTABLE` indirect dispatch Ghidra couldn't resolve statically. |
 | `0x8002fae0` | 84B | `VSC_0xfc93_FUN_8002fae0` | VSC 0xFC93 handler: on subcommand byte `0x09`, copies 6 packed fields from the VSC payload into 6 separate config globals (frequency/channel-map-style fields); returns `0x12` (invalid-params) otherwise. |
 | `0x8002fd3c` | 328B | `VSC_0xfd40_FUN_8002fd3c` | VSC 0xFD40 handler: a sequence of baseband-register read-modify-write calls through a single `PTR_DAT_8002fe84` register-access function pointer, configuring per-channel-index registers from VSC payload fields (frequency/role/clock-class bits). |
@@ -610,5 +610,35 @@ and mod-p conditional-add pattern directly readable from decompile.
 
 Region unnamed count after this pass: **311** (312 minus this rename). Live named **1610** global.
 
+**Next:** superseded by Pass 6 continuation (2).
+
+## Pass 6 continuation (2) (2026-06-30) — SSP/ECDH Jacobian point addition `FUN_8002dffc`
+
+Decompiled and renamed:
+**`FUN_8002dffc` → `crypto_ec_jacobian_point_add_mod_curve_prime`**
+(1366B, HIGH) via `RenamePass6Region80020000Fun8002dffc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (1366B) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=311` at pass start). Caller:
+`LMP__26E__FUN_8002eae0` (event `0x26e` cleanup/retry loop).
+
+**Mechanism:** In-place elliptic-curve point addition in Jacobian coordinates on a struct at
+`param_1`: accumulator X/Y/Z at `+0x08`/`+0x48`/`+0x88`; second-point operands at
+`+0xc8`/`+0xe8`; limb counts at `+0x128`/`+0x12a`/`+0x12c`/`+0x12e`/`+0x130`; curve width
+selector at `+0x138` (6 or 8 limbs → `PTR_DAT_8002e554` / `PTR_DAT_8002e558` curve prime).
+Repeated square/mul via `crypto_bignum_multiply_square_v1` +
+`crypto_bignum_multiply_variable_len`, mod reduction via `FUN_8002dfd4` (6-limb →
+`FUN_8002d744`, 8-limb → `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`),
+compare/subtract/add-mod-p via `compare_uint32_arrays_lexicographic_msb_to_lsb` + conditional
+prime add + `crypto_bignum_sub_u32_arrays_with_borrow`; left-shift via
+`crypto_bignum_left_shift_words_into_dest`; writes updated X/Y/Z back. Sibling of Pass 6
+continuation's `crypto_ec_jacobian_point_double_mod_curve_prime` (`0x8002e55c`) and
+`FUN_8002db50` affine→Jacobian prep in the same `big_ol_struct` layout.
+
+**Confidence:** HIGH — unambiguous Jacobian EC addition formula structure; same struct layout
+and mod-p conditional-add pattern as the doubling sibling; directly readable from decompile.
+
+Region unnamed count after this pass: **310** (311 minus this rename). Live named **1611** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java` (top by size:
-`FUN_8002dffc` 1366B; next `FUN_8002a3d8` 1100B xref_in=4).
+`FUN_8002a3d8` 1100B xref_in=4).

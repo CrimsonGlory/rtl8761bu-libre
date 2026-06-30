@@ -9217,9 +9217,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont.;
           rom_function_index.md; analysis/INDEX.md
 
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (2) (2026-06-30):
+          decompiled+renamed rank-1 by size `FUN_8002dffc`→
+          `crypto_ec_jacobian_point_add_mod_curve_prime` (1366B, HIGH) —
+          SSP/ECDH Jacobian point addition in-place mod curve prime; caller
+          `LMP__26E__FUN_8002eae0`. 310 unnamed in-region; live named 1611.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (2);
+          rom_function_index.md; analysis/INDEX.md
+
 [NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation: cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (311 remain;
-          top by size: `FUN_8002dffc` 1366B).
+          next rank-1 unnamed per `ListUnnamed80020000.java` (310 remain;
+          top by size: `FUN_8002a3d8` 1100B xref_in=4).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
