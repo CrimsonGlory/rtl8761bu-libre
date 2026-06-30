@@ -583,6 +583,32 @@ multi-stage subtract-reduce idiom directly readable from decompile.
 
 Region unnamed count after this pass: **312** (313 minus this rename). Live named **1609** global.
 
+**Next:** superseded by Pass 6 continuation.
+
+## Pass 6 continuation (2026-06-30) — SSP/ECDH Jacobian point doubling `FUN_8002e55c`
+
+Decompiled and renamed:
+**`FUN_8002e55c` → `crypto_ec_jacobian_point_double_mod_curve_prime`**
+(1400B, HIGH) via `RenamePass6Region80020000Fun8002e55c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (1400B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=312` at pass start).
+
+**Mechanism:** In-place elliptic-curve point doubling in Jacobian coordinates on a struct at
+`param_1`: X at `+0x08`, Y at `+0x48`, Z at `+0x88`; limb counts at `+0x128`/`+0x12a`/`+0x12c`;
+curve width selector at `+0x138` (6 or 8 limbs → `PTR_DAT_8002ead8` / `PTR_DAT_8002eadc` curve
+prime). Early exit when Z is zero-only: clears X, sets Y=`DAT_8002ead4`, lengths=1 (point at
+infinity). Main path: repeated `crypto_bignum_multiply_square_v1`, `crypto_bignum_multiply_variable_len`,
+`crypto_bignum_left_shift_words_into_dest`, compare/subtract/add-mod-p via
+`compare_uint32_arrays_lexicographic_msb_to_lsb` + conditional prime add +
+`crypto_bignum_sub_u32_arrays_with_borrow`; writes updated X/Y/Z back. Consumer of Pass 6's
+`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction` sibling cluster and region
+`0x80070000` bignum primitives (square, multiply, compare, subtract, fill, length).
+
+**Confidence:** HIGH — unambiguous Jacobian EC doubling formula structure; curve-width branch
+and mod-p conditional-add pattern directly readable from decompile.
+
+Region unnamed count after this pass: **311** (312 minus this rename). Live named **1610** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java` (top by size:
-`FUN_8002e55c` 1400B; top by xref_in among smaller: `FUN_8002d818` done — next
-`FUN_8002a3d8` 1100B xref_in=4 or re-run listing).
+`FUN_8002dffc` 1366B; next `FUN_8002a3d8` 1100B xref_in=4).
