@@ -6543,8 +6543,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fs: cold-triage next HANDLER-tier
-          candidate (`FUN_8007442c` rank-1 tied at xref_in=1, 10 remain per
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fs (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8007442c`→`rebuild_fc35_config_entry_to_connection_bitmaps`
+          (218B, HIGH, HANDLER-tier). Post-VSC-0xFC35 commit: walks config entries,
+          BDADDR-matches to `big_ol_struct` (type 2) or `0x1ac` records (other types),
+          rebuilds dual connection bitmasks at `+0x10`/`+2` + per-slot config-index
+          bytes; feeds Pass 12fp periodic dispatcher. 1 caller
+          `VSC_0xfc35_config_update`. HANDLER-tier unnamed 9 remain; live named 1328.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fs;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ft: cold-triage next HANDLER-tier
+          candidate (`FUN_80073e94` rank-1 tied at xref_in=1, 9 remain per
           `ListHandler80070000.java`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -2346,7 +2346,19 @@ Decompiled and renamed:
 
 Live named **1327** (global; in-region unnamed **25**; HANDLER-tier unnamed **10**).
 
-**Next:** cold-triage next HANDLER-tier candidate (`FUN_8007442c` rank-1 tied at xref_in=1, per `ListHandler80070000.java`).
+## Pass 12fs (2026-06-30) — VSC FC35 config-to-connection bitmap rebuild `FUN_8007442c`
+
+Decompiled and renamed:
+**`FUN_8007442c` → `rebuild_fc35_config_entry_to_connection_bitmaps`**
+(218B, HIGH, HANDLER-tier) via `RenamePass12fsFun8007442c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Post-upload commit helper called by `VSC_0xfc35_config_update` after all 9-byte config entries are loaded into the `0x1c`-stride table at `PTR_DAT_80074508` (count at `PTR_DAT_80074510[0]`). For each config entry, clears mapping-state bytes at `+2`/`+3` of the state table, then rebuilds two independent connection-handle bitmasks by BDADDR match: (1) when entry type byte `+8 == 2`, walks up to 10 `big_ol_struct` slots (`PTR_big_ol_struct_8007450c`), `memcmp` on BDADDR, sets the corresponding bit in the 16-bit mask at `+0x10` and stores the config-entry index at `+0x12+slot`; (2) otherwise walks up to 11 (`0xb`) `0x1ac`-stride connection records (`PTR_base_of_0x1ac_struct_array_0xA_large2_80074514`), gated on enable bit (`field3_0x3 & 1`), handle bitmask (`field453_0x1d2/field454_0x1d3`), matching type byte, and BDADDR `memcmp`, sets bits in the 16-bit mask at `+2` and stores config-entry index at `+4+slot`. These bitmasks are the same dual-mask structure consumed by Pass 12fp's `periodic_9tick_dispatch_link_sample_flush_and_feature_retry` on its 9-tick periodic fan-out. 1 confirmed caller: `VSC_0xfc35_config_update`.
+
+**Confidence:** HIGH — straightforward decompile; BDADDR-matching and dual-bitmask rebuild logic directly readable; sole caller confirmed via `find_callers`; ties config-upload cluster (region `0x80030000` Pass 3) to periodic link-sample dispatch (Passes 12fp/12fn).
+
+Live named **1328** (global; in-region unnamed **24**; HANDLER-tier unnamed **9**).
+
+**Next:** cold-triage next HANDLER-tier candidate (`FUN_80073e94` rank-1 tied at xref_in=1, per `ListHandler80070000.java`).
 
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 
