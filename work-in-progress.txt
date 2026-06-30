@@ -6888,8 +6888,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12he: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80075bd4`, 14B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12he (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80075bd4`→`is_pool_descriptor_stack_index_negative`
+          (14B, HIGH, STUB-tier). Null-safe sign-bit test on pool-descriptor
+          index at `+4` (`>>31`); index-stack cluster sibling of Pass 12p pop /
+          Pass 12dt push. xref_in=0. STUB-tier unnamed 3 remain; live named 1366.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12he;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hf: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_8007585c`, 46B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

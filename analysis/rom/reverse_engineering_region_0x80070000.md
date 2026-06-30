@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hd COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (4 STUB-tier unnamed remain). Latest: `pop_head_from_resource_pool_64_slot_freelist` (Pass 12hd). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1365** global; **6** in-region unnamed (4 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80075bd4`, 14B, xref_in=0). See Pass 12hd section below.
+**Status**: Pass 12he COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (3 STUB-tier unnamed remain). Latest: `is_pool_descriptor_stack_index_negative` (Pass 12he). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1366** global; **5** in-region unnamed (3 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_8007585c`, 46B, xref_in=0). See Pass 12he section below.
 
 ## Overview
 
@@ -2417,6 +2417,31 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12he (2026-06-30) — pool descriptor index sign-bit stub `FUN_80075bd4`
+
+Decompiled and renamed:
+**`FUN_80075bd4` → `is_pool_descriptor_stack_index_negative`**
+(14B, HIGH, STUB-tier) via `RenamePass12heRegion80070000Fun80075bd4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(14B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Null-safe sign-bit predicate on the pool-descriptor index-stack counter
+at offset `+4`: returns `0` when `param_1 == 0`, else `*(uint *)(param_1+4) >> 31`
+(tests whether the signed index is negative). Sits between
+`push_tag_to_pool_descriptor_index_stack_or_fail` (`0x80075b64`) and
+`pop_indexed_entry_from_pool_descriptor_stack` (`0x80075b88`) in the func1–func8
+`0x80100000` resource-pool index-stack cluster — complements Pass 12p's
+`index at +4 >= 0` guard on pop.
+
+**Confidence:** HIGH — unambiguous MSB/sign-bit extraction idiom on the same `+4`
+index field used by the already-named push/pop pair.
+
+Live named **1366** (global; in-region unnamed **5**; STUB-tier unnamed **3**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_8007585c`, 46B, xref_in=0).
+
 ## Pass 12hd (2026-06-30) — resource pool freelist pop stub `FUN_80075fd0`
 
 Decompiled and renamed:
@@ -2440,8 +2465,7 @@ Dealloc counterpart to the init-built 28-byte (`0x1c`) descriptor chain at
 
 Live named **1365** (global; in-region unnamed **6**; STUB-tier unnamed **4**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80075bd4`, 14B, xref_in=0).
+**Next:** superseded by Pass 12he.
 
 ## Pass 12hc (2026-06-30) — BB slot mode-bits setter stub `FUN_80076c68`
 
