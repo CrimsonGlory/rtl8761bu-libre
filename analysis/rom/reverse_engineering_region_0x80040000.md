@@ -4032,8 +4032,29 @@ handlers.
 Post-rename: **180 unnamed** in-region (95 in 1-150B tier unchanged); **85** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-3 `0x8004f580`
-(314B, 7 xrefs).
+**Next:** continue >150B cold-triage — decompile+rename rank-4 `0x8004bde8`
+(354B, 6 xrefs).
+
+## Pass 52ck (2026-06-30) — >150B rank-3 dual-list sorted event insert rename
+
+**>150B rank-3 decompiled and renamed (HIGH):** `FUN_8004f580` →
+`dual_list_sorted_event_insert_with_overlap_pushback` (314B, 7 xrefs) via
+`RenamePass52ckRegion80040000Fun8004f580.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 4, 2026-06-23). Sorted doubly-linked-list insert
+keyed by wraparound-masked delta `param_1[3]` relative to list head, with
+overlap-pushback adjustment of neighbor duration field `ushort+7` when inserting
+between nodes. Selects one of two lists rooted at `PTR_DAT_8004f6c0` (`+8`/`+0xc`
+or `+0x10`/`+0x14`) via bit 0 of `*(byte*)(param_1+2)`; gated on flag bits
+`0x12` in that byte. Early-return path logs via `possible_logging_function__var_args`
+when `param_1[1]!=0`. Structural sibling of `sorted_event_list_insert_by_relative_key`
+(`0x8004ee94`) and `sched_event_sorted_insert_with_overlap_pushback`
+(`0x800538b4`); insert counterpart to `FUN_8004ef08` dequeue/dispatch cluster.
+
+Post-rename: **178 unnamed** in-region (95 in 1-150B tier unchanged); **83** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-4 `0x8004bde8`
+(354B, 6 xrefs).
 
 ## Pass 52cj (2026-06-30) — >150B rank-2 BD_ADDR slot reconcile + LMP 0x259 dispatch
 
@@ -4055,5 +4076,4 @@ can short-circuit. Called from the shared connect-procedure dispatcher
 Post-rename: **179 unnamed** in-region (95 in 1-150B tier unchanged); **84** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-3 `0x8004f580`
-(314B, 7 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52ck below.
