@@ -8810,7 +8810,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gr: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gr (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004e2f4`→`count_active_lmp_procedure_links_by_conn_record_flags`
+          (70B, HIGH). Walks `PTR_PTR_8004e33c` conn-record table counting entries
+          with pkt_modes clear, `+0x20` bit0, `+0x1d` procedure-active; sole caller
+          `arm_lmp_procedure_slot_pending_by_active_link_count`. LMP procedure
+          permission-gate cluster. 69 unnamed in-region; live named 1569.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gr;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gs: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

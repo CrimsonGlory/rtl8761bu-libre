@@ -7561,5 +7561,42 @@ Pure diagnostic; no control-flow side effects.
 
 Post-rename: **70 unnamed** in-region (33 in 1-150B size≥20B tier); live named **1568**.
 
+**Next:** superseded by Pass 52gr below.
+
+## Pass 52gr (2026-06-30) — rank-1 LMP procedure link counter rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gr.java` — 70 unnamed,
+33 in 1-150B size≥20B tier; rank-1 `0x8004e2f4` (70B, 1 xref) — substantive
+LMP procedure permission-gate cluster counter (callee of Pass 52as's
+`arm_lmp_procedure_slot_pending_by_active_link_count`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004e2f4` →
+`count_active_lmp_procedure_links_by_conn_record_flags` (70B) via
+`RenamePass52grRegion80040000Fun8004e2f4.java` (`renamed=1`, live-verified).
+
+```c
+char count_active_lmp_procedure_links_by_conn_record_flags(void)
+{
+  count = 0;
+  for (idx = 0; idx < PTR_PTR_8004e33c[2]; idx++) {
+    rec = *(int *)(PTR_PTR_8004e33c[0] + idx * 4);
+    if ((rec != 0) && ((rec[+8] & 7) == 0) && ((rec[+0x20] & 1) != 0)
+        && ((rec[+0x1d] & 2) != 0))
+      count++;
+  }
+  return count;
+}
+```
+
+Walks the global conn-record pointer table at `PTR_PTR_8004e33c`, counting
+entries where pkt_modes low-3-bits clear (`+8`), link bit0 set (`+0x20`), and
+procedure-active bit2 set (`+0x1d`). Same selection criteria as
+`is_any_conn_lmp_procedure_busy_by_index` family but returns a count rather
+than a boolean. Sole caller `arm_lmp_procedure_slot_pending_by_active_link_count`
+(`0x8004e340`, Pass 52as): feeds `active_count + ctx[1] < 4` slot-arming gate
+in HCI sync-conn param commit path.
+
+Post-rename: **69 unnamed** in-region (32 in 1-150B size≥20B tier); live named **1569**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
