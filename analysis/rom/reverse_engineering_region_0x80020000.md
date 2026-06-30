@@ -1391,4 +1391,31 @@ Kovah-named LMP opcode handler for numeric comparison pairing step.
 
 Region unnamed count after this pass: **286** (287 minus this rename). Live named **1635** global.
 
+**Next:** superseded by Pass 6 continuation (27).
+
+## Pass 6 continuation (27) (2026-06-30) — E1/E22 SRES derivation dispatcher `FUN_800251f8`
+
+Decompiled and renamed:
+**`FUN_800251f8` → `derive_sres_e1_or_e22_and_send_lmp_response`**
+(276B, HIGH) via `RenamePass6Region80020000Fun800251f8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (276B, xref_in=13) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=286` at pass start).
+
+**Mechanism:** Classic Bluetooth authentication response dispatcher on the per-connection
+`_x58_crypto_struct` (`param_2`). Reads 16B AU_RAND from incoming LMP payload
+(`param_3+5`). Dispatches by pairing-mode byte `+0x1f1`:
+- mode `0x06`: E1 derivation via `FUN_8002d00c` (ACO+SRES from link key, RAND, BD_ADDR)
+- mode `0x08`: E22 derivation via `FUN_8002d14c` + `FUN_8002d0b0`, with BD_ADDR operand
+  order swapped per `bdaddr_random_` flag in global connection table
+Always finishes by sending LMP opcode `0x0C` (SRES) via `FUN_80024470`.
+
+**Callers:** `LMP_AU_RAND_0x0B` (9 sites), `LMP_SRES_0x0C` (2 sites),
+`apply_link_key_and_dispatch_auth_pairing_flow` (2 sites) — 16 total via `find_callers`.
+
+**Confidence:** HIGH — decompile confirms E1/E22 wrapper dispatch + LMP 0x0C send;
+callers are Kovah-named LMP auth handlers; consistent with `encryption_engine.md` §6.
+
+Region unnamed count after this pass: **285** (286 minus this rename). Live named **1636** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

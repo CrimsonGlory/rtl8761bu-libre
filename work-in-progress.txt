@@ -9414,8 +9414,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (26);
             analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (27): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (286 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (27) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_800251f8`→`derive_sres_e1_or_e22_and_send_lmp_response`
+          (276B, HIGH) — E1/E22 SRES derivation dispatcher; callers
+          `LMP_AU_RAND_0x0B`/`LMP_SRES_0x0C`; xref_in=13.
+          285 unnamed remain; live named 1636.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (27);
+            analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (28): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (285 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
