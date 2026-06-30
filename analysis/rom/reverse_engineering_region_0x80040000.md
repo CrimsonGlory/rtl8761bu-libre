@@ -214,7 +214,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
 | `0x80041dac` | 876B | `teardown_inquiry_lap_slot_baseband_cleanup_and_release` — inquiry/LAP slot teardown orchestrator on `param_1`-indexed `big_ol_struct`; IRQ-off baseband register teardown, clears role-switch hook, releases inquiry LAP pending bitmask, clears AFH channel map, bitmask cleanup; callers `fHCI_conn_req_cancel` + `connection_teardown_HCI_event_finalizer`. Renamed Pass 52dd. | HIGH |
 | `0x8004d294` | 1280B | `init_or_reset_sco_esco_hw_registers_and_link_slots` — SCO/eSCO HW register init/reset blob; dual-mode on `param_1` (full config-driven programming + 64+64 link-register-B clears + 11 eSCO slot clears when zero); see Pass 52dw | HIGH |
-| `0x8004ce70` | 908B | Already appears (unnamed) in `reverse_engineering_conn_feature_dispatch.md`'s xref list alongside `assoc_w_tLC_RX`/`FUN_80051368`/`FUN_80052f8c` — confirmed participant in the connection/feature dispatch graph, but specific behavior not yet isolated to a single clear purpose. | MEDIUM-HIGH |
+| `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `FUN_8004ae74`; type-1 single-chunk + clock-offset check; type-4 LE accumulate; see Pass 52dx | HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
 confidence (`init_global_connection_table_and_bt_state`,
@@ -4987,5 +4987,36 @@ hook at `PTR_DAT_8004d8b4(0)`. Reached from HCI-Reset teardown chain
 Post-rename: **142 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1496**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-37
-`0x8004ce70` (908B, xrefs:0, Pass 3 connection/feature-dispatch holdover).
+## Pass 52dx (2026-06-30) — >150B rank-37 conn TX packet-type dispatcher rename
+
+**>150B rank-37 decompiled+renamed (HIGH):** `FUN_8004ce70` →
+`dispatch_conn_tx_by_packet_type_nibble_with_reassembly` (908B, 0 xrefs) via
+`RenamePass52dxRegion80040000Fun8004ce70.java` (`renamed=1`, live-verified).
+
+Connection/feature-dispatch cluster TX handler (upgraded from MEDIUM-HIGH, Pass 3).
+Gated on feature bitmask `DAT_8004d1fc & *param_1`; extracts TX byte length from
+descriptor bits 11–25 and conn index from bits 5–8. Dispatches on low 5-bit packet
+type nibble:
+
+- **Type 0** — multi-chunk TX reassembly loop: copies into staging buffer
+  `PTR_DAT_8004d20c` in 0x400-byte chunks, programs HW descriptor per chunk via
+  `FUN_8002b558`, walks length-prefixed segments via
+  `walk_tx_reassembly_buffer_consuming_length_prefixed_segments`, dispatches
+  fragments via `FUN_8004ae74`, then `refcount_decrement_and_free(param_2)`.
+- **Type 1** — single-chunk path: programs HW descriptor, calls `FUN_8004c4a8`
+  for conn-index slot work, compares clock-offset fields with optional
+  `atomic_saturating_byte_decrement` on mismatch, optional timing diagnostic via
+  hook at `PTR_DAT_8004d21c`; clears conn `+0x90` bit3 and may call
+  `initiate_pending_procedure_or_defer`.
+- **Type 4** — LE accumulate path: `FUN_8004a730` consume + adds to global BT-state
+  field at `+0xf8`.
+- **Other** — `FUN_80014524(uVar15,1)` release + diagnostic log.
+
+0 xrefs (indirect fptr registration). Callee cluster for Pass 52ag/52dm TX
+reassembly helpers.
+
+Post-rename: **141 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1497**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-38
+`0x8004c4a8` (894B, xrefs:0, type-1 callee of this dispatcher).

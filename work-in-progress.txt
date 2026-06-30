@@ -8124,8 +8124,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dx: continue >150B cold-triage
-          — decompile+rename refreshed rank-37 `0x8004ce70` (908B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dx (2026-06-30): decompiled+
+          renamed rank-37 `FUN_8004ce70`→`dispatch_conn_tx_by_packet_type_nibble_with_reassembly`
+          (908B, HIGH). Conn TX packet-type dispatcher; type-0 multi-chunk reassembly via
+          `walk_tx_reassembly_buffer_*` + `FUN_8004ae74`; type-1 single-chunk + clock-offset
+          check; type-4 LE accumulate; upgraded from MEDIUM-HIGH (Pass 3). 0 xrefs (indirect
+          fptr registration). 141 unnamed in-region; live named 1497.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dy: continue >150B cold-triage
+          — decompile+rename refreshed rank-38 `0x8004c4a8` (894B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
