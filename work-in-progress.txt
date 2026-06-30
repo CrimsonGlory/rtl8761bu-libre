@@ -8641,9 +8641,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fz: continue 1-150B cold-triage
-          — re-rank and decompile+rename next rank-8+ candidate (skip rank-1–4
-          artifacts `0x8004a2e4`/`0x80045b94`/`0x80048934`/`0x8004701c`).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fz (2026-06-30): decompiled+
+          renamed refreshed rank-5 `FUN_8004e9c4`→`lookup_sco_esco_slot_timing_byte_by_opcode_index`
+          (24B, HIGH) — 2-entry byte lookup for SCO/eSCO slot-timing opcodes 1–2
+          via `PTR_DAT_8004e9dc`; credit-scheduler cluster sibling; 3 xrefs.
+          87 unnamed in-region; live named 1551.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ga: continue 1-150B cold-triage
+          — triage rank-6–8 artifacts (`0x8004498c`/`0x80046790`/`0x80049bfc`)
+          or decompile+rename next substantive candidate (skip rank-1–4 artifacts).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

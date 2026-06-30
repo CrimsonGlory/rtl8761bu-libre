@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 88 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fy, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 87 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fz, 2026-06-30).
 
 ## Overview
 
@@ -1108,7 +1108,7 @@ at `PTR_DAT_8004f248+4`. Callers (`sco_esco_slot_timing_offset_calc_variant1`/
 `variant2`, `LMP_power_and_clk_adj_procedure_orchestrator`) dereference the
 returned pointer at `+8` (type byte), `+0x10`/`+0x12`/`+4` (timing ushorts),
 and `+0x20` (nested descriptor when type==0x0a). Sibling of
-`FUN_8004e9c4` (indexed byte table lookup) in the SCO/eSCO slot-timing cluster
+`lookup_sco_esco_slot_timing_byte_by_opcode_index` (indexed byte table lookup) in the SCO/eSCO slot-timing cluster
 documented in region `0x80000000`. 3+ xrefs.
 
 Post-rename cold-triage refresh: **255 unnamed** in-region (169 in 1-150B tier).
@@ -6799,5 +6799,41 @@ invocation).
 
 Post-rename: **88 unnamed** in-region (88 in 1-150B tier); live named **1550**.
 
-**Next:** continue 1-150B cold-triage — re-rank and decompile+rename next
-rank-8+ candidate (skip rank-1–4 artifacts).
+**Next:** superseded by Pass 52fz below.
+
+## Pass 52fz (2026-06-30) — 1-150B rank-5 SCO/eSCO slot-timing byte table lookup rename
+
+**Cold-triage (refreshed):** 88 unnamed 1-150B remain (pre-rename). rank-1
+`0x8004a2e4` (10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B —
+artifact); rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x8004701c`
+(4 xrefs, 1B — artifact); rank-5 `0x8004e9c4` (3 xrefs, 24B); rank-6
+`0x8004498c` (3 xrefs, 1B — artifact); rank-7 `0x80046790` (3 xrefs, 1B —
+artifact); rank-8 `0x80049bfc` (3 xrefs, 1B — artifact).
+
+**Rank-1–4 triaged (non-function artifacts):** unchanged from Pass 52fy.
+
+**1-150B rank-5 decompiled+renamed (HIGH):** `FUN_8004e9c4` →
+`lookup_sco_esco_slot_timing_byte_by_opcode_index`
+(24B, 3 xrefs) via
+`RenamePass52fzRegion80040000Fun8004e9c4.java` (`renamed=1`, live-verified).
+
+```c
+byte lookup_sco_esco_slot_timing_byte_by_opcode_index(uint opcode)
+{
+  index = (opcode & 0xff) - 1;
+  if (index < 2)
+    return PTR_DAT_8004e9dc[index];
+  return 0;
+}
+```
+
+2-entry byte lookup for SCO/eSCO slot-timing opcodes 1–2: indexes
+`(opcode - 1)` into the table at `PTR_DAT_8004e9dc`, returns 0 for out-of-range.
+Sibling of Pass 52l's `get_credit_scheduler_context_active_entry_ptr`
+(`0x8004f240`); callers include `sco_esco_slot_timing_offset_calc_variant1`/
+`variant2` in region `0x80000000` (credit-scheduler slot-timing cluster).
+
+Post-rename: **87 unnamed** in-region (87 in 1-150B tier); live named **1551**.
+
+**Next:** continue 1-150B cold-triage — triage rank-6–8 artifacts or find next
+substantive candidate (skip rank-1–4 artifacts).
