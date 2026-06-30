@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12ha COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (7 STUB-tier unnamed remain). Latest: `thunk_init_bb_hw_config_struct_defaults` (Pass 12ha). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1362** global; **9** in-region unnamed (7 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80076ee4`, 38B, xref_in=0). See Pass 12ha section below.
+**Status**: Pass 12hb COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (6 STUB-tier unnamed remain). Latest: `sync_bb_slot_current_instant_to_reference_clear_timing_flags` (Pass 12hb). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1363** global; **8** in-region unnamed (6 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80076c68`, 36B, xref_in=0). See Pass 12hb section below.
 
 ## Overview
 
@@ -2417,6 +2417,31 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hb (2026-06-30) — BB slot instant sync stub `FUN_80076ee4`
+
+Decompiled and renamed:
+**`FUN_80076ee4` → `sync_bb_slot_current_instant_to_reference_clear_timing_flags`**
+(38B, HIGH, STUB-tier) via `RenamePass12hbRegion80070000Fun80076ee4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(38B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** On BB slot struct `PTR_DAT_80076f0c`: clears low 3 bits of status
+byte `+0x28`, zeroes link-timing bytes `+0x26`/`+0x27`, copies reference instant
+`+0x12` → current instant `+0x16`, sets out-params `*param_1=0` and `*param_2=8`.
+Same field-clear idiom as the equal-instant branch inside
+`commit_bb_slot_timing_flags_sync_and_tail_hook` (Pass 12i), but standalone and
+with opposite instant copy direction (reference→current vs commit's current→stored).
+BB link-timing cluster sibling of Passes 12f–12i (`0x80076f*` family).
+
+**Confidence:** HIGH — unambiguous struct field ops with explicit out-status bytes;
+cluster placement and offset layout match the already-named BB slot helpers.
+
+Live named **1363** (global; in-region unnamed **8**; STUB-tier unnamed **6**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80076c68`, 36B, xref_in=0).
+
 ## Pass 12ha (2026-06-30) — BB HW config init thunk `FUN_8007717c`
 
 Decompiled and renamed:
@@ -2438,8 +2463,7 @@ HIGH-named from Pass 12e; cluster placement confirmed by adjacent siblings.
 
 Live named **1362** (global; in-region unnamed **9**; STUB-tier unnamed **7**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80076ee4`, 38B, xref_in=0).
+**Next:** superseded by Pass 12hb.
 
 ## Pass 12gz (2026-06-30) — VSC FCA1 log-only thin wrapper `FUN_800777e2`
 

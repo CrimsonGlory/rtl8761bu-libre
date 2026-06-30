@@ -6861,8 +6861,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ha;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hb: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80076ee4`, 38B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hb (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80076ee4`→`sync_bb_slot_current_instant_to_reference_clear_timing_flags`
+          (38B, HIGH, STUB-tier). BB slot struct `PTR_DAT_80076f0c`: copy reference
+          instant `+0x12`→current `+0x16`, clear `+0x28` low bits and `+0x26`/`+0x27`,
+          out status `(0,8)`; sibling of Passes 12f–12i BB link-timing cluster.
+          xref_in=0. STUB-tier unnamed 6 remain; live named 1363.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hc: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80076c68`, 36B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
