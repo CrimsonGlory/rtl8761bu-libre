@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 63 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52gx, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 52 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52hi, 2026-06-30).
 
 ## Overview
 
@@ -8172,6 +8172,45 @@ SCO/eSCO sync-connection cluster sibling of
 `hci_sync_conn_param_commit_or_le_channel_scan_send_cmd_complete`.
 
 Post-rename: **53 unnamed** in-region (16 in 1-150B size≥20B tier); live named **1585**.
+
+**Next:** superseded by Pass 52hi below.
+
+## Pass 52hi (2026-06-30) — rank-1 conn-slot-10 u16 range-check HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hi.java` — 53 unnamed,
+16 in 1-150B size≥20B tier; rank-1 `0x80044f28` (106B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x80044fxx` LE Meta Event / conn-slot-10
+cluster (sibling of Pass 52bs's
+`hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete` at `0x80044f9c`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044f28` →
+`hci_conn10_0x154_bit2_u16_range_check_store_0x16_send_cmd_complete` (106B) via
+`RenamePass52hiRegion80040000Fun80044f28.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_conn10_0x154_bit2_u16_range_check_store_0x16_send_cmd_complete(short *param_1)
+{
+  /* conn-slot-10 +0x154 bit2 clear → gate_byte 0x1a */
+  /* bit2 set: u16 from param bytes +2/+3; valid if (val-1) < 0xa1b8 */
+  /*   → store to field_0x16, gate_byte 0; else gate_byte 0x12 */
+  /* status: param[0]==0 → 0, else field_0x165 (default 1) */
+  /* 4-byte Command Complete via hci_event_sender(0xe,…); returns gate_byte */
+}
+```
+
+106B HCI command handler: when conn-slot-10 `+0x154` bit 2 is clear, gate byte
+`0x1a` (same idiom as `hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete`);
+when bit 2 is set, extracts big-endian u16 from `param+2`, validates range
+`1..0xa1b8`, stores to `field_0x16` on success (gate byte `0`) or rejects with
+`0x12` (Invalid HCI Command Parameters); builds Command Complete status from
+`param[0]` (zero → status `0`, else `field_0x165` with default `1`); terminates
+via 4-byte HCI Command Complete (`hci_event_sender(0xe,…)`) with status +
+echoed cmd-word bytes + gate byte. No direct callers found (indirect HCI router).
+
+LE Meta Event / conn-slot-10 cluster sibling of
+`hci_conn10_0x154_bit2_flag_0x1a_global_byte_send_cmd_complete`.
+
+Post-rename: **52 unnamed** in-region (15 in 1-150B size≥20B tier); live named **1586**.
 
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
