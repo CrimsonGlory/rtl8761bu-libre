@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 137 functions in tier, 41 renamed HIGH (Passes 52–52ar). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ar, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 135 functions in tier, 42 renamed HIGH (Passes 52–52at). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52at, 2026-06-30).
 
 ## Overview
 
@@ -2409,5 +2409,43 @@ to `FUN_8004fd6c` before arming procedure bit `+0x1d` and scheduling
 
 Post-rename: **222 unnamed** in-region (136 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-38+
-substantive candidate; skip rank-1–37 artifacts and already-done ranks.
+## Pass 52at (2026-06-30) — rank-38 LMP transaction-mode mapper rename
+
+**Refreshed cold-triage (ranks 1-37 skipped as artifacts or already done):** rank-38
+`0x80043718` (82B, 1 xref) — substantive BOS-subindex→LMP transaction-mode byte mapper
+in the remote-name/role-switch cluster (`0x800437xx` siblings of
+`remote_name_request_feature_index_selector`).
+
+**Rank-38 decompiled and renamed (HIGH):** `FUN_80043718` →
+`map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random` (82B) via
+`RenamePass52atRegion80040000Fun80043718.java` (`renamed=1`, live-verified).
+
+```c
+char map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random(
+    uint conn_idx, byte bos_subindex, char default_mode)
+{
+  if (big_ol_struct[conn_idx].bdaddr_random_ != '\0') {
+    if (bos_subindex < 4)
+      return bos_subindex + 8;   // map 0-3 → 8-11 for LMP PDU transaction mode
+    possible_logging_function__var_args(2, 0x2c, 0xb79, 0xc34, 1, logger, bos_subindex);
+    return '\0';
+  }
+  return default_mode;
+}
+```
+
+When `bdaddr_random_` is set on the connection (post role-switch / random-address
+state), remaps BOS subindex bytes 0–3 to LMP transaction-mode values 8–11; logs and
+returns 0 on out-of-range subindex. When `bdaddr_random_` is clear, passes through
+`default_mode` unchanged (typically the output of sibling `FUN_80043774`). Sole caller
+`FUN_8006fd20` (454B role-switch/LMP slot-offset completion handler in region
+`0x80070000`): after `resolve_bos_subindex_byte_for_connection_index` and
+`FUN_80043774`, stores mapped mode into pending LMP PDU staging struct at `+0x11`
+before `FUN_80042ee0` + `FUN_8006f994` chain. Pairs with Pass 52ai's
+`resolve_bos_subindex_byte_for_connection_index` and Pass 52p's
+`classify_lmp_slot_offset_relation_masked` in the same role-switch path.
+
+Post-rename: **221 unnamed** in-region (135 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-39+
+substantive candidate; skip rank-1–38 artifacts and already-done ranks.
