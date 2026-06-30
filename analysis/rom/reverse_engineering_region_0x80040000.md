@@ -4228,5 +4228,25 @@ param commit) and `le_channel_selection_algorithm_event_dispatch` (region
 Post-rename: **171 unnamed** in-region (95 in 1-150B tier unchanged); **76** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-12 `0x8004b898`
-(194B, 3 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cs below.
+
+## Pass 52cs (2026-06-30) — >150B rank-12 feature-mask-gated conn param setter rename
+
+**>150B rank-12 decompiled and renamed (HIGH):** `FUN_8004b898` →
+`set_feature_mask_gated_conn_param_0x91_with_hw_hook_notify` (194B, 2 confirmed
+callers) via `RenamePass52csRegion80040000Fun8004b898.java` (`renamed=1`,
+live-verified). Upgraded from MEDIUM-HIGH (Pass 5, 2026-06-23). Bounds-checks
+index `param_1-0x10 < 0xb` (11 conn slots); under IRQ-disable verifies per-conn
+valid-entry bit (`field3_0x3 & 1`) and header feature mask
+(`field453_0x1d2`/`field454_0x1d3` bit-indexed by slot); on pass writes
+`param_2` to `field138_0x91`, sets `field136_0x8f` bit `0x20`, sets/clears
+`field139_0x92` bit 0 per `param_3`, invokes optional HW hook at
+`PTR_DAT_8004b960`, returns `1`/`0xff`; always logs. Callers:
+`fHCI_Disconnect_0x06` + `FUN_8004c2f0` (conn-slot-10 maintenance cluster
+sibling of `irq_safe_stage_conn10_diagnostic_dword_pair_and_incr_count`).
+
+Post-rename: **170 unnamed** in-region (95 in 1-150B tier unchanged); **75** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-13 `0x8004eb18`
+(404B, 2 xrefs).
