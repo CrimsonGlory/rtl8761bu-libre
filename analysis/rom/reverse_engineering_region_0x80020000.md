@@ -486,7 +486,7 @@ bug in the table**, documented below.
 | `0x8002a334` | 156B | `HCI_EVT_0x1fd_FUN_8002a334` | Ring-buffer drain loop: pops queued buffers (4-bit index/count fields in a fixed-size descriptor table) and forwards each via `FUN_8002ed9c`, advancing a 2-slot round-robin cursor (`%2` via `puVar3[0xcd]`). |
 | `0x8002c338` | 602B | `thing_that_uses_SHA_and_BLAKE` | Confirmed: a from-scratch SHA-256/SHACAL2-style compression-function implementation (BLAKE2 IV constants + SHACAL2 round constants table, full message-schedule + 64-round compression loop, big-endian digest output). |
 | `0x8002c59c` | 144B | `reverse_path_to_thing_that_uses_SHA_and_BLAKE__1` | Assembles a message block from 4 input buffers (two N-word values + two 16-byte values) and calls `thing_that_uses_SHA_and_BLAKE`, extracting a little-endian 32-bit digest prefix — a P-192/256-style key-derivation helper. |
-| `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `FUN_8002dda4` (point-on-curve check) and on success runs the full DHKey derivation (`FUN_8002eb94`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `FUN_8002eb94`. |
+| `0x8002c888` | 150B | `get_DHKey_to_3rd_param?` | Confirmed: validates an ECDH public point via `crypto_ec_validate_affine_point_on_curve_mod_prime` (point-on-curve check) and on success runs the full DHKey derivation (`FUN_8002eb94`); on failure, clears a status byte instead. Matches the name exactly — DHKey is written via the 3rd parameter path inside `FUN_8002eb94`. |
 | `0x8002eae0` | 168B | `LMP__26E__FUN_8002eae0` | Per-connection cleanup/retry-countdown loop keyed by event `0x26e`; decrements per-slot countdown fields and calls `FUN_8002db50`/`crypto_ec_jacobian_point_add_mod_curve_prime` as needed, logging via `possible_logger_called_if_no_patch3` on the final iteration. |
 | `0x8002f518` | 962B | `assoc_w_tHCI_TD_FUN_8002f518` | Confirmed: large opcode-dispatch handler for the `tHCI_TD` (HCI test-data / transport-data) log-tagged subsystem — branches on a 16-bit sub-opcode (0x190–0x4ed range) into encryption-mode toggles, SCO/eSCO config validation, link-key/baseband event triggers, and a final `UNRECOVERED_JUMPTABLE` indirect dispatch Ghidra couldn't resolve statically. |
 | `0x8002fae0` | 84B | `VSC_0xfc93_FUN_8002fae0` | VSC 0xFC93 handler: on subcommand byte `0x09`, copies 6 packed fields from the VSC payload into 6 separate config globals (frequency/channel-map-style fields); returns `0x12` (invalid-params) otherwise. |
@@ -829,5 +829,34 @@ prep for the documented Jacobian add/double struct layout; caller already tied t
 SSP event `0x26e` retry path.
 
 Region unnamed count after this pass: **304** (305 minus this rename). Live named **1617** global.
+
+**Next:** superseded by Pass 6 continuation (9).
+
+## Pass 6 continuation (9) (2026-06-30) — SSP/ECDH point-on-curve `FUN_8002dda4`
+
+Decompiled and renamed:
+**`FUN_8002dda4` → `crypto_ec_validate_affine_point_on_curve_mod_prime`**
+(536B, HIGH) via `RenamePass6Region80020000Fun8002dda4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (536B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=304` at pass start). Callers:
+`get_DHKey_to_3rd_param?` (`0x8002c8ce`) and `FUN_8002c928` (`0x8002c96e`).
+
+**Mechanism:** Validates an affine EC public point (X at `param_1`, Y at `param_3`)
+for 6- or 8-limb curve width (`param_2`/`param_4`). Rejects zero or out-of-range
+coordinates (lexicographic compare against curve prime at `PTR_DAT_8002dfbc`/`PTR_DAT_8002dfc0`).
+Computes X³ mod p via `crypto_bignum_multiply_square_v1` + curve-parameter adds at
+`PTR_DAT_8002dfc4`/`PTR_DAT_8002dfcc` + `crypto_bignum_multiply_variable_len`, with
+6-limb reduction via `FUN_8002d744` or 8-limb via
+`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`. Computes Y² mod p
+(second square/reduce path) and returns true when the two sides compare equal —
+standard short-Weierstrass point-on-curve check gating DHKey derivation in
+`get_DHKey_to_3rd_param?`.
+
+**Confidence:** HIGH — already cited as "point-on-curve check" in the 2026-06-26
+low→high pass for `get_DHKey_to_3rd_param?`; decompile confirms full X/Y range
+validation plus X³ vs Y² equality test using the documented SSP/ECDH bignum cluster.
+
+Region unnamed count after this pass: **303** (304 minus this rename). Live named **1618** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
