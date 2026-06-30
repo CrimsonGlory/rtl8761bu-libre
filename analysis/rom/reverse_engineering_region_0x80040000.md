@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 83 renamed HIGH (Passes 52–52cc). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cc, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 84 renamed HIGH (Passes 52–52cg). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cg, 2026-06-30).
 
 ## Overview
 
@@ -3930,5 +3930,36 @@ Pass 52cd). No direct callers found.
 
 Post-rename: **183 unnamed** in-region (97 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-87+
-substantive candidate; skip rank-1–86 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52cf):** rank-87+ — completed Pass 52cg below.
+
+## Pass 52cg (2026-06-30) — rank-87 param-buffer zeroing adapter rename
+
+**Refreshed cold-triage (ranks 1-86 skipped as artifacts, deferred, or already done):**
+rank-87 `0x8004a4fc` (10B, 0 xrefs in triage) — substantive thin adapter in the
+`0x8004a4xx` LMP-check/teardown neighborhood; zeroes two u32 fields and a trailing
+byte in a param buffer.
+
+**Rank-87 decompiled and renamed (HIGH):** `FUN_8004a4fc` →
+`zero_param_buffer_two_u32_and_byte` (10B) via
+`RenamePass52cgRegion80040000Fun8004a4fc.java` (`renamed=1`, live-verified).
+
+```c
+void zero_param_buffer_two_u32_and_byte(undefined4 *param_buffer)
+{
+  *param_buffer = 0;
+  param_buffer[1] = 0;
+  *(undefined1 *)(param_buffer + 2) = 0;
+  return;
+}
+```
+
+Param-buffer layout: `[0]` and `[1]` uint32 fields zeroed, plus byte at offset 8
+(`param_buffer+2` as byte pointer). Standard function-pointer-registration clear
+adapter pattern; sibling of `hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete`
+(`0x8004a464`, Pass 52bt) and `invoke_teardown_hook_triplet_with_lmp_power_gate`
+(`0x8004a4bc`, Pass 52bc). No direct callers found.
+
+Post-rename: **182 unnamed** in-region (96 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-88+
+substantive candidate; skip rank-1–87 artifacts, deferred, and already-done ranks.
