@@ -6665,7 +6665,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ge;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gf: cold-triage next rank-1
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gf (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80074da0`→`invoke_feature_page_hook_with_log_0x64`
+          (44B, HIGH, STUB-tier). Feature-page hook fptr at `PTR_DAT_80074dcc`
+          via `possible_logger_called_if_no_patch3` with log tag `0x64`, offset
+          `param_1-(int)PTR_DAT_80074dd0`; `0x80074dxx` cluster sibling of Pass
+          12bq/12bt. STUB-tier unnamed 28 remain; live named 1341.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gf;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gg: cold-triage next rank-1
           STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

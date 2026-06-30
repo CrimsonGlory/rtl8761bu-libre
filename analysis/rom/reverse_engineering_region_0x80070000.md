@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12ge COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (29 STUB-tier unnamed remain). Latest: `invoke_bb_regs_0x1a6_0xf4_enable_hook_or_clear_globals` (Pass 12ge). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1340** global; **31** in-region unnamed (29 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12ge section below.
+**Status**: Pass 12gf COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (28 STUB-tier unnamed remain). Latest: `invoke_feature_page_hook_with_log_0x64` (Pass 12gf). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1341** global; **30** in-region unnamed (28 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gf section below.
 
 ## Overview
 
@@ -2416,6 +2416,28 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gf (2026-06-30) — feature-page hook+log stub tag 0x64 `FUN_80074da0`
+
+Decompiled and renamed:
+**`FUN_80074da0` → `invoke_feature_page_hook_with_log_0x64`**
+(44B, HIGH, STUB-tier) via `RenamePass12gfRegion80070000Fun80074da0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(44B, xref_in=2 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Thin hook-dispatch stub in the `0x80074dxx` feature-page / logger fptr
+cluster: invokes patchable hook fptr at `*PTR_DAT_80074dcc` via
+`possible_logger_called_if_no_patch3` with log tag `0x64` (100), passing
+`param_1 - (int)PTR_DAT_80074dd0` as offset and `param_2 & 0xffff` as 16-bit arg.
+Tag-0x64 sibling of Pass 12bq's `invoke_feature_page_hook_fallback_with_log_0x385`
+and the Pass 12bt predicate-or-fallback path in the same cluster.
+
+**Confidence:** HIGH — unambiguous hook-fptr + offset-subtract + logger-dispatch idiom.
+
+Live named **1341** (global; in-region unnamed **30**; STUB-tier unnamed **28**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12ge (2026-06-30) — BB regs enable hook-or-default stub `FUN_800788e4`
 
