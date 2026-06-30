@@ -6737,8 +6737,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gn: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java`.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gn (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80072094`→`log_evt_0x268_conn_teardown_backoff_zero_via_patch_hook`
+          (42B, HIGH, STUB-tier). Thin `possible_logger_called_if_no_patch3` wrapper
+          with log tag `0x268`; sole caller `conn_teardown_and_link_loss_cleanup_handler`
+          at `0x80004968` when per-role backoff counter zero. STUB-tier unnamed
+          20 remain; live named 1349.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12go: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80071ae8`,
+          48B, xref_in=1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

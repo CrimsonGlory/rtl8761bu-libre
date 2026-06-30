@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gm COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (21 STUB-tier unnamed remain). Latest: `search_pool_descriptor_index_table_set_found_flag` (Pass 12gm). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1348** global; **23** in-region unnamed (21 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gm section below.
+**Status**: Pass 12gn COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (20 STUB-tier unnamed remain). Latest: `log_evt_0x268_conn_teardown_backoff_zero_via_patch_hook` (Pass 12gn). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1349** global; **22** in-region unnamed (20 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gn section below.
 
 ## Overview
 
@@ -2416,6 +2416,32 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gn (2026-06-30) — link-loss teardown event-0x268 logger hook `FUN_80072094`
+
+Decompiled and renamed:
+**`FUN_80072094` → `log_evt_0x268_conn_teardown_backoff_zero_via_patch_hook`**
+(42B, HIGH, STUB-tier) via `RenamePass12gnRegion80070000Fun80072094.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(42B, xref_in=1 — `FindCallers80072094.java` confirms 1 call site from
+`conn_teardown_and_link_loss_cleanup_handler` at `0x80004968`; MCP `xrefs_to`
+returns empty against this GZF, known gap).
+
+**Mechanism:** Thin patch-hook logger wrapper: invokes `possible_logger_called_if_no_patch3`
+with hook fptr at `*PTR_DAT_800720c0`, passing through caller-supplied args
+(`field_0x28` from `big_ol_struct`, literal `0x280`) and log tag `0x268`.
+Sole caller invokes it when per-role backoff counter at `PTR_DAT_80004d14[role]`
+is zero but `field_0x74` is nonzero — early in the link-loss teardown path,
+between the `0x267` log and backoff-table clear. Sits in the `0x800720xx`
+conn-teardown logger cluster adjacent to Pass 12fd's AFH LAP logger.
+
+**Confidence:** HIGH — unambiguous `possible_logger_called_if_no_patch3` idiom with
+fixed tag `0x268`; sole caller context and arg pattern confirmed via caller decompile.
+
+Live named **1349** (global; in-region unnamed **22**; STUB-tier unnamed **20**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gm (2026-06-30) — pool descriptor index membership search `FUN_80075bac`
 
