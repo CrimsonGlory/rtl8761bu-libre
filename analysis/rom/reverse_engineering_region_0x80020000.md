@@ -479,7 +479,7 @@ bug in the table**, documented below.
 | `0x80023fd0` | 10B | `some_case_0x2d` | Stores a 4-byte value at `+0x1e8` and zeroes a byte via an output pointer — a `case 0x2d` arm extracted as its own thunk. |
 | `0x800240f4` | 24B | `ret_bool_based_on_crypto_struct_0x50` | XOR of two boolean flags (`param_1+0xd0 == 0` and `param_2+0x50 != 1`). |
 | `0x80024ca4` | 864B | `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?` | Large per-connection state-machine update: optional registered callback first, then a ~20-case switch over the crypto-struct's state byte driving link-key-type transitions, SSP/auth event sends, and detach paths. Confirms the name (it is the post-SSP-complete state-machine update, structurally identical in role to a `?`-flagged guess). |
-| `0x80025d34` | 160B | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | Computes an HMAC-style check value via `FUN_8002c6c8` (BLAKE2/SHACAL2-based) over a16-byte buffer assembled from connection state + a config BD_ADDR, then `memcmp`s against the caller-supplied value — this is a DHKey/passkey *verification* check, consistent with both candidate event names (used during numeric-comparison or passkey confirmation). |
+| `0x80025d34` | 160B | `some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification` | Computes an HMAC-style check value via `assemble_63byte_hmac_and_compute_safer_hash` over a 16-byte buffer assembled from connection state + a config BD_ADDR, then `memcmp`s against the caller-supplied value — this is a DHKey/passkey *verification* check, consistent with both candidate event names (used during numeric-comparison or passkey confirmation). |
 | `0x80026608` | 140B | `call_send_evt_HCI_Simple_Pairing_Complete` | Confirmed: sends `send_evt_HCI_Simple_Pairing_Complete_0x36`, then either advances the state machine inline or (if `param_2` indicates a failure path) defers to `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_` above. |
 | `0x80029a50` | 66B | `send_evt_HCI_Link_Key_Type_Changed_0x0A` | Thin wrapper: packs connection handle + 2 status bytes, sends HCI event 0x0A. |
 | `0x80029a98` | 200B | `wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` | State machine over a 3-state counter at a fixed global struct (`+0x48`), driving combination/temporary/semi-permanent link-key transitions and re-invoking the event sender above. |
@@ -2217,7 +2217,8 @@ Decompiled and renamed:
 **Mechanism:** Per-connection DHKey-check responder. Reads 3-byte nonce from crypto
 struct `+0x1de/+0x1df/+0x1e0`, byte-swaps config BD_ADDR (`PTR_DAT_80025b14`) and
 connection BD_ADDR from `big_ol_struct[slot]`, assembles crypto key blocks at
-`+0x1be/+0xe8/+0xf8/+0x118`, and computes 16-byte HMAC via `FUN_8002c6c8` (same
+`+0x1be/+0xe8/+0xf8/+0x118`, and computes 16-byte HMAC via
+`assemble_63byte_hmac_and_compute_safer_hash` (same
 BLAKE2/SHACAL2 primitive as passkey verification at `0x80025d34`). Byte-swaps the
 hash output and sends LMP opcode `0x41` (DHKey Check) via `FUN_80024470` with 0x12-byte
 payload. Caller `LMP__271__FUN_80025cb4` gates on `crypto+0x50` and sets status `0x3a`
@@ -2614,7 +2615,7 @@ ipad/opad construction (`0x36`/`0x5c` XOR pads over 64-byte blocks) around two c
 `(key_ptr, key_len, msg_ptr, msg_len, out_ptr)` → 16-byte output. Inner pass hashes
 padded-key || message; outer pass hashes opad-key || inner digest.
 
-**Callers:** `derive_e21_or_e22_16byte_block_via_hmac_driver`, `derive_encryption_key_material_hmac_mode8_bdaddr_mix`, `FUN_8002c6c8` (SSP DHKey-check), `FUN_8002c7d0` (SSP confirmation hash), `derive_e1_aco_and_sres_via_safer_plus` (E1 path), plus one additional crypto wrapper — six sites total (xref_in=6).
+**Callers:** `derive_e21_or_e22_16byte_block_via_hmac_driver`, `derive_encryption_key_material_hmac_mode8_bdaddr_mix`, `assemble_63byte_hmac_and_compute_safer_hash` (SSP DHKey-check), `FUN_8002c7d0` (SSP confirmation hash), `derive_e1_aco_and_sres_via_safer_plus` (E1 path), plus one additional crypto wrapper — six sites total (xref_in=6).
 
 **Confidence:** HIGH — decompile confirms literal HMAC ipad/opad constants; callee chain
 matches documented SAFER+ encryption engine; all six callers are pairing/encryption
@@ -2986,7 +2987,8 @@ state-byte advance). Params: `big_ol_struct` entry (`param_1`) and crypto struct
 BD_ADDR (`PTR_DAT_80026600`) vs per-connection BD_ADDR at `param_1+0xd1`; both
 6-byte operands are byte-swapped. Assembles HMAC input from crypto key blocks at
 `+0x1be`/`+0xe8`/`+0xf8` with mode byte `+0x1f1`, invokes `FUN_8002c758`
-(HMAC ipad/opad 2-pass SAFER+ driver sibling of `FUN_8002c6c8`), byte-swaps 16B
+(HMAC ipad/opad 2-pass SAFER+ driver sibling of
+`assemble_63byte_hmac_and_compute_safer_hash`), byte-swaps 16B
 output into `+0x61`, copies link-key-type marker `+0x1e5` → `+0xb9`. Caller then
 branches on `crypto+0x50` and `+0x214` for post-derive state (`0x12`/`0x1b`/`5`/`6`)
 via `set_arg1_1_to_arg2`, optionally calling `FUN_80025164` when `+0x50==1`.
@@ -3000,5 +3002,40 @@ offset usage (`+0x61`/`+0xb9`/`+0x1e5`) matches crypto-struct link-key layout;
 sole caller is the confirmed SSP-complete HCI event sender on success path.
 
 Region unnamed count after this pass: **235** (236 minus this rename). Live named **1686** global.
+
+**Next:** superseded by Pass 6 continuation (78).
+
+## Pass 6 continuation (78) (2026-06-30) — SSP HMAC assembler `FUN_8002c6c8`
+
+Decompiled and renamed:
+**`FUN_8002c6c8` → `assemble_63byte_hmac_and_compute_safer_hash`**
+(142B, HIGH) via `RenamePass6Region80020000Fun8002c6c8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (142B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=235` at pass start). Sits in the
+`0x8002c6xx` SAFER+ HMAC cluster immediately above
+`hmac_ipad_opad_2pass_safer_hash_driver` (`0x8002c62c`).
+
+**Mechanism:** Shared SSP/crypto HMAC message assembler: copies three 16-byte crypto
+key blocks (`param_2`/`param_3`/`param_4`), a 3-byte mode prefix (`param_5`),
+and two byte-swapped 6-byte BD_ADDR operands (`param_6`/`param_7`) into a fixed
+63-byte (`0x3f`) message buffer, then invokes
+`hmac_ipad_opad_2pass_safer_hash_driver` with HMAC key `param_1` and mode byte
+`(param_9 & 0x3f) << 2`, writing 16-byte output to `param_8`. Sibling of
+`FUN_8002c758` (used by `derive_link_key_hmac_on_ssp_pairing_complete`) with
+identical assembly layout but different caller block-offset ordering.
+
+**Callers:** `derive_dhkey_check_and_send_lmp_0x41` at `0x80025ac4` (DHKey-check
+responder: blocks `+0x1be`/`+0xe8`/`+0xf8`/`+0x118`, sends LMP 0x41) and
+`some_case_0x3b_or_0x3c_possible_HCI_Passkey_Notification_or_HCI_Keypress_Notification`
+at `0x80025d88` (passkey/numeric-comparison verification via `memcmp` against
+caller-supplied 16B value) — xref_in=2, confirmed via caller decompilation.
+
+**Confidence:** HIGH — callee is the documented SAFER+ HMAC driver; 63-byte message
+layout matches DHKey-check and passkey-verification callers; block-offset usage
+(`+0x1be`/`+0xe8`/`+0xf8`/`+0x108`/`+0x118`, `+0x1f1` mode) consistent with
+Pass 6 cont. (52)/(77) SSP crypto-struct layout.
+
+Region unnamed count after this pass: **234** (235 minus this rename). Live named **1687** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
