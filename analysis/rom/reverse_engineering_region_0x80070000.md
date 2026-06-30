@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fv COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**6** HANDLER-tier unnamed remain in-region; live named **1331** global). Latest: `dispatch_lmp_25c_multi_slot_emit_with_config_gates` (Pass 12fv), `release_resource_pool_chain_slot_by_type` (Pass 12fu). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800708bc`, 6 remain). See Pass 12fv section below.
+**Status**: Pass 12fw COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**5** HANDLER-tier unnamed remain in-region; live named **1332** global). Latest: `handle_lmp_489_subcase7_conn_substate_emit_25c_268` (Pass 12fw), `dispatch_lmp_25c_multi_slot_emit_with_config_gates` (Pass 12fv). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800777f6`, 5 remain). See Pass 12fw section below.
 
 ## Overview
 
@@ -2415,7 +2415,30 @@ connection-record binding written by the alloc caller.
 
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
-**Next:** superseded by Pass 12fv.
+**Next:** superseded by Pass 12fw.
+
+## Pass 12fw (2026-06-30) — LMP 0x489 subcase-7 conn substate emit `FUN_800708bc`
+
+Decompiled and renamed:
+**`FUN_800708bc` → `handle_lmp_489_subcase7_conn_substate_emit_25c_268`**
+(160B, HIGH, HANDLER-tier) via `RenamePass12fwFun800708bc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection handler reached from `LMP__489__various_sub_cases` when PDU
+sub-opcode byte at `param+4 >> 1` equals `7`. Uses `PTR_big_ol_struct_80070954[param_1]`:
+when `field_0xff == 0x13` and `field_0xb5 != 0x04`, advances status byte to `0x16` and clears
+`field185_0x100`. When `field_0xb5 == 0x01` (armed sub-state): emits
+`LMP__25C_called3(conn_idx, field_0xff)`, then `LMP__25C_called1(*(field_0x24), 0)`, then
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` with slot from `field_0x24` and scaled
+timing derived from `field90_0x82` (`((ushort*5)>>3)*3`), then sets `field_0xb5 = 2`. Else logs
+unexpected sub-state via `possible_logging_function__var_args` (event `0x707`).
+
+**Confidence:** HIGH — explicit caller in decompiled `LMP__489__various_sub_cases` subcase-7
+branch; multiple named LMP 0x25C/0x268 emit calls with visible conn-record field semantics.
+
+Live named **1332** (global; in-region unnamed **20**; HANDLER-tier unnamed **5**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800777f6` per
+`ListHandler80070000.java`.
 
 ## Pass 12fv (2026-06-30) — LMP 0x25C multi-slot emit fan-out `FUN_80071cbc`
 
@@ -2439,8 +2462,7 @@ decompile.
 
 Live named **1331** (global; in-region unnamed **21**; HANDLER-tier unnamed **6**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800708bc` per
-`ListHandler80070000.java`.
+**Next:** superseded by Pass 12fw.
 
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 
