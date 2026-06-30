@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 144 functions in tier, 35 renamed HIGH (Passes 52–52al). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52al, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 142 functions in tier, 36 renamed HIGH (Passes 52–52am). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52am, 2026-06-30).
 
 ## Overview
 
@@ -2119,5 +2119,55 @@ region `0x80070000`. 1 xref.
 
 Post-rename: **229 unnamed** in-region (143 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-31+
-substantive candidate; skip rank-1–30 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-32+
+substantive candidate; skip rank-1–31 artifacts and already-done ranks.
+
+## Pass 52am (2026-06-30) — rank-31 list-A overflow collect + TX scheduler rename
+
+**Refreshed cold-triage (ranks 1-30 skipped as artifacts or already done):** rank-31
+`0x8004b6ec` (122B, 1 xref) — substantive per-connection TX queue orchestrator in the
+`0x8004b4xx` cluster (list-A counterpart to `atomically_take_conn_list_b_and_apply_quota_overflow`
+at `0x8004ca10`; sibling of `FUN_8004b468` TX fragmentation scheduler).
+
+**Rank-31 decompiled and renamed (HIGH):** `FUN_8004b6ec` →
+`atomically_take_conn_list_a_collect_overflow_and_schedule_tx` (122B) via
+`RenamePass52amRegion80040000Fun8004b6ec.java` (`renamed=1`, live-verified).
+
+```c
+void atomically_take_conn_list_a_collect_overflow_and_schedule_tx(uint conn_idx, uint budget)
+{
+  conn_idx = conn_idx & 0xff;
+  budget = budget & 0xff;
+  ctx = PTR_base_of_0x1ac_struct_array;
+  irq = disable_interrupts();
+  pending = ctx[conn_idx].field264_0x10f;
+  saved_head = ctx[conn_idx].field307_0x140;
+  if (pending != 0) {
+    if (saved_head != 10) ctx[conn_idx].field307_0x140 = 0xa0a;
+    pending = 1;
+    ctx[conn_idx].field264_0x10f = 0;
+  }
+  enable_interrupts(irq);
+  if (pending == 1) {
+    FUN_8004b29c(&local_list, saved_head);
+    if (local_list.count != 0)
+      FUN_8004b3c0(&local_list, conn_idx, 0, 0);
+  }
+  FUN_8004b468(conn_idx, budget);
+}
+```
+
+IRQ-off snapshot of list-A head index at `conn+0x140` (`field307_0x140`), gated on
+`field264_0x10f`; when set, resets the head field to empty-list sentinel `0xa0a` (same
+`init_connection_record` / `release_connection_record` default as list-B at `+0x144`).
+After re-enabling interrupts, walks the saved head via `FUN_8004b29c` (slot-table chain
+collecting overflow records into a local 3-word list), conditionally splices collected
+records back via `FUN_8004b3c0` (list-A / `param_4==0` path at `field289_0x128`), then
+always invokes `FUN_8004b468` (624B TX fragmentation scheduler over the `0x1ac` conn array).
+List-A twin of `atomically_take_conn_list_b_and_apply_quota_overflow` (which uses `+0x144`,
+`FUN_8004b1d0`, and optional `FUN_8004c940`). 1 xref (function-pointer registration).
+
+Post-rename: **228 unnamed** in-region (142 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-32+
+substantive candidate; skip rank-1–31 artifacts and already-done ranks.
