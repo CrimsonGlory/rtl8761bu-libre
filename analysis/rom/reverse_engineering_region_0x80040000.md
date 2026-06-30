@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 145 functions in tier, 34 renamed HIGH (Passes 52–52ak). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ak, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 144 functions in tier, 35 renamed HIGH (Passes 52–52al). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52al, 2026-06-30).
 
 ## Overview
 
@@ -2076,5 +2076,48 @@ corrected). Sibling pattern of `hci_link_policy_param_setup_handler_send_cmd_com
 
 Post-rename: **230 unnamed** in-region (144 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-30+
-substantive candidate; skip rank-1–29 artifacts and already-done ranks.
+## Pass 52al (2026-06-30) — rank-30 dual-slot ushort probe rename
+
+**Refreshed cold-triage (ranks 1-29 skipped as artifacts or already done):** rank-30
+`0x80043508` (128B, 1 xref) — substantive dual-slot buffer ushort probe in the
+`0x800435xx` inquiry/LAP / role-switch cluster (sibling of `FUN_800435a8` field
+manipulator and `dual_slot_buffer_reassignment_on_role_switch` in region `0x80030000`).
+
+**Rank-30 decompiled and renamed (HIGH):** `FUN_80043508` →
+`is_indexed_dual_slot_ushort_match_context_and_log` (128B) via
+`RenamePass52alRegion80040000Fun80043508.java` (`renamed=1`, live-verified).
+
+```c
+bool is_indexed_dual_slot_ushort_match_context_and_log(uint index)
+{
+  table = PTR_DAT_80043588;
+  expected = *(ushort *)(PTR_DAT_8004358c + 0xc);
+  entry = table + (index & 0xff) * 0x84;
+  active_slot = *entry & 1;
+  if (entry[1] == 0) {
+    if ((entry[active_slot * 0x40 + 0x30] != expected) &&
+        (expected != entry[(!active_slot) * 0x40 + 0x30]))
+      return false;
+  } else {
+    if (entry[1] != 1) return false;
+    if (expected != entry[active_slot * 0x40 + 0x30]) return false;
+  }
+  possible_logging_function__var_args(6, 0x2c, 0xcfa, 0x667, 0, PTR_unknown_dat_ref_by_logger_80043590, 0);
+  return true;
+}
+```
+
+Indexed probe on the stride-0x84 per-role dual-slot buffer table at `PTR_DAT_80043588`:
+bit 0 of `entry[0]` selects the active 0x40-byte slot; compares the ushort at
+`entry[slot*0x40+0x30]` against the global expected value at `PTR_DAT_8004358c+0xc`.
+When `entry[1]==0`, accepts a match on either active or alternate slot; when
+`entry[1]==1`, requires the active slot only. On success emits a varargs diagnostic
+log via `possible_logging_function__var_args`. Thin wrapper caller `FUN_80043594`
+(6B thunk). Same dual-slot layout family as `dual_slot_buffer_reassignment_on_role_switch`
+(region `0x80030000`) and LMP switch slot checks at `+0x30`/`+0x70` documented in
+region `0x80070000`. 1 xref.
+
+Post-rename: **229 unnamed** in-region (143 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-31+
+substantive candidate; skip rank-1–30 artifacts and already-done ranks.
