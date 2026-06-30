@@ -9194,8 +9194,23 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ie;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fq: continue HANDLER-tier
-          cold-triage rank-1 (13 unnamed HANDLER-tier remain per Pass 12fp).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hl (2026-06-30): WIP sync —
+          region sweep already complete (Pass 12hk). Live-verified
+          `ListUnnamed80070000.java` total_simple_tier=0; stale [NEXT] Pass 12fq
+          superseded (Passes 12fq–12hk done in region doc, 0 in-region unnamed).
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hk;
+          analysis/INDEX.md
+
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 (2026-06-30): pivoted from
+          stale 0x80070000 [NEXT]; decompiled+renamed rank-1 by xref_in
+          `FUN_8002d818`→`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`
+          (816B, HIGH) — SSP/ECDH curve-prime modular reduction via constant
+          subtraction chain; 10 xrefs. 312 unnamed in-region; live named 1609.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation: cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (312 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

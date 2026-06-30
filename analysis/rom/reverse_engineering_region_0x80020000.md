@@ -550,5 +550,39 @@ already-named `read_link_register_0xe_top_nibble_by_slot` to validate the HW lin
 top nibble matches the software counter; on mismatch (or bitmap hit with `log_flag==0`), logs
 via `possible_logging_function__var_args` with tags `0x5aa` / `0x5a2`.
 
-**Next:** run `ColdTriageRegion80050000Pass54.java` for the deferred Pass 54 general cold-triage
-re-rank (region `0x80050000`).
+**Next:** superseded by Pass 6.
+
+## Pass 6 (2026-06-30) — SSP/ECDH bignum modular reduction `FUN_8002d818`
+
+**Context:** Stale WIP `[NEXT]` for region `0x80070000` Pass 12fq was superseded — that region
+sweep completed (Pass 12hk, 0 in-region unnamed; live-verified this pass via
+`ListUnnamed80070000.java` `total_simple_tier=0`). Pivoted to region `0x80020000` unnamed
+cold-triage: fresh `ListUnnamed80020000.java` reports **313** unnamed `FUN_*` remain.
+
+Decompiled and renamed:
+**`FUN_8002d818` → `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`**
+(816B, HIGH) via `RenamePass6Region80020000Fun8002d818.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by xref_in among remaining unnamed (816B, xref_in=10) in the
+`0x8002dxxx` SSP/ECDH bignum cluster.
+
+**Mechanism:** Specialized modular reduction of a 16-limb input bignum (`param_1`, effective
+length from `crypto_bignum_effective_u32_word_count`) modulo the curve prime at
+`PTR_DAT_8002db48`. Copies input to a 16-word workspace, builds four derived 8-limb constant
+subtrahends from the high input limbs via chained `crypto_bignum_add_u32_arrays_with_carry`,
+applies `crypto_bignum_reduce_mod_by_repeated_subtract`, then for each constant: compare via
+`compare_uint32_arrays_lexicographic_msb_to_lsb`, conditionally add prime if underflow, log via
+`possible_logging_function__var_args` (event codes `0x181`/`0x192`/`0x1a1`/`0x1b0`) when
+compare fails, subtract constant via `crypto_bignum_sub_u32_arrays_with_borrow`. Final
+reduce-mod, zero-fill destination via `crypto_bignum_fill_u32_words`, add back lower 8 limbs.
+Consumer of Pass 12t compare, Pass 12u subtract, Pass 12ax reduce-mod, and Pass 12ay fill/length
+primitives (region `0x80070000`).
+
+**Confidence:** HIGH — unambiguous bignum primitive callee chain; curve-prime constant and
+multi-stage subtract-reduce idiom directly readable from decompile.
+
+Region unnamed count after this pass: **312** (313 minus this rename). Live named **1609** global.
+
+**Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java` (top by size:
+`FUN_8002e55c` 1400B; top by xref_in among smaller: `FUN_8002d818` done — next
+`FUN_8002a3d8` 1100B xref_in=4 or re-run listing).
