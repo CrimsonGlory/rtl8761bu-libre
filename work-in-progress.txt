@@ -8518,9 +8518,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fl: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fl (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800489e8`→`hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete`
+          (206B, HIGH). AFH-gated link-slot flag bitmap commit HCI handler;
+          `find_link_record_by_bdaddr_and_flag(2,…)`, commits `param+7` bit0 to
+          global bitmask + conn sub-record `+0x26` bit1; 4-byte Command Complete.
+          6 unnamed >150B; 101 unnamed in-region; live named 1537.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fm: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (7 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+          (6 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

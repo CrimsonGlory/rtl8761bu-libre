@@ -6293,6 +6293,36 @@ handler at `0x80046798`):
 Post-rename: **102 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1536**.
 
+**Next:** superseded by Pass 52fl below.
+
+## Pass 52fl (2026-06-30) — >150B rank-1 AFH-gated link-slot flag bitmap commit HCI handler rename
+
+**Cold-triage (refreshed):** 7 unnamed >150B remain. rank-1 `0x800489e8`
+(206B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_800489e8` →
+`hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete`
+(206B, 0 xrefs) via
+`RenamePass52flRegion80040000Fun800489e8.java` (`renamed=1`, live-verified).
+
+206B HCI command handler in the `0x800489xx`/`0x80048axx` AFH/link-slot cluster
+(sibling of `hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete` at
+`0x80048d6c` and `hci_link_slot_alloc_and_commit_gated_handler_send_cmd_complete`
+at `0x80048fb8`):
+
+- **AFH gate:** `field327_0x154` bit2 set (else status `0x1a`).
+- **Index validation:** pool-index byte at `param+3` must be `<2`.
+- **Lookup path:** `find_link_record_by_bdaddr_and_flag(2, index, bdaddr@+2)`;
+  slot index must be `<` bound at `PTR_DAT_80048abc` (else status `0x0c`).
+- **Flag commit:** byte at `param+7` bit0 drives per-slot bit in global
+  bitmask at `DAT_80048ac0` and bit1 of conn sub-record `+0x26` at
+  `field319_0x14c + slot*0x34`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **101 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1537**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (7 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (6 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
