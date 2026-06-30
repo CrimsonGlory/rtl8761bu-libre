@@ -4352,5 +4352,24 @@ exceed 1. Callees: `program_hw_channel_and_slot_params` (`0x80052008`, region
 Post-rename: **166 unnamed** in-region (95 in 1-150B tier unchanged); **71** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-18 `0x8004c940`
-(194B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cy below.
+
+## Pass 52cy (2026-06-30) — >150B rank-18 pending-completed-packet drain
+
+**>150B rank-18 decompiled+renamed (HIGH):** `FUN_8004c940` →
+`drain_conn_pending_completed_packets_and_emit_hci_event` (194B, 2 xrefs) via
+`RenamePass52cyRegion80040000Fun8004c940.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 6, 2026-06-23). Per-connection pending-packet
+list drain: IRQ-off swap/clear of embedded list head at conn-record
+`field403_0x1a0`/`field407_0x1a4`/`field411_0x1a8` (`0x1ac` stride array);
+walk extracted list clearing node `+0x100`, calling fn-ptr hook `(node, 5)` with
+log on nonzero return; increments `field89_0x59` by saved count; terminates in
+`send_evt_HCI_Number_Of_Completed_Packets`. Callee of
+`atomically_take_conn_list_b_and_apply_quota_overflow` (quota/pending-event
+pipeline).
+
+Post-rename: **165 unnamed** in-region (95 in 1-150B tier unchanged); **70** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-19 `0x8004f25c`
+(186B, 2 xrefs).
