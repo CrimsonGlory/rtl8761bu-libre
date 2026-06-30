@@ -7439,5 +7439,48 @@ cluster.
 
 Post-rename: **73 unnamed** in-region (36 in 1-150B size≥20B tier); live named **1565**.
 
+**Next:** superseded by Pass 52go below.
+
+## Pass 52go (2026-06-30) — rank-1 public-BD_ADDR role-change commit rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52go.java` — 73 unnamed,
+36 in 1-150B size≥20B tier; rank-1 `0x800434ac` (82B, 1 xref) — public-BD_ADDR
+role-change commit tail in SCO/eSCO HW-channel cluster; callee path from
+`FUN_8006f994` role-switch completion when slot-offset validation passes.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_800434ac` →
+`apply_public_bdaddr_role_change_commit_hci_evt_sync` (82B) via
+`RenamePass52goRegion80040000Fun800434ac.java` (`renamed=1`, live-verified).
+
+```c
+void apply_public_bdaddr_role_change_commit_hci_evt_sync(void)
+{
+  puVar2 = PTR_DAT_80043500;
+  conn_idx = puVar2[6];
+  pbVar3 = PTR_big_ol_struct_80043504;
+  if ((pbVar3[conn_idx].bdaddr_random_ == 0)
+      && ((byte)puVar2[7] != *(byte *)((int)puVar2 + 0xf))
+      && ((*puVar2 & 0xff) != (puVar2[1] & 0xff))) {
+    FUN_8006080c();   // link handler when public BD_ADDR + byte mismatch
+  }
+  apply_or_defer_conn_role_change_emit_hci_evt_sync(conn_idx, 0x35);
+  FUN_80034e6c();
+}
+```
+
+Role-change commit tail in the `0x800434xx` SCO/eSCO HW-channel cluster: reads
+conn index from shared parameter block `PTR_DAT_80043500` (`+0xc`), and when
+`bdaddr_random_` is clear (public BD_ADDR) plus role/slot bytes at `+0xe` and
+`+0xf` differ from low bytes of `+0x0`/`+0x1`, calls `FUN_8006080c` link
+handler before unconditionally applying role `0x35` via
+`apply_or_defer_conn_role_change_emit_hci_evt_sync` and housekeeping
+`FUN_80034e6c`. Sole caller `FUN_8006f994` (role-switch completion handler)
+after `FUN_80043594` slot-offset check passes. Sibling of
+`reconcile_conn_slot_timing_drift_commit_hw_channel_reconcile` (Pass 52gj) and
+`apply_codec_type_and_role_switch_hook_dispatch` tail (same `0x35` role +
+`FUN_80034e6c` pattern).
+
+Post-rename: **72 unnamed** in-region (35 in 1-150B size≥20B tier); live named **1566**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

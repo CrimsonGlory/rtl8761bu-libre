@@ -8782,7 +8782,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52go: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52go (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800434ac`→`apply_public_bdaddr_role_change_commit_hci_evt_sync`
+          (82B, HIGH). Public-BD_ADDR role-change commit tail in SCO/eSCO HW-channel
+          cluster; gated `FUN_8006080c` when role/slot bytes mismatch, then
+          `apply_or_defer_conn_role_change_emit_hci_evt_sync(0x35)`; callee of
+          `FUN_8006f994` role-switch completion. 72 unnamed remain; live named 1566.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52go;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gp: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
