@@ -6968,8 +6968,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52b;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52c: decompile+rename rank-3
-          `0x8004ce44` (16 xrefs, 38B, 1-50B tier).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52c: decompiled+renamed rank-3
+          `FUN_8004ce44`→`write_conn_record_esco_type_byte_and_link_quality_reset`
+          (38B, HIGH). Writes eSCO type byte to conn_rec+0x8e, triggers
+          `conn_link_quality_history_reset_and_vsc_0xfc95_trigger(conn_idx, 1)`;
+          RAM fn-ptr slot `0x8012082c` callee from patch eSCO setup.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52c;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52d: decompile+rename rank-4
+          `0x8004e500` (15 xrefs, 118B, 51-150B tier).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

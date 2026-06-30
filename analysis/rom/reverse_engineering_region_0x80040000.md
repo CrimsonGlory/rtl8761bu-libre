@@ -823,5 +823,24 @@ Structural AND-variant twin of Pass 52's `or_merge_hw_channel_table_entry_and_in
 (`init_or_clear_sco_hw_channel_subsystem` in region `0x80030000` iterates channel slots via
 `FUN_800430ac`, finishes with `and_mask_hw_channel_table_entry_and_indexed_dispatch`).
 
-**Next:** decompile+rename rank-3 `0x8004ce44` (16 xrefs, 38B); then continue down the
+## Pass 52c (2026-06-30) — rank-3 eSCO type-byte writer rename
+
+**Rank-3 decompiled and renamed (HIGH):** `FUN_8004ce44` →
+`write_conn_record_esco_type_byte_and_link_quality_reset` (38B) via
+`RenamePass52cRegion80040000Fun8004ce44.java` (`renamed=1`, live-verified).
+
+```c
+void write_conn_record_esco_type_byte_and_link_quality_reset(uint conn_idx, byte type_byte)
+{
+  conn_rec_array[(conn_idx & 0xff) * 0x1ac].field135_0x8e = type_byte;
+  conn_link_quality_history_reset_and_vsc_0xfc95_trigger(conn_idx & 0xff, 1);
+}
+```
+
+Writes the eSCO/connection-type byte to `conn_rec+0x8e` (`field135_0x8e`), then
+triggers the already-HIGH `conn_link_quality_history_reset_and_vsc_0xfc95_trigger`
+with `mode==1`. Invoked from patch eSCO setup via RAM fn-ptr slot `0x8012082c`
+(`(**0x8012082c)(conn_idx, 6)` from `FUN_8010b5d8` / `FUN_8010b4d0`).
+
+**Next:** decompile+rename rank-4 `0x8004e500` (15 xrefs, 118B); then continue down the
 Pass 52 ranked list.
