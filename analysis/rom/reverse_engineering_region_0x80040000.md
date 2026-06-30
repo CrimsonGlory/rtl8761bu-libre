@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 16 renamed HIGH (Passes 52–52q). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52q, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 17 renamed HIGH (Passes 52–52r). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52r, 2026-06-30).
 
 ## Overview
 
@@ -1294,5 +1294,43 @@ sentinel `0x7fff`, else blends with coefficient from optional hook at
 
 Post-rename: **250 unnamed** in-region (164 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-9+
-substantive candidate; skip rank-1/2/3/4/5/6/7 artifacts.
+## Pass 52r (2026-06-30) — rank-9 HW slot-counter poll into conn field0x3e rename
+
+**Refreshed cold-triage (rank-1–8 skipped as artifacts or already done):** rank-9
+`0x8004fb44` (110B, 2 callers) — substantive HW slot-counter poll/merge into
+conn_record `+0x3e` before LMP PDU fragment reassembly starts.
+
+**Rank-9 decompiled and renamed (HIGH):** `FUN_8004fb44` →
+`poll_hw_slot_counter_into_conn_record_field0x3e` (110B) via
+`RenamePass52rRegion80040000Fun8004fb44.java` (`renamed=1`, live-verified).
+
+```c
+void poll_hw_slot_counter_into_conn_record_field0x3e(conn_record_t *conn)
+{
+  ushort current = conn->field_0x3e & 0xfff;
+  ushort new_val = current;
+  for (int retry = 0; retry < 0xb; retry++) {
+    if (current != new_val) break;
+    *DAT_8004fbb4 = 5;              // poke HW refresh trigger
+    new_val = *DAT_8004fbb8;          // read global slot counter
+  }
+  if (retry == 0xb && current == new_val)
+    possible_logging_function__var_args(2, 0xd2, 0x4e7, 0xd45, ...);
+  conn->field_0x3e = (conn->field_0x3e & 0xf000) | (new_val & 0xfff);
+}
+```
+
+HW slot-counter poll before LMP PDU fragment collection: reads current 12-bit
+value at conn_record `+0x3e`, pokes global `DAT_8004fbb4` with `5` and polls
+`DAT_8004fbb8` up to 11 times until the counter changes (logs overrun if
+unchanged), then merges the new 12-bit value back preserving upper nibble
+(`0xf000`). Called from the twin LMP-PDU fragment-reassembly handlers
+`FUN_80047304`/`FUN_80047628` when starting a new fragment sequence
+(`bVar1==1` or `3`, and `bVar1==4` in the `0x80047628` variant) — immediately
+before writing the expected fragment length to `+0x2e`/`+0x2c`. Sits in the
+`0x8004f8xx` hardware-hook neighborhood adjacent to `FUN_8004f824`.
+
+Post-rename: **249 unnamed** in-region (163 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-10+
+substantive candidate; skip rank-1/2/3/4/5/6/7/8/9 artifacts.
