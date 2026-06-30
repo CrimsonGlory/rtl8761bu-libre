@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 82 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ge, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 63 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52gx, 2026-06-30).
 
 ## Overview
 
@@ -7778,6 +7778,40 @@ synchronizes to the next clock phase edge before slot-offset delta is computed.
 Sole caller `apply_SCO_connection_params_to_hw`. 1 xref.
 
 Post-rename: **64 unnamed** in-region (27 in 1-150B size≥20B tier); live named **1574**.
+
+**Next:** superseded by Pass 52gx below.
+
+## Pass 52gx (2026-06-30) — rank-1 dual-slot role-record reset by conn-index rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gx.java` — 64 unnamed,
+27 in 1-150B size≥20B tier; rank-1 `0x80043004` (48B, 1 xref) — per-conn-index
+dual-slot role-record field reset in the `0x800430xx` SCO/eSCO HW-channel cluster;
+per-index body of `reset_four_conn_lap_and_dual_slot_role_records` (Pass 52aq).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80043004` →
+`reset_dual_slot_role_record_by_conn_index` (48B) via
+`RenamePass52gxRegion80040000Fun80043004.java` (`renamed=1`, live-verified).
+
+```c
+void reset_dual_slot_role_record_by_conn_index(int conn_idx)
+{
+  entry = PTR_DAT_80043034 + conn_idx * 0x84;
+  entry[0] &= 0xfc;          // keep slot-selector bits 0-1
+  entry[1] = 2;              // default role/type byte
+  entry[2] = entry[3] = 0;
+  entry[0x32] = entry[0x72] = 0;
+}
+```
+
+Resets one 0x84-stride dual-slot role record at `PTR_DAT_80043034` for
+`conn_idx`: preserves slot-selector low bits in `entry[0]`, sets default type
+byte `+1`=2, clears housekeeping bytes `+2`/`+3` and per-slot fields `+0x32`/
+`+0x72` (same layout as `is_indexed_dual_slot_ushort_match_context_and_log` and
+`reset_four_conn_lap_and_dual_slot_role_records`). Sole caller `FUN_8003fcc8`
+at `0x8003ff14` (region `0x80030000` LAP/role teardown path). Per-index
+extract of the four-iteration loop body in Pass 52aq.
+
+Post-rename: **63 unnamed** in-region (26 in 1-150B size≥20B tier); live named **1575**.
 
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

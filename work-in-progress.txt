@@ -8867,7 +8867,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gx: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gx (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80043004`→`reset_dual_slot_role_record_by_conn_index`
+          (48B, HIGH) — per-conn-index 0x84-stride dual-slot role-record reset;
+          per-index body of Pass 52aq four-conn loop; caller `FUN_8003fcc8`.
+          63 unnamed in-region; live named 1575.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gy: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
