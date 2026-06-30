@@ -2695,3 +2695,40 @@ Post-rename: **215 unnamed** in-region (129 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-45+
 substantive candidate; skip rank-1–44 artifacts and already-done ranks.
+
+## Pass 52ba (2026-06-30) — rank-45 IRQ-guarded HW-channel dual-dispatch rename
+
+**Refreshed cold-triage (ranks 1-44 skipped as artifacts or already done):** rank-45
+`0x80043070` (54B, 1 xref) — substantive IRQ-guarded raw dual indexed dispatch in the
+SCO/eSCO HW-channel cluster (sibling of Pass 52g's mask-merge and Pass 52b's AND-mask
+variants; uses fptr table `PTR_DAT_800430a8` without table read-modify-write).
+
+**Rank-45 decompiled and renamed (HIGH):** `FUN_80043070` →
+`irq_guarded_hw_channel_raw_dual_indexed_dispatch` (54B) via
+`RenamePass52baRegion80040000Fun80043070.java` (`renamed=1`, live-verified).
+
+```c
+void irq_guarded_hw_channel_raw_dual_indexed_dispatch(uint slot_index)
+{
+  irq = disable_interrupts();
+  fptr_table = PTR_DAT_800430a8;
+  (*fptr_table)(10, (slot_index & 0xff) << 4);
+  (*fptr_table)(0, 0xc);
+  enable_interrupts(irq);
+}
+```
+
+IRQ-disabled raw dual indexed dispatch through `PTR_DAT_800430a8`: first call commits
+index 10 with `(slot_index << 4)`, second call commits index 0 with constant `0xc`.
+No per-index ushort table merge — direct (index, value) pairs unlike the OR/AND/mask
+trio (`or_merge_hw_channel_table_entry_and_indexed_dispatch`,
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch`,
+`and_mask_hw_channel_table_entry_and_indexed_dispatch`). Sole caller
+`fHCI_Disconnect_0x06` (region `0x80010000`): invoked on the `field310_0x278 == 3`
+SCO-active disconnect path after clearing teardown globals and dispatching hook arg 3 —
+commits HW-channel teardown slot params before LMP detach/unsniff continuation.
+
+Post-rename: **214 unnamed** in-region (128 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-46+
+substantive candidate; skip rank-1–45 artifacts and already-done ranks.

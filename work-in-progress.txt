@@ -7415,9 +7415,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52az;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ba: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-45+ substantive candidate;
-          skip rank-1–44 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ba (2026-06-30): decompiled+
+          renamed rank-45 `FUN_80043070`→`irq_guarded_hw_channel_raw_dual_indexed_dispatch`
+          (54B, HIGH, SIMPLE-tier). IRQ-guarded raw dual HW-channel dispatch via
+          `PTR_DAT_800430a8` (index 10 with slot<<4, index 0 with 0xc); sole caller
+          `fHCI_Disconnect_0x06` on SCO-active disconnect path. 214 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ba;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bb: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-46+ substantive candidate;
+          skip rank-1–45 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
