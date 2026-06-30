@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 93 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ft, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 92 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fu, 2026-06-30).
 
 ## Overview
 
@@ -6588,5 +6588,43 @@ in a 12-iteration loop from
 
 Post-rename: **93 unnamed** in-region (93 in 1-150B tier); live named **1545**.
 
+**Next:** superseded by Pass 52fu below.
+
+## Pass 52fu (2026-06-30) — 1-150B rank-4 HW-channel dual-dispatch reset rename
+
+**Cold-triage (refreshed):** 93 unnamed 1-150B remain. rank-1 `0x8004a2e4`
+(10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B — artifact);
+rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x80043038`
+(4 xrefs, 50B); rank-5 `0x8004701c` (4 xrefs, 1B — likely artifact);
+rank-6 `0x8004b170` (3 xrefs, 88B).
+
+**Rank-1–3 triaged (non-function artifacts):** unchanged from Pass 52ft.
+
+**1-150B rank-4 decompiled+renamed (HIGH):** `FUN_80043038` →
+`irq_guarded_hw_channel_dual_dispatch_slot_zero`
+(50B, 4 xrefs) via
+`RenamePass52fuRegion80040000Fun80043038.java` (`renamed=1`, live-verified).
+
+```c
+void irq_guarded_hw_channel_dual_dispatch_slot_zero(void)
+{
+  irq = disable_interrupts();
+  fptr_table = PTR_DAT_8004306c;
+  (*fptr_table)(10, 0);
+  (*fptr_table)(0, 0xc);
+  enable_interrupts(irq);
+}
+```
+
+IRQ-disabled fixed dual indexed dispatch through `PTR_DAT_8004306c`: index 10
+with constant `0` (slot-zero reset), index 0 with `0xc`. Zero-argument sibling
+of Pass 52ba's `irq_guarded_hw_channel_raw_dual_indexed_dispatch` (which passes
+`slot_index << 4` for index 10). Called from
+`bump_retry_or_timeout_counter_and_log` (`0x800075dc`, region `0x80000000`) on
+BLE timing recovery path; patch hooks it at `0x8010cc8c` per protocol-dispatch
+layer doc.
+
+Post-rename: **92 unnamed** in-region (92 in 1-150B tier); live named **1546**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next substantive
-candidate (rank-5 `0x80043038` 50B or rank-7 `0x8004b170` 88B).
+candidate (rank-6 `0x8004b170` 88B; skip rank-5 `0x8004701c` 1B artifact).
