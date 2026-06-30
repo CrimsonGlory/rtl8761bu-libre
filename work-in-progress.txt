@@ -7362,9 +7362,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52at;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52au: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-39+ substantive candidate;
-          skip rank-1–38 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52au (2026-06-30): decompiled+
+          renamed rank-39 `FUN_800445f4`→`align_sco_slots_and_derive_retx_buffer_dims`
+          (78B, HIGH). Invokes slot-align hook then fills retx-buffer dims on
+          0x14-byte SCO packet-param struct; sole caller `FUN_80046900` HCI
+          sync-conn validator. 220 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52au;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52av: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-40+ substantive candidate;
+          skip rank-1–39 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

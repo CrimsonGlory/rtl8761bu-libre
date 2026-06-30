@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 135 functions in tier, 42 renamed HIGH (Passes 52–52at). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52at, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 134 functions in tier, 43 renamed HIGH (Passes 52–52au). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52au, 2026-06-30).
 
 ## Overview
 
@@ -2447,5 +2447,48 @@ before `FUN_80042ee0` + `FUN_8006f994` chain. Pairs with Pass 52ai's
 
 Post-rename: **221 unnamed** in-region (135 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-39+
-substantive candidate; skip rank-1–38 artifacts and already-done ranks.
+## Pass 52au (2026-06-30) — rank-39 SCO slot-align + retx-dims filler rename
+
+**Refreshed cold-triage (ranks 1-38 skipped as artifacts or already done):** rank-39
+`0x800445f4` (78B, 1 xref) — substantive SCO/eSCO packet-parameter struct filler in
+the HCI synchronous-connection validator cluster (sibling of
+`align_sco_packet_slots_to_max_interval_mod6_or_mod3`).
+
+**Rank-39 decompiled and renamed (HIGH):** `FUN_800445f4` →
+`align_sco_slots_and_derive_retx_buffer_dims` (78B) via
+`RenamePass52auRegion80040000Fun800445f4.java` (`renamed=1`, live-verified).
+
+```c
+void align_sco_slots_and_derive_retx_buffer_dims(ushort *param_1)
+{
+  aligned = (*(code *)*PTR_DAT_80044644)(param_1[1], param_1[0]);
+  param_1[2] = aligned;
+  if (param_1[4] == 0)
+    param_1[4] = (aligned - 1) * 2;
+  if (param_1[3] == 0)
+    param_1[3] = param_1[4];
+  uVar = (aligned - 1) * 2;
+  if ((int)(uint)param_1[3] < (int)uVar)
+    uVar = (uint)param_1[3];
+  param_1[5] = (short)uVar;
+  param_1[8] = aligned >> 1;
+  iVar = aligned - 1;
+  if (8 < iVar)
+    iVar = 8;
+  param_1[9] = (short)iVar;
+}
+```
+
+Invokes slot-align hook at `PTR_DAT_80044644` (runtime `0x801206a8` — patch override
+of `PTR_DAT_8004a2fc` / `align_sco_packet_slots_to_max_interval_mod6_or_mod3`) with
+`(max_interval, packet_slots)` from the 0x14-byte per-entry struct at offsets `+0x22`/
+`+0x24`, stores aligned slot count at `+0x26`, then fills derived retransmission-buffer
+dimensions: `+0x28` default `(slots-1)*2`, `+0x2a` cap copy, `+0x2c` min of the two,
+`+0x32` slots/2, `+0x34` min(slots-1, 8). Sole caller `FUN_80046900` (682B HCI sync-
+connection packet-type table validator): called once per enabled packet-type entry after
+copying interval/latency fields into the 0x14-stride allocation block.
+
+Post-rename: **220 unnamed** in-region (134 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-40+
+substantive candidate; skip rank-1–39 artifacts and already-done ranks.
