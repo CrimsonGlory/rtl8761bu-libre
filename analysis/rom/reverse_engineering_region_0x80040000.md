@@ -8850,5 +8850,37 @@ the `0x8004f2xx` credit-scheduler / cmd-type-0xb dispatch cluster. 1 xref
 
 Post-rename: **34 unnamed** in-region (34 in 1-19B tier); live named **1604**.
 
+**Next:** superseded by Pass 52ib below.
+
+## Pass 52ib (2026-06-30) — rank-14/15 artifacts triaged; rank-25 eSCO global dword loader rename
+
+**Cold-triage (refreshed):** full 34-entry 1-19B tier via
+`ColdTriageRegion80040000Pass52ib.java`. Ranks 1–13 unchanged
+(`halt_baddata` artifacts). Rank-14 `0x8004a2e8` (8B, 1 xref) and rank-15
+`0x8004e3e0` (8B, 1 xref) confirmed `halt_baddata` artifacts — skipped.
+Rank-16 `0x8004a444` (4B, 1 xref) remains deferred mis-bound overlap with
+`hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_send_cmd_complete`
+(`0x8004a464`, Pass 52bt). Next substantive candidate among 0-xref tier:
+rank-25 `0x8004ecf8` (6B, 0 xrefs).
+
+**Rank-25 decompiled+renamed (HIGH):** `FUN_8004ecf8` →
+`load_dword_via_esco_negotiation_global_ptr` (6B) via
+`RenamePass52ibRegion80040000Fun8004ecf8.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 load_dword_via_esco_negotiation_global_ptr(void)
+{
+  return *(undefined4 *)PTR_DAT_8004ed00;
+}
+```
+
+6B indirect global dword loader: dereferences the pointer stored at
+`PTR_DAT_8004ed00` and returns the loaded 32-bit value. Immediate neighbor of
+`check_esco_link_timing_conflict_with_active` (`0x8004ed04`, Pass 52gi) in the
+`0x8004edxx` eSCO/SCO negotiation cluster. 0 xrefs in cold-triage (likely
+indirect fptr-table registration).
+
+Post-rename: **33 unnamed** in-region (33 in 1-19B tier); live named **1605**.
+
 **Next:** continue 1-19B cold-triage — skip rank-1–13 artifacts; refresh ranks via
-`ColdTriageRegion80040000Pass52hy2.java`.
+`ColdTriageRegion80040000Pass52ib.java`.

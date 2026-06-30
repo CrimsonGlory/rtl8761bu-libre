@@ -9159,9 +9159,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ia;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ib: continue 1-19B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ib (2026-06-30): triaged rank-14/15
+          artifacts (`0x8004a2e8`/`0x8004e3e0` halt_baddata); decompiled+renamed
+          rank-25 `FUN_8004ecf8`→`load_dword_via_esco_negotiation_global_ptr`
+          (6B, HIGH) — indirect dword load via `PTR_DAT_8004ed00`; eSCO negotiation
+          cluster sibling of `check_esco_link_timing_conflict_with_active`.
+          33 unnamed in-region (33 in 1-19B tier); live named 1605.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ib;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ic: continue 1-19B cold-triage
           — skip rank-1–13 artifacts; refresh ranks via
-          `ColdTriageRegion80040000Pass52hy2.java`.
+          `ColdTriageRegion80040000Pass52ib.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
