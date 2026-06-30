@@ -3264,4 +3264,39 @@ arg3); caller confirmed in encryption-opcode dispatch table.
 
 Region unnamed count after this pass: **227** (228 minus this rename). Live named **1694** global.
 
+**Next:** superseded by Pass 6 continuation (86).
+
+## Pass 6 continuation (86) (2026-06-30) — HCI Master Link Key dispatcher `FUN_8002a0f4`
+
+Decompiled and renamed:
+**`FUN_8002a0f4` → `dispatch_hci_master_link_key_0x417`**
+(136B, HIGH) via `RenamePass6Region80020000Fun8002a0f4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (136B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=227` at pass start). Tied at 136B with
+`FUN_80024314` and `FUN_80021fa0` (xref_in=1 each); selected first by list order.
+Completes the HCI Master Link Key (`0x0417`) cluster whose phase-1/phase-2 bodies were
+documented in Pass 6 cont. (58)/(18) but whose dispatcher remained unnamed.
+
+**Mechanism:** HCI Master Link Key (`0x0417`) opcode dispatcher. Validates command
+parameter-length byte at `param_1+3` (must be ≤1; else `0x12`). Branches on global
+phase dword `PTR_DAT_8002a17c+0x48`:
+- Param length `0` + phase `2` → phase-1
+  `start_hci_master_link_key_0x417_phase1_across_connections`.
+- Param length non-zero + phase `0` → pairing-state gate on `PTR_DAT_8002a180`; may log
+  via `possible_logging_function__var_args` (codes `0x3c0`/`0x4f1` or `0x3c6`/`0x4f2`)
+  or defer when `check_if_80122df0_is_non_zero_else_ret_0xff` blocks.
+- Param length non-zero + phase `2` → phase-2
+  `apply_hci_master_link_key_0x417_across_connections(param_1)`.
+- Default → `0x0c` (command rejected / no eligible connections).
+
+**Caller:** `HCI_Write_Simple_Pairing_Debug_Mode` at `0x8002354c` (xref_in=1, confirmed via
+`ListXrefsTo8002a0f4.java`) — HCI command-router case `0x417`.
+
+**Confidence:** HIGH — opcode `0x0417` = HCI_Master_Link_Key; direct callees are already
+HIGH Pass 6 cont. (58)/(18); phase split on param length and `+0x48` state machine matches
+documented two-phase master-link-key procedure.
+
+Region unnamed count after this pass: **226** (227 minus this rename). Live named **1695** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
