@@ -8734,7 +8734,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gi;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gj: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gj (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80043388`→`reconcile_conn_slot_timing_drift_commit_hw_channel_reconcile`
+          (110B, HIGH). Conn-indexed slot-timing drift checker: reads stored
+          timing `+0x18`, HW-clock offset via `FUN_80034a24` on `byte_0xCC`,
+          when drift >10 slots calls Pass 52gb reconcile; SCO/eSCO HW-channel
+          cluster. 77 unnamed remain; live named 1561.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gj;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gk: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

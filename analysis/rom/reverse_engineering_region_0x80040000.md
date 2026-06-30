@@ -7221,5 +7221,49 @@ sibling of `alloc_and_init_esco_sco_negotiation_subrecord` and
 
 Post-rename: **78 unnamed** in-region (41 in 1-150B size≥20B tier); live named **1560**.
 
+**Next:** superseded by Pass 52gj below.
+
+## Pass 52gj (2026-06-30) — rank-1 conn slot timing drift HW-channel reconcile rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x80043388` (110B,
+1 xref) — substantive conn-indexed slot-timing drift checker; callee of
+`reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch`
+(Pass 52gb) when drift exceeds threshold.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80043388` →
+`reconcile_conn_slot_timing_drift_commit_hw_channel_reconcile` (110B) via
+`RenamePass52gjRegion80040000Fun80043388.java` (`renamed=1`, live-verified).
+
+```c
+void reconcile_conn_slot_timing_drift_commit_hw_channel_reconcile(uint conn_index)
+{
+  record = PTR_big_ol_struct[conn_index & 0xffff];
+  stored = record.field_0x18;
+  FUN_80034a24(&computed, record.byte_0xCC);
+  if ((stored << 1 <= computed) &&
+      ((stored << 1 ^ computed) & DAT_800433fc) != 0)
+    computed |= DAT_800433fc;
+  half = computed >> 1;
+  if ((half < stored) && (delta = stored - half, 10 < delta)) {
+    computed = half;
+    if (delta < 0x21)
+      reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch(delta - 8);
+    else
+      reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch(delta - 0x18);
+  }
+  (*tail_fptr)();
+}
+```
+
+Loads stored slot timing from conn record `+0x18`, derives current HW-clock
+slot offset via `FUN_80034a24` on role-switch-hook byte `+0xCC`, optionally
+merges under mask `DAT_800433fc`, and when `(computed>>1) < stored` with
+delta > 10 slots dispatches Pass 52gb's HW-channel reconcile with adjusted
+param (`delta-8` or `delta-0x18`). SCO/eSCO HW-channel cluster sibling of
+`compute_sco_slot_offset_delta_from_hw_clock` (`0x80043438`) and
+`reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch`.
+
+Post-rename: **77 unnamed** in-region (40 in 1-150B size≥20B tier); live named **1561**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
