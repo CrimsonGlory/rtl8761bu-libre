@@ -3139,4 +3139,35 @@ chain through established LC TX logger-hook dispatcher (Pass 6 cont. 36).
 
 Region unnamed count after this pass: **231** (232 minus this rename). Live named **1690** global.
 
+**Next:** superseded by Pass 6 continuation (82).
+
+## Pass 6 continuation (82) (2026-06-30) — DHKey-check nonce sender `FUN_80025ea8`
+
+Decompiled and renamed:
+**`FUN_80025ea8` → `derive_dhkey_check_nonce_and_send_lmp_0x42`**
+(138B, HIGH) via `RenamePass6Region80020000Fun80025ea8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (138B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=231` at pass start). Sits in the
+`0x80025exx` SSP DHKey-check cluster adjacent to `derive_dhkey_check_and_send_lmp_0x41`
+(`0x80025a60`, HMAC responder for LMP 0x41) and `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66`.
+
+**Mechanism:** Dual-path LMP sender. When `crypto+0x214==0` and `crypto+0x50==1`
+(SSP active): primes 16B nonce via `FUN_8002c838`, stores byte-swapped copy at
+`crypto+0x1f2` and duplicate at `+0x202`, sets `crypto+0x212=1`, and transmits
+18-byte LMP opcode **`0x42`** (DHKey Check) via `FUN_80024470` → `send_LMP_pkt`.
+Otherwise: sends short 3-byte LMP with opcode `0x7f` and payload byte `0x17`
+(pause-encryption / not-accepted fallback on the non-SSP path).
+
+**Callers:** xref_in=4; `LMP_PAUSE_ENCRYPTION_AES_REQ_0x66` at `0x80029120`/`0x80029146`/
+`0x80029208` (3 sites) plus `FUN_80025f34` at `0x80025f46` — confirmed via
+`ListXrefsTo80025ea8.java`.
+
+**Confidence:** HIGH — LMP opcode `0x42` + `send_LMP_pkt` callee chain match Bluetooth
+DHKey Check initiator semantics; nonce generation idiom parallels AU_RAND sender
+`derive_au_rand_and_send_lmp_0x0b`; sibling of HMAC-based `derive_dhkey_check_and_send_lmp_0x41`;
+caller linkage through established pause-encryption handler.
+
+Region unnamed count after this pass: **230** (231 minus this rename). Live named **1691** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

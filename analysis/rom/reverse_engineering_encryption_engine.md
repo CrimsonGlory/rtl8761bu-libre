@@ -336,7 +336,7 @@ ROM-resident, also requiring no libre-side action) in
 | `0x8002cf1c` | `PTR_CRYPT_SAFER_exp_tab_8002cf1c` | SAFER `45^x mod 257` exponentiation table pointer |
 | `0x8002cf20` | `PTR_CRYPT_SAFER_log_tab_8002cf20` | SAFER logarithm table pointer (inverse of exp_tab) |
 | `0x8002408c` | `FUN_8002408c` | "Start encryption" gate, checks `config_base+0x7a` bit `0x4` |
-| `0x80025ea8` | `FUN_80025ea8` | Encryption-off toggle (HW control plane, not cipher) |
+| `0x80025ea8` | `derive_dhkey_check_nonce_and_send_lmp_0x42` | SSP DHKey-check nonce sender (LMP 0x42); pause-encryption fallback when non-SSP |
 | `0x800245fc` | `FUN_800245fc` | Encryption-on toggle (HW control plane, not cipher) |
 
 ---
