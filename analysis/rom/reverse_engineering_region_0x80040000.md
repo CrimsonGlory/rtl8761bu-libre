@@ -6145,6 +6145,32 @@ live named **1530**.
 Post-rename: **107 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1531**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-6
-unnamed >150B candidate (12 remain; run `ColdTriageRegion80040000Pass52eu.java`
+**Next:** superseded by Pass 52fg below.
+
+## Pass 52fg (2026-06-30) — >150B rank-6 HW-reg pool flush HCI handler rename
+
+**>150B rank-6 decompiled+renamed (HIGH):** `FUN_80049b40` →
+`hci_hw_reg_pool_flush_gated_handler_send_cmd_complete`
+(186B, 0 xrefs in cold-triage) via
+`RenamePass52fgRegion80040000Fun80049b40.java` (`renamed=1`, live-verified).
+
+186B HCI command handler in the `0x800499xx`/`0x80049cxx` HW-reg pool cluster
+(sibling of add/remove/commit handlers at `0x8004993c`/`0x8004996a`/`0x80049a2c`/
+`0x80049c10`):
+
+- **State gates:** conn-array fields at `_FUN_80049bfc+0x28`/`+0x44`,
+  `PTR_DAT_80049c00` bit0, `PTR_PTR_80049c04`/`PTR_PTR_80049c08` pool-state
+  bytes, and `field407_0x1a4` bitmask `0x21` — any failure → status `0x0c`.
+- **LMP-busy probe:** `is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180()`
+  when `PTR_DAT_80049c00` bit0 set.
+- **Flush path:** on success calls `flush_hw_pending_slots_by_connection_type(0)`
+  and clears bit-6 of `PTR_PTR_80049c04[5]`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **106 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1532**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-7
+unnamed >150B candidate (11 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
