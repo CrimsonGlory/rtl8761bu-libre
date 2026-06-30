@@ -2393,4 +2393,36 @@ matches documented encryption-procedure cluster.
 
 Region unnamed count after this pass: **255** (256 minus this rename). Live named **1666** global.
 
+**Next:** superseded by Pass 6 continuation (58).
+
+## Pass 6 continuation (58) (2026-06-30) — HCI Master Link Key phase-1 `FUN_80029d60`
+
+Decompiled and renamed:
+**`FUN_80029d60` → `start_hci_master_link_key_0x417_phase1_across_connections`**
+(172B, HIGH) via `RenamePass6Region80020000Fun80029d60.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (172B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=255` at pass start). Tied at 172B with
+`FUN_8002143c` (xref_in=1); selected first by list order.
+
+**Mechanism:** HCI Master Link Key (`0x0417`) phase-1 scan-and-arm body. Emits
+`send_evt_HCI_Command_Status`, clears pending counter at `PTR_DAT_80029e0c+0x8c`, then
+walks 10 `big_ol_struct` slots. For active links (status `0x04`/`0x0f`), classifies
+crypto sub-state via `(crypto_byte - 0x15)` bitmask tables (`0xfb8`/`0xfbb`); eligible
+slots with `(state_index & 3) != 0` invoke per-slot armer `FUN_80029cfc` (LMP 0x32 send +
+link-key-type `0x20` + encryption-state advance via `FUN_80023fb8(_,4)`). Status `0x0b`
+slots increment the pending counter without arming. On completion clears `+0x8d`/`+0x8e`
+and advances global phase dword `+0x48` from `2` → `3` for phase-2
+`apply_hci_master_link_key_0x417_across_connections`.
+
+**Callers:** `FUN_8002a0f4` (`0x8002a10a`) — HCI Master Link Key dispatcher; invoked when
+command param length byte is zero and `PTR_DAT_8002a17c+0x48 == 2`.
+
+**Confidence:** HIGH — caller decompile shows direct phase-1/phase-2 split on param
+length and `+0x48` state machine; scan/arm pattern mirrors documented phase-2 sibling
+`apply_hci_master_link_key_0x417_across_connections` and per-slot stager
+`stage_master_link_key_for_encrypted_connection_slot`.
+
+Region unnamed count after this pass: **254** (255 minus this rename). Live named **1667** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
