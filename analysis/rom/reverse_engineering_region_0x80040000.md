@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 12 renamed HIGH (Passes 52–52l). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52l, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 13 renamed HIGH (Passes 52–52n). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52n, 2026-06-30).
 
 ## Overview
 
@@ -1139,3 +1139,45 @@ free pool. Logs error code `0xd2` on failure. Gated callers include
 Documented in `reverse_engineering_conn_record_subsystem.md` §10. 5 xrefs.
 
 Post-rename: **254 unnamed** in-region.
+
+## Pass 52n (2026-06-30) — rank-5 inquiry/LAP slot bitmask release rename
+
+**Refreshed cold-triage (rank-1–4 skipped as artifacts or already done):** rank-5
+`0x80042c94` (150B, 4 xrefs) — substantive inquiry/LAP slot-state manager.
+
+**Rank-5 decompiled and renamed (HIGH):** `FUN_80042c94` →
+`release_inquiry_lap_slot_pending_bitmask` (150B) via
+`RenamePass52nRegion80040000Fun80042c94.java` (`renamed=1`, live-verified).
+
+```c
+void release_inquiry_lap_slot_pending_bitmask(uint slot_index)
+{
+  ctx = PTR_DAT_80042d2c;  // inquiry/LAP slot state: +0 active, +1 refcount,
+                           // +2 active_slot, +3 4-bit mask, +4[slot] status
+  if ((ctx[slot_index + 4] >> 1 & 1) == 0) return;  // pending bit not set
+  if ((ctx[slot_index + 4] & 1) == 0) {
+    // non-primary slot: find next set bit in mask, clear pending + mask bit,
+    // decrement refcount at +1
+    ...
+  } else if (*ctx != 0) {
+    // primary slot: if LAP[slot+0x45] in the_0x300 struct is zero,
+    // clear active flag and slot status bits
+    ...
+  }
+}
+```
+
+Releases inquiry/LAP slot pending bitmask state on link teardown or HCI cancel.
+Global context at `PTR_DAT_80042d2c` tracks per-slot status bytes (`+4[slot]`:
+bit0 = primary, bit1 = pending), a 4-bit active-slot mask (`+3`), refcount (`+1`),
+and active-slot index (`+2`). When the pending bit is set on the given slot index,
+either clears the next active slot from the mask (non-primary path) or clears the
+primary active flag when the corresponding `_x142_LAP[slot+0x45]` entry is zero.
+Setter sibling is still-unnamed `FUN_80042c28` (rank-6, 100B, 4 xrefs). Callers
+include `fHCI_conn_req_cancel` (`0x80036bd0`, region `0x80030000`) and connection
+teardown `FUN_80041dac`. 4 xrefs.
+
+Post-rename: **253 unnamed** in-region (167 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile rank-6 substantive
+candidate (`0x80042c28`, 100B, 4 xrefs) or skip rank-1/2/3/4 artifacts.
