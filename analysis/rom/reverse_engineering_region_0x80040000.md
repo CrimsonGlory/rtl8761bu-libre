@@ -2366,3 +2366,48 @@ Post-rename: **223 unnamed** in-region (137 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-37+
 substantive candidate; skip rank-1–36 artifacts and already-done ranks.
+
+## Pass 52as (2026-06-30) — rank-37 LMP procedure slot arming rename
+
+**Refreshed cold-triage (ranks 1-36 skipped as artifacts or already done):** rank-37
+`0x8004e340` (86B, 1 xref) — substantive LMP procedure slot allocator in the
+`0x8004e2xx` permission-gate cluster (sibling of `is_any_conn_lmp_procedure_busy_by_index`).
+
+**Rank-37 decompiled and renamed (HIGH):** `FUN_8004e340` →
+`arm_lmp_procedure_slot_pending_by_active_link_count` (86B) via
+`RenamePass52asRegion80040000Fun8004e340.java` (`renamed=1`, live-verified).
+
+```c
+int arm_lmp_procedure_slot_pending_by_active_link_count(void)
+{
+  active_count = FUN_8004e2f4();  // counts links: pkt_modes clear, +0x20 bit0, +0x1d procedure-active
+  ctx = PTR_DAT_8004e398;
+  if ((active_count + (byte)ctx[1]) < 4) {
+    slot_idx = 1;
+    if ((ctx[10] >> 1 & 1) && (slot_idx = 2, (ctx[0x11] >> 1 & 1))) {
+      if (ctx[0x18] >> 1 & 1) goto fail;
+      slot_idx = 3;
+    }
+    ctx[slot_idx * 7 + 3] |= 2;   // arm pending bit on 7-byte stride slot record
+    return slot_idx;
+  }
+fail:
+  return 0xff;
+}
+```
+
+Counts active procedure links via still-unnamed `FUN_8004e2f4` (same pkt_modes/
+procedure-active criteria as the busy-probe family, plus `+0x20` bit0). When
+`active_count + ctx[1] < 4`, cascades through three enable flags at `ctx+0x0a`,
+`+0x11`, `+0x18` (bit1 each) to pick slot index 1–3, then sets bit2 on the
+corresponding 7-byte stride record at `ctx[slot*7+3]`. Returns `0xff` when at
+capacity. Sole caller `FUN_80047980` (380B HCI synchronous-connection param
+commit handler): when `conn_rec+0x20` bit0 set and procedure not yet active,
+calls this function — on `0xff` returns HCI error `9`, else passes slot index
+to `FUN_8004fd6c` before arming procedure bit `+0x1d` and scheduling
+`build_linked_conn_param_buffers_and_schedule_link_timing_setup`.
+
+Post-rename: **222 unnamed** in-region (136 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-38+
+substantive candidate; skip rank-1–37 artifacts and already-done ranks.

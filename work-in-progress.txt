@@ -7345,9 +7345,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ar;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52as: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-37+ substantive candidate;
-          skip rank-1–36 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52as (2026-06-30): decompiled+
+          renamed rank-37 `FUN_8004e340`→`arm_lmp_procedure_slot_pending_by_active_link_count`
+          (86B, HIGH). Counts active procedure links via `FUN_8004e2f4`, arms
+          pending bit on 7-byte stride slot record when `count+ctx[1]<4`; returns
+          slot index 1-3 or `0xff` at capacity; sole caller `FUN_80047980` HCI
+          sync-conn param commit. 222 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52as;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52at: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-38+ substantive candidate;
+          skip rank-1–37 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
