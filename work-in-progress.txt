@@ -9381,8 +9381,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (22);
             analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (23): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (290 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (23) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80025b68`→
+          `unscramble_codec_jit_template_and_install_hw_hook` (300B, HIGH).
+          Per-connection SSP/eSCO codec JIT installer: un-scrambles MIPS16e
+          templates into `crypto_struct+0x13e`, sets `+0xe4` hw-write hook;
+          callers SSP IO-cap handlers; xref_in=3.
+          289 unnamed remain; live named 1632.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (23);
+            analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (24): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (289 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

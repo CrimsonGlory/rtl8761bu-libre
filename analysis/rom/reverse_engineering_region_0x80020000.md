@@ -1274,4 +1274,36 @@ range and three-mode field dispatch are unambiguous.
 
 Region unnamed count after this pass: **290** (291 minus this rename). Live named **1631** global.
 
+**Next:** superseded by Pass 6 continuation (23).
+
+## Pass 6 continuation (23) (2026-06-30) — Codec JIT hook installer `FUN_80025b68`
+
+Decompiled and renamed:
+**`FUN_80025b68` → `unscramble_codec_jit_template_and_install_hw_hook`**
+(300B, HIGH) via `RenamePass6Region80020000Fun80025b68.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (300B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=290` at pass start). Project-critical
+ROM function already analyzed in `reverse_engineering_hardware_layer.md` §1/§9/§12
+but had remained `FUN_*` in Ghidra.
+
+**Mechanism:** Per-connection SSP/eSCO codec JIT installer keyed on connection index
+(`param_1 & 0xffff`). Reads `big_ol_struct[conn]._x58_crypto_struct`, sets capability
+bytes at `+0xe0`–`+0xe2`, installs `*(void**)(+0xe4) = crypto_struct + 0x13e` (the
+per-connection hardware-write hook consumed by `FUN_8004f824`), and sets packet window
+`+0xe3` to `0x30` or `0x40`. When `+0x50 == 1`, un-scrambles pre-built MIPS16e codec
+templates from ROM tables (`PTR_DAT_80025ca8` for codec-6 `0x30` bytes,
+`PTR_DAT_80025cac` for codec-8 `0x40` bytes) into the `+0x13e` buffer via independent
+half-reversals, then calls `FUN_800688b0`; otherwise calls `FUN_80068428`. Finishes via
+`FUN_80024218` + `set_arg1_1_to_arg2` with status `0x21`/`0x22`.
+
+**Callers:** `handle_lmp_ext_io_capability_req_subopcode_0x19`, `FUN_80029364` (LMP ext
+IO-cap response), and `FUN_80025634` (pairing continuation) — all ROM SSP pairing path.
+
+**Confidence:** HIGH — mechanism fully cross-documented in hardware-layer analysis;
+decompile confirms hook install at `+0xe4`, template copy loops, and codec-type
+dispatch match prior RE.
+
+Region unnamed count after this pass: **289** (290 minus this rename). Live named **1632** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
