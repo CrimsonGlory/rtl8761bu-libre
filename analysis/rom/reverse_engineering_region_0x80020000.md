@@ -2456,4 +2456,31 @@ confirmed; this pass decompiled via `batch_decompile_functions` and persisted re
 
 Region unnamed count after this pass: **253** (254 minus this rename). Live named **1668** global.
 
+**Next:** superseded by Pass 6 continuation (60).
+
+## Pass 6 continuation (60) (2026-06-30) — SAFER+ bias-1 `FUN_8002ca88`
+
+Decompiled and renamed:
+**`FUN_8002ca88` → `apply_safer_plus_bias1_constants`**
+(164B, HIGH) via `RenamePass6Region80020000Fun8002ca88.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (164B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=253` at pass start). Already analyzed
+at HIGH confidence in `reverse_engineering_encryption_engine.md` §4 but still carried
+`FUN_*` name.
+
+**Mechanism:** Straight-line in-place application of the SAFER+ **bias-1 vector** over a
+16-byte block: alternating byte-wise ADD and XOR with the published fixed constants
+(`b[0]+=0xe9`, `b[1]^=0xe5`, … `b[15]+=0x83`). First step of the key-schedule path
+before `FUN_8002cb2c`'s per-round loop; callee of E1/E21/E22 auth wrappers via
+`safer_plus_block_encrypt` cluster.
+
+**Callers:** `FUN_8002cb2c` (SAFER+ key schedule) + one additional xref_in=2 caller
+(documented encryption-engine cluster).
+
+**Confidence:** HIGH — decompile matches byte-for-byte the bias table documented in
+`reverse_engineering_encryption_engine.md` §4 and reference SAFER+ implementations.
+
+Region unnamed count after this pass: **252** (253 minus this rename). Live named **1669** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
