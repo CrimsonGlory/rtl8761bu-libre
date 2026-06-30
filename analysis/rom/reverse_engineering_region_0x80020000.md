@@ -798,4 +798,36 @@ region `0x80030000` Pass 5 SCO setup/teardown family.
 
 Region unnamed count after this pass: **305** (306 minus this rename). Live named **1616** global.
 
+**Next:** superseded by Pass 6 continuation (8).
+
+## Pass 6 continuation (8) (2026-06-30) — SSP/ECDH affine→Jacobian `FUN_8002db50`
+
+Decompiled and renamed:
+**`FUN_8002db50` → `crypto_ec_affine_to_jacobian_mod_curve_prime`**
+(586B, HIGH) via `RenamePass6Region80020000Fun8002db50.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (586B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=305` at pass start). Caller:
+`LMP__26E__FUN_8002eae0` (event `0x26e` cleanup/retry loop).
+
+**Mechanism:** Per-connection SSP/ECDH affine→Jacobian coordinate prep on the
+316-byte (`0x13c` stride) EC work struct at `PTR_DAT_8002dd9c + (conn_index & 0xff)*0x13c`.
+Reads affine X/Y at `+0x08`/`+0x48`, Z scalar at `+0x88`, curve width at `+0x138`
+(6 or 8 limbs). Computes Z² and Z³ via `crypto_bignum_multiply_square_v1` +
+`crypto_bignum_multiply_variable_len`, reduces mod curve prime (`FUN_8002d744` for
+6-limb, `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction` for 8-limb),
+then forms Jacobian second-point operands at `+0xc8`/`+0xe8` using
+`crypto_bignum_mod_inverse_mod_curve_prime` (twice) and add-with-carry into
+zeroed buffers. Optional output pointers at struct head (`*piVar7`, `piVar7[1]`)
+receive byte-reversed copies via `crypto_copy_u8_array_reversed_to_dest`. Clears
+`big_ol_struct[slot].field_0xb9` on completion. Sibling of Pass 6 continuation (2)'s
+`crypto_ec_jacobian_point_add_mod_curve_prime` and continuation's
+`crypto_ec_jacobian_point_double_mod_curve_prime`.
+
+**Confidence:** HIGH — unambiguous Z²/Z³/inverse/mul/add chain matching affine→Jacobian
+prep for the documented Jacobian add/double struct layout; caller already tied to
+SSP event `0x26e` retry path.
+
+Region unnamed count after this pass: **304** (305 minus this rename). Live named **1617** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -9268,8 +9268,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (7);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (8): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (305 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (8) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8002db50`→`crypto_ec_affine_to_jacobian_mod_curve_prime`
+          (586B, HIGH). SSP/ECDH affine→Jacobian prep on per-conn EC work struct;
+          caller `LMP__26E__FUN_8002eae0`. 304 unnamed in-region; live named 1617.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (8);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (9): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (304 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
