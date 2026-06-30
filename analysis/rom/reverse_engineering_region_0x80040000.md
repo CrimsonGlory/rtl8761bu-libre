@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 101 functions in tier, 82 renamed HIGH (Passes 52–52cb). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cb, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 83 renamed HIGH (Passes 52–52cc). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cc, 2026-06-30).
 
 ## Overview
 
@@ -3797,5 +3797,37 @@ registration).
 
 Post-rename: **187 unnamed** in-region (101 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-83+
-substantive candidate; skip rank-1–82 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52cb):** rank-83+ — completed Pass 52cc below.
+
+## Pass 52cc (2026-06-30) — rank-83 baseband link-setup buffer adapter rename
+
+**Refreshed cold-triage (ranks 1-82 skipped as artifacts, deferred, or already done):**
+rank-83 `0x80048948` (28B, 0 xrefs in triage) — substantive thin wrapper in the
+`0x800483c0` baseband link-setup neighborhood; unpacks a 7-byte param buffer and
+delegates to the 866B link-setup handler documented at MEDIUM-HIGH in Pass 3.
+
+**Rank-83 decompiled and renamed (HIGH):** `FUN_80048948` →
+`invoke_baseband_link_setup_from_param_buffer` (28B) via
+`RenamePass52ccRegion80040000Fun80048948.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_baseband_link_setup_from_param_buffer(undefined2 *param_buffer)
+{
+  FUN_800483c0(*param_buffer,
+               *(byte *)((int)param_buffer + 3),
+               *(byte *)(param_buffer + 2),
+               *(byte *)((int)param_buffer + 5),
+               *(byte *)(param_buffer + 3));
+}
+```
+
+Unpacks buffer layout: `[0:2]` uint16 handle, `[3]` timing/param byte,
+`[4]` param3, `[5]` param4, `[6]` packet-mode byte — then calls
+`FUN_800483c0` (baseband link setup + HCI Command Complete sender, Pass 3
+MEDIUM-HIGH). Standard function-pointer-registration adapter pattern; no direct
+callers found.
+
+Post-rename: **186 unnamed** in-region (100 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-84+
+substantive candidate; skip rank-1–83 artifacts, deferred, and already-done ranks.
