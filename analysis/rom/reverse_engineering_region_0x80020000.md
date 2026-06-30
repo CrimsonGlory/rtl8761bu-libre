@@ -892,4 +892,39 @@ same 3-slot × 52-byte table layout and `big_ol_struct` index parameterization.
 
 Region unnamed count after this pass: **302** (303 minus this rename). Live named **1619** global.
 
+**Next:** superseded by Pass 6 continuation (11).
+
+## Pass 6 continuation (11) (2026-06-30) — encryption completion HCI notify `FUN_800249a8`
+
+Decompiled and renamed:
+**`FUN_800249a8` → `finalize_encryption_procedure_and_notify_hci`**
+(488B, HIGH) via `RenamePass6Region80020000Fun800249a8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (488B, xref_in=7) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=302` at pass start). Callers include
+`LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` (`0x80027ec6`), `FUN_80026a54`, `FUN_80027b28`,
+`FUN_800269e8`, `FUN_800280ac`, `FUN_80027ae0`.
+
+**Mechanism:** Per-connection encryption-procedure completion dispatcher. Params:
+connection handle (`param_1`) and status byte (`param_2`, success/fail). Operates on
+`big_ol_struct[slot]._x58_crypto_struct`. On entry may call `LMP__25C_called1` when
+pending LMP slot at `+0x1ec` is active. When `param_2==0` (success), sets encryption-mode
+byte at `+0x26` (1 or 2 per `+0x214` flag) and clears `+0x1f0`. Large switch on crypto
+sub-state byte `*pbVar7 - 6` dispatches HCI notifications:
+`send_evt_HCI_Encryption_Change_v1_`, `send_evt_HCI_Encryption_Key_Refresh_Complete`,
+`send_evt_HCI_Change_Connection_Link_Key_Complete`, and
+`calls_send_evt_HCI_Link_Key_Type_Changed_0x0A_and_possible_LMP_DETACH` per procedure
+type. Failure paths may invoke `possible_LMP_DETACH_handler`. Advances sub-state via
+lookup table `PTR_DAT_80024bd0`, optionally invokes registered hooks at
+`PTR_DAT_80024bd4` (`+0xa0`/`+0xb0` slots), clears `+0x50` sub-flag, calls
+`FUN_80017d2c` (8-byte field clear on conn record), then tail-calls `FUN_8002a188`.
+
+**Confidence:** HIGH — central post-encryption-procedure HCI notifier with 7 callers
+including documented `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10`; switch cases map cleanly to
+standard HCI encryption/key-refresh/link-key events; sits in the documented
+`0x80024xxx` crypto-struct cluster alongside `copy_fields_within_crypto_struct` and
+the SSP state-machine sibling at `0x80024ca4`.
+
+Region unnamed count after this pass: **301** (302 minus this rename). Live named **1620** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
