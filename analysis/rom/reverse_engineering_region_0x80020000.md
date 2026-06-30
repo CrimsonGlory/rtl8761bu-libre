@@ -2966,4 +2966,39 @@ pattern parallels Pass 6 cont. (63) `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr
 
 Region unnamed count after this pass: **236** (237 minus this rename). Live named **1685** global.
 
+**Next:** superseded by Pass 6 continuation (77).
+
+## Pass 6 continuation (77) (2026-06-30) — SSP link-key HMAC `FUN_80026570`
+
+Decompiled and renamed:
+**`FUN_80026570` → `derive_link_key_hmac_on_ssp_pairing_complete`**
+(144B, HIGH) via `RenamePass6Region80020000Fun80026570.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (144B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=236` at pass start). Sits in the
+`0x80026xxx` SSP-complete cluster immediately below
+`call_send_evt_HCI_Simple_Pairing_Complete` (`0x80026608`).
+
+**Mechanism:** Per-connection derived link-key material writer invoked on SSP pairing
+success (`call_send_evt_HCI_Simple_Pairing_Complete` when `param_2==0`, before
+state-byte advance). Params: `big_ol_struct` entry (`param_1`) and crypto struct
+(`param_2`). Role/initiator flag `param_1+0xd0` selects BD_ADDR operand order: config
+BD_ADDR (`PTR_DAT_80026600`) vs per-connection BD_ADDR at `param_1+0xd1`; both
+6-byte operands are byte-swapped. Assembles HMAC input from crypto key blocks at
+`+0x1be`/`+0xe8`/`+0xf8` with mode byte `+0x1f1`, invokes `FUN_8002c758`
+(HMAC ipad/opad 2-pass SAFER+ driver sibling of `FUN_8002c6c8`), byte-swaps 16B
+output into `+0x61`, copies link-key-type marker `+0x1e5` → `+0xb9`. Caller then
+branches on `crypto+0x50` and `+0x214` for post-derive state (`0x12`/`0x1b`/`5`/`6`)
+via `set_arg1_1_to_arg2`, optionally calling `FUN_80025164` when `+0x50==1`.
+
+**Caller:** `call_send_evt_HCI_Simple_Pairing_Complete` at `0x80026648` (xref_in=1,
+confirmed via `ListXrefsTo80026570.java`).
+
+**Confidence:** HIGH — HMAC assembly idiom matches documented DHKey-check/E21/E22
+cluster (`derive_dhkey_check_and_send_lmp_0x41`, `FUN_8002c758` callee chain);
+offset usage (`+0x61`/`+0xb9`/`+0x1e5`) matches crypto-struct link-key layout;
+sole caller is the confirmed SSP-complete HCI event sender on success path.
+
+Region unnamed count after this pass: **235** (236 minus this rename). Live named **1686** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
