@@ -1642,4 +1642,33 @@ key-size handler; LMP 0x11 transmit idiom matches encryption procedure cluster.
 
 Region unnamed count after this pass: **278** (279 minus this rename). Live named **1643** global.
 
+**Next:** superseded by Pass 6 continuation (35).
+
+## Pass 6 continuation (35) (2026-06-30) — start-encryption NOT ACCEPTED `FUN_80028ec4`
+
+Decompiled and renamed:
+**`FUN_80028ec4` → `handle_lmp_not_accepted_for_start_encryption_req_0x18`**
+(242B, HIGH) via `RenamePass6Region80020000Fun80028ec4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (242B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=278` at pass start).
+
+**Mechanism:** LMP extended NOT_ACCEPTED (0x7F) recovery handler for rejected opcode
+**0x18** (`LMP_START_ENCRYPTION_REQ_0x18` per region `0x80060000`). Dispatched from
+`LMP_encryption_opcode_handlers` 0x7F switch case `0x16`. Validates link/crypto
+preconditions via `FUN_8002408c` (feature-page gate) and `FUN_8002403c` (role-bit
+match on `big_ol_struct+0xd0`). When crypto sub-state `*pcVar6` is `0x11` or `0x1e`
+and `bdaddr_random_` is set, recovery path calls `FUN_80023fb8`, sets `+0x50=2`,
+then delegates to `program_encryption_key_and_send_lmp_start_encryption_req` and
+advances state via `set_arg1_1_to_arg2(..., 0x4b)`. Failure paths reply
+`FUN_800243b8(conn, 0x7f, 0x18, role_bit, reason)` with error codes `0x1a`/`0x24`.
+
+**Callers:** `LMP_encryption_opcode_handlers` (1 site, 0x7F sub-opcode 0x18).
+
+**Confidence:** HIGH — direct dispatch from documented encryption opcode router;
+recovery idiom matches sibling `handle_lmp_encryption_mode_req_not_accepted` (Pass 6
+cont. 28); success path reuses Pass 6 cont. 34's `program_encryption_key_and_send_lmp_start_encryption_req`.
+
+Region unnamed count after this pass: **277** (278 minus this rename). Live named **1644** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
