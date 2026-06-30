@@ -3333,4 +3333,35 @@ LMP 25C/268 sequence; lives in documented encryption-start cluster (`0x800241xx`
 
 Region unnamed count after this pass: **225** (226 minus this rename). Live named **1696** global.
 
+**Next:** superseded by Pass 6 continuation (88).
+
+## Pass 6 continuation (88) (2026-06-30) — DHKey-check stall timer tick `FUN_80021fa0`
+
+Decompiled and renamed:
+**`FUN_80021fa0` → `tick_dhkey_check_stall_scan_encrypted_links_on_timer_expiry`**
+(136B, HIGH) via `RenamePass6Region80020000Fun80021fa0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (136B, xref_in=1) per
+`ListUnnamed80020000.java` run at pass start (`total_unnamed=225`). Last remaining
+136B tie from Pass 6 cont. (87), which renamed sibling `FUN_80024314`.
+
+**Mechanism:** Global DHKey-check stall countdown at `PTR_DAT_80022028`: subtracts
+`param_1` each tick; when `param_1 >= *timer`, resets timer to **600** and scans up
+to **10** `big_ol_struct` connection slots. For valid entries whose crypto link-type
+byte (`*crypto`) is **`0x0c`** or **`0x16`** (encrypted link types), increments per-
+connection stall byte at `crypto+0x1f0`. When stall count exceeds **72** (`0x47`):
+if `FUN_8002408c()` (encryption feature gate) returns nonzero, resets `+0x1f0` to 0,
+sets `crypto+0x50=1` (SSP DHKey-check path), calls `FUN_80025f34(conn, crypto)`
+(→ `derive_dhkey_check_nonce_and_send_lmp_0x42`, Pass 6 cont. 82), and advances
+encryption state via `FUN_80023fb8(crypto, 5)`.
+
+**Caller:** xref_in=1 (single direct caller; timer/periodic dispatch — not resolved
+this pass).
+
+**Confidence:** HIGH — decompile confirms global 600-unit timer, encrypted-link-type
+filter (`0x0c`/`0x16`), 72-tick stall threshold, and callee chain into documented
+SSP DHKey-check nonce sender + encryption-state advance table.
+
+Region unnamed count after this pass: **224** (225 minus this rename). Live named **1697** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
