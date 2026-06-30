@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52df, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52dg, 2026-06-30).
 
 ## Overview
 
@@ -259,7 +259,7 @@ first as instructed.
 | `0x80043a60` | 358B | High xref count (15) for its size tier but decompile shows a fairly generic field-update/state-transition helper; no single confirmed call site distinguishes its purpose precisely. | MEDIUM |
 | `0x80040594` | 566B | `build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` — SCO/eSCO LMP PDU builder/submitter for conn-type nibble 1–2; see Pass 52de | HIGH |
 | `0x80041230` | 560B | `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble` — IRQ-masked 16-slot conn-event ring dequeue + type-nibble LMP dispatch; see Pass 52df | HIGH |
-| `0x80042640` | 530B | Field-update logic operating on connection-record-shaped data; plausible LC-layer helper but unconfirmed. | MEDIUM |
+| `0x80042640` | 530B | `select_sco_esco_packet_type_and_cap_window_by_conn_index` — SCO/eSCO packet-type selector from `field273_0x250` feature flags + window threshold; see Pass 52dg | HIGH |
 | `0x800401c4` | 426B | Compact dispatch-shaped function; case semantics not individually confirmed. | MEDIUM |
 | `0x80040e60` | 386B | Connection-record field manipulator; no cross-xref confirmation available (tooling gap, see below). | MEDIUM |
 | `0x80041900` | 376B | Similar shape to other lower-half record-field helpers. | MEDIUM |
@@ -4530,5 +4530,24 @@ empty ring. SCO/eSCO conn-type cluster hub sibling of Pass 52de PDU builder.
 Post-rename: **159 unnamed** in-region (95 in 1-150B tier unchanged); **64** in
 >150B tier; live named **1479**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-26 `0x80042640`
-(530B).
+## Pass 52dg (2026-06-30) — >150B rank-26 SCO/eSCO packet-type selector rename
+
+**>150B rank-26 decompiled+renamed (HIGH):** `FUN_80042640` →
+`select_sco_esco_packet_type_and_cap_window_by_conn_index` (530B) via
+`RenamePass52dgRegion80040000Fun80042640.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). Per-conn-index packet-type resolver
+on `big_ol_struct[conn].field273_0x250` feature bitmask: early-exit when bit0
+set copies fixed type from `PTR_DAT_80042858` and caps in/out window via
+`PTR_DAT_8004285c`; otherwise walks bit-position tables (`PTR_DAT_8004286c` for
+eSCO/`field_0xb7==2`, `PTR_DAT_80042868` for SCO) against window thresholds
+(`0x12` floor → default `0x3000`), with config `field208_0xd8` bit `0x100`
+gating alternate slot advance; optional pre/post hooks at `PTR_DAT_80042864` /
+`PTR_DAT_80042878`. Sole caller `FUN_80018654` (LMP PDU linked-list walker) on
+the non-LMP-25C-ready scheduling path. SCO/eSCO cluster sibling of Pass 52de/52df
+PDU builder and conn-event ring dispatcher.
+
+Post-rename: **158 unnamed** in-region (95 in 1-150B tier unchanged); **63** in
+>150B tier; live named **1480**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-27 `0x800401c4`
+(426B).
