@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hj COMPLETE (2026-06-30) — **CRITICAL-tier sweep COMPLETE** (0 remain). Latest: `register_afh_lap_group_slot_with_peer_channel_merge` (Pass 12hj). All tier sweeps complete (STUB/SIMPLE/HANDLER/CRITICAL: 0 remain). Live named **1371** global; **0** in-region unnamed. **[NEXT]** re-run `ListRegion0x80070000_Fixed.java` cold-triage to stage next unnamed targets outside this region's tier queues. See Pass 12hj section below.
+**Status**: Pass 12hk COMPLETE (2026-06-30) — **REGION SWEEP COMPLETE** (0 in-region unnamed). Live-verified via `ListUnnamed80070000.java` (`total_simple_tier=0`) and `ListHandler80070000.java` (`total_handler_tier=0`). All tier sweeps complete (STUB/SIMPLE/HANDLER/CRITICAL: 0 remain). Live named **1371** global. **[NEXT]** pivot to region `0x80040000` 1–150B tier cold-triage (206 functions). See Pass 12hk section below.
 
 ## Overview
 
@@ -2417,6 +2417,21 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hk (2026-06-30) — region sweep verification (0 unnamed remain)
+
+Re-ran cold-triage listing scripts to confirm region `0x80070000` is fully exhausted:
+
+| Script | Result |
+|--------|--------|
+| `ListUnnamed80070000.java` | `total_simple_tier=0` (51–150B unnamed) |
+| `ListHandler80070000.java` | `total_handler_tier=0` (151–600B unnamed) |
+
+No rank-1 rename target staged — all tier queues empty. Region sweep **COMPLETE**.
+
+Live named **1371** (global; in-region unnamed **0**).
+
+**Next:** pivot to region `0x80040000` 1–150B tier (206 functions per Pass 7 park note).
+
 ## Pass 12hj (2026-06-30) — AFH/LAP extended group slot registrar `FUN_80072bac`
 
 Decompiled and renamed:
@@ -2449,7 +2464,7 @@ live decompile plus Pass 12hi sibling structural match.
 
 Live named **1371** (global; in-region unnamed **0**; CRITICAL-tier unnamed **0**).
 
-**Next:** re-run region cold-triage listing to stage next targets.
+**Next:** superseded by Pass 12hk (region sweep complete).
 
 ## Pass 12hi (2026-06-30) — AFH/LAP group slot registrar `FUN_80072924`
 
