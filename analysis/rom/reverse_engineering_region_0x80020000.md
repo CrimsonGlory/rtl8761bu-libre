@@ -1218,4 +1218,30 @@ values `7/8/9/0x1c` match documented crypto-struct pairing modes.
 
 Region unnamed count after this pass: **292** (293 minus this rename). Live named **1629** global.
 
+**Next:** superseded by Pass 6 continuation (21).
+
+## Pass 6 continuation (21) (2026-06-30) — SAFER+ block encrypt `FUN_8002cddc`
+
+Decompiled and renamed:
+**`FUN_8002cddc` → `safer_plus_block_encrypt`**
+(318B, HIGH) via `RenamePass6Region80020000Fun8002cddc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (318B, xref_in=6) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=292` at pass start). Sits in the
+documented SAFER+ cipher cluster (`0x8002ca88`–`0x8002cf20`); already analyzed in
+`reverse_engineering_encryption_engine.md` but still carried `FUN_*` name.
+
+**Mechanism:** Full 8-round SAFER+ block encryption core. Copies 16-byte block to
+stack, runs rounds 1–8: odd/even round-key derivation via `FUN_8002cb2c`, key
+combination via `FUN_8002ca2c`, exp/log S-box substitution
+(`PTR_CRYPT_SAFER_exp_tab_8002cf1c`/`PTR_CRYPT_SAFER_log_tab_8002cf20`), 3×
+`FUN_8002cd80` linear mixing per round, final output-transform XOR. In-place
+encrypt on `param_2`; `param_3 & 0xff` gates round count (0 = full 8 rounds).
+Called by E1/E21/E22 Bluetooth authentication wrappers documented in encryption engine.
+
+**Confidence:** HIGH — literal `CRYPT_SAFER` symbol names, 8-round structure matches
+SAFER+ spec, cross-confirmed in `reverse_engineering_encryption_engine.md` Pass 1.
+
+Region unnamed count after this pass: **291** (292 minus this rename). Live named **1630** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
