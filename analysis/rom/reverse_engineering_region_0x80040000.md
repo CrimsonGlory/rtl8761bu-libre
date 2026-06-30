@@ -4268,5 +4268,24 @@ sibling `FUN_8004ea2c` (220B, still unnamed).
 Post-rename: **169 unnamed** in-region (95 in 1-150B tier unchanged); **74** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-14 `0x8004f374`
-(368B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52cu below.
+
+## Pass 52cu (2026-06-30) — >150B rank-14 eSCO/SCO negotiation diagnostic logger verify
+
+**>150B rank-14 live-verified (HIGH):** `FUN_8004f374` →
+`esco_sco_negotiation_diagnostic_logger` (368B, 2 callers) — already renamed
+Pass 12 region `0x80050000` (2026-06-27); Pass 52cu batch-decompiled live from
+GZF (`batch_decompile_functions`, `renamed=alreadyOk`). Upgraded from MEDIUM
+(Pass 6, 2026-06-23). Pure diagnostic logger (no state mutation): five
+`possible_logging_function__var_args` dumps gated on LMP PDU byte `param_1+2`
+low 6 bits — header fields, up to four sub-record pointers from `param_2[0..4]`
+(packet-type/window/offset), and trailing variable-length region when
+`(param_1+1)-mask` nonzero. Callees of `lmp_esco_sco_negotiation_packet_handler`
+(`0x80052c64`) and patch dispatch slot `0x8010baa6` — see
+`reverse_engineering_conn_feature_dispatch.md` §6.
+
+Post-rename: **169 unnamed** in-region (95 in 1-150B tier unchanged); **74** in
+>150B tier (no count change — name predated this pass).
+
+**Next:** continue >150B cold-triage — decompile+rename rank-15 `0x8004f730`
+(230B, 2 xrefs).
