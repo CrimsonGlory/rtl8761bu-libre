@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 155 functions in tier, 25 renamed HIGH (Passes 52–52aa). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aa, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 154 functions in tier, 27 renamed HIGH (Passes 52–52ac). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ac, 2026-06-30).
 
 ## Overview
 
@@ -1722,5 +1722,44 @@ Pure internal scheduler infra — same evidentiary class as the already-HIGH
 
 Post-rename: **239 unnamed** in-region (153 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-23+
-substantive candidate; skip rank-1–22 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-24+
+substantive candidate; skip rank-1–23 artifacts.
+
+## Pass 52ac (2026-06-30) — rank-23 global LMP procedure busy probe rename
+
+**Refreshed cold-triage (rank-1–22 skipped as artifacts or already done):** rank-23
+`0x8004e480` (56B, 2 xrefs) — substantive global conn-table LMP procedure busy
+probe in the permission-gate cluster (sibling of `is_any_conn_lmp_procedure_busy_by_index`
+and `is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180`).
+
+**Rank-23 decompiled and renamed (HIGH):** `FUN_8004e480` →
+`is_any_conn_lmp_procedure_busy` (56B) via
+`RenamePass52acRegion80040000Fun8004e480.java` (`renamed=1`, live-verified).
+
+```c
+byte is_any_conn_lmp_procedure_busy(void)
+{
+  for (conn_idx = 0; conn_idx < conn_table_count; conn_idx++) {
+    conn_rec = conn_table[conn_idx];  // PTR_PTR_8004e4b8
+    if (conn_rec != 0
+        && (conn_rec+0x08 & 7) == 0      // pkt_modes low 3 bits clear
+        && (conn_rec+0x1d & 2) != 0)    // procedure-active flag
+      return 1;
+  }
+  return 0;
+}
+```
+
+Unfiltered global busy-procedure probe: scans the connection table for any active
+link with pkt_modes clear and procedure-active bit set — same `+0x08`/`+0x1d`
+criteria as `is_any_conn_lmp_procedure_busy_by_index` but without the index/nibble
+filter at `+0x20`, and without the link-mode mask `0x180` check at `+0x1c` that
+Pass 52s's sibling applies. Single caller:
+`le_channel_selection_algorithm_event_dispatch` (`0x80055204`, region `0x80050000`)
+uses the result to gate status-byte update after LE Channel Selection Algorithm
+meta-subevent dispatch.
+
+Post-rename: **238 unnamed** in-region (152 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-24+
+substantive candidate; skip rank-1–23 artifacts.
