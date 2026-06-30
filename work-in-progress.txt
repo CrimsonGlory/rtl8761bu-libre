@@ -7028,8 +7028,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52i;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52j: continue refreshed 1-150B
-          cold-triage — decompile next substantive unnamed candidate.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52j (2026-06-30): decompiled+
+          renamed refreshed rank-2 `FUN_80044564`→`pack_lmp_response_header_status_and_handle`
+          (32B, HIGH). Packs 3-byte LMP response header: status from link-record
+          `field_0x165` (0 when handle==0, default 1), uint16 handle LE; LMP VSC
+          0x268 pool slot `0x8010bc6c`. 8 xrefs. 257 unnamed remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52j;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52k: decompile rank-4 `0x8004e3ec`
+          (124B, 6 xrefs) or triage rank-3 `0x8004f240` (6B, likely artifact).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

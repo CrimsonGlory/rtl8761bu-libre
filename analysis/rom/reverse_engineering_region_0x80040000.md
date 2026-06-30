@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 174 functions in tier, 9 renamed HIGH (Passes 52–52i). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52i, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 10 renamed HIGH (Passes 52–52j). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52j, 2026-06-30).
 
 ## Overview
 
@@ -1017,4 +1017,37 @@ confirmed callers (`FUN_8006b5f4`, `FUN_8006bdf8`, `FUN_8006c470`, `FUN_8006d33c
 
 Post-rename: **258 unnamed** in-region.
 
-**Next:** continue refreshed 1-150B cold-triage — next substantive unnamed candidate.
+## Pass 52j (2026-06-30) — rank-2 LMP response header packer rename
+
+**Refreshed rank-2 decompiled and renamed (HIGH):** `FUN_80044564` →
+`pack_lmp_response_header_status_and_handle` (32B) via
+`RenamePass52jRegion80040000Fun80044564.java` (`renamed=1`, live-verified).
+
+```c
+void pack_lmp_response_header_status_and_handle(uint handle, char *out)
+{
+  handle = handle & 0xffff;
+  if (handle == 0) {
+    out[0] = '\0';
+  } else {
+    status = PTR_struct_of_at_least_0x300_size_80044584->field_0x165;
+    if (status == '\0') status = '\x01';
+    out[0] = status;
+  }
+  out[1] = (char)handle;
+  out[2] = (char)(handle >> 8);
+}
+```
+
+Packs a 3-byte LMP response header: byte 0 is status from per-connection
+`field_0x165` (default `1` when zero, `0` when handle==0); bytes 1–2 are the
+uint16 handle little-endian. Installed in the LMP VSC 0x268 dispatch pool at
+patch slot `0x8010bc6c` (documented as "LMP response header builder" in
+`reverse_engineering_lmp_vsc_opcode_map.md`). LE Meta Event cluster neighbor
+(`0x80044564` sits just below `FUN_800454a8` HCI_Command_Status stub). 8
+xrefs.
+
+Post-rename: **257 unnamed** in-region.
+
+**Next:** continue refreshed 1-150B cold-triage — rank-4 `0x8004e3ec` (124B,
+6 xrefs) or triage rank-3 `0x8004f240` (6B, likely artifact).
