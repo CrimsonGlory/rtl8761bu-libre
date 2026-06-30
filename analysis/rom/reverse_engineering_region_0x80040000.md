@@ -5719,5 +5719,36 @@ struct.
 Post-rename: **119 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1519**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-6
-unnamed >150B candidate (`0x8004996a`, 172B).
+**Next:** superseded by Pass 52eu below.
+
+## Pass 52eu (2026-06-30) — >150B rank-6 HW-reg pool remove HCI handler rename
+
+**Cold-triage (refreshed, `ColdTriageRegion80040000Pass52eu.java`):** **23** unnamed
+>150B remain. rank-1 `0x80045c70` (520B); rank-2 `0x80048754` (478B); rank-3
+`0x80046e40` (474B); rank-4 `0x800451cc` (408B); rank-5 `0x80046798` (352B);
+rank-6 `0x8004635c` (320B); rank-7 `0x80046ce8` (316B).
+
+**>150B rank-6 decompiled+renamed (HIGH):** `FUN_8004996a` →
+`hci_hw_reg_pool_entry_remove_gated_handler_send_cmd_complete` (172B, 0 xrefs in
+cold-triage) via `RenamePass52euRegion80040000Fun8004996a.java` (`renamed=1`,
+live-verified).
+
+Re-entrancy-gated HCI command handler in the HW-reg pool entry cluster (sibling
+of `hci_hw_reg_pool_entry_remove_handler_send_cmd_complete` at `0x8004993c`,
+`FUN_80049a2c` add handler, and `FUN_80049b40` flush handler):
+
+- **Reentry gate:** when `param_1 & 1`, requires
+  `is_any_conn_lmp_procedure_busy_with_link_mode_mask_0x180()` to return 0.
+- **State guards:** `0x1ac` struct array fields `field68_0x44`, `field407_0x1a4`,
+  plus bytes at `PTR_PTR_80049a20`/`PTR_PTR_80049a24` — failure → HCI status
+  `0x0c` (Command Disallowed).
+- **Index `0xff`:** clears bit-6 of `PTR_PTR_80049a20[5]` (`&= 0xbf`).
+- **Otherwise:** `remove_pool_entry_by_bdaddr_and_release_hw_or_bitmap_slot(0)`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status-idiom (same pattern as Pass 52bz sibling).
+
+Post-rename: **118 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1520**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (`0x80045c70`, 520B).
