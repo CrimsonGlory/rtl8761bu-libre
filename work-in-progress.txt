@@ -7044,8 +7044,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md
           → analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52l: triage rank-3 `0x8004f240`
-          (6B, likely artifact) or next substantive rank-4+ candidate.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52l (2026-06-30): triaged rank-3
+          `0x8004f240` as substantive (not artifact); decompiled+renamed
+          `FUN_8004f240`→`get_credit_scheduler_context_active_entry_ptr` (6B, HIGH)
+          — returns active credit-scheduler slot descriptor pointer from
+          `PTR_DAT_8004f248+4`; SCO/eSCO slot-timing cluster accessor. 255 unnamed
+          remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52l
+          → analysis/rom/rom_function_index.md
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52m: decompile rank-4
+          `0x8004fcb8` (46B, 5 xrefs) or skip rank-1/2/3 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

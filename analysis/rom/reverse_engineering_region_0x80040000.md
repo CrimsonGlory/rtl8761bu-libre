@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 11 renamed HIGH (Passes 52–52k). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52k, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 172 functions in tier, 12 renamed HIGH (Passes 52–52l). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52l, 2026-06-30).
 
 ## Overview
 
@@ -1082,5 +1082,33 @@ bits `0xc0`). LMP/AFH cluster neighbor of Pass 52d's
 
 Post-rename: **256 unnamed** in-region.
 
-**Next:** continue refreshed 1-150B cold-triage — triage rank-3 `0x8004f240`
-(6B, likely artifact) or next substantive rank-4+ candidate.
+## Pass 52l (2026-06-30) — rank-3 credit-scheduler context accessor rename
+
+**Rank-3 triaged (substantive, not artifact):** `0x8004f240` (6B) — decompile
+confirms a real global accessor, not a mis-disassembly stub like `0x8004a2e4`.
+
+**Rank-3 decompiled and renamed (HIGH):** `FUN_8004f240` →
+`get_credit_scheduler_context_active_entry_ptr` (6B) via
+`RenamePass52lRegion80040000Fun8004f240.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 get_credit_scheduler_context_active_entry_ptr(void)
+{
+  return *(undefined4 *)(PTR_DAT_8004f248 + 4);
+}
+```
+
+Returns the active credit-scheduler slot descriptor pointer from global context
+at `PTR_DAT_8004f248+4`. Callers (`sco_esco_slot_timing_offset_calc_variant1`/
+`variant2`, `LMP_power_and_clk_adj_procedure_orchestrator`) dereference the
+returned pointer at `+8` (type byte), `+0x10`/`+0x12`/`+4` (timing ushorts),
+and `+0x20` (nested descriptor when type==0x0a). Sibling of
+`FUN_8004e9c4` (indexed byte table lookup) in the SCO/eSCO slot-timing cluster
+documented in region `0x80000000`. 3+ xrefs.
+
+Post-rename cold-triage refresh: **255 unnamed** in-region (169 in 1-150B tier).
+Refreshed rank-1 remains `0x8004a2e4` (10 xrefs, 1B — artifact); rank-4
+substantive lead is `0x8004fcb8` (46B, 5 xrefs).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile rank-4
+`0x8004fcb8` (46B, 5 xrefs) or skip rank-1/2/3 artifacts.
