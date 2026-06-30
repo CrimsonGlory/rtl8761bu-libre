@@ -4705,3 +4705,49 @@ live named **1486**.
 
 **Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
 `0x800407e8` (168B, xrefs:1).
+
+## Pass 52dn (2026-06-30) — >150B rank-30 conn-event update with RSSI/deferral rename
+
+**>150B rank-30 decompiled+renamed (HIGH):** `FUN_800407e8` →
+`update_conn_record_from_incoming_event_with_rssi_and_flag4_deferral` (168B, 1 xref) via
+`RenamePass52dnRegion80040000Fun800407e8.java` (`renamed=1`, live-verified).
+
+```c
+void update_conn_record_from_incoming_event_with_rssi_and_flag4_deferral(conn_rec *rec, event *evt)
+{
+  if ((byte)(the_0x300->field_0x17d - 1) < 2) {   /* modes 1 or 2 */
+    ushort rssi = return_RSSI_value(evt->field_6);
+    evt->field_6 = rssi;
+    rec->field_0x17 = (byte)rssi;
+  }
+  if (*PTR_DAT_80040894 != 0) {                    /* drain deferred record ptr */
+    possible_logging_function__var_args(...);
+    wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests(...);
+    *PTR_DAT_80040894 = 0;
+  }
+  if (((evt->flags & 4) == 0) || ((rec->field_0xb & 4) == 0)) {
+    rec->field_0xb &= ~4;
+    *rec = evt->field_8;                         /* apply dword update */
+    possible_logger_called_if_no_patch3(..., 0xff, 0x47f, ...);
+  } else {
+    *PTR_DAT_80040894 = rec;                     /* defer when both flag-4 set */
+  }
+}
+```
+
+Per-connection record updater on incoming conn events: when global `the_0x300->field_0x17d`
+is mode 1 or 2, refreshes RSSI via named `return_RSSI_value` into both the event buffer and
+record `+0x17`; drains any previously deferred record pointer through
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`; when either the incoming
+event or the record lacks flag bit 4 (`0x4`), clears that bit, copies the event's dword at
+`+0x8` into `*rec`, and logs via `possible_logger_called_if_no_patch3` (tag `0x47f`); when
+both sides have flag 4 set, defers by stashing `rec` in `PTR_DAT_80040894` for the next
+invocation's drain path. Sole caller `FUN_800411a4` (LMP role-connection accept path
+sibling of `accept_dual_slot_lmp_role_connection_and_program_baseband_regs`, Pass 52di).
+
+Post-rename cold-triage (`ColdTriageRegion80040000Pass52dn.java`): **56**
+unnamed in >150B tier; **151 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1487**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-30
+`0x80047628` (832B, xrefs:0).

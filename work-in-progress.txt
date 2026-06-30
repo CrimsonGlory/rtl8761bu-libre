@@ -8022,8 +8022,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dn: continue >150B cold-triage
-          — decompile+rename refreshed rank-30 `0x800407e8` (168B, xrefs:1).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dn (2026-06-30): decompiled+
+          renamed rank-30 `FUN_800407e8`→`update_conn_record_from_incoming_event_with_rssi_and_flag4_deferral`
+          (168B, HIGH). Conn-event record updater: RSSI refresh via `return_RSSI_value`
+          when `the_0x300->field_0x17d` is mode 1/2; drains deferred ptr via
+          `wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`; applies
+          dword from event+8 or defers when both record+event flag bit 4 set; logs
+          tag `0x47f` via `possible_logger_called_if_no_patch3`. Caller `FUN_800411a4`.
+          151 unnamed in-region; live named 1487.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52do: continue >150B cold-triage
+          — decompile+rename refreshed rank-30 `0x80047628` (832B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
