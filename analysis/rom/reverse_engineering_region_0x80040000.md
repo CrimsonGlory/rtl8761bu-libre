@@ -8055,5 +8055,43 @@ echoed command word, handle, and PHY pair on success. No direct callers found
 
 Post-rename: **56 unnamed** in-region (19 in 1-150B size≥20B tier); live named **1582**.
 
+**Next:** superseded by Pass 52hf below.
+
+## Pass 52hf (2026-06-30) — rank-1 eSCO/SCO config PDU set HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hf.java` — 56 unnamed,
+19 in 1-150B size≥20B tier; rank-1 `0x80047f1c` (138B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x80047fxx`/`0x800480xx` SCO/eSCO cluster
+(sibling of Pass 52fj's
+`hci_esco_packet_type_broadcast_validate_and_commit_send_cmd_complete` at
+`0x80047fb4` and Pass 52dr's
+`parse_validate_and_commit_esco_sco_config_pdu_to_conn_record` at `0x80047c50`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80047f1c` →
+`hci_esco_sco_config_pdu_set_validate_and_send_cmd_complete` (138B) via
+`RenamePass52hfRegion80040000Fun80047f1c.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_esco_sco_config_pdu_set_validate_and_send_cmd_complete(short *param_1)
+{
+  /* master struct state gate at slot[0xb].field96_0x60 — 0→2 in-progress */
+  /* PTR_DAT_80047fac bit0x10 + state≠2 → reject status 0x0c */
+  /* when master +0x28 bit0 clear → parse_validate_and_commit_esco_sco_config_pdu_to_conn_record */
+  /* conn_diagnostic_batch_dump(); 5-byte Command Complete via hci_event_sender(0xe,…) */
+}
+```
+
+138B HCI command handler: gates on master struct state byte at
+`PTR_base_of_0x1ac_struct_array_0xA_large2_80047fa8` slot `[0xb].field96_0x60`
+— when zero, marks in-progress (`2`); when `PTR_DAT_80047fac` bit `0x10` is set
+and state is not `2`, rejects with status `0x0c`; when master `field40_0x28` bit
+0 is clear, delegates to
+`parse_validate_and_commit_esco_sco_config_pdu_to_conn_record`; always calls
+`conn_diagnostic_batch_dump()` before terminating via 5-byte HCI Command Complete
+(`hci_event_sender(0xe,…)`) with `field_0x165` status idiom. No direct callers
+found (indirect HCI router).
+
+Post-rename: **55 unnamed** in-region (18 in 1-150B size≥20B tier); live named **1583**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
