@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 157 functions in tier, 23 renamed HIGH (Passes 52–52y). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52y, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 156 functions in tier, 24 renamed HIGH (Passes 52–52z). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52z, 2026-06-30).
 
 ## Overview
 
@@ -1605,5 +1605,41 @@ programming path. Sibling of the queue-scheduler helper trio in region
 
 Post-rename: **242 unnamed** in-region (156 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-20+
-substantive candidate; skip rank-1–19 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-21+
+substantive candidate; skip rank-1–20 artifacts.
+
+## Pass 52z (2026-06-30) — rank-20 inquiry/LAP slot pending-clear selector rename
+
+**Refreshed cold-triage (rank-1–19 skipped as artifacts or already done):** rank-20
+`0x80042f2c` (68B, 2 xrefs) — substantive inquiry/LAP slot selector in the
+AFH/LAP bitmask cluster (sibling of `set_inquiry_lap_slot_pending_bitmask` /
+`release_inquiry_lap_slot_pending_bitmask` / `triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear`).
+
+**Rank-20 decompiled and renamed (HIGH):** `FUN_80042f2c` →
+`find_first_inquiry_lap_slot_with_pending_clear` (68B) via
+`RenamePass52zRegion80040000Fun80042f2c.java` (`renamed=1`, live-verified).
+
+```c
+uint find_first_inquiry_lap_slot_with_pending_clear(void)
+{
+  ctx = PTR_DAT_80042f70;  // same layout as PTR_DAT_80042d2c / PTR_DAT_80042c90
+  if (ctx[1] + ctx[0] != 1) return 0xff;
+  if ((ctx[4] >> 1 & 1) == 0) return 0;
+  if ((ctx[5] >> 1 & 1) == 0) return 1;
+  if ((ctx[6] >> 1 & 1) == 0) return 2;
+  if ((ctx[7] >> 1 & 1) == 0) return 3;
+  return 0xff;
+}
+```
+
+When exactly one inquiry/LAP slot is active (`active + refcount == 1`), scans
+per-slot status bytes at `+4[slot]` (bit0 primary, bit1 pending per Pass 52n/o)
+and returns the first slot index 0–3 whose pending bit is clear, or `0xff` if
+none qualify. No direct callers found (likely function-pointer registration);
+2 data xrefs. Selector sibling of the setter/release pair and the LAP-slot HW
+dispatch helpers in the same `0x80042c00–0x80042f00` cluster.
+
+Post-rename: **241 unnamed** in-region (155 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-21+
+substantive candidate; skip rank-1–20 artifacts.

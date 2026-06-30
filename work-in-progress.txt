@@ -7183,9 +7183,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52y
           → analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52z: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-20+ substantive candidate;
-          skip rank-1–19 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52z (2026-06-30): decompiled+
+          renamed rank-20 `FUN_80042f2c`→`find_first_inquiry_lap_slot_with_pending_clear`
+          (68B, HIGH). When active+refcount==1 on inquiry/LAP context, scans per-slot
+          status bytes +4[slot] for first slot with pending bit (bit1) clear; returns
+          0-3 or 0xff. Selector sibling of set/release inquiry/LAP bitmask pair.
+          241 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52z
+          → analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52aa: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-21+ substantive candidate;
+          skip rank-1–20 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
