@@ -2132,4 +2132,39 @@ role-switch / SCO slot-reuse semantics.
 
 Region unnamed count after this pass: **263** (264 minus this rename). Live named **1658** global.
 
+**Next:** superseded by Pass 6 continuation (50).
+
+## Pass 6 continuation (50) (2026-06-30) — SCO per-handle pending-queue drain `FUN_8002ae50`
+
+Decompiled and renamed:
+**`FUN_8002ae50` → `drain_sco_per_handle_pending_descriptor_queue`**
+(182B, HIGH) via `RenamePass6Region80020000Fun8002ae50.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (182B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=263` at pass start). Tied at 182B with
+`FUN_80029eb0` (xref_in=2); selected `FUN_8002ae50` first by higher xref_in. Drain-side
+sibling of Pass 6 cont. (45)'s `enqueue_acl_tx_descriptor_to_per_handle_pending_queue`
+in the SCO/eSCO credit-scheduler cluster.
+
+**Mechanism:** Maps connection handle `param_1` to one of three active-handle slots by
+matching ushorts at `PTR_DAT_8002af08+0x18`/`+0x4c`/`+0x80` (same 3-slot ×0x34 stride
+pattern as ACL enqueue at `PTR_DAT_8002b010`). Under IRQ disable: walks the per-slot
+singly-linked pending queue at `PTR_DAT_8002af0c + index×0x34`, dispatching each node —
+when `the_0x300.field_0x179==2` invokes patch hook at `PTR_DAT_8002af18`, else calls
+callback fptr at `PTR_DAT_8002af1c` with `(*(node+8), 3)` — decrements queue count at
+`+0x12`, splices drained nodes back into free-pool `PTR_PTR_8002af20`, re-enables IRQ.
+Returns 1 on successful drain, 0 on handle mismatch (logs via
+`possible_logging_function__var_args`).
+
+**Callers:** `sco_esco_packet_credit_scheduler` (`0x80000fb8`, region `0x80000000`) —
+invoked during SCO/eSCO outbound packet-credit scheduling when credits allow pending
+descriptor work to flush.
+
+**Confidence:** HIGH — decompile confirms standard linked-list drain idiom mirroring
+the documented ACL enqueue cluster; sole caller is the named SCO/eSCO credit scheduler;
+`field_0x179==2` branch matches patch-hook dispatch pattern used across connection-state
+handlers.
+
+Region unnamed count after this pass: **262** (263 minus this rename). Live named **1659** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

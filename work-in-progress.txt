@@ -9638,8 +9638,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (50): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (263 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (50) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002ae50`→`drain_sco_per_handle_pending_descriptor_queue`
+          (182B, HIGH). SCO per-handle pending-queue drain: maps connection handle to
+          3-slot ×0x34 queue, walks linked list dispatching patch hook or callback fptr,
+          returns nodes to free pool; caller `sco_esco_packet_credit_scheduler`.
+          262 unnamed remain; live named 1659.
+          → analysis/rom/reverse_engineering_region_0x80020000.md;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (51): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (262 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
