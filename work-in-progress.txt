@@ -7136,9 +7136,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md
           → analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52u: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-12+ substantive candidate;
-          skip rank-1–11 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52u (2026-06-30): decompiled+
+          renamed refreshed rank-12 `FUN_80042984`→
+          `and_mask_hw_channel_table_entry_indexed_dispatch_noirq`
+          (32B, HIGH). AND-mask indexed HW-channel table dispatch without IRQ
+          disable; noirq twin of `and_mask_hw_channel_table_entry_and_indexed_dispatch`
+          in SCO/eSCO channel-commit cluster. 246 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52u
+          → analysis/rom/rom_function_index.md
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52v: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-13+ substantive candidate;
+          skip rank-1–12 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

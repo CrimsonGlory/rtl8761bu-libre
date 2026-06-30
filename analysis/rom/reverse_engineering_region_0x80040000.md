@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 163 functions in tier, 18 renamed HIGH (Passes 52–52s). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52s, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 160 functions in tier, 19 renamed HIGH (Passes 52–52u). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52u, 2026-06-30).
 
 ## Overview
 
@@ -1408,5 +1408,37 @@ conn_record `+0x1cc` and used to derive retransmission windows
 
 Post-rename: **247 unnamed** in-region (161 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-12+
-substantive candidate; skip rank-1–11 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-13+
+substantive candidate; skip rank-1–12 artifacts.
+
+## Pass 52u (2026-06-30) — rank-12 noirq AND-mask HW-channel dispatch rename
+
+**Refreshed cold-triage (rank-1–11 skipped as artifacts or already done):** rank-12
+`0x80042984` (3 xrefs, 32B) — substantive AND-mask indexed HW-channel table dispatch
+without IRQ disable; lightweight twin of Pass 52b's irq-guarded variant.
+
+**Rank-12 decompiled and renamed (HIGH):** `FUN_80042984` →
+`and_mask_hw_channel_table_entry_indexed_dispatch_noirq` (32B) via
+`RenamePass52uRegion80040000Fun80042984.java` (`renamed=1`, live-verified).
+
+```c
+void and_mask_hw_channel_table_entry_indexed_dispatch_noirq(uint index, ushort mask)
+{
+  table = DAT_800429a4;
+  fptr_table = PTR_DAT_800429a8;
+  (*fptr_table)(index & 0xffff, mask & table[index]);
+}
+```
+
+AND-mask indexed dispatch without IRQ protection: AND-masks `mask` with the
+per-index ushort HW-channel parameter table entry at `DAT_800429a4`, then calls
+through the function-pointer table at `PTR_DAT_800429a8`. Structural noirq twin
+of `and_mask_hw_channel_table_entry_and_indexed_dispatch` (`0x80043158`, 64B,
+IRQ-disabled) in the SCO/eSCO HW channel parameter-commit cluster alongside
+`or_merge_hw_channel_table_entry_and_indexed_dispatch` and
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch`. 3 xrefs.
+
+Post-rename: **246 unnamed** in-region (160 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-13+
+substantive candidate; skip rank-1–12 artifacts.
