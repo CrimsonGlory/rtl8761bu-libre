@@ -9812,8 +9812,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (70);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (71): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (242 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (71) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800232a4`→`fHCI_Change_Connection_Link_Key_0x15`
+          (152B, HIGH). HCI Change Connection Link Key 0x0415: resolve conn via
+          `FUN_800231bc`, gate on link-type `0x05`/`0x0c`, PIN-code or link-key-type
+          path, advance via `FUN_80023fb8(_,2)`; caller
+          `HCI_Write_Simple_Pairing_Debug_Mode`; 241 unnamed remain; live named 1680.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (71);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (72): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (241 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

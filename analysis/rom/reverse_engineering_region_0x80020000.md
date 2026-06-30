@@ -2768,4 +2768,36 @@ full write-up in `reverse_engineering_encryption_engine.md` §3.
 
 Region unnamed count after this pass: **242** (243 minus this rename). Live named **1679** global.
 
+**Next:** superseded by Pass 6 continuation (71).
+
+## Pass 6 continuation (71) (2026-06-30) — HCI Change Connection Link Key `FUN_800232a4`
+
+Decompiled and renamed:
+**`FUN_800232a4` → `fHCI_Change_Connection_Link_Key_0x15`**
+(152B, HIGH) via `RenamePass6Region80020000Fun800232a4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (152B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=242` at pass start).
+
+**Mechanism:** HCI Change Connection Link Key (OGF1 OCF 0x15 / opcode `0x0415`) command
+handler, dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` case `0x415`. Resolves
+connection slot via `FUN_800231bc`; on failure returns `2` (router emits Command Status
+with error). On success emits `send_evt_HCI_Command_Status` with status `0`. Gates on
+link-type byte `*crypto == 0x05 || *crypto == 0x0c` (encrypted ACL types); invalid types
+emit `send_evt_HCI_Change_Connection_Link_Key_Complete` with error `0x0c`.
+- Valid encrypted links: set `crypto+0x50=1`, then branch on `crypto+0x12` (encryption
+  mode): modes `1`/`2` → `FUN_80022e28` (PIN Code Request + `set_arg1_1_to_arg2`); else
+  copy 16B `crypto+2` → `crypto+0x51`, `FUN_800255fc` (link-key-type advance to `0x0d`/`0x0e`),
+  `set_arg1_1_to_arg2(crypto,0xf)`.
+Always finishes via `FUN_80023fb8(crypto, 2)` to kick off link-key change procedure.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (opcode `0x415` branch).
+
+**Confidence:** HIGH — router decompile confirms opcode `0x415`; link-key/encryption
+callees (`FUN_80022e28`, `FUN_800255fc`, `FUN_80023fb8`,
+`send_evt_HCI_Change_Connection_Link_Key_Complete`) match documented HCI auth/encryption
+cluster in `0x80023xxx`.
+
+Region unnamed count after this pass: **241** (242 minus this rename). Live named **1680** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
