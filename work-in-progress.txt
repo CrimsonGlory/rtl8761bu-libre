@@ -7511,9 +7511,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bl: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-59+ substantive candidate;
-          skip rank-1–58 artifacts, deferred, and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bl (2026-06-30): ranks 59–65
+          triaged as 1B `halt_baddata` artifacts; decompiled+renamed rank-66
+          `FUN_800494b0`→`validate_conn_and_start_lmp_power_clk_adj_if_enabled`
+          (150B, HIGH) — HCI command handler gating LMP power/clk-adj pending
+          proc on config+conn flags; sibling of
+          `HCI_Accept_Synchronous_Connection_Request_handler`. 203 unnamed
+          in-region (117 in 1-150B tier); live named 1435.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bm: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-67+ substantive candidate;
+          skip rank-1–66 artifacts, deferred, and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
