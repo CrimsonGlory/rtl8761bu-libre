@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: PASS 11 CRITICAL tier batch 1 completed (6 functions decompiled, 4× HIGH + 2× MEDIUM confidence) — 2026-06-25
+**Status**: Pass 12fs COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**9** HANDLER-tier unnamed remain in-region; live named **1328** global). Latest: `packet_slot_ring_dequeue_and_dispatch_loop` (Pass 12fr), `rebuild_fc35_config_entry_to_connection_bitmaps` (Pass 12fs). **[NEXT]** `FUN_80073e94` (rank-1 HANDLER-tier, xref_in=1). See Pass 12fs section below.
 
 ## Overview
 
@@ -2345,6 +2345,8 @@ Decompiled and renamed:
 **Confidence:** HIGH — straightforward decompile; slot-table walk, fill-count probe, IRQ dequeue, and per-slot fn-ptr dispatch all directly readable and consistent with the Pass 12du/12dr packet-slot accessor cluster.
 
 Live named **1327** (global; in-region unnamed **25**; HANDLER-tier unnamed **10**).
+
+**Next:** superseded by Pass 12fs.
 
 ## Pass 12fs (2026-06-30) — VSC FC35 config-to-connection bitmap rebuild `FUN_8007442c`
 
