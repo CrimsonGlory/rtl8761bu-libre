@@ -268,7 +268,7 @@ first as instructed.
 | `0x80040e60` | 386B | `accept_dual_slot_lmp_role_connection_and_program_baseband_regs` — IRQ-off dual-slot LMP role connection accept + baseband programmer; see Pass 52di | **HIGH** |
 | `0x80041900` | 376B | `program_page_train_baseband_regs_and_start_paging` — HCI Create Connection page-train BB programmer; see Pass 52dj | **HIGH** |
 | `0x80043c7c` | 372B | `compute_automatic_flush_timeout_ticks_by_connection_handle` — ACL automatic-flush-timeout tick calculator; see Pass 52dk | **HIGH** |
-| `0x80041a94` | 352B | Field manipulator, lower conn-type cluster. | MEDIUM |
+| `0x80041a94` | 352B | `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` — HCI Periodic Inquiry Mode configure handler; programs LAP/min/max delays, access-code sync word, baseband regs, LMP 0x25B/0x268; see Pass 52eg | HIGH |
 | `0x800435a8` | 338B | Field manipulator, lower conn-type cluster. | MEDIUM |
 | `0x80041028` | 336B | Field manipulator, lower conn-type cluster. | MEDIUM |
 
@@ -5291,3 +5291,47 @@ live named **1505**.
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
 decompile+rename next rank-1 unnamed >150B candidate (rank-2 `0x80041a94`,
 352B).
+
+## Pass 52eg (2026-06-30) — >150B rank-2 periodic inquiry configure rename
+
+**Cold-triage (refreshed):** 38 unnamed >150B remain. rank-1 `0x800435a8`
+(338B); rank-2 `0x80041028` (336B); rank-3 `0x8004704c` (296B);
+rank-4 `0x80043a60` (358B, 15 xrefs); rank-5 `0x8004c4a8` (894B).
+
+**>150B rank-2 decompiled+renamed (HIGH):** `FUN_80041a94` →
+`configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` (352B, 1 xref)
+via `RenamePass52egRegion80040000Fun80041a94.java` (`renamed=1`,
+live-verified).
+
+HCI Periodic Inquiry Mode configure handler — sole callee from
+`fHCI_Periodic_Inquiry_Mode_0x03` (`0x8001bf44`, OGF 0x04 OCF 0x03):
+
+- **State guard:** returns `0xff` when `the_0x300->int_0x10 == 2`
+  (already in periodic inquiry); if `int_0x10 != 0` calls
+  `reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259()` first.
+- **Shared init:** `FUN_800408ec()` (same teardown-path helper as
+  `fHCI_Exit_Periodic_Inquiry_Mode_0x04`); sets `ptr_to_EIR_data` to
+  `0x00000002`.
+- **LAP/timing commit:** stores LAP (`param_1`) and min delay (`param_2`)
+  to globals; encodes inquiry length (`param_4`) as `(length & 0xff) << 10`;
+  programs max-delay low/high via shared HW-write fptr (`0x14`, `0x16`).
+- **Baseband setup:** `or_merge_hw_channel_table_entry_and_indexed_dispatch`,
+  `compute_access_code_sync_word_from_bdaddr`, programs sync-word halves +
+  channel-table entry via fptr opcodes `0x10`/`0x12`/`0x2e`/`0x2c`.
+- **Mode select:** derives `0x100`/`0x200`/`0x300` from
+  `field_0x171`/`byte_0x16f`/`ushort_0x24` inquiry-mode byte triplet.
+- **LMP arm:** `LMP__25B__most_common_for_VSCs1` + `VSC_0xfc95_called2`;
+  on success scales delays × `0x500`, calls
+  `LMP__268__most_common_for_VSCs2_checks_fptr_patch`, sets
+  `the_0x300->int_0x10 = 1`, returns 0.
+
+Inquiry/LAP cluster sibling of `program_inquiry_or_esco_baseband_from_hci_command`
+(Pass 52dc), `fHCI_Exit_Periodic_Inquiry_Mode_0x04` (`0x80041c18`), and
+`teardown_inquiry_lap_slot_baseband_cleanup_and_release` (Pass 52dd).
+
+Post-rename: **132 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1506**.
+
+**Next:** continue refreshed >150B cold-triage — refresh rank list and
+decompile+rename next rank-1 unnamed >150B candidate (rank-3 `0x800435a8`,
+338B).

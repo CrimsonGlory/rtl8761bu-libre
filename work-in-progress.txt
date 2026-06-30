@@ -8218,9 +8218,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ef;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eg: continue refreshed >150B
-          cold-triage — refresh rank list and decompile+rename next rank-1
-          unnamed >150B candidate (rank-2 `0x80041a94`, 352B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52eg (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80041a94`→`configure_periodic_inquiry_lap_delays_
+          baseband_and_arm_lmp` (352B, HIGH, 1 xref). HCI Periodic Inquiry Mode
+          configure handler; LAP/min/max-delay commit, access-code sync word,
+          baseband reg programming, LMP 0x25B/0x268 arm; callee from
+          `fHCI_Periodic_Inquiry_Mode_0x03`. 132 unnamed in-region; live named
+          1506. → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eh: continue refreshed >150B
+          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
+          (rank-3 `0x800435a8`, 338B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
