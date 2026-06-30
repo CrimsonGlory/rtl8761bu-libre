@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 154 functions in tier, 28 renamed HIGH (Passes 52–52ad). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ad, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 150 functions in tier, 29 renamed HIGH (Passes 52–52ae). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ae, 2026-06-30).
 
 ## Overview
 
@@ -1795,3 +1795,38 @@ Post-rename: **237 unnamed** in-region (151 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-25+
 substantive candidate; skip rank-1–24 artifacts.
+
+## Pass 52ae (2026-06-30) — rank-16 conn-diagnostic batch logger rename
+
+**Refreshed cold-triage (ranks 1-24 skipped as artifacts or already done; ranks
+25-30 are 1-4B stubs):** rank-16 `0x8004f910` (126B, 2 xrefs) — substantive
+conn-diagnostic batch logging helper in the diagnostic-dump cluster (callee of
+`collect_and_dispatch_conn_diagnostic_batches` in region `0x80050000`).
+
+**Rank-16 decompiled and renamed (HIGH):** `FUN_8004f910` →
+`log_conn_diagnostic_batch_up_to_five_entries` (126B) via
+`RenamePass52aeRegion80040000Fun8004f910.java` (`renamed=1`, live-verified).
+
+```c
+void log_conn_diagnostic_batch_up_to_five_entries(
+    byte batch_idx, byte count, byte mode,
+    byte *field0x10_arr, ushort *field0x20_arr, byte *field0x2b_arr)
+{
+  possible_logging_function__var_args(
+      6, 0xd2, 0x594, 0xd2a, 0x13, PTR_unknown_dat_ref_by_logger_8004f990,
+      batch_idx, *PTR_DAT_8004f994 & 1, count, mode,
+      field0x10_arr[0..4], field0x20_arr[0..4], field0x2b_arr[0..4]);
+}
+```
+
+Formats up to five per-connection diagnostic triples (byte at conn_rec `+0x10`,
+ushort at `+0x20`, nibble at `+0x2b`) into a single varargs logger call.
+Called once per full batch of five and once for any partial trailing batch by
+`collect_and_dispatch_conn_diagnostic_batches` (`0x80050194`, region
+`0x80050000`); sibling of the already-HIGH `conn_diagnostic_batch_dump`
+(`0x80050304`) and `diagnostic_batch_entry_log_emit` (`0x8004fe64`).
+
+Post-rename: **236 unnamed** in-region (150 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-17+
+substantive candidate; skip rank-1–16 artifacts and already-done ranks.
