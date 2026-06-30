@@ -290,7 +290,7 @@ undefined1 FUN_80041900(int param_1)
     (*hw_write)(0x10, &DAT_00006e1e);                  // default sync word A
     (*hw_write)(0x12, &DAT_000088d6);                  // default sync word B
   } else {
-    FUN_8004287c(bdaddr, &sync_word_buf);              // compute access-code sync word from BD_ADDR
+    compute_access_code_sync_word_from_bdaddr(bdaddr, &sync_word_buf);  // derive access-code sync word from BD_ADDR
     (*hw_write)(0x10, sync_word_buf[0]);
     (*hw_write)(0x12, sync_word_buf[1]);
   }

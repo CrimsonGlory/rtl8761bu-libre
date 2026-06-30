@@ -6984,8 +6984,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52d;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52e: decompile+rename rank-5
-          `0x8004287c` (10 xrefs, 88B, 51-150B tier).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52e (2026-06-30): decompiled+
+          renamed rank-5 `FUN_8004287c`→`compute_access_code_sync_word_from_bdaddr`
+          (88B, HIGH). CRC/LFSR 30-iteration bit walk derives 5-byte Bluetooth
+          access-code sync word from BD_ADDR low24; output for HW regs 0x10/0x12
+          in page-train baseband programming (`FUN_80041900`).
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52e;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52f: decompile+rename refreshed
+          rank-1 `0x80042934` (10 xrefs, 62B, 51-150B tier).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

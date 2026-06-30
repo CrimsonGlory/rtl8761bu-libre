@@ -871,5 +871,33 @@ procedure state. Used 15× as stage-(b) of the 4-stage permission gate in
 `check_feature_permission_by_category_and_index` (`0x8005af8c`, region `0x80050000`);
 sibling of still-unnamed `FUN_8004e9e0` (global busy-bit scan without index).
 
-**Next:** decompile+rename rank-5 `0x8004287c` (10 xrefs, 88B); then continue down the
-Pass 52 ranked list.
+## Pass 52e (2026-06-30) — rank-5 access-code sync-word writer rename
+
+**Rank-5 decompiled and renamed (HIGH):** `FUN_8004287c` →
+`compute_access_code_sync_word_from_bdaddr` (88B) via
+`RenamePass52eRegion80040000Fun8004287c.java` (`renamed=1`, live-verified).
+
+```c
+void compute_access_code_sync_word_from_bdaddr(uint bdaddr_low24, byte *out_buf)
+{
+  // Select CRC polynomial seed based on (seed & bdaddr_low24)
+  seed = ((DAT_800428d4 & bdaddr_low24) == 0) ? DAT_800428dc : DAT_800428d8;
+  state = ((seed | bdaddr_low24) ^ DAT_800428e0) << 2;
+  // 30-iteration (0x1e) LFSR-style bit walk with feedback constants
+  // DAT_800428e4 / DAT_800428e8 when MSB set
+  for (i = 0; i < 0x1e; i++) { ... }
+  // Pack 5 output bytes into caller buffer (sync-word halves for HW regs 0x10/0x12)
+  out_buf[0..4] = packed_bits;
+}
+```
+
+CRC/LFSR-style 30-iteration bit walk derives the 5-byte Bluetooth access-code
+sync word from the BD_ADDR low-24 bits (`param_1`). Output is written to the
+caller buffer and programmed into baseband HW registers `0x10`/`0x12` by
+`FUN_80041900` (page-train baseband programming) when the peer BD_ADDR differs
+from the cached local address — otherwise the ROM uses fixed default sync-word
+constants (`0x6e1e`/`0x88d6`). 10 xrefs; sibling cluster to the
+SCO/eSCO HW-channel indexed-dispatch trio from Passes 52–52b.
+
+**Next:** decompile+rename refreshed rank-1 `0x80042934` (10 xrefs, 62B); then
+continue down the Pass 52 ranked list (262 unnamed remain in-region).
