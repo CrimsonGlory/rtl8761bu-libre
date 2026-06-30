@@ -7388,9 +7388,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52aw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ax: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-42+ substantive candidate;
-          skip rank-1–41 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ax (2026-06-30): decompiled+
+          renamed rank-42 `FUN_8004f328`→`conn_channel_param_mismatch_predicate`
+          (66B, HIGH). Channel/param mismatch predicate for
+          `conn_param_revalidate_if_dirty`; checks sub-rec flag byte at +8 with
+          eSCO special case (flags==6, LMP opcode 0x80 class, codec ptr +0x20).
+          Sibling of `conn_record_get_4byte_field_by_handle`. 217 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ax;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ay: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-43+ substantive candidate;
+          skip rank-1–42 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

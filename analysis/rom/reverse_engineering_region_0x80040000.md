@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 133 functions in tier, 44 renamed HIGH (Passes 52–52av). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52av, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 132 functions in tier, 45 renamed HIGH (Passes 52–52ax). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ax, 2026-06-30).
 
 ## Overview
 
@@ -2564,5 +2564,46 @@ purges stale pending entries before dispatching
 
 Post-rename: **218 unnamed** in-region (132 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-42+
-substantive candidate; skip rank-1–41 artifacts and already-done ranks.
+## Pass 52ax (2026-06-30) — rank-42 conn channel/param mismatch predicate rename
+
+**Refreshed cold-triage (ranks 1-41 skipped as artifacts or already done):** rank-42
+`0x8004f328` (66B, 1 xref) — substantive connection channel/param mismatch predicate
+in the `conn_param_revalidate_if_dirty` cluster (sibling of
+`conn_record_get_4byte_field_by_handle` per `reverse_engineering_conn_feature_dispatch.md`).
+
+**Rank-42 decompiled and renamed (HIGH):** `FUN_8004f328` →
+`conn_channel_param_mismatch_predicate` (66B) via
+`RenamePass52axRegion80040000Fun8004f328.java` (`renamed=1`, live-verified).
+
+```c
+bool conn_channel_param_mismatch_predicate(int lmp_buf, int *param_2, int sub_rec)
+{
+  if (*(int *)(param_2 + 0x10) != 0) {
+    return false;
+  }
+  flags = *(byte *)(sub_rec + 8);
+  if ((flags & 1) == 0) {
+    if ((flags & 2) == 0) {
+      return false;
+    }
+    if (((flags == 6) && ((*(byte *)(lmp_buf + 2) & 0xc0) == 0x80)) &&
+       (**(char **)(sub_rec + 0x20) == '\x01')) {
+      return *(char *)(sub_rec + 0x1d) == '\x02';
+    }
+  }
+  return true;
+}
+```
+
+Returns true when channel/param flags indicate a mismatch needing re-sync (caller
+`conn_param_revalidate_if_dirty` at `0x80050ff8` sets sub-record `+0x11` bit4 on
+non-zero result). Short-circuits false when `param_2+0x10` is non-zero. Flag byte at
+`sub_rec+8`: bit0 alone → true; bit1-only path has a special eSCO case (flags==6,
+LMP opcode `0x80` class, codec ptr `+0x20`==1) comparing `sub_rec+0x1d` against 2.
+Sole caller `conn_param_revalidate_if_dirty` (region `0x80050000`, also reached via
+`lmp_esco_sco_negotiation_packet_handler` / `FUN_80052c64`).
+
+Post-rename: **217 unnamed** in-region (131 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-43+
+substantive candidate; skip rank-1–42 artifacts and already-done ranks.
