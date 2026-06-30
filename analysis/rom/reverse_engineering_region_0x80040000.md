@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 150 functions in tier, 29 renamed HIGH (Passes 52–52ae). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ae, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 149 functions in tier, 30 renamed HIGH (Passes 52–52af). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52af, 2026-06-30).
 
 ## Overview
 
@@ -1830,3 +1830,45 @@ Post-rename: **236 unnamed** in-region (150 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-17+
 substantive candidate; skip rank-1–16 artifacts and already-done ranks.
+
+## Pass 52af (2026-06-30) — rank-17 dual record-pool free-list linker rename
+
+**Refreshed cold-triage (ranks 1-16 skipped as artifacts or already done):** rank-17
+`0x8004e878` (114B, 2 xrefs) — substantive config-driven free-list wiring for
+0x60- and 0x108-byte record pools (callee of
+`alloc_0x60_and_0x108_record_pools_from_config_and_wire` in region `0x80050000`).
+
+**Rank-17 decompiled and renamed (HIGH):** `FUN_8004e878` →
+`link_0x60_and_0x108_record_pools_into_free_lists_by_config` (114B) via
+`RenamePass52afRegion80040000Fun8004e878.java` (`renamed=1`, live-verified).
+
+```c
+void link_0x60_and_0x108_record_pools_into_free_lists_by_config(void)
+{
+  *PTR_PTR_8004e8ec = 0;  // 0x60-pool free-list head
+  *PTR_PTR_8004e8f0 = 0;  // 0x108-pool free-list head
+  for (i = 0; i < (config+0x1e1 >> 2 & 0x1f); i++) {
+    record = PTR_PTR_8004e8f4 + i * 0x60;
+    *record = *PTR_PTR_8004e8ec;  // record->next = head
+    *PTR_PTR_8004e8ec = record;   // head = record
+  }
+  for (i = 0; i < (((config+0x1e2 & 0xf) << 1) | (config+0x1e1 >> 7)); i++) {
+    record = PTR_PTR_8004e8fc + i * 0x108;
+    *record = *PTR_PTR_8004e8f0;
+    *PTR_PTR_8004e8f0 = record;
+  }
+}
+```
+
+Clears two free-list heads, then LIFO-prepends config-counted arrays of
+`0x60`-byte and `0x108`-byte records into singly-linked chains. Counts derive
+from `PTR_config_base` fields `0x1e1`/`0x1e2` — same config fields consumed by
+caller `alloc_0x60_and_0x108_record_pools_from_config_and_wire` (`0x80052458`).
+Structural sibling of `link_0x54_record_pool_into_free_list_by_config_count` and
+`alloc_and_link_0xfc_record_pool` in the record-pool init cluster invoked from
+`init_record_pools_and_related_substates`.
+
+Post-rename: **235 unnamed** in-region (149 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-18+
+substantive candidate; skip rank-1–17 artifacts and already-done ranks.
