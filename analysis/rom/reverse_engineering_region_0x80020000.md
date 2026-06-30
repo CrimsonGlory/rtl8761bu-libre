@@ -1155,4 +1155,33 @@ are Pass-5 HIGH `thing_that_uses_SHA_and_BLAKE` family.
 
 Region unnamed count after this pass: **294** (295 minus this rename). Live named **1627** global.
 
+**Next:** superseded by Pass 6 continuation (19).
+
+## Pass 6 continuation (19) (2026-06-30) — TX buffer enqueue `FUN_8002b3b4`
+
+Decompiled and renamed:
+**`FUN_8002b3b4` → `enqueue_tx_buffer_fragments_for_slot`**
+(324B, HIGH) via `RenamePass6Region80020000Fun8002b3b4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (324B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=294` at pass start). Sole caller:
+`lmp_packet_completion_event_drain_dispatch` (`0x80059454`, region `0x80050000` Pass 3c
+#19) — two call sites at `0x80059596`/`0x80059638`.
+
+**Mechanism:** Per-slot TX buffer fragment enqueuer. Indexes a 12-byte slot descriptor table
+(`PTR_PTR_8002b4f8`), bails if pending-credit counter (low 5 bits at `+9`) is zero. Copies
+`param_4` dword descriptors from `param_3` into the slot's ring buffer (`piVar16[1]`),
+accumulating total fragment length from each descriptor's `0x1fff`-masked length field.
+Updates the active TX header at `*piVar16 + ring_index*4`: patches length low bits,
+encodes `param_2`/`param_5` type bits into header byte `+3`, optionally ORs connection
+record flag from `base_of_0x1ac_struct_array` offset `+0x14e`. Advances ring write index
+and decrements pending credits; writes a composite slot/type tag to `DAT_8002b50c`.
+Returns `0` on credit exhaustion, `1` on success.
+
+**Confidence:** HIGH — caller already renamed and documented in `region_0x80050000` as
+"posts completion via `FUN_8002b3b4(idx,3,...)`"; mechanism matches TX fragment posting
+into per-connection hardware buffer queue.
+
+Region unnamed count after this pass: **293** (294 minus this rename). Live named **1628** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
