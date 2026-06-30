@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 134 functions in tier, 43 renamed HIGH (Passes 52–52au). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52au, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 133 functions in tier, 44 renamed HIGH (Passes 52–52av). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52av, 2026-06-30).
 
 ## Overview
 
@@ -2490,5 +2490,39 @@ copying interval/latency fields into the 0x14-stride allocation block.
 
 Post-rename: **220 unnamed** in-region (134 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-40+
-substantive candidate; skip rank-1–39 artifacts and already-done ranks.
+## Pass 52av (2026-06-30) — rank-40 HCI-reset LMP-check buffer + BB-reg programmer rename
+
+**Refreshed cold-triage (ranks 1-39 skipped as artifacts or already done):** rank-40
+`0x8004ab0c` (70B, 1 xref) — substantive HCI-reset sub-step in the config-flag/BB-register
+programming cluster (callee of region `0x80070000` Pass 12cw
+`hci_reset_apply_bdaddr_scramble_and_patch_hooks` when `field_0xe & 0x20`).
+
+**Rank-40 decompiled and renamed (HIGH):** `FUN_8004ab0c` →
+`hci_reset_clear_lmp_check_buf_set_flag_and_program_bb_regs` (70B) via
+`RenamePass52avRegion80040000Fun8004ab0c.java` (`renamed=1`, live-verified).
+
+```c
+void hci_reset_clear_lmp_check_buf_set_flag_and_program_bb_regs(void)
+{
+  buf = PTR_check_before_call_LMP_func_8004ab54;
+  memset(buf, 0, 0x20);
+  *(uint *)(buf + 0x1c) = 0xffffffff;
+  *(uint *)(PTR_DAT_8004ab58 + 0x44) |= 1;
+  write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook();
+  (*(code *)*PTR_DAT_8004ab60)(0x21a, *DAT_8004ab5c | 1);
+}
+```
+
+Clears the 32-byte LMP pre-call check buffer at `PTR_check_before_call_LMP_func_8004ab54`,
+seeds sentinel `0xffffffff` at `+0x1c`, sets config flag bit0 at `PTR_DAT_8004ab58+0x44`,
+invokes Pass 12cy's `write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook` (BB-reg
+`0x212..0x218` quad toggle on config-flag state), then writes BB register `0x21a` with
+`(*DAT_8004ab5c | 1)` via patch hook at `PTR_DAT_8004ab60`. Sole caller
+`hci_reset_apply_bdaddr_scramble_and_patch_hooks` (`0x80079934`, region `0x80070000` Pass
+12cw) when global config `field_0xe & 0x20` — HCI-reset continuation sibling of Passes
+12cm–12cx.
+
+Post-rename: **219 unnamed** in-region (133 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-41+
+substantive candidate; skip rank-1–40 artifacts and already-done ranks.

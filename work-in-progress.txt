@@ -7370,9 +7370,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52au;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52av: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-40+ substantive candidate;
-          skip rank-1–39 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52av (2026-06-30): decompiled+
+          renamed rank-40 `FUN_8004ab0c`→`hci_reset_clear_lmp_check_buf_set_flag_and_program_bb_regs`
+          (70B, HIGH). Clears 32-byte LMP-check buffer, sets config flag bit0,
+          programs BB regs via Pass 12cy hook + writes BB reg 0x21a; caller
+          `hci_reset_apply_bdaddr_scramble_and_patch_hooks` when field_0xe&0x20.
+          219 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52av;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52aw: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-41+ substantive candidate;
+          skip rank-1–40 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
