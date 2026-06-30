@@ -1030,4 +1030,37 @@ state-base offset (`-0xd` vs `-6`) and distinct lookup tables.
 
 Region unnamed count after this pass: **298** (299 minus this rename). Live named **1623** global.
 
+**Next:** superseded by Pass 6 continuation (15).
+
+## Pass 6 continuation (15) (2026-06-30) — HCI TD connection side-effects `FUN_8002f048`
+
+Decompiled and renamed:
+**`FUN_8002f048` → `dispatch_hci_td_connection_event_side_effects`**
+(414B, HIGH) via `RenamePass6Region80020000Fun8002f048.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (414B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=298` at pass start). Caller:
+`FUN_8002f39c` (`0x8002f3a2`) — thin 3-arg thunk that forwards `(conn_ptr, event_byte)`
+into this function; sits in the `0x8002f0xx` cluster adjacent to documented
+`assoc_w_tHCI_TD_FUN_8002f518` (`tHCI_TD` log subsystem).
+
+**Mechanism:** Per-connection HCI transport-data (TD) event post-processor. Params:
+connection record pointer (`param_1`) and event-type byte (`param_2`, values 2–5).
+`param_2==4` is the substantive path: when link-state-6 AFH flags match
+(`(*flags & 0x1e)==6`), optionally invokes `link_state6_afh_or_channel_feature_toggle1`,
+`vsc_0xfc17_packet_type_change_handler`, and `vsc_0xfc56_set_3word_params_and_packet_type`;
+when `*param_1==5` and power-gate passes, sends LMP power req via
+`LMP__25C_called1`/`LMP__268__most_common_for_VSCs2_checks_fptr_patch`; runs
+config-mask callback on `config_struct+0xe4`, clears tracked connection pointer at
+`config+0xd8` bit 0x40 (or calls `FUN_800324f4`), and logs via
+`possible_logging_function__var_args` on failure. Simpler paths `param_2==2/5` log
+HCI evt `0x1f6` (subcodes 2/5); `param_2==3` gates on
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests` then logs evt `0x1fd`.
+
+**Confidence:** HIGH — callee cluster is documented `tHCI_TD` subsystem; mode-4 path
+calls three already-named VSC/AFH helpers; logging opcodes `0x1f6`/`0x1fd` match
+documented HCI event drain cluster in this region.
+
+Region unnamed count after this pass: **297** (298 minus this rename). Live named **1624** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
