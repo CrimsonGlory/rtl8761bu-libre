@@ -5419,4 +5419,40 @@ Post-rename: **130 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1508**.
 
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x8004704c`, 296B).
+unnamed >150B candidate (`0x8004c4a8`, 894B).
+
+## Pass 52ej (2026-06-30) — >150B rank-1 HCI link policy param commit body rename
+
+**Cold-triage (refreshed):** 36 unnamed >150B remain. rank-1 `0x8004704c`
+(296B); rank-2 `0x8004c4a8` (894B); rank-3 `0x8004bde8` (354B, 6 xrefs);
+rank-4 `0x8004c4a8` (894B); rank-5 `0x8004bde8` (354B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004704c` →
+`commit_hci_link_policy_slot_intervals_from_cmd_payload` (296B, 1 xref from
+`hci_link_policy_param_setup_handler_send_cmd_complete`) via
+`RenamePass52ejRegion80040000Fun8004704c.java` (`renamed=1`, live-verified).
+
+HCI Link Policy parameter commit body (delegate of Pass 52w handler):
+
+- **Validation:** policy mode bytes at `param+3/+4` must be `<4`; link bitmask
+  at `param+5` must have only bits 0/1/3 set (`&0xfa==0`).
+- **Per-link iteration:** for each set bit in the link bitmask, reads 5-byte
+  entries (`mode` byte + min/max interval ushorts); rejects when `mode>1`,
+  `min<max`, or `max<4`.
+- **Status-byte writes:** per-link mode byte stored at
+  `global_ctx + is_active_link_mask_bit_four(bit) + 0x22` (the `(bit==4)+0x22`
+  offset idiom from Pass 52bj).
+- **Interval aggregation:** tracks min/max interval pair across all selected
+  links; applies timing slack from `(byte@global+0xe3 >> 5) * 0xc`.
+- **Tag-5 subrecord:** `lazy_alloc_tag5_singleton_and_encode_lowbit_index`
+  allocates singleton; stores `+0x25=1`, interval triple at `+0x18/+0x1a/+0x1c`;
+  packs policy mode bytes into global context `+5`.
+- **Returns:** `0` success, `0x12` invalid params, `0x43` alloc failure.
+
+Sibling of `hci_link_policy_settings_read_send_cmd_complete` (read-only path).
+
+Post-rename: **129 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1509**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (`0x8004c4a8`, 894B).
