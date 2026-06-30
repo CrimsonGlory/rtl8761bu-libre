@@ -629,7 +629,7 @@ Decompiled and renamed:
 selector at `+0x138` (6 or 8 limbs → `PTR_DAT_8002e554` / `PTR_DAT_8002e558` curve prime).
 Repeated square/mul via `crypto_bignum_multiply_square_v1` +
 `crypto_bignum_multiply_variable_len`, mod reduction via `FUN_8002dfd4` (6-limb →
-`FUN_8002d744`, 8-limb → `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`),
+`crypto_bignum_reduce_mod_6limb_curve_prime`, 8-limb → `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`),
 compare/subtract/add-mod-p via `compare_uint32_arrays_lexicographic_msb_to_lsb` + conditional
 prime add + `crypto_bignum_sub_u32_arrays_with_borrow`; left-shift via
 `crypto_bignum_left_shift_words_into_dest`; writes updated X/Y/Z back. Sibling of Pass 6
@@ -815,7 +815,7 @@ Decompiled and renamed:
 316-byte (`0x13c` stride) EC work struct at `PTR_DAT_8002dd9c + (conn_index & 0xff)*0x13c`.
 Reads affine X/Y at `+0x08`/`+0x48`, Z scalar at `+0x88`, curve width at `+0x138`
 (6 or 8 limbs). Computes Z² and Z³ via `crypto_bignum_multiply_square_v1` +
-`crypto_bignum_multiply_variable_len`, reduces mod curve prime (`FUN_8002d744` for
+`crypto_bignum_multiply_variable_len`, reduces mod curve prime (`crypto_bignum_reduce_mod_6limb_curve_prime` for
 6-limb, `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction` for 8-limb),
 then forms Jacobian second-point operands at `+0xc8`/`+0xe8` using
 `crypto_bignum_mod_inverse_mod_curve_prime` (twice) and add-with-carry into
@@ -848,7 +848,7 @@ for 6- or 8-limb curve width (`param_2`/`param_4`). Rejects zero or out-of-range
 coordinates (lexicographic compare against curve prime at `PTR_DAT_8002dfbc`/`PTR_DAT_8002dfc0`).
 Computes X³ mod p via `crypto_bignum_multiply_square_v1` + curve-parameter adds at
 `PTR_DAT_8002dfc4`/`PTR_DAT_8002dfcc` + `crypto_bignum_multiply_variable_len`, with
-6-limb reduction via `FUN_8002d744` or 8-limb via
+6-limb reduction via `crypto_bignum_reduce_mod_6limb_curve_prime` or 8-limb via
 `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`. Computes Y² mod p
 (second square/reduce path) and returns true when the two sides compare equal —
 standard short-Weierstrass point-on-curve check gating DHKey derivation in
@@ -1856,5 +1856,38 @@ with named in-place sibling; sole caller in established SSP/ECDH curve-constant
 table cluster adjacent to `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`.
 
 Region unnamed count after this pass: **271** (272 minus this rename). Live named **1650** global.
+
+**Next:** superseded by Pass 6 continuation (42).
+
+## Pass 6 continuation (42) (2026-06-30) — SSP/ECDH 6-limb curve-prime reduction `FUN_8002d744`
+
+Decompiled and renamed:
+**`FUN_8002d744` → `crypto_bignum_reduce_mod_6limb_curve_prime`**
+(208B, HIGH) via `RenamePass6Region80020000Fun8002d744.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (208B, xref_in=10) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=271` at pass start). Already cited
+unrenamed in Pass 6 continuations (2)/(8)/(9) as the 6-limb curve-prime reduction
+path paired with 8-limb `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`.
+
+**Mechanism:** 6-limb modular reduction helper in the SSP/ECDH `0x8002d7xx` bignum cluster.
+Copies up to 12 u32 limbs from `param_1` into a local buffer, extracts words 6–11 into
+three partial 6-limb addends, zeros the upper half, chains three
+`crypto_bignum_add_u32_arrays_with_carry` merges, then reduces via
+`crypto_bignum_reduce_mod_by_repeated_subtract` against 6-limb curve prime at
+`PTR_DAT_8002d814`. Clears dest with `crypto_bignum_fill_u32_words` and writes back
+the reduced lower 6 limbs.
+
+**Callers:** `crypto_ec_jacobian_point_add_mod_curve_prime` (via `FUN_8002dfd4`),
+`crypto_ec_affine_to_jacobian_mod_curve_prime`, and
+`crypto_ec_validate_affine_point_on_curve_mod_prime` — all branch on curve width
+selector (6 vs 8 limbs) at struct `+0x138`.
+
+**Confidence:** HIGH — unambiguous partial-sum + repeated-subtract mod-p idiom; long
+pre-documented as the 6-limb reduction counterpart to the 8-limb constant-subtraction
+sibling; decompile confirms `PTR_DAT_8002d814` + `crypto_bignum_reduce_mod_by_repeated_subtract`
+call chain.
+
+Region unnamed count after this pass: **270** (271 minus this rename). Live named **1651** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
