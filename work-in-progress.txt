@@ -8687,8 +8687,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ge: continue 1-150B cold-triage
-          — decompile+rename next substantive candidate (xrefs≥2, size≥20B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ge (2026-06-30): xrefs≥2 tier
+          exhausted; relaxed to size≥20B; decompiled+renamed rank-1
+          `FUN_80043774`→`resolve_bos_connection_index_for_subindex_when_bdaddr_public`
+          (142B, HIGH) — public-BD_ADDR BOS subindex→connection-index resolver;
+          sibling of `map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random`; caller
+          `FUN_8006fd20`; 1 xref. 82 unnamed in-region; live named 1556.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ge;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gf: continue 1-150B cold-triage
+          — decompile+rename next candidate (size≥20B, xrefs≥1; rank-2 `0x800411a4`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 84 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52gc, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 82 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ge, 2026-06-30).
 
 ## Overview
 
@@ -2446,10 +2446,11 @@ char map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random(
 When `bdaddr_random_` is set on the connection (post role-switch / random-address
 state), remaps BOS subindex bytes 0–3 to LMP transaction-mode values 8–11; logs and
 returns 0 on out-of-range subindex. When `bdaddr_random_` is clear, passes through
-`default_mode` unchanged (typically the output of sibling `FUN_80043774`). Sole caller
+`default_mode` unchanged (typically the output of sibling
+`resolve_bos_connection_index_for_subindex_when_bdaddr_public`). Sole caller
 `FUN_8006fd20` (454B role-switch/LMP slot-offset completion handler in region
 `0x80070000`): after `resolve_bos_subindex_byte_for_connection_index` and
-`FUN_80043774`, stores mapped mode into pending LMP PDU staging struct at `+0x11`
+`resolve_bos_connection_index_for_subindex_when_bdaddr_public`, stores mapped mode into pending LMP PDU staging struct at `+0x11`
 before `FUN_80042ee0` + `FUN_8006f994` chain. Pairs with Pass 52ai's
 `resolve_bos_subindex_byte_for_connection_index` and Pass 52p's
 `classify_lmp_slot_offset_relation_masked` in the same role-switch path.
@@ -6986,5 +6987,46 @@ index `0x100` on the IRQ-off LMP connection-setup path (after
 
 Post-rename: **83 unnamed** in-region (83 in 1-150B tier); live named **1555**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename next substantive
-candidate (ranks 10–13 are artifacts; only xrefs≥2 size≥20B functions remain).
+**Next:** superseded by Pass 52ge below.
+
+## Pass 52ge (2026-06-30) — rank-1 BOS subindex connection-index resolver rename
+
+**Cold-triage (refreshed):** xrefs≥2 size≥20B tier fully exhausted (zero
+substantive candidates remain). Relaxed filter to size≥20B; rank-1
+`0x80043774` (142B, 1 xref) — substantive BOS subindex→connection-index
+resolver on the public-BD_ADDR path, sibling of Pass 52at's
+`map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80043774` →
+`resolve_bos_connection_index_for_subindex_when_bdaddr_public` (142B) via
+`RenamePass52geRegion80040000Fun80043774.java` (`renamed=1`, live-verified).
+
+```c
+byte resolve_bos_connection_index_for_subindex_when_bdaddr_public(
+    uint conn_idx, byte bos_subindex)
+{
+  result = 0xff;
+  if (big_ol_struct[conn_idx].bdaddr_random_ == '\0') {
+    if (big_ol_struct[conn_idx].byte_0xCC == bos_subindex)
+      result = big_ol_struct[conn_idx].bos_connection__array_index;
+    else if (lookup_bos_subindex_mapping(&result, bos_subindex) == 0)
+      mapping_table[((result - 1) * 4 + bos_subindex) * 2 + 1] = (char)conn_idx;
+  }
+  return result;
+}
+```
+
+When `bdaddr_random_` is clear (public/static BD_ADDR), resolves the BOS
+connection-array index for a given `bos_subindex`: fast-path returns
+`bos_connection__array_index` when `byte_0xCC` already matches; otherwise
+looks up via `FUN_80060770` and records `conn_idx` in the subindex mapping
+table at `PTR_DAT_8004380c`. Returns `0xff` when random-address mode is
+active (handled by sibling `map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random`).
+Sole caller `FUN_8006fd20` (role-switch/LMP slot-offset handler): output feeds
+`map_bos_subindex_to_lmp_txn_mode_when_bdaddr_random` as `default_mode` before
+staging into pending LMP PDU struct `+0x11`.
+
+Post-rename: **82 unnamed** in-region (45 in 1-150B size≥20B tier); live named **1556**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename next candidate
+(size≥20B; xrefs≥1 tier; rank-2 `0x800411a4` 132B).
