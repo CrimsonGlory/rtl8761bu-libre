@@ -279,7 +279,7 @@ each other on content alone).
 | Address | Size | Behavior | Confidence |
 |---|---|---|---|
 | `0x8004c4a8` | 894B | Large handler, shape and field-touches not yet isolated to one specific purpose. | MEDIUM |
-| `0x800483c0` | 866B | Terminates via `hci_event_sender(0xe,&local_34,4)` (Command Complete pattern), writes into the established per-connection struct array fields, validates params against eSCO-style bounds. Likely an HCI VSC/command handler setting per-connection eSCO/SCO timing parameters, but no second confirming signal (xrefs tooling gap) to clear the HIGH bar precisely. | MEDIUM-HIGH |
+| `0x800483c0` | 866B | `program_baseband_link_setup_slot10_and_send_hci_cmd_complete` — validates eSCO-style params (`param_2≤0x27`, `param_4≤7`), programs conn-record slot 10 fields `+0xf4..+0x106`, dispatches on packet-mode 1–4 to program HW regs, calls `compute_indexed_table_addr_by_category_and_bank`, derives slot count via `0x271` divisor, optional veto hook; terminates via `hci_event_sender(0xe,…)` Command Complete. See Pass 52dz | HIGH |
 | `0x80047628` | 832B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set` — HCI/LMP fragment-reassembly handler (role-bit-set variant); conn `+0x2c` length accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50` + `setup_type3_esco_sco_conn_record_with_role_bit_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear`. See Pass 52do | HIGH |
 | `0x80047304` | 780B | `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_clear` — HCI/LMP fragment-reassembly handler (role-bit-clear variant); conn `+0x2c` accumulator; `find_tail_of_payload_subrecord_chain_at_field0x50_0x24` + `setup_type3_esco_sco_conn_record_with_role_bit_clear`; completion walks `+0x20` chain via `prepend_payload_subrecord_to_pending_lists_if_low3bits_set`; sibling of `reassemble_lmp_pdu_fragments_into_subrecord_chain_with_role_bit_set`. See Pass 52dp | HIGH |
 | `0x8004cb48` | 722B | `program_esco_slot_from_lmp0x22_negotiation_pdu_and_emit_0x26f` — eSCO slot programmer for LMP PDU type `0x22`; `esco_sco_param_negotiate_and_stage` + 0x1ac-stride field writes; LMP `0x26f` emit + VSC fc95 trigger. See Pass 52dq | HIGH |
@@ -5018,9 +5018,6 @@ reassembly helpers.
 Post-rename: **141 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1497**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-39
-`0x800483c0` (866B, xrefs:0, likely HCI VSC/command handler per Pass 3).
-
 ## Pass 52dy (2026-06-30) — >150B rank-38 conn TX single-chunk segment walker rename
 
 **>150B rank-38 decompiled+renamed (HIGH):** `FUN_8004c4a8` →
@@ -5048,3 +5045,33 @@ the TX buffer (`param_1`, length `param_2`, conn index `param_3`):
 
 Post-rename: **140 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1498**.
+
+## Pass 52dz (2026-06-30) — >150B rank-39 baseband link setup programmer rename
+
+**>150B rank-39 decompiled+renamed (HIGH):** `FUN_800483c0` →
+`program_baseband_link_setup_slot10_and_send_hci_cmd_complete` (866B, 0 xrefs) via
+`RenamePass52dzRegion80040000Fun800483c0.java` (`renamed=1`, live-verified).
+
+Baseband link-setup programmer on conn-record slot 10 of the `0x1ac` struct array.
+Takes handle u16 + four byte params + packet-mode 1–4:
+
+- Bounds-checks eSCO-style limits (`param_2 > 0x27` or `param_4 > 7` → error path).
+- Programs slot 10 fields `+0xf4..+0x106`, sets control bit `0x2000` on
+  `DAT_80048734`, programs multiple baseband HW register globals.
+- Dispatches packet-mode: mode 1 → category 0; mode 2 → category 1 + flag;
+  mode 3 → category 2; mode 4 → category 2 + flag + alternate HW encoding.
+- Calls `compute_indexed_table_addr_by_category_and_bank` for timing interval;
+  derives slot count `(interval + 0x369) / 0x271` and writes to `DAT_80048744`.
+- Optional veto callback at `PTR_DAT_80048748` — early return on non-zero.
+- Always ends with `hci_event_sender(0xe, &{status_id, handle_lo, handle_hi, status}, 4)`
+  Command Complete pattern.
+
+Callee of `invoke_baseband_link_setup_from_param_buffer` (`0x80048948`, Pass 52cc).
+Cross-region caller `FUN_80054b14` (0x80050000) confirmed in prior analysis.
+Upgraded from MEDIUM-HIGH (Pass 3).
+
+Post-rename: **139 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1499**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename rank-1
+`0x8004a730` (456B, xrefs:1).

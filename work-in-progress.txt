@@ -8143,8 +8143,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dz: continue >150B cold-triage
-          — decompile+rename refreshed rank-39 `0x800483c0` (866B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dz (2026-06-30): decompiled+
+          renamed rank-39 `FUN_800483c0`→`program_baseband_link_setup_slot10_and_send_hci_cmd_complete`
+          (866B, HIGH) — baseband link-setup on conn-record slot 10; eSCO param bounds,
+          packet-mode 1–4 HW register dispatch, `compute_indexed_table_addr_by_category_and_bank`
+          timing, slot-count `0x271` divisor, optional veto hook; `hci_event_sender(0xe)`
+          Command Complete; callee of `invoke_baseband_link_setup_from_param_buffer`;
+          upgraded from MEDIUM-HIGH (Pass 3). 0 xrefs (indirect fptr registration).
+          139 unnamed in-region; live named 1499.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ea: continue refreshed >150B
+          cold-triage — decompile+rename rank-1 `0x8004a730` (456B, xrefs:1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
