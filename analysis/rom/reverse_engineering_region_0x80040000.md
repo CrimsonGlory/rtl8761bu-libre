@@ -6389,6 +6389,36 @@ SCO/eSCO connection-setup cluster sibling of
 Post-rename: **99 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1539**.
 
+**Next:** superseded by Pass 52fo below.
+
+## Pass 52fo (2026-06-30) — >150B rank-1 AFH-gated link-reg 0x2e timing triple HCI handler rename
+
+**Cold-triage (refreshed):** 4 unnamed >150B remain. rank-1 `0x80048ac8`
+(170B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80048ac8` →
+`hci_afh_gated_read_link_reg_0x2e_timing_triple_send_cmd_complete`
+(170B, 0 xrefs) via
+`RenamePass52foRegion80040000Fun80048ac8.java` (`renamed=1`, live-verified).
+
+170B HCI command handler in the `0x80048axx` AFH/link-slot cluster (sibling of
+`hci_afh_gated_link_slot_flag_bitmap_commit_send_cmd_complete` at `0x800489e8`
+and `hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete` at
+`0x80048d6c`):
+
+- **AFH gate:** `field327_0x154` bit2 set (else status `0x1a`).
+- **Index validation:** pool-index byte at `param+3` must be `<2` (else status
+  `0x12`).
+- **Lookup path:** `find_link_record_by_bdaddr_and_flag(2, index, bdaddr@+2)`;
+  when sub-record has nonzero timing words at `+0x2e`/`+0x30`/`+0x32`, copies
+  dword at `+0x2e` and word at `+0x32` into response (status `0`); else status
+  `2`.
+- **Terminus:** 10-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **98 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1540**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (4 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (3 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
