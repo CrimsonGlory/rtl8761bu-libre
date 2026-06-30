@@ -8676,9 +8676,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gd: continue 1-150B cold-triage
-          — decompile+rename next rank-11+ substantive candidate (skip rank-1–7
-          artifacts).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gd (2026-06-30): skipped ranks
+          10–13 as 1–4B artifacts; decompiled+renamed overall-rank-8 substantive
+          `FUN_800429ac`→`or_merge_hw_channel_table_entry_indexed_dispatch_noirq`
+          (32B, HIGH) — noirq OR-merge HW-channel table dispatch; noirq twin of
+          irq-guarded `or_merge_hw_channel_table_entry_and_indexed_dispatch`;
+          OR-variant sibling of Pass 52u's AND-mask noirq twin; caller
+          `accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` (index
+          `0x100`); 2 xrefs. 83 unnamed in-region; live named 1555.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ge: continue 1-150B cold-triage
+          — decompile+rename next substantive candidate (xrefs≥2, size≥20B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

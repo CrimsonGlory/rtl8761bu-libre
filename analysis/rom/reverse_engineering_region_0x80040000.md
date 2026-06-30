@@ -6951,5 +6951,40 @@ region `0x80010000`). Inquiry/LAP slot-state cluster sibling of Pass 52n/52o
 
 Post-rename: **84 unnamed** in-region (84 in 1-150B tier); live named **1554**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename next rank-11+
-substantive candidate; skip rank-1–7 artifacts.
+**Next:** superseded by Pass 52gd below.
+
+## Pass 52gd (2026-06-30) — rank-8 substantive noirq OR-merge HW-channel dispatch rename
+
+**Cold-triage (refreshed):** ranks 10–13 are 1–4B artifacts (`0x80047afc` 4B,
+`0x80049924` 2B, `0x80046cc4`/`0x80047b00` 1B). Next substantive candidate
+(overall rank-8, 32B, 2 xrefs, size≥20B filter): `0x800429ac`.
+
+**1-150B rank-8 decompiled+renamed (HIGH):** `FUN_800429ac` →
+`or_merge_hw_channel_table_entry_indexed_dispatch_noirq`
+(32B, 2 xrefs) via
+`RenamePass52gdRegion80040000Fun800429ac.java` (`renamed=1`, live-verified).
+
+```c
+void or_merge_hw_channel_table_entry_indexed_dispatch_noirq(uint index, ushort mask)
+{
+  table = DAT_800429cc;
+  fptr_table = PTR_DAT_800429d0;
+  (*fptr_table)(index & 0xffff, mask | table[index]);
+}
+```
+
+OR-merge indexed dispatch without IRQ protection: OR-merges `mask` onto the
+per-index ushort HW-channel parameter table entry at `DAT_800429cc`, then calls
+through the function-pointer table at `PTR_DAT_800429d0`. Structural noirq twin
+of `or_merge_hw_channel_table_entry_and_indexed_dispatch` (`0x8004310c`, 68B,
+IRQ-disabled) and OR-variant sibling of Pass 52u's
+`and_mask_hw_channel_table_entry_indexed_dispatch_noirq` (`0x80042984`, 32B)
+in the SCO/eSCO HW channel parameter-commit cluster. Caller
+`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` invokes with
+index `0x100` on the IRQ-off LMP connection-setup path (after
+`and_mask_hw_channel_table_entry_indexed_dispatch_noirq`).
+
+Post-rename: **83 unnamed** in-region (83 in 1-150B tier); live named **1555**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename next substantive
+candidate (ranks 10–13 are artifacts; only xrefs≥2 size≥20B functions remain).
