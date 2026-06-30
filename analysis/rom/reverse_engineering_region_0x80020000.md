@@ -1516,4 +1516,39 @@ event dispatchers; sets `field_0xb9` consistent with LMP 0x271 opcode map.
 
 Region unnamed count after this pass: **282** (283 minus this rename). Live named **1639** global.
 
+**Next:** superseded by Pass 6 continuation (31).
+
+## Pass 6 continuation (31) (2026-06-30) — SSP number NOT ACCEPTED recovery `FUN_800286a8`
+
+Decompiled and renamed:
+**`FUN_800286a8` → `handle_lmp_simple_pairing_number_not_accepted`**
+(250B, HIGH) via `RenamePass6Region80020000Fun800286a8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (250B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=282` at pass start).
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcode **0x40**
+(Simple Pairing Number). Sole caller `LMP_NOT_ACCEPTED_0x04` (`FUN_80027d4c`)
+when rejected-opcode byte at `param+5` is `0x40`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. Gated by
+`ret_bool_based_on_crypto_struct_0x50` vs rejected-payload bit at `param+4&1`,
+unless global bypass flag `PTR_DAT_800287a8[2]&0x80` is set. Dispatches on crypto
+sub-state byte at `+1`:
+- `0x30`: numeric-comparison value derivation via
+  `reverse_path_to_thing_that_uses_SHA_and_BLAKE__1` (P-192/P-256 keyed by `+0x1f1`),
+  modulo `DAT_800287b4`, then `send_evt_HCI_User_Confirmation_Request`
+- `0x28`: `LMP__271__FUN_80025cb4` (LMP 0x271 continuation)
+- `0x25`/`0x2c`/`0x34`/`0x39`: status transitions via `set_arg1_1_to_arg2`
+  (`0x24`/`0x2b`/`0x32`/`0x37`); `0x39` with `+0x13c==0x14` also calls
+  `FUN_8002600c` before LMP 0x271 path
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site, rejected-opcode `0x40` branch).
+
+**Confidence:** HIGH — decompile confirms NOT-ACCEPTED recovery idiom matching
+sibling `handle_lmp_encryption_mode_req_not_accepted` (Pass 6 cont. 28); sole
+caller is documented `LMP_NOT_ACCEPTED_0x04` dispatcher; numeric-comparison path
+ties to established SHA/BLAKE digest helper and HCI User Confirmation Request.
+
+Region unnamed count after this pass: **281** (282 minus this rename). Live named **1640** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
