@@ -139,6 +139,7 @@ region (addresses verified from the primary index):
 | `0x80026e64` | `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` | 0x10 | Duplicate/alternate variant (0x10) |
 | `0x80027f30` | `LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` | 0x3B | Encryption key size mask response |
 | `0x80027f80` | `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` | 0x3A | Encryption key size mask request |
+| `0x80026a54` | `LMP_START_ENCRYPTION_REQ_0x11` | 0x11 | Start encryption on link (key material + accept) |
 | `0x80027fd4` | `LMP_STOP_ENCRYPTION_REQ_0x12` | 0x12 | Request to stop encryption |
 
 ### Key derivation procedures (legacy/classic pairing)
@@ -902,7 +903,8 @@ Decompiled and renamed:
 
 **Triage note:** Rank-1 by size among remaining unnamed (488B, xref_in=7) per fresh
 `ListUnnamed80020000.java` run (`total_unnamed=302` at pass start). Callers include
-`LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` (`0x80027ec6`), `FUN_80026a54`, `FUN_80027b28`,
+`LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` (`0x80027ec6`), `LMP_START_ENCRYPTION_REQ_0x11`,
+`FUN_80027b28`,
 `FUN_800269e8`, `FUN_800280ac`, `FUN_80027ae0`.
 
 **Mechanism:** Per-connection encryption-procedure completion dispatcher. Params:
@@ -958,5 +960,40 @@ the 2026-06-26 low→high pass for `get_DHKey_to_3rd_param?`; decompile confirms
 layout, bit-scan loop, and `LMP__26E__FUN_8002eae0` scheduling sibling.
 
 Region unnamed count after this pass: **300** (301 minus this rename). Live named **1621** global.
+
+**Next:** superseded by Pass 6 continuation (13).
+
+## Pass 6 continuation (13) (2026-06-30) — LMP start encryption `FUN_80026a54`
+
+Decompiled and renamed:
+**`FUN_80026a54` → `LMP_START_ENCRYPTION_REQ_0x11`**
+(462B, HIGH) via `RenamePass6Region80020000Fun80026a54.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (462B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=300` at pass start). Callers:
+`LMP_encryption_opcode_handlers` (`0x8002838c`) and one recursive self-call
+(`0x80026c02`).
+
+**Mechanism:** LMP opcode **0x11** (Start Encryption) handler dispatched from
+`LMP_encryption_opcode_handlers`. Params: LMP PDU buffer (`param_1`), connection
+handle (`param_2`), status-out byte (`param_3`). Operates on
+`big_ol_struct[slot]._x58_crypto_struct`. When crypto sub-state byte at `+1` is
+`'I'` (init/idle encryption state), validates role via
+`ret_bool_based_on_crypto_struct_0x50` and `FUN_80024020`/`FUN_8002403c` gates.
+Success path: programs encryption key material via `FUN_8002d3d8` (when `+0x214==0`)
+or `FUN_8002d1f0` (alternate path when `+0x214!=0` and `field_0x2b2` unset), sends
+`wrap_send_LMP_ACCEPTED_and_some_other_things(handle,0x11,role)`, calls
+`finalize_encryption_procedure_and_notify_hci(handle,0)`, and arms link via
+`FUN_80022210`. Failure/reject paths send `wrap_send_LMP_NOT_ACCEPTED(handle,0x11,...)`.
+Special sub-path when stored opcode byte is `0x11` or `0x1e` with public BD_ADDR:
+may invoke `FUN_8002408c`, set crypto flags, and recursively re-enter this handler.
+
+**Confidence:** HIGH — unambiguous LMP 0x11 accept/reject dispatch with encryption-key
+programming helpers and `finalize_encryption_procedure_and_notify_hci` completion;
+caller from documented `LMP_encryption_opcode_handlers`; fits Bluetooth Core
+LMP_start_encryption_req opcode between key-size (0x10) and stop (0x12) handlers
+already named in this region.
+
+Region unnamed count after this pass: **299** (300 minus this rename). Live named **1622** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
