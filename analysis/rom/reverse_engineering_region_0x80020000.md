@@ -1925,4 +1925,43 @@ slot-bank programmer; sole caller identified via `ListXrefsTo8002b2b8.java`.
 
 Region unnamed count after this pass: **269** (270 minus this rename). Live named **1652** global.
 
+**Next:** superseded by Pass 6 continuation (44).
+
+## Pass 6 continuation (44) (2026-06-30) — LMP IN_RAND NOT ACCEPTED recovery `FUN_80027380`
+
+Decompiled and renamed:
+**`FUN_80027380` → `handle_lmp_in_rand_not_accepted`**
+(202B, HIGH) via `RenamePass6Region80020000Fun80027380.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (202B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=269` at pass start). Sibling of
+`handle_lmp_encryption_mode_req_not_accepted` (Pass 6 cont. 28) and
+`handle_lmp_simple_pairing_number_not_accepted` (Pass 6 cont. 31) in the
+`LMP_NOT_ACCEPTED_0x04` per-rejected-opcode dispatch cluster.
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcode **0x08**
+(LMP IN_RAND). Sole caller `LMP_NOT_ACCEPTED_0x04` when rejected-opcode byte at
+`param+5` is `0x08`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. Gated by
+`FUN_8002403c` (compares `big_ol_struct+0xd0` vs rejected-payload bit at
+`param+4&1`) unless global bypass flag `PTR_DAT_80027450[2]&0x80` is set.
+Dispatches on crypto sub-state byte at `+1`:
+- `0x0c` (SRES phase): on match, calls `FUN_80025474` (sub-state → `0x19` or
+  `0x1a` per global flag) then `FUN_80025634` (clears dword at `+0x1e8`)
+- `0x19` (SSP phase): falls through to
+  `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+- `0x0b` (AU_RAND phase): on match, if payload byte at `param+6` is `'#'` and
+  `bdaddr_random_==0`, sets `+0x50=3` and `set_arg1_1_to_arg2(0x18)`; else same
+  SSP state-machine tail as `0x19`
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x80028216`, rejected-opcode
+`0x08` branch).
+
+**Confidence:** HIGH — decompile confirms NOT-ACCEPTED recovery idiom matching
+documented siblings; sole caller is the established `LMP_NOT_ACCEPTED_0x04`
+dispatcher; crypto sub-state values `0x0b`/`0x0c`/`0x19` align with AU_RAND/SRES/SSP
+pairing cluster documented in Pass 2/3.
+
+Region unnamed count after this pass: **268** (269 minus this rename). Live named **1653** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
