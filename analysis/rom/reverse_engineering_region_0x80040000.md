@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52dg, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52eb, 2026-06-30).
 
 ## Overview
 
@@ -214,8 +214,9 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
 | `0x80041dac` | 876B | `teardown_inquiry_lap_slot_baseband_cleanup_and_release` — inquiry/LAP slot teardown orchestrator on `param_1`-indexed `big_ol_struct`; IRQ-off baseband register teardown, clears role-switch hook, releases inquiry LAP pending bitmask, clears AFH channel map, bitmask cleanup; callers `fHCI_conn_req_cancel` + `connection_teardown_HCI_event_finalizer`. Renamed Pass 52dd. | HIGH |
 | `0x8004d294` | 1280B | `init_or_reset_sco_esco_hw_registers_and_link_slots` — SCO/eSCO HW register init/reset blob; dual-mode on `param_1` (full config-driven programming + 64+64 link-register-B clears + 11 eSCO slot clears when zero); see Pass 52dw | HIGH |
-| `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `FUN_8004ae74`; type-1 single-chunk + clock-offset check; type-4 LE accumulate via `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count`; see Pass 52dx/52ea | HIGH |
+| `0x8004ce70` | 908B | `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` — conn TX packet-type dispatcher; type-0 multi-chunk reassembly via `walk_tx_reassembly_buffer_*` + `walk_conn_tx_segments_dispatch_by_packet_type_nibble`; type-1 single-chunk + clock-offset check; type-4 LE accumulate via `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count`; see Pass 52dx/52ea/52eb | HIGH |
 | `0x8004a730` | 456B | `walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` — type-4 LE TX segment consumer; walks length-prefixed segments, validates slot-10 clock-offset fields, returns segment count; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52ea | HIGH |
+| `0x8004ae74` | 452B | `walk_conn_tx_segments_dispatch_by_packet_type_nibble` — type-0 multi-chunk TX segment walker; dispatches each segment by packet-type nibble via `PTR_PTR_8004b044` table, fallback to `compute_length_prefixed_segment_advance_clamped_to_remainder`; callee of `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`; see Pass 52eb | HIGH |
 
 **Net effect this pass**: 2 of 8 decompiled candidates renamed to HIGH
 confidence (`init_global_connection_table_and_bt_state`,
@@ -5098,11 +5099,43 @@ pre-hook at `PTR_DAT_8004a8f8`. Walks length-prefixed segments in TX buffer
 - Returns accumulated segment count (`local_30[0]`); caller adds to global
   BT-state field at `+0xf8`.
 
-Connection TX dispatch cluster sibling of `FUN_8004ae74` (452B, adjacent segment
-finalizer).
+Connection TX dispatch cluster sibling of
+`walk_conn_tx_segments_dispatch_by_packet_type_nibble` (452B, adjacent segment
+dispatcher).
 
 Post-rename: **138 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1500**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename rank-1
-`0x8004ae74` (452B, xrefs:1).
+## Pass 52eb (2026-06-30) — >150B rank-1 TX segment dispatcher rename
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_8004ae74` →
+`walk_conn_tx_segments_dispatch_by_packet_type_nibble` (452B, 1 xref in
+cold-triage) via `RenamePass52ebRegion80040000Fun8004ae74.java` (`renamed=1`,
+live-verified).
+
+Type-0 multi-chunk reassembly callee of
+`dispatch_conn_tx_by_packet_type_nibble_with_reassembly` (Pass 52dx). Optional
+pre-hook at `PTR_DAT_8004b038`. Walks length-prefixed segments in TX buffer
+(`param_1`, length `param_2`):
+
+- Per-segment packet-type nibble from `buf[offset] & 0xf`.
+- When nibble `< 9`: checks conn-record slot-10 status via
+  `field68_0x44 & 0x40` or `scan_active_link_mask_for_slot_status_flag()`;
+  type-4 with no active slot bypasses table dispatch; otherwise dispatches via
+  function-pointer table `PTR_PTR_8004b044[nibble]`.
+- When nibble `>= 9` or type-4 bypass: falls back to
+  `compute_length_prefixed_segment_advance_clamped_to_remainder`.
+- Diagnostic logging when slot-10 `field327_0x154 & 4` set; per-segment trace
+  when type `!= 3`.
+- On completion, if `field68_0x44 & 1`, calls
+  `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`.
+
+Connection TX dispatch cluster sibling of
+`walk_le_tx_segments_validate_slot10_clock_offset_and_return_count` (type-4 LE
+accumulate path).
+
+Post-rename: **137 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1501**.
+
+**Next:** continue refreshed >150B cold-triage — refresh rank list and
+decompile+rename next rank-1 unnamed >150B candidate.
