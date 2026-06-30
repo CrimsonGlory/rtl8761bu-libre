@@ -6765,8 +6765,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gp;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gq: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80078914`, 34B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gq (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80078914`→`select_event_desc_param_byte_on_0x9c_sentinel_when_0x80`
+          (34B, HIGH, STUB-tier). Gated event-desc byte selector: requires byte
+          `+5` nonzero and type marker `+8==0x80`; when `+0x15==0x9c` returns
+          byte `+0x17`, else when `+0x16==0x9c` returns byte `+0x18`, else 0.
+          No direct callers (xref_in=0). `0x800789xx` HCI-reset/event cluster
+          sibling of Pass 12dy param-length lookup. STUB-tier unnamed 17 remain;
+          live named 1352.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gq;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gr: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_8007884c`, 4B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

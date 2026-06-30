@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gp COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (18 STUB-tier unnamed remain). Latest: `hci_reset_memset_seed_and_invoke_lmp_25b` (Pass 12gp). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1351** global; **20** in-region unnamed (18 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078914`, 34B, xref_in=0). See Pass 12gp section below.
+**Status**: Pass 12gq COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (17 STUB-tier unnamed remain). Latest: `select_event_desc_param_byte_on_0x9c_sentinel_when_0x80` (Pass 12gq). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1352** global; **19** in-region unnamed (17 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_8007884c`, 4B, xref_in=0). See Pass 12gq section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gq (2026-06-30) — event-desc param-byte selector stub `FUN_80078914`
+
+Decompiled and renamed:
+**`FUN_80078914` → `select_event_desc_param_byte_on_0x9c_sentinel_when_0x80`**
+(34B, HIGH, STUB-tier) via `RenamePass12gqRegion80070000Fun80078914.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(34B, xref_in=0 — `FindCallers80078914.java` confirms 0 call sites; MCP `xrefs_to`
+returns empty against this GZF, known gap).
+
+**Mechanism:** Gated byte selector over an event-descriptor struct (`param_1`):
+requires byte `+5` nonzero and type marker `+8 == 0x80`; when byte `+0x15 == 0x9c`
+returns byte `+0x17`, else when byte `+0x16 == 0x9c` returns byte `+0x18`, otherwise
+returns `0`. Sits in the `0x800789xx` HCI-reset/event cluster adjacent to Pass 12dy
+`lookup_event_param_len_via_hook_or_default_table` (`0x800789c0`) and Pass 12cy
+`write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook` (`0x80078938`) — likely
+a sentinel-driven alternate-param-byte lookup helper for event descriptor blocks.
+
+**Confidence:** HIGH — unambiguous gated sentinel-byte selector with concrete
+offset literals (`0x80`, `0x9c`) and clear two-tier fallback chain.
+
+Live named **1352** (global; in-region unnamed **19**; STUB-tier unnamed **17**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_8007884c`, 4B, xref_in=0).
+
 ## Pass 12gp (2026-06-30) — HCI reset memset+LMP-25B subchain stub `FUN_80078bd0`
 
 Decompiled and renamed:
@@ -2442,8 +2468,7 @@ decompilation alone.
 
 Live named **1351** (global; in-region unnamed **20**; STUB-tier unnamed **18**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80078914`, 34B, xref_in=0).
+**Next:** superseded by Pass 12gq.
 
 ## Pass 12go (2026-06-30) — HCI packet-type max-slot classifier `FUN_80071ae8`
 
