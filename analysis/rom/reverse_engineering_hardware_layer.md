@@ -365,8 +365,8 @@ ROM LMP_encryption_opcode_handlers @ 0x80028264   ← dispatched by ROM LMP stat
            └─ FUN_80025b68(conn_handle, role_bit)
 
 ROM HCI_Write_Simple_Pairing_Debug_Mode @ 0x800233e8   ← HCI command handler
-    └─ ROM FUN_80023d14 @ 0x80023d14  [state==0x1e or fallthrough]
-           └─ FUN_80025b68(conn_handle, uVar5)
+    └─ ROM continue_ssp_pairing_after_hci_debug_mode_write @ 0x80023d14  [state==0x1e or fallthrough]
+           └─ unscramble_codec_jit_template_and_install_hw_hook(conn_handle, uVar5)
 ```
 
 `role_bit = *(byte *)(lmp_pdu + 4) & 1` — 0 = slave, 1 = master.  This selects

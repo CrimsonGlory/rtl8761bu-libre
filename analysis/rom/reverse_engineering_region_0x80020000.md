@@ -1334,4 +1334,34 @@ this as the OOB confirmation verifier for `HCI_Remote_OOB_Extended_Data_Request_
 
 Region unnamed count after this pass: **288** (289 minus this rename). Live named **1633** global.
 
+**Next:** superseded by Pass 6 continuation (25).
+
+## Pass 6 continuation (25) (2026-06-30) — SSP debug-mode continuation `FUN_80023d14`
+
+Decompiled and renamed:
+**`FUN_80023d14` → `continue_ssp_pairing_after_hci_debug_mode_write`**
+(282B, HIGH) via `RenamePass6Region80020000Fun80023d14.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (282B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=288` at pass start). Caller:
+`HCI_Write_Simple_Pairing_Debug_Mode` — documented in
+`reverse_engineering_hardware_layer.md` §12 call chain.
+
+**Mechanism:** SSP pairing continuation helper invoked from HCI Write Simple Pairing
+Debug Mode. Resolves connection via `FUN_80023008`, copies 9 debug-mode bytes into
+per-connection `_x58_crypto_struct` at `+0x1de`, normalizes OOB-mode byte `+0x1df`
+when `+0x214` pairing-mode flag is set. Primary path when crypto sub-state `== 0x1e`:
+runs `FUN_80025910` then arms codec JIT via
+`unscramble_codec_jit_template_and_install_hw_hook`. Alternate paths inspect pending
+LMP slot at `+0x1e8`: when empty, `FUN_80025948` + status `0x15`; when holding LMP
+ext IO-cap req (`0x7f`/`0x19`), either copies IO-cap bytes, emits
+`send_evt_HCI_IO_Capability_Response`, runs `FUN_80025910`, installs codec hook
+(non-OOB path), or rejects via `FUN_800243b8`. Always finishes via `FUN_80025634`
+pairing continuation on non-`0x1e` fallthrough.
+
+**Confidence:** HIGH — caller and `unscramble_codec_jit_template_and_install_hw_hook`
+callee already Pass-6 HIGH; mechanism matches documented hardware-layer SSP call chain.
+
+Region unnamed count after this pass: **287** (288 minus this rename). Live named **1634** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
