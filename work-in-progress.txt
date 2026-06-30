@@ -6692,8 +6692,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gi: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070444`, 16B, xref_in=2).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gi (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80070444`→`thunk_send_evt_HCI_Number_Of_Completed_Packets`
+          (16B, HIGH, STUB-tier). Trivial tail-call thunk to
+          `send_evt_HCI_Number_Of_Completed_Packets` (`0x8001da3c`); HCI event `0x13`
+          alias. STUB-tier unnamed 25 remain; live named 1344.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gi;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gj: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078b7c`, 20B, xref_in=1).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

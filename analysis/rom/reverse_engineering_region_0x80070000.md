@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gh COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (26 STUB-tier unnamed remain). Latest: `compare_afh_lap_slot_pair_bytes_set_mismatch_flag_and_index` (Pass 12gh). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1343** global; **28** in-region unnamed (26 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070444`, 16B, xref_in=2). See Pass 12gh section below.
+**Status**: Pass 12gi COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (25 STUB-tier unnamed remain). Latest: `thunk_send_evt_HCI_Number_Of_Completed_Packets` (Pass 12gi). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1344** global; **27** in-region unnamed (25 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078b7c`, 20B, xref_in=1). See Pass 12gi section below.
 
 ## Overview
 
@@ -2417,6 +2417,30 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gi (2026-06-30) — HCI completed-packets thunk `FUN_80070444`
+
+Decompiled and renamed:
+**`FUN_80070444` → `thunk_send_evt_HCI_Number_Of_Completed_Packets`**
+(16B, HIGH, STUB-tier) via `RenamePass12giRegion80070000Fun80070444.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(16B, xref_in=2 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Trivial tail-call thunk — sole body is
+`send_evt_HCI_Number_Of_Completed_Packets()` (`0x8001da3c`, Pass 1
+`send_evt_HCI_*` cluster), which iterates up to four packet-completion sources
+and emits HCI event `0x13` when at least one `(handle, count)` pair is collected.
+Likely exists as an indirect-dispatch alias for the same event sender used from
+connection teardown paths (e.g. Pass 4 `FUN_8004c940` in region `0x80040000`).
+
+**Confidence:** HIGH — unambiguous single-callee decompile with callee already at
+HIGH confidence in region `0x80010000`.
+
+Live named **1344** (global; in-region unnamed **27**; STUB-tier unnamed **25**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
+(top remaining: `FUN_80078b7c`, 20B, xref_in=1).
+
 ## Pass 12gh (2026-06-30) — AFH LAP slot-pair compare stub `FUN_8007196c`
 
 Decompiled and renamed:
@@ -2439,8 +2463,7 @@ in the `0x800719xx` AFH/LAP cluster.
 
 Live named **1343** (global; in-region unnamed **28**; STUB-tier unnamed **26**).
 
-**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
-(top remaining: `FUN_80070444`, 16B, xref_in=2).
+**Next:** superseded by Pass 12gi.
 
 ## Pass 12gg (2026-06-30) — eSCO link-setup gate default stub `FUN_80071bc4`
 
