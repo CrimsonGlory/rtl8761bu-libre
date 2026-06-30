@@ -8483,5 +8483,40 @@ status + cmd echo + zero gate byte + eight contiguous global bytes copied from
 
 Post-rename: **45 unnamed** in-region (8 in 1-150B size≥20B tier); live named **1593**.
 
+**Next:** superseded by Pass 52hq below.
+
+## Pass 52hq (2026-06-30) — rank-1 LE Meta Event const-byte-0x20 Command Complete rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hq.java` — 45 unnamed,
+8 in 1-150B size≥20B tier; rank-1 `0x80045188` (62B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x800451xx` LE Meta Event neighborhood;
+sibling of `hci_finalize_conn_type_timing_delta_send_cmd_complete`
+at `0x80045000` and `hci_le_scan_params_reentry_gate_interval_window_commit_send_cmd_complete`
+at `0x800451cc`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80045188` →
+`hci_field_0x165_cmd_echo_const_byte_0x20_send_cmd_complete` (62B) via
+`RenamePass52hqRegion80040000Fun80045188.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_field_0x165_cmd_echo_const_byte_0x20_send_cmd_complete(short *param_1)
+{
+  /* status from field_0x165 (0 when cmd word==0, else default 1) */
+  /* echo cmd-word bytes; gate byte 0 */
+  /* append constant byte 0x20 */
+  hci_event_sender(0xe, &status, 5);
+  return 0;
+}
+```
+
+62B HCI command handler in the `0x800451xx` LE Meta Event cluster:
+status from global `field_0x165` (0 when cmd word==0, else default 1); echoes
+cmd-word bytes; packs 5-byte Command Complete (`hci_event_sender(0xe,…)`) with
+status + cmd echo + zero gate byte + fixed constant byte `0x20`. Ungated sibling
+of the global-byte/dword echo variants in `0x80044bxx`/`0x80045bxx`/`0x800457xx`.
+No direct callers found (indirect HCI router).
+
+Post-rename: **44 unnamed** in-region (7 in 1-150B size≥20B tier); live named **1594**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
