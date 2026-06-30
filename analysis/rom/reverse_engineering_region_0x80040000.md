@@ -1173,11 +1173,55 @@ bit0 = primary, bit1 = pending), a 4-bit active-slot mask (`+3`), refcount (`+1`
 and active-slot index (`+2`). When the pending bit is set on the given slot index,
 either clears the next active slot from the mask (non-primary path) or clears the
 primary active flag when the corresponding `_x142_LAP[slot+0x45]` entry is zero.
-Setter sibling is still-unnamed `FUN_80042c28` (rank-6, 100B, 4 xrefs). Callers
-include `fHCI_conn_req_cancel` (`0x80036bd0`, region `0x80030000`) and connection
-teardown `FUN_80041dac`. 4 xrefs.
+Setter sibling is `set_inquiry_lap_slot_pending_bitmask` (`0x80042c28`, Pass 52o).
+Callers include `fHCI_conn_req_cancel` (`0x80036bd0`, region `0x80030000`) and
+connection teardown `FUN_80041dac`. 4 xrefs.
 
 Post-rename: **253 unnamed** in-region (167 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile rank-6 substantive
-candidate (`0x80042c28`, 100B, 4 xrefs) or skip rank-1/2/3/4 artifacts.
+## Pass 52o (2026-06-30) — rank-6 inquiry/LAP slot bitmask setter rename
+
+**Refreshed cold-triage (rank-1–5 skipped as artifacts or already done):** rank-6
+`0x80042c28` (100B, 4 xrefs) — substantive inquiry/LAP slot-state setter, sibling
+of Pass 52n's `release_inquiry_lap_slot_pending_bitmask`.
+
+**Rank-6 decompiled and renamed (HIGH):** `FUN_80042c28` →
+`set_inquiry_lap_slot_pending_bitmask` (100B) via
+`RenamePass52oRegion80040000Fun80042c28.java` (`renamed=1`, live-verified).
+
+```c
+uint set_inquiry_lap_slot_pending_bitmask(int is_primary, byte *slot_index_ptr)
+{
+  hook = PTR_DAT_80042c8c;
+  if (hook == NULL || hook(&is_primary) == 0) {
+    slot = *slot_index_ptr;
+    ctx = PTR_DAT_80042c90;  // same layout as PTR_DAT_80042d2c in release fn
+    if (is_primary == 1) {
+      ctx[slot + 4] |= 1;   // primary flag
+      *ctx = 1;             // active
+      ctx[2] = slot;        // active_slot index
+    } else {
+      ctx[slot + 4] &= 0xfe; // clear primary flag
+      ctx[1]++;              // refcount
+      ctx[3] |= (1 << slot); // set bit in 4-bit active mask
+    }
+    ctx[slot + 4] |= 2;     // pending flag (always set)
+  }
+  return slot;
+}
+```
+
+Acquires inquiry/LAP slot pending bitmask state — setter counterpart to
+`release_inquiry_lap_slot_pending_bitmask`. Optional veto hook at `PTR_DAT_80042c8c`.
+Global context at `PTR_DAT_80042c90` (same struct layout as `PTR_DAT_80042d2c` in
+the release function): `+0` active, `+1` refcount, `+2` active_slot, `+3` 4-bit
+mask, `+4[slot]` status (bit0 primary, bit1 pending). When `is_primary==1`, marks
+slot as primary and sets active; otherwise clears primary bit, bumps refcount, and
+ORs slot into the active mask. Always sets the pending bit before return. 2
+confirmed callers via `xrefs_to`: `FUN_800435a8` and
+`role_switch_completion_or_abort_handler`.
+
+Post-rename: **252 unnamed** in-region (166 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-7+
+substantive candidate or skip rank-1/2/3/4 artifacts.

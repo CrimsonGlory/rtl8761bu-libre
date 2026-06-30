@@ -7073,9 +7073,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md
           → analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52o: decompile+rename rank-6
-          substantive candidate `FUN_80042c28` (100B, 4 xrefs, inquiry/LAP slot
-          setter sibling); skip rank-1/2/3/4 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52o (2026-06-30): decompiled+
+          renamed rank-6 `FUN_80042c28`→`set_inquiry_lap_slot_pending_bitmask`
+          (100B, HIGH) — acquires inquiry/LAP slot pending bitmask; optional hook
+          `PTR_DAT_80042c8c`; global context `PTR_DAT_80042c90` (+0 active, +1
+          refcount, +2 active_slot, +3 mask, +4[slot] status); setter sibling of
+          `release_inquiry_lap_slot_pending_bitmask`; callers `FUN_800435a8` +
+          `role_switch_completion_or_abort_handler`. 252 unnamed remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52o
+          → analysis/rom/rom_function_index.md
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52p: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-7+ substantive candidate; skip
+          rank-1/2/3/4 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
