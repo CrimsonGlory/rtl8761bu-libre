@@ -7676,5 +7676,41 @@ reads `conn_rec[+0x10]` handle byte and removes from sorted table at
 
 Post-rename: **67 unnamed** in-region (30 in 1-150B size≥20B tier); live named **1571**.
 
+**Next:** superseded by Pass 52gu below.
+
+## Pass 52gu (2026-06-30) — rank-1 linked slot clock-in-window probe rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gu.java` — 67 unnamed,
+30 in 1-150B size≥20B tier; rank-1 `0x8004fa24` (58B, 1 xref) — conn-slot timing
+linked-window clock probe (callee of Pass 52eq's re-arm walker).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004fa24` →
+`probe_linked_slot_list_clock_in_window` (58B) via
+`RenamePass52guRegion80040000Fun8004fa24.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 probe_linked_slot_list_clock_in_window(int *ctx)
+{
+  for (node = *(int **)(PTR_DAT_8004fa60 + 0xc); node != NULL; node = *node) {
+    parent = resolve_parent_context_by_role(node);
+    if ((*(uint *)(parent + 0xc) <= *(uint *)(ctx + 0xc)) &&
+        (*(uint *)(ctx + 0xc) <=
+         (uint)*(ushort *)(parent + 0x26) + *(uint *)(parent + 0xc)))
+      return 1;
+  }
+  return 0;
+}
+```
+
+Walks singly-linked list head at `PTR_DAT_8004fa60+0xc`; for each node resolves
+parent context via `resolve_parent_context_by_role` and tests whether clock
+instant at `ctx+0xc` falls within window `[parent+0xc, parent+0xc + ushort(+0x26)]`.
+Returns 1 on first match, 0 when list exhausted. Sole caller
+`rearm_conn_slot_timing_instant_to_target_and_walk_linked_windows` (`0x8004fbc0`,
+Pass 52eq): increments `+0xc` and re-probes until match fails during conn-slot
+timing instant re-arm walk.
+
+Post-rename: **66 unnamed** in-region (29 in 1-150B size≥20B tier); live named **1572**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

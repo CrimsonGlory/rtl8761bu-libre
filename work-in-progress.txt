@@ -8840,7 +8840,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gt;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gu: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gu (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004fa24`→`probe_linked_slot_list_clock_in_window`
+          (58B, HIGH). Singly-linked slot-window clock probe on `PTR_DAT_8004fa60`;
+          tests `ctx+0xc` in `[parent+0xc, parent+0xc+ushort(+0x26)]` via
+          `resolve_parent_context_by_role`; callee of
+          `rearm_conn_slot_timing_instant_to_target_and_walk_linked_windows`.
+          66 unnamed in-region; live named 1572.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gu;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gv: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
