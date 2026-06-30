@@ -2742,4 +2742,30 @@ pattern matches sibling SSP HCI dispatchers.
 
 Region unnamed count after this pass: **243** (244 minus this rename). Live named **1678** global.
 
+**Next:** superseded by Pass 6 continuation (70).
+
+## Pass 6 continuation (70) (2026-06-30) — SAFER+ key schedule `FUN_8002cb2c`
+
+Decompiled and renamed:
+**`FUN_8002cb2c` → `safer_plus_key_schedule`**
+(152B, HIGH) via `RenamePass6Region80020000Fun8002cb2c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (152B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=243` at pass start). Previously
+documented in `reverse_engineering_encryption_engine.md` §3 but still `FUN_*` in Ghidra.
+
+**Mechanism:** Published SAFER+ `Key_Schedule()` — builds 17-byte extended key (16 key bytes +
+XOR-parity byte 16), applies `(which-1)` rounds of 3-bit left-rotation on all 17 bytes,
+extracts 16 output bytes round-robin from offset `(which-1) % 17`, and when `which > 1` adds
+per-round bias constants from `PTR_DAT_8002cbc4`.
+
+**Callers:** `safer_plus_block_encrypt` (per odd/even round-key derivation) plus two
+E1/E21/E22 auth-wrapper callees — xref_in=3 total.
+
+**Confidence:** HIGH — decompile matches published SAFER+ key-schedule algorithm verbatim;
+sibling names `apply_safer_plus_bias1_constants` + `safer_plus_block_encrypt` already HIGH;
+full write-up in `reverse_engineering_encryption_engine.md` §3.
+
+Region unnamed count after this pass: **242** (243 minus this rename). Live named **1679** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

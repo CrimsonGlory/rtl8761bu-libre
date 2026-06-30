@@ -9804,8 +9804,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (69);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (70): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (243 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (70) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_8002cb2c`→`safer_plus_key_schedule`
+          (152B, HIGH) — SAFER+ round-key generator; xref_in=3; callers
+          `safer_plus_block_encrypt` + E1/E21/E22 wrappers; 242 unnamed remain;
+          live named 1679.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (70);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (71): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (242 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
