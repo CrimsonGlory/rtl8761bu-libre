@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gg COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (27 STUB-tier unnamed remain). Latest: `esco_link_setup_gate_default_return_zero` (Pass 12gg). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1342** global; **29** in-region unnamed (27 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gg section below.
+**Status**: Pass 12gh COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (26 STUB-tier unnamed remain). Latest: `compare_afh_lap_slot_pair_bytes_set_mismatch_flag_and_index` (Pass 12gh). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1343** global; **28** in-region unnamed (26 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070444`, 16B, xref_in=2). See Pass 12gh section below.
 
 ## Overview
 
@@ -2416,6 +2416,31 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12gh (2026-06-30) — AFH LAP slot-pair compare stub `FUN_8007196c`
+
+Decompiled and renamed:
+**`FUN_8007196c` → `compare_afh_lap_slot_pair_bytes_set_mismatch_flag_and_index`**
+(48B, HIGH, STUB-tier) via `RenamePass12ghRegion80070000Fun8007196c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(48B, xref_in=2 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Walks six LAP table entries on global `struct_of_at_least_0x300_size`;
+for each index `i` in `0..5`, compares `_x142_LAP[i+0x4f]` vs `_x142_LAP[i+0x49]`.
+On first mismatch: writes `*param_1 = 1` and `*param_2 = _x142_LAP[i+0x5b]`.
+If all six pairs match: writes `*param_1 = 0` and `*param_2 = 0xff`.
+Same `_x142_LAP` offset family as Pass 12v `clear_afh_lap_channel_map_for_matching_group`
+(`+0x49/+0x4f/+0x5b`) and Pass 12gc `advance_lcg_prng_state_and_return_high_byte`
+in the `0x800719xx` AFH/LAP cluster.
+
+**Confidence:** HIGH — unambiguous six-iteration byte-pair compare with documented
+`_x142_LAP` struct offsets and dual output-flag semantics.
+
+Live named **1343** (global; in-region unnamed **28**; STUB-tier unnamed **26**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`
+(top remaining: `FUN_80070444`, 16B, xref_in=2).
 
 ## Pass 12gg (2026-06-30) — eSCO link-setup gate default stub `FUN_80071bc4`
 

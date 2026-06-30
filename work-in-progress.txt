@@ -6683,8 +6683,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gh: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java`.
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gh (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8007196c`→`compare_afh_lap_slot_pair_bytes_set_mismatch_flag_and_index`
+          (48B, HIGH, STUB-tier). Six-iteration `_x142_LAP` byte-pair compare at offsets
+          `+0x49/+0x4f`; sets mismatch flag and index byte at `+0x5b` or `0xff` when all
+          match. `0x800719xx` AFH/LAP cluster sibling of Pass 12gc/12v. STUB-tier unnamed
+          26 remain; live named 1343.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gi: cold-triage next rank-1
+          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070444`, 16B, xref_in=2).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
