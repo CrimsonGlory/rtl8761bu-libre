@@ -7125,9 +7125,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/rom_function_index.md
           → analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52t: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-11+ substantive candidate;
-          skip rank-1–10 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52t (2026-06-30): decompiled+
+          renamed rank-11 `FUN_800445b8`→
+          `align_sco_packet_slots_to_max_interval_mod6_or_mod3`
+          (58B, HIGH). SCO/eSCO packet-slot alignment to max-interval mod6/mod3;
+          called via `PTR_DAT_8004a2fc` from HCI Setup/Accept Synchronous
+          Connection handlers; result at conn_record `+0x1cc`; sibling of
+          `pack_lmp_response_header_status_and_handle`. 247 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52t
+          → analysis/rom/rom_function_index.md
+          → analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52u: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-12+ substantive candidate;
+          skip rank-1–11 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1370,5 +1370,43 @@ when non-zero, handlers return HCI status `0x0c` (Command Disallowed).
 
 Post-rename: **248 unnamed** in-region (162 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-11+
-substantive candidate; skip rank-1–10 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-12+
+substantive candidate; skip rank-1–11 artifacts.
+
+## Pass 52t (2026-06-30) — rank-11 SCO slot-alignment helper rename
+
+**Refreshed cold-triage (rank-1–10 skipped as artifacts or already done):** rank-11
+`0x800445b8` (58B, 3 xrefs) — substantive SCO/eSCO slot-count alignment helper
+in the HCI synchronous-connection setup cluster (sibling of
+`pack_lmp_response_header_status_and_handle`).
+
+**Rank-11 decompiled and renamed (HIGH):** `FUN_800445b8` →
+`align_sco_packet_slots_to_max_interval_mod6_or_mod3` (58B) via
+`RenamePass52tRegion80040000Fun800445b8.java` (`renamed=1`, live-verified).
+
+```c
+uint align_sco_packet_slots_to_max_interval_mod6_or_mod3(uint max_slots, uint packet_slots)
+{
+  max_slots &= 0xffff;
+  rem = max_slots % 6;
+  packet_slots &= 0xffff;
+  delta = max_slots - packet_slots;
+  if ((rem <= delta) || (rem = max_slots % 3, rem <= delta))
+    packet_slots = max_slots - rem;
+  return packet_slots;
+}
+```
+
+Aligns SCO/eSCO packet-slot count to max-interval modulus boundaries: when the
+gap between max slots and packet slots exceeds `max_slots % 6` (or else
+`max_slots % 3`), snaps packet slots to `max_slots - remainder`. Invoked via
+function pointer `PTR_DAT_8004a2fc` from
+`HCI_Setup_Synchronous_Connection_handler` and
+`HCI_Accept_Synchronous_Connection_Request_handler`; result stored at
+conn_record `+0x1cc` and used to derive retransmission windows
+(`(slot_count - 1) * 2`).
+
+Post-rename: **247 unnamed** in-region (161 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-12+
+substantive candidate; skip rank-1–11 artifacts.
