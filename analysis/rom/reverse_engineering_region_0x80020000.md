@@ -3299,4 +3299,38 @@ documented two-phase master-link-key procedure.
 
 Region unnamed count after this pass: **226** (227 minus this rename). Live named **1695** global.
 
+**Next:** superseded by Pass 6 continuation (87).
+
+## Pass 6 continuation (87) (2026-06-30) — VSC 0xFC95 slot-0 callback `FUN_80024314`
+
+Decompiled and renamed:
+**`FUN_80024314` → `vsc_fc95_slot0_send_lmp_ext_0x7f_0x21_and_lmp_268`**
+(136B, HIGH) via `RenamePass6Region80020000Fun80024314.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (136B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=226` at pass start). Tied at 136B with
+`FUN_80021fa0` (xref_in=1); selected first by list order after Pass 6 cont. (86) renamed
+the other 136B tie `FUN_8002a0f4`.
+
+**Mechanism:** VSC `0xFC95` dispatch callback for the first pending-LMP slot
+(`big_ol_struct[conn].field_0x2a8`), registered in literal-pool table
+`PTR_LAB_800243a0` consumed by `start_encryption_vsc_pair_on_mode3_enable` (Pass 6
+cont. 57). Sends 3-byte LMP-ext packet opcode `0x7f` / sub-opcode `0x21` via
+`send_LMP_pkt`; ORs status bits from `get_status_bits_by_LMP_Opcode(0x7f, 0x22)` into
+per-connection status at `_x30_status_byte_by_index_at_0xb2`. When pending slot state
+is `2` (`check_slot_state_is_2`), calls `LMP__25C_called1(slot, 0)`; always finishes
+with `LMP__268__most_common_for_VSCs2_checks_fptr_patch(slot, field_0x2a6 * 5)` —
+the `*5` multiplier idiom matches the slot-0 arm of the encryption-start pair.
+
+**Caller:** data pointer at `0x800243aa` in `PTR_LAB_800243a0` (xref_in=1, no
+containing function — indirect via `VSC_0xfc95_called2` from
+`start_encryption_vsc_pair_on_mode3_enable`).
+
+**Confidence:** HIGH — decompile confirms LMP-ext 0x7f/0x21 send + 0x22 status-arm +
+LMP 25C/268 sequence; lives in documented encryption-start cluster (`0x800241xx`–
+`0x800243xx`); status bytes `0x21`/`0x22` match codec-JIT installer finish path
+(Pass 6 cont. 23).
+
+Region unnamed count after this pass: **225** (226 minus this rename). Live named **1696** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
