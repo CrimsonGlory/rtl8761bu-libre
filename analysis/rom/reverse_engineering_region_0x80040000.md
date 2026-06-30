@@ -8370,5 +8370,44 @@ variant) and `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`.
 
 Post-rename: **48 unnamed** in-region (11 in 1-150B size≥20B tier); live named **1590**.
 
+**Next:** superseded by Pass 52hn below.
+
+## Pass 52hn (2026-06-30) — rank-1 baseband link-slot Command Status + 0x26f log rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hn.java` — 48 unnamed,
+11 in 1-150B size≥20B tier; rank-1 `0x8004836c` (74B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x800483xx` baseband link-setup neighborhood
+(sibling of `program_baseband_link_setup_slot10_and_send_hci_cmd_complete`
+at `0x800483c0` and compact `hci_stage_8byte_param_log_0x26f_send_cmd_status`
+at `0x80048980` which stages 8-byte params first).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004836c` →
+`hci_send_cmd_status_mask7_log_0x26f_baseband_link_slot` (74B) via
+`RenamePass52hnRegion80040000Fun8004836c.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_send_cmd_status_mask7_log_0x26f_baseband_link_slot(undefined2 *param_1)
+{
+  /* immediate HCI Command Status OK via send_evt_HCI_Command_Status(*param_1, 0) */
+  /* log conn-state event 0x26f via possible_logger_called_if_no_patch3 */
+  /*   (mask DAT_800483b8 & 7, slot ptr PTR_DAT_800483bc) */
+  return 0;
+}
+```
+
+74B HCI command handler in the `0x800483xx` baseband link-setup cluster:
+immediately acknowledges with `send_evt_HCI_Command_Status` status `0`, then logs
+connection-state change event `0x26f` via `possible_logger_called_if_no_patch3`
+(mask `DAT_800483b8 & 7`, slot context at `PTR_DAT_800483bc`) — same
+`send_evt_HCI_Command_Status` + `0x26f` logging idiom as
+`hci_stage_8byte_param_log_0x26f_send_cmd_status` but without the 8-byte param
+staging step. No direct callers found (indirect HCI router).
+
+Baseband link-setup cluster sibling of
+`program_baseband_link_setup_slot10_and_send_hci_cmd_complete` and
+`hci_stage_8byte_param_log_0x26f_send_cmd_status`.
+
+Post-rename: **47 unnamed** in-region (10 in 1-150B size≥20B tier); live named **1591**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

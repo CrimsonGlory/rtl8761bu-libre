@@ -9034,7 +9034,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hm;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hn: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hn (2026-06-30): cold-triage
+          refreshed via `ColdTriageRegion80040000Pass52hn.java`; decompiled+
+          renamed rank-1 `FUN_8004836c`→`hci_send_cmd_status_mask7_log_0x26f_baseband_link_slot`
+          (74B, HIGH) — immediate HCI Command Status OK + conn-state log `0x26f`
+          (mask7, no param staging); `0x800483xx` baseband link-setup cluster.
+          47 unnamed in-region (10 in 1-150B size≥20B tier); live named 1591.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hn;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ho: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
