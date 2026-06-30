@@ -212,7 +212,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 | `0x80043e04` | 1168B | `program_dual_slot_lmp25c_packet_credits_by_conn_index` — IRQ-off dual-slot LMP-25C packet-credit programmer on 0x84-stride role records; see Pass 52da | **HIGH** |
 | `0x80040a24` | 988B | `process_dual_slot_lmp25c_role_record_packet_completion` — dual-slot role-record LMP-25C packet completion handler; see Pass 52db | **HIGH** |
 | `0x8004147c` | 934B | `program_inquiry_or_esco_baseband_from_hci_command` — HCI inquiry/cancel/SCO-setup baseband programmer (fptr `fptr_DAT_80036f5c` for opcodes `0x401`/`0x419`/`0x43f`); programs BD_ADDR halves, access-code sync word, clock offset, role/AM_ADDR at BB reg `0xaa`, channel-table entries, clears role-switch hook; optional veto callback before arming. Renamed Pass 52dc. | HIGH |
-| `0x80041dac` | 876B | `void FUN_80041dac(uint param_1)` — connection-teardown/cleanup-shaped handler operating on a `param_1`-indexed record; clears multiple fields consistent with link release. No confirmed cross-xref yet. | MEDIUM |
+| `0x80041dac` | 876B | `teardown_inquiry_lap_slot_baseband_cleanup_and_release` — inquiry/LAP slot teardown orchestrator on `param_1`-indexed `big_ol_struct`; IRQ-off baseband register teardown, clears role-switch hook, releases inquiry LAP pending bitmask, clears AFH channel map, bitmask cleanup; callers `fHCI_conn_req_cancel` + `connection_teardown_HCI_event_finalizer`. Renamed Pass 52dd. | HIGH |
 | `0x8004d294` | 1280B | Large upper-half handler adjacent to the LE Meta Event cluster; plausible event-assembly routine but case/field semantics not individually confirmed this pass. | MEDIUM |
 | `0x8004ce70` | 908B | Already appears (unnamed) in `reverse_engineering_conn_feature_dispatch.md`'s xref list alongside `assoc_w_tLC_RX`/`FUN_80051368`/`FUN_80052f8c` — confirmed participant in the connection/feature dispatch graph, but specific behavior not yet isolated to a single clear purpose. | MEDIUM-HIGH |
 
@@ -4466,5 +4466,29 @@ sibling of Pass 52da/52db dual-slot LMP-25C programmers.
 Post-rename: **162 unnamed** in-region (95 in 1-150B tier unchanged); **67** in
 >150B tier; live named **1476**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-23 `0x80041dac`
-(876B).
+## Pass 52dd (2026-06-30) — >150B rank-23 inquiry/LAP slot teardown rename
+
+**>150B rank-23 decompiled+renamed (HIGH):** `FUN_80041dac` →
+`teardown_inquiry_lap_slot_baseband_cleanup_and_release` (876B) via
+`RenamePass52ddRegion80040000Fun80041dac.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). Inquiry/LAP slot teardown
+orchestrator on `param_1`-indexed `big_ol_struct` record: extracts LAP index
+from `byte_0xCC` and conn index from `bos_connection__array_index`, calls
+`remap_role_index_to_esco_slot_if_pending` + `LMP__25C_called2`, IRQ-off
+baseband register teardown via `PTR_DAT_80042120` HW-write vtable (mirrors
+Pass 52dc programmer shape), clears role-switch hook, decrements inquiry
+refcount and may emit LMP `0x264`, calls `release_inquiry_lap_slot_pending_bitmask`,
+restores channel-table entry when `_x142_LAP[slot+0x45]` clear,
+`clear_afh_lap_channel_map_for_matching_offset_group`, clears multiple global
+bitmask bytes, terminates with `FUN_800362b4` +
+`triple_inverted_mask_hw_dispatch_for_lap_slot_if_0x45_clear` +
+`remote_name_request_feature_apply_orchestrator`. Confirmed callers:
+`fHCI_conn_req_cancel` (region `0x80030000`) and
+`connection_teardown_HCI_event_finalizer` (region `0x80070000`). Inquiry/LAP/role-switch
+cluster sibling of Pass 52dc programmer and Pass 52n release-bitmask setter.
+
+Post-rename: **161 unnamed** in-region (95 in 1-150B tier unchanged); **66** in
+>150B tier; live named **1477**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-24 `0x80040594`
+(566B).

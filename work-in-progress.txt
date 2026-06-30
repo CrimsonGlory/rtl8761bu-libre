@@ -7930,8 +7930,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dd: continue >150B cold-triage
-          — decompile+rename rank-23 `0x80041dac` (876B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dd (2026-06-30): decompiled+
+          renamed rank-23 `FUN_80041dac`→`teardown_inquiry_lap_slot_baseband_cleanup_and_release`
+          (876B, HIGH). Inquiry/LAP slot teardown orchestrator: IRQ-off baseband
+          register teardown, role-switch hook clear, `release_inquiry_lap_slot_pending_bitmask`,
+          AFH channel-map clear; callers `fHCI_conn_req_cancel` +
+          `connection_teardown_HCI_event_finalizer`; upgraded from MEDIUM (Pass 3).
+          161 unnamed in-region; live named 1477.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52de: continue >150B cold-triage
+          — decompile+rename rank-24 `0x80040594` (566B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
