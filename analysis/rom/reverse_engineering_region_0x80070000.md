@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fy COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**3** HANDLER-tier unnamed remain in-region; live named **1334** global). Latest: `apply_vsc_fca1_status_bitmask_arm_sticky_flags_and_log` (Pass 12fy), `dispatch_vsc_fca1_bb_reg_offset_write_subcases` (Pass 12fx). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_8007522c`, 3 remain). See Pass 12fy section below.
+**Status**: Pass 12fz COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**2** HANDLER-tier unnamed remain in-region; live named **1335** global). Latest: `emit_patch_absent_a5_diag_packet_via_logger1` (Pass 12fz), `apply_vsc_fca1_status_bitmask_arm_sticky_flags_and_log` (Pass 12fy). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_80074518`, 2 remain). See Pass 12fz section below.
 
 ## Overview
 
@@ -2417,6 +2417,29 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12fz (2026-06-30) — patch-absent A5 diag packet emitter `FUN_8007522c`
+
+Decompiled and renamed:
+**`FUN_8007522c` → `emit_patch_absent_a5_diag_packet_via_logger1`**
+(154B, HIGH, HANDLER-tier) via `RenamePass12fzFun8007522c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Gated diagnostic packet builder in the `0x800752xx` resource-pool/logger
+cluster. Returns `0xff` when patch-absent flag at `PTR_DAT_800752c8` is clear or config
+`field208_0xd8` bit `0x8000` is set. Otherwise builds an 11-byte (or variable-length)
+framed packet: header `0xa5/0xa5`, type byte `(param_1<<5)|6` (fixed) or `|0x16` (extended
+with `optimized_memcpy` payload), delimiter `0x5a`, ushort fields from `param_3`/`param_4`,
+byte `param_2`, then dispatches via `possible_logger_called_if_no_patch1`. Sibling of Pass
+12df `bump_alloc_aligned_from_resource_pool_heap` at `0x800752d0`.
+
+**Confidence:** HIGH — unambiguous patch-absent gate + fixed magic framing + named logger
+callee chain; matches `possible_logger_called_if_no_patch*` cluster at `0x80074f38`. No
+direct callers found (consistent with indirect fptr dispatch).
+
+Live named **1335** (global; in-region unnamed **17**; HANDLER-tier unnamed **2**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_80074518` per
+`ListHandler80070000.java`.
+
 ## Pass 12fy (2026-06-30) — VSC FCA1 status bitmask apply `FUN_800776c8`
 
 Decompiled and renamed:
@@ -2437,8 +2460,7 @@ No direct callers found (consistent with indirect VSC dispatch).
 
 Live named **1334** (global; in-region unnamed **18**; HANDLER-tier unnamed **3**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_8007522c` per
-`ListHandler80070000.java`.
+**Next:** superseded by Pass 12fz.
 
 ## Pass 12fx (2026-06-30) — VSC FCA1 BB reg offset write subcase dispatch `FUN_800777f6`
 

@@ -6610,8 +6610,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fz: cold-triage next rank-1
-          HANDLER-tier candidate `FUN_8007522c` per `ListHandler80070000.java` (3 remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fz (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8007522c`→`emit_patch_absent_a5_diag_packet_via_logger1`
+          (154B, HIGH, HANDLER-tier). Patch-absent-gated A5/0x5a framed diag packet
+          builder: `(slot<<5)|6` fixed or `|0x16` extended payload, dispatches
+          `possible_logger_called_if_no_patch1`; resource-pool/logger cluster sibling
+          of `bump_alloc_aligned_from_resource_pool_heap`. No direct callers (indirect
+          fptr dispatch). HANDLER-tier unnamed 3→2 remain; live named 1334→1335.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ga: cold-triage next rank-1
+          HANDLER-tier candidate `FUN_80074518` per `ListHandler80070000.java` (2 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
