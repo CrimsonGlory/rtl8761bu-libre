@@ -6881,5 +6881,38 @@ in the SCO/eSCO HW-channel cluster (`0x800429xx`–`0x80042bxx`).
 
 Post-rename: **86 unnamed** in-region (86 in 1-150B tier); live named **1552**.
 
-**Next:** continue 1-150B cold-triage — decompile+rename rank-9
-`0x8004332c` (82B) or next substantive candidate; skip rank-1–7 artifacts.
+**Next:** superseded by Pass 52gb below.
+
+## Pass 52gb (2026-06-30) — rank-9 HW-channel index-32 flag commit rename
+
+**1-150B rank-9 decompiled+renamed (HIGH):** `FUN_8004332c` →
+`reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch`
+(82B, 2 xrefs) via
+`RenamePass52gbRegion80040000Fun8004332c.java` (`renamed=1`, live-verified).
+
+```c
+void reconcile_bdaddr_and_commit_hw_channel_index32_or_flags_with_slot_dispatch(
+    uint slot_param)
+{
+  reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259();
+  *PTR_DAT_80043380 = 1;
+  and_mask_hw_channel_table_entry_and_indexed_dispatch(0x32, 0xfff);
+  (*(code *)PTR_DAT_80043384)(0x30, (slot_param & 0x1ffff) >> 1);
+  or_merge_hw_channel_table_entry_and_indexed_dispatch(0x32, 0x4000);
+  or_merge_hw_channel_table_entry_and_indexed_dispatch(0x32, 0x2000);
+  or_merge_hw_channel_table_entry_and_indexed_dispatch(0x32, 0x8000);
+}
+```
+
+BD_ADDR slot reconciliation prelude (Pass 52cj's
+`reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259`), then HW-channel
+index-0x32 programming: AND-mask clears lower 12 bits, fptr dispatch at index
+0x30 commits shifted slot parameter, three OR-merge commits set flags
+0x4000/0x2000/0x8000 on the same index. SCO/eSCO HW-channel cluster sibling
+of Pass 52g's OR/AND/mask trio and Pass 52ga's status-byte commit path
+(`0x800429xx`–`0x800433xx`).
+
+Post-rename: **85 unnamed** in-region (85 in 1-150B tier); live named **1553**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename rank-10
+`0x80042d34` (60B) or next substantive candidate; skip rank-1–7 artifacts.
