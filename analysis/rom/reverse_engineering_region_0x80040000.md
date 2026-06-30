@@ -6118,6 +6118,33 @@ opcode `0x2022`:
 Post-rename: **108 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1530**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
-unnamed >150B candidate (13 remain; run `ColdTriageRegion80040000Pass52eu.java`
+**Next:** superseded by Pass 52ff below.
+
+## Pass 52ff (2026-06-30) — >150B rank-5 AFH poll read link RX timing HCI handler rename
+
+**>150B rank-5 decompiled+renamed (HIGH):** `FUN_80048d6c` →
+`hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete`
+(204B, 0 xrefs in cold-triage) via
+`RenamePass52ffRegion80040000Fun80048d6c.java` (`renamed=1`, live-verified).
+
+204B HCI command handler in the `0x80048dxx` AFH/link-timing cluster (sibling of
+`FUN_80048fb8` link-slot alloc/busy handler at `0x80048fb8` and
+`dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery` at `0x80048b80`):
+
+- **AFH gate:** requires `field327_0x154` bit2 set (else status `0x1a`); index
+  byte at `+3` must be `<2` (else `0x12`).
+- **Poll path:** calls `afh_channel_quality_poll_commit()`; when
+  `field40_0x28` bit0 set and poll result `<` threshold `PTR_DAT_80048e3c`,
+  stores quality nibble in `field42_0x2a` bits 5:2.
+- **Link lookup:** `find_link_record_by_bdaddr_and_flag(2, index, bdaddr@+2)`;
+  reads RX timing triple at sub-record `+0x28`/`+0x2a`/`+0x2c` — all-zero →
+  status `2` (Unknown Connection Identifier).
+- **Terminus:** 10-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  status + echoed opcode + timing dword/u16 on success.
+
+Post-rename: **107 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1531**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-6
+unnamed >150B candidate (12 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).
