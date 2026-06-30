@@ -3233,4 +3233,35 @@ sub-opcode in arg3); caller confirmed in encryption-opcode dispatch table.
 
 Region unnamed count after this pass: **228** (229 minus this rename). Live named **1693** global.
 
+**Next:** superseded by Pass 6 continuation (85).
+
+## Pass 6 continuation (85) (2026-06-30) — LMP ext sub0x1c SSP state handler `FUN_80028d04`
+
+Decompiled and renamed:
+**`FUN_80028d04` → `handle_lmp_ext_subopcode_0x1c_by_ssp_state`**
+(138B, HIGH) via `RenamePass6Region80020000Fun80028d04.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (138B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=228` at pass start). Immediate sibling of
+Pass 6 cont. (84)'s `handle_lmp_ext_subopcode_0x1b_by_ssp_state` in the
+`0x80028xxx` SSP encryption-opcode cluster.
+
+**Mechanism:** LMP extended (0x7F) sub-opcode **0x1c** handler gated on role bit
+`param_1+4&1` vs `ret_bool_based_on_crypto_struct_0x50`, with bypass when global
+`PTR_DAT_80028d94[2]&0x80`:
+- Crypto sub-state `0x37` (`'7'`) or `0x3c` (`<`): emit
+  `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5, param_3)`.
+- State `0x35` (`'5'`) with no pending LMP (`+0x1e8==0`): `some_case_0x2d` then return
+  (defer accept — parallels 0x1b's `'-'` defer branch).
+- Default / role mismatch: `FUN_800243b8(conn, 0x7f, 0x1c, role_bit, 0x24)` (reject).
+
+**Caller:** `LMP_encryption_opcode_handlers` at `0x80028488` (xref_in=1, confirmed via
+`ListXrefsTo80028d04.java`).
+
+**Confidence:** HIGH — structural sibling of Pass 6 cont. (84)'s 0x1b handler (same role
+gate, same SSP-complete sender, same `FUN_800243b8` NOT_ACCEPTED idiom with sub-opcode in
+arg3); caller confirmed in encryption-opcode dispatch table.
+
+Region unnamed count after this pass: **227** (228 minus this rename). Live named **1694** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
