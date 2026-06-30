@@ -4248,5 +4248,25 @@ sibling of `irq_safe_stage_conn10_diagnostic_dword_pair_and_incr_count`).
 Post-rename: **170 unnamed** in-region (95 in 1-150B tier unchanged); **75** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-13 `0x8004eb18`
-(404B, 2 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52ct below.
+
+## Pass 52ct (2026-06-30) — >150B rank-13 link-setup baseband register writer rename
+
+**>150B rank-13 decompiled and renamed (HIGH):** `FUN_8004eb18` →
+`write_link_setup_timing_params_to_baseband_register_block` (404B, 2 confirmed
+callers) via `RenamePass52ctRegion80040000Fun8004eb18.java` (`renamed=1`,
+live-verified). Upgraded from MEDIUM (Pass 6, 2026-06-23). Packs negotiated
+link-timing fields from global ctx `PTR_PTR_8004ecac` (offsets
+5/6/8/0xc/0xe/0x10/0x11/0x12/0x14/0x16) and param buffer `param_2` (offsets
+4/0xa/0xc/0xe/0x10/0x12) into ~14 unaligned baseband HW register pointers
+(`DAT_8004ecb0`…`DAT_8004ecf4`); `param_3` low 3 bits OR into bits 12:14 of one
+packed register; conditional OR-flag set at `DAT_8004ece8` when 2-bit sub-field
+from ctx byte 5 exceeds 1. Full register-block writer — callee of twin link-setup
+PDU handlers `0x80051c60`/`0x80051f14` (region `0x80050000`), paired with smaller
+sibling `FUN_8004ea2c` (220B, still unnamed).
+
+Post-rename: **169 unnamed** in-region (95 in 1-150B tier unchanged); **74** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-14 `0x8004f374`
+(368B, 2 xrefs).
