@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 87 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fz, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 86 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ga, 2026-06-30).
 
 ## Overview
 
@@ -6835,5 +6835,51 @@ Sibling of Pass 52l's `get_credit_scheduler_context_active_entry_ptr`
 
 Post-rename: **87 unnamed** in-region (87 in 1-150B tier); live named **1551**.
 
-**Next:** continue 1-150B cold-triage — triage rank-6–8 artifacts or find next
-substantive candidate (skip rank-1–4 artifacts).
+**Next:** superseded by Pass 52ga below.
+
+## Pass 52ga (2026-06-30) — rank-6/7 artifact triage + rank-8 HW-channel status commit rename
+
+**Cold-triage (refreshed):** 87 unnamed 1-150B remain. rank-6 `0x80046790`
+(3 xrefs, 1B — artifact); rank-7 `0x80049bfc` (3 xrefs, 1B — artifact);
+rank-8 `0x80042ab0` (2 xrefs, 120B); rank-9 `0x8004332c` (2 xrefs, 82B);
+rank-10 `0x80042d34` (2 xrefs, 60B).
+
+**Rank-6–7 triaged (non-function artifacts):** `0x80046790` and `0x80049bfc`
+(3 xrefs each, 1B) — decompile yields `halt_baddata`/undefined-instruction stubs,
+not substantive functions (same artifact class as rank-1–4).
+
+**1-150B rank-8 decompiled+renamed (HIGH):** `FUN_80042ab0` →
+`hw_channel_pack_slot_type_status_bytes_table_lookup_dispatch`
+(120B, 2 xrefs) via
+`RenamePass52gaRegion80040000Fun80042ab0.java` (`renamed=1`, live-verified).
+
+```c
+void hw_channel_pack_slot_type_status_bytes_table_lookup_dispatch(
+    uint slot_index, int out_rec, uint type_index)
+{
+  fptr = PTR_DAT_80042b28;
+  (*fptr)(2, (type_index & 0x1f) << 0xb | (slot_index & 0xff) << 5);
+  *(byte *)(out_rec + 1) = 2;
+  if ((type_index < 4) &&
+      ((PTR_DAT_80042b2c[type_index + 4] >> 1 & 1) != 0) &&
+      ((PTR_DAT_80042b2c[type_index + 4] & 1) == 0)) {
+    *(byte *)(out_rec + 2) = 2;
+  }
+  idx = *(ushort *)(out_rec + 4);
+  (*fptr)(idx, *(ushort *)(idx + DAT_80042b30) & 0xfff8 | 1);
+  (*fptr)(0, 0x21);
+}
+```
+
+Triple HW-channel fptr dispatch through `PTR_DAT_80042b28`: first packs
+`type_index`/`slot_index` into index-2 register value; writes status byte `2`
+to output record `+1` (and conditionally `+2` when per-type flag table
+`PTR_DAT_80042b2c` indicates); second commit uses ushort index at `out_rec+4`
+with table lookup at `DAT_80042b30`; final index-0 dispatch with `0x21`.
+Noirq multi-step sibling of Pass 52ba's `irq_guarded_hw_channel_raw_dual_indexed_dispatch`
+in the SCO/eSCO HW-channel cluster (`0x800429xx`–`0x80042bxx`).
+
+Post-rename: **86 unnamed** in-region (86 in 1-150B tier); live named **1552**.
+
+**Next:** continue 1-150B cold-triage — decompile+rename rank-9
+`0x8004332c` (82B) or next substantive candidate; skip rank-1–7 artifacts.
