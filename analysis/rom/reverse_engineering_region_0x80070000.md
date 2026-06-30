@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gv COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (12 STUB-tier unnamed remain). Latest: `noop_unused_patch_hook_slot_before_vsc_fc13_stub_gap` (Pass 12gv). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1357** global; **14** in-region unnamed (12 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078834`, 4B, xref_in=0). See Pass 12gv section below.
+**Status**: Pass 12gw COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (11 STUB-tier unnamed remain). Latest: `noop_unused_patch_hook_slot_vsc_fc13_stub_gap_tail` (Pass 12gw). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1358** global; **13** in-region unnamed (11 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078830`, 4B, xref_in=0). See Pass 12gw section below.
 
 ## Overview
 
@@ -2417,6 +2417,31 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gw (2026-06-30) — patch-hook gap noop stub `FUN_80078834`
+
+Decompiled and renamed:
+**`FUN_80078834` → `noop_unused_patch_hook_slot_vsc_fc13_stub_gap_tail`**
+(4B, HIGH, STUB-tier) via `RenamePass12gwRegion80070000Fun80078834.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(4B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Trivial `return;` noop stub occupying the tail slot of the
+four-byte gap cluster at `0x8007882c`–`0x80078834` in the `0x800788xx`
+patch-hook cluster — sits immediately after `VSC_0xfc13_return_one_default_stub`
+at `0x80078828` and immediately before Pass 12gv's
+`noop_unused_patch_hook_slot_before_vsc_fc13_stub_gap` at `0x80078838`. No
+callers; likely an unused patch-hook slot placeholder that patch firmware may
+repurpose.
+
+**Confidence:** HIGH — unambiguous trivial return; cluster placement confirmed
+by adjacent named siblings; zero xref_in consistent with dead/unused hook slot.
+
+Live named **1358** (global; in-region unnamed **13**; STUB-tier unnamed **11**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80078830`, 4B, xref_in=0).
+
 ## Pass 12gv (2026-06-30) — patch-hook gap noop stub `FUN_80078838`
 
 Decompiled and renamed:
@@ -2437,8 +2462,7 @@ by adjacent named siblings; zero xref_in consistent with dead/unused hook slot.
 
 Live named **1357** (global; in-region unnamed **14**; STUB-tier unnamed **12**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80078834`, 4B, xref_in=0).
+**Next:** superseded by Pass 12gw.
 
 ## Pass 12gu (2026-06-30) — patch-hook gap noop stub `FUN_8007883c`
 
