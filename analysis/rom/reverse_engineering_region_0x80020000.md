@@ -2897,4 +2897,42 @@ crypto-struct layout; type-byte semantics align with `LMP_COMB_KEY_0x09` cluster
 
 Region unnamed count after this pass: **238** (239 minus this rename). Live named **1683** global.
 
+**Next:** superseded by Pass 6 continuation (75).
+
+## Pass 6 continuation (75) (2026-06-30) — pairing continuation `FUN_80022e54`
+
+Decompiled and renamed:
+**`FUN_80022e54` → `dispatch_pairing_continuation_by_crypto_state_and_pending_lmp`**
+(146B, HIGH) via `RenamePass6Region80020000Fun80022e54.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (146B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=238` at pass start). Sits in the
+`0x80022xxx` link-key/SSP pairing cluster alongside
+`apply_link_key_and_dispatch_auth_pairing_flow` and
+`dispatch_lmp_pairing_continuation_by_crypto_state`.
+
+**Mechanism:** Per-connection pairing/auth continuation router keyed on crypto sub-state
+byte `+1` and pending LMP opcode at `*(+0x1e8)+4 >> 1`:
+- State `0x16`: reject pending LMP via `FUN_800226ec` (wrap_send_LMP_NOT_ACCEPTED +
+  `FUN_80025634` clear), then advance SSP state machine via
+  `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+  with mode `6`.
+- No pending LMP (`+0x1e8==0`): when `FUN_80023fdc` gate passes, emit
+  `send_evt_HCI_IO_Capability_Request` and `set_arg1_1_to_arg2(_,0x14)`.
+- Pending opcode `0x0B` (AU_RAND): `FUN_800226ec` then fall through to PIN path.
+- Pending opcode `0x7F` extended with sub-opcode `+5==0x19`: IO-capability request +
+  state `0x14`.
+- Pending opcode `8`: `FUN_80022e28` → `send_evt_HCI_PIN_Code_Request` + state `10`.
+- Default: clear pending via `FUN_80025634`.
+
+**Callers:** `FUN_80023154` at `0x8002316c` (HCI Link Key Request Negative Reply
+`0x040c` body after `FUN_80023008` conn resolve) and `many_sub_if_else_cases_on_param2`
+at `0x80022f24` when internal opcode `param_2==0x17`.
+
+**Confidence:** HIGH — callee cluster matches documented SSP/link-key HCI event senders
+and pairing-state transitions (`set_arg1_1_to_arg2`); LMP opcode dispatch idiom parallels
+Pass 6 cont. (16)/(20) siblings; both callers confirmed via `ListXrefsTo80022e54.java`.
+
+Region unnamed count after this pass: **237** (238 minus this rename). Live named **1684** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
