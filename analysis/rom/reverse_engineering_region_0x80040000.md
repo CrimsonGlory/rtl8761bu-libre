@@ -3057,3 +3057,38 @@ Post-rename: **205 unnamed** in-region (119 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-55+
 substantive candidate; skip rank-1–54 artifacts and already-done ranks.
+
+## Pass 52bk (2026-06-30) — rank-55/56 artifacts skipped; rank-58 active-link slot status lookup rename
+
+**Refreshed cold-triage (ranks 1-54 skipped as artifacts or already done):**
+- rank-55 `0x8004a2e8` (8B, 1 xref) — **artifact** (`halt_baddata`, bad instruction data)
+- rank-56 `0x8004e3e0` (8B, 1 xref) — **artifact** (`halt_baddata`, bad instruction data)
+- rank-57 `0x8004a444` (4B listed, 1 xref) — deferred (Ghidra body undersized; decompile
+  shows substantive HCI Command Complete sender — revisit when boundary fixed)
+- rank-58 `0x8004e9a4` (4B, 1 xref) — substantive 3-entry lookup in the
+  `0x8004e9xx` active-link-mask cluster (sibling of Pass 52bj's
+  `is_active_link_mask_bit_four` and still-unnamed `FUN_8004e9a8`)
+
+**Rank-58 decompiled and renamed (HIGH):** `FUN_8004e9a4` →
+`lookup_active_link_slot_status_by_index` (4B) via
+`RenamePass52bkRegion80040000Fun8004e9a4.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 lookup_active_link_slot_status_by_index(uint index)
+{
+  uint slot = (index & 0xff) - 2 & 0xff;
+  if (slot < 3) {
+    return PTR_DAT_8004e9c0[slot];
+  }
+  return 0;
+}
+```
+
+Maps conn-slot indices 2–4 to a 3-byte status table at `PTR_DAT_8004e9c0`
+(indices 0–2); returns 0 for out-of-range. Same cluster as
+`scan_active_link_mask_for_slot_status_flag` / `is_active_link_mask_bit_four`.
+
+Post-rename: **204 unnamed** in-region (118 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-59+
+substantive candidate; skip rank-1–58 artifacts, deferred, and already-done ranks.
