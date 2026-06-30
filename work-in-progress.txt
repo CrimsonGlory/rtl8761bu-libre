@@ -9069,7 +9069,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hq;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hr: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hr (2026-06-30): cold-triage
+          refreshed via `ColdTriageRegion80040000Pass52hr.java`; decompiled+
+          renamed rank-1 `FUN_8004bf60`→`invoke_esco_sco_lmp_pdu_validate_negotiate_dispatch_min_hdr_6_default_1`
+          (46B, HIGH) — thin wrapper to `esco_sco_lmp_pdu_validate_negotiate_and_dispatch`
+          with fixed min_hdr=6/default=1; `0x8004bfxx` eSCO/SCO LMP-PDU cluster.
+          43 unnamed in-region (6 in 1-150B size≥20B tier); live named 1595.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hr;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hs: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 

@@ -8518,5 +8518,39 @@ No direct callers found (indirect HCI router).
 
 Post-rename: **44 unnamed** in-region (7 in 1-150B size≥20B tier); live named **1594**.
 
+**Next:** superseded by Pass 52hr below.
+
+## Pass 52hr (2026-06-30) — rank-1 eSCO/SCO LMP-PDU wrapper rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hr.java` — 44 unnamed,
+7 in 1-150B size≥20B tier; rank-1 `0x8004bf60` (46B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x8004bfxx` eSCO/SCO LMP-PDU cluster;
+confirmed thin wrapper sibling of Pass 51's
+`esco_sco_lmp_pdu_validate_negotiate_and_dispatch` at `0x8004bde8`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004bf60` →
+`invoke_esco_sco_lmp_pdu_validate_negotiate_dispatch_min_hdr_6_default_1` (46B) via
+`RenamePass52hrRegion80040000Fun8004bf60.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_esco_sco_lmp_pdu_validate_negotiate_dispatch_min_hdr_6_default_1(
+     undefined4 param_1, undefined2 param_2, undefined4 param_3,
+     undefined4 param_4, undefined1 param_5, undefined1 param_6)
+{
+  esco_sco_lmp_pdu_validate_negotiate_and_dispatch
+            (param_1, param_2, 6, 1, param_3, param_4, param_5, param_6);
+  return;
+}
+```
+
+46B thin per-opcode wrapper in the `0x8004bfxx` eSCO/SCO LMP-PDU cluster:
+forwards all caller arguments to
+`esco_sco_lmp_pdu_validate_negotiate_and_dispatch` with fixed
+`min_header_len=6` and `default_answer=1` (the only confirmed named wrapper;
+five additional call sites at `0x8004bfb0`/`0x8004c046`/etc. remain orphaned
+mis-disassembled code per Pass 51). No direct callers found (indirect LMP router).
+
+Post-rename: **43 unnamed** in-region (6 in 1-150B size≥20B tier); live named **1595**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
