@@ -1796,4 +1796,35 @@ sits in established SSP/ECDH curve-constant table cluster adjacent to
 
 Region unnamed count after this pass: **273** (274 minus this rename). Live named **1648** global.
 
+**Next:** superseded by Pass 6 continuation (40).
+
+## Pass 6 continuation (40) (2026-06-30) — connection policy priority lookup `FUN_80021754`
+
+Decompiled and renamed:
+**`FUN_80021754` → `resolve_connection_policy_priority_by_bdaddr_or_bitmask`**
+(214B, HIGH) via `RenamePass6Region80020000Fun80021754.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (214B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=273` at pass start).
+
+**Mechanism:** Backward-walking connection-policy rule-table resolver in the
+`0x800217xx` QoS/policy cluster (sibling of unnamed `FUN_80021838` type-1 matcher).
+Walks `PTR_DAT_80021834` table (20-byte/`0x14` stride entries, count at
+`PTR_DAT_80021830`), considering only entries with category byte `+0x11 == 0x02`.
+Three match modes at `+0x12`: `0x00` catch-all (first match), `0x01` bitmask
+`((param_2 XOR value) & mask) != 0`, `0x02` 6-byte BD_ADDR `memcmp` against
+`entry+0x08`. Merges priority result byte at `entry+0x10` with precedence
+`2 > 3 > others`; returns merged class when index exhausts.
+
+**Callers:** `FUN_800218c0` (unnamed dispatcher: mode `0x02` path) — itself called
+from `LMP_HOST_CONNECTION_REQ_0x33`, `LMP_eSCO_LINK_REQ_0x7F_0C`,
+`emit_hci_inquiry_result_or_extended_and_maybe_complete`, and `FUN_8006bfec`.
+
+**Confidence:** HIGH — unambiguous rule-table walk with established BD_ADDR/bitmask
+match idiom; sits adjacent to `compute_and_store_connection_qos_poll_interval` and
+policy globals `PTR_config_base_80021744`/`PTR_big_ol_struct_80021748`; used at
+connection-setup decision points across LMP and HCI inquiry paths.
+
+Region unnamed count after this pass: **272** (273 minus this rename). Live named **1649** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

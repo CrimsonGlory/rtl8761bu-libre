@@ -9542,8 +9542,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (39);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (40): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (273 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (40) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_80021754`→
+          `resolve_connection_policy_priority_by_bdaddr_or_bitmask`
+          (214B, HIGH). Connection-policy rule-table backward-walk: category-0x02
+          entries, catch-all/bitmask/BD_ADDR match modes, priority merge 2>3;
+          caller `FUN_800218c0` (LMP host-conn/eSCO-link + HCI inquiry).
+          272 unnamed remain; live named 1649.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (40);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (41): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (272 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
