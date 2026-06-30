@@ -9143,8 +9143,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hy;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hz: continue 1-19B cold-triage
-          — skip rank-1–7 artifacts; refresh ranks via
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hz (2026-06-30): decompiled+
+          renamed rank-14 `FUN_80043594`→`invoke_is_indexed_dual_slot_ushort_match_context_and_log`
+          (18B, HIGH) — thin wrapper to `is_indexed_dual_slot_ushort_match_context_and_log`;
+          role-switch slot-offset check in `0x800435xx` cluster. 35 unnamed in-region
+          (35 in 1-19B tier); live named 1603.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hz;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ia: continue 1-19B cold-triage
+          — skip rank-1–13 artifacts; refresh ranks via
           `ColdTriageRegion80040000Pass52hy2.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

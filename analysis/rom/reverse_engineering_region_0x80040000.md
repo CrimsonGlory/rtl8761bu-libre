@@ -8793,5 +8793,34 @@ sibling of `return_RSSI_value` (`0x80042b38`) in the `0x80042bxx` power/RSSI clu
 
 Post-rename: **36 unnamed** in-region (36 in 1-19B tier); live named **1602**.
 
-**Next:** continue 1-19B cold-triage — skip rank-1–7 artifacts; refresh ranks via
+**Next:** superseded by Pass 52hz below.
+
+## Pass 52hz (2026-06-30) — rank-14 dual-slot ushort match thin-wrapper rename
+
+**Cold-triage (refreshed):** ranks 8–13 are 1–4B `halt_baddata` artifacts
+(`0x80047afc` 4B, `0x80049924` 2B, `0x80046cc4`/`0x80047b00`/`0x80047bc8`/
+`0x800480a4` 1B). Next substantive candidate (overall rank-14, 18B, 1 xref):
+`0x80043594`.
+
+**Rank-14 decompiled+renamed (HIGH):** `FUN_80043594` →
+`invoke_is_indexed_dual_slot_ushort_match_context_and_log` (18B) via
+`RenamePass52hzRegion80040000Fun80043594.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_is_indexed_dual_slot_ushort_match_context_and_log(byte index)
+{
+  is_indexed_dual_slot_ushort_match_context_and_log(index);
+  return;
+}
+```
+
+18B thin wrapper: forwards the index byte to
+`is_indexed_dual_slot_ushort_match_context_and_log` (`0x80043508`, Pass 52al) —
+dual-slot 0x84-stride buffer ushort probe used as a role-switch slot-offset
+check before `FUN_8006f994` applies role `0x35`. Inquiry/LAP/role-switch cluster
+`0x800435xx`. 1 xref.
+
+Post-rename: **35 unnamed** in-region (35 in 1-19B tier); live named **1603**.
+
+**Next:** continue 1-19B cold-triage — skip rank-1–13 artifacts; refresh ranks via
 `ColdTriageRegion80040000Pass52hy2.java`.
