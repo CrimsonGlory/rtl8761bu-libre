@@ -2033,4 +2033,35 @@ teardown hook consistent with sibling encryption/pairing handlers in this cluste
 
 Region unnamed count after this pass: **266** (267 minus this rename). Live named **1655** global.
 
+**Next:** superseded by Pass 6 continuation (47).
+
+## Pass 6 continuation (47) (2026-06-30) — HCI Set Connection Encryption `FUN_800231d8`
+
+Decompiled and renamed:
+**`FUN_800231d8` → `fHCI_Set_Connection_Encryption_0x13`**
+(198B, HIGH) via `RenamePass6Region80020000Fun800231d8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (198B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=266` at pass start). Sits in the
+`0x80023xxx` HCI encryption-command cluster alongside `FUN_80023180` (link-key HCI
+path) and `apply_link_key_and_dispatch_auth_pairing_flow`.
+
+**Mechanism:** HCI Set Connection Encryption (OGF1 OCF 0x13 / opcode `0x0413`) command
+handler. Resolves connection slot via `FUN_800231bc`; reads `encryption_enable` from
+cmd buffer byte `+5`. Rejects disable (`enable==0`) when pairing-mode flag
+`crypto+0x214` is set → status `0x25`. Emits `send_evt_HCI_Command_Status`. Validates
+`enable ≤ 1` and link-type byte `*crypto` is one of `0x05`/`0x0c`/`0x15`/`0x16`; on
+valid paths sets `crypto+0x50`, calls `FUN_80024590(slot, crypto, 3, enable_flag)` and
+`FUN_80023fb8(crypto, 1)` to kick off encryption start/stop; invalid link-type emits
+`send_evt_HCI_Encryption_Change_v1_` with error `0x0c`.
+
+**Callers:** xref_in=1; individual caller not resolved this pass.
+
+**Confidence:** HIGH — decompile confirms standard HCI encryption-command idiom with
+documented crypto-struct offsets (`+0x50` mode, `+0x214` pairing flag), sibling calls
+to `FUN_80023fb8`/`send_evt_HCI_Encryption_Change_v1_` consistent with encryption
+cluster handlers in this region.
+
+Region unnamed count after this pass: **265** (266 minus this rename). Live named **1656** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
