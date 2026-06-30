@@ -8340,9 +8340,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52es;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52et: continue refreshed >150B
-          cold-triage — decompile+rename next rank-5 unnamed >150B candidate
-          (`0x8004a908`, 186B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52et (2026-06-30): decompiled+
+          renamed rank-5 `FUN_8004a908`→`program_sco_esco_timing_hw_globals_from_slot_interval`
+          (186B, HIGH). SCO/eSCO timing HW globals programmer; clamps slot interval
+          to `0x20a`, programs seven globals with `0x271` packed encoding; sole
+          caller `init_or_reset_sco_esco_hw_registers_and_link_slots`. 119 unnamed
+          in-region; live named 1519.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52et;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eu: continue refreshed >150B
+          cold-triage — decompile+rename next rank-6 unnamed >150B candidate
+          (`0x8004996a`, 172B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

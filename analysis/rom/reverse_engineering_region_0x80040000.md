@@ -5700,5 +5700,24 @@ slot `+5`, and when counter reaches threshold at `+2` clears link bytes
 Post-rename: **120 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1518**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
-unnamed >150B candidate (`0x8004a908`, 186B).
+**Next:** superseded by Pass 52et below.
+
+## Pass 52et (2026-06-30) — >150B rank-5 SCO/eSCO timing globals programmer rename
+
+**>150B rank-5 decompiled+renamed (HIGH):** `FUN_8004a908` →
+`program_sco_esco_timing_hw_globals_from_slot_interval` (186B) via
+`RenamePass52etRegion80040000Fun8004a908.java` (`renamed=1`, live-verified).
+
+SCO/eSCO timing HW globals programmer — clamps slot-interval `param_2` to
+`0x20a` (with logging when `param_1` flag set or value exceeds bound), then
+programs seven global HW register pointers using `0x271` (625 µs slot)
+packed quotient/remainder encoding `(q << 10) | r`; final register set to
+`0x410`. Sole caller `init_or_reset_sco_esco_hw_registers_and_link_slots`
+(`0x8004d294`) during full-reset path with packed timing from per-connection
+struct.
+
+Post-rename: **119 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1519**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-6
+unnamed >150B candidate (`0x8004996a`, 172B).
