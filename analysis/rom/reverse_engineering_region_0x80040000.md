@@ -8552,5 +8552,41 @@ mis-disassembled code per Pass 51). No direct callers found (indirect LMP router
 
 Post-rename: **43 unnamed** in-region (6 in 1-150B size≥20B tier); live named **1595**.
 
+**Next:** superseded by Pass 52hs below.
+
+## Pass 52hs (2026-06-30) — rank-1 timer-queue DLL unlink rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hs.java` — 43 unnamed,
+6 in 1-150B size≥20B tier; rank-1 `0x8004ed90` (44B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x8004edxx` timer/event-queue cluster;
+sibling of `sorted_event_list_insert_by_relative_key` at `0x8004ee94` and
+`dispatch_inflight_timer_queue_drain_pending_and_promote_next` at `0x8004ef08`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004ed90` →
+`unlink_event_list_node_by_link_status_bits` (44B) via
+`RenamePass52hsRegion80040000Fun8004ed90.java` (`renamed=1`, live-verified).
+
+```c
+void unlink_event_list_node_by_link_status_bits(int *param_1)
+{
+  /* early return unless status byte bit0 or bits 0x12 set */
+  /* select list head: PTR_DAT_8004edbc (default) or PTR_DAT_8004edc0 */
+  /* standard DLL unlink: prev->next = next; next->prev = prev; clear next ptr */
+  return;
+}
+```
+
+44B flag-gated doubly-linked-list unlink in the `0x8004edxx` timer/event-queue
+cluster: returns immediately unless `param_1+2` status byte has bit 0 or bits
+`0x12` set; selects list head `PTR_DAT_8004edbc` (bit 0 set) vs
+`PTR_DAT_8004edc0` (bit 0 clear, `0x12` set); performs standard intrusive-list
+unlink (patch predecessor next-pointer — head or node — and successor
+prev-pointer, zero node's next). Unlink primitive sibling of
+`sorted_event_list_insert_by_relative_key` (insert) and
+`dispatch_inflight_timer_queue_drain_pending_and_promote_next` (dequeue/dispatch).
+No direct callers found (indirect timer-queue router).
+
+Post-rename: **42 unnamed** in-region (5 in 1-150B size≥20B tier); live named **1596**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

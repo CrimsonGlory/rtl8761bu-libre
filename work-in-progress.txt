@@ -9078,7 +9078,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hr;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hs: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hs (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004ed90`→`unlink_event_list_node_by_link_status_bits`
+          (44B, HIGH). Flag-gated DLL unlink in `0x8004edxx` timer/event-queue
+          cluster: status-byte bits 0/0x12 gate; selects list head
+          `PTR_DAT_8004edbc` vs `PTR_DAT_8004edc0`; standard intrusive-list
+          unlink. Sibling of `sorted_event_list_insert_by_relative_key` and
+          `dispatch_inflight_timer_queue_drain_pending_and_promote_next`.
+          42 unnamed in-region (5 in 1-150B size≥20B tier); live named 1596.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hs;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ht: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
