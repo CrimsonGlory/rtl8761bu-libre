@@ -6057,5 +6057,37 @@ live named **1527**.
 Post-rename: **110 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1528**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-3
-unnamed >150B candidate (`0x80049c10`, 248B).
+**Next:** superseded by Pass 52fd below.
+
+## Pass 52fd (2026-06-30) — >150B rank-3 HW-reg pool commit HCI handler rename
+
+**>150B rank-3 decompiled+renamed (HIGH):** `FUN_80049c10` →
+`hci_hw_reg_pool_commit_gated_handler_send_cmd_complete_and_le_conn_complete`
+(248B, 0 xrefs in cold-triage) via
+`RenamePass52fdRegion80040000Fun80049c10.java` (`renamed=1`, live-verified).
+
+248B HCI command handler in the HW-reg pool entry cluster (sibling of
+`hci_hw_reg_pool_entry_add_gated_handler_send_cmd_complete` at `0x80049a2c`,
+remove handlers at `0x8004993c`/`0x8004996a`, and `FUN_80049b40` flush handler):
+
+- **Idle path (`PTR_PTR_80049d08[4]==0`):** requires conn-array
+  `field407_0x1a4` bit0 set (else status `0x0c` Command Disallowed); calls
+  `check_state_ready_and_invoke_or_busy()` — when return value is `4`, logs via
+  `possible_logger_called_if_no_patch3` and aborts with internal status `0x1f`
+  without Command Complete; otherwise clears bit0 of `field407_0x1a4`.
+- **Active path (`PTR_PTR_80049d08[4]!=0`):** invokes fn-ptr at
+  `PTR_DAT_80049d0c` with arg `0` (flush/apply pending pool state); sets
+  conn-type indicator `iVar10=1`.
+- **Command Complete:** 4-byte `hci_event_sender(0xe,…)` with opcode byte
+  `0x20` and `field_0x165` status idiom.
+- **Success follow-up:** when commit succeeded, emits LE Meta subevent via
+  `send_evt_Meta_subevent_0x01_or_0x0a_HCI_LE_Connection_Complete_or_HCI_LE_Enhanced_Connection_Complete`
+  (type `2`) and clears one bit of conn-array `field453_0x1d2`/`field454_0x1d3`
+  bitmask indexed by `field440_0x1c5` or `PTR_PTR_80049d08[0x11]`.
+
+Post-rename: **109 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1529**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
+unnamed >150B candidate (14 remain; run `ColdTriageRegion80040000Pass52eu.java`
+for fresh rank list).
