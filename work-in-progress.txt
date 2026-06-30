@@ -8195,9 +8195,21 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ed;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ee: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ee (2026-06-30): decompiled+
+          renamed rank-2 `FUN_80047980`→`validate_unique_handles_and_commit_sync_conn_params`
+          (380B, HIGH) — HCI sync-conn param commit helper; duplicate-handle
+          guard (HCI 0x12), per-entry conn-record commit with LMP procedure-slot
+          arm via `arm_lmp_procedure_slot_pending_by_active_link_count` (HCI 9
+          on capacity), packet-type hook merge, schedules
+          `build_linked_conn_param_buffers_and_schedule_link_timing_setup`;
+          sole callee from `FUN_80047b10` Command-Complete wrapper.
+          134 unnamed in-region; live named 1504.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ee;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ef: continue refreshed >150B
           cold-triage — refresh rank list and decompile+rename next rank-1
-          unnamed >150B candidate (rank-2 `0x80047980`, 380B).
+          unnamed >150B candidate.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

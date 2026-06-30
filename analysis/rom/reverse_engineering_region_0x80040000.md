@@ -2405,10 +2405,12 @@ procedure-active criteria as the busy-probe family, plus `+0x20` bit0). When
 `active_count + ctx[1] < 4`, cascades through three enable flags at `ctx+0x0a`,
 `+0x11`, `+0x18` (bit1 each) to pick slot index 1–3, then sets bit2 on the
 corresponding 7-byte stride record at `ctx[slot*7+3]`. Returns `0xff` when at
-capacity. Sole caller `FUN_80047980` (380B HCI synchronous-connection param
-commit handler): when `conn_rec+0x20` bit0 set and procedure not yet active,
-calls this function — on `0xff` returns HCI error `9`, else passes slot index
-to `FUN_8004fd6c` before arming procedure bit `+0x1d` and scheduling
+capacity. Sole caller `validate_unique_handles_and_commit_sync_conn_params`
+(380B HCI synchronous-connection param commit handler): when `conn_rec+0x20`
+bit0 set and procedure not yet active, calls this function — on `0xff` returns
+HCI error `9`, else passes slot index to
+`set_channel_slot_enable_refcount_and_conn_record_mode` before arming procedure
+bit `+0x1d` and scheduling
 `build_linked_conn_param_buffers_and_schedule_link_timing_setup`.
 
 Post-rename: **222 unnamed** in-region (136 in 1-150B tier).
@@ -5206,3 +5208,44 @@ live named **1503**.
 **Next:** continue refreshed >150B cold-triage — refresh rank list and
 decompile+rename next rank-1 unnamed >150B candidate (rank-2 `0x80047980`,
 380B).
+
+## Pass 52ee (2026-06-30) — >150B rank-2 HCI sync-conn param commit rename
+
+**Cold-triage (from Pass 52ed refresh):** rank-2 `0x80047980` (380B, 1 xref).
+
+**>150B rank-2 decompiled+renamed (HIGH):** `FUN_80047980` →
+`validate_unique_handles_and_commit_sync_conn_params` (380B, 1 xref) via
+`RenamePass52eeRegion80040000Fun80047980.java` (`renamed=1`, live-verified).
+
+HCI synchronous-connection parameter commit helper — sole callee from
+`FUN_80047b10` (outer handler that terminates via `hci_event_sender(0xe,…)`
+Command Complete):
+
+- **Duplicate-handle guard:** nested loop over `param_3` 4-byte entries at
+  `param_2` (handle at byte 0); returns HCI `0x12` (Invalid HCI Command
+  Parameters) on any duplicate.
+- **Per-entry commit** (`param_1 != 0` commit mode): lookup via
+  `conn_record_get_4byte_field_by_handle`; missing record → `0x42`.
+- **New procedure** (`conn_rec+0x1d` bit2 clear): slot-offset bound check on
+  `+0x20==0x1d` links; when `+0x20` bit0 set calls
+  `arm_lmp_procedure_slot_pending_by_active_link_count` — returns HCI `9` on
+  `0xff` capacity, else `set_channel_slot_enable_refcount_and_conn_record_mode`;
+  writes `+0x1b`, `+0x22` (slot offset), `+0x17` (air mode); packet-type hook
+  at `_FUN_80047afc` merges into `+0x28`; sets `+0x1d` bit2; schedules
+  `build_linked_conn_param_buffers_and_schedule_link_timing_setup`.
+- **Re-commit** (bit2 already set): re-merges packet-type mask into `+0x28`,
+  diagnostic log via `possible_logging_function__var_args`.
+- **Probe mode** (`param_1 == 0`): when bit2 set dispatches
+  `conditional_dispatch_LE_channel_selection_algorithm`; gates on
+  `config_base+0x1e0` low-5-bits vs entry index.
+
+SCO/eSCO connection-setup cluster sibling of
+`HCI_Setup_Synchronous_Connection_handler` /
+`HCI_Accept_Synchronous_Connection_Request_handler` and the Pass 52do/52dp
+LMP fragment-reassembly pair.
+
+Post-rename: **134 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1504**.
+
+**Next:** continue refreshed >150B cold-triage — refresh rank list and
+decompile+rename next rank-1 unnamed >150B candidate.
