@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hh COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **COMPLETE** (0 remain). Latest: `thunk_send_lmp_accepted_0x33_and_finalize_crypto` (Pass 12hh). SIMPLE-tier and HANDLER-tier sweeps also complete (0 remain). Live named **1369** global; **2** in-region unnamed (2 CRITICAL). **[NEXT]** cold-triage next CRITICAL-tier unnamed per `ListCritical80070000.java` (top: `FUN_80072924`, xref_in=10). See Pass 12hh section below.
+**Status**: Pass 12hi COMPLETE (2026-06-30) — CRITICAL-tier cold-triage in progress (1 remain: `FUN_80072bac`). Latest: `register_afh_lap_group_slot_with_collision_check` (Pass 12hi). STUB/SIMPLE/HANDLER-tier sweeps complete (0 remain). Live named **1370** global; **1** in-region unnamed (1 CRITICAL). **[NEXT]** cold-triage remaining CRITICAL-tier `FUN_80072bac` (814B, xref_in=7). See Pass 12hi section below.
 
 ## Overview
 
@@ -2417,6 +2417,37 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hi (2026-06-30) — AFH/LAP group slot registrar `FUN_80072924`
+
+Decompiled and renamed:
+**`FUN_80072924` → `register_afh_lap_group_slot_with_collision_check`**
+(628B, HIGH, CRITICAL-tier) via `RenamePass12hiRegion80070000Fun80072924.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 CRITICAL-tier candidate per `ListCritical80070000.java` listing
+(628B, xref_in=10).
+
+**Mechanism:** 5-parameter AFH/LAP group-slot registration on global
+`struct_of_at_least_0x300_size` (`_x142_LAP[6]` table). Optional first patchable hook at
+`PTR_DAT_80072b98`. Calls `find_free_afh_lap_group_index_after_map_clear` (Pass 12cj) to
+acquire a free group index, builds a 36-byte occupancy bitmap from the six LAP entries,
+computes slot-period/stride/offset via `compute_afh_lap_slot_offset_from_conn_cc_and_timing_base`
+(Pass 12ci) when conn-index `<0x10`, writes group-byte/`+0x4f` handle/`+0x55` period/
+`+0x5b` offset/`+0x61` slot/`+0x67` stride/`+0x6e` timing word into the free slot, then
+scans the registration window for channel collisions against the bitmap. Returns `0` on
+success (no collision) or `1` when a conflicting LAP handle occupies the window. Shorter
+5-param sibling of the extended 6-param `FUN_80072bac` variant (which additionally invokes
+`merge_afh_lap_peer_channel_maps_and_find_free_channel` for peer-map merge). Callers include
+`compute_esco_timing_offset_and_dispatch` (region `0x80050000`) and
+`LMP_SCO_LINK_REQ_0x17_handler` (SCO setup consulting the AFH/LAP channel table).
+
+**Confidence:** HIGH — AFH/LAP cluster now fully named end-to-end via Passes 12cj/12ci/12ck
+helpers plus direct structural match to documented `VSC_0xfc73_AFH_Channel_Assessment` field
+layout; collision-return semantics and callee chain unambiguous.
+
+Live named **1370** (global; in-region unnamed **1**; CRITICAL-tier unnamed **1**).
+
+**Next:** cold-triage remaining CRITICAL-tier `FUN_80072bac` (814B, xref_in=7).
+
 ## Pass 12hh (2026-06-30) — LMP-accepted-0x33 crypto-finalize thunk `FUN_80070070`
 
 Decompiled and renamed:
@@ -2440,8 +2471,7 @@ role-switch routing documented in Pass 4/12fk.
 
 Live named **1369** (global; in-region unnamed **2**; STUB-tier unnamed **0**).
 
-**Next:** cold-triage next CRITICAL-tier unnamed per `ListCritical80070000.java`
-(top: `FUN_80072924`, xref_in=10).
+**Next:** superseded by Pass 12hi.
 
 ## Pass 12hg (2026-06-30) — conn-gated EDR feature-bit probe stub `FUN_80071b1c`
 

@@ -6924,8 +6924,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hi: cold-triage next CRITICAL-tier
-          unnamed per `ListCritical80070000.java` (top: `FUN_80072924`, xref_in=10).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hi (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80072924`→`register_afh_lap_group_slot_with_collision_check`
+          (628B, HIGH, CRITICAL-tier). 5-param AFH/LAP group-slot registrar: free-index
+          via `find_free_afh_lap_group_index_after_map_clear`, bitmap build, slot-offset
+          via `compute_afh_lap_slot_offset_from_conn_cc_and_timing_base`, collision check;
+          shorter sibling of `FUN_80072bac`; callers `compute_esco_timing_offset_and_dispatch`
+          + `LMP_SCO_LINK_REQ_0x17_handler`. CRITICAL-tier unnamed 1 remain; live named 1370.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hi;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hj: cold-triage remaining CRITICAL-tier
+          unnamed `FUN_80072bac` (814B, xref_in=7).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
