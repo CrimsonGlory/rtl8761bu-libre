@@ -288,7 +288,7 @@ each other on content alone).
 | `0x80046900` | 682B | `validate_and_stage_sco_packet_type_table_from_hci_params` — multi-entry SCO packet-type table HCI param validator; 3-bit packet-type mask; `lazy_alloc_tag9_singleton_and_encode_lowbit_index` + `align_sco_slots_and_derive_retx_buffer_dims` per entry. See Pass 52ds | HIGH |
 | `0x800480b0` | 682B | `validate_and_stage_sco_air_mode_change_from_hci_command` — HCI SCO air-mode change validator+stager; see Pass 52dt | HIGH |
 | `0x8004b468` | 624B | `fragment_conn_tx_overflow_chain_into_hw_descriptor_slots_by_budget` — IRQ-off snapshot of overflow queue at `conn+0x128..0x131`, walks `+0x100` chain, allocates HW descriptor slots, fragments TX bytes within budget, recycles or enqueues via list-A; see Pass 52du | HIGH |
-| `0x80045964` | 560B | Validates page-scan/inquiry-scan-style window/interval parameter pairs (bounded `0x1f..0x4000`), bit-packs results into a `the_0x300`-sized struct's offset `0x28-0x2f` region, terminates via `hci_event_sender(0xe,...)` (Command Complete). Strong shape match to HCI_Write_Page_Scan_Activity / HCI_Write_Inquiry_Scan_Activity, but two near-identical HCI commands share this exact bounds pattern in the spec — can't be distinguished to HIGH without a confirming xref. | MEDIUM-HIGH |
+| `0x80045964` | 560B | `validate_and_commit_hci_scan_activity_params_from_command` — HCI scan-activity interval/window validator+committer; bounds `0x1f..0x4000`, bit-packs into global BT-state `+0x28..0x2f`, `hci_event_sender(0xe,...)` Command Complete; see Pass 52dv | HIGH |
 
 **Net effect (upper half)**: 1 of 11 renamed to HIGH confidence
 (`HCI_Accept_Synchronous_Connection_Request_handler`, sibling to the
@@ -4930,5 +4930,31 @@ Upgraded from MEDIUM (Pass 3). 0 xrefs (indirect function-pointer registration).
 Post-rename: **144 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1494**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-35
-`0x80045964` (560B, xrefs:0).
+## Pass 52dv (2026-06-30) — >150B rank-35 HCI scan-activity validator rename
+
+**>150B rank-35 decompiled+renamed (HIGH):** `FUN_80045964` →
+`validate_and_commit_hci_scan_activity_params_from_command` (560B, 0 xrefs) via
+`RenamePass52dvRegion80040000Fun80045964.java` (`renamed=1`, live-verified).
+
+HCI scan-activity parameter validator+committer (upgraded from MEDIUM-HIGH, Pass 3).
+Re-entrancy guard on global `the_0x300` struct byte at `+0x15dc`; gated on
+`field208_0xd8` bit 0 and config flag `PTR_DAT_80045b98` bit 4. Two validation
+paths: (a) scan-enable fast-path when type byte is 1 or 4 with `param_len < 4`,
+copies 6 bytes via `optimized_memcpy` into template at
+`PTR_base_of_0x1ac_struct_array_0xA_large2_0__field48_0x30_80045ba0` and
+bit-packs mode flags into `+0x28`/`+0x29`; (b) interval/window pair path with
+HCI-spec bounds `0x1f < value < 0x4001`, window ≤ interval, optional page-scan
+repetition-mode check via `PTR_DAT_80045ba4`, writes interval to `+0x2c` and
+window to `+0x2e`. Commits packed fields into global BT-state struct at
+`+0x28..0x2f`. Returns `0x00` OK, `0x0c` busy (re-entrant), `0x12` invalid
+param; logs via `possible_logging_function__var_args` then emits HCI Command
+Complete via `hci_event_sender(0xe, &local_38, 4)`. Shape matches both
+HCI_Write_Page_Scan_Activity and HCI_Write_Inquiry_Scan_Activity (indistinguishable
+without confirming xref); named generically per Pass 3 precedent. 0 xrefs
+(indirect HCI dispatch).
+
+Post-rename: **143 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1495**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-36
+`0x8004d294` (1280B, xrefs:0).

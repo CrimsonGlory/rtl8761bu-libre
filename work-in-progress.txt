@@ -8102,8 +8102,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52du;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dv: continue >150B cold-triage
-          — decompile+rename refreshed rank-35 `0x80045964` (560B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dv (2026-06-30): decompiled+
+          renamed rank-35 `FUN_80045964`→`validate_and_commit_hci_scan_activity_params_from_command`
+          (560B, HIGH). HCI scan-activity interval/window validator+committer;
+          bounds `0x1f..0x4000`, bit-packs into global BT-state `+0x28..0x2f`,
+          `hci_event_sender(0xe,...)` Command Complete; upgraded from MEDIUM-HIGH
+          (Pass 3). 0 xrefs (indirect HCI dispatch). 143 unnamed in-region;
+          live named 1495.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dv;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dw: continue >150B cold-triage
+          — decompile+rename refreshed rank-36 `0x8004d294` (1280B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
