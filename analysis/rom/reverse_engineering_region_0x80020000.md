@@ -1584,4 +1584,34 @@ opcode and LMP 0x40 accept/reject dispatch parallel extended OOB handler at
 
 Region unnamed count after this pass: **280** (281 minus this rename). Live named **1641** global.
 
+**Next:** superseded by Pass 6 continuation (33).
+
+## Pass 6 continuation (33) (2026-06-30) — HW TX descriptor slot programmer `FUN_8002b558`
+
+Decompiled and renamed:
+**`FUN_8002b558` → `program_active_tx_descriptor_slots_to_hw_registers`**
+(246B, HIGH) via `RenamePass6Region80020000Fun8002b558.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (246B, xref_in=7) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=280` at pass start).
+
+**Mechanism:** HW TX descriptor submitter in the `0x8002b5xx` TX-buffer cluster (sibling
+of `enqueue_tx_buffer_fragments_for_slot`). Gated on header validity at `param_1+2`
+(bits `0x1ffc`). Polls HW ready via `FUN_8002b514` before programming (and again when
+`param_5 != 0`). Walks up to `param_2` slots (capped at 8), programming each active
+descriptor dword (`0x1ffc0000` payload mask) into three BB register pointers
+`DAT_8002b650`/`DAT_8002b654`/`DAT_8002b658`. Encodes slot index and fragment length
+from descriptor bitfields; merges type bits from `param_3`/`param_4` low nibbles.
+
+**Callers:** 7 xrefs (`find_callers` lock-contended this pass); documented caller
+`dispatch_conn_tx_by_packet_type_nibble_with_reassembly` (`0x8004ce70`, region
+`0x80040000` Pass 52dx) programs HW descriptor per chunk during type-0 multi-chunk TX
+reassembly.
+
+**Confidence:** HIGH — decompile confirms BB register triplet write idiom; sits
+adjacent to `enqueue_tx_buffer_fragments_for_slot` (Pass 6 cont. 19); cross-region
+caller already documents "programs HW descriptor per chunk via FUN_8002b558".
+
+Region unnamed count after this pass: **279** (280 minus this rename). Live named **1642** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
