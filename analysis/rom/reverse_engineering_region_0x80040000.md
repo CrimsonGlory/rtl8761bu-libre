@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 156 functions in tier, 24 renamed HIGH (Passes 52–52z). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52z, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 155 functions in tier, 25 renamed HIGH (Passes 52–52aa). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aa, 2026-06-30).
 
 ## Overview
 
@@ -1643,3 +1643,44 @@ Post-rename: **241 unnamed** in-region (155 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-21+
 substantive candidate; skip rank-1–20 artifacts.
+
+## Pass 52aa (2026-06-30) — rank-21 0x54-record free-list linker rename
+
+**Refreshed cold-triage (rank-1–20 skipped as artifacts or already done):** rank-21
+`0x8004e220` (64B, 2 xrefs) — substantive record-pool free-list linker in the
+config-driven allocator cluster (sibling of `alloc_0x54_record_pool_and_ptr_table` /
+`init_0xfc_record_pool_and_send_LMP_25B` in region `0x80050000`).
+
+**Rank-21 decompiled and renamed (HIGH):** `FUN_8004e220` →
+`link_0x54_record_pool_into_free_list_by_config_count` (64B) via
+`RenamePass52aaRegion80040000Fun8004e220.java` (`renamed=1`, live-verified).
+
+```c
+void link_0x54_record_pool_into_free_list_by_config_count(void)
+{
+  head = PTR_PTR_8004e260;
+  *head = 0;
+  n = config.field468_0x1e0 & 0x1f;
+  for (i = 0; i < n; i++) {
+    rec = PTR_PTR_8004e264 + i * 0x54;
+    *rec = *head;   // next pointer
+    *head = rec;
+  }
+  meta = PTR_PTR_8004e270;
+  meta[1] = n;
+  meta[0] = PTR_PTR_8004e26c;
+  meta[2] = 0;
+}
+```
+
+Builds a singly-linked free list through the first dword of each pre-allocated
+0x54-byte record; count from config `field468_0x1e0` low 5 bits. Head at
+`PTR_PTR_8004e260`, pool base at `PTR_PTR_8004e264`, metadata triple at
+`PTR_PTR_8004e270`. Called by `alloc_0x54_record_pool_and_ptr_table`
+(`0x800524b8`) and `init_0xfc_record_pool_and_send_LMP_25B` (`0x80052344`)
+after struct-pool allocation — shared linking step in the record-pool init family.
+
+Post-rename: **240 unnamed** in-region (154 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-22+
+substantive candidate; skip rank-1–21 artifacts.
