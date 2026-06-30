@@ -6323,6 +6323,37 @@ at `0x80048fb8`):
 Post-rename: **101 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1537**.
 
+**Next:** superseded by Pass 52fm below.
+
+## Pass 52fm (2026-06-30) — >150B rank-1 AFH-gated conn10 HW-ctrl + LMP recovery HCI handler rename
+
+**Cold-triage (refreshed):** 6 unnamed >150B remain. rank-1 `0x80048c0c`
+(200B, 0 xrefs).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80048c0c` →
+`hci_afh_gated_conn10_hw_ctrl_and_lmp_recovery_send_cmd_complete`
+(200B, 0 xrefs) via
+`RenamePass52fmRegion80040000Fun80048c0c.java` (`renamed=1`, live-verified).
+
+200B HCI command handler in the `0x80048cxx` AFH/LMP-recovery cluster (sibling of
+`hci_afh_poll_read_link_rx_timing_triple_send_cmd_complete` at `0x80048d6c` and
+`dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery` at `0x80048b80`):
+
+- **AFH gate:** `field327_0x154` bit2 set (else status `0x1a`).
+- **State gates:** conn-array fields at `+0x28`/`+0x44`/`+0x1a4`,
+  `PTR_DAT_80048cd8` bit0, `PTR_PTR_80048cdc`/`PTR_PTR_80048ce0` pool-state
+  bytes — any failure → status `0x0c`.
+- **Enable path:** byte at `param+3` drives enable flag; calls
+  `set_hw_ctrl_bits_and_update_conn10_0x154(enable)`; updates timing word at
+  master struct `+0xe` and related globals at `DAT_80048ce4`/`DAT_80048ce8`/
+  `DAT_80048cec`; then
+  `dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery(enable)`.
+- **Terminus:** 4-byte HCI Command Complete via `hci_event_sender(0xe,…)` with
+  `field_0x165` status idiom.
+
+Post-rename: **100 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1538**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (6 remain; run `ColdTriageRegion80040000Pass52eu.java`
+unnamed >150B candidate (5 remain; run `ColdTriageRegion80040000Pass52eu.java`
 for fresh rank list).

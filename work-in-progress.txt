@@ -8527,9 +8527,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fl;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fm: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fm (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80048c0c`→`hci_afh_gated_conn10_hw_ctrl_and_lmp_recovery_send_cmd_complete`
+          (200B, HIGH). AFH-gated conn10 HW-ctrl + LMP recovery HCI handler;
+          `set_hw_ctrl_bits_and_update_conn10_0x154`, timing-word commit,
+          `dispatch_lmp_25c_25b_and_optional_vsc_fc95_lmp_268_recovery`.
+          5 unnamed >150B; 100 unnamed in-region; live named 1538.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fm;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fn: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (6 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
+          (5 remain; run ColdTriageRegion80040000Pass52eu.java for fresh rank).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
