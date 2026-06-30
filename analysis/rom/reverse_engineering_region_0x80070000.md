@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fs COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**9** HANDLER-tier unnamed remain in-region; live named **1328** global). Latest: `packet_slot_ring_dequeue_and_dispatch_loop` (Pass 12fr), `rebuild_fc35_config_entry_to_connection_bitmaps` (Pass 12fs). **[NEXT]** `FUN_80073e94` (rank-1 HANDLER-tier, xref_in=1). See Pass 12fs section below.
+**Status**: Pass 12ft COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**8** HANDLER-tier unnamed remain in-region; live named **1329** global). Latest: `append_quality_sample_to_rssi_batch_and_flush` (Pass 12ft), `rebuild_fc35_config_entry_to_connection_bitmaps` (Pass 12fs). **[NEXT]** `FUN_800739ac` (rank-1 HANDLER-tier tied at xref_in=1). See Pass 12ft section below.
 
 ## Overview
 
@@ -2360,7 +2360,37 @@ Decompiled and renamed:
 
 Live named **1328** (global; in-region unnamed **24**; HANDLER-tier unnamed **9**).
 
-**Next:** cold-triage next HANDLER-tier candidate (`FUN_80073e94` rank-1 tied at xref_in=1, per `ListHandler80070000.java`).
+**Next:** superseded by Pass 12ft.
+
+## Pass 12ft (2026-06-30) — RSSI batch append sink `FUN_80073e94`
+
+Decompiled and renamed:
+**`FUN_80073e94` → `append_quality_sample_to_rssi_batch_and_flush`**
+(200B, HIGH, HANDLER-tier) via `RenamePass12ftFun80073e94.java` (`renamed=1`, live-verified).
+
+**Mechanism:** RSSI/link-quality batch-entry sink called by Pass 12fq's
+`retry_ext_feature_page_req_and_flush_quality_average_sample` with `(record+0x10, average)`.
+Gates on the sample-type nibble (`*param_1 & 0xf`): only types with bits set in mask `0x55`
+(types 0/2/4/6) proceed; type 2 additionally requires `param_1[1] - 6` as a variable-length
+payload byte count, other accepted types use zero-length extra data. Appends into the shared
+`0x1ac`-base struct batch arrays at `PTR_base_of_0x1ac_struct_array_0xA_large2_80073f50`:
+stores type nibble at `+0x4d[index]`, high-bit flag at `+0x51[index]`, 6-byte BDADDR copy at
+`+0x55[index*6]`, optional extra bytes at `+0x71[index*0x20]`, length at `+0x6d[index]`, and
+the quality value (`param_2`) at `+0xf1[index]`; increments slot counter `+0x4c` and when the
+pre-increment value was not `0xFF`, flushes via already-named
+`flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb` then resets the counter. Completes the
+RSSI-batch cluster documented in region `0x80040000` Pass 51 (`append_rssi_entry_to_pending_batch_and_flush_if_full` /
+`flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`) as the alternate per-quality-sample
+append path feeding the same meta-subevent flush primitive.
+
+**Confidence:** HIGH — straightforward decompile; type-gate bitmask, BDADDR memcpy, batch-index
+increment, and named flush callee all directly readable; caller link confirmed from Pass 12fq's
+decompiled body (`retry_ext_feature_page_req_and_flush_quality_average_sample` average-sink call).
+
+Live named **1329** (global; in-region unnamed **23**; HANDLER-tier unnamed **8**).
+
+**Next:** cold-triage next HANDLER-tier candidate (`FUN_800739ac` rank-1 tied at xref_in=1, per
+`ListHandler80070000.java`).
 
 ## Pass 12fq (2026-06-29) — LMP ext-feature-page retry + quality average `FUN_80073f5c`
 
@@ -2377,15 +2407,17 @@ counter, clears the state back to `1`, and calls Pass-documented
 `alloc_and_send_lmp_ext_feature_page_req_pdu_with_log(...)` to retry the LMP extended-feature-page
 request; (2) independently, if bit3 of the state byte is set, increments a second counter at `+9`
 against limit `+8`; once exceeded, resets it and — if the accumulated sample count at `+10` is
-nonzero — divides the sum at `+0xc` by that count and passes the average to `FUN_80073e94`
-(`pbVar7+0x10`, avg), which posts the value into the RSSI/link-quality batch arrays flushed via
+nonzero — divides the sum at `+0xc` by that count and passes the average to
+`append_quality_sample_to_rssi_batch_and_flush` (`pbVar7+0x10`, avg), which posts the value into
+the RSSI/link-quality batch arrays flushed via
 `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`, then zeroes the accumulator fields
 `+0xa..+0xf`. `find_callers` returned no direct xrefs (consistent with Pass 12fp's note that this
 is reached only via its third 32-bit bitmask walk, an indirect per-link dispatch, not a direct
 call site).
 
 **Confidence:** HIGH — straightforward decompile; record layout (retry counter/limit pair,
-separate average accumulator pair) and the downstream average-sink call to `FUN_80073e94` are
+separate average accumulator pair) and the downstream average-sink call to
+`append_quality_sample_to_rssi_batch_and_flush` are
 both directly readable from the decompilation.
 
 Live named **1326** (global; in-region unnamed **26**; HANDLER-tier unnamed **13**, no change —

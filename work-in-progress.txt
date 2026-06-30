@@ -6553,8 +6553,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12fs;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ft: cold-triage next HANDLER-tier
-          candidate (`FUN_80073e94` rank-1 tied at xref_in=1, 9 remain per
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ft (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80073e94`→`append_quality_sample_to_rssi_batch_and_flush`
+          (200B, HIGH, HANDLER-tier). RSSI/link-quality batch append sink: type-nibble
+          gate (mask 0x55), BDADDR+optional payload into `0x1ac`-base batch arrays,
+          flush via `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb` on counter
+          wrap; caller `retry_ext_feature_page_req_and_flush_quality_average_sample`.
+          HANDLER-tier unnamed 8 remain; live named 1329.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ft;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fu: cold-triage next HANDLER-tier
+          candidate (`FUN_800739ac` rank-1 tied at xref_in=1, 8 remain per
           `ListHandler80070000.java`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
