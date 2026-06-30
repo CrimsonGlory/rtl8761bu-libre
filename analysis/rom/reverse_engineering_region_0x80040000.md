@@ -4533,7 +4533,7 @@ Early exits for LE/inquiry codec-match (`FUN_80015a68`), duplicate-codec reject
 filters via `gate_conn_event_ring_dequeue_by_sco_esco_type_flags`, validates role via
 `lookup_codec_or_role_type_table_7x4`, then dispatches by conn-type nibble:
 nibble 2 → `FUN_800411a4`; nibble 3 (in `local_3c` byte-1 bits 4–5) →
-`FUN_80040494`; nibbles 1–2 → callee
+`build_and_submit_lmp_0x480_for_conn_type_3`; nibbles 1–2 → callee
 `build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` (Pass 52de). Logs on
 empty ring. SCO/eSCO conn-type cluster hub sibling of Pass 52de PDU builder.
 
@@ -5567,5 +5567,39 @@ the same dispatcher and `pack_and_log_param_pair_0x26f` (region `0x80050000`).
 Post-rename: **125 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1513**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
-unnamed >150B candidate (`0x80040494`, 238B).
+**Next:** superseded by Pass 52eo below.
+
+## Pass 52eo (2026-06-30) — >150B rank-5 conn-type-3 LMP 0x480 builder rename
+
+**Refreshed cold-triage (`ColdTriageRegion80040000Pass52eo.java`):** **29** unnamed
+>150B remain (down from 34 at Pass 52ek). rank-1 `0x8004c844` (234B); rank-2
+`0x8004fbc0` (216B); rank-3 `0x80044490` (202B); rank-4 `0x8004b1d0` (200B);
+rank-5 `0x8004a908` (186B); rank-6 `0x8004996a` (172B).
+
+**>150B rank-5 decompiled+renamed (HIGH):** `FUN_80040494` →
+`build_and_submit_lmp_0x480_for_conn_type_3` (238B, 1 xref from
+`dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`) via
+`RenamePass52eoRegion80040000Fun80040494.java` (`renamed=1`, live-verified).
+
+Conn-event ring conn-type-nibble-3 LMP `0x480` PDU builder — sibling of
+`build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2` (nibbles 1–2) and
+`FUN_800411a4` (nibble 2 role-connection path). Called when dequeued record
+byte-1 bits 4–5 encode conn-type `3` with handle `param_1`, role sub-index
+`param_2`, and encoded role/type byte `param_3`:
+
+- **Buffer alloc:** patch-hook fptr at `PTR_DAT_80040584` via
+  `call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`.
+- **PDU body:** `FUN_800145e8(buf+4, handle, 0)` fills LMP payload.
+- **Slot resolve:** when `param_2==0`, walks `big_ol_struct[0..9]` for valid
+  non-random entry with `byte_0xCC == param_3`; else
+  `lookup_codec_or_role_type_table_7x4`.
+- **Header pack:** writes conn index at `+0x16`, handle at `+0x18`, role byte
+  at `+0x19`.
+- **Submit:** `possible_logger_called_if_no_patch3` with LMP opcode `0x480`.
+- **Failure path:** `FUN_80014524(handle,0)` + diagnostic log.
+
+Post-rename: **124 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1514**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
+unnamed >150B candidate (`0x8004c844`, 234B).

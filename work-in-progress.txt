@@ -8294,9 +8294,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52en;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eo: continue refreshed >150B
-          cold-triage — decompile+rename next rank-5 unnamed >150B candidate
-          (`0x80040494`, 238B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52eo (2026-06-30): decompiled+
+          renamed rank-5 `FUN_80040494`→`build_and_submit_lmp_0x480_for_conn_type_3`
+          (238B, HIGH). Conn-event ring conn-type-nibble-3 LMP 0x480 PDU builder;
+          patch-hook alloc, `FUN_800145e8` body, slot resolve, header pack, submit;
+          callee of `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`.
+          124 unnamed in-region; live named 1514.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52eo;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ep: continue refreshed >150B
+          cold-triage — decompile+rename next rank-1 unnamed >150B candidate
+          (`0x8004c844`, 234B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
