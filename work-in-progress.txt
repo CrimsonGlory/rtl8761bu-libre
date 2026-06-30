@@ -8082,8 +8082,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ds;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52dt: continue >150B cold-triage
-          — decompile+rename refreshed rank-33 `0x800480b0` (682B, xrefs:0).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52dt (2026-06-30): decompiled+
+          renamed rank-33 `FUN_800480b0`→`validate_and_stage_sco_air_mode_change_from_hci_command`
+          (682B, HIGH). HCI SCO air-mode change validator+stager; gated on global
+          `field451_0x1d0` bit 0; `validate_esco_packet_type_params_with_hook` +
+          `initiate_pending_procedure_or_defer`; no-change path emits LMP `0x26f`;
+          sibling of `HCI_Accept_Synchronous_Connection_Request_handler`. 0 xrefs
+          (indirect HCI dispatch). 145 unnamed in-region; live named 1493.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dt;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52du: continue >150B cold-triage
+          — decompile+rename refreshed rank-34 `0x8004b468` (624B, xrefs:0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -286,7 +286,7 @@ each other on content alone).
 | `0x80047c50` | 700B | `parse_validate_and_commit_esco_sco_config_pdu_to_conn_record` — 28-byte eSCO/SCO config PDU validator+committer; LMP VSC 0x268 pool slot `0x8010bc64`; `alloc_link_record_and_register_by_index` + `dispatch_hw_hook_for_main_and_substates`. See Pass 52dr | HIGH |
 | `0x8004966c` | 696B | `undefined1 FUN_8004966c(...)`: validates SCO/eSCO bandwidth/packet-type/retransmission-window params using nearly identical bounds checks to the already-confirmed `HCI_Setup_Synchronous_Connection_handler` (0x80049d20), writes into `get_0x1ac_struct_ptr_by_index`-addressed connection-record fields, and terminates via `send_evt_HCI_Command_Status` on every path — the same "this is an HCI command handler" signature as its sibling. Parameter shape and termination pattern match HCI Accept Synchronous Connection Request. | **HIGH** — renamed `HCI_Accept_Synchronous_Connection_Request_handler` |
 | `0x80046900` | 682B | `validate_and_stage_sco_packet_type_table_from_hci_params` — multi-entry SCO packet-type table HCI param validator; 3-bit packet-type mask; `lazy_alloc_tag9_singleton_and_encode_lowbit_index` + `align_sco_slots_and_derive_retx_buffer_dims` per entry. See Pass 52ds | HIGH |
-| `0x800480b0` | 682B | Validates connection params via `get_0x1ac_struct_ptr_by_index`, checks a bitmask with sub-cases 0/1/2, conditionally calls `FUN_8005fe90`, terminates exclusively via `send_evt_HCI_Command_Status` on every path — shape consistent with an HCI command handler toggling a per-connection link-policy/mode flag (e.g. Sniff/Hold/Park-style), but no definitive single name confirmed. | MEDIUM-HIGH |
+| `0x800480b0` | 682B | `validate_and_stage_sco_air_mode_change_from_hci_command` — HCI SCO air-mode change validator+stager; see Pass 52dt | HIGH |
 | `0x8004b468` | 624B | No HCI event/status sender at all — pure internal queue/scheduler logic over `0x1ac`-strided struct array entries via `FUN_8004b344`/`FUN_8004b170`/`FUN_8004b0f8`/`FUN_8004b3c0`; disables/enables interrupts around a critical section; manages a linked list with byte-budget accounting. Likely the TX/scheduling fragmentation engine for per-connection ACL/SCO data queues — internal infra, not an HCI command handler. | MEDIUM |
 | `0x80045964` | 560B | Validates page-scan/inquiry-scan-style window/interval parameter pairs (bounded `0x1f..0x4000`), bit-packs results into a `the_0x300`-sized struct's offset `0x28-0x2f` region, terminates via `hci_event_sender(0xe,...)` (Command Complete). Strong shape match to HCI_Write_Page_Scan_Activity / HCI_Write_Inquiry_Scan_Activity, but two near-identical HCI commands share this exact bounds pattern in the spec — can't be distinguished to HIGH without a confirming xref. | MEDIUM-HIGH |
 
@@ -4881,5 +4881,31 @@ timing fields on the tag-9 record (`+0xc/+0xd/+0xe`), merges mode nibbles into
 Post-rename: **146 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1492**.
 
-**Next:** continue >150B cold-triage — decompile+rename refreshed rank-33
-`0x800480b0` (682B, xrefs:0).
+## Pass 52dt (2026-06-30) — >150B rank-33 HCI SCO air-mode change validator+stager rename
+
+**>150B rank-33 decompiled+renamed (HIGH):** `FUN_800480b0` →
+`validate_and_stage_sco_air_mode_change_from_hci_command` (682B, 0 xrefs) via
+`RenamePass52dtRegion80040000Fun800480b0.java` (`renamed=1`, live-verified).
+
+HCI synchronous-connection air-mode change handler (structural sibling of
+`HCI_Accept_Synchronous_Connection_Request_handler` and
+`validate_and_stage_sco_packet_type_table_from_hci_params`). Gated on global
+`field451_0x1d0` bit 0; parses connection handle + air-mode/packet-type bytes
+from HCI command buffer; resolves conn record via
+`query_config_struct_0x1ac_by_index`; selects override/default packet-type pair
+via `select_override_or_default_byte_pair_and_log`; validates via
+`validate_esco_packet_type_params_with_hook`. Writes air-mode fields to conn
+record (`+0x115..+0x117`, `+0x124`, `+0x118` low-nibble encoding for eSCO-flag
+sub-cases 0/1/2). No-change path (staged bytes `+0x122`/`+0x123` match): sends
+`send_evt_HCI_Command_Status` OK + logs LMP `0x26f` via
+`possible_logger_called_if_no_patch3` (same idiom as Accept handler). Change
+path when `+0x90` bit 2 clear and `+0x114` low nibble idle: stages new bytes at
+`+0x11a`/`+0x11b`, sets `+0x60` bit 3, calls
+`initiate_pending_procedure_or_defer`. Returns `0x00` OK, `0x02` lookup fail,
+`0x0c` busy, `0x12` invalid param. 0 xrefs (indirect HCI dispatch).
+
+Post-rename: **145 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1493**.
+
+**Next:** continue >150B cold-triage — decompile+rename refreshed rank-34
+`0x8004b468` (624B, xrefs:0).

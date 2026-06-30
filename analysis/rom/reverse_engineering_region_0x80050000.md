@@ -3293,7 +3293,7 @@ xref count. Continue excluding all 8 confirmed mis-disassembly artifacts.
 
 **0x80059a1c** (64B, rank 13) → `validate_esco_packet_type_params_with_hook`
 - Optional fn-ptr override at `PTR_DAT_80059a5c`; if no fn or result==0: checks (param_1&7)==0 (pass) OR (param_2&7)!=0 (pass); returns 0 or 1
-- Called by `FUN_800480b0`
+- Called by `validate_and_stage_sco_air_mode_change_from_hci_command` (`0x800480b0`, Pass 52dt)
 
 **0x80051c24** (54B, rank 14) → `write_link_capability_flags_to_hw_reg_7`
 - Reads bits 0 and 1 of `PTR_PTR_80051c5c[8]`, maps: bit0→5, bit1→2, both→7, neither→0
