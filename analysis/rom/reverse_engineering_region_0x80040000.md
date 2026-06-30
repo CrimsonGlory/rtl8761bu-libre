@@ -8332,5 +8332,43 @@ global-byte variant) and `hci_reentry_gate_field_0x165_cmd_echo_u16_send_cmd_com
 
 Post-rename: **49 unnamed** in-region (12 in 1-150B size≥20B tier); live named **1589**.
 
+**Next:** superseded by Pass 52hm below.
+
+## Pass 52hm (2026-06-30) — rank-1 dual-global-dword HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hm.java` — 49 unnamed,
+12 in 1-150B size≥20B tier; rank-1 `0x80045770` (78B, 0 xrefs) — largest
+remaining 1-150B candidate in the LE Meta Event / RSSI cluster (`0x800457xx`
+neighborhood); compact 12-byte Command Complete sibling of
+`hci_global_field_0x165_status_echo_send_cmd_complete` at `0x800457cc`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80045770` →
+`hci_field_0x165_cmd_echo_two_global_dwords_send_cmd_complete` (78B) via
+`RenamePass52hmRegion80040000Fun80045770.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 hci_field_0x165_cmd_echo_two_global_dwords_send_cmd_complete(short *param_1)
+{
+  /* status: param[0]==0 → 0, else field_0x165 defaulting to 1 */
+  /* snapshot two 4-byte globals from PTR_DAT_800457c0 / PTR_DAT_800457c4 */
+  /* 12-byte Command Complete via hci_event_sender(0xe,…): */
+  /*   status + cmd_lo + cmd_hi + gate_byte(0) + dword@PTR_DAT_800457c0 + dword@PTR_DAT_800457c4 */
+  return 0;
+}
+```
+
+78B HCI command handler: derives status from global `the_0x300` struct
+`field_0x165` (0 when cmd word==0, else field value defaulting to 1); packs
+12-byte Command Complete (`hci_event_sender(0xe,…)`) with status + echoed
+cmd-word bytes + zero gate byte + two 4-byte snapshots from
+`PTR_DAT_800457c0` and `PTR_DAT_800457c4`. No re-entrancy gate (unlike
+cluster neighbors with gate bytes). No direct callers found (indirect HCI router).
+
+LE Meta Event / RSSI cluster sibling of
+`hci_global_field_0x165_status_echo_send_cmd_complete` (118B opcode-template
+variant) and `flush_rssi_batch_arrays_via_meta_subevent_0x2_or_0xb`.
+
+Post-rename: **48 unnamed** in-region (11 in 1-150B size≥20B tier); live named **1590**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
