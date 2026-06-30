@@ -2298,4 +2298,37 @@ program descriptors then invoke this helper on success vs `FUN_8002bae0` on alte
 
 Region unnamed count after this pass: **258** (259 minus this rename). Live named **1663** global.
 
+**Next:** superseded by Pass 6 continuation (55).
+
+## Pass 6 continuation (55) (2026-06-30) — mode-8 encryption key derivation `FUN_8002d1f0`
+
+Decompiled and renamed:
+**`FUN_8002d1f0` → `derive_encryption_key_material_hmac_mode8_bdaddr_mix`**
+(176B, HIGH) via `RenamePass6Region80020000Fun8002d1f0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (176B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=258` at pass start). Tied at 176B with
+`FUN_8002309c` (xref_in=1); selected for higher xref_in and encryption-cluster centrality.
+
+**Mechanism:** Encryption key-material derivation helper selected when crypto struct mode
+byte `+0x1f1==8` (BD_ADDR-mixing path, used when `+0x214!=0` and `field_0x2b2` unset).
+Assembles 16-byte key block (`param_1`), 4-byte aux (`param_2`), two 6-byte BD_ADDR/RAND
+blocks (`param_3`/`param_4`), and 8-byte aux block (`param_5`); byte-swaps all address
+fields via `swap_byte_order`, packs a 24-byte derived input, and invokes
+`FUN_8002c62c` (HMAC-style 2-pass driver per `reverse_engineering_encryption_engine.md`
+§6) to produce 16-byte output written to `param_6`. Extended sibling of
+`FUN_8002d14c` (E22-shaped, 16-byte derived input) with larger 24-byte mixing block.
+
+**Callers:** `LMP_START_ENCRYPTION_REQ_0x11` (Pass 6 cont. 13) and
+`program_encryption_key_and_send_lmp_start_encryption_req` (Pass 6 cont. 34) — both
+encryption-procedure kickoff paths that select this helper vs `FUN_8002d3d8` (mode 6 /
+SHA-BLAKE chain) based on crypto struct state.
+
+**Confidence:** HIGH — decompile confirms `swap_byte_order` + `FUN_8002c62c` idiom
+matching documented E21/E22 wrappers; callers already named and documented as
+encryption-key programmers; mode-byte `+0x1f1==8` gate consistent with
+`derive_sres_e1_or_e22_and_send_lmp_response` dispatcher (Pass 6 cont. 27).
+
+Region unnamed count after this pass: **257** (258 minus this rename). Live named **1664** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

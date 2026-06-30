@@ -9683,8 +9683,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (55): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (258 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (55) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8002d1f0`→`derive_encryption_key_material_hmac_mode8_bdaddr_mix`
+          (176B, HIGH). Mode-8 HMAC key derivation with BD_ADDR mixing via `FUN_8002c62c`;
+          callers `LMP_START_ENCRYPTION_REQ_0x11` + `program_encryption_key_and_send_lmp_start_encryption_req`.
+          257 unnamed remain; live named 1664.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (55);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (56): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (257 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
