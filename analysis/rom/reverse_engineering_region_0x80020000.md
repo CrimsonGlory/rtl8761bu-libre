@@ -1614,4 +1614,32 @@ caller already documents "programs HW descriptor per chunk via FUN_8002b558".
 
 Region unnamed count after this pass: **279** (280 minus this rename). Live named **1642** global.
 
+**Next:** superseded by Pass 6 continuation (34).
+
+## Pass 6 continuation (34) (2026-06-30) — encryption key programmer `FUN_80025058`
+
+Decompiled and renamed:
+**`FUN_80025058` → `program_encryption_key_and_send_lmp_start_encryption_req`**
+(244B, HIGH) via `RenamePass6Region80020000Fun80025058.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (244B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=279` at pass start).
+
+**Mechanism:** Post-key-size-accept encryption kickoff helper called from
+`LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` when `bdaddr_random_` is set (random-address link).
+Programs 16-byte encryption key material into crypto struct `+0x13`: debug/test path
+copies canned keys from `PTR_DAT_80025154`/`PTR_DAT_80025158` when first PDU byte
+`-0x14` indexes a nonzero slot in `PTR_DAT_80025150`; otherwise derives via
+`FUN_8002d3d8` (mode byte `+0x1f1==6`) or `FUN_8002d1f0` (mode `+0x1f1==8` with
+BD_ADDR mixing when `field_0x2b2` unset). Sends LMP opcode **0x11** (Start Encryption)
+via `FUN_80024470`, arms link via `FUN_80022210`, sets `field_0x2b0=1`.
+
+**Callers:** `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` (1 site, post-accept random-addr branch).
+
+**Confidence:** HIGH — decompile confirms same key-programming helpers as
+`LMP_START_ENCRYPTION_REQ_0x11` (Pass 6 cont. 13); sole caller is documented
+key-size handler; LMP 0x11 transmit idiom matches encryption procedure cluster.
+
+Region unnamed count after this pass: **278** (279 minus this rename). Live named **1643** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
