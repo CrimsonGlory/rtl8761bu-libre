@@ -704,4 +704,37 @@ two documented callers in `FUN_8002db50`.
 
 Region unnamed count after this pass: **308** (309 minus this rename). Live named **1613** global.
 
+**Next:** superseded by Pass 6 continuation (5).
+
+## Pass 6 continuation (5) (2026-06-30) — HCI Command Complete dispatcher `FUN_80022950`
+
+Decompiled and renamed:
+**`FUN_80022950` → `hci_ogf1_ogf3_shared_command_complete_event_sender`**
+(722B, HIGH) via `RenamePass6Region80020000Fun80022950.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (722B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=308` at pass start). Callers:
+`FUN_80023008`, `HCI_Write_Simple_Pairing_Debug_Mode`, `FUN_80023b40`.
+
+**Mechanism:** Shared HCI Command Complete (event `0x0E`) formatter for OGF 1 Link
+Control (`0x04xx`) and OGF 3 Controller & Baseband (`0x0Cxx`) opcodes. Params:
+command-word pointer (`param_1`), status byte (`param_2`), optional connection index
+(`param_3`, `0xff` = global/no-record). Big opcode switch builds variable-length
+return payload in a stack buffer (echoes opcode bytes, reads/writes controller
+config bytes at `PTR_DAT_80022c2c`, copies BD_ADDR from connection record or cmd
+buffer for link-control opcodes, delegates link-key reads to
+`send_evt_HCI_Return_Link_Keys`/`FUN_800268ac`/`FUN_80026874`/`FUN_80026920` on
+`0x0C0D`/`0x0C12`, local-name/IRK fetch via `FUN_8002c838`/`FUN_8002cfac` on
+`0x0C0B`, EIR snapshot via `FUN_80025e2c` + byte-swap on `0x0C57`, AFH-assessment
+mode write via `FUN_8002572c` on `0x0C56`); always terminates with
+`hci_event_sender(0xe, &local_120, payload_len)`. Distinct from the giant
+`OGC_3_OCF_TONS_deal_with_return_status_referencing_default_name_10` sink at
+`0x8001dc10` — this is a mid-size opcode-specific completer in the `0x80022xxx`
+event-sender neighborhood.
+
+**Confidence:** HIGH — unambiguous Command Complete pattern (`hci_event_sender(0xe,…)`);
+opcode cases map cleanly to BT spec OGF1/OGF3 commands; three documented callers.
+
+Region unnamed count after this pass: **307** (308 minus this rename). Live named **1614** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
