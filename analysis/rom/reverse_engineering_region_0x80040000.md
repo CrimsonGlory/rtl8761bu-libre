@@ -8093,5 +8093,44 @@ found (indirect HCI router).
 
 Post-rename: **55 unnamed** in-region (18 in 1-150B size≥20B tier); live named **1583**.
 
+**Next:** superseded by Pass 52hg below.
+
+## Pass 52hg (2026-06-30) — rank-1 conn release-by-handle HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hg.java` — 55 unnamed,
+18 in 1-150B size≥20B tier; rank-1 `0x8004727c` (122B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x800472xx` conn-release/diagnostic-batch HCI
+cluster (sibling of Pass 52bp's
+`hci_conn_diag_batch_gate_field_0x165_send_cmd_complete` at `0x80047200` and
+Pass 52fx's `release_conn_record_to_free_pool` at `0x8004fcec`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004727c` →
+`hci_release_conn_by_handle_validate_and_send_cmd_complete` (122B) via
+`RenamePass52hgRegion80040000Fun8004727c.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_release_conn_by_handle_validate_and_send_cmd_complete(short *param_1)
+{
+  /* master struct state gate at slot[0xb].field96_0x60 — 0→2 in-progress */
+  /* PTR_DAT_800472fc bit0x10 + state≠2 → reject status 0x0c */
+  /* default status 0x42; conn_record_get_4byte_field_by_handle(param+3) */
+  /* when found → release_conn_record_to_free_pool + status 0 */
+  /* conn_diagnostic_batch_dump(); 4-byte Command Complete via hci_event_sender(0xe,…) */
+}
+```
+
+122B HCI command handler: re-entrancy-gated on master struct state byte at
+`PTR_base_of_0x1ac_struct_array_0xA_large2_800472f8` slot `[0xb].field96_0x60`
+— when zero, marks in-progress (`2`); when `PTR_DAT_800472fc` bit `0x10` is set
+and state is not `2`, rejects with status `0x0c`; otherwise defaults to HCI
+`0x42` (Unknown Connection Identifier), looks up conn record by handle at
+`param+3` via `conn_record_get_4byte_field_by_handle`, and when found calls
+`release_conn_record_to_free_pool` with status `0`; always calls
+`conn_diagnostic_batch_dump()` before terminating via 4-byte HCI Command Complete
+(`hci_event_sender(0xe,…)`) with `field_0x165` status idiom. No direct callers
+found (indirect HCI router).
+
+Post-rename: **54 unnamed** in-region (17 in 1-150B size≥20B tier); live named **1584**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).
