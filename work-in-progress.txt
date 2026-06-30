@@ -7011,8 +7011,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52g;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52h: triage refreshed rank-1
-          `0x8004a2e4` (10 xrefs, 1B — likely artifact) or decompile next
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52h (2026-06-30): triaged rank-1
+          `0x8004a2e4` as 1B `halt_baddata` artifact; decompiled+renamed rank-3
+          `FUN_8004e9e0`→`scan_active_link_mask_for_slot_status_flag` (70B, HIGH).
+          Bit-scan over active-link mask at context+0x24; 8 xrefs. 259 unnamed
+          remain in-region.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52h;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52i: decompile refreshed rank-2
+          `0x80042da0` (9 xrefs, 18B — sum-of-two-byte threshold probe) or next
           substantive unnamed from refreshed 1-150B cold-triage list.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

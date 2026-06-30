@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 175 functions in tier, 7 renamed HIGH (Passes 52–52g). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52g, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 174 functions in tier, 8 renamed HIGH (Passes 52–52h). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52h, 2026-06-30).
 
 ## Overview
 
@@ -959,5 +959,38 @@ Pass 52b's `and_mask_hw_channel_table_entry_and_indexed_dispatch`. 8 xrefs.
 Post-rename: **260 unnamed** in-region. Refreshed rank-1 remains `0x8004a2e4`
 (10 xrefs, 1B — likely artifact).
 
-**Next:** triage refreshed rank-1 `0x8004a2e4` (1B artifact) or decompile next
-substantive candidate from refreshed Pass 52 ranked list.
+## Pass 52h (2026-06-30) — rank-1 artifact triage + rank-3 link-mask probe rename
+
+**Rank-1 triaged (non-function artifact):** `0x8004a2e4` (10 xrefs, 1B) — decompile
+returns `halt_baddata()` / bad-instruction truncation; confirmed 1-byte mis-disassembly
+artifact, not a substantive function. Cold-triage rank-1 remains this address until
+Ghidra boundary cleanup; substantive work skips to rank-2+.
+
+**Refreshed rank-3 decompiled and renamed (HIGH):** `FUN_8004e9e0` →
+`scan_active_link_mask_for_slot_status_flag` (70B) via
+`RenamePass52hRegion80040000Fun8004e9e0.java` (`renamed=1`, live-verified).
+
+```c
+undefined4 scan_active_link_mask_for_slot_status_flag(void)
+{
+  mask = *(byte *)(*PTR_PTR_8004ea28 + 0x24);
+  while (true) {
+    bit = -mask & mask;              // isolate lowest set bit
+    if (bit == 0) return 0;
+    if (*(char *)(*PTR_PTR_8004ea28 + (bit == 4) + 0x22) == 1) break;
+    mask = ~bit & mask;              // clear bit, continue scan
+  }
+  return 1;
+}
+```
+
+Bit-scan over active-link bitmask byte at global context `+0x24`: for each set bit,
+checks status byte at `+0x22` (default) or `+0x23` (when isolated bit == 4); returns
+1 on first match, 0 when mask exhausted. Isolate-lowest-set-bit idiom matches the
+bit-scan family in region `0x80050000` (`find_and_clear_pending_bit_for_index_and_dispatch`).
+8 xrefs.
+
+Post-rename: **259 unnamed** in-region. Refreshed substantive rank-2 is `0x80042da0`
+(9 xrefs, 18B — sum-of-two-byte threshold probe).
+
+**Next:** decompile refreshed rank-2 `0x80042da0` or next substantive 1-150B candidate.
