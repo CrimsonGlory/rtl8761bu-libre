@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 110 functions in tier, 62 renamed HIGH (Passes 52–52bw). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52bw, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 110 functions in tier, 63 renamed HIGH (Passes 52–52by). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52by, 2026-06-30).
 
 ## Overview
 
@@ -3638,5 +3638,40 @@ Each iteration prepends one record via `free_list_lifo_push_0xfc_record_pool`
 
 Post-rename: **191 unnamed** in-region (105 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-79+
-substantive candidate; skip rank-1–78 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52bx):** rank-79+ — completed Pass 52by below.
+
+## Pass 52by (2026-06-30) — rank-79 noirq mask-merge HW-channel dispatch rename
+
+**Refreshed cold-triage (ranks 1-78 skipped as artifacts, deferred, or already done):**
+rank-79 `0x800429d4` (56B, 0 xrefs in triage) — substantive mask-merge indexed
+HW-channel table dispatch without IRQ protection; noirq twin of Pass 52g's
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch` (`0x800430ac`, 88B,
+IRQ-disabled) in the SCO/eSCO HW channel parameter-commit cluster.
+
+**Rank-79 decompiled and renamed (HIGH):** `FUN_800429d4` →
+`mask_merge_hw_channel_table_entry_indexed_dispatch_noirq` (56B) via
+`RenamePass52byRegion80040000Fun800429d4.java` (`renamed=1`, live-verified).
+
+```c
+void mask_merge_hw_channel_table_entry_indexed_dispatch_noirq(uint index, ushort value, ushort mask)
+{
+  table = DAT_80042a0c;
+  fptr_table = PTR_DAT_80042a10;
+  (*fptr_table)(index & 0xffff,
+                table[index] & ~mask | mask & value);
+}
+```
+
+Mask-merge indexed dispatch without IRQ protection: merges `value`/`mask` onto the
+per-index ushort HW-channel parameter table entry at `DAT_80042a0c` via
+`(table & ~mask) | (mask & value)`, then calls through the function-pointer table
+at `PTR_DAT_80042a10`. Structural noirq twin of
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch` (IRQ-guarded, 88B) and
+sibling of `and_mask_hw_channel_table_entry_indexed_dispatch_noirq` (AND-mask,
+32B) in the SCO/eSCO HW channel parameter-commit cluster alongside the irq-guarded
+OR/AND/mask trio. No direct callers found (function-pointer registration).
+
+Post-rename: **190 unnamed** in-region (104 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-80+
+substantive candidate; skip rank-1–79 artifacts, deferred, and already-done ranks.
