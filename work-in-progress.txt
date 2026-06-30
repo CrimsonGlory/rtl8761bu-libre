@@ -7260,9 +7260,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ah;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ai: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-20+ substantive candidate;
-          skip rank-1–19 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ai (2026-06-30): decompiled+
+          renamed rank-27 `FUN_80042e38`→`resolve_bos_subindex_byte_for_connection_index`
+          (150B, HIGH) — BOS subindex (`byte_0xCC`) resolver for connection index;
+          optional hook, public/random BD_ADDR branches, inquiry-LAP pending-bit scan.
+          232 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ai;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52aj: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-28+ substantive candidate;
+          skip rank-1–27 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

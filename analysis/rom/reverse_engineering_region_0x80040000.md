@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 149 functions in tier, 30 renamed HIGH (Passes 52–52af). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52af, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 147 functions in tier, 32 renamed HIGH (Passes 52–52ai). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ai, 2026-06-30).
 
 ## Overview
 
@@ -1943,5 +1943,57 @@ in the `0x800443xx`/`0x800445xx` SCO/eSCO slot path.
 
 Post-rename: **233 unnamed** in-region (147 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-20+
-substantive candidate; skip rank-1–19 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-28+
+substantive candidate; skip rank-1–27 artifacts and already-done ranks.
+
+## Pass 52ai (2026-06-30) — rank-27 BOS subindex byte resolver rename
+
+**Refreshed cold-triage (ranks 1-19 skipped as artifacts or already done; ranks
+20-26 are 1-4B stubs):** rank-27 `0x80042e38` (150B, 1 xref) — substantive
+BOS subindex (`byte_0xCC`) resolver for connection index in the inquiry/LAP
+cluster (sibling of `set_inquiry_lap_slot_pending_bitmask` /
+`release_inquiry_lap_slot_pending_bitmask` /
+`find_first_inquiry_lap_slot_with_pending_clear`).
+
+**Rank-27 decompiled and renamed (HIGH):** `FUN_80042e38` →
+`resolve_bos_subindex_byte_for_connection_index` (150B) via
+`RenamePass52aiRegion80040000Fun80042e38.java` (`renamed=1`, live-verified).
+
+```c
+char resolve_bos_subindex_byte_for_connection_index(uint conn_idx)
+{
+  conn_idx = conn_idx & 0xffff;
+  if (hook_at_PTR_DAT_80042ed0 && hook(conn_idx, &out) != 0)
+    return out;
+  slot = big_ol_struct[conn_idx];
+  out = slot.byte_0xCC;
+  ctx = PTR_DAT_80042ed8;
+  if (slot.bdaddr_random_ == 0) {
+    if (ctx[0] != 0) out = ctx[2];
+  } else {
+    lap = PTR_struct_of_at_least_0x300_size_80042edc;
+    if (1 < lap->_x142_LAP[(byte)ctx[2] + 0x45]) {
+      /* scan inquiry/LAP slot pending bits at ctx+4..+7 (bit1) */
+      out = highest_consecutive_pending_slot_index_or_0xff;
+    }
+  }
+  return out;
+}
+```
+
+Optional hook at `PTR_DAT_80042ed0` may override the default path. Otherwise
+indexes `big_ol_struct[conn_idx]` and returns `byte_0xCC` (BOS subindex/slot
+byte). Public BD_ADDR path (`bdaddr_random_==0`): when global gate byte at
+`PTR_DAT_80042ed8[0]` is set, substitutes `ctx[2]`. Random BD_ADDR path: when
+the LAP table entry `_x142_LAP[slot+0x45]` count exceeds 1, scans per-slot
+status bytes at `ctx+4..+7` (bit1 pending pattern matching the inquiry/LAP
+bitmask cluster) and returns the highest consecutive pending-slot index (0-3)
+or `-1` when all four slots are pending. No direct callers found (likely
+function-pointer registration). Consumer sibling of
+`purge_pending_queue_nodes_for_bos_slot` which passes the resolved `byte_0xCC`
+to `FUN_8006aee4`.
+
+Post-rename: **232 unnamed** in-region (146 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-28+
+substantive candidate; skip rank-1–27 artifacts and already-done ranks.
