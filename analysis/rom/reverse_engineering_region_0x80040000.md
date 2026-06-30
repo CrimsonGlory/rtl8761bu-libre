@@ -209,7 +209,7 @@ pre-split to avoid the same issue)). All 8/8 decompiled successfully.
 |---|---|---|---|
 | `0x8004d8b8` | 1898B | Global BT-state/connection-table initializer: `memset`s the entire `PTR_base_of_0x1ac_struct_array_0xA_large2` array (the project's established 11-entry `big_ol_struct` connection-record array), then loops `uVar14 < 0xb` setting default LST `0xa0a` (same constant `init_connection_record`/0x8005b9d8 uses), default poll intervals, BD_ADDR/feature fields from `config_struct`, and calls sub-initializers `init_0x58_stride_conn_record_ptr_table_11_slots`, `FUN_80058a34`, `FUN_80009774`, `FUN_8005c988`. Structurally the top-level/global counterpart to the already-named per-record `init_connection_record`. | **HIGH** — renamed `init_global_connection_table_and_bt_state` |
 | `0x80049d20` | 1476B | Validates a packed parameter block (bandwidth/packet-type/retransmission-window fields with explicit range checks matching SCO/eSCO bounds, e.g. `0x3ffd`/`0xc7b`/`0xc77` window checks), writes results into `big_ol_struct` SCO/eSCO fields at offsets `+0x1a6..+0x1ce`, and terminates with `send_evt_HCI_Command_Status(*param_1, status)` — the canonical "this is an HCI command handler" signature. Parameter shape matches HCI Setup/Accept Synchronous Connection. | **HIGH** — renamed `HCI_Setup_Synchronous_Connection_handler` |
-| `0x80043e04` | 1168B | Dense register-programming function operating on connection-record fields; references several already-named eSCO/role helpers. Single coherent purpose visible but no confirmed cross-link strong enough for a precise verb-noun name yet. | MEDIUM-HIGH |
+| `0x80043e04` | 1168B | `program_dual_slot_lmp25c_packet_credits_by_conn_index` — IRQ-off dual-slot LMP-25C packet-credit programmer on 0x84-stride role records; see Pass 52da | **HIGH** |
 | `0x80040a24` | 988B | Large dispatcher-shaped function in the lower-half conn-type cluster; switch-like structure but case semantics not yet individually confirmed. | MEDIUM |
 | `0x8004147c` | 934B | Already partially documented in `reverse_engineering_lc_lmp_state_machine.md` (referenced via `fptr_DAT_80036f5c` for HCI_Inquiry/0x419/0x43f) as "inquiry-train baseband programming / role-related setup" — dense register-programming, consistent with that prior note. Left unrenamed pending a more specific single-purpose confirmation. | MEDIUM-HIGH |
 | `0x80041dac` | 876B | `void FUN_80041dac(uint param_1)` — connection-teardown/cleanup-shaped handler operating on a `param_1`-indexed record; clears multiple fields consistent with link release. No confirmed cross-xref yet. | MEDIUM |
@@ -4393,5 +4393,29 @@ refcounted object pool).
 Post-verify: **165 unnamed** in-region unchanged (name predated this pass);
 **70** in >150B tier; live named **1473** unchanged.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-20 `0x80043e04`
-(1168B, 6 xrefs).
+**Next:** continue >150B cold-triage — decompile+rename rank-21 `0x80040a24`
+(988B).
+
+## Pass 52da (2026-06-30) — >150B rank-20 dual-slot LMP-25C packet credit programmer
+
+**>150B rank-20 decompiled+renamed (HIGH):** `FUN_80043e04` →
+`program_dual_slot_lmp25c_packet_credits_by_conn_index` (1168B, 6 xrefs) via
+`RenamePass52daRegion80040000Fun80043e04.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 3, 2026-06-23). Per-connection-index
+(`param_1 & 0xff`) dual-slot role-record programmer on the 0x84-stride table at
+`PTR_DAT_800442a4`: gates on LAP entry at `the_0x300->_x142_LAP[index+0x45]`,
+requires pending credit byte `entry[1]!=0` with `entry[2]==0` and no active
+per-slot flags at `+0x32`/`+0x72`; iterates credit count decrementing
+`entry[1]` while toggling slot selector `entry[0]^=2`. Two packet-source paths:
+(1) fresh allocation via `FUN_8006b05c` with packet-type `0x3000` or `0x8000`
+depending on conn-record `field273_0x250` gate; (2) existing LMP PDU lookup via
+`FUN_80018654` / `lookup_up_to_3_bos_array_indices_by_connection_handle` with
+`0x400`/`0x800` slot flags. IRQ-off programs per-slot fields at
+`entry[slot*0x40+0x2c..0x40]` (conn index, role bits `>>6`, mapped conn-array
+index, packet ptr), calls `LMP__25C_called2()` before each slot commit.
+Inquiry/LAP/role-switch cluster sibling of
+`reset_four_conn_lap_and_dual_slot_role_records` (`0x80043bfc`) and
+`probe_lmp_25c_scheduling_readiness_by_credit_window` (`0x80040060`).
+
+Post-rename: **164 unnamed** in-region (95 in 1-150B tier unchanged); **69** in
+>150B tier; live named **1474**.
