@@ -1364,4 +1364,31 @@ callee already Pass-6 HIGH; mechanism matches documented hardware-layer SSP call
 
 Region unnamed count after this pass: **287** (288 minus this rename). Live named **1634** global.
 
+**Next:** superseded by Pass 6 continuation (26).
+
+## Pass 6 continuation (26) (2026-06-30) — SSP numeric-comparison confirmation verifier `FUN_80026194`
+
+Decompiled and renamed:
+**`FUN_80026194` → `verify_ssp_numeric_comparison_confirmation_hash`**
+(280B, HIGH) via `RenamePass6Region80020000Fun80026194.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (280B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=287` at pass start).
+
+**Mechanism:** SSP numeric-comparison confirmation verifier on the per-connection
+`_x58_crypto_struct` (`param_1`). Copies 16 bytes from incoming LMP payload
+(`param_2+5`), byte-swaps, computes confirmation hash via `FUN_8002c7d0` from
+pairing state at `+0x17e` (keyed by byte at `+0x1f1`), `memcmp`s against stored
+confirmation at `+0x128`, logs success/failure via
+`possible_logging_function__var_args`. Returns bool (match). Sibling of Pass 6
+cont. (24)'s `verify_ssp_oob_confirmation_hash` — same hash primitive, different
+input source and compare target.
+
+**Callers:** `LMP_SIMPLE_PAIRING_NUMBER_0x40` (3 call sites within handler).
+
+**Confidence:** HIGH — decompile confirms hash-then-compare pattern; caller is
+Kovah-named LMP opcode handler for numeric comparison pairing step.
+
+Region unnamed count after this pass: **286** (287 minus this rename). Live named **1635** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
