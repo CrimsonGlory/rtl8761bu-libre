@@ -9134,9 +9134,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hx;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hy: continue 1-150B cold-triage
-          — refresh ranks via `ColdTriageRegion80040000Pass52*.java`; pivot to
-          next tier or adjacent region if no size≥20B candidates remain.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hy (2026-06-30): pivoted to
+          1-19B tier (size≥20B and >150B exhausted); decompiled+renamed rank-8
+          `FUN_80042b34`→`return_rssi_iir_blend_coefficient_4` (4B, HIGH) —
+          default RSSI IIR blend coef stub for `PTR_DAT_80042c08` hook;
+          `0x80042bxx` cluster. 36 unnamed in-region (36 in 1-19B tier);
+          live named 1602.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hy;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hz: continue 1-19B cold-triage
+          — skip rank-1–7 artifacts; refresh ranks via
+          `ColdTriageRegion80040000Pass52hy2.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

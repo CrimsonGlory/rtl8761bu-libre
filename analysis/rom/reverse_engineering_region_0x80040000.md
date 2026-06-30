@@ -8765,5 +8765,33 @@ controller). Standard function-pointer-registration adapter; no direct callers f
 
 Post-rename: **37 unnamed** in-region (0 in 1-150B size≥20B tier); live named **1601**.
 
-**Next:** continue 1-150B cold-triage — refresh ranks when new size≥20B candidates
-appear; otherwise pivot to next tier or adjacent region.
+**Next:** superseded by Pass 52hy below.
+
+## Pass 52hy (2026-06-30) — pivot to 1-19B tier; rank-8 RSSI IIR coef stub rename
+
+**Tier pivot:** 1-150B size≥20B tier exhausted (Pass 52hx); >150B tier also empty
+(`ColdTriageRegion80040000Pass52hy.java` — 0 candidates). Pivoted to 1-19B tier
+(`ColdTriageRegion80040000Pass52hy2.java` — 37 unnamed, all 1-19B). Ranks 1-7 are
+known 1B `halt_baddata` artifacts (`0x8004a2e4` et al.); skipped per prior passes.
+
+**Rank-8 decompiled+renamed (HIGH):** `FUN_80042b34` →
+`return_rssi_iir_blend_coefficient_4` (4B) via
+`RenamePass52hyRegion80040000Fun80042b34.java` (`renamed=1`, live-verified).
+
+```c
+int return_rssi_iir_blend_coefficient_4(void)
+{
+  return 4;
+}
+```
+
+4B constant-return stub: default IIR blend coefficient (`4` of `0x10` scale) for
+the RSSI filter hook at `PTR_DAT_80042c08`. Called indirectly from
+`apply_iir_filter_to_rssi_on_big_ol_struct_slot` (`0x80042b80`, Pass 52q) and
+`update_rssi_iir_filtered_for_connection` (`0x80059de8`, region `0x80050000`) —
+sibling of `return_RSSI_value` (`0x80042b38`) in the `0x80042bxx` power/RSSI cluster.
+
+Post-rename: **36 unnamed** in-region (36 in 1-19B tier); live named **1602**.
+
+**Next:** continue 1-19B cold-triage — skip rank-1–7 artifacts; refresh ranks via
+`ColdTriageRegion80040000Pass52hy2.java`.
