@@ -6657,7 +6657,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12ge: cold-triage next rank-1
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12ge (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800788e4`→`invoke_bb_regs_0x1a6_0xf4_enable_hook_or_clear_globals`
+          (36B, HIGH, STUB-tier). Patch-hook null-check: clear globals at
+          `PTR_DAT_8007890c`/`0x10`, default-enable via Pass 12dp callee; else invoke
+          hook. STUB-tier unnamed 29 remain; live named 1340.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ge;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gf: cold-triage next rank-1
           STUB-tier unnamed per `ListStub80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

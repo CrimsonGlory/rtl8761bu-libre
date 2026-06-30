@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gd COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (30 STUB-tier unnamed remain). Latest: `allocate_first_free_bit_in_16bit_pool_mask` (Pass 12gd). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1339** global; **32** in-region unnamed (30 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gd section below.
+**Status**: Pass 12ge COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (29 STUB-tier unnamed remain). Latest: `invoke_bb_regs_0x1a6_0xf4_enable_hook_or_clear_globals` (Pass 12ge). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1340** global; **31** in-region unnamed (29 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12ge section below.
 
 ## Overview
 
@@ -2416,6 +2416,27 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12ge (2026-06-30) — BB regs enable hook-or-default stub `FUN_800788e4`
+
+Decompiled and renamed:
+**`FUN_800788e4` → `invoke_bb_regs_0x1a6_0xf4_enable_hook_or_clear_globals`**
+(36B, HIGH, STUB-tier) via `RenamePass12geRegion80070000Fun800788e4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(36B, xref_in=2 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Patch-hook dispatch stub in the `0x800788xx` HCI-reset cluster: when
+patch fptr at `PTR_DAT_80078908` is null, clears globals at `PTR_DAT_8007890c` and
+`PTR_DAT_80078910`, then calls `program_bb_regs_0x1a6_0xf4_enable_disable_via_patch_hook(1)`
+(Pass 12dp enable path); otherwise invokes the patch hook directly. Thin
+hook-or-default sibling of Pass 12dp's BB-register writer.
+
+**Confidence:** HIGH — unambiguous patch-hook null-check + clear + enable-default idiom.
+
+Live named **1340** (global; in-region unnamed **31**; STUB-tier unnamed **29**).
+
+**Next:** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`.
 
 ## Pass 12gd (2026-06-30) — 16-bit pool mask bit allocator `FUN_80078a44`
 
