@@ -5869,5 +5869,42 @@ Pass 52ev/52ew adv-data handlers and
 Post-rename: **115 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1523**.
 
+**Next:** superseded by Pass 52ey below.
+
+## Pass 52ey (2026-06-30) — >150B rank-1 LE scan-params HCI handler rename
+
+**Cold-triage (refreshed, from Pass 52ex):** **19** unnamed >150B remain.
+rank-1 `0x80046798` (352B); rank-2 `0x8004635c` (320B); rank-3
+`0x80046a00` (318B); rank-4 `0x8004ab64` (414B); rank-5 `0x8004c2f0`
+(414B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_800451cc` →
+`hci_le_scan_params_reentry_gate_interval_window_commit_send_cmd_complete`
+(408B, 0 xrefs in cold-triage) via
+`RenamePass52eyRegion80040000Fun800451cc.java` (`renamed=1`, live-verified).
+
+408B HCI command handler in the LE scan/advertising cluster (sibling of
+Pass 52ex enable handler and Pass 52dv classic scan-activity validator):
+
+- **Re-entrancy gate:** per-control-record state byte at `bos[0xb].field96_0x60`
+  (0→1; returns `0x0c` when busy and global flag bit `0x10` set).
+- **Enable guard:** only commits when `field68_0x44` bit 0 clear (scan/adv
+  not currently enabled).
+- **Parameter validation:** scan interval at cmd `+4` and window at cmd `+6`
+  must satisfy `4 < value < 0x4001` and window ≤ interval; type byte at
+  `+8` and filter-policy byte at `+9` must be `< 4`; own-address-type
+  byte at `+3` must be `< 2`.
+- **Interval fudge:** when `interval − window < (config field216_0xe3 >> 5) * 0xc`,
+  bumps interval by that margin before commit.
+- **State commit:** packs type/filter/own-addr bits into `field68_0x44`,
+  stores interval to `field70_0x46`/`field71_0x47`, window to
+  `field72_0x48`/`field73_0x49`, merges low 3 bits from `PTR_DAT_80045370`
+  into `field68`/`field69`.
+- **Command Complete:** `hci_event_sender(0xe, &local_18, 4)` with
+  `field_0x165` status idiom; diagnostic log tag `0x446`.
+
+Post-rename: **114 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1524**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x800451cc`, 408B).
+unnamed >150B candidate (`0x80046798`, 352B).
