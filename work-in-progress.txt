@@ -6631,8 +6631,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12ga;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gb: cold-triage next rank-1
-          HANDLER-tier candidate `FUN_800742d0` per `ListHandler80070000.java` (224B, 1 remain).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12gb (2026-06-30): decompiled+
+          renamed rank-1 `FUN_800742d0`→`match_feature_page_slot_by_short_uint32_or_blob_field_update_tlv`
+          (224B, HIGH, HANDLER-tier). Feature-page pool bitmask walk: per-slot type byte
+          (`0x01` short/`0x02` uint32/`0x03` 16-byte blob) field match then
+          `update_feature_page_slot_record_from_tlv_payload`; type-field lookup sibling of
+          Pass 12ga/12fj/12bm matchers. HANDLER-tier sweep COMPLETE (0 remain); live named
+          1336→1337.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gc: cold-triage next rank-1
+          SIMPLE-tier unnamed per `ListRegion0x80070000.java`.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

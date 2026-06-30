@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12ga COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**1** HANDLER-tier unnamed remain in-region; live named **1336** global). Latest: `match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (Pass 12ga), `emit_patch_absent_a5_diag_packet_via_logger1` (Pass 12fz). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800742d0`, 224B, 1 remain). See Pass 12ga section below.
+**Status**: Pass 12gb COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep **COMPLETE** (**0** HANDLER-tier unnamed remain in-region; live named **1337** global). Latest: `match_feature_page_slot_by_short_uint32_or_blob_field_update_tlv` (Pass 12gb), `match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (Pass 12ga). **[NEXT]** cold-triage next rank-1 SIMPLE-tier unnamed per `ListRegion0x80070000.java`. See Pass 12gb section below.
 
 ## Overview
 
@@ -2417,6 +2417,33 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12gb (2026-06-30) — type-field feature-page slot matcher `FUN_800742d0`
+
+Decompiled and renamed:
+**`FUN_800742d0` → `match_feature_page_slot_by_short_uint32_or_blob_field_update_tlv`**
+(224B, HIGH, HANDLER-tier) via `RenamePass12gbFun800742d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Walks active-slot bitmask at `PTR_DAT_800743b0 + 0x278`. For each set bit in
+slots `0..0x13` (20 entries, `0x24` stride), reads slot type byte at `+0x1818` and dispatches:
+type `0x01` — loop `*param_4` times comparing `short` at `slot + 0x181c` vs
+`param_4 + index*2 + 4`; type `0x02` — loop `param_4[1]` times comparing `uint32` at
+`slot + 0x181c` vs `param_4 + (index+4)*4 + 4`; type `0x03` — when `param_4[2] != 0`,
+`memcmp` 16 bytes at `param_4 + 0x28` vs `slot + 0x181c`. On first match calls
+`update_feature_page_slot_record_from_tlv_payload(slot_index, param_1, param_2)`, returns 1;
+else 0. Writes matched slot index to `*param_3`. Type-field lookup sibling of Pass 12ga
+`match_feature_page_slot_by_hw_crypto_prefix_update_tlv` (crypto-prefix), Pass 12fj
+`match_active_resource_pool_slot_by_bdaddr_page_update_tlv` (BDADDR/page), and Pass 12bm
+`match_feature_page_tlv_tag_for_bitmask_bits_and_update_slot` (TLV tag) in the
+`0x800742xx`/`0x800743xx` feature-page pool cluster.
+
+**Confidence:** HIGH — unambiguous bitmask walk + three typed field-match arms + callee chain
+to Pass 12bn updater; same 20-slot/`0x24`-stride/`+0x1818` type-byte pool layout as Pass 12fj.
+No direct callers found (consistent with indirect dispatch).
+
+Live named **1337** (global; in-region unnamed **15**; HANDLER-tier unnamed **0** — sweep complete).
+
+**Next:** cold-triage next rank-1 SIMPLE-tier unnamed per `ListRegion0x80070000.java`.
+
 ## Pass 12ga (2026-06-30) — hw-crypto feature-page slot matcher `FUN_80074518`
 
 Decompiled and renamed:
@@ -2438,8 +2465,7 @@ match) in the `0x800745xx` feature-page pool cluster. Caller `FUN_800492d8` (reg
 
 Live named **1336** (global; in-region unnamed **16**; HANDLER-tier unnamed **1**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800742d0` per
-`ListHandler80070000.java` (224B, xref_in=0).
+**Next:** superseded by Pass 12gb.
 
 ## Pass 12fz (2026-06-30) — patch-absent A5 diag packet emitter `FUN_8007522c`
 
