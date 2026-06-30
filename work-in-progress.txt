@@ -6879,8 +6879,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hc;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hd: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80075fd0`, 34B,
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hd (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80075fd0`→`pop_head_from_resource_pool_64_slot_freelist`
+          (34B, HIGH, STUB-tier). Singly-linked freelist head-pop on 64-slot
+          resource pool: head/tail at `PTR_PTR_80075ff4`/`80075ff8`, next link
+          at descriptor `+0x14`; dealloc counterpart to Pass 12dh init. xref_in=0.
+          STUB-tier unnamed 4 remain; live named 1365.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hd;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12he: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80075bd4`, 14B,
           xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

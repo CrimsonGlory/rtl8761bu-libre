@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hc COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (5 STUB-tier unnamed remain). Latest: `set_bb_slot_status_mode_bits_clear_drift_counters` (Pass 12hc). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1364** global; **7** in-region unnamed (5 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80075fd0`, 34B, xref_in=0). See Pass 12hc section below.
+**Status**: Pass 12hd COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (4 STUB-tier unnamed remain). Latest: `pop_head_from_resource_pool_64_slot_freelist` (Pass 12hd). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1365** global; **6** in-region unnamed (4 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80075bd4`, 14B, xref_in=0). See Pass 12hd section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hd (2026-06-30) — resource pool freelist pop stub `FUN_80075fd0`
+
+Decompiled and renamed:
+**`FUN_80075fd0` → `pop_head_from_resource_pool_64_slot_freelist`**
+(34B, HIGH, STUB-tier) via `RenamePass12hdRegion80070000Fun80075fd0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(34B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Singly-linked freelist head-pop on the 64-slot resource pool from
+Pass 12dh (`init_resource_pool_64_slot_freelist_descriptors`): reads head at
+`PTR_PTR_80075ff4`, writes popped descriptor pointer to `*param_1` (or `0` when
+empty), advances head via next link at descriptor `+0x14`, clears popped node's
+`+0x14`, and zeroes tail pointer at `PTR_PTR_80075ff8` when the list drains.
+Dealloc counterpart to the init-built 28-byte (`0x1c`) descriptor chain at
+`PTR_DAT_80075fbc`; sits in the `0x80075fxx` resource-pool cluster alongside
+`advance_mod64_ring_cursor_and_log_active_slot` (Pass 12fe).
+
+**Confidence:** HIGH — unambiguous intrusive-list pop idiom matching Pass 12dh's
+`+0x14` next-pointer layout and head/tail globals.
+
+Live named **1365** (global; in-region unnamed **6**; STUB-tier unnamed **4**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80075bd4`, 14B, xref_in=0).
+
 ## Pass 12hc (2026-06-30) — BB slot mode-bits setter stub `FUN_80076c68`
 
 Decompiled and renamed:
@@ -2441,8 +2467,7 @@ already-named BB slot helpers.
 
 Live named **1364** (global; in-region unnamed **7**; STUB-tier unnamed **5**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80075fd0`, 34B, xref_in=0).
+**Next:** superseded by Pass 12hd.
 
 ## Pass 12hb (2026-06-30) — BB slot instant sync stub `FUN_80076ee4`
 
