@@ -3073,4 +3073,36 @@ callers sit on established SSP pairing-method dispatch paths (Pass 6 cont. 30/48
 
 Region unnamed count after this pass: **233** (234 minus this rename). Live named **1688** global.
 
+**Next:** superseded by Pass 6 continuation (80).
+
+## Pass 6 continuation (80) (2026-06-30) — AU_RAND sender `FUN_80025164`
+
+Decompiled and renamed:
+**`FUN_80025164` → `derive_au_rand_and_send_lmp_0x0b`**
+(140B, HIGH) via `RenamePass6Region80020000Fun80025164.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (140B, xref_in=12) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=233` at pass start). Sits in the
+`0x800251xx` authentication cluster adjacent to `derive_sres_e1_or_e22_and_send_lmp_response`
+(`0x800251f8`) and the SSP confirm/DHKey-check senders at `0x800259xx`.
+
+**Mechanism:** LMP Authentication Random Number (opcode **0x0b**) generator and sender.
+Primes 16B challenge via `FUN_8002c838`, then:
+- when `crypto+0x214==0` and curve-width `+0x1f1==0x06` (P-256): invokes
+  `derive_e1_aco_and_sres_via_safer_plus` over link-key block `+0x61`, primed random,
+  per-connection BD_ADDR table entry (`×0x2b8` stride), and whitening blocks `+0xba`/`+0xc2`;
+- else when `+0x214!=0`: copies primed random to `+0x91` or `+0x81` depending on
+  `bdaddr_random_` flag in `big_ol_struct` table.
+Transmits 18-byte LMP payload (`0x12`) via `FUN_80024470` → `send_LMP_pkt` with opcode `0x0b`.
+
+**Callers:** xref_in=12; documented paths include `fHCI_Authentication_Requested_0x11`
+(AU_RAND/E1 branch after copying 16B to `crypto+0x61`), `apply_link_key_and_dispatch_auth_pairing_flow`
+(AU_RAND phase `0x0b`), and `dispatch_lmp_pairing_continuation_by_crypto_state` (when `+0x50==1`).
+
+**Confidence:** HIGH — LMP opcode `0x0b` + `send_LMP_pkt` callee chain match Bluetooth AU_RAND;
+E1 derivation path reuses documented `derive_e1_aco_and_sres_via_safer_plus`; sibling of
+`derive_sres_e1_or_e22_and_send_lmp_response` (SRES 0x0c sender) in same `0x800251xx` cluster.
+
+Region unnamed count after this pass: **232** (233 minus this rename). Live named **1689** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

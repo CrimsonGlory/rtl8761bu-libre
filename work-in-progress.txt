@@ -9898,8 +9898,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (79);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (80): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (233 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (80) (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80025164`→`derive_au_rand_and_send_lmp_0x0b`
+          (140B, HIGH). LMP AU_RAND (0x0b) challenge generator/sender: primes random
+          via `FUN_8002c838`, optional E1 path via `derive_e1_aco_and_sres_via_safer_plus`
+          when P-256, sends 18B LMP via `FUN_80024470`; xref_in=12; callers include
+          `fHCI_Authentication_Requested_0x11` + `apply_link_key_and_dispatch_auth_pairing_flow`;
+          232 unnamed remain; live named 1689.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (80);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (81): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (232 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
