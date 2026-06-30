@@ -7746,5 +7746,38 @@ diagnostic-batch HCI prelude cleanup before `conn_diagnostic_batch_dump`.
 
 Post-rename: **65 unnamed** in-region (28 in 1-150B size≥20B tier); live named **1573**.
 
+**Next:** superseded by Pass 52gw below.
+
+## Pass 52gw (2026-06-30) — rank-1 SCO HW-clock bit1 phase spin-wait rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52gw.java` — 65 unnamed,
+28 in 1-150B size≥20B tier; rank-1 `0x80043400` (54B, 1 xref) — SCO slot-timing
+HW-clock phase spin-wait in the `0x800434xx` cluster (paired sibling of Pass 52ap's
+`compute_sco_slot_offset_delta_from_hw_clock`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80043400` →
+`spin_until_hw_clock_bit1_phase_toggles` (54B) via
+`RenamePass52gwRegion80040000Fun80043400.java` (`renamed=1`, live-verified).
+
+```c
+void spin_until_hw_clock_bit1_phase_toggles(byte conn_idx)
+{
+  FUN_80034a24(&clock_raw, conn_idx);
+  phase_bit = clock_raw & 2;
+  do {
+    FUN_80034a24(&clock_raw, conn_idx);
+  } while ((clock_raw & 2) == phase_bit);
+}
+```
+
+Samples HW clock via `FUN_80034a24` (conn-indexed BOS subindex reader), captures
+initial bit-1 phase (`clock_raw & 2`), then busy-spins until that bit toggles.
+Paired with `compute_sco_slot_offset_delta_from_hw_clock` (`0x80043438`) inside
+interrupt-bracketed `apply_SCO_connection_params_to_hw` (`0x8003d7bc`): spin-wait
+synchronizes to the next clock phase edge before slot-offset delta is computed.
+Sole caller `apply_SCO_connection_params_to_hw`. 1 xref.
+
+Post-rename: **64 unnamed** in-region (27 in 1-150B size≥20B tier); live named **1574**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

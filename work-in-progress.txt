@@ -8859,7 +8859,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gw: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gw (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80043400`→`spin_until_hw_clock_bit1_phase_toggles`
+          (54B, HIGH). Busy-spins on HW-clock bit-1 phase toggle via `FUN_80034a24`;
+          paired with `compute_sco_slot_offset_delta_from_hw_clock` inside
+          `apply_SCO_connection_params_to_hw`. 64 unnamed in-region; live named 1574.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gx: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
