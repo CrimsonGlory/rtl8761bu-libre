@@ -7173,5 +7173,53 @@ idiom and 4-byte Command Complete. Link-policy cluster sibling of
 
 Post-rename: **79 unnamed** in-region (42 in 1-150B size≥20B tier); live named **1559**.
 
+**Next:** superseded by Pass 52gi below.
+
+## Pass 52gi (2026-06-30) — rank-1 eSCO link timing conflict checker rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x8004ed04` (120B,
+1 xref) — substantive eSCO/SCO negotiation timing-conflict checker; sole callee
+of `alloc_and_init_esco_sco_negotiation_subrecord` (region `0x80050000` Pass 37).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004ed04` →
+`check_esco_link_timing_conflict_with_active` (120B) via
+`RenamePass52giRegion80040000Fun8004ed04.java` (`renamed=1`, live-verified).
+
+```c
+void check_esco_link_timing_conflict_with_active(conn_record_t *record, byte *conflict_out)
+{
+  if ((record->mode_flags & 0x12) == 0) return;
+  active = PTR_active_esco_link[4];
+  if (active == NULL) return;
+  if ((active->mode_flags & 1) == 0) {
+    if ((active->mode_flags & 0x12) != 0 &&
+        ((record->slot_count - active->slot_count) & mask1) != 0)
+      *conflict_out = 1;
+  } else {
+    peer = PTR_peer_esco_link;
+    if (active->mode_flags == 5)
+      gate = peer->mode_flags & 1;
+    else
+      gate = peer->mode_flags & 2;
+    if ((gate != 0 || (active->field_0x21 & 1) == 0) &&
+        ((record->slot_count - (active->interval_0x1e + 2 + active->slot_count) & mask2)
+         & mask3) != 0)
+      *conflict_out = 1;
+  }
+  (*PTR_esco_negotiation_commit_fn)();
+}
+```
+
+When `record+8` has eSCO mode bits 1 or 4 set, loads the current active eSCO
+link from `PTR_DAT_8004ed7c+4`. SCO-bit-clear path: compares slot-count delta
+`record+0xc` vs `active+0xc` under mask `DAT_8004ed88`. SCO-bit-set path:
+modular comparison including `active+0x1e` interval word and peer-link gate bits
+from `PTR_PTR_8004ed80`; sets `*conflict_out = 1` on timing overlap. Tail
+calls indirect commit/flush via `PTR_DAT_8004ed8c`. eSCO/SCO negotiation cluster
+sibling of `alloc_and_init_esco_sco_negotiation_subrecord` and
+`kickoff_esco_sco_negotiation_after_timing_check` (region `0x80050000`).
+
+Post-rename: **78 unnamed** in-region (41 in 1-150B size≥20B tier); live named **1560**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).

@@ -8724,7 +8724,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gh;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gi: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gi (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004ed04`→`check_esco_link_timing_conflict_with_active`
+          (120B, HIGH). eSCO/SCO negotiation timing-conflict checker; gates on
+          `record+8 & 0x12`, compares slot-count deltas vs active link, sets
+          conflict flag, tail commit via `PTR_DAT_8004ed8c`; callee of
+          `alloc_and_init_esco_sco_negotiation_subrecord`. 78 unnamed remain;
+          live named 1560.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gi;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gj: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 
