@@ -7423,9 +7423,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ba;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bb: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-46+ substantive candidate;
-          skip rank-1–45 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bb (2026-06-30): decompiled+
+          renamed rank-46 `FUN_8004e190`→`lookup_record_ptr_by_index_byte_via_bsearch`
+          (52B, HIGH, SIMPLE-tier). Sorted conn_rec-pointer table lookup via
+          `binary_search_sorted_table_by_index_byte`; insert sibling
+          `insert_record_into_sorted_index_table_if_absent`; conn-record handle-table
+          cluster (§8 conn_record_subsystem). 213 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bb;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bc: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-47+ substantive candidate;
+          skip rank-1–46 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

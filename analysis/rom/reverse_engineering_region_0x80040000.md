@@ -2732,3 +2732,42 @@ Post-rename: **214 unnamed** in-region (128 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-46+
 substantive candidate; skip rank-1–45 artifacts and already-done ranks.
+
+## Pass 52bb (2026-06-30) — rank-46 sorted-index-table lookup rename
+
+**Refreshed cold-triage (ranks 1-45 skipped as artifacts or already done):** rank-46
+`0x8004e190` (52B, 1 xref) — substantive lookup companion of Pass 51's
+`insert_record_into_sorted_index_table_if_absent` / `binary_search_sorted_table_by_index_byte`
+handle→conn_rec sorted-pointer-table cluster (documented in
+`reverse_engineering_conn_record_subsystem.md` §8).
+
+**Rank-46 decompiled and renamed (HIGH):** `FUN_8004e190` →
+`lookup_record_ptr_by_index_byte_via_bsearch` (52B) via
+`RenamePass52bbRegion80040000Fun8004e190.java` (`renamed=1`, live-verified).
+
+```c
+bool lookup_record_ptr_by_index_byte_via_bsearch(int *table, byte index_byte, undefined4 *out)
+{
+  int found_idx;
+  bool found = binary_search_sorted_table_by_index_byte(table, index_byte, &found_idx);
+  if (found) {
+    *out = *(undefined4 *)(*table + found_idx * 4);
+  }
+  return found;
+}
+```
+
+Binary-searches the sorted conn_rec-pointer table via
+`binary_search_sorted_table_by_index_byte` (sort key = `conn_rec[+0x10]` LMP handle);
+on hit, dereferences `table->array_base[found_idx]` and writes the record pointer to
+`*out`. Structural twin of region `0x80050000`'s `lookup_record_ptr_by_key_via_bsearch`
+(8-byte key variant). Insert/remove siblings:
+`insert_record_into_sorted_index_table_if_absent` / `remove_record_from_sorted_index_table`
+(not yet renamed). Widely reused by conn-record accessors (e.g.
+`conn_record_get_4byte_field_by_handle`, LMP VSC hook entry, LE connection-complete
+event senders — see conn-record subsystem docs).
+
+Post-rename: **213 unnamed** in-region (127 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-47+
+substantive candidate; skip rank-1–46 artifacts and already-done ranks.
