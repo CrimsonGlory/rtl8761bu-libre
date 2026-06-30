@@ -7077,5 +7077,55 @@ Pass 52di dual-slot accept, and Pass 52dn event updater.
 
 Post-rename: **81 unnamed** in-region (44 in 1-150B size≥20B tier); live named **1557**.
 
+**Next:** superseded by Pass 52gg below.
+
+## Pass 52gg (2026-06-30) — rank-1 link-policy offset+dword commit HCI handler rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x80045854` (124B,
+1 xref) — substantive link-policy cluster HCI Command Complete sender; sibling of
+`hci_link_policy_settings_read_send_cmd_complete` and
+`hci_link_policy_param_setup_handler_send_cmd_complete`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80045854` →
+`hci_link_policy_offset_dword_commit_send_cmd_complete` (124B) via
+`RenamePass52ggRegion80040000Fun80045854.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 hci_link_policy_offset_dword_commit_send_cmd_complete(short *hci_cmd)
+{
+  ctrl = PTR_base_of_0x1ac_struct_array[0xb];
+  state = ctrl.field96_0x60;
+  if (state == 0)
+    ctrl.field96_0x60 = 1;
+  else if ((*PTR_DAT_800458d4 & 0x10) && state != 1)
+    return 0xc;  // Command Disallowed — skip param commit
+  offset_byte = *(byte *)((int)hci_cmd + 3);
+  status = 0x12;  // Invalid HCI Command Parameters
+  if (offset_byte < 0x20) {
+    ctrl.field55_0x37 = offset_byte;
+    status = 0;
+    if (offset_byte != 0)
+      optimized_memcpy(ctrl.field60_0x3c..field63_0x3f, hci_cmd + 2, 4);
+  }
+  cmd_word = *hci_cmd;
+  hci_status = (cmd_word == 0) ? 0 : field_0x165 defaulting to 1;
+  hci_event_sender(0xe, {hci_status, cmd_lo, cmd_hi, status}, 4);
+  return status;
+}
+```
+
+Re-entrancy-gated HCI command handler on global control record `bos[0xb]`:
+`field96_0x60` state byte (0→1 transition, returns `0xc` when disallowed) —
+same gate idiom as `hci_link_policy_settings_read_send_cmd_complete` (read-only
+sibling) but with lightweight param commit: when offset byte at `hci_cmd+3` is
+`<0x20`, writes `field55_0x37` and optionally copies a 4-byte dword from
+`hci_cmd+2` into `field60_0x3c..field63_0x3f`; otherwise leaves status
+`0x12`. Derives HCI status byte from global `the_0x300` struct `field_0x165`
+(0 when cmd word==0, else field value defaulting to 1); packs 4-byte Command
+Complete (`hci_event_sender(0xe,…)`). No direct callers found (function-pointer
+registration).
+
+Post-rename: **80 unnamed** in-region (43 in 1-150B size≥20B tier); live named **1558**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
