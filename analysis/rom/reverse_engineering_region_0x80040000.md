@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 84 renamed HIGH (Passes 52–52cg). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52cg, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 100 functions in tier, 85 renamed HIGH (Passes 52–52ch). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ch, 2026-06-30).
 
 ## Overview
 
@@ -3961,5 +3961,42 @@ adapter pattern; sibling of `hci_copy_conn_struct_1c_6byte_hw_regs_field_0x165_s
 
 Post-rename: **182 unnamed** in-region (96 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-88+
-substantive candidate; skip rank-1–87 artifacts, deferred, and already-done ranks.
+**Next (at Pass 52cg):** rank-88+ — completed Pass 52ch below.
+
+## Pass 52ch (2026-06-30) — rank-88 global-ctx slot triplet clear/bind adapter rename
+
+**Refreshed cold-triage (ranks 1-87 skipped as artifacts, deferred, or already done):**
+rank-88 `0x8004e94c` (22B, 0 xrefs in triage) — substantive thin adapter in the
+`0x8004e9xx` active-link-mask neighborhood; clears two u32 fields at global-context
+offsets `+0x238`/`+0x23c` and binds `PTR_DAT_8004e968` at `+0x240`.
+
+**Rank-88 decompiled and renamed (HIGH):** `FUN_8004e94c` →
+`clear_global_ctx_u32_pair_and_bind_data_ptr_at_240` (22B) via
+`RenamePass52chRegion80040000Fun8004e94c.java` (`renamed=1`, live-verified).
+
+```c
+void clear_global_ctx_u32_pair_and_bind_data_ptr_at_240(void)
+{
+  undefined *puVar1;
+  undefined *puVar2;
+
+  puVar1 = PTR_PTR_8004e964;
+  puVar2 = PTR_DAT_8004e968;
+  *(undefined4 *)(puVar1 + 0x23c) = 0;
+  *(undefined **)(puVar1 + 0x240) = puVar2;
+  *(undefined4 *)(puVar1 + 0x238) = 0;
+  return;
+}
+```
+
+Global context base from `PTR_PTR_8004e964`; zeroes u32 slots at `+0x238` and
+`+0x23c`, then stores data pointer `PTR_DAT_8004e968` at `+0x240`. Standard
+function-pointer-registration init/clear adapter pattern; sibling of
+`is_active_link_mask_bit_four` (`0x8004e96c`, Pass 52bj) and
+`lookup_active_link_slot_status_by_index` (`0x8004e9a4`, Pass 52bk). No direct
+callers found.
+
+Post-rename: **181 unnamed** in-region (95 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-89+
+substantive candidate; skip rank-1–88 artifacts, deferred, and already-done ranks.
