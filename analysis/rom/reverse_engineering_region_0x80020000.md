@@ -2622,4 +2622,36 @@ derivation wrappers already analyzed in Pass 6 cont. 55/62/52/24.
 
 Region unnamed count after this pass: **247** (248 minus this rename). Live named **1674** global.
 
+**Next:** superseded by Pass 6 continuation (66).
+
+## Pass 6 continuation (66) (2026-06-30) — LMP ext enc sub2 inner0x19 SSP state 0x15 `FUN_8002958c`
+
+Decompiled and renamed:
+**`FUN_8002958c` → `handle_lmp_ext_enc_sub2_inner0x19_ssp_state_0x15`**
+(156B, HIGH) via `RenamePass6Region80020000Fun8002958c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (156B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=247` at pass start). Deferred in Pass 6
+cont. (65) in favor of tied-size `FUN_8002c62c` (higher xref_in=6).
+
+**Mechanism:** SSP IO-capability completion handler gated on per-connection crypto
+sub-state `+1 == 0x15`. Reached via `LMP_encryption_opcode_handlers` → `FUN_80027ae0`
+(LMP 0x7F sub-opcode 0x02 multiplexer) when inner type byte at PDU `+7 == 0x19`.
+Validates role/capability via `FUN_8002403c` unless global bypass flag set. When pending
+LMP at `+0x1e8`: sets `+0x50=3`, advances sub-state to `0x1d` via
+`set_arg1_1_to_arg2`, delegates to `handle_lmp_ext_io_capability_req_subopcode_0x19`,
+then clears pending via `FUN_80025634`. When no pending LMP: if public BD_ADDR and status
+byte at `+8 == 0x23`, same state advance to `0x1d`; else emits
+`call_send_evt_HCI_Simple_Pairing_Complete` with status from `+8`.
+
+**Callers:** `FUN_80027ae0` (1 site at `0x80027b1a`, inner-type `0x19` branch) ←
+`LMP_encryption_opcode_handlers` (LMP 0x7F sub-opcode 0x02 case).
+
+**Confidence:** HIGH — dispatch chain confirmed via xref scripts; state-gate idiom
+matches sibling `FUN_80029364` (sub-opcode 0x1a at state 0x15, Pass 6 cont. 17);
+pending-LMP forward to documented IO-cap req handler; SSP-complete fallback matches
+cluster handlers at `0x800236cc`/`0x80023878`.
+
+Region unnamed count after this pass: **246** (247 minus this rename). Live named **1675** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
