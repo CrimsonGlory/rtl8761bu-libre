@@ -6906,9 +6906,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hf;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hg: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80071b1c`, 44B,
-          xref_in=0).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hg (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80071b1c`→`get_global_edr_feature_bit2_when_conn_page1_bit4_set`
+          (44B, HIGH, STUB-tier). Conn-gated EDR feature-page bit probe: when conn
+          `_xe3_features_pages_array_0_[1]` bit `4` set, returns global
+          `some_feature_page_base[1]` bit `2`; else `0`. `0x80071bxx` LMP/eSCO cluster.
+          STUB-tier unnamed 1 remains; live named 1368.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hg;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hh: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80070070`, xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

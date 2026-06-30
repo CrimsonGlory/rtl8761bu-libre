@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hf COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (2 STUB-tier unnamed remain). Latest: `reset_packet_slot_descriptor_and_decrement_active_count` (Pass 12hf). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1367** global; **4** in-region unnamed (2 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80071b1c`, 44B, xref_in=0). See Pass 12hf section below.
+**Status**: Pass 12hg COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (1 STUB-tier unnamed remains). Latest: `get_global_edr_feature_bit2_when_conn_page1_bit4_set` (Pass 12hg). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1368** global; **3** in-region unnamed (1 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070070`, xref_in=0). See Pass 12hg section below.
 
 ## Overview
 
@@ -2417,6 +2417,31 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hg (2026-06-30) — conn-gated EDR feature-bit probe stub `FUN_80071b1c`
+
+Decompiled and renamed:
+**`FUN_80071b1c` → `get_global_edr_feature_bit2_when_conn_page1_bit4_set`**
+(44B, HIGH, STUB-tier) via `RenamePass12hgRegion80070000Fun80071b1c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(44B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Conn-index-gated EDR feature-page bit probe in the `0x80071bxx`
+LMP/eSCO cluster (between Pass 12go max-slot classifier and Pass 12gg eSCO gate).
+When `big_ol_struct[conn]._xe3_features_pages_array_0_[1]` has bit `4` set, returns
+bit `2` of global `some_feature_page_base[1]` (`(byte >> 2) & 1`); otherwise returns
+`0`. Same per-conn feature-page byte `1` bit `4` gate used by Pass 12al/12am LMP
+preferred-rate and auto-rate senders, but here only probes the global side bit `2`
+rather than sending a PDU.
+
+**Confidence:** HIGH — unambiguous gated bit-extract idiom on the established
+`big_ol_struct` feature-page array + `some_feature_page_base` pair.
+
+Live named **1368** (global; in-region unnamed **3**; STUB-tier unnamed **1**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80070070`, xref_in=0).
+
 ## Pass 12hf (2026-06-30) — packet-slot descriptor reset stub `FUN_8007585c`
 
 Decompiled and renamed:
@@ -2440,8 +2465,7 @@ Pass 12du/12dv/12dr fill-count at `+0x10`.
 
 Live named **1367** (global; in-region unnamed **4**; STUB-tier unnamed **2**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80071b1c`, 44B, xref_in=0).
+**Next:** superseded by Pass 12hg.
 
 ## Pass 12he (2026-06-30) — pool descriptor index sign-bit stub `FUN_80075bd4`
 
