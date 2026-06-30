@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12hg COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (1 STUB-tier unnamed remains). Latest: `get_global_edr_feature_bit2_when_conn_page1_bit4_set` (Pass 12hg). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1368** global; **3** in-region unnamed (1 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80070070`, xref_in=0). See Pass 12hg section below.
+**Status**: Pass 12hh COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **COMPLETE** (0 remain). Latest: `thunk_send_lmp_accepted_0x33_and_finalize_crypto` (Pass 12hh). SIMPLE-tier and HANDLER-tier sweeps also complete (0 remain). Live named **1369** global; **2** in-region unnamed (2 CRITICAL). **[NEXT]** cold-triage next CRITICAL-tier unnamed per `ListCritical80070000.java` (top: `FUN_80072924`, xref_in=10). See Pass 12hh section below.
 
 ## Overview
 
@@ -2417,6 +2417,32 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12hh (2026-06-30) — LMP-accepted-0x33 crypto-finalize thunk `FUN_80070070`
+
+Decompiled and renamed:
+**`FUN_80070070` → `thunk_send_lmp_accepted_0x33_and_finalize_crypto`**
+(20B, HIGH, STUB-tier) via `RenamePass12hhRegion80070000Fun80070070.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(20B, xref_in=0 — MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Trivial tail-call thunk — sole body is `FUN_80060898(conn_idx)`
+(region `0x80060000`). Callee sends `send_LMP_ACCEPTED(conn, 0x33, …)`, runs
+`FUN_80064a64`, and when `FUN_800222b0` returns zero invokes
+`crypto_state_machine_finalizer` plus status-bit merge from
+`get_status_bits_by_LMP_Opcode(0x31, 0)`. Same callee dispatched from
+`LMP_role_switch_completion_handler` on status `0x0a` and from
+`apply_codec_type_and_role_switch_hook_dispatch` on status `0x0a` — indirect
+dispatch alias for the role-switch LMP-accepted path.
+
+**Confidence:** HIGH — unambiguous single-callee decompile; callee behavior and
+role-switch routing documented in Pass 4/12fk.
+
+Live named **1369** (global; in-region unnamed **2**; STUB-tier unnamed **0**).
+
+**Next:** cold-triage next CRITICAL-tier unnamed per `ListCritical80070000.java`
+(top: `FUN_80072924`, xref_in=10).
+
 ## Pass 12hg (2026-06-30) — conn-gated EDR feature-bit probe stub `FUN_80071b1c`
 
 Decompiled and renamed:
@@ -2439,8 +2465,7 @@ rather than sending a PDU.
 
 Live named **1368** (global; in-region unnamed **3**; STUB-tier unnamed **1**).
 
-**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
-`FUN_80070070`, xref_in=0).
+**Next:** superseded by Pass 12hh.
 
 ## Pass 12hf (2026-06-30) — packet-slot descriptor reset stub `FUN_8007585c`
 

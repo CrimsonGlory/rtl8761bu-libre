@@ -6915,8 +6915,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hh: cold-triage next STUB-tier
-          unnamed per `ListStub80070000.java` (top: `FUN_80070070`, xref_in=0).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12hh (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80070070`→`thunk_send_lmp_accepted_0x33_and_finalize_crypto`
+          (20B, HIGH, STUB-tier). Trivial tail-call thunk to `FUN_80060898` — LMP
+          ACCEPTED opcode `0x33` + crypto-state finalizer path; role-switch status
+          `0x0a` dispatch alias. STUB-tier sweep **COMPLETE** (0 remain); live
+          named 1369; 2 CRITICAL-tier unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12hh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12hi: cold-triage next CRITICAL-tier
+          unnamed per `ListCritical80070000.java` (top: `FUN_80072924`, xref_in=10).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
