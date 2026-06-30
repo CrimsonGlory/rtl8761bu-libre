@@ -8698,5 +8698,38 @@ No direct callers found (function-pointer registration).
 
 Post-rename: **39 unnamed** in-region (2 in 1-150B size≥20B tier); live named **1599**.
 
+**Next:** superseded by Pass 52hw below.
+
+## Pass 52hw (2026-06-30) — rank-1 LE Meta subevent handle+byte adapter rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hw.java` — 39 unnamed,
+2 in 1-150B size≥20B tier; rank-1 `0x80044f10` (24B, 0 xrefs) — thin adapter in
+the LE Meta Event cluster (`0x80044fxx` neighborhood); sibling of
+`invoke_send_evt_meta_subevent_0_or_1_from_param_buffer` (`0x80044ef8`, Pass 52ce)
+and `hci_conn10_0x154_bit2_u16_range_check_store_0x16_send_cmd_complete`
+(`0x80044f28`, Pass 52hi).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80044f10` →
+`invoke_send_evt_meta_subevent_0_or_1_handle_byte_params_1_0` (24B) via
+`RenamePass52hwRegion80040000Fun80044f10.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_send_evt_meta_subevent_0_or_1_handle_byte_params_1_0(undefined2 *param_buffer)
+{
+  send_evt_Meta_subevent_0_or_1
+            (*param_buffer,*(undefined1 *)((int)param_buffer + 3),1,0);
+  return;
+}
+```
+
+24B thin adapter: reads uint16 handle from `param_buffer[0]` and byte param from
+offset `+3`, then calls `send_evt_Meta_subevent_0_or_1` (`0x80044c7c`) with
+hardcoded third/fourth args `(1, 0)`. Narrower sibling of
+`invoke_send_evt_meta_subevent_0_or_1_from_param_buffer` which unpacks all four
+byte params from the buffer. Standard function-pointer-registration adapter; no
+direct callers found.
+
+Post-rename: **38 unnamed** in-region (1 in 1-150B size≥20B tier); live named **1600**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

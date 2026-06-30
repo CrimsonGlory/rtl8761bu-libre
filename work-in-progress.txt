@@ -9116,7 +9116,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hv;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hw: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hw (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80044f10`→`invoke_send_evt_meta_subevent_0_or_1_handle_byte_params_1_0`
+          (24B, HIGH) — thin LE Meta subevent adapter: handle from `param[0]`,
+          byte from `param+3`, hardcoded args `(1,0)` to `send_evt_Meta_subevent_0_or_1`;
+          `0x80044fxx` LE Meta Event cluster. 0 xrefs.
+          38 unnamed in-region (1 in 1-150B size≥20B tier); live named 1600.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hw;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hx: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
