@@ -327,7 +327,7 @@ ROM-resident, also requiring no libre-side action) in
 | `0x800251f8` | `FUN_800251f8` | E21/E22-style crypto wrapper (BD_ADDR/RAND in, key material out) |
 | `0x8002d00c` | `FUN_8002d00c` | **E1-shaped**: 2-pass SAFER+, outputs 4B ACO + 12B SRES |
 | `0x8002d14c` | `FUN_8002d14c` | **E21/E22-shaped**: 16B key + 16B block → 16B output via SAFER+ |
-| `0x8002c62c` | `FUN_8002c62c` | 2-pass driver with HMAC-style ipad/opad (`0x36`/`0x5c`) padding around SAFER+ calls; misleading default Ghidra name `thing_that_uses_SHA_and_BLAKE` |
+| `0x8002c62c` | `hmac_ipad_opad_2pass_safer_hash_driver` (was `FUN_8002c62c`) | 2-pass driver with HMAC-style ipad/opad (`0x36`/`0x5c`) padding around SAFER+ calls; callee `thing_that_uses_SHA_and_BLAKE` is misleading — see Pass 6 cont. (65) 2026-06-30 |
 | `0x8002cddc` | `FUN_8002cddc` | **SAFER+ block encrypt** — full round-function core |
 | `0x8002cb2c` | `FUN_8002cb2c` | **SAFER+ key schedule** — 17-byte extended key, 3-bit rotation, bias table |
 | `0x8002ca88` | `FUN_8002ca88` | **SAFER+ bias-1 constant** application (fixed add/XOR bytes) |

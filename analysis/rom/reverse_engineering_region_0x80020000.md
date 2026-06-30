@@ -2594,4 +2594,32 @@ match documented link-key/encryption HCI handlers in `0x80023xxx`.
 
 Region unnamed count after this pass: **248** (249 minus this rename). Live named **1673** global.
 
+**Next:** superseded by Pass 6 continuation (65).
+
+## Pass 6 continuation (65) (2026-06-30) — HMAC ipad/opad 2-pass SAFER+ driver `FUN_8002c62c`
+
+Decompiled and renamed:
+**`FUN_8002c62c` → `hmac_ipad_opad_2pass_safer_hash_driver`**
+(156B, HIGH) via `RenamePass6Region80020000Fun8002c62c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (156B, xref_in=6) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=248` at pass start). Tied at 156B with
+`FUN_8002958c` (xref_in=1); selected for higher xref_in and encryption-engine centrality
+(already documented in `reverse_engineering_encryption_engine.md` §6 but still unnamed).
+
+**Mechanism:** Shared Bluetooth key-derivation primitive implementing HMAC-style
+ipad/opad construction (`0x36`/`0x5c` XOR pads over 64-byte blocks) around two calls to
+`thing_that_uses_SHA_and_BLAKE` (misleading Ghidra name — actually the SAFER+-based
+2-pass hash primitive per encryption-engine analysis). Signature:
+`(key_ptr, key_len, msg_ptr, msg_len, out_ptr)` → 16-byte output. Inner pass hashes
+padded-key || message; outer pass hashes opad-key || inner digest.
+
+**Callers:** `derive_e21_or_e22_16byte_block_via_hmac_driver`, `derive_encryption_key_material_hmac_mode8_bdaddr_mix`, `FUN_8002c6c8` (SSP DHKey-check), `FUN_8002c7d0` (SSP confirmation hash), `derive_e1_aco_and_sres_via_safer_plus` (E1 path), plus one additional crypto wrapper — six sites total (xref_in=6).
+
+**Confidence:** HIGH — decompile confirms literal HMAC ipad/opad constants; callee chain
+matches documented SAFER+ encryption engine; all six callers are pairing/encryption
+derivation wrappers already analyzed in Pass 6 cont. 55/62/52/24.
+
+Region unnamed count after this pass: **247** (248 minus this rename). Live named **1674** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
