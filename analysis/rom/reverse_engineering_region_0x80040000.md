@@ -261,7 +261,7 @@ first as instructed.
 | `0x80041230` | 560B | `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble` — IRQ-masked 16-slot conn-event ring dequeue + type-nibble LMP dispatch; see Pass 52df | HIGH |
 | `0x80042640` | 530B | `select_sco_esco_packet_type_and_cap_window_by_conn_index` — SCO/eSCO packet-type selector from `field273_0x250` feature flags + window threshold; see Pass 52dg | HIGH |
 | `0x800401c4` | 426B | `commit_dual_slot_lmp25c_role_record_state_and_chain_credits` — IRQ-off dual-slot LMP-25C role-record state commit; see Pass 52dh | HIGH |
-| `0x80040e60` | 386B | Connection-record field manipulator; no cross-xref confirmation available (tooling gap, see below). | MEDIUM |
+| `0x80040e60` | 386B | `accept_dual_slot_lmp_role_connection_and_program_baseband_regs` — IRQ-off dual-slot LMP role connection accept + baseband programmer; see Pass 52di | **HIGH** |
 | `0x80041900` | 376B | Similar shape to other lower-half record-field helpers. | MEDIUM |
 | `0x80043c7c` | 372B | Small state-check/update helper; plausible but unconfirmed single purpose. | MEDIUM |
 | `0x80041a94` | 352B | Field manipulator, lower conn-type cluster. | MEDIUM |
@@ -4573,5 +4573,30 @@ completion handler (simpler commit path without packet decode).
 Post-rename: **157 unnamed** in-region (95 in 1-150B tier unchanged); **62** in
 >150B tier; live named **1481**.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-28 `0x80040e60`
-(386B).
+## Pass 52di (2026-06-30) — >150B rank-28 dual-slot LMP role connection accept rename
+
+**>150B rank-28 decompiled+renamed (HIGH):** `FUN_80040e60` →
+`accept_dual_slot_lmp_role_connection_and_program_baseband_regs` (386B) via
+`RenamePass52diRegion80040000Fun80040e60.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM (Pass 3, 2026-06-23). IRQ-masked dual-slot LMP role
+connection acceptance handler: reads active slot index from `PTR_DAT_80040fe4`
+(0xff error path logs via `possible_logging_function__var_args`); stores role
+index (`param_2`) to `PTR_DAT_80040ff0`; OR-merges HW channel table entry via
+`or_merge_hw_channel_table_entry_and_indexed_dispatch` using conn id at
+`param_1+0x16`; dual-slot toggle `alt_slot = (active_slot + 8) & 0xff` copies
+8-byte stride entries between slots in `PTR_DAT_80040ff8`; programs baseband
+registers through fptr `PTR_DAT_80041000` (mask-merge on first reg, then
+bit-packed `(role << 5 | slot << 11)` write); calls
+`LMP_accept_or_mirror_connection_handler` for BOS slot allocation/state setup;
+programs remaining BB regs from per-slot tables; derives access-code sync word
+via `compute_access_code_sync_word_from_bdaddr`; calls `FUN_80013c64` with
+sub-opcode byte; restores IRQs. Sole caller `FUN_800411a4` (conn-type-nibble-2
+dispatch path from `dequeue_conn_event_ring_and_dispatch_lmp_by_conn_type_nibble`).
+Inquiry/LAP/role-switch cluster sibling of Pass 52dh role-record commit and Pass
+52dc inquiry baseband programmer.
+
+Post-rename: **156 unnamed** in-region (95 in 1-150B tier unchanged); **61** in
+>150B tier; live named **1482**.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-29 `0x80041900`
+(376B).
