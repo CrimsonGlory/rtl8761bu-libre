@@ -5544,5 +5544,28 @@ paths.
 Post-rename: **126 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1512**.
 
-**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-4
-unnamed >150B candidate (`0x8004ad68`, 244B).
+**Next:** superseded by Pass 52en below.
+
+## Pass 52en (2026-06-30) — >150B rank-4 LMP 0x26f status logger rename
+
+**>150B rank-4 decompiled+renamed (HIGH):** `FUN_8004ad68` →
+`log_conn_slot_status_word_0x26f_after_connection_init` (244B, 1 xref from
+`conn_class_mode_apply_and_log_variant2` case-0 success path) via
+`RenamePass52enRegion80040000Fun8004ad68.java` (`renamed=1`, live-verified).
+
+Conn-slot LMP `0x26f` status-word logger on `uint param_1` (slot index): reads
+global `_x1F4_struct` `field5_0x5` bit2 → low status nibble `0` or `6`; packs
+`(param_1 & 0xf) << 5` into bits 5–8; ANDs with `DAT_8004ae60` mask; merges
+`PTR_PTR_8004ae68[4] & 3` into high-byte bits 1–2; emits via
+`possible_logger_called_if_no_patch3` (tag `0x26f`). When `config_struct`
+`field_0xe0` bit0 set and `PTR_DAT_8004ae70` bitmask has bit `param_1` set,
+re-emits with status `| 5`. Sole caller: `conn_class_mode_apply_and_log_variant2`
+after `init_connection_record` + `find_duplicate_bdaddr_and_disconnect` in
+case-0 class-mode apply path — sibling of inline `0x26f` logging in cases 1–4 of
+the same dispatcher and `pack_and_log_param_pair_0x26f` (region `0x80050000`).
+
+Post-rename: **125 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1513**.
+
+**Next:** continue refreshed >150B cold-triage — decompile+rename next rank-5
+unnamed >150B candidate (`0x80040494`, 238B).

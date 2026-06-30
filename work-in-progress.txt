@@ -8285,9 +8285,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52em;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52en: continue refreshed >150B
-          cold-triage — decompile+rename next rank-4 unnamed >150B candidate
-          (`0x8004ad68`, 244B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52en (2026-06-30): decompiled+
+          renamed rank-4 `FUN_8004ad68`→`log_conn_slot_status_word_0x26f_after_connection_init`
+          (244B, HIGH). Conn-slot LMP 0x26f status-word logger; global mode-bit2
+          pack, optional second emit with |5; callee of
+          `conn_class_mode_apply_and_log_variant2` case-0 after connection init.
+          125 unnamed in-region; live named 1513.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52en;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52eo: continue refreshed >150B
+          cold-triage — decompile+rename next rank-5 unnamed >150B candidate
+          (`0x80040494`, 238B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
