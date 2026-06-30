@@ -6746,9 +6746,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12gn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12go: cold-triage next rank-1
-          STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80071ae8`,
-          48B, xref_in=1).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12go (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80071ae8`→`classify_hci_conn_packet_type_max_slot_requirement`
+          (48B, HIGH, STUB-tier). Classifies `HCI_Create_Connection_PacketType`
+          into max-slot requirements 1/3/5 by bitmask; sole caller
+          `fHCI_Change_Connection_Packet_Type_0x0F` gates LMP_MAX_SLOT_REQ path.
+          STUB-tier unnamed 19 remain; live named 1350.
+          → analysis/rom/reverse_engineering_region_0x80070000.md Pass 12go;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12gp: cold-triage next STUB-tier
+          unnamed per `ListStub80070000.java` (top: `FUN_80078bd0`, 22B,
+          xref_in=0).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

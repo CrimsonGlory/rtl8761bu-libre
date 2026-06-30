@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12gn COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (20 STUB-tier unnamed remain). Latest: `log_evt_0x268_conn_teardown_backoff_zero_via_patch_hook` (Pass 12gn). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1349** global; **22** in-region unnamed (20 STUB + 2 CRITICAL). **[NEXT]** cold-triage next rank-1 STUB-tier unnamed per `ListStub80070000.java`. See Pass 12gn section below.
+**Status**: Pass 12go COMPLETE (2026-06-30) — STUB-tier cold-triage sweep **in progress** (19 STUB-tier unnamed remain). Latest: `classify_hci_conn_packet_type_max_slot_requirement` (Pass 12go). SIMPLE-tier sweep complete (0 remain). HANDLER-tier sweep also complete (0 remain). Live named **1350** global; **21** in-region unnamed (19 STUB + 2 CRITICAL). **[NEXT]** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top: `FUN_80078bd0`, 22B, xref_in=0). See Pass 12go section below.
 
 ## Overview
 
@@ -2416,6 +2416,36 @@ connection-record binding written by the alloc caller.
 Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7**).
 
 **Next:** superseded by Pass 12fw.
+
+## Pass 12go (2026-06-30) — HCI packet-type max-slot classifier `FUN_80071ae8`
+
+Decompiled and renamed:
+**`FUN_80071ae8` → `classify_hci_conn_packet_type_max_slot_requirement`**
+(48B, HIGH, STUB-tier) via `RenamePass12goRegion80070000Fun80071ae8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 STUB-tier candidate per `ListStub80070000.java` listing
+(48B, xref_in=1 — sole caller `fHCI_Change_Connection_Packet_Type_0x0F` at
+`0x8001b84c`; MCP `xrefs_to` returns empty against this GZF, known gap).
+
+**Mechanism:** Reads `big_ol_struct[conn_index].HCI_Create_Connection_PacketType`
+and classifies max-slot requirement by bitmask: returns **5** when `packet_type &
+0xf000 != 0` (EDR/eSCO high-nibble types), **3** when only `0x0f00` bits set
+(2/3-DH/2/3-DM class), **1** for basic 1-slot types. Caller compares return
+against `field_0x24a` (stored max-slot ceiling): if `return==1` or
+`return<=field_0x24a`, takes direct path (`recompute_and_store_field_0x250_packet_type_on_conn_slot`
++ `FUN_8001b750`); else dispatches `send_lmp_max_slot_req_0x2e_pdu_on_feature_and_state`
+and sets LMP-pending bit `0x20`. Sibling of Pass 12ca's
+`select_max_slot_packet_type_on_feature_page_and_config` in the `0x80071axx`
+packet-type/max-slot cluster.
+
+**Confidence:** HIGH — unambiguous bitmask classifier with return values 1/3/5
+matching the established max-slot cluster; sole caller context and branch logic
+confirmed via caller decompile.
+
+Live named **1350** (global; in-region unnamed **21**; STUB-tier unnamed **19**).
+
+**Next:** cold-triage next STUB-tier unnamed per `ListStub80070000.java` (top:
+`FUN_80078bd0`, 22B, xref_in=0).
 
 ## Pass 12gn (2026-06-30) — link-loss teardown event-0x268 logger hook `FUN_80072094`
 
