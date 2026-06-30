@@ -8588,5 +8588,40 @@ No direct callers found (indirect timer-queue router).
 
 Post-rename: **42 unnamed** in-region (5 in 1-150B size≥20B tier); live named **1596**.
 
+**Next:** superseded by Pass 52ht below.
+
+## Pass 52ht (2026-06-30) — rank-1 inquiry/LAP slot pending status code rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52ht.java` — 42 unnamed,
+5 in 1-150B size≥20B tier; rank-1 `0x80042d74` (38B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x80042dxx` inquiry/LAP slot cluster;
+sibling of `count_consecutive_inquiry_lap_pending_slot_flags` at `0x80042d34`
+and `release_inquiry_lap_slot_pending_bitmask` at `0x80042c94`.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80042d74` →
+`get_inquiry_lap_slot_pending_status_code_by_index` (38B) via
+`RenamePass52htRegion80040000Fun80042d74.java` (`renamed=1`, live-verified).
+
+```c
+uint get_inquiry_lap_slot_pending_status_code_by_index(uint index)
+{
+  byte *status = PTR_DAT_80042d9c + (index & 0xff) + 4;
+  if ((status[0] >> 1 & 1) == 0) return 0;
+  if ((status[0] & 1) == 0) return 0x21;
+  return 1;
+}
+```
+
+38B per-slot status-code lookup in the inquiry/LAP cluster: reads status byte
+at `PTR_DAT_80042d9c[index+4]` (bit0=primary/active, bit1=pending — same layout
+as `release_inquiry_lap_slot_pending_bitmask` / `set_inquiry_lap_slot_pending_bitmask`);
+returns `0` when bit1 clear, `1` when bit1+bit0 set, `0x21` when bit1 set and
+bit0 clear (pending-only, mirrors the eSCO-remap gate in
+`remap_role_index_to_esco_slot_if_pending`). Status-probe sibling of
+`count_consecutive_inquiry_lap_pending_slot_flags`. No direct callers found
+(indirect inquiry/LAP router).
+
+Post-rename: **41 unnamed** in-region (4 in 1-150B size≥20B tier); live named **1597**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

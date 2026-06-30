@@ -9089,7 +9089,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hs;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ht: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ht (2026-06-30): cold-triage
+          refreshed via `ColdTriageRegion80040000Pass52ht.java`; decompiled+
+          renamed rank-1 `FUN_80042d74`→`get_inquiry_lap_slot_pending_status_code_by_index`
+          (38B, HIGH) — per-slot inquiry/LAP pending-bit status code lookup at
+          `PTR_DAT_80042d9c[index+4]`; returns 0/1/0x21 by bit1+bit0;
+          `0x80042dxx` inquiry/LAP cluster. 0 xrefs.
+          41 unnamed in-region (4 in 1-150B size≥20B tier); live named 1597.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ht;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hu: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
