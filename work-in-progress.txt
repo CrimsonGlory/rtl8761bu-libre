@@ -9234,8 +9234,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (3);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation: cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (309 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (4) (2026-06-30):
+          decompiled+renamed rank-1 by size `FUN_8002d464`→
+          `crypto_bignum_mod_inverse_mod_curve_prime` (728B, HIGH) —
+          SSP/ECDH binary extended-GCD modular inverse in-place mod curve
+          prime (6/8 limbs); callers `FUN_8002db50`. 308 unnamed in-region;
+          live named 1613.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (4);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (5): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (308 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

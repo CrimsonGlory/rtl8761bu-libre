@@ -674,4 +674,34 @@ dispatcher and ACL continuation handler; ring-buffer enqueue matches sibling
 
 Region unnamed count after this pass: **309** (310 minus this rename). Live named **1612** global.
 
+**Next:** superseded by Pass 6 continuation (4).
+
+## Pass 6 continuation (4) (2026-06-30) — SSP/ECDH modular inverse `FUN_8002d464`
+
+Decompiled and renamed:
+**`FUN_8002d464` → `crypto_bignum_mod_inverse_mod_curve_prime`**
+(728B, HIGH) via `RenamePass6Region80020000Fun8002d464.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (728B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=309` at pass start). Callers:
+`FUN_8002db50` (twice at `0x8002dc3a`/`0x8002dccc`) — sibling in the SSP/ECDH
+bignum cluster also calling `FUN_8002dda4`/`FUN_8002eb94`.
+
+**Mechanism:** Binary extended-GCD modular inverse in-place mod the curve prime.
+Only runs when `param_3` (curve width) is 6 or 8 limbs. Copies input bignum from
+`param_1` into a 16-limb working buffer, loads curve prime from `PTR_DAT_8002d73c`
+(6-word) or `PTR_DAT_8002d740` (8-word), initializes cofactors `local_ac=1` and
+`local_6c=0`, then loops while input nonzero: right-shifts even limbs via
+`crypto_bignum_right_shift_u32_array_by_one_bit`, conditionally adds curve prime to
+odd cofactors, lexicographically compares and subtracts via
+`compare_uint32_arrays_lexicographic_msb_to_lsb` /
+`crypto_bignum_sub_u32_arrays_with_borrow`, finally zero-fills `param_1` and writes
+back `local_6c` as the inverse.
+
+**Confidence:** HIGH — unambiguous extended-GCD inverse structure; uses the same
+curve-prime constants and bignum primitives as Pass 6's reduce/double/add cluster;
+two documented callers in `FUN_8002db50`.
+
+Region unnamed count after this pass: **308** (309 minus this rename). Live named **1613** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
