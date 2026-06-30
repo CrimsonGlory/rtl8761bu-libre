@@ -7940,8 +7940,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52dd;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52de: continue >150B cold-triage
-          — decompile+rename rank-24 `0x80040594` (566B).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52de (2026-06-30): decompiled+
+          renamed rank-24 `FUN_80040594`→`build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2`
+          (566B, HIGH, >150B tier). SCO/eSCO LMP PDU builder for conn-type nibble 1–2;
+          caller `FUN_80041230`; upgraded from MEDIUM (Pass 3). 160 unnamed remain;
+          live named 1478.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52de;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52df: continue >150B cold-triage
+          — decompile+rename rank-25 `0x80041230` (560B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
