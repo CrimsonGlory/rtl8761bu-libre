@@ -6976,8 +6976,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52c;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52d: decompile+rename rank-4
-          `0x8004e500` (15 xrefs, 118B, 51-150B tier).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52d: decompiled+renamed rank-4
+          `FUN_8004e500`→`is_any_conn_lmp_procedure_busy_by_index`
+          (118B, HIGH). Maps index 0-4 to conn_rec+0x20 procedure nibble,
+          scans conn table for active LMP procedure; busy-probe for
+          `check_feature_permission_by_category_and_index`.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52d;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52e: decompile+rename rank-5
+          `0x8004287c` (10 xrefs, 88B, 51-150B tier).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

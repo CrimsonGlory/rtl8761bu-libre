@@ -842,5 +842,34 @@ triggers the already-HIGH `conn_link_quality_history_reset_and_vsc_0xfc95_trigge
 with `mode==1`. Invoked from patch eSCO setup via RAM fn-ptr slot `0x8012082c`
 (`(**0x8012082c)(conn_idx, 6)` from `FUN_8010b5d8` / `FUN_8010b4d0`).
 
-**Next:** decompile+rename rank-4 `0x8004e500` (15 xrefs, 118B); then continue down the
+## Pass 52d (2026-06-30) — rank-4 LMP procedure busy-probe rename
+
+**Rank-4 decompiled and renamed (HIGH):** `FUN_8004e500` →
+`is_any_conn_lmp_procedure_busy_by_index` (118B) via
+`RenamePass52dRegion80040000Fun8004e500.java` (`renamed=1`, live-verified).
+
+```c
+byte is_any_conn_lmp_procedure_busy_by_index(byte index)
+{
+  // optional hook override at PTR_DAT_8004e578
+  nibble = (index < 5) ? lookup_table[index] : 0;  // PTR_DAT_8004e57c
+  for (conn_idx = 0; conn_idx < conn_table_count; conn_idx++) {
+    conn_rec = conn_table[conn_idx];  // PTR_PTR_8004e580
+    if (conn_rec != 0
+        && (conn_rec+0x08 & 7) == 0      // link-state low 3 bits clear
+        && (conn_rec+0x1d & 2) != 0      // procedure-active flag
+        && (conn_rec+0x20 & 0xf) == nibble)  // procedure-type nibble match
+      return 1;
+  }
+  return 0;
+}
+```
+
+Boolean busy-procedure probe: maps `index` 0-4 to a conn_rec+0x20 low-nibble value via
+lookup table, then scans the global connection table for any active link with matching
+procedure state. Used 15× as stage-(b) of the 4-stage permission gate in
+`check_feature_permission_by_category_and_index` (`0x8005af8c`, region `0x80050000`);
+sibling of still-unnamed `FUN_8004e9e0` (global busy-bit scan without index).
+
+**Next:** decompile+rename rank-5 `0x8004287c` (10 xrefs, 88B); then continue down the
 Pass 52 ranked list.
