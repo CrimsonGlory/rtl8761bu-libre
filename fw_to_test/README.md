@@ -3,8 +3,8 @@
 NeoPC `try_new_firmware.sh` scp's **only** from this directory:
 
 ```
-root@daas-dev.codexgigassys.com:/root/rtl8761bu-libre/fw_to_test/rtl8761bu_fw.bin
-root@daas-dev.codexgigassys.com:/root/rtl8761bu-libre/fw_to_test/rtl8761bu_config.bin
+root@daas-dev:/root/rtl8761bu-libre/fw_to_test/rtl8761bu_fw.bin
+root@daas-dev:/root/rtl8761bu-libre/fw_to_test/rtl8761bu_config.bin
 ```
 
 Built profiles (libre, vendor baseline, bisect phases) live under `rtl8761bu-libre/` as
