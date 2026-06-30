@@ -2959,3 +2959,41 @@ Post-rename: **208 unnamed** in-region (122 in 1-150B tier).
 
 **Next:** continue refreshed 1-150B cold-triage — decompile next rank-52+
 substantive candidate; skip rank-1–51 artifacts and already-done ranks.
+
+## Pass 52bh (2026-06-30) — rank-52 conditional LMP 0x25B dispatch on HCI reset rename
+
+**Refreshed cold-triage (ranks 1-51 skipped as artifacts or already done):** rank-52
+`0x8004aae8` (26B, 1 xref) — substantive conditional LMP 0x25B dispatch gated on the
+LMP pre-check buffer sentinel at `+0x1c` in the `0x8004aaxx`/`0x8004abxx` HCI-reset
+LMP-check cluster (sibling of Pass 52av's
+`hci_reset_clear_lmp_check_buf_set_flag_and_program_bb_regs` which seeds `+0x1c` to
+`0xffffffff`, and Pass 52bd's `clear_lmp_precheck_entry_and_arm_connection_active_bitmask`
+on a related check-buffer pointer).
+
+**Rank-52 decompiled and renamed (HIGH):** `FUN_8004aae8` →
+`invoke_lmp_25b_if_precheck_sentinel_not_minus_one` (26B) via
+`RenamePass52bhRegion80040000Fun8004aae8.java` (`renamed=1`, live-verified).
+
+```c
+void invoke_lmp_25b_if_precheck_sentinel_not_minus_one(void)
+{
+  buf = PTR_check_before_call_LMP_func_8004ab04;
+  if (*(int *)(buf + 0x1c) != -1) {
+    LMP__25B__most_common_for_VSCs1(PTR_DAT_8004ab08);
+  }
+}
+```
+
+When the dword sentinel at `+0x1c` of `PTR_check_before_call_LMP_func_8004ab04` is not
+`0xffffffff` (i.e. pre-check state is active/pending rather than idle), invokes the
+established `LMP__25B__most_common_for_VSCs1` pending-flag scheduler wrapper (vendor LMP
+opcode 0x25B, documented in `reverse_engineering_lmp_vsc_opcode_map.md`). Sole caller:
+`fHCI_Reset_0x03_full_subsystem_teardown` — fires during full HCI Reset teardown before
+Pass 52ar's `release_all_conn_records_and_invoke_teardown_chain` work, ensuring any
+in-flight LMP 0x25B pending state is flushed when the pre-check sentinel indicates
+activity.
+
+Post-rename: **207 unnamed** in-region (121 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-53+
+substantive candidate; skip rank-1–52 artifacts and already-done ranks.

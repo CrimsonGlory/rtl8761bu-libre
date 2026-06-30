@@ -7475,9 +7475,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bh: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-52+ substantive candidate;
-          skip rank-1–51 artifacts and already-done ranks.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52bh (2026-06-30): decompiled+
+          renamed rank-52 `FUN_8004aae8`→`invoke_lmp_25b_if_precheck_sentinel_not_minus_one`
+          (26B, HIGH, 1 xref). Conditional LMP 0x25B dispatch when pre-check sentinel
+          `+0x1c` not `0xffffffff`; caller `fHCI_Reset_0x03_full_subsystem_teardown`.
+          207 unnamed in-region (121 in 1-150B tier); live named 1431.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52bh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52bi: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-53+ substantive candidate;
+          skip rank-1–52 artifacts and already-done ranks.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
