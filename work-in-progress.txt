@@ -9464,8 +9464,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (31);
             analysis/rom/rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (32): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (281 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (32) (2026-06-30):
+          decompiled+renamed rank-1 `FUN_800236cc`→`fHCI_Remote_OOB_Data_Request_Reply_0x30`
+          (248B, HIGH). Legacy SSP OOB confirmation reply (opcode 0x0430 router
+          slot): byte-swaps single OOB hash/randomizer pair, verifies via
+          `verify_ssp_oob_confirmation_hash`, LMP 0x40 accept/reject or HCI
+          Simple Pairing Complete; caller `HCI_Write_Simple_Pairing_Debug_Mode`.
+          280 unnamed remain; live named 1641.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (32);
+            analysis/rom/rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (33): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (280 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

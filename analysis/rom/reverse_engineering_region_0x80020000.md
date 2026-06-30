@@ -1325,8 +1325,8 @@ via `possible_logging_function__var_args`, and on match stores the 16-byte OOB
 response at `+0x118` from `param_3`. Returns bool (match).
 
 **Callers:** `fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45` (twice — legacy
-and P-256 extended OOB pairs) and `FUN_800236cc` (sibling HCI OOB reply handler
-in the SSP pairing path).
+and P-256 extended OOB pairs) and `fHCI_Remote_OOB_Data_Request_Reply_0x30`
+(legacy single-pair OOB reply handler in the SSP pairing path).
 
 **Confidence:** HIGH — decompile confirms hash-then-compare-then-store pattern;
 callers and cross-region doc (`region_0x80010000` Pass 4fHCI) already identified
@@ -1550,5 +1550,38 @@ caller is documented `LMP_NOT_ACCEPTED_0x04` dispatcher; numeric-comparison path
 ties to established SHA/BLAKE digest helper and HCI User Confirmation Request.
 
 Region unnamed count after this pass: **281** (282 minus this rename). Live named **1640** global.
+
+**Next:** superseded by Pass 6 continuation (32).
+
+## Pass 6 continuation (32) (2026-06-30) — legacy SSP OOB reply `FUN_800236cc`
+
+Decompiled and renamed:
+**`FUN_800236cc` → `fHCI_Remote_OOB_Data_Request_Reply_0x30`**
+(248B, HIGH) via `RenamePass6Region80020000Fun800236cc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (248B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=281` at pass start).
+
+**Mechanism:** Legacy (single-pair) SSP Out-of-Band Data Request Reply handler,
+dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` opcode switch case **0x430**
+(OCF 0x30). Resolves connection via `FUN_80023008`, byte-swaps the 16-byte OOB
+hash and randomizer at `param+9` / `param+0x19`, verifies via
+`verify_ssp_oob_confirmation_hash`, stores result at crypto struct `+0x1e6`.
+When no pending LMP at `+0x1e8`, sets crypto sub-state `0x25` or `0x27` (or
+calls `FUN_80025980` on sub-state `#`). When pending LMP opcode is **0x40**
+(Simple Pairing Number), on verify success copies pending payload, sends
+`wrap_send_LMP_ACCEPTED_and_some_other_things` for opcode 0x40, continues via
+`FUN_80025634`/`FUN_80025980` with sub-state `0x28`; on failure sends
+`wrap_send_LMP_NOT_ACCEPTED`. Otherwise clears pending via `FUN_80025634` and
+emits `call_send_evt_HCI_Simple_Pairing_Complete`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (1 site, opcode `0x430` branch).
+
+**Confidence:** HIGH — decompile confirms single-pair OOB verify idiom matching
+`verify_ssp_oob_confirmation_hash` caller note from Pass 6 cont. (24); router
+opcode and LMP 0x40 accept/reject dispatch parallel extended OOB handler at
+`fHCI_Remote_OOB_Extended_Data_Request_Reply_0x45`.
+
+Region unnamed count after this pass: **280** (281 minus this rename). Live named **1641** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
