@@ -8753,7 +8753,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gk;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gl: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52gl (2026-06-30): decompiled+
+          renamed rank-1 `FUN_8004f824`→`validate_pdu_slot_budget_and_dispatch_hw_write_hook`
+          (106B, HIGH). Optional hook at `0x801212e4` (`PTR_DAT_8004f890`); ROM
+          fallback validates conn-type nibble + clamps `pkt_interval+pdu_slots+1≤0xFF`;
+          returns `5` on type-zero error; does not write BB registers — HW writes
+          live in hook. Callee of `conn_type_checked_hw_hook_dispatch`; documented
+          in hardware_layer.md since 2026-06-08 but still `FUN_*` until now.
+          75 unnamed remain; live named 1563.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52gl;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52gm: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B, xrefs≥1).
 

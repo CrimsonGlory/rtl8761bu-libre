@@ -7307,5 +7307,46 @@ fragmentation scheduler cluster.
 
 Post-rename: **76 unnamed** in-region (39 in 1-150B size≥20B tier); live named **1562**.
 
+**Next:** superseded by Pass 52gl below.
+
+## Pass 52gl (2026-06-30) — rank-1 PDU slot budget validator + HW write hook rename
+
+**Cold-triage (refreshed):** size≥20B, xrefs≥1 tier; rank-1 `0x8004f824` (106B,
+1 xref) — slot-budget validator + optional RAM hook dispatch at `0x801212e4`;
+documented in `reverse_engineering_hardware_layer.md` since 2026-06-08 but still
+`FUN_*` in Ghidra.
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004f824` →
+`validate_pdu_slot_budget_and_dispatch_hw_write_hook` (106B) via
+`RenamePass52glRegion80040000Fun8004f824.java` (`renamed=1`, live-verified).
+
+```c
+uint8_t validate_pdu_slot_budget_and_dispatch_hw_write_hook(hw_obj_t *obj)
+{
+  hook = *(code **)PTR_DAT_8004f890;   // 0x801212e4 RAM hook slot
+  if (hook != NULL && hook(obj, result) != 0)
+    return result[0];                  // hook handled — use its return
+
+  if ((obj[0x08] & 7) == 0) {
+    log(..., obj[0x08] & 7);
+    return 5;                          // conn type unset — error
+  }
+  // Slot budget: pkt_interval + pdu_slots + 1 ≤ 0xFF
+  if ((uint)(obj[0x09] + obj[0x11] + 1) > 0xFF)
+    obj[0x11] = 0xFE - obj[0x09];      // clamp pdu_slots
+  return 0;
+}
+```
+
+Optional hook at `0x801212e4` (`PTR_DAT_8004f890`); ROM fallback validates
+conn-type nibble (`+0x08 & 7`) and enforces `pkt_interval + pdu_slots + 1 ≤ 0xFF`
+(`+0x09`/`+0x11`), clamping `pdu_slots` to `0xFE − pkt_interval` on overflow.
+Returns `5` on type-zero error, `0` on success. Does not write BB registers itself —
+actual HW writes live in the hook (per-connection runtime-generated code from
+`FUN_80025b68`). Callee of `conn_type_checked_hw_hook_dispatch` (`0x80050994`).
+Hardware-hook architecture cluster.
+
+Post-rename: **75 unnamed** in-region (38 in 1-150B size≥20B tier); live named **1563**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
