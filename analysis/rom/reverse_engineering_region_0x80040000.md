@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 147 functions in tier, 32 renamed HIGH (Passes 52–52ai). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ai, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 146 functions in tier, 33 renamed HIGH (Passes 52–52aj). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52aj, 2026-06-30).
 
 ## Overview
 
@@ -1995,5 +1995,48 @@ to `FUN_8006aee4`.
 
 Post-rename: **232 unnamed** in-region (146 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-28+
-substantive candidate; skip rank-1–27 artifacts and already-done ranks.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-29+
+substantive candidate; skip rank-1–28 artifacts and already-done ranks.
+
+## Pass 52aj (2026-06-30) — rank-28 record-pool free-list diagnostic logger rename
+
+**Refreshed cold-triage (ranks 1-27 skipped as artifacts or already done):** rank-28
+`0x8004f4e8` (138B, 1 xref) — substantive record-pool diagnostic logger in the
+`0x8004f5xx` cluster (sibling of `log_conn_diagnostic_batch_up_to_five_entries`).
+
+**Rank-28 decompiled and renamed (HIGH):** `FUN_8004f4e8` →
+`log_record_pool_four_free_list_counts_and_head_state` (138B) via
+`RenamePass52ajRegion80040000Fun8004f4e8.java` (`renamed=1`, live-verified).
+
+```c
+void log_record_pool_four_free_list_counts_and_head_state(void)
+{
+  ctx = PTR_DAT_8004f574;
+  head = *(void **)(ctx + 4);
+  if (head == 0) { head_byte = 0; head_dword = 0; }
+  else { head_byte = *(byte *)(head + 8); head_dword = *(dword *)(head + 0xc); }
+  count0 = walk_singly_linked_list(*(void **)(ctx + 8));
+  count1 = walk_singly_linked_list(*(void **)(ctx + 0x10));
+  count2 = walk_singly_linked_list(*(void **)(ctx + 0x18));
+  count3 = walk_singly_linked_list(*PTR_PTR_8004f578);
+  possible_logging_function__var_args(
+      6, 0xd2, 0x2263, 0xd4c, 9, PTR_unknown_dat_ref_by_logger_8004f57c,
+      head, head_byte, head_dword, count0, count1, count2, count3,
+      *(dword *)(ctx + 0x24), *(dword *)(ctx + 0x28));
+}
+```
+
+Walks four singly-linked free lists rooted at `PTR_DAT_8004f574+8/+0x10/+0x18` and
+`PTR_PTR_8004f578`, counts elements in each, reads head-record byte/dword fields
+from the pointer at `ctx+4`, and emits a single varargs diagnostic log via
+`possible_logging_function__var_args`. Record-pool allocator diagnostic sibling of
+`log_conn_diagnostic_batch_up_to_five_entries` and the `0x8004e2xx`/`0x8004e8xx`
+free-list init cluster (`link_0x54_record_pool_into_free_list_by_config_count`,
+`link_0x60_and_0x108_record_pools_into_free_lists_by_config`,
+`free_list_lifo_push_0xfc_record_pool`). No direct callers found (likely
+function-pointer registration).
+
+Post-rename: **231 unnamed** in-region (145 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-29+
+substantive candidate; skip rank-1–28 artifacts and already-done ranks.
