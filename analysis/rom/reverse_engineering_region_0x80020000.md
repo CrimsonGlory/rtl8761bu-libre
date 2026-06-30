@@ -996,4 +996,38 @@ already named in this region.
 
 Region unnamed count after this pass: **299** (300 minus this rename). Live named **1622** global.
 
+**Next:** superseded by Pass 6 continuation (14).
+
+## Pass 6 continuation (14) (2026-06-30) — stop-encryption completion `FUN_800247b4`
+
+Decompiled and renamed:
+**`FUN_800247b4` → `finalize_stop_encryption_procedure_and_notify_hci`**
+(448B, HIGH) via `RenamePass6Region80020000Fun800247b4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (448B, xref_in=5) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=299` at pass start). Callers:
+`LMP_STOP_ENCRYPTION_REQ_0x12` (`0x80028064`), `FUN_80027b9c`, `FUN_800280ac`,
+`FUN_80029260`, plus one computed xref at `0x800256ee`.
+
+**Mechanism:** Sibling to `finalize_encryption_procedure_and_notify_hci` (`0x800249a8`) —
+per-connection stop-encryption / link-key procedure completion dispatcher. Params:
+connection handle (`param_1`) and status byte (`param_2`). Operates on
+`big_ol_struct[slot]._x58_crypto_struct`. On entry may call `LMP__25C_called1` when
+pending LMP slot at `+0x1ec` is active. Switch on crypto sub-state byte `*pbVar7 - 0xd`
+dispatches HCI notifications: `send_evt_HCI_Encryption_Change_v1_`,
+`send_evt_HCI_Encryption_Key_Refresh_Complete`,
+`send_evt_HCI_Change_Connection_Link_Key_Complete`, and
+`calls_send_evt_HCI_Link_Key_Type_Changed_0x0A_and_possible_LMP_DETACH` per procedure
+type. Failure paths invoke `FUN_80025b1c`/`FUN_800245cc` or set sub-state bytes
+`0x45`/`0x49`/`0x46`. Advances sub-state via lookup table `PTR_DAT_800249a0`,
+optionally invokes registered hook at `PTR_DAT_800249a4` (`+0xa8` slot), clears `+0x50`
+sub-flag, calls `FUN_80017d2c` on conn record, then tail-calls `FUN_8002a188`.
+
+**Confidence:** HIGH — primary caller is documented `LMP_STOP_ENCRYPTION_REQ_0x12`
+(opcode 0x12); switch cases map to standard HCI encryption/key-refresh/link-key events;
+structurally mirrors the start-encryption finalizer at `0x800249a8` with complementary
+state-base offset (`-0xd` vs `-6`) and distinct lookup tables.
+
+Region unnamed count after this pass: **298** (299 minus this rename). Live named **1623** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
