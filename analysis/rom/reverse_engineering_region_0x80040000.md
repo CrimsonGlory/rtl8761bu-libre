@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 13 renamed HIGH (Passes 52–52n). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52n, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 168 functions in tier, 15 renamed HIGH (Passes 52–52p). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52p, 2026-06-30).
 
 ## Overview
 
@@ -1223,5 +1223,38 @@ confirmed callers via `xrefs_to`: `FUN_800435a8` and
 
 Post-rename: **252 unnamed** in-region (166 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-7+
+## Pass 52p (2026-06-30) — rank-7 LMP slot-offset relation classifier rename
+
+**Refreshed cold-triage (rank-1–6 skipped as artifacts or already done):** rank-7
+`0x80042c0c` (24B, 4 xrefs) — substantive tri-state masked slot-offset comparator
+in the inquiry/LAP / role-switch cluster (sibling of Pass 52n/o bitmask setters).
+
+**Rank-7 decompiled and renamed (HIGH):** `FUN_80042c0c` →
+`classify_lmp_slot_offset_relation_masked` (24B) via
+`RenamePass52pRegion80040000Fun80042c0c.java` (`renamed=1`, live-verified).
+
+```c
+int classify_lmp_slot_offset_relation_masked(uint current_offset, uint proposed_offset)
+{
+  int result = 1;
+  if (proposed_offset <= current_offset) {
+    mask = DAT_80042c24;  // literal-pool mask at +0x18
+    result = 3 - (uint)(((current_offset ^ proposed_offset) & mask) == 0);
+  }
+  return result;
+}
+```
+
+Tri-state masked LMP slot-offset relation classifier for role-switch handling:
+returns **1** when `proposed > current` (accept path in `LMP_SWITCH_REQ_0x13`);
+**2** when `proposed <= current` and masked bits differ (reject →
+`LMP_NOT_ACCEPTED` error `0x28`); **3** when `proposed <= current` but equal in
+masked bits (special adjust loop in `FUN_8006f994` role-switch completion).
+Current offset from `FUN_80034a24`; proposed from conn record `field_0x18` or
+LMP switch PDU bytes. 4 confirmed callers via `find_callers`: `LMP_SWITCH_REQ_0x13`,
+`FUN_8006f994`, `FUN_8006fd20`, `LMP_SET_AFH_0x3C`.
+
+Post-rename: **251 unnamed** in-region (165 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-8+
 substantive candidate or skip rank-1/2/3/4 artifacts.
