@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 92 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fu, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; >150B tier exhausted Pass 52fr (2026-06-30); 1-150B tier cold-triage resumed Pass 52fs (2026-06-30): 89 unnamed remain in-region. Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52fx, 2026-06-30).
 
 ## Overview
 
@@ -6710,5 +6710,54 @@ into bits 11+, ANDs with `DAT_8004ad60` mask, emits via patch-hook fptr at
 
 Post-rename: **90 unnamed** in-region (90 in 1-150B tier); live named **1548**.
 
-**Next:** continue 1-150B cold-triage — run fresh cold-triage for next substantive
-candidate (skip rank-1–4 artifacts).
+**Next:** superseded by Pass 52fx below.
+
+## Pass 52fx (2026-06-30) — 1-150B rank-6 conn-record release to free pool rename
+
+**Cold-triage (refreshed):** 90 unnamed 1-150B remain (pre-rename). rank-1
+`0x8004a2e4` (10 xrefs, 1B — artifact); rank-2 `0x80045b94` (6 xrefs, 1B —
+artifact); rank-3 `0x80048934` (5 xrefs, 1B — artifact); rank-4 `0x8004701c`
+(4 xrefs, 1B — artifact); rank-5 `0x8004ad0c` (3 xrefs, 84B — done Pass 52fw);
+rank-6 `0x8004fcec` (3 xrefs, 60B); rank-7 `0x80044588` (3 xrefs, 40B).
+
+**Rank-1–4 triaged (non-function artifacts):** unchanged from Pass 52fw.
+
+**1-150B rank-6 decompiled+renamed (HIGH):** `FUN_8004fcec` →
+`release_conn_record_to_free_pool`
+(60B, 3 xrefs) via
+`RenamePass52fxRegion80040000Fun8004fcec.java` (`renamed=1`, live-verified).
+
+```c
+void release_conn_record_to_free_pool(conn_rec_t *conn_rec)
+{
+  if (!is_conn_record_pkt_modes_cleared_for_free()) return;
+
+  teardown_conn_hw_resource_subobject_tree_and_free_to_pools(conn_rec);
+  deregister_link_record_handle_from_index_table(conn_rec);
+
+  if ((conn_rec[0x08] & 0x7) != 0) {
+    // push conn_rec[0x14] to SCO sub-resource pool at PTR_PTR_8004fd28
+    sco_subobj = conn_rec[0x14];
+    sco_subobj->next = *PTR_PTR_8004fd28;
+    *PTR_PTR_8004fd28 = sco_subobj;
+  }
+
+  // push conn_rec to main free list at PTR_PTR_8004fd2c
+  conn_rec[0x00] = *PTR_PTR_8004fd2c;
+  *PTR_PTR_8004fd2c = conn_rec;
+}
+```
+
+Conn-record teardown + free-pool return: gated on pkt_modes-cleared precondition
+(`is_conn_record_pkt_modes_cleared_for_free`, Pass 52m), tears down HW-resource
+subobject tree, deregisters handle from sorted index table, optionally returns
+SCO sub-object at `+0x14` when pkt_mode bits set, then pushes slot onto main
+free-list head. VSC dispatcher error path and conn-record subsystem documented
+in `reverse_engineering_conn_record_subsystem.md` §7.
+
+Post-rename cold-triage (`ColdTriageRegion80040000Pass52fx.java`): **89 unnamed**
+in-region (89 in 1-150B tier); live named **1549**. Next substantive rank-5:
+`0x80044588` (40B, 3 xrefs).
+
+**Next:** continue 1-150B cold-triage — decompile+rename rank-5 `0x80044588`
+(skip rank-1–4 artifacts).

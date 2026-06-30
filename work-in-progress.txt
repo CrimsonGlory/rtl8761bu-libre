@@ -8625,11 +8625,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fw;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fx: continue 1-150B cold-triage
-          — decompile+rename next substantive unnamed 1-150B candidate (run
-          ColdTriageRegion80040000Pass52fw.java or successor for fresh rank;
-          skip rank-1–4 artifacts `0x8004a2e4`/`0x80045b94`/`0x80048934`/
-          `0x8004701c`).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52fx (2026-06-30): decompiled+
+          renamed rank-6 `FUN_8004fcec`→`release_conn_record_to_free_pool`
+          (60B, HIGH) — pkt_modes gate, HW teardown, handle deregister, SCO
+          sub-pool + main free-list push; 3 xrefs. 89 unnamed in-region; live
+          named 1549.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52fx;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52fy: continue 1-150B cold-triage
+          — decompile+rename rank-5 `0x80044588` (40B, 3 xrefs; skip rank-1–4
+          artifacts `0x8004a2e4`/`0x80045b94`/`0x80048934`/`0x8004701c`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
