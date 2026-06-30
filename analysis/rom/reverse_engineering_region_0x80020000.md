@@ -2800,4 +2800,33 @@ cluster in `0x80023xxx`.
 
 Region unnamed count after this pass: **241** (242 minus this rename). Live named **1680** global.
 
+**Next:** superseded by Pass 6 continuation (72).
+
+## Pass 6 continuation (72) (2026-06-30) — SSP/ECDH DHKey entry P-192 `FUN_8002c928`
+
+Decompiled and renamed:
+**`FUN_8002c928` → `get_DHKey_to_3rd_param_p192`**
+(150B, HIGH) via `RenamePass6Region80020000Fun8002c928.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (150B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=241` at pass start).
+
+**Mechanism:** P-192 (6-word / 0x18-byte) sibling of `get_DHKey_to_3rd_param?` (256-bit
+8-word variant at `0x8002c888`). Reverses peer X/Y and local scalar from `param_2`/`param_1`
+into stack buffers, validates the peer affine point via
+`crypto_ec_validate_affine_point_on_curve_mod_prime` with word-count `6`. On failure: calls
+`FUN_8002c838` (SHA/BLAKE hash fallback into `param_3+3`) and clears
+`big_ol_struct[slot].field_0xb9`. On success: calls `crypto_ec_dhkey_montgomery_ladder_init`
+with 6-word operands to derive DHKey into the 3rd-parameter output path.
+
+**Callers:** `LMP__266__FUN_80022030` (LMP 0x266 SSP DHKey material path) — xref_in=1;
+documented in Pass 6 continuation (30) pairing-method dispatch cluster.
+
+**Confidence:** HIGH — decompile is structurally identical to the already-HIGH
+`get_DHKey_to_3rd_param?` with only operand width differing (6 vs 8 words); callee names
+(`crypto_ec_validate_affine_point_on_curve_mod_prime`, `crypto_ec_dhkey_montgomery_ladder_init`,
+`FUN_8002c838`) all previously renamed HIGH in this SSP/ECDH cluster.
+
+Region unnamed count after this pass: **240** (241 minus this rename). Live named **1681** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
