@@ -8132,5 +8132,46 @@ found (indirect HCI router).
 
 Post-rename: **54 unnamed** in-region (17 in 1-150B size≥20B tier); live named **1584**.
 
+**Next:** superseded by Pass 52hh below.
+
+## Pass 52hh (2026-06-30) — rank-1 sync-conn link-param store HCI handler rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hh.java` — 54 unnamed,
+17 in 1-150B size≥20B tier; rank-1 `0x80047bdc` (112B, 0 xrefs) — largest
+remaining 1-150B candidate in the `0x80047bxx` SCO/eSCO sync-connection cluster
+(sibling of Pass 52fn's
+`hci_sync_conn_param_commit_or_le_channel_scan_send_cmd_complete` at `0x80047b10`
+and Pass 52ee's `validate_unique_handles_and_commit_sync_conn_params` at
+`0x80047980`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_80047bdc` →
+`hci_sync_conn_link_param_store_to_record_send_cmd_complete` (112B) via
+`RenamePass52hhRegion80040000Fun80047bdc.java` (`renamed=1`, live-verified).
+
+```c
+char hci_sync_conn_link_param_store_to_record_send_cmd_complete(short *param_1)
+{
+  /* handle at param+3; conn_record_get_4byte_field_by_handle or */
+  /* alloc_link_record_and_register_by_index on miss */
+  /* when record exists or alloc succeeds: memcpy 6 bytes param+2 → record+0x40 */
+  /* status: param[0]==0 → 0, else field_0x165 (default 1) */
+  /* 4-byte Command Complete via hci_event_sender(0xe,…); returns alloc status */
+}
+```
+
+112B HCI command handler: looks up conn record by handle at `param+3` via
+`conn_record_get_4byte_field_by_handle`, or allocates via
+`alloc_link_record_and_register_by_index` on miss; when the record exists or
+allocation succeeds, copies 6-byte link-param block from `param+2` into
+conn-record `+0x40`; builds Command Complete status from `param[0]` (zero →
+status `0`, else `field_0x165` with default `1`); terminates via 4-byte HCI
+Command Complete (`hci_event_sender(0xe,…)`) with `field_0x165` status idiom.
+No direct callers found (indirect HCI router).
+
+SCO/eSCO sync-connection cluster sibling of
+`hci_sync_conn_param_commit_or_le_channel_scan_send_cmd_complete`.
+
+Post-rename: **53 unnamed** in-region (16 in 1-150B size≥20B tier); live named **1585**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; refresh cold-triage ranks).

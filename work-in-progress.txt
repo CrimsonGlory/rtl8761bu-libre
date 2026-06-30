@@ -8972,7 +8972,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hg;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hh: continue 1-150B cold-triage
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52hh (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80047bdc`→`hci_sync_conn_link_param_store_to_record_send_cmd_complete`
+          (112B, HIGH). Sync-conn link-param store HCI handler: handle at
+          `param+3`; `conn_record_get_4byte_field_by_handle` or
+          `alloc_link_record_and_register_by_index`; copies 6-byte block from
+          `param+2` to conn-record `+0x40`; 4-byte Command Complete via
+          `hci_event_sender(0xe,…)`; `0x80047bxx` sync-conn cluster sibling of
+          Pass 52fn. 53 unnamed in-region (16 in 1-150B size≥20B tier); live
+          named 1585.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52hh;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52hi: continue 1-150B cold-triage
           — refresh ranks via `ColdTriageRegion80040000Pass52*.java`, then
           decompile+rename next candidate (size≥20B).
 
