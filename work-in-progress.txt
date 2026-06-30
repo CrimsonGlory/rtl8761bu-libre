@@ -8382,9 +8382,22 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ew;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ex: continue refreshed >150B
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ex (2026-06-30): decompiled+
+          renamed rank-1 `FUN_80046e40`→
+          `hci_le_adv_scan_enable_feature_gate_commit_flush_send_cmd_complete`
+          (474B, HIGH). LE adv/scan enable HCI handler: re-entrancy gate,
+          two boolean params commit `field68_0x44` bits 0/5, category-2
+          feature permission, enable/disable fn-ptr paths with
+          `flush_pending_hw_writes_or_dispatch_mode1`, optional
+          `set_channel_bdaddr_scramble_fields`, Command Complete via
+          `hci_event_sender(0xe,…)`; >150B rank-1 from cold-triage. 20
+          unnamed >150B; 115 unnamed in-region; live named 1523.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ex;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ey: continue refreshed >150B
           cold-triage — decompile+rename next rank-1 unnamed >150B candidate
-          (`0x80046e40`, 474B).
+          (`0x800451cc`, 408B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

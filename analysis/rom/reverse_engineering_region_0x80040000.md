@@ -5831,5 +5831,43 @@ at `0x800483c0`, thin wrapper `invoke_baseband_link_setup_from_param_buffer` at
 Post-rename: **116 unnamed** in-region (95 in 1-150B tier unchanged);
 live named **1522**.
 
+**Next:** superseded by Pass 52ex below.
+
+## Pass 52ex (2026-06-30) — >150B rank-1 LE adv/scan enable HCI handler rename
+
+**Cold-triage (refreshed, from Pass 52ew):** **20** unnamed >150B remain.
+rank-1 `0x800451cc` (408B); rank-2 `0x80046798` (352B); rank-3
+`0x8004635c` (320B); rank-4 `0x80046a00` (318B); rank-5 `0x8004ab64`
+(414B).
+
+**>150B rank-1 decompiled+renamed (HIGH):** `FUN_80046e40` →
+`hci_le_adv_scan_enable_feature_gate_commit_flush_send_cmd_complete`
+(474B, 0 xrefs in cold-triage) via
+`RenamePass52exRegion80040000Fun80046e40.java` (`renamed=1`, live-verified).
+
+474B HCI command handler in the LE advertising/scan cluster (neighbor of
+Pass 52ev/52ew adv-data handlers and
+`process_link_feature_toggle_command_and_send_status_event`):
+
+- **Re-entrancy gate:** per-control-record state byte at `+0x15dc`; returns
+  `0x0c` (Command Disallowed) when busy and global flag bit `0x10` set.
+- **Parameter validation:** two boolean bytes at HCI cmd `+2` (`local_18`) and
+  `+3` (`bVar1`); both must be ≤1 else `0x12` (Invalid Parameters).
+- **Feature permission:** when `bVar1 != 0`, calls
+  `check_feature_permission_by_category_and_index(2, (field68_0x44 >> 6) & 1)`.
+- **State commit:** updates `field68_0x44` bit 0 ← `bVar1`, bit 5 ←
+  `local_18`; may set/clear `field69_0x45` bit `0x80`.
+- **Link-state branch:** when active link mode byte `0x268 == 2` and
+  `0x26a != 0`, enable path calls fn-ptr pair + copies timing fields at
+  `0x15c8`/`0x15ca`; disable path calls alternate fn-ptr +
+  `flush_pending_hw_writes_or_dispatch_mode1(0/1)`.
+- **BDADDR scramble:** when config `field208_0xd8 & 0x80`, calls
+  `set_channel_bdaddr_scramble_fields`.
+- **Command Complete:** `hci_event_sender(0xe, &local_20, 4)` with
+  `field_0x165` status idiom; diagnostic log tag `0x515`.
+
+Post-rename: **115 unnamed** in-region (95 in 1-150B tier unchanged);
+live named **1523**.
+
 **Next:** continue refreshed >150B cold-triage — decompile+rename next rank-1
-unnamed >150B candidate (`0x80046e40`, 474B).
+unnamed >150B candidate (`0x800451cc`, 408B).
