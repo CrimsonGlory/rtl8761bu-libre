@@ -4143,5 +4143,26 @@ of `is_any_conn_lmp_procedure_busy_by_index` (`0x8004e500`) and
 Post-rename: **175 unnamed** in-region (95 in 1-150B tier unchanged); **80** in
 >150B tier.
 
-**Next:** continue >150B cold-triage — decompile+rename rank-8 `0x80040060`
-(184B, 4 xrefs).
+**Next:** continue >150B cold-triage — completed Pass 52co below.
+
+## Pass 52co (2026-06-30) — >150B rank-8 LMP-25C scheduling-readiness probe rename
+
+**>150B rank-8 decompiled and renamed (HIGH):** `FUN_80040060` →
+`probe_lmp_25c_scheduling_readiness_by_credit_window` (184B, 4 xrefs) via
+`RenamePass52coRegion80040000Fun80040060.java` (`renamed=1`, live-verified).
+Upgraded from MEDIUM-HIGH (Pass 5, 2026-06-23). Per-connection
+scheduling-readiness gate for LMP-0x25C procedure slots: when coexistence flag
+`PTR_DAT_80040118` is set, clears deadline sentinel at subrecord `+0x40c` and
+sets mode bits at `param_1+1`; derives initial state byte at `conn_rec+0x247`
+from 2-bit mode field; when sentinel is `-1` marks ready (`+0x247=1`); else
+under IRQ-disable calls `LMP__25C_called2()` and compares timing credit
+`ushort+0x6e` doubled against wraparound-masked global window minus deadline
+`*piVar9`, promoting `+0x247` to 1 when credit window permits. Called by
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type` and
+siblings in the LMP-25C busy-wait / slot-timing-reprogram cluster.
+
+Post-rename: **174 unnamed** in-region (95 in 1-150B tier unchanged); **79** in
+>150B tier.
+
+**Next:** continue >150B cold-triage — decompile+rename rank-9 `0x8004326c`
+(166B, 4 xrefs).

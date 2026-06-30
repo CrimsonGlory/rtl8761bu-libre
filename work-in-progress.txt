@@ -7789,8 +7789,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52cn;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52co: continue >150B cold-triage
-          — decompile+rename rank-8 `0x80040060` (184B, 4 xrefs).
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52co (2026-06-30): decompiled+
+          renamed rank-8 `FUN_80040060`→`probe_lmp_25c_scheduling_readiness_by_credit_window`
+          (184B, HIGH). LMP-25C scheduling-readiness probe: coexistence sentinel
+          clear at subrecord `+0x40c`, IRQ-off credit-window compare via
+          `LMP__25C_called2`, promotes `conn_rec+0x247` ready byte when
+          `(credit<<1) < (masked_window - deadline)`; gates
+          `sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type`.
+          174 unnamed in-region (79 in >150B tier); live named 1464.
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52co;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52cp: continue >150B cold-triage
+          — decompile+rename rank-9 `0x8004326c` (166B, 4 xrefs).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
