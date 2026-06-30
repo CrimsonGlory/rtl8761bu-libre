@@ -7984,5 +7984,41 @@ and `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp`.
 
 Post-rename: **58 unnamed** in-region (21 in 1-150B size≥20B tier); live named **1580**.
 
+**Next:** superseded by Pass 52hd below.
+
+## Pass 52hd (2026-06-30) — rank-1 active-link mask-bit conn-slot index lookup rename
+
+**Cold-triage (refreshed):** `ColdTriageRegion80040000Pass52hd.java` — 58 unnamed,
+21 in 1-150B size≥20B tier; rank-1 `0x8004e9a8` (24B, 1 xref) — caller-visible
+entry in the `0x8004e9xx` active-link-mask cluster (4B above Pass 52bk's
+`lookup_active_link_slot_status_by_index` at `0x8004e9a4`; sibling of Pass 52h's
+`scan_active_link_mask_for_slot_status_flag` and Pass 52bj's
+`is_active_link_mask_bit_four`).
+
+**Rank-1 decompiled+renamed (HIGH):** `FUN_8004e9a8` →
+`lookup_active_link_conn_slot_index_by_mask_bit` (24B) via
+`RenamePass52hdRegion80040000Fun8004e9a8.java` (`renamed=1`, live-verified).
+
+```c
+undefined1 lookup_active_link_conn_slot_index_by_mask_bit(uint mask_bit)
+{
+  uint slot = (mask_bit & 0xff) - 2 & 0xff;
+  if (slot < 3) {
+    return PTR_DAT_8004e9c0[slot];
+  }
+  return 0;
+}
+```
+
+Maps isolated active-link mask bit positions 2–4 to a 3-byte conn-slot index
+table at `PTR_DAT_8004e9c0`; returns 0 out-of-range. Sole caller
+`init_esco_sco_negotiation_state_and_scan_active_conns` (region `0x80050000`)
+feeds isolate-lowest-set-bit of the active-link mask byte, then uses the return
+as `index * 0x14 + 0x26` into the per-conn `0x1ac` struct array to seed the
+running minimum slot-timing field. Overlaps the 4B Ghidra body at `0x8004e9a4`
+(Pass 52bk) — this 24B entry is the actual call target.
+
+Post-rename: **57 unnamed** in-region (20 in 1-150B size≥20B tier); live named **1581**.
+
 **Next:** continue 1-150B cold-triage — decompile+rename next candidate
 (size≥20B; xrefs≥1 tier; refresh cold-triage ranks).
