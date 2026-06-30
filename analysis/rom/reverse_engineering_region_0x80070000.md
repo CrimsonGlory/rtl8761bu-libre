@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80070000-0x8007ffff
 
-**Status**: Pass 12fx COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**4** HANDLER-tier unnamed remain in-region; live named **1333** global). Latest: `dispatch_vsc_fca1_bb_reg_offset_write_subcases` (Pass 12fx), `handle_lmp_489_subcase7_conn_substate_emit_25c_268` (Pass 12fw). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_800776c8`, 4 remain). See Pass 12fx section below.
+**Status**: Pass 12fy COMPLETE (2026-06-30) — HANDLER-tier cold-triage sweep in progress (**3** HANDLER-tier unnamed remain in-region; live named **1334** global). Latest: `apply_vsc_fca1_status_bitmask_arm_sticky_flags_and_log` (Pass 12fy), `dispatch_vsc_fca1_bb_reg_offset_write_subcases` (Pass 12fx). **[NEXT]** next rank-1 HANDLER-tier per `ListHandler80070000.java` (`FUN_8007522c`, 3 remain). See Pass 12fy section below.
 
 ## Overview
 
@@ -2417,6 +2417,29 @@ Live named **1330** (global; in-region unnamed **22**; HANDLER-tier unnamed **7*
 
 **Next:** superseded by Pass 12fw.
 
+## Pass 12fy (2026-06-30) — VSC FCA1 status bitmask apply `FUN_800776c8`
+
+Decompiled and renamed:
+**`FUN_800776c8` → `apply_vsc_fca1_status_bitmask_arm_sticky_flags_and_log`**
+(194B, HIGH, HANDLER-tier) via `RenamePass12fyFun800776c8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Bitmask-driven VSC 0xFCA1 status apply (input in `param_1` / `unaff_s0`).
+Bit 0: log event `0x128`. Bit 1: arm `PTR_DAT_800778c4` sticky flag, log `0x130`. Bit 2:
+arm `PTR_DAT_800778c8`, log `0x138`. Bits 3–5 (`0x38` mask): store nibble
+`(param_1>>3)&0xf` to `PTR_DAT_800778cc` when `!=7`, log `0x142`. Bit 6 (`0x40`):
+`log_vsc_fca1_decoded_bb_status_bit(4,0x71,0x146)`. Same sticky-flag globals as Pass 12w
+`decode_vsc_fca1_bitfield_and_log_bb_status_flags`; apply-side sibling of Pass 12fx
+`dispatch_vsc_fca1_bb_reg_offset_write_subcases`.
+
+**Confidence:** HIGH — unambiguous per-bit flag test + sticky-flag arm + VSC FCA1 logging
+callees; event codes `0x128`–`0x146` sit in the `log_many_2_0x72_0x121-0x14e` cluster.
+No direct callers found (consistent with indirect VSC dispatch).
+
+Live named **1334** (global; in-region unnamed **18**; HANDLER-tier unnamed **3**).
+
+**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_8007522c` per
+`ListHandler80070000.java`.
+
 ## Pass 12fx (2026-06-30) — VSC FCA1 BB reg offset write subcase dispatch `FUN_800777f6`
 
 Decompiled and renamed:
@@ -2437,8 +2460,7 @@ callees; register-offset mapping is explicit in decompile. No direct callers fou
 
 Live named **1333** (global; in-region unnamed **19**; HANDLER-tier unnamed **4**).
 
-**Next:** cold-triage next rank-1 HANDLER-tier candidate `FUN_800776c8` per
-`ListHandler80070000.java`.
+**Next:** superseded by Pass 12fy.
 
 ## Pass 12fw (2026-06-30) — LMP 0x489 subcase-7 conn substate emit `FUN_800708bc`
 
