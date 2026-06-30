@@ -7219,9 +7219,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ac;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ad: continue refreshed 1-150B
-          cold-triage — decompile+rename next rank-24+ substantive candidate;
-          skip rank-1–23 artifacts.
+[DONE]  Full RE: ROM region 0x80040000 — Pass 52ad (2026-06-30): decompiled+
+          renamed rank-24 `FUN_8004e204`→`free_list_lifo_push_0xfc_record_pool`
+          (22B, HIGH). LIFO prepend onto 0xfc-record-pool free-list head
+          `PTR_PTR_8004e21c`; callee of `FUN_8004e1c4`; sibling of
+          `free_list_lifo_push`. Region 237 unnamed remain (151 in 1-150B tier).
+          → analysis/rom/reverse_engineering_region_0x80040000.md Pass 52ad;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80040000 — Pass 52ae: continue refreshed 1-150B
+          cold-triage — decompile+rename next rank-25+ substantive candidate;
+          skip rank-1–24 artifacts.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1,6 +1,6 @@
 # Phase 9: Exhaustive RE — ROM Region 0x80040000-0x8004ffff
 
-**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 154 functions in tier, 27 renamed HIGH (Passes 52–52ac). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ac, 2026-06-30).
+**Status**: PASS 1-6 COMPLETE (2026-06-23); PASS 7 COMPLETE (2026-06-24) — 151-600B tier fully exhausted; 1-150B tier cold-triage resumed Pass 52 (2026-06-30): 154 functions in tier, 28 renamed HIGH (Passes 52–52ad). Formal park unaffected by opportunistic cross-region passes since (Pass 33/47/51 addenda) — see bottom of file for the latest (PASS 52ad, 2026-06-30).
 
 ## Overview
 
@@ -1722,8 +1722,8 @@ Pure internal scheduler infra — same evidentiary class as the already-HIGH
 
 Post-rename: **239 unnamed** in-region (153 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-24+
-substantive candidate; skip rank-1–23 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-23+
+substantive candidate; skip rank-1–22 artifacts.
 
 ## Pass 52ac (2026-06-30) — rank-23 global LMP procedure busy probe rename
 
@@ -1761,5 +1761,37 @@ meta-subevent dispatch.
 
 Post-rename: **238 unnamed** in-region (152 in 1-150B tier).
 
-**Next:** continue refreshed 1-150B cold-triage — decompile next rank-24+
-substantive candidate; skip rank-1–23 artifacts.
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-25+
+substantive candidate; skip rank-1–24 artifacts.
+
+## Pass 52ad (2026-06-30) — rank-24 0xfc record-pool free-list push rename
+
+**Refreshed cold-triage (rank-1–23 skipped as artifacts or already done):** rank-24
+`0x8004e204` (22B, 2 xrefs) — substantive singly-linked-list LIFO prepend primitive
+in the 0xfc-record-pool allocator cluster (sibling of `free_list_lifo_push` and
+`link_0x54_record_pool_into_free_list_by_config_count`).
+
+**Rank-24 decompiled and renamed (HIGH):** `FUN_8004e204` →
+`free_list_lifo_push_0xfc_record_pool` (22B) via
+`RenamePass52adRegion80040000Fun8004e204.java` (`renamed=1`, live-verified).
+
+```c
+void free_list_lifo_push_0xfc_record_pool(undefined4 *node)
+{
+  head = PTR_PTR_8004e21c;
+  *node = *head;    // node->next = current head
+  *head = node;     // head = node
+}
+```
+
+Trivial singly-linked-list LIFO push onto the 0xfc-record-pool free-list head at
+`PTR_PTR_8004e21c` — same idiom as `free_list_lifo_push` (`0x8004e808`, head at
+`PTR_PTR_8004e818`) but without a NULL guard. Consumed by `FUN_8004e1c4` (64B),
+which loops over config-counted `0xfc`-byte records and prepends each via this
+helper — structural parallel to `link_0x54_record_pool_into_free_list_by_config_count`
+(`0x8004e220`) and region-`0x80050000`'s `alloc_and_link_0xfc_record_pool`.
+
+Post-rename: **237 unnamed** in-region (151 in 1-150B tier).
+
+**Next:** continue refreshed 1-150B cold-triage — decompile next rank-25+
+substantive candidate; skip rank-1–24 artifacts.
