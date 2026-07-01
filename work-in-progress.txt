@@ -12443,7 +12443,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 83;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 84: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 84 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003785c`→`mask_merge_hw_channel_index_from_mode_byte_with_fptr_precheck_and_post_hooks`
+          (116B, HIGH). Mode-byte HW-channel index `(param&0x7f)<<9` with optional
+          `0x1000` precheck bit; mask-merge `0x1e00` via
+          `mask_merge_hw_channel_table_entry_and_indexed_dispatch`; dual post-commit
+          fptr hooks. Inquiry-cancel / paging / slot-timing cluster.
+          3 xref-in (`fHCI_inquiry_cancel`, `FUN_800378e4`/`FUN_8003792c`,
+          `program_page_train_baseband_regs_and_start_paging`).
+          206 unnamed remain; live named 1960.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 84;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 85: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -125,7 +125,7 @@ Expected output:
 | Address | Size | Name | Confidence | Purpose |
 |---------|------|------|------------|---------|
 | `0x80036bd0` | 336 | `fHCI_conn_req_cancel` | **HIGH** | Create Connection / Remote Name Request cancellation; BD_ADDR lookup; clears connection record; calls ROM send_evt_HCI_Remote_Name_Request_Complete + FUN_80041dac/80042c94/80067ff4/80043a60 |
-| `0x80036d44` | 86 | `fHCI_inquiry_cancel` | **HIGH** | Inquiry Cancel handler; calls ROM FUN_800408ec/80043a60/8003785c/800362b4; clears EIR data structure |
+| `0x80036d44` | 86 | `fHCI_inquiry_cancel` | **HIGH** | Inquiry Cancel handler; calls ROM FUN_800408ec/80043a60/mask_merge_hw_channel_index_from_mode_byte_with_fptr_precheck_and_post_hooks/800362b4; clears EIR data structure |
 
 ### Key Findings
 
@@ -384,7 +384,7 @@ Expected output:
 | `0x80030eec` | VSC_0xfc8b_FUN_80030eec | **VSC_0xfc8b_diagnostic_query** | 40 B | MEDIUM | Minimal: uVar6 < 2 check; calls FUN_80011468(uVar6, uVar1); write PTR_DAT_80030f14/f18 |
 | `0x8003bbf0` | VSC_0xfd49_FUN_8003bbf0 | **VSC_0xfd49_extended_diagnostic** | 94 B | MEDIUM | Calls fptr @ PTR_DAT_8003bc50 with (local_20, param_1, param_2); bit-manip on param_1 (& 0x3f, \| 0x40); tail-calls FUN_8003bad4 |
 | `0x80036bd0` | fHCI_[Create_Connection_0x08]_or_[Remote_Name_Request_0x1A]_Cancel | **fHCI_conn_req_cancel** | 336 B | **HIGH** | Dual-opcode HCI handler (Create Connection 0x08 OR Remote Name Request 0x1A cancellation); BD_ADDR match gate; state checks (field185_0x100, xb2 byte); LMP calls (0x26f, 0x82); cleanup chain |
-| `0x80036d44` | fHCI_Inquiry_Cancel_0x02_1 | **fHCI_inquiry_cancel** | 86 B | **HIGH** | HCI Inquiry Cancel (OGF 1 / OCF 2) handler; loop over callback result (uVar4 >> 2 + 1); cleanup chain (FUN_800408ec, FUN_80043a60, FUN_8003785c, FUN_800362b4) |
+| `0x80036d44` | fHCI_Inquiry_Cancel_0x02_1 | **fHCI_inquiry_cancel** | 86 B | **HIGH** | HCI Inquiry Cancel (OGF 1 / OCF 2) handler; loop over callback result (uVar4 >> 2 + 1); cleanup chain (FUN_800408ec, FUN_80043a60, mask_merge_hw_channel_index_from_mode_byte_with_fptr_precheck_and_post_hooks, FUN_800362b4) |
 
 **Post-decompile renames:** Ran `RenameBatch1Region80030000` via GZF process mode.
 - Exit code: 0
@@ -2401,5 +2401,40 @@ cluster matches region's power-management theme.
 Region unnamed count after this pass: **207** (208 minus this rename). Live named
 **1959** global.
 
-**Next:** Pass 84 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 84.
+
+## Pass 84 (2026-07-01) — HW channel mask-merge from mode byte `FUN_8003785c`
+
+Fresh `ListUnnamed80030000.java` re-run: **207 unnamed** remain in region
+(unchanged from Pass 83; rank-1 by size at xref=3 tier is `FUN_8003785c` at
+116B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003785c` → `mask_merge_hw_channel_index_from_mode_byte_with_fptr_precheck_and_post_hooks`**
+(116B, HIGH) via `RenamePass84Region80030000Fun8003785c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Mode-byte (`param_1 & 0xff`) HW-channel reconfiguration in the
+`0x800378xx` eSCO/SCO slot-timing cluster. Computes channel index
+`(param_1 & 0x7f) << 9`, optionally ORs `0x1000` when precheck fptr at
+`PTR_DAT_800378d0` returns non-zero for `(1, 0xffff, mode_byte)`. Commits via
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch(index, 0x1e00)`.
+Post-commit invokes fptr hooks at `PTR_DAT_800378d8` and `PTR_DAT_800378dc`
+with `(0, mode_byte)`, then logs via `possible_logging_function__var_args`.
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap): `fHCI_inquiry_cancel` cleanup chain,
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types` cluster siblings
+(`FUN_800378e4`/`FUN_8003792c`), and `program_page_train_baseband_regs_and_start_paging`
+pre-page setup (region `0x80040000` Pass 52dj).
+
+**Confidence:** HIGH — full 116B decompile; named
+`mask_merge_hw_channel_table_entry_and_indexed_dispatch` callee, index/mask
+construction, and documented caller contexts in inquiry-cancel / paging /
+slot-timing clusters anchor the HW-channel commit role.
+
+Region unnamed count after this pass: **206** (207 minus this rename). Live named
+**1960** global.
+
+**Next:** Pass 85 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
