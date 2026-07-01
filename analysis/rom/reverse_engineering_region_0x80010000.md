@@ -2128,4 +2128,32 @@ conn-record index-table family in region `0x80040000`.
 
 Region unnamed count after this pass: **208** (209 minus this rename).
 
-**Next:** Pass 104 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 104.
+
+## Pass 104 (2026-07-01) — BB reg 5-bit field writer `FUN_80012e80`
+
+Pass 104 target from cold-triage rank-1 (3 xref_in, 72B — largest at xref=3
+tier after Pass 103 cleared `FUN_800174a8`). Decompiled and renamed:
+**`FUN_80012e80` → `write_baseband_reg_field_5bit_indexed`**
+(72B, HIGH) via `RenamePass104Region80010000Fun80012e80.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Read-modify-write helper on the IRQ-masked baseband register
+primitives (`read_baseband_register_masked_busywait` /
+`write_baseband_register_masked_busywait`). Selects base offset `0x5c` when
+`param_1==0`, else `0x58`; computes register index
+`(param_2 & 0x3f) + base`, left-shifts by 2 for word-aligned addressing;
+reads current value, writes back with low 5 bits replaced by `param_3 & 0x1f`.
+
+**Callers:** `config_bit_gated_reg_field_write_idx0xb` (region `0x80000000`),
+`flag_gated_reg_field_write_idx0xb` (region `0x80000000`), and
+`VSC_0xfc39_2_FUN_80013074` (VSC 0xfc39 mode dispatcher tail) — 3 xref_in per
+`ListUnnamed80010000.java`.
+
+**Confidence:** HIGH — self-contained RMW field patch; callers in region
+`0x80000000` already documented this as the "baseband-register-field-write
+helper" at field index `0xb`.
+
+Region unnamed count after this pass: **207** (208 minus this rename).
+
+**Next:** Pass 105 — cold-triage next rank-1 unnamed in region `0x80010000`.

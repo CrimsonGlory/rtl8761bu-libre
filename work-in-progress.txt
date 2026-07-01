@@ -14886,8 +14886,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 103;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 104: cold-triage next rank-1
-          unnamed function in region `0x80010000` (208 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 104 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80012e80`→
+          `write_baseband_reg_field_5bit_indexed`
+          (72B, HIGH). IRQ-masked BB reg RMW: base offset 0x58/0x5c select,
+          6-bit field index, patches low 5 bits; callers
+          `config_bit_gated_reg_field_write_idx0xb` +
+          `flag_gated_reg_field_write_idx0xb` + `VSC_0xfc39_2_FUN_80013074`;
+          3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 104;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 105: cold-triage next rank-1
+          unnamed function in region `0x80010000` (207 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
