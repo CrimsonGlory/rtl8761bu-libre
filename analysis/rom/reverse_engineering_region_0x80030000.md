@@ -7980,5 +7980,36 @@ two flag bits at positions 8/9), and invokes hook fptr at `PTR_DAT_8003b3b0`.
 Region unnamed count after this pass: **34** (35 minus this rename). Live named
 **2132** global.
 
-**Next:** Pass 257 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 257.
+
+## Pass 257 (2026-07-01) — config-dispatch dual-hook `FUN_80039abc`
+
+Fresh `ListUnnamed80030000.java` re-run: **34 unnamed** remain in region
+(unchanged from Pass 256; xref_in=0 tier dominates — rank-1 is `FUN_80039abc`
+at 70B, largest among xref=0 cohort by address sort over tied `FUN_8003b364`
+which was renamed in Pass 256).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039abc` → `config_gated_dispatch_dual_fptr_hooks_via_shared_arg_provider`**
+(70B, HIGH, HANDLER-tier) via
+`RenamePass257Region80030000Fun80039abc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-gated dual hook-fptr dispatcher in the `0x80039abc`
+TX-power/config cluster (parent of Pass 137's
+`noop_config_dispatch_hook_fptr_jr_ra_stub`). First branch: when link struct
+`field_0x17b == 0` and `config_base->field1018_0x406 != 0`, invokes hook at
+`PTR_PTR_80039b0c` with arg from shared provider `PTR_PTR_80039b10`. Second
+branch: when `config_base->field1019_0x407 != 0`, invokes hook at
+`PTR_DAT_80039b14` with the same shared arg provider. Uninstalled hook slots
+default to the noop stub at `0x80039a10`.
+
+**Callers:** 0 xref-in (consistent with indirect config/TX-power init dispatch).
+
+**Confidence:** HIGH — full 70B decompile; dual config-flag gates, shared arg
+provider pattern, and sibling noop-stub default unambiguous.
+
+Region unnamed count after this pass: **33** (34 minus this rename). Live named
+**2133** global.
+
+**Next:** Pass 258 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

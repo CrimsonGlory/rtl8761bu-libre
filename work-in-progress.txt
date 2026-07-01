@@ -14088,7 +14088,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 256;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 257: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 257 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80039abc`→`config_gated_dispatch_dual_fptr_hooks_via_shared_arg_provider`
+          (70B, HIGH, HANDLER-tier). Config-gated dual hook-fptr dispatcher:
+          when link `field_0x17b==0` and config `field1018_0x406` set, invokes
+          `PTR_PTR_80039b0c`; when config `field1019_0x407` set, invokes
+          `PTR_DAT_80039b14`; both pass arg from shared provider
+          `PTR_PTR_80039b10`; default noop stub `noop_config_dispatch_hook_fptr_jr_ra_stub`;
+          `0x80039abc` TX-power/config cluster; xref=0. 33 unnamed remain;
+          live named 2133.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 257;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 258: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
