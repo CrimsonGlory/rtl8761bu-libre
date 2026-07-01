@@ -8593,4 +8593,29 @@ documented HCI TD connection-event side-effect cluster.
 
 Region unnamed count after this pass: **51** (52 minus this rename). Live named **1870** global.
 
+**Next:** superseded by Pass 6 continuation (262).
+
+## Pass 6 continuation (262) (2026-07-01) — LMP-ext legacy encryption-mode sender `FUN_800258ec`
+
+Decompiled and renamed:
+**`FUN_800258ec` → `send_lmp_ext_pkt_0x7f_subopcode_0x18_legacy_encryption_mode_req`**
+(36B, HIGH) via `RenamePass6Region80020000Fun800258ec.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=51` at pass start). First-listed
+`FUN_800258ec` in the tied 36B cluster.
+
+**Mechanism:** Thin outbound LMP-ext sender: builds 3-byte PDU with bytes `0x7f`/`0x18`
+and transmits via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn, buf, 3, param_3)`.
+Outbound complement of inbound `handle_lmp_encryption_mode_req_not_accepted` (Pass 6 cont. 28)
+which receives `0x7f`/`0x18` NOT_ACCEPTED replies.
+
+**Callers:** `start_encryption_ssp_or_legacy_lmp_arm_substate_0x49_0x4b` (`0x80025b1c`) —
+legacy branch when `bdaddr_random_==0`, arms crypto sub-state `0x49`; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms fixed LMP-ext opcode pair; caller already
+documented in Pass 6 cont. (175) with matching PDU bytes and sub-state arm idiom.
+
+Region unnamed count after this pass: **50** (51 minus this rename). Live named **1871** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

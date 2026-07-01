@@ -11589,8 +11589,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (261);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (262): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (51 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (262) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800258ec`→`send_lmp_ext_pkt_0x7f_subopcode_0x18_legacy_encryption_mode_req`
+          (36B, HIGH). LMP-ext 0x7f/0x18 legacy encryption-mode sender; caller
+          `start_encryption_ssp_or_legacy_lmp_arm_substate_0x49_0x4b`; xref_in=1.
+          Region 50 unnamed remain; live named 1871.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (262);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (263): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (50 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
