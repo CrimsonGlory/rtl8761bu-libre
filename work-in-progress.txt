@@ -14965,8 +14965,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 111;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 112: cold-triage next rank-1
-          unnamed function in region `0x80010000` (200 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 112 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80017618`→`lookup_pending_callback_table_entry_by_conn_handle`
+          (24B, HIGH). Bound wrapper on `FUN_800175bc` lookup into `PTR_LAB_80017630`
+          pending-callback table by conn handle; caller
+          `pop_pending_callback_by_handle_invoke_after_remove`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 112;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 113: cold-triage next rank-1
+          unnamed function in region `0x80010000` (199 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

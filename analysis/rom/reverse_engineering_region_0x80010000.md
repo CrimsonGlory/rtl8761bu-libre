@@ -2364,4 +2364,31 @@ matches documented sync-gate cluster semantics.
 
 Region unnamed count after this pass: **200** (201 minus this rename).
 
-**Next:** Pass 112 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 112.
+
+## Pass 112 (2026-07-01) — pending-callback table lookup `FUN_80017618`
+
+Pass 112 target from cold-triage rank-1 (3 xref_in, 24B — largest at xref=3
+tier after Pass 111 cleared `FUN_80017c3c`). Decompiled and renamed:
+**`FUN_80017618` → `lookup_pending_callback_table_entry_by_conn_handle`**
+(24B, HIGH) via `RenamePass112Region80010000Fun80017618.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin bound wrapper on the Pass 103 sorted ushort-key table
+lookup primitive `FUN_800175bc`. Looks up a pending-callback record pointer
+in global table `PTR_LAB_80017630` keyed by connection handle (`ushort
+param_1`). Returns the matching table entry pointer (or 0 on miss). Sibling
+wrappers in the `0x800176xx` cluster: `FUN_80017634` (insert into
+`PTR_LAB_8001764c`) and `FUN_80017650` (remove from `PTR_LAB_80017668`).
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java` cold-triage;
+decompile-confirmed consumer `pop_pending_callback_by_handle_invoke_after_remove`
+(region `0x80020000` Pass 6 cont. 192) — HCI TD opcode `0x193` pop/dispatch
+path.
+
+**Confidence:** HIGH — trivial decompile; bound-table lookup pattern matches
+documented pending-callback insert/pop/remove cluster semantics.
+
+Region unnamed count after this pass: **199** (200 minus this rename).
+
+**Next:** Pass 113 — cold-triage next rank-1 unnamed in region `0x80010000`.
