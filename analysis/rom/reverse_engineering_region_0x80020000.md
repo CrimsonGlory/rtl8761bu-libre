@@ -8175,4 +8175,35 @@ in SSP debug-mode command router.
 
 Region unnamed count after this pass: **65** (66 minus this rename). Live named **1856** global.
 
+**Next:** superseded by Pass 6 continuation (248).
+
+## Pass 6 continuation (248) (2026-07-01) — HCI passkey-reply thin wrapper `FUN_8002384c`
+
+Decompiled and renamed:
+**`FUN_8002384c` → `hci_resolve_conn_fhci_user_passkey_request_reply_0x34`**
+(40B, HIGH) via `RenamePass6Region80020000Fun8002384c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=65` at pass start). First-listed in tied
+40B tier; sits in the `0x800238xx` SSP HCI-reply cluster alongside
+`fHCI_User_Passkey_Request_Reply_0x34` (Pass 6 cont. 99) and sibling thin wrappers
+`hci_resolve_conn_tail_call_dispatch_ssp_lmp_ext_0x1b_or_dhkey_0x41` (Pass 6 cont. 247)
+and `hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x19_auth_failure` (Pass 6 cont. 226).
+
+**Mechanism:** Thin HCI command wrapper — `hci_resolve_conn_record_validate_and_complete`
+with validator `PTR_LAB_800235cc_1`, then on success calls
+`fHCI_User_Passkey_Request_Reply_0x34(conn_handle)` and returns its result; returns 0
+on conn-resolve failure. Same conn-resolve→fHCI-handler idiom as Pass 6 cont. (247)'s
+`hci_resolve_conn_tail_call_dispatch_ssp_lmp_ext_0x1b_or_dhkey_0x41` but targets the
+HCI User Passkey Request Reply (opcode 0x0434 / OCF 0x34) path documented in Pass 6 cont. (99).
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` at `0x8002350c`; xref_in=1 per
+`ListXrefsTo8002384c.java`.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus
+call to documented SSP passkey-entry reply handler; caller confirmed in SSP debug-mode
+command router.
+
+Region unnamed count after this pass: **64** (65 minus this rename). Live named **1857** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
