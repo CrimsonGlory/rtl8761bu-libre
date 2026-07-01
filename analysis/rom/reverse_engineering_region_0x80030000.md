@@ -6485,5 +6485,35 @@ unambiguous; caller SCO/eSCO HW subsystem init path matches Pass 140 sibling.
 Region unnamed count after this pass: **82** (83 minus this rename). Live named
 **2084** global.
 
-**Next:** Pass 209 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 209.
+
+## Pass 209 (2026-07-01) — BB reg `0x2b` slot-nibble RMW `FUN_80039194`
+
+Fresh `ListUnnamed80030000.java` re-run: **82 unnamed** remain in region
+(unchanged from Pass 208; rank-1 by size at xref=1 tier is `FUN_80039194` at
+50B — tied 50B sibling `FUN_8003b328` was renamed in Pass 208).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039194` → `read_modify_write_hw_reg_0x2b_merge_slot_nibble_via_hw_hook`**
+(50B, HIGH, SIMPLE-tier) via
+`RenamePass209Region80030000Fun80039194.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write BB register `0x2b` via hook fptr pair
+`PTR_DAT_800391c8`/`PTR_DAT_800391cc`: reads current value, merges
+`(param_1 & 0xf) << 8` into bits 8-11 while preserving low byte
+(`read & 0xff`), writes back. Core callee of Pass 117's
+`apply_hw_reg_0x2b_slot_nibble_if_config_bit3` in the `0x800391xx` BB
+register-config init cluster; sibling of Pass 199's reg `0x22` RMW helper.
+
+**Callers:** 1 xref-in — `apply_hw_reg_0x2b_slot_nibble_if_config_bit3`
+(config-bit3-gated optional hook during BB reg-config init).
+
+**Confidence:** HIGH — full 50B decompile; register index `0x2b` and 4-bit
+nibble merge at bits 8-11 unambiguous; caller relationship documented in
+Pass 117.
+
+Region unnamed count after this pass: **81** (82 minus this rename). Live named
+**2085** global.
+
+**Next:** Pass 210 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
