@@ -991,4 +991,30 @@ pair atop the masked busy-wait read primitive.
 
 Region unnamed count after this pass: **249** (250 minus this rename).
 
-**Next:** Pass 7j — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7j (2026-07-01) — TX descriptor slot release `FUN_80014524`
+
+Pass 7j target from cold-triage rank-1 (11 xref_in, 184B). Decompiled and renamed:
+**`FUN_80014524` → `release_active_tx_descriptor_slots_via_hw_programmer`**
+(184B, HIGH) via `RenamePass7jRegion80010000Fun80014524.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** TX descriptor slot release primitive in the `0x800145xx` cluster.
+Calls `LMP__25C_called2()` (BLE coexistence hook) first. When `param_1 & 0xffff`
+is non-zero, builds up to `(param_1 >> 8) + 1` cleared 4-byte HW TX descriptor
+entries on the stack from template globals (`DAT_800145dc`, `PTR_DAT_800145e0`,
+`DAT_800145e4`): each slot ORs `0x400` into the ushort at offset+2 and clears
+bit5 in byte at offset+3; the final slot encodes type bits from `param_1 & 0xff`
+shifted left by 2. Submits the array via
+`program_active_tx_descriptor_slots_to_hw_registers` with `param_2 & 0xff` as
+the poll/diagnostic flag.
+
+**Callers:** 11 xref_in including `dispatch_conn_tx_by_packet_type_nibble_with_reassembly`
+(region `0x80040000` — "other" release path with `(handle,1)` and failure path
+with `(handle,0)`), plus conn-event ring LMP PDU builders on allocation failure.
+
+**Confidence:** HIGH — decompile confirms stack-built descriptor array + established
+HW programmer callee; cross-region callers already document release semantics.
+
+Region unnamed count after this pass: **248** (249 minus this rename).
+
+**Next:** Pass 7k — cold-triage next rank-1 unnamed in region `0x80010000`.

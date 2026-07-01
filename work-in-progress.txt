@@ -14480,8 +14480,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7i;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7j: cold-triage next rank-1
-          unnamed function in region `0x80010000` (249 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7j (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014524`→`release_active_tx_descriptor_slots_via_hw_programmer`
+          (184B, HIGH). TX descriptor slot release: `LMP__25C_called2` coexistence
+          hook, builds cleared descriptor array from template globals, submits via
+          `program_active_tx_descriptor_slots_to_hw_registers`; 11 xref_in including
+          `dispatch_conn_tx_by_packet_type_nibble_with_reassembly` release/failure
+          paths. 248 unnamed remain; live named 2176.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7j;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7k: cold-triage next rank-1
+          unnamed function in region `0x80010000` (248 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
