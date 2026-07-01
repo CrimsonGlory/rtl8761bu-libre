@@ -4361,8 +4361,9 @@ cont. (119) renamed `FUN_800268ac`.
 `PTR_DAT_800225a0` and seeds bytes `+2=0x10`, `+3=1`. Loops all 10 `big_ol_struct` slots:
 `memset` each `_x58_crypto_struct` to 0x218 bytes, sets pending-LMP dword at `+0x1ec` to
 `0xffffffff`, and defaults pairing-mode byte `+0x1f1` to `6` (E1 derivation path). Then
-chains three global clears: `FUN_80026854` clears occupied flags on all 7 link-key table
-slots at `PTR_DAT_80026870` (sibling of `store_link_keys_in_global_slot_table`);
+chains three global clears: `clear_occupied_flags_on_seven_link_key_table_slots` clears
+occupied flags on all 7 link-key table slots at `PTR_DAT_80026870` (sibling of
+`store_link_keys_in_global_slot_table`);
 `FUN_80025710` clears bit0 on four status bytes at `PTR_DAT_80025728`;
 `FUN_80021cb8` clears bit3 on four status bytes at `PTR_DAT_80021cd0`.
 
@@ -9111,5 +9112,34 @@ the same `initialize_some_global_struct_FUN_80021924` call but uses different up
 with established `0x80021xxx` boot-init cluster semantics.
 
 Region unnamed count after this pass: **32** (33 minus this rename). Live named **1889** global.
+
+**Next:** superseded by Pass 6 continuation (281).
+
+## Pass 6 continuation (281) (2026-07-01) — link-key table occupied-flag clear `FUN_80026854`
+
+Decompiled and renamed:
+**`FUN_80026854` → `clear_occupied_flags_on_seven_link_key_table_slots`**
+(26B, HIGH) via `RenamePass6Region80020000Fun80026854.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size with xref_in≥1 among remaining unnamed (26B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=32` at pass start). Skipped rank-1 `FUN_8002b394`
+(28B, xref_in=0) per established cold-triage convention.
+
+**Mechanism:** Thin link-key global-slot-table reset helper in the `0x800268xx` cluster. Loops
+7 entries at `PTR_DAT_80026870` with 0x17-byte stride, clearing the occupied-flag byte at
+offset `+0x16` on each slot — inverse of `store_link_keys_in_global_slot_table` which sets
+that flag when storing a 6B BD_ADDR + 16B key pair. Sibling to
+`build_occupied_link_key_bdaddr_and_key_ptr_arrays` (scans the same occupied flags for HCI
+stored-link-key export).
+
+**Callers:** sole xref from `reset_all_connection_crypto_slots_and_link_key_table` (`0x80022530`,
+Pass 6 cont. 120) — chained as the first of three global clears during subsystem-wide
+crypto/link-key bootstrap reset; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms unambiguous 7-iteration loop with 0x17 stride and
++0x16 byte clear; slot layout matches documented link-key table semantics; single caller
+already analyzed in Pass 6 cont. (120).
+
+Region unnamed count after this pass: **31** (32 minus this rename). Live named **1890** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
