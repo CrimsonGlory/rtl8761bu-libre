@@ -8407,7 +8407,7 @@ before sibling thunk `FUN_8002ed9c` (mode-3 forwarder used by `HCI_EVT_0x1fd_FUN
 invokes the fptr with fixed mode argument `2` plus the computed range and trailing `0`.
 Thin arithmetic wrapper around the same indirect-dispatch pattern as `FUN_8002ed9c`.
 
-**Caller:** `FUN_8002f378` at `0x8002f38e` — passes fixed offset `4`, buffer base, and
+**Caller:** `hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2` at `0x8002f38e` — passes fixed offset `4`, buffer base, and
 `*(ushort*)(buffer+2)` as `param_5`; xref_in=1 via `ListXrefsTo8002ed70.java`.
 
 **Confidence:** HIGH — decompile confirms ushort window arithmetic and mode-2 fptr tail-call;
@@ -8534,5 +8534,34 @@ caller decompiles show established `==0` success-path idiom paired with `FUN_800
 prior prose references in this doc (Pass 6 cont. 20/77) now resolved.
 
 Region unnamed count after this pass: **53** (54 minus this rename). Live named **1868** global.
+
+**Next:** superseded by Pass 6 continuation (260).
+
+## Pass 6 continuation (260) (2026-07-01) — HCI evt buffer mode-2 dispatch wrapper `FUN_8002f378`
+
+Decompiled and renamed:
+**`FUN_8002f378` → `hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2`**
+(36B, HIGH) via `RenamePass6Region80020000Fun8002f378.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=53` at pass start). Highest xref count in
+the tied 36B tier; callee wrapper for Pass 6 cont. (255)'s
+`hci_evt_buffer_fptr_dispatch_mode2_computed_ushort_range` in the `0x8002f3xx` HCI
+event-buffer ring cluster.
+
+**Mechanism:** Thin wrapper around
+`hci_evt_buffer_fptr_dispatch_mode2_computed_ushort_range(2, buf, 4, param_2,
+*(ushort*)(buf+2))`; returns `0`. Fixed offset `4` and buffer `+2` ushort supply the
+computed ushort-window args to the mode-2 fptr thunk documented in Pass 6 cont. (255).
+
+**Callers:** `FUN_8001fd20` (2 sites — HCI event-buffer ring drain when mode active:
+copies 4-byte header via `optimized_memcpy`, dispatches buffered segment) and
+`FUN_8001ffdc` (1 site — HCI event enqueue: when mode inactive, direct dispatch after
+staging 4-byte header); xref_in=3 via `ListXrefsTo8002f378.java`.
+
+**Confidence:** HIGH — decompile confirms fixed-offset wrapper pattern; caller decompiles
+show established HCI event-buffer ring enqueue/drain choreography.
+
+Region unnamed count after this pass: **52** (53 minus this rename). Live named **1869** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
