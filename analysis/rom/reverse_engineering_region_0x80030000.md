@@ -7856,5 +7856,36 @@ documented register-script cluster.
 Region unnamed count after this pass: **38** (39 minus this rename). Live named
 **2128** global.
 
-**Next:** Pass 253 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 253.
+
+## Pass 253 (2026-07-01) — role-slot timing threshold max `FUN_80037974`
+
+Fresh `ListUnnamed80030000.java` re-run: **38 unnamed** remain in region
+(unchanged from Pass 252; xref_in=0 tier dominates — rank-1 is `FUN_80037974`
+at 82B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037974` → `compute_max_role_slot_timing_threshold_from_conn_fields_298_294_weight_x2`**
+(82B, HIGH, HANDLER-tier) via
+`RenamePass253Region80030000Fun80037974.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-conn-index `big_ol_struct` threshold helper in the
+`0x800379xx` link-state / truncated-page cluster. Returns
+`max(field_0x298, field_0x294, field106_0x94 << 1)` from
+`PTR_big_ol_struct_800379c8[param_1]`. Extracted threshold computation
+matching the inline formula documented in Pass 126's
+`check_role_slot_timing_deadline_overrun_and_set_flag` relative-deadline
+path (`field_0x29c == 3`); sibling of Pass 195's
+`arm_link_state_advance_pending_and_commit_conn_slot_timing_mode1` and
+Pass 200's `handle_trunc_page_complete_status_bit8_via_optional_hook_and_log_0x6e`.
+
+**Callers:** 0 xref-in (consistent with indirect role-slot timing dispatch).
+
+**Confidence:** HIGH — full 82B decompile; three-field max formula matches
+Pass 126 deadline-overrun threshold idiom exactly.
+
+Region unnamed count after this pass: **37** (38 minus this rename). Live named
+**2129** global.
+
+**Next:** Pass 254 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
