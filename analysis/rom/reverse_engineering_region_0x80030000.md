@@ -7391,5 +7391,38 @@ dispatch integration; naming pattern matches sibling return-zero stubs
 Region unnamed count after this pass: **52** (53 minus this rename). Live named
 **2114** global.
 
-**Next:** Pass 239 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 239.
+
+## Pass 239 (2026-07-01) — type-3 resource-pool memcpy dest base `FUN_800308d8`
+
+Fresh `ListUnnamed80030000.java` re-run: **52 unnamed** remain in region
+(unchanged from Pass 238; rank-1 at xref=1 tier is `FUN_800308d8` at 1B —
+largest among tied xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800308d8` → `resource_pool_chain_type3_slot_memcpy_dest_stride_base`**
+(1B, HIGH, DATA-tier) via
+`RenamePass239Region80030000Fun800308d8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Ghidra-carved 1-byte symbol used as address-arithmetic base for
+type-3 resource-pool chain slot payload staging. In allocate handler
+`FUN_800305f4` when `local_40 == 3`: after
+`allocate_resource_pool_chain_slots_by_type(3,1)` succeeds, computes destination
+`slot_index * 0x24 + resource_pool_chain_type3_slot_memcpy_dest_stride_base`
+and `optimized_memcpy`s 0x10 bytes from the HCI command buffer. Not executable
+code (decompile shows `halt_baddata`); sole xref is READ from `0x800306ee`
+inside `FUN_800305f4`.
+
+**Callers:** 1 xref-in (READ) — `FUN_800305f4` at `0x800306ee` (HCI
+extended-inquiry / feature-page resource-pool allocate handler; sibling of Pass
+160's `release_resource_pool_chain_slot_type02_with_cleanup`).
+
+**Confidence:** HIGH — caller decompile anchors purpose unambiguously; naming
+consistent with `allocate_resource_pool_chain_slots_by_type` / Pass 12fl pool
+chain (`0x24` stride) documented in region `0x80070000`.
+
+Region unnamed count after this pass: **51** (52 minus this rename). Live named
+**2115** global.
+
+**Next:** Pass 240 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -13922,7 +13922,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 238;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 239: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 239 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800308d8`→`resource_pool_chain_type3_slot_memcpy_dest_stride_base`
+          (1B, HIGH, DATA-tier). Type-3 resource-pool chain slot memcpy dest base
+          (`slot_index*0x24` stride) in allocate handler `FUN_800305f4`; READ
+          xref at `0x800306ee`. Region unnamed 51 remain; live named 2115.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 239;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 240: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
