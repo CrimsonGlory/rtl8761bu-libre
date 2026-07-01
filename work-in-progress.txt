@@ -14740,8 +14740,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 88;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 89: cold-triage next rank-1
-          unnamed function in region `0x80010000` (223 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 89 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800143b0`→`irq_masked_commit_hw_channel_table_merge_by_conn_cc_index`
+          (138B, HIGH). IRQ-masked HW-channel table merge: dual hook commits via
+          `PTR_DAT_8001443c`; esco-remap; optional bitmask arm when slot>7;
+          callers link-state-advance establish/teardown pair; 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 89;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 90: cold-triage next rank-1
+          unnamed function in region `0x80010000` (222 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

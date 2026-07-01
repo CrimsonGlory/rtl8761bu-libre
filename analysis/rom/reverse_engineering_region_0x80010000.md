@@ -1680,4 +1680,36 @@ quality-recovery prelude, and link-mode-change cluster integration.
 
 Region unnamed count after this pass: **223** (224 minus this rename).
 
-**Next:** Pass 89 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 90.
+
+## Pass 89 (2026-07-01) — IRQ-masked HW-channel table merge `FUN_800143b0`
+
+Pass 89 target from cold-triage rank-1 (4 xref_in, 138B — largest at xref=4
+tier after Pass 88). Decompiled and renamed:
+**`FUN_800143b0` → `irq_masked_commit_hw_channel_table_merge_by_conn_cc_index`**
+(138B, HIGH) via `RenamePass89Region80010000Fun800143b0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked HW-channel table merge primitive in the `0x800143xx`
+cluster (sibling of Pass 7o `read_halfword_via_bb_reg_0x1f0_esco_slot_select_by_conn_index`
+and Pass 7s `write_hw_register_by_conn_cc_index_byte_half`). Takes conn-array
+index `param_1` and role byte `param_2` (typically `byte_0xCC`). IRQ-disables,
+issues two commits via hook fptr `PTR_DAT_8001443c`: selector `2` with encoded
+`(role<<11)|(index<<5)`, then selector `0` with `0x84`. Remaps via
+`remap_role_index_to_esco_slot_if_pending`; when remapped slot `>7` and gate
+byte at `PTR_DAT_80014440` is clear, invokes hook `PTR_DAT_80014444(2)` and ORs
+role bit into bitmask bytes at `PTR_DAT_80014448` and `PTR_DAT_8001444c`.
+
+**Callers:** 4 xref_in — `arm_link_state_advance_pending_and_commit_conn_slot_timing_mode1`
+and `clear_link_state_advance_pending_and_commit_conn_slot_timing_mode2` (region
+`0x80030000` Pass 192/195 — link-state-advance establish/teardown pair), plus
+two additional conn-setup paths.
+
+**Confidence:** HIGH — decompile confirms IRQ-gated dual-hook channel-table merge
++ esco-remap bitmask arm; cross-region callers document link-state-advance
+semantics; cluster placement consistent with `0x800140d8`/`FUN_800143b0`/`FUN_80014dac`
+triplet referenced from region `0x80030000`.
+
+Region unnamed count after this pass: **222** (223 minus this rename).
+
+**Next:** Pass 90 — cold-triage next rank-1 unnamed in region `0x80010000`.
