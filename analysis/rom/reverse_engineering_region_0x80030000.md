@@ -5685,5 +5685,37 @@ Pass documentation.
 Region unnamed count after this pass: **107** (108 minus this rename). Live named
 **2059** global.
 
-**Next:** Pass 184 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 184.
+
+## Pass 184 (2026-07-01) — ACL RX continuation/hook dispatcher `FUN_8003d2f8`
+
+Fresh `ListUnnamed80030000.java` re-run: **107 unnamed** remain in region
+(unchanged from Pass 183; rank-1 by size at xref=1 tier is `FUN_8003d2f8` at
+78B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d2f8` → `dispatch_acl_rx_continuation_or_procedure_hook_by_conn_flag_0x23`**
+(78B, HIGH, HANDLER-tier) via
+`RenamePass184Region80030000Fun8003d2f8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-role-slot ACL RX branch on `0x28`-stride conn struct
+(`PTR_some_connection_struct_array_8003d348`). When `field_0x23 != 0`: feeds
+`hci_acl_data_fragment_assembler_and_enqueue` with handle (`field_0x4`), ACL
+type (`field_0x1b`), payload ptr (`field_0x20`), length (`field_0x1a`), mode 0
+(continuation). When `field_0x23 == 0` and global `the_0x300` struct
+`byte_0x16f != 0`: dispatches optional hook at `PTR_DAT_8003d350` with
+procedure opcode `0x14` or `0x1e` (selected by `ushort_0x24 != 0x40`), args
+`(field_0x20, opcode, 0xc0, 0)`.
+
+**Callers:** 1 xref-in — `LC_event_RX_dispatcher` at `0x80042238` (LC RX ACL
+path; sibling of `dispatch_acl_fragment_with_per_conn_reassembly_flags` per Pass
+125 and `hci_acl_data_fragment_assembler_and_enqueue` per Pass 6 cont. 3).
+
+**Confidence:** HIGH — full 78B decompile; callee `hci_acl_data_fragment_assembler_and_enqueue`
+already HIGH-named; conn-field branch matches documented ACL reassembly cluster.
+
+Region unnamed count after this pass: **106** (107 minus this rename). Live named
+**2060** global.
+
+**Next:** Pass 185 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
