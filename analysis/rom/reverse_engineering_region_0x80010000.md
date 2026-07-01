@@ -1770,4 +1770,34 @@ cluster placement consistent with `0x800147b0`/`0x80014c58` codec-table family.
 
 Region unnamed count after this pass: **220** (221 minus this rename).
 
-**Next:** Pass 92 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 92.
+
+## Pass 92 (2026-07-01) — sync-conn air-mode capability packer `FUN_80018c80`
+
+Pass 92 target from cold-triage rank-1 (4 xref_in, 96B — largest at xref=4
+tier after Pass 91). Decompiled and renamed:
+**`FUN_80018c80` → `pack_sync_conn_air_mode_capability_bits_from_feature_page_bytes`**
+(96B, HIGH) via `RenamePass92Region80010000Fun80018c80.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Feature-page byte-block → sync-connection air-mode capability
+bitmask packer in the `0x80018cxx` HCI sync-conn cluster (sibling of
+`HCI_Setup_Synchronous_Connection_LMP_Feature_Checker` at `0x80018d44`).
+Extracts and OR-combines bitfields from bytes at offsets `+1`, `+3`, `+4`,
+`+5` of the input page array; byte `+5` sign/bit `0x20`/`0x40` gates
+additional flag tiers (`0x40`, `0x80`, `0x140`, `0x280`). Returns `uint`
+capability mask for intersection against peer page and packet-type field.
+
+**Callers:** 4 xref_in (2 call sites each) —
+`send_HCI_Command_Status_for_HCI_0x07` (HCI Add SCO / sync-conn command-status
+gate: `local & remote & (packet_types ^ 0x3c0)`, then `(mask & 0x3f8)` /
+`(mask & 7)` compatibility check) and `FUN_80019774` (same intersection
+pattern on success path before `FUN_80019714` / `FUN_800192c4` dispatch).
+
+**Confidence:** HIGH — decompile confirms deterministic bit-pack from
+feature-page bytes; caller decompiles show identical intersection mask
+semantics on both HCI 0x07 command-status paths.
+
+Region unnamed count after this pass: **219** (220 minus this rename).
+
+**Next:** Pass 93 — cold-triage next rank-1 unnamed in region `0x80010000`.

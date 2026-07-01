@@ -14766,8 +14766,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 91;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 92: cold-triage next rank-1
-          unnamed function in region `0x80010000` (220 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 92 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80018c80`→
+          `pack_sync_conn_air_mode_capability_bits_from_feature_page_bytes`
+          (96B, HIGH). Feature-page byte-block → sync-conn air-mode capability
+          bitmask packer; callers `send_HCI_Command_Status_for_HCI_0x07` +
+          `FUN_80019774` (2× each, intersection mask gate); 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 92;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 93: cold-triage next rank-1
+          unnamed function in region `0x80010000` (219 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
