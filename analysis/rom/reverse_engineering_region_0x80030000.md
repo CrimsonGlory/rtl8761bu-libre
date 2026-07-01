@@ -8497,5 +8497,36 @@ truncate semantics unambiguous; aligns with Pass 12cd packet-type commit path.
 Region unnamed count after this pass: **16** (17 minus this rename). Live named
 **2150** global.
 
-**Next:** Pass 275 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 275.
+
+## Pass 275 (2026-07-01) — packet-type mask merge `FUN_80033168`
+
+Fresh `ListUnnamed80030000.java` re-run: **16 unnamed** remain in region
+(unchanged from Pass 274; xref_in=0 tier dominates — rank-1 is `FUN_80033168`
+at 32B, wins on size over tied 30B sibling `FUN_800392d4`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033168` → `merge_packet_type_bitmasks_0x3306_or_0xcc18_and_intersection`**
+(32B, HIGH, UTILITY-tier) via
+`RenamePass275Region80030000Fun80033168.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Two-mask HCI packet-type ushort combiner:
+`(param_2 | param_1) & 0x3306 | param_1 & 0xcc18 & param_2` — OR-union
+masked to `0x3306` bits plus `0xcc18` bitwise-AND intersection. Sibling of
+Pass 12cd's `recompute_and_store_field_0x250_packet_type_on_conn_slot`
+setup-chain (`merge_packet_type_mask_from_conn_slot_and_feature_page`,
+`mask_packet_type_bitmask_by_max_slot_fields_0x24a_0x24b`, Pass 274's
+`truncate_ushort_to_byte_if_conn_field0x206_eq_1`, etc.). The `0x3306`
+sentinel mask appears in step-1 merge; `0xcc18` is the packet-type-class
+bitmask used elsewhere in role-switch/AFH paths.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 32B decompile; dual-mask combine semantics
+unambiguous; aligns with `0x800333xx` packet-type cluster.
+
+Region unnamed count after this pass: **15** (16 minus this rename). Live named
+**2151** global.
+
+**Next:** Pass 276 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
