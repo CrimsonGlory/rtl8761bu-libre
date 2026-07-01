@@ -4872,5 +4872,38 @@ conn-record flag gating consistent with neighboring `0x80035xxx` cluster.
 Region unnamed count after this pass: **132** (133 minus this rename). Live named
 **2034** global.
 
-**Next:** Pass 159 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 159.
+
+## Pass 159 (2026-07-01) — conn-table crypto reinit `FUN_800343dc`
+
+Fresh `ListUnnamed80030000.java` re-run: **132 unnamed** remain in region
+(unchanged from Pass 158; rank-1 at xref=1 tier is `FUN_800343dc` at 132B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800343dc` → `reinit_conn_table_crypto_preserve_active_slot_record`**
+(132B, HIGH, INIT-tier) via
+`RenamePass159Region80030000Fun800343dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Boot/subsystem init sub-step (second callee of `FUN_800347a0`
+after `copy_nine_dispatch_slots_and_init_baseband_subsystems`). Sweeps all 10
+connection slots via `FUN_80067768` (per-slot connection-record initializer).
+When `the_0x300.field_0x173` set and active slot index at `PTR_DAT_80034464` is
+`< 10`: copies staged conn record from `PTR_DAT_8003446c` into
+`big_ol_struct[active_slot]`, and when `active_slot != 0` clones the
+0x218-byte crypto struct from slot 0 into the active slot. Then re-inits crypto
+for every non-active slot via `init_per_connection_crypto_struct_for_bos_slot`.
+Clears 0x27c-byte workspace at `PTR_DAT_80034470`.
+
+**Callers:** 1 xref-in — `FUN_800347a0` at `0x800347b8` (hook-null default init
+wrapper; sibling of `copy_nine_dispatch_slots_and_init_baseband_subsystems`).
+
+**Confidence:** HIGH — full 132B decompile; named callees anchor conn-table
+crypto init path; `field_0x173` active-slot preservation matches
+`commit_sco_teardown_bb_hook_pairs_and_18pair_param_table` cluster.
+
+Region unnamed count after this pass: **131** (132 minus this rename). Live named
+**2035** global.
+
+**Next:** Pass 160 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

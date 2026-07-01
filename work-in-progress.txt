@@ -13154,7 +13154,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 158;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 159: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 159 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800343dc`→`reinit_conn_table_crypto_preserve_active_slot_record`
+          (132B, HIGH, INIT-tier). Conn-table crypto reinit: sweep 10 slots via
+          `FUN_80067768`, preserve active conn record when `field_0x173` set,
+          re-init non-active crypto structs, clear 0x27c workspace; caller
+          `FUN_800347a0` boot-init wrapper. Region 131 unnamed remain; live
+          named 2035.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 159;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 160: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
