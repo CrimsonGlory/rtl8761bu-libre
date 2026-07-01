@@ -6254,4 +6254,35 @@ prior pass cross-references.
 
 Region unnamed count after this pass: **130** (131 minus this rename). Live named **1791** global.
 
+**Next:** superseded by Pass 6 continuation (183).
+
+## Pass 6 continuation (183) (2026-07-01) — SCO HW channel table clear + BB reg zero `FUN_8002fc60`
+
+Decompiled and renamed:
+**`FUN_8002fc60` → `and_mask_sco_hw_channel_table_5e_and_zero_bb_regs`**
+(68B, HIGH) via `RenamePass6Region80020000Fun8002fc60.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=130` at pass start). Tied at 68B with
+three siblings; first listed at xref_in=2 (siblings `FUN_8002a2ec` also xref_in=2,
+`FUN_800244f8` xref_in=1).
+
+**Mechanism:** Compact SCO HW channel teardown helper in the `0x8002fcxx` cluster
+(sibling of `program_sco_hw_channel_table_and_bb_regs_from_config` at `0x8002fcb0`).
+AND-masks channel-table entry **0x5e** with **0xff6f** via
+`and_mask_hw_channel_table_entry_and_indexed_dispatch`; indexes 7-entry lookup table
+`PTR_DAT_8002fcac` by config byte `PTR_DAT_8002fca4[8] & 7` and AND-masks that slot
+with **0xfeff**. Zeros BB registers **0xd8** and **0x108** via HW-write fptr at
+`PTR_DAT_8002fca8` (`0xd8←0x107`, `0x108←0`) — inverse of the OR-merge + `0x108←3`
+programming path in Pass 6 continuation (101).
+
+**Callers:** xref_in=2 (not enumerated this pass; likely VSC/mailbox dispatch siblings
+of `program_sco_hw_channel_table_and_bb_regs_from_config` callers).
+
+**Confidence:** HIGH — decompile confirms established channel-table AND-mask idiom
+(documented in region `0x80040000` Pass 52b); BB reg **0xd8**/**0x108** pair matches
+SCO/eSCO baseband setup family; literal-pool layout mirrors `0x8002fcb0` config struct.
+
+Region unnamed count after this pass: **129** (130 minus this rename). Live named **1792** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
