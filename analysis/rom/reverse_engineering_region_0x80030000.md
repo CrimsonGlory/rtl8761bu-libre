@@ -8786,5 +8786,33 @@ cluster placement matches documented `0x8003b7xx` HW-buffer setup primitives.
 Region unnamed count after this pass: **6** (7 minus this rename). Live named
 **2160** global.
 
-**Next:** Pass 285 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 285.
+
+## Pass 285 (2026-07-01) — timing global byte getter `FUN_800396bc`
+
+Fresh `ListUnnamed80030000.java` re-run: **6 unnamed** remain in region
+(unchanged from Pass 284; xref_in=0 tier dominates — rank-1 is `FUN_800396bc`
+at 6B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800396bc` → `read_timing_global_dat_byte_at_offset_8`**
+(6B, HIGH, UTILITY-tier) via
+`RenamePass285Region80030000Fun800396bc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial timing-config byte getter in the `0x800396xx` cluster
+(address-adjacent sibling of Pass 91's
+`compute_timing_offset_from_table_base_step_and_index_div10` and Pass 261's
+`compute_timing_short_from_callback_scaled_by_byte_delta_div100`). Loads
+pointer from `PTR_DAT_800396c4` and returns byte at offset `+8` — the same
+offset Pass 261's scaler reads as `dat[8]` in its delta formula.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — trivial 6B decompile; byte-at-offset-8 semantics
+unambiguous; timing-cluster context matches Pass 261 sibling.
+
+Region unnamed count after this pass: **5** (6 minus this rename). Live named
+**2161** global.
+
+**Next:** Pass 286 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
