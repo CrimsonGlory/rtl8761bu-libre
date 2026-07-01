@@ -8814,5 +8814,35 @@ unambiguous; timing-cluster context matches Pass 261 sibling.
 Region unnamed count after this pass: **5** (6 minus this rename). Live named
 **2161** global.
 
-**Next:** Pass 286 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 286.
+
+## Pass 286 (2026-07-01) — parallel-slot noop stub `FUN_8003cf98`
+
+Fresh `ListUnnamed80030000.java` re-run: **5 unnamed** remain in region
+(unchanged from Pass 285; xref_in=0 tier dominates — rank-1 is `FUN_8003cf98`
+at 4B, tied with `FUN_80033d2c`/`FUN_80033d24`/`FUN_80033b10` at 4B;
+first-listed wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cf98` → `noop_void_stub_parallel_slot_table_cluster_jr_ra`**
+(4B, HIGH, STUB-tier) via
+`RenamePass286Region80030000Fun8003cf98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e void return stub (`jr ra` + delay-slot
+`_nop`). Empty body decompiles to bare `return;`. Address-adjacent gap between
+`reset_parallel_slot_table_tail_states_slots_0_through_2` (`0x8003cf80`, 24B)
+and `select_max_dword_parallel_slot_type_0x101_store_byte_at_plus6`
+(`0x8003cf9c`, 60B) in the `0x8003cfxx` parallel three-slot table cluster
+(documented Pass 68/228/262/264). Likely optional hook-table placeholder or
+alignment padding between cold-init wrapper and max-metric selector.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — trivial 4B decompile; empty void body unambiguous;
+cluster placement matches documented parallel-slot-table siblings.
+
+Region unnamed count after this pass: **4** (5 minus this rename). Live named
+**2162** global.
+
+**Next:** Pass 287 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

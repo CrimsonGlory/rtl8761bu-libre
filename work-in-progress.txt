@@ -14359,7 +14359,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 285;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 286: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 286 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003cf98`→`noop_void_stub_parallel_slot_table_cluster_jr_ra`
+          (4B, HIGH, STUB-tier). Trivial void `jr ra` noop between Pass 228
+          reset wrapper and Pass 262 max selector in `0x8003cfxx` parallel-slot
+          table cluster. Region unnamed 4 remain; live named 2162.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 286;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 287: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
