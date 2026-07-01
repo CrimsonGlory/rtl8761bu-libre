@@ -8699,5 +8699,33 @@ not renamed).
 Region unnamed count after this pass: **9** (10 minus this rename). Live named
 **2157** global.
 
-**Next:** Pass 282 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 282.
+
+## Pass 282 (2026-07-01) — inquiry-LAP slot selector wrapper `FUN_80034cac`
+
+Fresh `ListUnnamed80030000.java` re-run: **9 unnamed** remain in region
+(unchanged from Pass 281; xref_in=0 tier dominates — rank-1 is `FUN_80034cac`
+at 16B, the tied sibling deferred from Pass 281).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034cac` → `invoke_find_first_inquiry_lap_slot_with_pending_clear_2`**
+(16B, HIGH, UTILITY-tier) via
+`RenamePass282Region80030000Fun80034cac.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Identical thin void wrapper to Pass 281's
+`invoke_find_first_inquiry_lap_slot_with_pending_clear`: tail-calls
+`find_first_inquiry_lap_slot_with_pending_clear()` (region `0x80040000` Pass 52z)
+and discards the returned slot index. Adjacent at `0x80034cac` (16B before
+`0x80034cbc`); likely duplicate fptr-table entry in the `0x80034cxx` packet-type /
+conn-setup cluster.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — trivial 16B decompile; byte-identical semantics to Pass 281
+sibling; callee already documented at `0x80042f2c`.
+
+Region unnamed count after this pass: **8** (9 minus this rename). Live named
+**2158** global.
+
+**Next:** Pass 283 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
