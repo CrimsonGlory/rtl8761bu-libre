@@ -9234,4 +9234,36 @@ sub-state `0x40`/`0x48` pairing matches `send_lmp_encryption_mode_req_0x0f_and_a
 
 Region unnamed count after this pass: **28** (29 minus this rename). Live named **1893** global.
 
+**Next:** superseded by Pass 6 continuation (285).
+
+## Pass 6 continuation (285) (2026-07-01) — crypto encryption-state table lookup `FUN_80024020`
+
+Decompiled and renamed:
+**`FUN_80024020` → `lookup_crypto_encryption_state_0x14_0x1f_flag`**
+(24B, HIGH) via `RenamePass6Region80020000Fun80024020.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_80024020` (24B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=28` at pass start). Sits in the
+`0x800240xx` encryption validation cluster alongside `FUN_8002403c` role gate and
+`ret_bool_based_on_crypto_struct_0x50`.
+
+**Mechanism:** Reads crypto struct byte at offset **0** (`*param_1`); computes index
+`(byte - 0x14) & 0xff`. When index `< 0x0c` (states **0x14–0x1F**), returns flag byte from
+12-entry table `PTR_DAT_80024038[index]`; otherwise returns **0**. Nonzero return selects
+alternate key-derivation / mode-3 encryption arm paths in encryption-procedure handlers.
+
+**Callers:** `LMP_START_ENCRYPTION_REQ_0x11` (`0x80026a54`) — when crypto sub-state `+1=='I'`,
+nonzero lookup selects `derive_encryption_key_material_safer_plus_mode6` path vs direct
+key-block copy; `arm_link_encryption_post_key_program` (`0x80022210`) — on public BD_ADDR
+links (`bdaddr_random_==0`), nonzero lookup triggers
+`program_key_block_and_arm_mode3_encryption(crypto+0x13)`; xref_in=2 per
+`ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous table-index arithmetic and single
+data-pool read; both caller decompiles show consistent gate semantics documented in prior
+passes (encryption key-program cluster at `0x800222xx`).
+
+Region unnamed count after this pass: **27** (28 minus this rename). Live named **1894** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
