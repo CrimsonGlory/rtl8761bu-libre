@@ -8001,4 +8001,33 @@ Pass 6 cont. (81)'s `0x453` buffer-clone callee.
 
 Region unnamed count after this pass: **71** (72 minus this rename). Live named **1850** global.
 
+**Next:** superseded by Pass 6 continuation (242).
+
+## Pass 6 continuation (242) (2026-07-01) — HCI PIN Code Request + pairing-state setter `FUN_80022e28`
+
+Decompiled and renamed:
+**`FUN_80022e28` → `send_evt_hci_pin_code_request_and_set_pairing_state`**
+(42B, HIGH) via `RenamePass6Region80020000Fun80022e28.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (42B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=71` at pass start). First-listed in tied
+42B tier; callee of already-HIGH `dispatch_pairing_continuation_by_crypto_state_and_pending_lmp`
+(pending LMP opcode `8` path) and `fHCI_Change_Connection_Link_Key_0x15` (encryption modes
+`1`/`2` PIN-code path).
+
+**Mechanism:** Thin pairing-state transition wrapper in the `0x80022xxx` link-key/SSP cluster.
+Two-step composition: (1) `send_evt_HCI_PIN_Code_Request(param_1)` emits HCI PIN Code Request
+to host, (2) `set_arg1_1_to_arg2(param_2, param_3)` advances crypto pairing sub-state (e.g.
+state `10` on pending-LMP opcode-`8` path, or mode-dependent status on Change Connection Link
+Key).
+
+**Callers:** `dispatch_pairing_continuation_by_crypto_state_and_pending_lmp` (pending opcode
+`8` arm) and `fHCI_Change_Connection_Link_Key_0x15` (encryption modes `1`/`2` branch) —
+xref_in=2; both documented in Pass 6 cont. (75)/(71).
+
+**Confidence:** HIGH — decompile is a two-callee glue stub with both callees already HIGH in
+the HCI auth/pairing cluster; caller context from prior passes confirms PIN-code-request idiom.
+
+Region unnamed count after this pass: **70** (71 minus this rename). Live named **1851** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
