@@ -1418,7 +1418,8 @@ call pairs: `0x1c00→0xc000` (eSCO→max-rate-SCO), `0xc000→0x1c00`
 
 **Callers:** 4 direct call sites via `find_callers`:
 `conn_event_packet_type_update_and_reschedule`, `FUN_800366cc`,
-`FUN_800367e4`, and `sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types`, and
+`sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
 (region `0x80040000` Pass 52cp). Sibling of
 `select_and_program_sco_esco_packet_type_for_conn` / `program_packet_type_with_default_fallback`
 in region `0x80000000`.
@@ -2051,5 +2052,48 @@ index `0x36` pattern.
 Region unnamed count after this pass: **217** (218 minus this rename). Live named
 **1949** global.
 
-**Next:** Pass 74 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 74.
+
+## Pass 74 (2026-07-01) — conn slot-timing commit `FUN_800367e4`
+
+Fresh `ListUnnamed80030000.java` re-run: **217 unnamed** remain in region
+(unchanged from Pass 73; rank-1 by xref count drops to xref=3 tier; top by
+size is `FUN_800367e4` at 920B, 3 xref-in — tied with `FUN_80035768` on
+xref/size, wins on address sort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800367e4` → `recompute_and_commit_conn_slot_timing_hw_and_packet_types`**
+(920B, HIGH) via `RenamePass74Region80030000Fun800367e4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Large conn-indexed slot-timing commit orchestrator on
+`big_ol_struct` stride `0x2b8`. Optional prelude hook at `PTR_DAT_80036b7c`
+and epilogue at `PTR_DAT_80036bcc`. Reads HW clock via
+`read_hw_clock_raw_dword_by_role_index`, computes slot instant/offset with
+modulo arithmetic on per-conn timing fields (`field_0x29a`, `+0x3b`..`+0x35`),
+programs HW via `PTR_DAT_80036b9c` register writes (`0x2`, `0x4e`, `0x48`,
+`0x4c`, `0x4a`, `0x21c`), commits deadline to `unknown4_0x3C`, calls
+`scheduler_find_next_min_deadline`, then
+`or_merge_hw_channel_table_entry_and_indexed_dispatch(0x5e,0x800)`.
+`param_2` (`char`) selects establish vs teardown paths: establish
+(`param_2==1`) may early-return `0xff` when timing divisor zero; teardown
+(`param_2==0`) clears gate bytes and runs inverse packet-type transitions via
+`program_packet_type_if_stored_matches_expected` (`0xc000→0x1c00`,
+`0xc000→0xc00`, `0xc00→0xc000`). Large slot offsets (`>0x50`) dispatch
+`compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`. Uses
+`remap_role_index_to_esco_slot_if_pending` for eSCO slot indexing.
+
+**Callers:** 3 xref-in: `FUN_800378e4`, `FUN_8003792c`, `FUN_80060a78`
+(eSCO/SCO slot-timing dispatch cluster near `0x800378xx`).
+
+**Confidence:** HIGH — full 920B decompile; multiple named callees
+(`read_hw_clock_raw_dword_by_role_index`, `program_packet_type_if_stored_matches_expected`,
+`compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`,
+`or_merge_hw_channel_table_entry_and_indexed_dispatch`) anchor the
+establish/teardown packet-type and HW-register commit paths.
+
+Region unnamed count after this pass: **216** (217 minus this rename). Live named
+**1950** global.
+
+**Next:** Pass 75 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -12339,7 +12339,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 73;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 74: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 74 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800367e4`→`recompute_and_commit_conn_slot_timing_hw_and_packet_types`
+          (920B, HIGH, 3 xref-in). Conn-indexed slot-timing commit on
+          `big_ol_struct` stride `0x2b8`: HW-clock instant math,
+          `PTR_DAT_80036b9c` register writes, `scheduler_find_next_min_deadline`,
+          `or_merge_hw_channel_table_entry_and_indexed_dispatch(0x5e,0x800)`;
+          establish/teardown via `program_packet_type_if_stored_matches_expected`
+          + `compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`; callers
+          `FUN_800378e4`/`FUN_8003792c`/`FUN_80060a78`.
+          216 unnamed remain; live named 1950.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 74;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 75: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
