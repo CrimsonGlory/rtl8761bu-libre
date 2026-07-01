@@ -3717,4 +3717,41 @@ auth-failure idiom; sibling of `fHCI_User_Confirmation_Request_Reply_0x33`.
 
 Region unnamed count after this pass: **213** (214 minus this rename). Live named **1708** global.
 
+**Next:** superseded by Pass 6 continuation (100).
+
+## Pass 6 continuation (100) (2026-07-01) — LMP COMB_KEY NOT ACCEPTED recovery `FUN_80027278`
+
+Decompiled and renamed:
+**`FUN_80027278` → `handle_lmp_comb_key_not_accepted`**
+(128B, HIGH) via `RenamePass6Region80020000Fun80027278.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (128B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=213` at pass start). Sibling of
+`handle_lmp_in_rand_not_accepted` (Pass 6 cont. 44) in the
+`LMP_NOT_ACCEPTED_0x04` per-rejected-opcode dispatch cluster.
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcode **0x09**
+(LMP COMB_KEY). Sole caller `LMP_NOT_ACCEPTED_0x04` when rejected-opcode byte at
+`param+5` is `0x09`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. Gated by
+`FUN_8002403c` (compares `big_ol_struct+0xd0` vs rejected-payload bit at
+`param+4&1`) unless global bypass flag `PTR_DAT_800272fc[2]&0x80` is set.
+Dispatches on crypto sub-state byte at `+1`:
+- `0x0f`: falls through to SSP state-machine update
+- `0x10`: on match, if payload byte at `param+6` is `'#'` and
+  `bdaddr_random_==0`, calls `FUN_800255a0` (pairing continuation) then
+  `FUN_80025634` (clears dword at `+0x1e8`); else same SSP state-machine tail
+- other sub-states: early return
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x8002821e`, rejected-opcode
+`0x09` branch) — confirmed via `FindCallers80027278.java`.
+
+**Confidence:** HIGH — decompile confirms NOT-ACCEPTED recovery idiom matching
+documented siblings; sole caller is the established `LMP_NOT_ACCEPTED_0x04`
+dispatcher; crypto sub-states `0x0f`/`0x10` align with COMB_KEY pairing cluster
+documented in Pass 2/3; callee `FUN_800255a0` matches pairing-continuation
+pattern from `handle_lmp_in_rand_not_accepted`'s `FUN_80025474` sibling.
+
+Region unnamed count after this pass: **212** (213 minus this rename). Live named **1709** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
