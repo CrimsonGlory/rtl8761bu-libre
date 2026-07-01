@@ -4308,4 +4308,34 @@ fixed constant `0xc` in documented disconnect path.
 
 Region unnamed count after this pass: **194** (195 minus this rename). Live named **1727** global.
 
+**Next:** superseded by Pass 6 continuation (119).
+
+## Pass 6 continuation (119) (2026-07-01) — stored link-key slot writer `FUN_800268ac`
+
+Decompiled and renamed:
+**`FUN_800268ac` → `store_link_keys_in_global_slot_table`**
+(110B, HIGH) via `RenamePass6Region80020000Fun800268ac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (110B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=194` at pass start). Tied at 110B with
+`FUN_80022530`; selected first-listed address after Pass 6 cont. (118) renamed
+`FUN_8002b1f8`.
+
+**Mechanism:** Writes HCI command-supplied link-key records into a 7-slot global table at
+`PTR_DAT_8002691c`. Each slot is 0x17 bytes: 6-byte BD_ADDR, 16-byte link key, and a
++0x16 occupied flag. Scans all 7 slots; for each empty slot while stored count `< param_2`,
+copies one 0x16-byte record from `param_1 + count*0x16` and sets the occupied flag.
+Returns the number of entries stored.
+
+**Caller:** `hci_ogf1_ogf3_shared_command_complete_event_sender` (`0x80022950`) at
+`0x80022bb4` — the shared OGF1/OGF3 Command Complete formatter that delegates link-key
+read/write paths (`0x0C0D`/`0x0C12`) to this helper alongside `FUN_80026874` (pointer-array
+export) and `FUN_80026920` (slot clear). xref_in=1 via `ListXrefsTo800268ac.java`.
+
+**Confidence:** HIGH — decompile confirms 7-slot BD_ADDR+key store with occupied-byte
+gating; slot layout matches `send_evt_HCI_Return_Link_Keys` 6+0x10 packing; single caller
+in documented HCI stored-link-key command-complete path.
+
+Region unnamed count after this pass: **193** (194 minus this rename). Live named **1728** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
