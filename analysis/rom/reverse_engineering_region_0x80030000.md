@@ -4315,5 +4315,42 @@ split confirmed; caller integration in status-word link-event path.
 Region unnamed count after this pass: **148** (149 minus this rename). Live named
 **2018** global.
 
-**Next:** Pass 143 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 143.
+
+## Pass 143 (2026-07-01) — `step_conn_esco_codec_counter_and_apply_if_gate_armed`
+
+Fresh `ListUnnamed80030000.java` re-run: **148 unnamed** remain in region
+(unchanged from Pass 142; rank-1 at xref=1 tier is `FUN_8003611c` at 188B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003611c` → `step_conn_esco_codec_counter_and_apply_if_gate_armed`**
+(188B, HIGH, HANDLER-tier) via
+`RenamePass143Region80030000Fun8003611c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection eSCO codec-sample counter stepper on
+`big_ol_struct` records, gated on `the_0x300` timer-active byte
+`field_0x175`. When sub-counter `field_0x6a` is zero, seeds main counter
+`field_0x68` from scan-interval byte `field_0x178`; otherwise increments
+`field_0x68` by step byte `field_0x177` with clamp against
+`field90_0x82` ceiling (8-slot wrap-aware). IRQ-disabled path then, when
+per-slot gate byte at `PTR_DAT_800361e0[slot]==1`, dispatches
+`FUN_80014450` + `FUN_80014dac` (codec-config apply pair). Indexed
+per-connection variant of Pass 118's page/inquiry slot stepper
+`increment_esco_slot_counter_and_apply_codec_if_gate_armed`; structural
+sibling of `FUN_800361e4` (codec-slot flush callee of
+`arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots`).
+
+**Callers:** 1 xref-in via `find_callers` —
+`LC_event_TX_dispatcher` (LC-layer TX event multiplexer).
+
+**Confidence:** HIGH — full 188B decompile; counter/step/clamp field offsets
+match `the_0x300` timer cluster from Pass 55/118; codec-apply callee pair
+confirmed; gate-byte dispatch pattern matches documented eSCO slot sweep
+family.
+
+Region unnamed count after this pass: **147** (148 minus this rename). Live named
+**2019** global.
+
+**Next:** Pass 144 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
