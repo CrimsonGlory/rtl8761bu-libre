@@ -6193,4 +6193,32 @@ send wrapper; prior passes already cited this address by role without decompilin
 
 Region unnamed count after this pass: **132** (133 minus this rename). Live named **1789** global.
 
+**Next:** superseded by Pass 6 continuation (181).
+
+## Pass 6 continuation (181) (2026-07-01) — LMP ext-opcode reply wrapper `FUN_800243b8`
+
+Decompiled and renamed:
+**`FUN_800243b8` → `send_lmp_ext_opcode_reply_maybe_ssp_complete`**
+(68B, HIGH) via `RenamePass6Region80020000Fun800243b8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=11) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=132` at pass start). Highest-xref
+function in the 68B tier (siblings at xref_in=6/2/2/1/0).
+
+**Mechanism:** Thin wrapper around `send_extended_opcode_LMP_reply_` for outbound
+LMP 0x7F extended-opcode replies. Masks conn index to 16 bits, sends
+`(conn, ext_opcode, sub_opcode, role_bit, reason/status)`, then when per-connection
+`_x58_crypto_struct` byte `+1` is non-zero calls `FUN_80024218(conn, &PTR_DAT_00007530)`
+to arm SSP Simple Pairing Complete follow-up. Ubiquitous SSP/encryption reject-or-accept
+reply primitive — prior passes cited it by address across 10+ handlers without
+decompiling (e.g. `(conn, 0x7f, 0x19, role_bit, reason)` IO-cap reject,
+`(conn, 0x7f, 0x1d, role_bit, 0)`/`0x24` accept/reject pairs).
+
+**Callers:** xref_in=11 across LMP-ext SSP sub-opcode handlers (0x18–0x1e cluster).
+
+**Confidence:** HIGH — decompile confirms two-step send-then-maybe-finalize pattern;
+role already documented in 15+ prior pass cross-references.
+
+Region unnamed count after this pass: **131** (132 minus this rename). Live named **1790** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

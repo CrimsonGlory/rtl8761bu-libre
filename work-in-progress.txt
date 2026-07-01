@@ -10858,8 +10858,14 @@ sweep beyond enumeration and is the most out-of-date):
           xref_in=10; 132 unnamed remain; live named 1789.
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (180)
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (181): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (132 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (181) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800243b8`→`send_lmp_ext_opcode_reply_maybe_ssp_complete`
+          (68B, HIGH) — LMP 0x7F ext-opcode reply wrapper + conditional SSP-complete arm;
+          xref_in=11; 131 unnamed remain; live named 1790.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (181)
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (182): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (131 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
