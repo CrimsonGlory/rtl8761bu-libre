@@ -3583,5 +3583,39 @@ packet-type apply family; role-switch context confirmed by master dispatcher doc
 Region unnamed count after this pass: **170** (171 minus this rename). Live named
 **1996** global.
 
-**Next:** Pass 121 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 121.
+
+## Pass 121 (2026-07-01) — `lmp_status_apply_packet_types_on_stride88_slot`
+
+Fresh `ListUnnamed80030000.java` re-run: **170 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003de48` at 620B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003de48` → `lmp_status_apply_packet_types_on_stride88_slot`**
+(620B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass121Region80030000Fun8003de48.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP PDU status handler on the stride-0x88 per-connection table
+(`PTR_DAT_8003e0b8`, same family as
+`connection_setup_arm_stride88_slot_and_apply_packet_types`). Guarded on
+`the_0x300.field_0x171`; `FUN_8006c81c` resolves connection index. Opcode-index
+gate via `0x30c0 >> (status_nibble & 0xf) & 1`. Updates slot flags at
+`+0x7a` (bits 1/2), `+0x80`, `+0x7b`, `+0x82`. Branches on `bdaddr_random_`
+for public vs random-BD_ADDR packet-type table paths (`PTR_DAT_8003e0c4`/
+`PTR_DAT_8003e0cc` + `DAT_8003e0d0`). Dispatches packet-type updates via hook
+`PTR_DAT_8003e0c8` with masks `0xc00`/`0x1c00`/`0x800`. Logs via
+`possible_logger_called_if_no_patch3` (opcode `0x2c1`) when status-bit
+combinations fire.
+
+**Callers:** 1 xref-in — `lmp_pdu_received_top_level_processor` at `0x80003f5e`.
+
+**Confidence:** HIGH — full 620B decompile; stride-0x88 offsets match Pass 119
+cluster; LMP ingress caller confirmed; packet-type hook dispatch matches
+documented apply family.
+
+Region unnamed count after this pass: **169** (170 minus this rename). Live named
+**1997** global.
+
+**Next:** Pass 122 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
