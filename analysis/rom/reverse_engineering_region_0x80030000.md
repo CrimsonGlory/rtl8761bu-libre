@@ -7304,5 +7304,35 @@ reuse and hook-override idiom unambiguous; mid-entry relationship confirmed via
 Region unnamed count after this pass: **55** (56 minus this rename). Live named
 **2111** global.
 
-**Next:** Pass 236 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 236.
+
+## Pass 236 (2026-07-01) — Inquiry RSSI raw ushort accessor `FUN_800379cc`
+
+Fresh `ListUnnamed80030000.java` re-run: **55 unnamed** remain in region
+(unchanged from Pass 235; rank-1 at xref=1 tier is `FUN_800379cc` at 12B —
+largest among tied xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800379cc` → `read_global_ushort_inquiry_rssi_raw_at_DAT_800379d8`**
+(12B, HIGH, SIMPLE-tier) via
+`RenamePass236Region80030000Fun800379cc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin global ushort accessor in the `0x800379xx` link-state cluster
+adjacent to Pass 195's
+`arm_link_state_advance_pending_and_commit_conn_slot_timing_mode1` and Pass 200's
+`handle_trunc_page_complete_status_bit8_via_optional_hook_and_log_0x6e`. Loads
+pointer `DAT_800379d8`, returns `*(ushort*)puVar1` — raw inquiry RSSI sample
+fed through `return_RSSI_value()` as the 4th byte of HCI event `0x56`
+(Inquiry Response Notification) in `send_evt_HCI_Inquiry_Response_Notification`.
+
+**Callers:** 1 xref-in — `send_evt_HCI_Inquiry_Response_Notification` at
+`0x8001cab0` (region `0x80010000` HCI event cluster).
+
+**Confidence:** HIGH — full 12B decompile; caller context shows unambiguous
+inquiry-RSSI payload role; cluster placement beside Pass 195/200 siblings.
+
+Region unnamed count after this pass: **54** (55 minus this rename). Live named
+**2112** global.
+
+**Next:** Pass 237 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

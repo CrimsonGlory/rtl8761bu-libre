@@ -13895,7 +13895,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 235;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 236: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 236 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800379cc`→`read_global_ushort_inquiry_rssi_raw_at_DAT_800379d8`
+          (12B, HIGH, SIMPLE-tier). Thin global ushort accessor in `0x800379xx`
+          cluster: returns `*(ushort*)DAT_800379d8` as raw inquiry RSSI sample
+          fed through `return_RSSI_value()` for HCI event `0x56` 4th payload
+          byte in `send_evt_HCI_Inquiry_Response_Notification`. Region unnamed 54
+          remain; live named 2112.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 236;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 237: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
