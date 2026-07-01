@@ -893,4 +893,24 @@ status; cross-region callers (`apply_eSCO_SCO_packet_type_params`,
 
 Region unnamed count after this pass: **253** (254 minus this rename).
 
-**Next:** Pass 7f — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7f (2026-07-01) — status-gated byte write `FUN_8001359c`
+
+Pass 7f target from cold-triage rank-1 (16 xref_in, 22B). Decompiled and renamed:
+**`FUN_8001359c` → `busywait_status_bits_0x60_then_write_byte`**
+(22B, HIGH) via `RenamePass7fRegion80010000Fun8001359c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Infinite-loop status poll then byte write primitive in the
+`0x800135xx` scheduler/packet-slot cluster (sibling of `FUN_800135bc` scheduler
+yield). Spins on `*DAT_800135b4` until `(*status & 0x60) != 0` (bits 5+6 set),
+then writes `param_1 & 0xff` to `*DAT_800135b8`. No timeout — caller must
+ensure the status bits eventually assert. Distinct from the IRQ-masked
+baseband R/W pair (Pass 7/7b) and MMIO-indexed pair (Pass 7c/7d).
+
+**Confidence:** HIGH — trivial decompile; 16 xref_in confirms generic primitive
+status; behavioral name matches decompile exactly.
+
+Region unnamed count after this pass: **252** (253 minus this rename).
+
+**Next:** Pass 7g — cold-triage next rank-1 unnamed in region `0x80010000`
+(`FUN_80013e78`, 14 xref, 98B).

@@ -14445,8 +14445,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7e;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7f: cold-triage next rank-1
-          unnamed function in region `0x80010000` (253 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7f (2026-07-01): decompiled+
+          renamed `FUN_8001359c`→`busywait_status_bits_0x60_then_write_byte`
+          (22B, HIGH). Infinite-loop poll until `(*DAT_800135b4 & 0x60) != 0`,
+          then writes `param_1 & 0xff` to `*DAT_800135b8`; 16 xref_in;
+          `0x800135xx` scheduler cluster; live named 2172.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7f;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7g: cold-triage next rank-1
+          unnamed function in region `0x80010000` (`FUN_80013e78`, 14 xref, 98B;
+          252 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
