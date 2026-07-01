@@ -5168,5 +5168,37 @@ field pairing matches documented Pass 8 calibration-mode idiom.
 Region unnamed count after this pass: **123** (124 minus this rename). Live named
 **2043** global.
 
-**Next:** Pass 168 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 168.
+
+## Pass 168 (2026-07-01) — LMP 0x3ee link-mode byte commit `FUN_80035f74`
+
+Fresh `ListUnnamed80030000.java` re-run: **123 unnamed** remain in region
+(unchanged from Pass 167; rank-1 at xref=1 tier is `FUN_80035f74` at 110B —
+largest among the xref=1 cohort, tied with `FUN_80034564`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035f74` → `apply_lmp_3ee_case2_and_link_mode_byte_on_signed_status`**
+(110B, HIGH, HANDLER-tier) via
+`RenamePass168Region80030000Fun80035f74.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change cluster LMP 0x3ee commit helper. Reads signed
+status dword at `DAT_80035fe4`; on negative path clears companion flag bit at
+`PTR_DAT_80035fec`, invokes `LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10`
++ `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` (HW reprogram pair), and clears
+link-mode byte bits 1+2 on workspace `PTR_DAT_80035fe8+0x164` (`& 0xf9`); on
+non-negative path sets bit 2 on `+0x164` (`| 4`) and logs via
+`possible_logging_function__var_args`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+invocation (consistent with link-mode-change fptr-table dispatch).
+
+**Confidence:** HIGH — full 110B decompile; LMP 0x3ee case2 branch idiom matches
+siblings `zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`
+(Pass 134) and `evaluate_lmp_3ee_link_mode_phase_with_retry_counter` (Pass 154);
+`+0x164` link-mode byte merge matches documented cluster field layout.
+
+Region unnamed count after this pass: **122** (123 minus this rename). Live named
+**2044** global.
+
+**Next:** Pass 169 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
