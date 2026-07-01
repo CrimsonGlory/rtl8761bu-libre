@@ -6019,4 +6019,33 @@ but bit clear.
 
 Region unnamed count after this pass: **138** (139 minus this rename). Live named **1783** global.
 
+**Next:** superseded by Pass 6 continuation (175).
+
+## Pass 6 continuation (175) (2026-07-01) — SSP/legacy encryption start `FUN_80025b1c`
+
+Decompiled and renamed:
+**`FUN_80025b1c` → `start_encryption_ssp_or_legacy_lmp_arm_substate_0x49_0x4b`**
+(72B, HIGH) via `RenamePass6Region80020000Fun80025b1c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (72B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=138` at pass start). First-listed
+`FUN_80025b1c` in the 72B cluster.
+
+**Mechanism:** Encryption-start branch helper in the `0x80025bxx` encryption cluster
+(sibling of legacy wrapper `FUN_800245cc` at `0x800245cc`). On connection index
+`param_1`, when `bdaddr_random_==0` sends legacy LMP encryption-mode request via
+`FUN_800258ec(_,_,3)` (PDU bytes `0x7f`/`0x18`) and arms crypto sub-state `0x49`;
+otherwise calls `program_encryption_key_and_send_lmp_start_encryption_req(_,_,3)` and
+arms sub-state `0x4b`. Both paths finish via `set_arg1_1_to_arg2(param_2, status)`.
+
+**Callers:** `arm_encryption_when_crypto_substate_0x11_or_0x1e` (SSP feature-gate
+branch when `FUN_8002408c` nonzero) and failure-path in
+`finalize_stop_encryption_procedure_and_notify_hci` (Pass 6 cont. 14) — xref_in=2.
+
+**Confidence:** HIGH — decompile confirms pure bdaddr-random branch with documented
+callees; caller decompile in Pass 6 cont. (138) already mapped the SSP vs legacy
+split; sub-state bytes `0x49`/`0x4b` match stop-encryption finalizer failure paths.
+
+Region unnamed count after this pass: **137** (138 minus this rename). Live named **1784** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
