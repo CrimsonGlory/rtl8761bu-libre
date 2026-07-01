@@ -8888,4 +8888,31 @@ documented TLV-scan usage in region `0x80070000` Pass 12.
 
 Region unnamed count after this pass: **40** (41 minus this rename). Live named **1881** global.
 
+**Next:** superseded by Pass 6 continuation (273).
+
+## Pass 6 continuation (273) (2026-07-01) — LMP 0x32 sender `FUN_80029cdc`
+
+Decompiled and renamed:
+**`FUN_80029cdc` → `send_lmp_use_semi_permanent_key_0x32`**
+(32B, HIGH) via `RenamePass6Region80020000Fun80029cdc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (32B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=40` at pass start). First-listed of
+the tied 32B/xref_in=1 cluster after Pass 6 cont. (272) renamed `FUN_8002141c`.
+
+**Mechanism:** Outbound LMP **0x32** (USE_SEMI_PERMANENT_KEY) 2-byte PDU sender —
+builds buffer `{0x32}` and dispatches via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn, buf, 2, 0)`. Leaf send
+primitive for the Master Link Key phase-1 armer and `LMP_USE_SEMI_PERMANENT_KEY_0x32`
+handler cluster.
+
+**Caller:** `arm_master_link_key_phase1_slot_lmp_0x32` at `0x80029d0a` (xref_in=1,
+documented in Pass 6 cont. 144).
+
+**Confidence:** HIGH — decompile confirms unambiguous 2B LMP 0x32 wrapper; caller
+matches documented Master Link Key phase-1 arm path; sibling of
+`LMP_USE_SEMI_PERMANENT_KEY_0x32` inbound handler.
+
+Region unnamed count after this pass: **39** (40 minus this rename). Live named **1882** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

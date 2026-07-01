@@ -11680,8 +11680,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (272);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (273): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (40 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (273) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80029cdc`→`send_lmp_use_semi_permanent_key_0x32`
+          (32B, HIGH). Outbound LMP 0x32 USE_SEMI_PERMANENT_KEY 2B PDU via
+          `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`; caller
+          `arm_master_link_key_phase1_slot_lmp_0x32`; xref_in=1; 39 unnamed
+          remain; live named 1882.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (273);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (274): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (39 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
