@@ -4277,4 +4277,35 @@ HIGH-named; caller context matches documented LMP-accepted-0x33 role-switch path
 
 Region unnamed count after this pass: **195** (196 minus this rename). Live named **1726** global.
 
+**Next:** superseded by Pass 6 continuation (118).
+
+## Pass 6 continuation (118) (2026-07-01) — global HW-clock spin-wait `FUN_8002b1f8`
+
+Decompiled and renamed:
+**`FUN_8002b1f8` → `spin_until_global_hw_clock_advances_by_ticks`**
+(110B, HIGH) via `RenamePass6Region80020000Fun8002b1f8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (110B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=195` at pass start). Tied at 110B with
+`FUN_800268ac` and `FUN_80022530`; selected first-listed address.
+
+**Mechanism:** Busy-spin delay until the global HW clock (index 0 via `FUN_80034a24`)
+advances by `param_1` ticks. When the stored reference `DAT_8002b268` has already advanced
+partway toward the target, a wrap/sync preamble waits for clock to pass `DAT_8002b26c` then
+re-sync to `DAT_8002b268` before spinning the remaining delta. Final loop polls
+`FUN_80034a24` until `clock >= start + param_1`.
+
+**Caller:** `FUN_8006ba88` (region `0x80060000` — multi-connection disconnect teardown
+dispatcher) calls `spin_until_global_hw_clock_advances_by_ticks(0xc)` after emitting one or
+more `send_evt_HCI_Disconnection_Complete` events — a fixed 12-tick post-disconnect settle
+delay before `some_case_0x2b` + `FUN_8001a0c8` cleanup. xref_in=1 via
+`ListXrefsTo8002b1f8.java`.
+
+**Confidence:** HIGH — decompile confirms pure clock-polling spin with wrap handling;
+`FUN_80034a24(_,0)` global-clock idiom matches `spin_until_hw_clock_bit1_phase_toggles` /
+`compute_sco_slot_offset_delta_from_hw_clock` cluster in region `0x80040000`; caller passes
+fixed constant `0xc` in documented disconnect path.
+
+Region unnamed count after this pass: **194** (195 minus this rename). Live named **1727** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
