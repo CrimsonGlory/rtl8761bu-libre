@@ -13469,7 +13469,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 190;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 191: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 191 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003a5ec`→`read_link_register_0xe_role_bits_13_14_by_slot`
+          (68B, HIGH, UTILITY-tier). Slot-indexed HW link reg `0xe` reader:
+          eSCO stride `0x14` / SCO stride `0x1e`, returns bits 13:14; caller
+          `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`.
+          99 unnamed remain; live named 2067.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 191;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 192: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

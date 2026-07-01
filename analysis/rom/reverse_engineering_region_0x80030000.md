@@ -5905,5 +5905,34 @@ cluster idiom; sole xref confirmed via `ListXrefsTo8003aa20`.
 Region unnamed count after this pass: **100** (101 minus this rename). Live named
 **2066** global.
 
-**Next:** Pass 191 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 191.
+
+## Pass 191 (2026-07-01) — link-register role-bit reader `FUN_8003a5ec`
+
+Fresh `ListUnnamed80030000.java` re-run: **100 unnamed** remain in region
+(unchanged from Pass 190; rank-1 by size at xref=1 tier is `FUN_8003a5ec` at
+68B — tied with two 68B siblings, first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a5ec` → `read_link_register_0xe_role_bits_13_14_by_slot`**
+(68B, HIGH, UTILITY-tier) via
+`RenamePass191Region80030000Fun8003a5ec.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Slot-indexed HW link-register reader sibling of region
+`0x80050000`'s `read_link_register_0xe_top_nibble_by_slot` (`0x800566b8`).
+For slot `< 8`: calls `read_indexed_esco_link_register(slot*0x14 + 0xe)`; for
+slot `≥ 8`: calls `read_indexed_link_register((slot-8)*0x1e + 0xe)`; returns
+bits 13:14 (`>> 0xd & 3`) from register index `0xe`.
+
+**Callers:** 1 xref-in — `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`
+(TX-power runtime-mode reconfiguration cluster).
+
+**Confidence:** HIGH — full 68B decompile; eSCO/SCO stride split matches
+established `read_link_register_0xe_top_nibble_by_slot` pattern; both callees
+already HIGH-named; sole xref confirmed via `ListXrefsTo8003a5ec`.
+
+Region unnamed count after this pass: **99** (100 minus this rename). Live named
+**2067** global.
+
+**Next:** Pass 192 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
