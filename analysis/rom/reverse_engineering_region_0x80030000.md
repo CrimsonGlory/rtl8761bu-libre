@@ -2836,5 +2836,34 @@ sibling of Pass 96's config-field variant
 Region unnamed count after this pass: **193** (194 minus this rename). Live named
 **1973** global.
 
-**Next:** Pass 98 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 98.
+
+## Pass 98 (2026-07-01) — IRQ-masked HW slot bit program `FUN_8003d558`
+
+Fresh `ListUnnamed80030000.java` re-run: **193 unnamed** remain in region
+(unchanged from Pass 97; rank-1 by size at xref=2 tier is `FUN_8003d558` at
+194B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d558` → `irq_masked_program_slot_bit_in_reg2_and_clear_reg11c_by_conn_index`**
+(194B, HIGH, HANDLER-tier) via `RenamePass98Region80030000Fun8003d558.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked BB register programming via hook at `PTR_DAT_8003d620`.
+Reads `byte_0xCC` and `bos_connection__array_index` from `big_ol_struct[param_2]`.
+Clears bit7 on reg `0x11c` (`& 0xff7f`); programs reg `2` with packed value
+`(byte_0xCC << 11) | (array_index << 5) | (1 << (param_1 & 0x1f))`; writes reg
+`0` = `5`; optionally reg `0xe0` = `0` when `param_4` nonzero; logs tag `0x2b`.
+
+**Callers:** 2 xref-in; callee of `connection_state_manager` (`FUN_8003d630`)
+non-SCO disconnect/abort path alongside `FUN_8002a868` (Pass 6 documented).
+
+**Confidence:** HIGH — full 194B decompile; IRQ-masked HW hook pattern matches
+SCO/BB-register cluster (`0x11c`/`0xe0` family); connection-state-manager
+disconnect context from Pass 6.
+
+Region unnamed count after this pass: **192** (193 minus this rename). Live named
+**1974** global.
+
+**Next:** Pass 99 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

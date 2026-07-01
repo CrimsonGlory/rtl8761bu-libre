@@ -12576,7 +12576,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 97;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 98: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 98 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003d558`→`irq_masked_program_slot_bit_in_reg2_and_clear_reg11c_by_conn_index`
+          (194B, HIGH, HANDLER-tier). IRQ-masked BB reg programmer: clear reg
+          `0x11c` bit7, program reg `2` slot bit from conn `byte_0xCC`/
+          `array_index`, reg `0`=5, optional reg `0xe0`=0; callee of
+          `connection_state_manager` disconnect path. 192 unnamed remain; live
+          named 1974.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 98;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 99: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
