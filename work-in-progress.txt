@@ -13267,7 +13267,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 170;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 171: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 171 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (120 unnamed); decompiled+renamed rank-1
+          `FUN_80035640`→`gated_link_mode_change_dispatch_with_prehook_and_completion`
+          (106B, HIGH, HANDLER-tier). Type-105 link-mode-change handler: clears
+          status bytes, gates on config bit 0x10, optional pre-hook, calls
+          `link_mode_change_state_machine`, completion fptr on success; sibling
+          of `remote_name_feature_cleanup_and_lmp268_timer_dispatch`. Region
+          unnamed 119 remain; live named 2047.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 171;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 172: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

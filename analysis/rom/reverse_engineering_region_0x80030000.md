@@ -5260,5 +5260,37 @@ fallback dispatches via `PTR_DAT_80037800` fptr with arg 3.
 Region unnamed count after this pass: **120** (121 minus this rename). Live named
 **2046** global.
 
-**Next:** Pass 171 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 171.
+
+## Pass 171 (2026-07-01) — Gated link-mode dispatch `FUN_80035640`
+
+Fresh `ListUnnamed80030000.java` re-run: **120 unnamed** remain in region
+(unchanged from Pass 170; rank-1 at xref=1 tier is `FUN_80035640` at 106B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035640` → `gated_link_mode_change_dispatch_with_prehook_and_completion`**
+(106B, HIGH, HANDLER-tier) via
+`RenamePass171Region80030000Fun80035640.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Type-105 (`0x69`) internal-message handler sibling of
+`remote_name_feature_cleanup_and_lmp268_timer_dispatch` (Pass 158) in
+`unknown_fptr_index0` case 5. Clears status bytes at workspace `+0x97` and
+`+0xfc`; gates on config `field208_0xd8` bit `0x10` and workspace dword-zero
+(returning `0xff` on failure). Optional validator/transformation pre-hook at
+`PTR_DAT_800356b4` may short-circuit with its output byte; else calls
+`link_mode_change_state_machine(link_type, param2, param3)` and on success
+(return `0`) invokes completion fptr at `PTR_DAT_800356b8`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch via `unknown_fptr_index0` type-105 path (known pattern).
+
+**Confidence:** HIGH — full 106B decompile; named callee
+`link_mode_change_state_machine` anchors the link-mode cluster; pre-hook +
+completion-callback idiom matches sibling `0x80035xxx` handlers.
+
+Region unnamed count after this pass: **119** (120 minus this rename). Live named
+**2047** global.
+
+**Next:** Pass 172 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
