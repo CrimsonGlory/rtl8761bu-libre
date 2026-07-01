@@ -141,13 +141,14 @@ uint FUN_80011584(ushort param_1)
 3 mod 4) — a deliberate "this should never happen" marker rather than a
 silently wrong value.
 
-## 5. `FUN_80011a74` — AFH-related register bit toggle
+## 5. `afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000` — AFH-related register bit toggle
 
-`0x80011a74`, 56 bytes. Callers: `unknown_referencing_default_name_6`,
-`FUN_8010ccb8` (patch), `FUN_80011ab0`, plus 1 raw-data caller at `0x6532`.
+`0x80011a74`, 56 bytes (renamed Pass 95 2026-07-01). Callers:
+`unknown_referencing_default_name_6`, `FUN_8010ccb8` (patch), `FUN_80011ab0`,
+plus 1 raw-data caller at `0x6532`.
 
 ```c
-void FUN_80011a74(void)
+void afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000(void)
 {
     uVar2 = FUN_80011510(0xfc, 2);            // read register 0xfc (word width)
     if ((*DAT_80011aac >> 0x10 & 0x42) == 0)
@@ -264,7 +265,7 @@ further tracing into `FUN_8000b864`).
 | `write_baseband_register_masked_busywait` | 110 B | Generic masked baseband register write (busy-wait) |
 | `FUN_800115c8` | 62 B | Byte-granular read wrapper around `read_baseband_register_masked_busywait` |
 | `FUN_80011584` | 66 B | Halfword-granular read wrapper around `read_baseband_register_masked_busywait` (returns `0xdead` on bad alignment) |
-| `FUN_80011a74` | 56 B | AFH-flag-gated toggle of register `0xfc` bit `0x1000` |
+| `afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000` | 56 B | AFH-flag-gated toggle of register `0xfc` bit `0x1000` |
 | `FUN_800117a4` | 14 B | Unconditional OR `0xfc00` into a fixed register/global |
 | `dispatch_afh_cap_param_to_bb_register_clear_loop` | 64 B | Config-flag-gated dispatcher to `FUN_80012e38` |
 | `FUN_80012e38` | 70 B | Clears bit `0x40` across registers `0x170/0x174/0x178/0x17c` |

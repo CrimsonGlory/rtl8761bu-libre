@@ -1858,4 +1858,31 @@ paired use immediately after Pass 7t poll primitive.
 
 Region unnamed count after this pass: **217** (218 minus this rename).
 
-**Next:** Pass 95 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 95.
+
+## Pass 95 (2026-07-01) — AFH-flag-gated BB reg 0xfc bit writer `FUN_80011a74`
+
+Pass 95 target from cold-triage rank-1 (4 xref_in, 56B — largest at xref=4
+tier after Pass 94). Decompiled and renamed:
+**`FUN_80011a74` → `afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000`**
+(56B, HIGH) via `RenamePass95Region80010000Fun80011a74.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** AFH state-flag-gated read-modify-write on BB reg `0xfc` in the
+`0x80011axx` cluster (sibling of `called_if_config[0xf2]&4` at `0x80011a18`).
+Reads reg `0xfc` via `read_baseband_register_masked_busywait`, tests global
+`*DAT_80011aac` upper-halfword bits `0x42` (AFH capability/feature flag area):
+when clear, ORs bit `0x1000`; when set, ANDs `~0x1000`; writes back via
+`write_baseband_register_masked_busywait`.
+
+**Callers:** 4 xref_in — `unknown_referencing_default_name_6` (ROM link-mode
+bitmask reconfigure handler) + `FUN_8010ccb8` (patch eSCO capability writer);
+2 confirmed via `find_callers`.
+
+**Confidence:** HIGH — decompile confirms flag-gated bit `0x1000` toggle on BB
+reg `0xfc`; prior partial analysis in `reverse_engineering_baseband_reg_helpers.md`
+Section 5 now formalized with persisted rename.
+
+Region unnamed count after this pass: **216** (217 minus this rename).
+
+**Next:** Pass 96 — cold-triage next rank-1 unnamed in region `0x80010000`.
