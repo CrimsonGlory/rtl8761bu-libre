@@ -2038,4 +2038,34 @@ gating, eSCO slot remap, and dual sync-gate byte tables; caller context in
 
 Region unnamed count after this pass: **211** (212 minus this rename).
 
-**Next:** Pass 101 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 101.
+
+## Pass 101 (2026-07-01) — VSC fc95/LMP-268 gateway `FUN_80015d9c`
+
+Pass 101 target from cold-triage rank-1 (3 xref_in, 84B — largest at xref=3
+tier after Pass 100 cleared `FUN_80017ad4`). Decompiled and renamed:
+**`FUN_80015d9c` → `feature_bit0_gated_vsc_fc95_lmp268_gateway_with_config_scaled_delay`**
+(84B, HIGH) via `RenamePass101Region80010000Fun80015d9c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Feature-gated VSC `0xfc95` + LMP `0x268` dispatch gateway.
+Returns immediately unless config byte at `PTR_DAT_80015df0+0x84` bit 0 is set.
+When pending slot dword at `PTR_DAT_80015df4 != -1`, calls
+`LMP__25B__most_common_for_VSCs1`. When `param_1 != 0`: issues
+`VSC_0xfc95_called2(0, pending_slot, PTR_LAB_80015e4c_1_80015df8, 0, 0)` then
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` with pending value and delay
+`(ushort at cfg+0x98) * 5 >> 3`. Sibling pattern to region `0x80030000`
+`per_link_vsc_fc95_lmp268_gateway_with_param_scaled_timeout` and
+`dual_pending_vsc_fc95_and_lmp268_gateway_with_config_timeout`.
+
+**Callers:** `FUN_800161e4` (CPB/page-receive setup — sets `cfg+0x84 |= 1` then
+calls with `param_1==1` after connection slot bind); `lmp_pdu_received_top_level_processor`.
+
+**Confidence:** HIGH — decompile confirms feature-bit gate, LMP-25B pre-dispatch,
+fc95+268 pair with config-derived scaled delay; caller context in CPB receive
+setup cross-confirmed with `HCI_Set_Connectionless_Peripheral_Broadcast_Receive`
+cluster documentation.
+
+Region unnamed count after this pass: **210** (211 minus this rename).
+
+**Next:** Pass 102 — cold-triage next rank-1 unnamed in region `0x80010000`.
