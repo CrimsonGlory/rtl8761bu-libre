@@ -1344,5 +1344,32 @@ in Passes 45–50; dedicated analysis doc exists; name persisted in Ghidra.
 Region unnamed count after this pass: **239** (240 minus this rename). Live named
 **1927** global.
 
-**Next:** Pass 52 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (`FUN_80039920`, 78B, 12 xref_in per Pass 51 list).
+**Next:** superseded by Pass 52.
+
+## Pass 52 (2026-07-01) — clamped byte offset helper `FUN_80039920`
+
+Fresh `ListUnnamed80030000.java` re-run: **239 unnamed** remain in region
+(unchanged from Pass 51).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039920` → `clamp_byte_offset_base_plus_adj_minus_product`**
+(78B, HIGH) via `RenamePass52Region80030000Fun80039920.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Signed-byte arithmetic helper using context struct at
+`PTR_DAT_80039970`: computes
+`(param_1 + ctx[1] + param_4 - param_3*param_2)` as a byte, then clamps to
+`[ctx[0xf], ctx[0x10]]` (min/max bounds). Used as a lookup-index / offset
+transform in the calibration-table cluster near `0x80039de4`.
+
+**Callers:** 12 xref_in (rank-1 by xref count); includes indirect dispatch via
+`calibration_table_populate_via_lookup_fptr` lookup fptr table.
+
+**Confidence:** HIGH — fully decompiled 78B utility; clear min/max clamp
+semantics; name persisted in Ghidra.
+
+Region unnamed count after this pass: **238** (239 minus this rename). Live named
+**1928** global.
+
+**Next:** Pass 53 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (`FUN_8003ce50`, 24B, 11 xref_in per Pass 52 list).
