@@ -12202,7 +12202,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 60;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 61: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 61 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (230 unnamed); decompiled+renamed rank-1
+          `FUN_80034e6c`→`log_role_switch_housekeeping_evt_0x330_if_no_patch3`
+          (38B, HIGH). Thin `possible_logger_called_if_no_patch3` stub tag
+          `0x330`; tail-call after role-switch/codec-type housekeeping
+          (`apply_codec_type_and_role_switch_hook_dispatch`,
+          `apply_public_bdaddr_role_change_commit_hci_evt_sync`); sibling of
+          Pass 60 `log_ogc3_config_apply_evt_0x4b6_if_no_patch3`.
+          229 unnamed remain; live named 1937.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 61;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 62: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

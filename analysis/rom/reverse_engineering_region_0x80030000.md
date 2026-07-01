@@ -1628,5 +1628,40 @@ confirmed via `OGC_3_OCF_45`/`OGC_3_OCF_49` decompile.
 Region unnamed count after this pass: **230** (231 minus this rename). Live named
 **1936** global.
 
-**Next:** Pass 61 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 61.
+
+## Pass 61 (2026-07-01) — role-switch housekeeping logger `FUN_80034e6c`
+
+Fresh `ListUnnamed80030000.java` re-run: **230 unnamed** remain in region
+(unchanged from Pass 60 pre-rename list; rank-1 was `FUN_80034e6c` at 38B,
+6 xref-in — sole remaining 6-xref tie member after Pass 60 renamed sibling
+`FUN_80034e98`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034e6c` → `log_role_switch_housekeeping_evt_0x330_if_no_patch3`**
+(38B, HIGH) via `RenamePass61Region80030000Fun80034e6c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin `possible_logger_called_if_no_patch3` tail-call stub with
+event tag `0x330`; context pointer from `PTR_DAT_80034e94`. Called after
+role-switch / codec-type housekeeping — notably
+`apply_codec_type_and_role_switch_hook_dispatch` (region `0x80000000`),
+`apply_public_bdaddr_role_change_commit_hci_evt_sync` (region `0x80040000`
+Pass 52go), and similar tails that emit role `0x35` via
+`apply_or_defer_conn_role_change_emit_hci_evt_sync`. Sibling of Pass 60's
+`log_ogc3_config_apply_evt_0x4b6_if_no_patch3` (same shape, tag `0x4b6`,
+OGC-3 config-apply cluster).
+
+**Callers:** 6 xref-in (rank-1 by xref count); role-switch housekeeping +
+indirect dispatch slots.
+
+**Confidence:** HIGH — fully decompiled 38B; logger-stub idiom matches
+documented `possible_logger_called_if_no_patch3` cluster; caller semantics
+confirmed via `apply_public_bdaddr_role_change_commit_hci_evt_sync` and
+`apply_codec_type_and_role_switch_hook_dispatch` decompile.
+
+Region unnamed count after this pass: **229** (230 minus this rename). Live named
+**1937** global.
+
+**Next:** Pass 62 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
