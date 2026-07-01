@@ -1118,4 +1118,29 @@ cross-region callers already document fast-poll semantics; completes the
 
 Region unnamed count after this pass: **244** (245 minus this rename).
 
-**Next:** Pass 7o — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7o (2026-07-01) — per-conn BB reg 0x1f0 halfword read `FUN_80014354`
+
+Pass 7o target from cold-triage rank-1 (9 xref_in, 80B). Decompiled and renamed:
+**`FUN_80014354` → `read_halfword_via_bb_reg_0x1f0_esco_slot_select_by_conn_index`**
+(80B, HIGH) via `RenamePass7oRegion80010000Fun80014354.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Per-connection halfword read primitive in the `0x800143xx` cluster
+(sibling of Pass 7m/7n fast-poll toggles). Takes conn-table index `param_1`
+(0–9); returns sentinel `0xbeef` when `param_1 >= 10`. Looks up
+`big_ol_struct[param_1]` for `bos_connection__array_index` and role byte
+`0xCC`, remaps via `remap_role_index_to_esco_slot_if_pending`, then programs
+BB register **0x1f0** via HW hook fptr `PTR_DAT_800143a8` with offset
+`(remapped_slot - 1) * 0x1000` (per-slot bank select). Returns cached halfword
+from `DAT_800143ac` (populated by the hook side effect).
+
+**Callers:** 9 xref_in (fresh `ListUnnamed80010000.java` rank-1 at Pass 7o
+list time); conn-indexed callers in packet-type/codec-table sync paths.
+
+**Confidence:** HIGH — decompile confirms esco-remap + 0x1f0 slot-bank select +
+cached halfword return; sentinel on out-of-range index; sits in established
+`0x800142xx`/`0x800143xx` BB-register helper cluster.
+
+Region unnamed count after this pass: **243** (244 minus this rename).
+
+**Next:** Pass 7p — cold-triage next rank-1 unnamed in region `0x80010000`.
