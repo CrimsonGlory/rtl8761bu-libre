@@ -1091,4 +1091,31 @@ cross-region callers already document fast-poll semantics.
 
 Region unnamed count after this pass: **245** (246 minus this rename).
 
-**Next:** Pass 7n — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7n (2026-07-01) — fast-poll BB reg 0x11c `FUN_800142f8`
+
+Pass 7n target from cold-triage rank-1 (10 xref_in, 82B). Decompiled and renamed:
+**`FUN_800142f8` → `apply_fast_poll_mode_bb_reg_0x11c_irq_gated`**
+(82B, HIGH) via `RenamePass7nRegion80010000Fun800142f8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-gated fast-poll mode toggle on baseband register **0x11c**
+(bit 7). IRQ-disables, reads saved halfword at `DAT_8001434c`; when
+`param_1==1`, ORs low byte with `0x80` (set bit 7); otherwise ANDs with
+`0x7f` (clear). Commits via HW programmer hook at `PTR_DAT_80014350`
+(`0x11c`, value). Pairs with sibling `apply_fast_poll_mode_bb_reg_0x298_irq_gated`
+on reg **0x298** — callers invoke both together as the documented fast-poll
+enable/disable sequence.
+
+**Callers:** 10 xref_in including `conn_packet_type_apply_and_codec_table_sync`,
+`ring_buffer_event_drain_dispatch_loop` (clears fast-poll on per-connection
+apply), `conn_index_status_bit_apply_and_log` (re-enables fast-poll after LMP
+procedure validation), and `page_response_timing_and_afh_update_counters`
+(calls with `0` when channel-active bitmask empties).
+
+**Confidence:** HIGH — decompile confirms IRQ-masked 0x11c bit-7 toggle;
+cross-region callers already document fast-poll semantics; completes the
+0x142xx fast-poll register pair started in Pass 7m.
+
+Region unnamed count after this pass: **244** (245 minus this rename).
+
+**Next:** Pass 7o — cold-triage next rank-1 unnamed in region `0x80010000`.

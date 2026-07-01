@@ -14523,8 +14523,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7m;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7n: cold-triage next rank-1
-          unnamed function in region `0x80010000` (245 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7n (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800142f8`→`apply_fast_poll_mode_bb_reg_0x11c_irq_gated`
+          (82B, HIGH). IRQ-gated fast-poll toggle on BB reg 0x11c (bit 7):
+          OR `0x80`/AND `0x7f` on `DAT_8001434c`; commits via `PTR_DAT_80014350`;
+          pairs with Pass 7m's `apply_fast_poll_mode_bb_reg_0x298_irq_gated` —
+          callers invoke both as fast-poll enable/disable sequence; 10 xref_in.
+          244 unnamed remain; live named 2180.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7n;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7o: cold-triage next rank-1
+          unnamed function in region `0x80010000` (244 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
