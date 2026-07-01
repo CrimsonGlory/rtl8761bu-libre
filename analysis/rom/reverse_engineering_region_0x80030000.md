@@ -7731,5 +7731,35 @@ scaled delta formula match documented TX-power init/adjust cluster.
 Region unnamed count after this pass: **42** (43 minus this rename). Live named
 **2124** global.
 
-**Next:** Pass 249 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 249.
+
+## Pass 249 (2026-07-01) — parallel slot table active-state init `FUN_8003d068`
+
+Fresh `ListUnnamed80030000.java` re-run: **42 unnamed** remain in region
+(unchanged from Pass 248; xref_in=0 tier dominates — rank-1 is `FUN_8003d068`
+at 100B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d068` → `init_parallel_slot_table_entry_active_state_from_dual_index`**
+(100B, HIGH) via
+`RenamePass249Region80030000Fun8003d068.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Parallel-slot-table entry initializer in the `0x8003d0`
+cluster (`PTR_DAT_8003d0cc`, 0x88-byte stride). `param_2` encodes dual
+indices: full low-16-bit index selects the primary slot (`+0x80..+0x82`
+active flags, `+0x78` cleared, `+0x7a` bit1 cleared, `+0x70`/`+0x74` counter
+handling); low-byte index selects a sub-slot (`+0x79` stores param low byte,
+`+0x7a` bit0 cleared, copies template dword from `+0x30` to `+0x7c`). Setup
+counterpart to Pass 68 `reset_parallel_slot_table_entry_tail_state_by_index`
+and Pass 88 `reset_slot_tail_and_hook_dispatch_status_upper_bits_if_idle`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 100B decompile; 0x88-stride field offsets and
+dual-index encoding match documented parallel-slot-table cluster.
+
+Region unnamed count after this pass: **41** (42 minus this rename). Live named
+**2125** global.
+
+**Next:** Pass 250 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
