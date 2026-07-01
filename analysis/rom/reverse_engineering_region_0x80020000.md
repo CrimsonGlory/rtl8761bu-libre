@@ -5760,4 +5760,36 @@ cluster.
 
 Region unnamed count after this pass: **147** (148 minus this rename). Live named **1774** global.
 
+**Next:** superseded by Pass 6 continuation (166).
+
+## Pass 6 continuation (166) (2026-07-01) — Boot init chain wrapper `FUN_8002a1dc`
+
+Decompiled and renamed:
+**`FUN_8002a1dc` → `boot_init_chain_string_user_baseband_and_subsystems`**
+(78B, HIGH) via `RenamePass6Region80020000Fun8002a1dc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (78B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=147` at pass start). Tied 78B cluster
+with `FUN_800225a8`; first-listed `FUN_8002a1dc`.
+
+**Mechanism:** Mid-level ROM boot-init chain wrapper invoked from the patch-installer
+fptr table. Sequential subsystem init: (1) `calls_interesting_string_user_FUN_80021c9c`
+(string-user registration + global struct init), (2)
+`copy_eight_literal_pool_globals_and_init_baseband_hw` (literal-pool staging +
+baseband MMIO from config), (3) unnamed `FUN_80037710`, (4) system BT init
+`FUN_800614fc`. Two config-gated optional hooks: when
+`config._x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ & 2`, calls
+`invoke_teardown_hook_triplet_with_lmp_power_gate`; when `config.field217_0xe4 & 2`,
+indirectly invokes fptr at `PTR_DAT_8002a230`. Tail call `FUN_80018c18`.
+
+**Callers:** `calls_to_0x8010a001_as_fptr_to_install_patches` (1 site at
+`0x80010a6c` — ROM patch-installer fptr table entry; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms ordered boot-init callee chain matching
+documented Pass 6 cont. (141) child `copy_eight_literal_pool_globals_and_init_baseband_hw`;
+config-flag gates align with `invoke_teardown_hook_triplet_with_lmp_power_gate` cluster;
+sole caller is established patch-installer fptr registration site.
+
+Region unnamed count after this pass: **146** (147 minus this rename). Live named **1775** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

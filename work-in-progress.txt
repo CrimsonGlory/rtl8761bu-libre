@@ -10730,8 +10730,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (165);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (166): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (147 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (166) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8002a1dc`→`boot_init_chain_string_user_baseband_and_subsystems`
+          (78B, HIGH). ROM boot-init chain: string-user registration →
+          literal-pool/baseband HW init → `FUN_80037710`/`FUN_800614fc` + config-gated
+          teardown/optional fptr hooks; caller
+          `calls_to_0x8010a001_as_fptr_to_install_patches`; xref_in=1.
+          146 unnamed remain; live named 1775.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (166);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (167): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (146 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
