@@ -7458,4 +7458,32 @@ pointers `PTR_DAT_8002ae48`/`PTR_DAT_8002ae4c` co-located with SCO descriptor cl
 
 Region unnamed count after this pass: **90** (91 minus this rename). Live named **1831** global.
 
+**Next:** superseded by Pass 6 continuation (223).
+
+## Pass 6 continuation (223) (2026-07-01) — ACL three-slot handle lookup `FUN_8002a234`
+
+Decompiled and renamed:
+**`FUN_8002a234` → `lookup_three_slot_0x34_acl_record_by_connection_handle`**
+(52B, HIGH) via `RenamePass6Region80020000Fun8002a234.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=90` at pass start). First-listed at 52B
+tier; successor to Pass 6 cont. (222)'s `FUN_8002ae14`.
+
+**Mechanism:** Maps connection handle `param_1` to one of three per-handle records by
+matching ushorts at `PTR_DAT_8002a268+0x18`/`+0x4c`/`+0x80` (standard 3-slot ×0x34 stride
+pattern). Returns `PTR_DAT_8002a26c + index×0x34` on match, NULL otherwise. Structurally
+identical to Pass 6 cont. (222)'s SCO-cluster `lookup_three_slot_0x34_record_by_connection_handle`
+but uses ACL reassembly literal-pool pointers; address-adjacent sibling of Pass 6 cont. (110)'s
+`drain_acl_reassembly_pending_ring_by_slot_and_release_buffers` at `0x8002a270`.
+
+**Callers:** none resolved (xref_in=0) — likely indirect or inlined at call sites not yet
+linked in Ghidra.
+
+**Confidence:** HIGH — decompile confirms identical idiom to documented 3-slot handle-lookup
+cluster; literal-pool pointers `PTR_DAT_8002a268`/`PTR_DAT_8002a26c` co-located with ACL
+reassembly pending-ring cluster at `0x8002a2xx`.
+
+Region unnamed count after this pass: **89** (90 minus this rename). Live named **1832** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -11230,8 +11230,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (222);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (223): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (90 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (223) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002a234`→
+          `lookup_three_slot_0x34_acl_record_by_connection_handle` (52B, HIGH).
+          ACL-cluster 3-slot ×0x34 per-handle record lookup at
+          `PTR_DAT_8002a268`/`PTR_DAT_8002a26c`; sibling of ACL reassembly
+          drainers; xref_in=0. 89 unnamed remain; live named 1832.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (223);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (224): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (89 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
