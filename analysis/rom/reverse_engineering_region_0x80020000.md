@@ -5384,4 +5384,31 @@ path and default link-type-mask disable branch with `+0x50=2`).
 
 Region unnamed count after this pass: **159** (160 minus this rename). Live named **1762** global.
 
+**Next:** superseded by Pass 6 continuation (154).
+
+## Pass 6 continuation (154) (2026-07-01) — dual curve-constant subtract `FUN_8002d378`
+
+Decompiled and renamed:
+**`FUN_8002d378` → `crypto_bignum_subtract_dual_curve_constants_by_key_size_index`**
+(88B, HIGH) via `RenamePass6Region80020000Fun8002d378.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (88B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=159` at pass start). First-listed at
+88B (tied cluster; first entry `FUN_8002d378`).
+
+**Mechanism:** SSP/ECDH curve-constant dispatcher — when key-size index `param_2 < 0x10`,
+copies two 16-byte constants from `PTR_DAT_8002d3d0`/`PTR_DAT_8002d3d4` tables at offset
+`(index−1)×0x10`, then applies `crypto_bignum_sub_u8_byte_arrays_in_place(dest, first, 0x10)`
+followed by `crypto_bignum_sub_u8_byte_arrays_to_dest(dest, second, 0x10)`. Tail step of
+`derive_encryption_key_material_safer_plus_mode6` (mode-6 SAFER+ key derivation).
+
+**Callers:** `derive_encryption_key_material_safer_plus_mode6` (`0x8002d3d8`) — passes
+derived key buffer as `param_1` and `crypto+0x23` key-size byte as `param_2`.
+
+**Confidence:** HIGH — decompile confirms indexed dual-table memcpy + documented bignum
+subtract siblings; sole caller already named in Pass 6 cont. (83); cross-references in
+Pass 6 cont. (39)/(41) now resolved.
+
+Region unnamed count after this pass: **158** (159 minus this rename). Live named **1763** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
