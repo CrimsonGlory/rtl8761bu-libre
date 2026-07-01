@@ -4837,5 +4837,40 @@ neighboring `0x8003a7xx` helpers.
 Region unnamed count after this pass: **133** (134 minus this rename). Live named
 **2033** global.
 
-**Next:** Pass 158 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 158.
+
+## Pass 158 (2026-07-01) — remote-name cleanup + LMP268 dispatch `FUN_800356bc`
+
+Fresh `ListUnnamed80030000.java` re-run: **133 unnamed** remain in region
+(unchanged from Pass 157; rank-1 at xref=1 tier is `FUN_800356bc` at 136B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800356bc` → `remote_name_feature_cleanup_and_lmp268_timer_dispatch`**
+(136B, HIGH, HANDLER-tier) via
+`RenamePass158Region80030000Fun800356bc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Internal message-type-105 handler in ROM `unknown_fptr_index0`
+dispatch (case 5 / raw type `0x69`). Optional prelude hook at `PTR_DAT_80035744`;
+clears status bytes at `PTR_DAT_80035748+0x96` and `+0x6c`; calls
+`remote_name_request_feature_apply_orchestrator()`. When global status bit `0x20`
+clear and config `LMP_POWER_REQ_RES_and_CLK_ADJ` bit2 set: conditionally invokes
+hook fptrs at `PTR_DAT_80035758`/`PTR_DAT_8003575c` when conn-record
+`field40_0x28`/`field68_0x44` bit0 set, and
+`merge_feature_page_bytes_into_conn_record_bitfields_0x44_0x49` when
+`PTR_DAT_80035760+0x34` bit0 set; then `FUN_80067cf0()`. Always finishes with
+`dispatch_lmp_268_timers_with_hook_and_config_gates()`. Sibling of
+`FUN_80035640` in the same `unknown_fptr_index0` switch case.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch via `unknown_fptr_index0` type-105 path (known pattern).
+
+**Confidence:** HIGH — full 136B decompile; named callees anchor remote-name
+feature-orchestrator and LMP-0x268 timer-dispatch paths; register-script /
+conn-record flag gating consistent with neighboring `0x80035xxx` cluster.
+
+Region unnamed count after this pass: **132** (133 minus this rename). Live named
+**2034** global.
+
+**Next:** Pass 159 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

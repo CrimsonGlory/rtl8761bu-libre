@@ -13144,7 +13144,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 157;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 158: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 158 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800356bc`→`remote_name_feature_cleanup_and_lmp268_timer_dispatch`
+          (136B, HIGH, HANDLER-tier). Internal msg-type-105 handler: clears
+          status bytes, `remote_name_request_feature_apply_orchestrator`, gated
+          conn-record feature cleanup, `dispatch_lmp_268_timers_with_hook_and_config_gates`;
+          caller `unknown_fptr_index0` type-105 via fptr. Region 132 unnamed
+          remain; live named 2034.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 158;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 159: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
