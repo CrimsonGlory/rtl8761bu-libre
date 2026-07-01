@@ -4124,4 +4124,33 @@ single named VSC-dispatcher caller pins role.
 
 Region unnamed count after this pass: **200** (201 minus this rename). Live named **1721** global.
 
+**Next:** superseded by Pass 6 continuation (113).
+
+## Pass 6 continuation (113) (2026-07-01) — LMP COMB_KEY sender `FUN_80025524`
+
+Decompiled and renamed:
+**`FUN_80025524` → `derive_comb_key_xor_and_send_lmp_0x09`**
+(114B, HIGH) via `RenamePass6Region80020000Fun80025524.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (114B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=200` at pass start). First-listed at
+114B (next tied cluster at 112B).
+
+**Mechanism:** Outbound LMP COMB_KEY (opcode **0x09**) builder/sender — outbound
+counterpart to inbound `FUN_800254b0`/`update_crypto_struct_key_material_xor_or_copy_by_type`
+cluster documented in Pass 6 cont. (74). Primes 16B key material via `FUN_8002c838`,
+clears `big_ol_struct[slot].field_0x2b2`, mixes BD_ADDR via `FUN_8002cfac` from crypto
+`+0xa9`, XOR-combines payload with existing 16B block at crypto `+0x51`, then sends
+18-byte LMP (`0x12`) via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+
+**Callers:** `FUN_800255a0` (pairing continuation) at `0x800255cc` and
+`FUN_800255fc` at `0x8002561e` — confirmed via `ListXrefsTo80025524.java`.
+
+**Confidence:** HIGH — opcode 0x09 + 16B XOR with `+0x51` + `FUN_8002cfac` BD_ADDR mix
+mirror the inbound COMB_KEY receive path; send wrapper and `derive_au_rand_and_send_lmp_0x0b`
+sibling pattern; callers sit in documented pairing-continuation cluster (`handle_lmp_comb_key_not_accepted`
+cites `FUN_800255a0`).
+
+Region unnamed count after this pass: **199** (200 minus this rename). Live named **1722** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
