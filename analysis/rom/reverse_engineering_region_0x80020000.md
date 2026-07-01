@@ -5907,4 +5907,33 @@ Pass 6 cont. (159)/(16); 0x17 stride and `+0x16` active gate match link-key stor
 
 Region unnamed count after this pass: **142** (143 minus this rename). Live named **1779** global.
 
+**Next:** superseded by Pass 6 continuation (171).
+
+## Pass 6 continuation (171) (2026-07-01) — patch-install bootstrap globals logger `FUN_8002b1a4`
+
+Decompiled and renamed:
+**`FUN_8002b1a4` → `log_patch_install_bootstrap_globals_ten_fields`**
+(74B, HIGH) via `RenamePass6Region80020000Fun8002b1a4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=142` at pass start). First-listed
+`FUN_8002b1a4` in the 74B cluster.
+
+**Mechanism:** Pure diagnostic logging wrapper in the patch-download bootstrap path.
+Calls `possible_logging_function__var_args(2, 0x1d, 0x5d, &DAT_000016a9, 10, …)` with
+ten mixed byte/dword fields read from the bootstrap globals block at `PTR_DAT_8002b1f4`
+(alias of `PTR_DAT_80010d84`–`PTR_PTR_80010da4` in the patch-installer literal pool).
+Immediately preceded in the caller by a sibling log using `&DAT_000016a8`; caller clears
+all nine bootstrap globals to zero/`0xff`/`0xffff` right after this call.
+
+**Caller:** `calls_to_0x8010a001_as_fptr_to_install_patches` at `0x80010be4` — gated on
+`DAT_80010d54` bit2 set, bit4 clear, bit0x20 set (patch-download path without full patch
+load). xref_in=1 via `ListXrefsTo8002b1a4.java`.
+
+**Confidence:** HIGH — decompile confirms pure varargs logger with no other side effects;
+caller context pins role as patch-install bootstrap-state diagnostic snapshot; sole caller
+is established patch-entry invocation chain documented in `reverse_engineering_boot_reset_sequence.md`.
+
+Region unnamed count after this pass: **141** (142 minus this rename). Live named **1780** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
