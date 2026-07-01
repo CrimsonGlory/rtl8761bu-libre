@@ -3055,5 +3055,35 @@ role-switch paths confirmed via caller decompile.
 Region unnamed count after this pass: **186** (187 minus this rename). Live named
 **1980** global.
 
-**Next:** Pass 105 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 105.
+
+## Pass 105 (2026-07-01) — role-slot state logger `FUN_8003d490`
+
+Fresh `ListUnnamed80030000.java` re-run: **186 unnamed** remain in region
+(unchanged from Pass 104; rank-1 by size at xref=2 tier is `FUN_8003d490` at
+96B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d490` → `log_role_slot_state_evt_0x2c5_when_not_role_switch`**
+(96B, HIGH, HANDLER-tier) via `RenamePass105Region80030000Fun8003d490.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook veto at `PTR_DAT_8003d4f0` — when absent or
+returns zero, checks per-role-slot connection struct (`0x28` stride,
+`PTR_some_connection_struct_array_8003d4f4`): requires `field_0x24 != 0x02`
+(not in role-switch state) and `field_0x23 != 0`; then logs via
+`possible_logger_called_if_no_patch3` with opcode `0x2c5` (709).
+
+**Callers:** 2 xref-in — `status_bit_gated_role_state_logger_dispatch` (region
+`0x80000000`, passes role-state code 0/1/2 with subcode 2) and
+`link_status_bit_dispatch_for_role_state_notify` (region `0x80000000`, same
+leaf after status-word bit classification).
+
+**Confidence:** HIGH — full 96B decompile; hook-veto + dual-field gate matches
+documented role-switch logging cluster; both callers confirmed via decompile.
+
+Region unnamed count after this pass: **185** (186 minus this rename). Live named
+**1981** global.
+
+**Next:** Pass 106 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
