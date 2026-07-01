@@ -1166,7 +1166,7 @@ alongside those two — used for scripted BB register poll/read steps.
 
 **Callers (6 computed xrefs):** `FUN_8003aea0` (register-script interpreter),
 `AFH_channel_map_hw_register_programmer`, `packet_type_to_hw_code_translator_4link`,
-`multi-VSC_Handler_FUN_80032540`, `FUN_80039c98`, patch `FUN_8010fcac`.
+`multi-VSC_Handler_FUN_80032540`, `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`, patch `FUN_8010fcac`.
 
 **Confidence:** HIGH — clear IRQ-masked MMIO index-select + low-word readback idiom;
 hook/default split matches documented `FUN_8003c608` write primitive; register-script
@@ -2393,9 +2393,10 @@ function-pointer hooks at `PTR_DAT_80039bfc` then `PTR_DAT_80039c00` with
 `compute_tx_power_delta_from_global_baselines` and the `FUN_80039844`/
 `FUN_80039c08` init/adjust pair.
 
-**Callers:** 3 xref-in via computed call — `FUN_80039c98` (TX-power mode-change
-notifier), `conn_field_swap_and_notify_dispatcher_3_4` (conn-field swap on
-opcode 3/4), `init_connection_record`.
+**Callers:** 3 xref-in via computed call —
+`apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links` (TX-power
+mode-change notifier), `conn_field_swap_and_notify_dispatcher_3_4` (conn-field
+swap on opcode 3/4), `init_connection_record`.
 
 **Confidence:** HIGH — full 118B decompile; dual-offset byte selection and
 sequential dual-fptr dispatch unambiguous; caller context in TX-power/conn-setup
@@ -3861,5 +3862,41 @@ gating match documented boot-init cluster; callees
 Region unnamed count after this pass: **162** (163 minus this rename). Live named
 **2004** global.
 
-**Next:** Pass 129 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 129.
+
+## Pass 129 (2026-07-01) — `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`
+
+Fresh `ListUnnamed80030000.java` re-run: **162 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_80039c98` at 264B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039c98` → `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`**
+(264B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass129Region80030000Fun80039c98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** TX-power runtime mode-byte change notifier in the
+`PTR_DAT_80039da0` config cluster. When diagnostic bit 2 of `+0x36` is set,
+logs mode byte, prior `+0x13` value, and hook sample via
+`possible_logging_function__var_args`. On `param_1 != +0x13`, stores new mode
+byte and invokes four sequential fptr hooks (`PTR_PTR_80039db0`,
+`PTR_DAT_80039db4(param_1)`, `PTR_DAT_80039db8`, optional `PTR_DAT_80039dbc`),
+then runs `dispatch_be_u16_pairs_reverse_step2_from_buf_via_fptr_hook` on three
+calibration-table buffers (`0x136`/`0x1bc`/`0x1c4` byte counts), copies three
+u16 globals from `+0x33`/`+0x30`/`+0x2e`, and walks slots `0..0xa` of the
+`0x1ac` connection array — for each active link (bit0 of `field3_0x3`), invokes
+per-link fptr hooks at `PTR_DAT_80039ddc`/`PTR_DAT_80039de0`. Sibling/caller of
+Pass 83's `dispatch_tx_power_config_byte_0x2c_or_0x2d_via_dual_fptr_hooks`.
+
+**Callers:** 1 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch gap).
+
+**Confidence:** HIGH — full 264B decompile; mode-byte gate at `+0x13`,
+calibration-table dispatch trio, and per-active-link propagation match
+documented TX-power runtime-config cluster.
+
+Region unnamed count after this pass: **161** (162 minus this rename). Live named
+**2005** global.
+
+**Next:** Pass 130 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

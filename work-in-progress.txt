@@ -12870,7 +12870,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 128;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 129: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 129 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (162 unnamed); decompiled+renamed rank-1
+          `FUN_80039c98`→`apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`
+          (264B, HIGH, HANDLER-tier). TX-power runtime mode-byte change notifier:
+          on `param_1 != PTR_DAT_80039da0[+0x13]`, invokes fptr hooks, runs
+          `dispatch_be_u16_pairs_reverse_step2_from_buf_via_fptr_hook` on three
+          calibration buffers, copies u16 globals, walks active `0x1ac` links.
+          1 xref-in (indirect fptr gap). 161 unnamed remain; live named 2005.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 129;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 130: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
