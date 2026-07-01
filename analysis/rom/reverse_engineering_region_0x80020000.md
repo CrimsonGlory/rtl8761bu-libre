@@ -4096,4 +4096,32 @@ atomically set the bitmask bit; returns 1/0.
 
 Region unnamed count after this pass: **201** (202 minus this rename). Live named **1720** global.
 
+**Next:** superseded by Pass 6 continuation (112).
+
+## Pass 6 continuation (112) (2026-07-01) — VSC config 0x4000-bit toggle `FUN_8002ffc4`
+
+Decompiled and renamed:
+**`FUN_8002ffc4` → `vsc_toggle_config_d0_bit_0x4000_and_field132_by_enable`**
+(116B, HIGH) via `RenamePass6Region80020000Fun8002ffc4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (116B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=201` at pass start). First-listed after
+Pass 111 cleared the tied `FUN_8002b920` entry.
+
+**Mechanism:** IRQ-safe VSC sub-handler validating cmd bytes `param_1+2==1` and
+`param_1+3<2` (enable flag 0/1). On success toggles config word at `config_base+0xd0/d1`
+bit **0x4000** (`|=` when enable, `&= 0xbfff` when disable) and sets `field132` to
+**0xfb** (enable) or **0xff** (disable). Returns 0 on success, **0x12** (Invalid HCI
+Command Parameters) on validation failure.
+
+**Callers:** `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` at `0x800319de` — sole
+VSC vendor-path dispatch; confirmed via `ListXrefsTo8002ffc4.java`.
+
+**Confidence:** HIGH — unambiguous config-bit toggle idiom matching documented
+`write_bb_regs_0x212_quad_toggle_0x4000_bit_via_patch_hook` cluster; `field132`
+0xfb/0xff pattern matches HCI-reset `hci_reset_invoke_ogc3_ocf1_zero_params_and_clear_global_bit2`;
+single named VSC-dispatcher caller pins role.
+
+Region unnamed count after this pass: **200** (201 minus this rename). Live named **1721** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
