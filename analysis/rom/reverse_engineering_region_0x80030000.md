@@ -3719,5 +3719,36 @@ inputs match Pass 67 caller analysis.
 Region unnamed count after this pass: **166** (167 minus this rename). Live named
 **2000** global.
 
-**Next:** Pass 125 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 125.
+
+## Pass 125 (2026-07-01) — `dispatch_acl_fragment_with_per_conn_reassembly_flags`
+
+Fresh `ListUnnamed80030000.java` re-run: **166 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003d354` at 292B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d354` → `dispatch_acl_fragment_with_per_conn_reassembly_flags`**
+(292B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass125Region80030000Fun8003d354.java` (`renamed=1`, live-verified).
+
+**Mechanism:** ACL fragment reassembly state dispatcher on per-conn 0x88-stride
+table (`PTR_DAT_8003d47c`). Optional veto hooks at `PTR_DAT_8003d478`/`480`/
+`484`/`488`/`48c`. Skips when slot byte `+0x18==1`. Manages per-conn reassembly
+flags at `+0x83` (pending) and `+0x84` (continuation armed); branches on
+fragment opcode `param_2` (`0xffff` flush/complete vs low-byte start vs high-byte
+continuation) and dispatches to `hci_acl_data_fragment_assembler_and_enqueue`
+with fragment modes 1 (start) or 2 (complete/abort).
+
+**Callers:** 1 xref-in — `LC_event_RX_dispatcher` at `0x80042262` (LC RX ACL
+fragment path; sibling caller of `hci_acl_data_fragment_assembler_and_enqueue` per
+Pass 6 cont. 3 in region `0x80020000`).
+
+**Confidence:** HIGH — full 292B decompile; callee `hci_acl_data_fragment_assembler_and_enqueue`
+already HIGH-named; per-conn flag semantics match documented ACL reassembly cluster.
+
+Region unnamed count after this pass: **165** (166 minus this rename). Live named
+**2001** global.
+
+**Next:** Pass 126 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
