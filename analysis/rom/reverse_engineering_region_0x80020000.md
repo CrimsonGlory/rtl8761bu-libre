@@ -6583,4 +6583,34 @@ init after bulk defaults programmed.
 
 Region unnamed count after this pass: **119** (120 minus this rename). Live named **1802** global.
 
+**Next:** superseded by Pass 6 continuation (194).
+
+## Pass 6 continuation (194) (2026-07-01) — bulk packet-slot flush check `FUN_800219a4`
+
+Decompiled and renamed:
+**`FUN_800219a4` → `flush_check_seven_packet_slots_via_call_fptr_if_set_wraps_packet_slot_flush_check`**
+(66B, HIGH) via `RenamePass6Region80020000Fun800219a4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=119` at pass start). First-listed at
+66B/xref_in=1 after Pass 6 cont. (193)'s `clear_connection_slot_supervision_timing_counters`.
+
+**Mechanism:** Boot/init bulk flush-check fan-out: sequentially invokes
+`call_fptr_if_set_wraps_packet_slot_flush_check` on seven consecutive global data-pointer
+slots `PTR_DAT_800219e8` … `PTR_DAT_80021a00` (4-byte stride). Each call optionally
+dispatches a registered hook at `PTR_DAT_8000998c` or falls back to
+`flush_check_packet_slot` (documented in region `0x80000000`). Structural sibling of
+`init_eleven_pool_slots_via_call_fptr_if_set_wraps_pool_slot_init_and_zero` (Pass 6 cont.
+136) in the same `0x800219xx`–`0x80021axx` init cluster.
+
+**Callers:** sole direct caller at `0x80021a9e` per `ListXrefsTo800219a4.java` — boot init
+neighborhood between pool-slot init (`0x80021a04`) and string-user registration
+(`0x80021ab0`). xref_in=1.
+
+**Confidence:** HIGH — unambiguous seven-iteration unrolled loop over named callee with no
+branches; literal-pool pointer table immediately follows function body; matches established
+packet-slot flush-check wrapper idiom.
+
+Region unnamed count after this pass: **118** (119 minus this rename). Live named **1803** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
