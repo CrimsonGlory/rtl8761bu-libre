@@ -7363,5 +7363,33 @@ channel-init staging clear; cluster placement beside Pass 159/43 siblings.
 Region unnamed count after this pass: **53** (54 minus this rename). Live named
 **2113** global.
 
-**Next:** Pass 238 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 238.
+
+## Pass 238 (2026-07-01) — LC TX dispatch return-zero stub `FUN_80033164`
+
+Fresh `ListUnnamed80030000.java` re-run: **53 unnamed** remain in region
+(unchanged from Pass 237; rank-1 at xref=1 tier is `FUN_80033164` at 4B —
+largest among tied xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033164` → `stub_return_zero_for_LC_event_TX_dispatcher`**
+(4B, HIGH, SIMPLE-tier) via
+`RenamePass238Region80030000Fun80033164.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial `return 0` stub in the `0x800331xx` LMP-path cluster
+adjacent to `calls_fptr_down_LMP__47E_path` (`0x80033188`). Serves as the
+default success/no-op handler slot invoked from the LC-layer TX event
+multiplexer.
+
+**Callers:** 1 xref-in — `LC_event_TX_dispatcher` at `0x800424a6`
+(region `0x80040000` LC TX dispatch cluster).
+
+**Confidence:** HIGH — full 4B decompile; caller context unambiguous LC TX
+dispatch integration; naming pattern matches sibling return-zero stubs
+(`esco_link_setup_gate_default_return_zero`, `stub_return_zero_link_key_lookup_cluster_gap`).
+
+Region unnamed count after this pass: **52** (53 minus this rename). Live named
+**2114** global.
+
+**Next:** Pass 239 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
