@@ -8067,5 +8067,34 @@ threshold clamp to `0xffff` unambiguous.
 Region unnamed count after this pass: **31** (32 minus this rename). Live named
 **2135** global.
 
-**Next:** Pass 260 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 260.
+
+## Pass 260 (2026-07-01) — int64 bit-extract helper `FUN_80038c54`
+
+Fresh `ListUnnamed80030000.java` re-run: **31 unnamed** remain in region
+(unchanged from Pass 259; xref_in=0 tier dominates — rank-1 is `FUN_80038c54`
+at 64B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038c54` → `extract_int64_halves_shifted_short_at_bit_offset`**
+(64B, HIGH, UTILITY-tier) via
+`RenamePass260Region80030000Fun80038c54.java` (`renamed=1`, live-verified).
+
+**Mechanism:** MIPS16e 64-bit-emulation bit-extract primitive in the
+`0x80038cxx` cluster (address-adjacent sibling of Pass 64's
+`compute_int64_halves_signed_shift_width`). Given `halves[2]` (low dword +
+sign-extension byte at `+4`) and bit offset `param_2 & 0xff`, extracts a
+signed 16-bit window: offset `<0x11` left-shifts low dword; `0x11..0x20`
+right-shifts low dword; `≥0x21` combines sign-byte left-shift with low-dword
+right-shift. Pure compiler-support primitive — no protocol-specific meaning.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 64B decompile; three-way offset branching and
+`int64_halves` representation match sibling `compute_int64_halves_signed_shift_width`.
+
+Region unnamed count after this pass: **30** (31 minus this rename). Live named
+**2136** global.
+
+**Next:** Pass 261 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
