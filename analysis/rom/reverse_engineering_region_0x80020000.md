@@ -7892,4 +7892,31 @@ at `0x800242dc` (Pass 6 cont. 218).
 
 Region unnamed count after this pass: **75** (76 minus this rename). Live named **1846** global.
 
+**Next:** superseded by Pass 6 continuation (238).
+
+## Pass 6 continuation (238) (2026-07-01) — VSC config bit-3 setter `FUN_8002fa64`
+
+Decompiled and renamed:
+**`FUN_8002fa64` → `set_config_byte_bit3_from_enable_byte`**
+(44B, HIGH) via `RenamePass6Region80020000Fun8002fa64.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=75` at pass start). First-listed in tied
+44B tier ahead of `FUN_8002fa34` (bit 2) and `FUN_80024400`; sibling deferred from Pass 6
+cont. (186)/(202) bit-setter cluster documentation.
+
+**Mechanism:** VSC config flag setter: when `param_2==1`, mirrors enable byte `*param_1`
+into bit 3 of config struct byte `PTR_PTR_8002fa90+8` (`puVar1[8] = puVar1[8] & 0xf7 |
+(*param_1 != '\0') << 3`). Returns `0x12` on bad params, `0` on success. Same idiom as
+siblings `set_config_byte_bit4_and_status_word_bit15_from_enable_byte` (bit 4),
+`set_config_byte_bits0_and_1_from_enable_pair` (bits 0–1), and pending `FUN_8002fa34`
+(bit 2).
+
+**Callers:** none found (xref_in=0) — indirect VSC handler table dispatch like cluster peers.
+
+**Confidence:** HIGH — decompile confirms minimal bit-setter idiom matching documented
+`0x8002f9xx` VSC config cluster; naming pattern consistent with Pass 6 cont. (186)/(202).
+
+Region unnamed count after this pass: **74** (75 minus this rename). Live named **1847** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
