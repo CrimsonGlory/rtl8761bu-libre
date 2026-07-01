@@ -5778,5 +5778,36 @@ documented LC TX opcode table; caller and callee chain confirmed via
 Region unnamed count after this pass: **104** (105 minus this rename). Live named
 **2062** global.
 
-**Next:** Pass 187 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 187.
+
+## Pass 187 (2026-07-01) — TX power byte getter `FUN_8003b1d0`
+
+Fresh `ListUnnamed80030000.java` re-run: **104 unnamed** remain in region
+(unchanged from Pass 186; rank-1 by size at xref=1 tier is `FUN_8003b1d0` at
+72B, tied with `FUN_8003845c` — first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b1d0` → `get_tx_power_byte_from_config_field453_plus_channel_or_hook`**
+(72B, HIGH, UTILITY-tier) via
+`RenamePass187Region80030000Fun8003b1d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** TX-power byte getter with optional hook override. When fptr at
+`PTR_DAT_8003b218` is null, computes
+`config.field453_0x1d1 + 0x5a + (param_1 & 0xff) * 2` and clamps to signed
+8-bit `[-128,127]` before return; when hook present, calls `hook(0)` instead.
+TX-power cluster sibling of `compute_clamped_tx_power_level_from_link_class_baselines`
+(Pass 162) and `return_RSSI_value` (config-formula + hook-override idiom).
+
+**Callers:** 1 xref-in — `LMP_CH__0x3ea__FUN_800656bc` at `0x800656ee` (region
+`0x80060000`, LMP channel sub-opcode `0x3ea` handler per
+`assoc_w_tLMP_CH` dispatch table).
+
+**Confidence:** HIGH — full 72B decompile; `config.field453_0x1d1` reuse and
+hook-override pattern match documented TX-power cluster; sole caller confirmed
+via `ListXrefsTo8003b1d0`.
+
+Region unnamed count after this pass: **103** (104 minus this rename). Live named
+**2063** global.
+
+**Next:** Pass 188 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
