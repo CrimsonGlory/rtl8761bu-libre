@@ -4403,4 +4403,35 @@ prior Pass 6 cont. (49)/(54) caller documentation aligns with slot-reuse/teardow
 
 Region unnamed count after this pass: **191** (192 minus this rename). Live named **1730** global.
 
+**Next:** superseded by Pass 6 continuation (122).
+
+## Pass 6 continuation (122) (2026-07-01) — connection-slot LMP PDU reset `FUN_80021dcc`
+
+Decompiled and renamed:
+**`FUN_80021dcc` → `clear_connection_slot_lmp_pdu_and_pending_fields`**
+(108B, HIGH) via `RenamePass6Region80020000Fun80021dcc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (108B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=191` at pass start). Tied largest size tier;
+highest xref_in at 108B (siblings `FUN_8002ad30`/`FUN_80027b28`/`FUN_80023bdc` each xref_in=1).
+
+**Mechanism:** Per-connection-slot (`param_1 & 0xffff`) state scrub on
+`PTR_big_ol_struct_80021e38[slot]`. Clears timer dword `field_0x48` to `0xffffffff`, zeroes
+word fields `field_0xa0`/`field_0xa2`, LMP PDU buffer bytes `field_0x212`–`field_0x215`/
+`field_0x213`/`field_0x214`/`field_0x243`/`field_0x219`, and timing bytes
+`field_0x216`/`field_0x217`/`field_0x218`. Loop clears two 10-entry pending-state byte
+arrays in `_x101_remote_name_buf_248_` at offsets `+0x123` (to `0xff`) and `+0x137` (to `0`).
+Sets `field_0x242=0` and `int_0x50=-1`.
+
+**Callers:** Documented callee of `LMP_role_switch_completion_handler` (`0x80070084`,
+region `0x80070000`) post role-switch HCI/LMP event dispatch — clears per-slot LMP PDU
+and pending-queue state before AFH/BLE sync (`VSC_0xfc95`) and eSCO allocator checks.
+ListUnnamed reports xref_in=2 (second caller not resolved this pass).
+
+**Confidence:** HIGH — decompile confirms `big_ol_struct` indexed slot scrub with
+LMP-buffer offset cluster matching role-switch completion handler documentation; no
+ambiguous control flow.
+
+Region unnamed count after this pass: **190** (191 minus this rename). Live named **1731** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
