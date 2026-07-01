@@ -8833,4 +8833,33 @@ caller in documented BT cold-init orchestrator alongside sibling
 
 Region unnamed count after this pass: **42** (43 minus this rename). Live named **1879** global.
 
+**Next:** superseded by Pass 6 continuation (271).
+
+## Pass 6 continuation (271) (2026-07-01) — global status flag setter `FUN_80021cd4`
+
+Decompiled and renamed:
+**`FUN_80021cd4` → `set_global_status_bit7_and_bit3_on_four_slots`**
+(34B, HIGH) via `RenamePass6Region80020000Fun80021cd4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (34B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=42` at pass start). First-listed of
+the tied 34B/xref_in=1 cluster after Pass 6 cont. (270) renamed `FUN_80021ea0`.
+
+**Mechanism:** Global status-flag setter (enable path). Four-iteration loop ORs
+`0x80` (bit7) on status byte at `PTR_DAT_80021cf8` and `0x08` (bit3) on status
+byte at `PTR_DAT_80021cfc` — inverse pattern to sibling `FUN_80021cb8` (clears
+bit3 on four status bytes at `PTR_DAT_80021cd0` during crypto/link-key reset in
+`reset_all_connection_crypto_slots_and_link_key_table`, Pass 6 cont. 120). Invoked
+from HCI handler `FUN_8001f908` (region `0x80010000`) when mode byte at
+`param+3 == 1`; else branch calls `FUN_80021cb8` (clear path). Handler stores mode
+byte at `PTR_DAT_8001f948[0xb8]` after gating on `the_0x300` struct state.
+
+**Caller:** `FUN_8001f908` at `0x8001f92a` (xref_in=1, confirmed via
+`ListXrefsTo80021cd4.java`).
+
+**Confidence:** HIGH — decompile confirms unambiguous 4× dual-flag OR loop;
+single caller with explicit enable/disable toggle vs sibling clear function.
+
+Region unnamed count after this pass: **41** (42 minus this rename). Live named **1880** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
