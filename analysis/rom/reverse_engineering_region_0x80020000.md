@@ -5668,4 +5668,35 @@ sole caller is established `LMP_NOT_ACCEPTED_0x04` dispatcher; crypto sub-states
 
 Region unnamed count after this pass: **150** (151 minus this rename). Live named **1771** global.
 
+**Next:** superseded by Pass 6 continuation (163).
+
+## Pass 6 continuation (163) (2026-07-01) — SSP numeric-comparison confirm dispatcher `FUN_80025fb4`
+
+Decompiled and renamed:
+**`FUN_80025fb4` → `dispatch_ssp_numeric_comparison_confirm_and_arm_state`**
+(82B, HIGH) via `RenamePass6Region80020000Fun80025fb4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (82B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=150` at pass start). First-listed
+`FUN_80025fb4` in the 82B cluster. Sibling of passkey/OOB dispatchers from
+`dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` (Pass 6 cont. 30/69/106);
+mechanism pre-documented at Pass 6 cont. (79) caller xref for
+`derive_simple_pairing_confirm_and_send_lmp_0x3f`.
+
+**Mechanism:** SSP numeric-comparison / JustWorks pairing-method path (IO-cap
+classifier result `0`). Clears crypto pending via `FUN_80025f7c`, then branches on
+`crypto+0x50`: when `== 1` arms SSP sub-state `0x2a` via `set_arg1_1_to_arg2`;
+otherwise sends LMP Simple Pairing Confirm (`0x3f`) through
+`derive_simple_pairing_confirm_and_send_lmp_0x3f` and arms sub-state `0x2f`.
+
+**Callers:** `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` (1 site,
+numeric-comparison classifier branch; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms established SSP pairing-method dispatch
+idiom matching siblings `dispatch_ssp_user_passkey_request_or_notification` and
+`dispatch_ssp_remote_oob_data_request_hci`; LMP 0x3f confirm sender and
+`set_arg1_1_to_arg2` arming pattern match Pass 6 cont. (79) pre-analysis.
+
+Region unnamed count after this pass: **149** (150 minus this rename). Live named **1772** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
