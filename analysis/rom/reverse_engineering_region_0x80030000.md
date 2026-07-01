@@ -2699,7 +2699,7 @@ calls `init_or_clear_sco_hw_channel_subsystem(0)`,
 callees; sets BB reg `0x11c` with `0x800` bit via `DAT_80037708`; optional
 post-hook at `PTR_PTR_8003770c`.
 
-**Callers:** `fHCI_Reset_0x03_full_subsystem_teardown` + `FUN_80037710`
+**Callers:** `fHCI_Reset_0x03_full_subsystem_teardown` + `boot_init_reset_conn_sco_hw_optional_fc95_and_descriptor_reinit`
 (3 call sites via `find_callers`).
 
 **Confidence:** HIGH — full 250B decompile; SCO channel-init cluster and HCI
@@ -5102,5 +5102,40 @@ range unambiguous.
 Region unnamed count after this pass: **125** (126 minus this rename). Live named
 **2041** global.
 
-**Next:** Pass 166 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (likely `FUN_80037710`, 114B at xref=1).
+**Next:** superseded by Pass 166.
+
+## Pass 166 (2026-07-01) — Boot-init subsystem reset `FUN_80037710`
+
+Fresh `ListUnnamed80030000.java` re-run: **125 unnamed** remain in region
+(unchanged from Pass 165; rank-1 at xref=1 tier is `FUN_80037710` at 114B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037710` → `boot_init_reset_conn_sco_hw_optional_fc95_and_descriptor_reinit`**
+(114B, HIGH, HANDLER-tier) via
+`RenamePass166Region80030000Fun80037710.java` (`renamed=1`, live-verified).
+
+**Mechanism:** ROM boot-init subsystem reset orchestrator (parallel to HCI Reset
+teardown sub-steps): clears global status bit `0x400`, resets connection subsystem
+via `reset_conn_subsystem_global_state_and_reinit_slot_entries`, runs
+`hw_register_config_with_timeout(0)` and `dispatch_bb_register_da_d6_write_with_hook`,
+optionally calls `FUN_80062368` when config
+`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit0 set (counter-derived slot table),
+draws PRNG via `lcg_prng_bounded_modulo(0x3ff)` and when pending-VSC sentinel
+`PTR_DAT_80037788 == -1` issues `VSC_0xfc95_called2` (returns `0xff` on failure),
+then chains `hci_reset_reinit_conn_subsystem_lmp_and_descriptor_tables` and
+`init_sco_hw_channel_8plus4_slot_program_and_bb_regs`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `find_callers` empty —
+indirect invocation from `boot_init_chain_string_user_baseband_and_subsystems`
+(documented in region `0x80020000` Pass 6 cont. 166).
+
+**Confidence:** HIGH — full 114B decompile; named conn-subsystem/SCO-HW/descriptor
+callees anchor the boot-init reset role; sibling of Pass 93 SCO init and Pass 113
+HCI Reset reinit orchestrator.
+
+Region unnamed count after this pass: **124** (125 minus this rename). Live named
+**2042** global.
+
+**Next:** Pass 167 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (likely `FUN_80033670`, 112B at xref=1).
