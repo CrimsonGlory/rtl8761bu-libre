@@ -9845,4 +9845,32 @@ documented encryption opcode dispatcher.
 
 Region unnamed count after this pass: **7** (8 minus this rename). Live named **1914** global.
 
+**Next:** superseded by Pass 6 continuation (306).
+
+## Pass 6 continuation (306) (2026-07-01) — crypto encryption-state table lookup B `FUN_80024004`
+
+Decompiled and renamed:
+**`FUN_80024004` → `lookup_crypto_encryption_state_0x14_0x1f_flag_b`**
+(24B, HIGH) via `RenamePass6Region80020000Fun80024004.java` (`renamed=1`, live-verified).
+
+**Triage note:** All 7 remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_80024004` (24B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=7` at pass start). Sits in the
+`0x800240xx` encryption validation cluster as the alternate-table sibling of Pass 6 cont. (285)'s
+`lookup_crypto_encryption_state_0x14_0x1f_flag` at `0x80024020` (table `PTR_DAT_80024038`).
+
+**Mechanism:** Reads crypto struct byte at offset **0** (`*param_1`); computes index
+`(byte - 0x14) & 0xff`. When index `< 0x0c` (states **0x14–0x1F**), returns flag byte from
+12-entry table `PTR_DAT_8002401c[index]` (literal pool immediately following function body);
+otherwise returns **0**. Structurally identical to `lookup_crypto_encryption_state_0x14_0x1f_flag`
+but uses a distinct adjacent table — likely a reserved/duplicate lookup slot or compile-time
+table variant in the encryption key-program cluster.
+
+**Callers:** none (xref_in=0; `find_callers` returned zero call sites).
+
+**Confidence:** HIGH for mechanism (unambiguous table-index arithmetic); MEDIUM for role
+(orphan with no proven call sites, but naming/cluster placement match documented sibling).
+
+Region unnamed count after this pass: **6** (7 minus this rename). Live named **1915** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
