@@ -4635,5 +4635,38 @@ pairing with Pass 109 programmer confirmed.
 Region unnamed count after this pass: **139** (140 minus this rename). Live named
 **2027** global.
 
-**Next:** Pass 152 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 152.
+
+## Pass 152 (2026-07-01) — BB reg triple `FUN_8003b76c`
+
+Fresh `ListUnnamed80030000.java` re-run: **139 unnamed** remain in region
+(unchanged from Pass 151; rank-1 at xref=1 tier is `FUN_8003b76c` at 156B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b76c` → `program_bb_regs_0x220_0x222_0x224_via_hook_with_masked_params`**
+(156B, HIGH, SIMPLE-tier) via
+`RenamePass152Region80030000Fun8003b76c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BB-register triple programmer in the `0x8003b7xx` cluster. Three
+hook-writes via fptr at `PTR_DAT_8003b80c`, merging caller params with config
+literals from `DAT_8003b808`/`DAT_8003b810`/`DAT_8003b814`:
+- reg `0x220`: `(param_3 << 8) | (param_1 & 0xff) | (*DAT_8003b808 & 0x8080)`
+- reg `0x222`: `((param_4 & 1) << 8) | (*DAT_8003b810 & 0xfe80) | (param_2 & 0xff)`
+- reg `0x224`: `(*DAT_8003b814 & 0xfc00) | param_5`
+
+Sibling of `program_sco_bb_regs_from_config_offset_0x106_via_hw_hook` (Pass 140)
+and `program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch` (Pass 103) in
+the BB-reg hook-programming family.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; likely indirect/data-ref
+invocation (same pattern as Pass 151).
+
+**Confidence:** HIGH — full 156B decompile; three-register masked-merge idiom
+matches established BB-reg programmer cluster.
+
+Region unnamed count after this pass: **138** (139 minus this rename). Live named
+**2028** global.
+
+**Next:** Pass 153 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

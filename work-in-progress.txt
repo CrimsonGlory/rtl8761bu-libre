@@ -13092,7 +13092,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 151;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 152: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 152 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003b76c`→`program_bb_regs_0x220_0x222_0x224_via_hook_with_masked_params`
+          (156B, HIGH, SIMPLE-tier). BB-reg triple programmer: hook-writes regs
+          `0x220`/`0x222`/`0x224` via `PTR_DAT_8003b80c`, merging caller params
+          with config literals `DAT_8003b808`/`810`/`814`. Region 138 unnamed
+          remain; live named 2028.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 152;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 153: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
