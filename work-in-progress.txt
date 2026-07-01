@@ -10532,8 +10532,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (145);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (146): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (167 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (146) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80026050`→
+          `reset_crypto_pending_buffers_for_ssp_oob_request`
+          (94B, HIGH). SSP OOB pending-buffer reset: primes `+0xe8` hash via
+          `FUN_8002c838`, zeros/copies `+0x108`/`+0x118` keyed by `+0x1e2`/`+0x1f1`,
+          clears `+0x13d`; caller `dispatch_ssp_remote_oob_data_request_hci`.
+          166 unnamed remain; live named 1755.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (146);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (147): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (166 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

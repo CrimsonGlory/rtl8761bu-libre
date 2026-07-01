@@ -3928,7 +3928,7 @@ Decompiled and renamed:
 
 **Mechanism:** SSP OOB pairing-method HCI dispatcher (IO-cap method `2` path from
 `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook`). Resolves connection slot,
-clears crypto pending state via `FUN_80026050`, primes OOB response flags at
+clears crypto pending state via `reset_crypto_pending_buffers_for_ssp_oob_request`, primes OOB response flags at
 `+0x1e6`/`+0x1e7`, then role-gates on `crypto+0x50`: master with no local OOB
 (`+0x1df==0`) calls `FUN_80025980` (sub-state 3) and arms status `0x25`; master
 with OOB sends `send_evt_HCI_Remote_OOB_Data_Request` and arms `0x23`; slave
@@ -5151,5 +5151,34 @@ callers are Kovah-named LMP legacy-auth handlers adjacent to
 `derive_sres_e1_or_e22_and_send_lmp_response` (Pass 6 cont. 27).
 
 Region unnamed count after this pass: **167** (168 minus this rename). Live named **1754** global.
+
+**Next:** superseded by Pass 6 continuation (146).
+
+## Pass 6 continuation (146) (2026-07-01) — SSP OOB pending-buffer reset `FUN_80026050`
+
+Decompiled and renamed:
+**`FUN_80026050` → `reset_crypto_pending_buffers_for_ssp_oob_request`**
+(94B, HIGH) via `RenamePass6Region80020000Fun80026050.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=167` at pass start). First-listed at
+94B (tied cluster; first entry `FUN_80026050`).
+
+**Mechanism:** SSP OOB pairing prep helper on per-connection crypto struct
+(`param_1`). Primes hash block at `+0xe8` via `FUN_8002c838`, then resets two
+16-byte pending buffers at `+0x108` and `+0x118`: when `+0x1e2==0` zeros the
+first block; when non-zero copies 16B template from `PTR_DAT_800260b0` (curve
+width `+0x1f1==0x06`/P-256) or `PTR_DAT_800260b4` (width `0x08`/P-192); always
+zeros second block and clears flag byte `+0x13d`.
+
+**Caller:** `dispatch_ssp_remote_oob_data_request_hci` (`0x800263e4`, Pass 6
+cont. 106) — xref_in=1; first step before priming OOB response flags and
+role-gated HCI Remote OOB Data Request dispatch.
+
+**Confidence:** HIGH — decompile matches documented SSP OOB dispatcher preamble;
+block offsets `+0x108`/`+0x118`/`+0x1f1` consistent with Pass 6 cont. (77)/(79)
+SSP crypto-struct layout; sole caller already HIGH-named.
+
+Region unnamed count after this pass: **166** (167 minus this rename). Live named **1755** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
