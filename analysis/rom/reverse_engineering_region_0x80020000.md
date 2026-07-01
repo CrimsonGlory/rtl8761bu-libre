@@ -5688,7 +5688,8 @@ mechanism pre-documented at Pass 6 cont. (79) caller xref for
 `derive_simple_pairing_confirm_and_send_lmp_0x3f`.
 
 **Mechanism:** SSP numeric-comparison / JustWorks pairing-method path (IO-cap
-classifier result `0`). Clears crypto pending via `FUN_80025f7c`, then branches on
+classifier result `0`). Clears crypto pending via
+`advance_prng_and_clear_crypto_pending_buffers`, then branches on
 `crypto+0x50`: when `== 1` arms SSP sub-state `0x2a` via `set_arg1_1_to_arg2`;
 otherwise sends LMP Simple Pairing Confirm (`0x3f`) through
 `derive_simple_pairing_confirm_and_send_lmp_0x3f` and arms sub-state `0x2f`.
@@ -7147,5 +7148,36 @@ cont. 211 sibling; callees already Pass-6 HIGH; caller is the documented stop-en
 counterpart of `finalize_encryption_procedure_and_notify_hci`.
 
 Region unnamed count after this pass: **100** (101 minus this rename). Live named **1821** global.
+
+**Next:** superseded by Pass 6 continuation (213).
+
+## Pass 6 continuation (213) (2026-07-01) — SSP crypto pending-buffer clear `FUN_80025f7c`
+
+Decompiled and renamed:
+**`FUN_80025f7c` → `advance_prng_and_clear_crypto_pending_buffers`**
+(54B, HIGH) via `RenamePass6Region80020000Fun80025f7c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (54B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=100` at pass start). First-listed
+`FUN_80025f7c` in the 54B cluster. Callee pre-documented at Pass 6 cont. (163) as
+the numeric-comparison SSP preamble helper.
+
+**Mechanism:** SSP crypto-struct pending-buffer reset helper on per-connection crypto
+struct (`param_1`). Primes hash block at `+0xe8` via
+`advance_global_sha_blake_prng_state_16byte`, then zero-clears eight dwords at
+`+0x108`..`+0x124` (32-byte pending-buffer span covering the `+0x108`/`+0x118`
+pair documented in Pass 6 cont. (146)) and clears flag byte `+0x13d`. Simpler
+sibling of `reset_crypto_pending_buffers_for_ssp_oob_request` — no OOB template
+copy path.
+
+**Callers:** `dispatch_ssp_numeric_comparison_confirm_and_arm_state` (`0x80025fb4`,
+Pass 6 cont. 163) — first step before branching on `crypto+0x50` for numeric
+comparison vs JustWorks confirm dispatch; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms established SSP crypto-struct buffer
+offsets (`+0xe8`/`+0x108`/`+0x13d`) and callee already Pass-6 HIGH; sole caller
+already HIGH-named and documented this callee by role at Pass 6 cont. (163).
+
+Region unnamed count after this pass: **99** (100 minus this rename). Live named **1822** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
