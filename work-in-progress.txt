@@ -10585,8 +10585,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (151);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (152): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (161 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (152) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80029978`→
+          `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3` (88B, HIGH).
+          Random-BD_ADDR encrypted-crypto-state sweep → mode-3 arm/disable via
+          `sometimes_called_with_0_3_0`; xref_in=4. 160 unnamed remain;
+          live named 1761.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (152);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (153): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (160 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

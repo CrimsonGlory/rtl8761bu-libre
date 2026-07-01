@@ -5320,4 +5320,36 @@ first-fit vs indexed-alloc distinction is unambiguous from control flow.
 
 Region unnamed count after this pass: **161** (162 minus this rename). Live named **1760** global.
 
+**Next:** superseded by Pass 6 continuation (152).
+
+## Pass 6 continuation (152) (2026-07-01) — random-BD_ADDR encrypted-state scan `FUN_80029978`
+
+Decompiled and renamed:
+**`FUN_80029978` → `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3`**
+(88B, HIGH) via `RenamePass6Region80020000Fun80029978.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (88B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=161` at pass start). Highest xref_in
+among tied 88B cluster; first-listed `FUN_80029978`.
+
+**Mechanism:** Sweeps up to 10 `big_ol_struct` connection slots (`PTR_big_ol_struct_800299d0`).
+For each slot with `bdaddr_random_ != 0` (random-address link), checks crypto link-type
+byte `*crypto` against bitmask `0x7c1` after subtracting base `0x16` — matching states
+`0x16`, `0x1c`, `0x1d`, `0x1e`, `0x1f`, `0x20` (encrypted/pairing link types). When any
+random-address link matches: calls `FUN_800221f0(PTR_DAT_800299d4)` which invokes
+`FUN_80014770(0,0,key_block)` then `sometimes_called_with_0_3_0(0,3,3)` (mode-3 encryption
+enable with param 3). Otherwise falls through to `FUN_8002217c` →
+`sometimes_called_with_0_3_0(0,3,0)` (mode-3 encryption disable). Encryption-arming
+dispatcher sibling of `arm_link_encryption_post_key_program` (Pass 6 cont. 67) and
+`arm_encryption_when_crypto_substate_0x11_or_0x1e` (Pass 6 cont. 138).
+
+**Callers:** xref_in=4 — four direct call sites (encryption/pairing procedure cluster).
+
+**Confidence:** HIGH — decompile confirms 10-slot `bdaddr_random_` sweep idiom used across
+region; crypto link-type bitmask `0x7c1` matches documented encrypted states `0x0c`/`0x16`
+cluster; branch callees tie into documented `sometimes_called_with_0_3_0` /
+`start_encryption_vsc_pair_on_mode3_enable` chain.
+
+Region unnamed count after this pass: **160** (161 minus this rename). Live named **1761** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
