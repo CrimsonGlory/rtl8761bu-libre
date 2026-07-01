@@ -3305,5 +3305,39 @@ and two named connection-setup dispatch callers anchor the role.
 Region unnamed count after this pass: **178** (179 minus this rename). Live named
 **1988** global.
 
-**Next:** Pass 113 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 113.
+
+## Pass 113 (2026-07-01) — HCI Reset conn reinit `FUN_80036f60`
+
+Fresh `ListUnnamed80030000.java` re-run: **178 unnamed** remain in region
+(unchanged from Pass 112; rank-1 by size at xref=2 tier is `FUN_80036f60` at
+66B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80036f60` → `hci_reset_reinit_conn_subsystem_lmp_and_descriptor_tables`**
+(66B, HIGH, HANDLER-tier) via `RenamePass113Region80030000Fun80036f60.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** HCI Reset teardown reinit orchestrator: clears global status bit
+`0x400`, waits for in-flight LMP-0x25C via `lmp_25c_procedure_completion_waiter`,
+runs BD_ADDR slot reconciliation via
+`reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259`, conditionally dispatches
+`LMP__25B__most_common_for_VSCs1` when pending-VSC sentinel `!= -1`, resets
+connection subsystem via
+`reset_conn_subsystem_global_state_and_reinit_slot_entries`, then calls two
+still-unnamed helpers (`FUN_80018120`, `FUN_8006ad5c`) and initializes the
+3×0x34 linked-descriptor tables via
+`init_three_slot_0x34_linked_descriptors_and_clear_buffers`.
+
+**Callers:** 1 confirmed via `find_callers` —
+`fHCI_Reset_0x03_full_subsystem_teardown` (HCI Reset command full teardown path;
+sibling of Pass 93's `init_sco_hw_channel_8plus4_slot_program_and_bb_regs`).
+
+**Confidence:** HIGH — full 66B decompile; named LMP/conn-subsystem/descriptor
+callees and sole HCI Reset caller anchor the role.
+
+Region unnamed count after this pass: **177** (178 minus this rename). Live named
+**1989** global.
+
+**Next:** Pass 114 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

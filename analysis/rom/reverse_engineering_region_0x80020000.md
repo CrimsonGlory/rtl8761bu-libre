@@ -4461,7 +4461,7 @@ with siblings `FUN_80027b28`/`FUN_80023bdc` (each xref_in=1); first listed by so
 `FUN_8002b118`, then `memset` side buffers at `PTR_DAT_8002ada4` (`0x40`) and
 `PTR_DAT_8002ada8` (`0xd0`).
 
-**Callers:** Sole direct caller `FUN_80036f60` (`0x80036f96`, region `0x80030000`) —
+**Callers:** Sole direct caller `hci_reset_reinit_conn_subsystem_lmp_and_descriptor_tables` (`0x80036f96`, region `0x80030000`) —
 subsystem init chain entry point.
 
 **Confidence:** HIGH — decompile confirms classic 3-slot linked-descriptor init idiom
