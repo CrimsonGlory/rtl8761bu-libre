@@ -13390,7 +13390,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 182;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 183: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 183 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003d4fc`→`log_role_slot_state_evt_0x2c4_when_not_role_switch`
+          (78B, HIGH, HANDLER-tier). Hook-veto gated role-slot state logger:
+          when `field_0x24!=0x02` logs via `0x2c4`; caller
+          `status_bit_gated_role_state_logger_dispatch`.
+          107 unnamed remain; live named 2059.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 183;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 184: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

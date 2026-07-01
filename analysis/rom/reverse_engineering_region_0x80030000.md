@@ -5652,5 +5652,38 @@ teardown triplet in region `0x80000000`.
 Region unnamed count after this pass: **108** (109 minus this rename). Live named
 **2058** global.
 
-**Next:** Pass 183 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 183.
+
+## Pass 183 (2026-07-01) — role-slot state logger `FUN_8003d4fc`
+
+Fresh `ListUnnamed80030000.java` re-run: **108 unnamed** remain in region
+(unchanged from Pass 182; rank-1 by size at xref=1 tier is `FUN_8003d4fc` at
+78B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d4fc` → `log_role_slot_state_evt_0x2c4_when_not_role_switch`**
+(78B, HIGH, HANDLER-tier) via
+`RenamePass183Region80030000Fun8003d4fc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook veto at `PTR_DAT_8003d54c` — when absent or
+returns zero, checks per-role-slot connection struct (`0x28` stride,
+`PTR_some_connection_struct_array_8003d550`): requires `field_0x24 != 0x02`
+(not in role-switch state); then logs via `possible_logger_called_if_no_patch3`
+with opcode `0x2c4` (708). Sibling of
+`log_role_slot_state_evt_0x2c5_when_not_role_switch` (Pass 105) — same
+hook-veto + role-switch gate pattern but omits the `field_0x23 != 0` check and
+uses a different log opcode.
+
+**Callers:** 1 xref-in — `status_bit_gated_role_state_logger_dispatch` (region
+`0x80000000`, dispatches to this leaf vs the `0x2c5` sibling depending on
+status-word `0x1e0` field).
+
+**Confidence:** HIGH — full 78B decompile; hook-veto + role-switch gate matches
+documented role-state logging cluster; caller confirmed via region `0x80000000`
+Pass documentation.
+
+Region unnamed count after this pass: **107** (108 minus this rename). Live named
+**2059** global.
+
+**Next:** Pass 184 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
