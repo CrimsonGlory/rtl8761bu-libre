@@ -1120,6 +1120,28 @@ callees of `reset_sco_esco_hw_subsystem_on_link_loss` are now HIGH-confidence na
 the full SCO/eSCO-link-loss teardown call tree (caller + 4 callees + their callees)
 is fully resolved with no remaining low/medium-confidence holdovers.
 
-**Next**: Continue region 0x80050000 cold-triage or rank-1 xrefs≥3 backlog as time
-permits (no specific lead queued from this pass — the teardown call tree it was
-chasing is now closed out).
+**Next**: superseded by Pass 44.
+
+## Pass 44 (2026-07-01) — HW-clock raw-dword reader wrapper `FUN_80034a24`
+
+Fresh `ListUnnamed80030000.java` re-run: **245 unnamed** remain in region
+`0x80030000`. Decompiled and renamed rank-1 (highest xref_in):
+**`FUN_80034a24` → `read_hw_clock_raw_dword_by_role_index`**
+(20B, HIGH) via `RenamePass44Region80030000Fun80034a24.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin wrapper tail-calling `FUN_8003497c(out_dword, NULL, role_index)` —
+i.e. reads only the raw 32-bit HW clock dword from the global clock table at
+`DAT_80034a20`, without computing the optional slot-offset short that the callee
+writes when `param_2 != NULL`. The callee remaps role indices 8–11 to eSCO slot
+register offsets via `remap_role_index_to_esco_slot_if_pending` before indexing the
+appropriate dword/short pairs. **63 xref-in** across SCO/eSCO timing (`spin_until_hw_clock_bit1_phase_toggles`,
+`compute_sco_slot_offset_delta_from_hw_clock`, `reconcile_conn_slot_timing_drift_commit_hw_channel_reconcile`
+in region `0x80040000`) and global busy-spin delays (`spin_until_global_hw_clock_advances_by_ticks`
+in region `0x80020000`).
+
+**Confidence:** HIGH — trivial decompile; callee mechanism directly readable; cross-region
+callers already documented under the old `FUN_80034a24` alias.
+
+Region unnamed count after this pass: **244** (245 minus this rename). Live named **1922** global.
+
+**Next:** Pass 45 — cold-triage rank-2 `FUN_8003c69c` (66B, xref_in=40).

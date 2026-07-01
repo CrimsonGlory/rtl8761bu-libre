@@ -12042,8 +12042,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (312);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fq: cold-triage rank-1 HANDLER-tier
-          unnamed per `ListRegion0x80070000.java` (13 HANDLER-tier remain after Pass 12fp).
+[DONE]  Full RE: ROM region 0x80070000 — Pass 12fq stale-close (2026-07-01): region sweep
+          already complete (Pass 12hk, 0 in-region unnamed). Live-verified this pass via
+          `ListUnnamedHandler80070000.java` (`total_handler_tier=0`). No further work in
+          region `0x80070000`; pivoted to `0x80030000`.
+
+[DONE]  Full RE: ROM region 0x80030000 — Pass 44 (2026-07-01): decompiled+renamed rank-1
+          `FUN_80034a24`→`read_hw_clock_raw_dword_by_role_index` (20B, HIGH). Thin wrapper
+          to `FUN_8003497c(_,0,role_index)` — raw HW clock dword reader; 63 xref-in across
+          SCO timing + global busy-spin clusters. Region 244 unnamed remain; live named 1922.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 44;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 45: cold-triage rank-2 unnamed
+          `FUN_8003c69c` (66B, xref_in=40 per `ListUnnamed80030000.java`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
