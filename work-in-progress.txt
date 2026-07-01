@@ -13962,7 +13962,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 242;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 243: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 243 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80035ff4`→
+          `program_link_mode_bb_regs_merge_ram_timing_and_arm_status`
+          (268B, HIGH, HANDLER-tier). Link-mode-change BB register commit:
+          merges RAM timing globals into regs 0/2/3/5/6 with spin delay,
+          arms status bit `0x40` on `DAT_8012312c`; `0x80035fxx` cluster
+          sibling. 0 xref-in. Region unnamed 47 remain; live named 2119.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 243;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 244: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

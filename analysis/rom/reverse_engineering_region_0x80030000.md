@@ -7538,5 +7538,41 @@ table with allocate/dealloc siblings Pass 241/160.
 Region unnamed count after this pass: **48** (49 minus this rename). Live named
 **2118** global.
 
-**Next:** Pass 243 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 243.
+
+## Pass 243 (2026-07-01) — link-mode BB register commit `FUN_80035ff4`
+
+Fresh `ListUnnamed80030000.java` re-run: **48 unnamed** remain in region
+(unchanged from Pass 242; xref_in=0 tier dominates — rank-1 is `FUN_80035ff4`
+at 268B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035ff4` → `program_link_mode_bb_regs_merge_ram_timing_and_arm_status`**
+(268B, HIGH, HANDLER-tier) via
+`RenamePass243Region80030000Fun80035ff4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change cluster BB hardware commit sequence in the
+`0x80035fxx` family (sibling of Pass 134's
+`zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch` and Pass
+168's `apply_lmp_3ee_case2_and_link_mode_byte_on_signed_status`). Enables
+peripheral dword bits (`_DAT_b000a05c |= 0x800000`), then read-modify-writes BB
+regs `3`/`5`/`6`/`2`/`0` via ROM `FUN_8001136c`/`FUN_8001139c`, merging low
+fields from RAM timing globals `DAT_80123130`/`DAT_80123132`. Inserts
+`spin_delay_10x_iterations(10)`, sets reg-0 bit `0x8000`, arms peripheral index
+`0x15c` via `FUN_80011510`/`FUN_80011608`, clears `_DAT_b000a0bc` bit 1, and
+sets status bit `0x40` on `DAT_8012312c`. HW-fallback path sibling of Pass 118's
+`increment_page_inquiry_esco_codec_slot_sample_counter` alternate entry (same
+BB-reg programming idiom). Data xref from `FUN_80036100` at `0x80035ffc`
+(fptr-table reference documented Pass 118).
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 268B decompile; BB-reg mask/merge pattern matches
+documented link-mode-change cluster; RAM timing globals and `spin_delay` idiom
+match siblings; Pass 118 cross-ref confirms fptr-table placement.
+
+Region unnamed count after this pass: **47** (48 minus this rename). Live named
+**2119** global.
+
+**Next:** Pass 244 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
