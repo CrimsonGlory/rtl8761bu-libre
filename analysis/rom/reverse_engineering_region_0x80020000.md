@@ -3494,4 +3494,35 @@ idiom matches `FUN_800239cc`←`HCI_Write_Simple_Pairing_Debug_Mode`.
 
 Region unnamed count after this pass: **220** (221 minus this rename). Live named **1701** global.
 
+**Next:** superseded by Pass 6 continuation (93).
+
+## Pass 6 continuation (93) (2026-07-01) — LMP ext IO cap resp `FUN_80029364`
+
+Decompiled and renamed:
+**`FUN_80029364` → `handle_lmp_ext_io_capability_resp_subopcode_0x1a`**
+(132B, HIGH) via `RenamePass6Region80020000Fun80029364.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (132B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=220` at pass start). Sibling of Pass 6
+cont. (17)'s `handle_lmp_ext_io_capability_req_subopcode_0x19` in the
+`0x800293xx` LMP-extended IO-capability exchange cluster.
+
+**Mechanism:** Simple Pairing LMP-extended IO Capability Response handler gated on
+per-connection crypto sub-state `+1 == 0x15`. Primary success path when global flag
+`PTR_DAT_800293ec+2` bit7 clear and `FUN_8002403c` validation passes: copies IO-cap
+bytes from PDU offset `+6` into crypto struct `+0x1e1` via `FUN_800257f0`, emits
+`send_evt_HCI_IO_Capability_Response`, arms pairing-template staging via
+`unscramble_codec_jit_template_and_install_hw_hook` (`FUN_80025b68`). Error /
+wrong-state path replies `FUN_800243b8(conn, 0x7f, 0x1a, role_bit, 0x24)` (LMP ext
+NOT_ACCEPTED).
+
+**Callers:** xref_in=1 (indirect/table — documented in `reverse_engineering_hardware_layer.md`
+call chain alongside sibling `handle_lmp_ext_io_capability_req_subopcode_0x19`).
+
+**Confidence:** HIGH — state-gated IO-cap response path mirrors Pass 6 cont. (17)'s
+request handler; HCI IO-cap event sender already Pass-5 HIGH; `FUN_80025b68` pairing-
+template path documented in `reverse_engineering_hardware_layer.md`.
+
+Region unnamed count after this pass: **219** (220 minus this rename). Live named **1702** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

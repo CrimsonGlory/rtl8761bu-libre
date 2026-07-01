@@ -10022,8 +10022,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (92);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (93): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (220 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (93) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80029364`→
+          `handle_lmp_ext_io_capability_resp_subopcode_0x1a`
+          (132B, HIGH) — LMP-ext IO-cap response sub-opcode 0x1a at state 0x15:
+          copy IO caps, HCI IO_Capability_Response, arm pairing template; xref_in=1;
+          via `RenamePass6Region80020000Fun80029364.java`, `renamed=1`, live-verified.
+          219 unnamed remain; live named 1702.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (93);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (94): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (219 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
