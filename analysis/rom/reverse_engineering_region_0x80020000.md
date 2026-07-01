@@ -4521,4 +4521,36 @@ DHKey-check stall timer).
 
 Region unnamed count after this pass: **187** (188 minus this rename). Live named **1734** global.
 
+**Next:** superseded by Pass 6 continuation (126).
+
+## Pass 6 continuation (126) (2026-07-01) — LMP SSP Confirm NOT ACCEPTED `FUN_80028634`
+
+Decompiled and renamed:
+**`FUN_80028634` → `handle_lmp_simple_pairing_confirm_not_accepted`**
+(106B, HIGH) via `RenamePass6Region80020000Fun80028634.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (106B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=187` at pass start). Completes the
+`dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` rejected-opcode `0x41`
+slot documented in Pass 6 cont. (73) but left unnamed.
+
+**Mechanism:** LMP NOT ACCEPTED (0x04) rejected-opcode `0x41` (Simple Pairing Confirm /
+DHKey-check confirm) recovery handler. Role-gated via `ret_bool_based_on_crypto_struct_0x50`
+on the per-connection `_x58_crypto_struct`, with alternate bypass when global
+`PTR_DAT_800286a4+2` bit `0x80` is set or LMP payload bit0 at `param+4` matches role
+bool. Crypto sub-state byte at `+1` drives recovery:
+- `':'` (0x3a) → advance to `0x3b` via `set_arg1_1_to_arg2`
+- `'='` (0x3d) → emit HCI Simple Pairing Complete via
+  `call_send_evt_HCI_Simple_Pairing_Complete(conn, 0)`
+
+**Callers:** xref_in=1 — sole caller `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`
+(rejected opcode `0x41` case); sibling of `handle_lmp_simple_pairing_number_not_accepted`
+(0x40) and other alt-recovery handlers in the `0x80027xxx`/`0x80028xxx` cluster.
+
+**Confidence:** HIGH — decompile confirms established NOT-ACCEPTED recovery idiom
+(role gate + crypto sub-state dispatch); callees are documented SSP cluster helpers;
+opcode `0x41` assignment matches Pass 6 cont. (73) dispatch table.
+
+Region unnamed count after this pass: **186** (187 minus this rename). Live named **1735** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
