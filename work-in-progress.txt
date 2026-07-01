@@ -13561,7 +13561,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 199;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 200: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 200 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800379dc`→`handle_trunc_page_complete_status_bit8_via_optional_hook_and_log_0x6e`
+          (56B, HIGH, SIMPLE-tier). Truncated-page status bit-8 handler:
+          optional hook at `PTR_DAT_80037a14`, default `PTR_PTR_80037a18(0,0)`
+          + log `0x6e`; caller `truncated_page_complete_status_dispatcher`.
+          90 unnamed remain; live named 2076.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 200;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 201: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

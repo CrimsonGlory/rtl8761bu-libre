@@ -6207,5 +6207,36 @@ merge at bits 7-9 unambiguous; caller config-gate pattern matches Pass 117's
 Region unnamed count after this pass: **91** (92 minus this rename). Live named
 **2075** global.
 
-**Next:** Pass 200 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 200.
+
+## Pass 200 (2026-07-01) — truncated-page status bit-8 handler `FUN_800379dc`
+
+Fresh `ListUnnamed80030000.java` re-run: **91 unnamed** remain in region
+(unchanged from Pass 199; rank-1 by size at xref=1 tier is `FUN_800379dc` at
+56B — wins on size over tied 54B/52B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800379dc` → `handle_trunc_page_complete_status_bit8_via_optional_hook_and_log_0x6e`**
+(56B, HIGH, SIMPLE-tier) via
+`RenamePass200Region80030000Fun800379dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Truncated-page-complete status-word bit-8 handler in the
+`truncated_page_complete_status_dispatcher` cluster. Optional hook at
+`PTR_DAT_80037a14` — when null or returns zero, default path invokes fptr at
+`PTR_PTR_80037a18(0,0)` then logs via `possible_logger_called_if_no_patch3`
+with event tag `0x6e` from `PTR_DAT_80037a1c`. Sibling of Pass 102's
+`toggle_0x4000_status_bit_via_hook_on_trunc_page_counter_threshold` (bits
+`0x80`/`0x100`/`0x200` branches) in the same dispatcher.
+
+**Callers:** 1 xref-in — `truncated_page_complete_status_dispatcher` (`0x800022e4`)
+when status-word bit 8 is set.
+
+**Confidence:** HIGH — full 56B decompile; optional-hook + default-dispatch +
+`possible_logger_called_if_no_patch3` idiom matches ROM cluster; caller context
+in documented truncated-page-complete dispatcher (region `0x80000000`).
+
+Region unnamed count after this pass: **90** (91 minus this rename). Live named
+**2076** global.
+
+**Next:** Pass 201 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
