@@ -2528,5 +2528,34 @@ fptr dispatch loop unambiguous.
 Region unnamed count after this pass: **203** (204 minus this rename). Live named
 **1963** global.
 
-**Next:** Pass 88 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 88.
+
+## Pass 88 (2026-07-01) — slot-tail reset + status upper-bits fptr hook `FUN_8003d0d0`
+
+Fresh `ListUnnamed80030000.java` re-run: **203 unnamed** remain in region
+(unchanged from Pass 87; rank-1 by size at xref=3 tier is `FUN_8003d0d0` at
+50B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d0d0` → `reset_slot_tail_and_hook_dispatch_status_upper_bits_if_idle`**
+(50B, HIGH) via `RenamePass88Region80030000Fun8003d0d0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Calls `reset_parallel_slot_table_entry_tail_state_by_index(param_2)`
+first. If `PTR_struct_of_at_least_0x300_size_8003d104->field_0x171 == 0`, reads
+a `uint16` from `PTR_DAT_8003d108`, masks to upper 10 bits (`& 0xfc00`), writes
+back, then invokes the patchable fptr at `PTR_DAT_8003d10c` with
+`(1, masked_u16, 0xa0, 0)`. Parallel-slot-table cluster sibling of Pass 68's
+`reset_parallel_slot_table_entry_tail_state_by_index` (`0x8003cf28`).
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap).
+
+**Confidence:** HIGH — full 50B decompile; tail-reset + conditional status-bit
+mask and fptr dispatch unambiguous.
+
+Region unnamed count after this pass: **202** (203 minus this rename). Live named
+**1964** global.
+
+**Next:** Pass 89 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

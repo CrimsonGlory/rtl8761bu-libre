@@ -12485,7 +12485,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 87;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 88: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 88 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003d0d0`→`reset_slot_tail_and_hook_dispatch_status_upper_bits_if_idle`
+          (50B, HIGH). Calls `reset_parallel_slot_table_entry_tail_state_by_index`;
+          if `field_0x171` clear, masks status u16 to upper 10 bits (`&0xfc00`)
+          and dispatches via `PTR_DAT_8003d10c` fptr hook `(1, masked, 0xa0, 0)`.
+          Parallel-slot-table cluster sibling of Pass 68's tail-reset fn. 3 xref-in.
+          202 unnamed remain; live named 1964.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 88;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 89: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
