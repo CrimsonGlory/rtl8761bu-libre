@@ -11528,8 +11528,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (255);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (256): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (57 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (256) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80026920`→
+          `clear_all_link_key_slot_occupied_flags_and_count`
+          (38B, HIGH). 7-slot stored-link-key bulk occupied-flag clear on
+          `PTR_DAT_80026948` (0x17 stride, +0x16 flag), returns cleared count;
+          caller `hci_ogf1_ogf3_shared_command_complete_event_sender` at
+          `0x80022bd6` (HCI delete-all path); xref_in=1; 56 unnamed remain;
+          live named 1865.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (256);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (257): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (56 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

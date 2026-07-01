@@ -8415,4 +8415,34 @@ caller decompile shows fixed `param_3=4` buffer-dispatch wrapper pattern.
 
 Region unnamed count after this pass: **57** (58 minus this rename). Live named **1864** global.
 
+**Next:** superseded by Pass 6 continuation (256).
+
+## Pass 6 continuation (256) (2026-07-01) — link-key slot bulk clear `FUN_80026920`
+
+Decompiled and renamed:
+**`FUN_80026920` → `clear_all_link_key_slot_occupied_flags_and_count`**
+(38B, HIGH) via `RenamePass6Region80020000Fun80026920.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (38B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=57` at pass start). First-listed in tied
+38B tier; sits in the `0x800269xx` stored-link-key table cluster alongside
+`store_link_keys_in_global_slot_table` (`PTR_DAT_8002691c`),
+`clear_matching_bdaddr_occupied_flag_in_7slot_table` (`PTR_DAT_80026990`), and
+`build_occupied_link_key_bdaddr_and_key_ptr_arrays`.
+
+**Mechanism:** Iterates all 7 slots at `PTR_DAT_80026948` (0x17-byte stride); for each
+slot with occupied flag `+0x16` set, clears the flag and increments a running count.
+Returns the number of slots cleared. Bulk-clear complement to per-BD_ADDR clear in
+`clear_matching_bdaddr_occupied_flag_in_7slot_table`.
+
+**Caller:** `hci_ogf1_ogf3_shared_command_complete_event_sender` at `0x80022bd6` — HCI
+stored-link-key delete-all path alongside `store_link_keys_in_global_slot_table` (write) and
+`build_occupied_link_key_bdaddr_and_key_ptr_arrays` (export); xref_in=1 via
+`ListXrefsTo80026920.java`.
+
+**Confidence:** HIGH — decompile confirms 7-slot occupied-flag scan/clear with return count;
+caller site matches documented HCI OGF3 stored-link-key command-complete cluster.
+
+Region unnamed count after this pass: **56** (57 minus this rename). Live named **1865** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
