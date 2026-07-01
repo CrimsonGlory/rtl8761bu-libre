@@ -6661,5 +6661,33 @@ status-byte return path unambiguous; link-mode-change cluster sibling of Pass 78
 Region unnamed count after this pass: **76** (77 minus this rename). Live named
 **2090** global.
 
-**Next:** Pass 215 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 215.
+
+## Pass 215 (2026-07-01) — clock-trim vs BB-reg dispatch `FUN_8003a360`
+
+Fresh `ListUnnamed80030000.java` re-run: **76 unnamed** remain in region
+(unchanged from Pass 214; rank-1 by size at xref=1 tier is `FUN_8003a360` at
+38B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a360` → `dispatch_clock_trim_or_bb_reg_0x6f_by_config_flag0x8`**
+(38B, HIGH, SIMPLE-tier) via `RenamePass215Region80030000Fun8003a360.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Config-flag-gated dispatch in the `0x8003a1xx` clock-trim cluster:
+when `PTR_DAT_8003a388[0] & 0x8 == 0`, calls `clock_trim_calibration_measure_apply`
+(`0x8003a180`, Pass 8); when flag set, calls
+`program_bb_reg_0x6f_7bit_field_at_bits7_13_via_hook` with cached byte at config
+offset `+0x23`. Sibling pattern to Pass 212's `program_bb_reg_0x1e_5bit_from_hook_or_config_if_flag0x10`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 38B decompile; flag `0x8` branch + callee chain
+unambiguous; clock-trim cluster sibling of Pass 8/111.
+
+Region unnamed count after this pass: **75** (76 minus this rename). Live named
+**2091** global.
+
+**Next:** Pass 216 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
