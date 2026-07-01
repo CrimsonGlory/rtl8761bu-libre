@@ -5477,4 +5477,41 @@ central LMP PDU processor.
 
 Region unnamed count after this pass: **156** (157 minus this rename). Live named **1765** global.
 
+**Next:** superseded by Pass 6 continuation (157).
+
+## Pass 6 continuation (157) (2026-07-01) — SSP IO-cap pairing-method classifier `FUN_80025800`
+
+Decompiled and renamed:
+**`FUN_80025800` → `classify_ssp_pairing_method_from_io_capabilities`**
+(86B, HIGH) via `RenamePass6Region80020000Fun80025800.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (86B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=156` at pass start). First-listed
+`FUN_80025800` in the 86B cluster.
+
+**Mechanism:** SSP Simple Pairing IO-capability pairing-method classifier. Takes two
+3-byte IO-capability records (`param_1`, `param_2` — local/remote) and writes a
+secondary method byte to `*param_3` (default `5`, `4` for Just Works / numeric path).
+Return value selects the HCI dispatch branch in
+`dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook`:
+- `2` → OOB path when either record's byte at `+1` (OOB data flag) is set
+- `1` → passkey-entry path when one side is KeyboardOnly (`0x02`) and the other is
+  not NoInputNoOutput (`0x03`)
+- `0` → numeric-comparison or Just Works: both DisplayYesNo (`0x01`) yields Just
+  Works (`*param_3=5`); otherwise sets `*param_3=4` for numeric comparison
+
+IO-capability byte at `+0`/`+2` follow Bluetooth spec values (DisplayOnly `0x00`,
+DisplayYesNo `0x01`, KeyboardOnly `0x02`, NoInputNoOutput `0x03`, KeyboardDisplay
+`0x04`).
+
+**Caller:** `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` — xref_in=1,
+documented in Pass 6 cont. (30) as the classifier on crypto-struct bytes at
+`+0x1de`/`+0x1e1`/`+0x1e5`.
+
+**Confidence:** HIGH — return-code dispatch (`0`/`1`/`2`) matches the three established
+SSP HCI dispatchers already named in Pass 6 cont. (30/69/106); IO-cap byte tests
+match Bluetooth Simple Pairing capability matrix; caller already documented.
+
+Region unnamed count after this pass: **155** (156 minus this rename). Live named **1766** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
