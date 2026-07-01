@@ -7058,5 +7058,33 @@ path closes gap noted in Pass 139 mechanism section.
 Region unnamed count after this pass: **63** (64 minus this rename). Live named
 **2103** global.
 
-**Next:** Pass 228 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 228.
+
+## Pass 228 (2026-07-01) — Parallel slot-table triple tail-reset wrapper `FUN_8003cf80`
+
+Fresh `ListUnnamed80030000.java` re-run: **63 unnamed** remain in region
+(unchanged from Pass 227; rank-1 at xref=1 tier is `FUN_8003cf80` at 24B —
+largest among tied 24B xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cf80` → `reset_parallel_slot_table_tail_states_slots_0_through_2`**
+(24B, HIGH, SIMPLE-tier) via
+`RenamePass228Region80030000Fun8003cf80.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BT cold-init wrapper that sequentially calls
+`reset_parallel_slot_table_entry_tail_state_by_index` (Pass 68) for slot indices
+0, 1, and 2 in the parallel three-slot table at `PTR_DAT_8003cf7c`
+(0x88 stride). Closes the wrapper gap noted in Pass 68 mechanism section.
+
+**Callers:** 1 xref-in — sole caller is
+`init_three_0x88_slot_tables_and_clear_crypto_globals` (`0x80021e6c`, region
+`0x80020000` Pass 6 cont. 219) during BT cold-init slot-table bootstrap.
+
+**Confidence:** HIGH — full 24B decompile; triple-index tail-reset sequence
+matches documented parallel-slot init chain; sibling callee already named Pass 68.
+
+Region unnamed count after this pass: **62** (63 minus this rename). Live named
+**2104** global.
+
+**Next:** Pass 229 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
