@@ -8997,4 +8997,31 @@ referenced by address.
 
 Region unnamed count after this pass: **36** (37 minus this rename). Live named **1885** global.
 
+**Next:** superseded by Pass 6 continuation (277).
+
+## Pass 6 continuation (277) (2026-07-01) — HCI cmd connection-handle lookup gate `FUN_800231bc`
+
+Decompiled and renamed:
+**`FUN_800231bc` → `hci_cmd_connection_handle_lookup_failed`**
+(28B, HIGH) via `RenamePass6Region80020000Fun800231bc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (28B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=36` at pass start).
+
+**Mechanism:** Thin HCI command-buffer connection-handle validation gate in the
+`0x800231xx` encryption/auth command cluster. Reads connection handle from
+`*(ushort*)(param_1+3)` (standard HCI cmd layout), calls
+`lookup_up_to_3_bos_array_indices_by_connection_handle`, returns **true** when lookup
+fails (index 0). Callers treat a true return as "unknown connection" and return error
+code `2` (router emits Command Status with error) before proceeding.
+
+**Callers:** `fHCI_Set_Connection_Encryption_0x13`, `fHCI_Authentication_Requested_0x11`,
+`fHCI_Change_Connection_Link_Key_0x15`, `fHCI_Refresh_Encryption_Key_0x14` (xref_in=4).
+
+**Confidence:** HIGH — decompile confirms unambiguous handle-extract + lookup-failed
+boolean; callee already named; all four callers documented in prior passes with this
+address referenced as the shared conn-resolve gate.
+
+Region unnamed count after this pass: **35** (36 minus this rename). Live named **1886** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

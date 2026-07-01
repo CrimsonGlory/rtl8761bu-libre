@@ -11718,8 +11718,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (276);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (277): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (36 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (277) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800231bc`→`hci_cmd_connection_handle_lookup_failed`
+          (28B, HIGH) — HCI cmd buf `+3` handle →
+          `lookup_up_to_3_bos_array_indices_by_connection_handle`, returns true on
+          lookup failure; callers `fHCI_Set_Connection_Encryption_0x13`/
+          `fHCI_Authentication_Requested_0x11`/`fHCI_Change_Connection_Link_Key_0x15`/
+          `fHCI_Refresh_Encryption_Key_0x14`; xref_in=4; 35 unnamed remain; live
+          named 1886.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (277);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (278): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (35 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
