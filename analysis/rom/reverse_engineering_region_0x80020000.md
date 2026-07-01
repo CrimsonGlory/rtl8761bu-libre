@@ -1599,7 +1599,7 @@ Decompiled and renamed:
 
 **Mechanism:** HW TX descriptor submitter in the `0x8002b5xx` TX-buffer cluster (sibling
 of `enqueue_tx_buffer_fragments_for_slot`). Gated on header validity at `param_1+2`
-(bits `0x1ffc`). Polls HW ready via `FUN_8002b514` before programming (and again when
+(bits `0x1ffc`). Polls HW ready via `poll_hw_tx_status_until_nonnegative_or_log_timeout` before programming (and again when
 `param_5 != 0`). Walks up to `param_2` slots (capped at 8), programming each active
 descriptor dword (`0x1ffc0000` payload mask) into three BB register pointers
 `DAT_8002b650`/`DAT_8002b654`/`DAT_8002b658`. Encodes slot index and fragment length
@@ -6879,5 +6879,35 @@ callers already HIGH-named and document this function by role; cluster siblings
 procedure context.
 
 Region unnamed count after this pass: **109** (110 minus this rename). Live named **1812** global.
+
+**Next:** superseded by Pass 6 continuation (204).
+
+## Pass 6 continuation (204) (2026-07-01) — HW TX ready-status poll `FUN_8002b514`
+
+Decompiled and renamed:
+**`FUN_8002b514` → `poll_hw_tx_status_until_nonnegative_or_log_timeout`**
+(56B, HIGH) via `RenamePass6Region80020000Fun8002b514.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (56B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=109` at pass start). Sits in the
+`0x8002b5xx` TX-buffer cluster immediately before
+`program_active_tx_descriptor_slots_to_hw_registers` (`0x8002b558`), which Pass 6
+cont. (33) already documented as polling this helper before BB register programming.
+
+**Mechanism:** Busy-wait poll loop on HW status dword at `DAT_8002b54c` — returns
+immediately when `*status >= 0` (ready). Otherwise spins up to `DAT_8002b550`
+iterations; on timeout logs via `possible_logging_function__var_args` with codes
+`200`/`0x5c9`/`0xbe0`. Thin readiness gate, not descriptor programming itself.
+
+**Callers:** `program_active_tx_descriptor_slots_to_hw_registers` (Pass 6 cont. 33
+documented); `pdu_type_dispatch_enqueue_to_per_type_ring_and_notify` (`0x8000aa64`,
+per `find_callers`); xref_in=3 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms poll-until-nonnegative + timeout-log idiom;
+sibling `program_active_tx_descriptor_slots_to_hw_registers` already HIGH-named and
+references this function by role; cluster context (TX descriptor BB register
+triplet `DAT_8002b650`/`654`/`658`) is established.
+
+Region unnamed count after this pass: **108** (109 minus this rename). Live named **1813** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

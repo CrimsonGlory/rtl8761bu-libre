@@ -11040,8 +11040,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (203);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (204): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (109 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (204) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8002b514`→`poll_hw_tx_status_until_nonnegative_or_log_timeout`
+          (56B, HIGH). HW TX status poll-until-ready with timeout log; callers
+          `program_active_tx_descriptor_slots_to_hw_registers`/`pdu_type_dispatch_enqueue_to_per_type_ring_and_notify`;
+          xref_in=3; 108 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (204);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (205): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (108 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
