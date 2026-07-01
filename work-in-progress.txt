@@ -14549,8 +14549,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7p;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7q: cold-triage next rank-1
-          unnamed function in region `0x80010000` (242 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7q (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013be4`→`write_packet_type_table_high_byte_at_offset`
+          (36B, HIGH). High-byte half of eSCO/SCO packet-type table writer pair:
+          `entry = (entry & 0xff) | (param_2 << 8)` at `ushort[offset + DAT_80013c08]`;
+          sibling of Pass 7e low-byte writer; called from `apply_eSCO_SCO_packet_type_params`
+          and connection-setup/role-switch paths; 8 xref_in. 241 unnamed remain;
+          live named 2183.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7q;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7r: cold-triage next rank-1
+          unnamed function in region `0x80010000` (241 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

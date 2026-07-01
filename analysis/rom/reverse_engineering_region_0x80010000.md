@@ -882,8 +882,9 @@ live-verified).
 (documented cross-region in `region_0x80030000` as the apply path inside
 `apply_eSCO_SCO_packet_type_params`). Indexes `ushort[param_1 + DAT_80013c38]`
 and patches bits[7:0]: `entry = (entry & 0xff00) | (param_2 & 0xff)`.
-High-byte counterpart is sibling `FUN_80013be4` (36B, 8 xref) at
-`DAT_80013c08`, which ORs `param_2 << 8` into bits[15:8]. Called together
+High-byte counterpart is sibling `write_packet_type_table_high_byte_at_offset`
+(36B, 8 xref, Pass 7q) at `DAT_80013c08`, which ORs `param_2 << 8` into
+bits[15:8]. Called together
 from connection-setup, role-switch, and LMP PDU paths project-wide.
 
 **Confidence:** HIGH — trivial decompile; 18 xref_in confirms generic primitive
@@ -1172,4 +1173,23 @@ body semantics; pairs with Pass 7j release primitive.
 
 Region unnamed count after this pass: **242** (243 minus this rename).
 
-**Next:** Pass 7q — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7q (2026-07-01) — packet-type table high-byte writer `FUN_80013be4`
+
+Pass 7q target from cold-triage rank-1 (8 xref_in, 36B). Decompiled and renamed:
+**`FUN_80013be4` → `write_packet_type_table_high_byte_at_offset`**
+(36B, HIGH) via `RenamePass7qRegion80010000Fun80013be4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** High-byte half of the eSCO/SCO packet-type table writer pair
+(sibling of Pass 7e's `write_packet_type_table_low_byte_at_offset`). Indexes
+`ushort[param_1 + DAT_80013c08]` and patches bits[15:8]:
+`entry = (entry & 0xff) | (param_2 << 8)`. Called together with the low-byte
+writer from `apply_eSCO_SCO_packet_type_params`, connection-setup, and
+role-switch paths project-wide.
+
+**Confidence:** HIGH — trivial decompile; 8 xref_in; Pass 7e already documented
+the pair; decompile confirms complementary mask/shift pattern.
+
+Region unnamed count after this pass: **241** (242 minus this rename).
+
+**Next:** Pass 7r — cold-triage next rank-1 unnamed in region `0x80010000`.
