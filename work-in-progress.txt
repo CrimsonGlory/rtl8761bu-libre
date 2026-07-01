@@ -12998,7 +12998,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 141;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 142: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 142 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (149 unnamed); decompiled+renamed rank-1
+          `FUN_8003e694`→`gate_connection_slot_reuse_by_link_type_role_match`
+          (192B, HIGH, HANDLER-tier). Decodes link-type flags 0x400/0x800/0x1000
+          to role index 0/1/2; on match with conn +0x70 role nibble invokes
+          `role_index_remap_gate_invoke_connection_slot_reuse(9,0,role)` with
+          ACL or SCO teardown drain path; caller
+          `status_word_multiflag_link_event_dispatcher2`.
+          148 unnamed remain; live named 2018.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 142;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 143: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

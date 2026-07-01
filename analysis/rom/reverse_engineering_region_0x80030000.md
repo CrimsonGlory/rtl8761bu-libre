@@ -4280,5 +4280,40 @@ integration in connection-teardown path confirmed via `find_callers`.
 Region unnamed count after this pass: **149** (150 minus this rename). Live named
 **2017** global.
 
-**Next:** Pass 142 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 142.
+
+## Pass 142 (2026-07-01) — connection slot-reuse gate `FUN_8003e694`
+
+Fresh `ListUnnamed80030000.java` re-run: **149 unnamed** remain in region
+(unchanged from Pass 141; rank-1 at xref=1 tier is `FUN_8003e694` at 192B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e694` → `gate_connection_slot_reuse_by_link_type_role_match`**
+(192B, HIGH, HANDLER-tier) via
+`RenamePass142Region80030000Fun8003e694.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Decodes link-type role index 0/1/2 from status-word bit flags
+`0x400`/`0x800`/`0x1000` on `param_1`. When decoded index matches connection
+record `+0x70` role nibble (`>>6`) and active flag `+0x71` bit0 set: SCO path
+(`+0x73` bit2) drains SCO pending queue then invokes
+`role_index_remap_gate_invoke_connection_slot_reuse(9,0,role)` plus optional
+`reinit_hci_cmd_list_clear_active_descriptor_tails_and_drain`; ACL path drains
+packet-completion ring via
+`drain_connection_packet_completion_ring_and_emit_hci_num_completed` with same
+slot-reuse call plus optional
+`clear_active_stride88_connection_buffers_and_drain_hci_cmds`. On role-index
+mismatch logs via `possible_logging_function__var_args` (opcode `0x2b`).
+
+**Callers:** 1 xref-in — `status_word_multiflag_link_event_dispatcher2` at
+`0x800030c6` (link-event multiplexer in lower ROM).
+
+**Confidence:** HIGH — full 192B decompile; slot-reuse mode-9 pattern matches
+`role_index_remap_gate_invoke_connection_slot_reuse` cluster; ACL/SCO branch
+split confirmed; caller integration in status-word link-event path.
+
+Region unnamed count after this pass: **148** (149 minus this rename). Live named
+**2018** global.
+
+**Next:** Pass 143 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
