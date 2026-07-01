@@ -14846,8 +14846,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 99;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 100: cold-triage next rank-1
-          unnamed function in region `0x80010000` (212 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 100 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80017ad4`→
+          `probe_acl_tx_buffer_walk_eligibility_by_role_and_sync_gates`
+          (162B, HIGH). ACL TX buffer walk eligibility gate: bos-entry role
+          match, pending-counter gating at conn subrecord `+0x40c`,
+          `remap_role_index_to_esco_slot_if_pending`, dual sync-gate bytes
+          `PTR_DAT_80017b80`/`80017b84`; caller `FUN_80018654` LMP-25C
+          allocator (3×); 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 100;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 101: cold-triage next rank-1
+          unnamed function in region `0x80010000` (211 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

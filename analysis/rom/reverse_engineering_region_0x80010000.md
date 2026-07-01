@@ -2006,4 +2006,36 @@ buffer reassignment caller.
 
 Region unnamed count after this pass: **212** (213 minus this rename).
 
-**Next:** Pass 100 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 100.
+
+## Pass 100 (2026-07-01) — ACL TX buffer walk eligibility probe `FUN_80017ad4`
+
+Pass 100 target from cold-triage rank-1 (3 xref_in, 162B — largest at xref=3
+tier after Pass 99 cleared `FUN_80017a04`). Decompiled and renamed:
+**`FUN_80017ad4` → `probe_acl_tx_buffer_walk_eligibility_by_role_and_sync_gates`**
+(162B, HIGH) via `RenamePass100Region80010000Fun80017ad4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Boolean gate predicate used during ACL TX buffer linked-list
+walks in `FUN_80018654` (LMP-25C dual-slot packet allocator). When
+`param_1` (conn role index) nonzero: scans up to 10 `big_ol_struct` entries
+matching `bos_connection__array_index` + `byte_0xCC`; gates on
+`field200_0x206`, `field106_0x94` vs `PTR_DAT_80017b7c` threshold, and
+`field154_0xc7` with pending counter bytes at conn subrecord
+`*(param_3+0x40c)+0x10/+0x11` vs `param_4`; may clear pending byte `+0x11`.
+After loop: `remap_role_index_to_esco_slot_if_pending`, then requires both
+sync-gate bytes at `PTR_DAT_80017b80[idx]` and `PTR_DAT_80017b84[idx]` set.
+Returns 1 when node is eligible for selection, 0 to skip.
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java`; sole function caller
+`FUN_80018654` (invoked 3× during alternate linked-list walk paths); integrates
+with Pass 99 `process_role_matched_acl_tx_completions_and_emit_hci_completed_packets`
+and Pass 85 ACL TX completion cluster inside same walker.
+
+**Confidence:** HIGH — decompile confirms bos-entry role match, pending-counter
+gating, eSCO slot remap, and dual sync-gate byte tables; caller context in
+`FUN_80018654` LMP-25C packet-credit allocator cross-confirmed.
+
+Region unnamed count after this pass: **211** (212 minus this rename).
+
+**Next:** Pass 101 — cold-triage next rank-1 unnamed in region `0x80010000`.
