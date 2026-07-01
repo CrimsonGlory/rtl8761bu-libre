@@ -13448,7 +13448,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 188;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 189: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 189 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033e10`→`materialize_indexed_lut_5_ushort_buf0_18_ushort_buf1`
+          (70B, HIGH, UTILITY-tier). Indexed LUT materializer: 5 ushort entries
+          to buf0 via `PTR_DAT_80033e58`/`DAT_80033e5c`, count `5` at
+          `DAT_80033e60`, 18 ushort entries to buf1 via `PTR_DAT_80033e64`/
+          `DAT_80033e68`; callee of
+          `commit_link_mode_snapshot_role_slots_and_materialize_lut`.
+          101 unnamed remain; live named 2065.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 189;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 190: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

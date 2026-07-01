@@ -5841,5 +5841,37 @@ caller decompile.
 Region unnamed count after this pass: **102** (103 minus this rename). Live named
 **2064** global.
 
-**Next:** Pass 189 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 189.
+
+## Pass 189 (2026-07-01) — indexed LUT materializer `FUN_80033e10`
+
+Fresh `ListUnnamed80030000.java` re-run: **102 unnamed** remain in region
+(unchanged from Pass 188; rank-1 by size at xref=1 tier is `FUN_80033e10` at
+70B — tied with several 68B siblings, first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033e10` → `materialize_indexed_lut_5_ushort_buf0_18_ushort_buf1`**
+(70B, HIGH, UTILITY-tier) via
+`RenamePass189Region80030000Fun80033e10.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Indexed LUT materializer for link-mode commit path. Loops 5 times
+copying ushort values from base `DAT_80033e5c` indexed by `PTR_DAT_80033e58`
+into `param_1` buffer; writes count `5` to `DAT_80033e60`; then loops 18
+times copying ushort values from base `DAT_80033e68` indexed by
+`PTR_DAT_80033e64` into `param_2` buffer. Extracted helper sibling of
+`commit_link_mode_snapshot_role_slots_and_materialize_lut`'s 9-entry dword LUT
+materialization (Pass 106).
+
+**Callers:** 1 xref-in — `commit_link_mode_snapshot_role_slots_and_materialize_lut`
+at `0x80034618` (region `0x80030000`, link-mode commit after role-slot snapshot
+and HW-ready poll).
+
+**Confidence:** HIGH — full 70B decompile; indexed-LUT copy idiom matches
+documented link-mode-commit cluster; sole caller confirmed via
+`ListXrefsTo80033e10`.
+
+Region unnamed count after this pass: **101** (102 minus this rename). Live named
+**2065** global.
+
+**Next:** Pass 190 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
