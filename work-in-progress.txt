@@ -13982,7 +13982,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 244;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 245: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 245 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003a520`→`dispatch_complex_pair_arithmetic_by_opcode`
+          (194B, HIGH, HANDLER-tier). Complex I/Q pair arithmetic dispatcher:
+          opcode 0=add, 1=sub, 2=mul, 3=div on two int[2] operands; divide-by-zero
+          logs + sets error flag; unknown opcode → 0xffff/0xffff. `0x8003a5xx`
+          cluster sibling of `read_link_register_0xe_role_bits_13_14_by_slot`.
+          0 xref-in. Region unnamed 45 remain; live named 2121.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 245;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 246: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

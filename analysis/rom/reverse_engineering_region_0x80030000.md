@@ -7608,5 +7608,35 @@ matches `program_rf_freq_reg_and_start_poll` semantics documented in
 Region unnamed count after this pass: **46** (47 minus this rename). Live named
 **2120** global.
 
-**Next:** Pass 245 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 245.
+
+## Pass 245 (2026-07-01) — complex-pair arithmetic dispatcher `FUN_8003a520`
+
+Fresh `ListUnnamed80030000.java` re-run: **46 unnamed** remain in region
+(unchanged from Pass 244; xref_in=0 tier dominates — rank-1 is `FUN_8003a520`
+at 194B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a520` → `dispatch_complex_pair_arithmetic_by_opcode`**
+(194B, HIGH, HANDLER-tier) via
+`RenamePass245Region80030000Fun8003a520.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Complex-number (I/Q pair) arithmetic dispatcher on two
+`int[2]` operands (`real`, `imag`). Opcode byte selects operation:
+`0` = add, `1` = subtract, `2` = multiply, `3` = divide; unknown opcode
+writes `0xffff`/`0xffff` to result. Division checks divisor magnitude
+`|z|² = re²+im²`; on zero logs via `possible_logging_function__var_args`,
+sets error flag `*PTR_DAT_8003a5e8 = 1`, and returns without writing result.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation;
+`0x8003a5xx` cluster sibling of `read_link_register_0xe_role_bits_13_14_by_slot`
+at `0x8003a5ec` — likely RF/calibration math helper).
+
+**Confidence:** HIGH — full 194B decompile; add/sub/mul/div formulas match
+standard complex arithmetic on int pairs.
+
+Region unnamed count after this pass: **45** (46 minus this rename). Live named
+**2121** global.
+
+**Next:** Pass 246 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
