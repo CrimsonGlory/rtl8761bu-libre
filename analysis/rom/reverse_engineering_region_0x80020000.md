@@ -6910,4 +6910,35 @@ triplet `DAT_8002b650`/`654`/`658`) is established.
 
 Region unnamed count after this pass: **108** (109 minus this rename). Live named **1813** global.
 
+**Next:** superseded by Pass 6 continuation (205).
+
+## Pass 6 continuation (205) (2026-07-01) — SAFER+ PIN pairing continuation `FUN_80025474`
+
+Decompiled and renamed:
+**`FUN_80025474` → `dispatch_safer_plus_pin_derive_or_accept_and_arm_substate`**
+(56B, HIGH) via `RenamePass6Region80020000Fun80025474.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (56B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=108` at pass start). Sits in the
+`0x800254xx` legacy PIN/SAFER+ pairing cluster between Pass 6 cont. (143)'s
+`derive_pin_safer_plus_au_rand_and_send_lmp_0x0b` and Pass 6 cont. (198)'s
+`accept_in_rand_safer_plus_pin_encrypt_and_send_lmp_0x08`.
+
+**Mechanism:** Thin pairing-continuation dispatcher gated on global byte
+`PTR_DAT_800254ac[5]`: when `== 1`, calls
+`derive_pin_safer_plus_au_rand_and_send_lmp_0x0b(conn, crypto, pdu_mode_bit)` with
+mode bit from `param_3+4 & 1` and arms crypto sub-state `0x19`; else calls
+`accept_in_rand_safer_plus_pin_encrypt_and_send_lmp_0x08(conn)` and arms sub-state
+`0x1a`. Writes sub-state byte to `*(param_2 + 1)` (per-connection crypto struct).
+
+**Callers:** `LMP_IN_RAND_0x08` (non-SSP pairing-continuation branch at `0x8002549a`);
+`handle_lmp_in_rand_not_accepted` (SRES sub-state `0x0c` recovery path per Pass 6
+cont. 44); xref_in=3 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms binary dispatch between the two already-HIGH
+SAFER+ PIN siblings; sub-states `0x19`/`0x1a` match documented NOT-ACCEPTED recovery
+and IN_RAND pairing flows in Pass 6 cont. 44/198.
+
+Region unnamed count after this pass: **107** (108 minus this rename). Live named **1814** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

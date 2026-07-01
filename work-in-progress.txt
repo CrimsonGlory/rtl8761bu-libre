@@ -11048,8 +11048,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (204);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (205): cold-triage
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (205): cold-triage
           next rank-1 unnamed per `ListUnnamed80020000.java` (108 remain).
+          Decompiled+renamed `FUN_80025474`→`dispatch_safer_plus_pin_derive_or_accept_and_arm_substate`
+          (56B, HIGH). SAFER+ PIN pairing continuation: global-flag dispatch to
+          derive AU_RAND (0x0b) or accept IN_RAND (0x08), arms sub-state `0x19`/`0x1a`;
+          callers `LMP_IN_RAND_0x08`/`handle_lmp_in_rand_not_accepted`; xref_in=3;
+          107 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (205);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (206): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (107 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
