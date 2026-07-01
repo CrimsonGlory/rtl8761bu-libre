@@ -11507,8 +11507,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (253);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (254): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (59 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (254) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002405c`→
+          `lookup_min_encryption_key_size_from_config_tables`
+          (38B, HIGH). Min encryption key-size config lookup: conn `+0xd0` flag +
+          12-entry opcode enable table gates return of `PTR_DAT_80024088[2]` vs `[3]`;
+          callers `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` at `0x80027e5a`/`0x80027eaa`
+          (sub-states `'J'`/`'G'`); xref_in=2; 58 unnamed remain; live named 1863.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (254);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (255): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (58 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

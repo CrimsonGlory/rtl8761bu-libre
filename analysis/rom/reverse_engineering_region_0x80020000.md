@@ -8360,4 +8360,33 @@ region `0x80060000`.
 
 Region unnamed count after this pass: **59** (60 minus this rename). Live named **1862** global.
 
+**Next:** superseded by Pass 6 continuation (254).
+
+## Pass 6 continuation (254) (2026-07-01) — min encryption key-size config lookup `FUN_8002405c`
+
+Decompiled and renamed:
+**`FUN_8002405c` → `lookup_min_encryption_key_size_from_config_tables`**
+(38B, HIGH) via `RenamePass6Region80020000Fun8002405c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (38B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=59` at pass start). First-listed in tied
+38B tier; sits in the `0x800240xx` encryption key-size config cluster alongside sibling
+`FUN_80024050` (max-key-size config byte reader).
+
+**Mechanism:** Returns a minimum allowed encryption key-size byte from global config
+`PTR_DAT_80024088`: when conn-record flag `+0xd0` is set, crypto struct byte `*param_2`
+minus `0x14` indexes a 12-entry enable table `PTR_DAT_80024084` (opcodes `0x14`–`0x1f`
+range), and a nonzero table entry selects config byte at index `2`; otherwise returns
+config byte at index `3`. Caller compares return value against inbound LMP 0x10 key-size
+request byte to accept/reject or clamp negotiation.
+
+**Callers:** `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` at `0x80027e5a` (crypto sub-state `'J'`)
+and `0x80027eaa` (sub-state `'G'`); xref_in=2 via `ListXrefsTo8002405c.java`.
+
+**Confidence:** HIGH — decompile confirms config-table lookup gated on conn `+0xd0` and
+12-entry opcode-class enable bitmap; caller decompile shows return used as minimum key-size
+bound against PDU byte 5 during LMP 0x10 negotiation in both `'J'` and `'G'` branches.
+
+Region unnamed count after this pass: **58** (59 minus this rename). Live named **1863** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
