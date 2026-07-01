@@ -4073,5 +4073,36 @@ idiom matches sibling `FUN_800352d0`.
 Region unnamed count after this pass: **156** (157 minus this rename). Live named
 **2010** global.
 
-**Next:** Pass 135 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 135.
+
+## Pass 135 (2026-07-01) — register-script invoke wrapper `FUN_800393d8`
+
+Fresh `ListUnnamed80030000.java` re-run: **156 unnamed** remain in region
+(unchanged from Pass 134; rank-1 at xref=2 tier is `FUN_800393d8` at 24B —
+largest among tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800393d8` → `invoke_register_script_from_global_context_0x60_0x64`**
+(24B, HIGH, SIMPLE-tier) via
+`RenamePass135Region80030000Fun800393d8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin register-script interpreter invocation wrapper in the
+`0x800393xx` cluster. Loads global context `PTR_PTR_800393f0`, calls through
+hook fptr at `PTR_DAT_800393f4` with `(script_ptr, num_halfwords)` =
+`(*(ctx+0x60), *(ushort*)(ctx+0x64))` — matching
+`register_script_interpreter` signature. Sibling of `FUN_800393f8`
+(offsets `+0x58`/`+0x5c`) and `FUN_80039418` (dual invoke). Listed as caller
+of `register_script_interpreter` in
+`reverse_engineering_register_script_interpreter.md`.
+
+**Callers:** 2 xref-in (caller names unresolved this pass; `find_callers` empty
+— likely indirect/data-ref invocation).
+
+**Confidence:** HIGH — full 24B decompile; fptr-dispatch idiom and context-field
+offsets match documented register-script cluster; name persisted in Ghidra.
+
+Region unnamed count after this pass: **155** (156 minus this rename). Live named
+**2011** global.
+
+**Next:** Pass 136 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
