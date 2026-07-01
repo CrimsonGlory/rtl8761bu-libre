@@ -8058,4 +8058,31 @@ LE crypto HCI event sender; neighborhood cluster with `0x800257b0`/`0x80025b68`.
 
 Region unnamed count after this pass: **69** (70 minus this rename). Live named **1852** global.
 
+**Next:** superseded by Pass 6 continuation (244).
+
+## Pass 6 continuation (244) (2026-07-01) — SAFER+ PHT butterfly mix helper `FUN_8002c9c8`
+
+Decompiled and renamed:
+**`FUN_8002c9c8` → `safer_plus_pht_butterfly_mix_16byte_block`**
+(42B, HIGH) via `RenamePass6Region80020000Fun8002c9c8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (42B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=69` at pass start). First-listed in tied
+42B tier; immediate neighbor of `get_DHKey_to_3rd_param_p192` (`0x8002c928`) and
+`safer_plus_round_key_xor_or_add_block` (`0x8002ca2c`) in the SAFER+ cipher cluster.
+
+**Mechanism:** In-place SAFER+ PHT-style 2-2 byte-pair butterfly over a 16-byte block
+(`param_1`). For each adjacent pair `(a,b)`: writes `(2a+b, a+b)` mod 256 across eight
+iterations (`uVar2` steps 0,2,…,14). Decompile is byte-identical to the inline PHT loops
+in `safer_plus_block_encrypt` (both the 3×/round inner loop and the post-round pass
+documented in `reverse_engineering_encryption_engine.md` §5).
+
+**Callers:** xref_in=0 — not invoked directly; `safer_plus_block_encrypt` inlines the same
+logic rather than calling this outlined helper.
+
+**Confidence:** HIGH — exact structural match to documented SAFER+ PHT butterfly in
+`safer_plus_block_encrypt`; sits between two already-HIGH SAFER+ cluster neighbors.
+
+Region unnamed count after this pass: **68** (69 minus this rename). Live named **1853** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
