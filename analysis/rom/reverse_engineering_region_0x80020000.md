@@ -4581,4 +4581,37 @@ are established SSP confirm/OOB verification paths.
 
 Region unnamed count after this pass: **185** (186 minus this rename). Live named **1736** global.
 
+**Next:** superseded by Pass 6 continuation (128).
+
+## Pass 6 continuation (128) (2026-07-01) — HCI Create Connection validator `FUN_800214f4`
+
+Decompiled and renamed:
+**`FUN_800214f4` → `validate_hci_create_connection_params`**
+(102B, HIGH) via `RenamePass6Region80020000Fun800214f4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (102B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=185` at pass start). Sibling of
+`validate_hci_role_switch_feasibility_for_bdaddr_and_role` (`0x8002143c`) in the
+connection-setup validation cluster.
+
+**Mechanism:** HCI Create Connection (opcode `0x0405`) PDU parameter validator.
+Copies 6-byte BD_ADDR from `param+3`, resolves slot via
+`look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot` (returns `0x0b`
+on failure). On slot found, tests global paging-capacity bit via
+`bit_test__bit_index_at_offset_0x16f__within__short_at_offset_0x24_` (returns `0x0d`
+when set). Otherwise validates packet-type reserved bits (`param+9 & 0xe1 == 0`),
+page-scan repetition mode (`param+0xb <= 2`), reserved byte zero (`param+0xc == 0`),
+and allow-role-switch flag (`param+0xf & 0xfe == 0`); invalid combo → `0x12`.
+Returns `0` on success.
+
+**Callers:** `fHCI_Create_Connection_0x05` (`0x8001bd7a`) — documented gate in
+`reverse_engineering_lc_lmp_state_machine.md` §3; patch firmware `FUN_8010dd1c`
+(`0x8010deda`) — string-assoc installer hook path.
+
+**Confidence:** HIGH — decompile confirms HCI Create Connection PDU field layout and
+standard error-code mapping (`0x0b`/`0x0d`/`0x12`); callee/caller names are
+established connection-setup cluster helpers.
+
+Region unnamed count after this pass: **184** (185 minus this rename). Live named **1737** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
