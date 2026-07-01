@@ -14597,8 +14597,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7u;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7v: cold-triage next rank-1
-          unnamed function in region `0x80010000` (237 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7v (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8001a0c8`→`conditionally_apply_ogc3_ocf47_hw_bit0x100_when_idle`
+          (42B, HIGH). OGF=3 OCF=0x47 apply tail-call: gates `FUN_8001409c(1)` on
+          `field_0x17d==2` + idle prereqs (`byte_0x16f`/`field_0x171` clear), else
+          `FUN_8001409c(0)` for bit0x100 commit via hook index `0x16`; 7 xref_in.
+          236 unnamed remain; live named 2188.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7v;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7w: cold-triage next rank-1
+          unnamed function in region `0x80010000` (236 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

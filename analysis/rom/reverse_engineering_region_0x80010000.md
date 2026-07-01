@@ -1297,4 +1297,29 @@ exactly.
 
 Region unnamed count after this pass: **237** (238 minus this rename).
 
-**Next:** Pass 7v — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7v (2026-07-01) — OGC-3 OCF-47 conditional config-bit apply `FUN_8001a0c8`
+
+Pass 7v target from cold-triage rank-1 (7 xref_in, 42B — sole rank-1 at xref=7
+tier after Pass 7u). Decompiled and renamed:
+**`FUN_8001a0c8` → `conditionally_apply_ogc3_ocf47_hw_bit0x100_when_idle`**
+(42B, HIGH) via `RenamePass7vRegion80010000Fun8001a0c8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** OGF=3 OCF=0x47 (`OGC_3_OCF_47`) apply tail-call. After the setter
+writes `field_0x17d` on the `0x300`-byte config struct, this gate calls
+`FUN_8001409c(1)` only when `field_0x17d==2` AND `byte_0x16f==0` AND
+`field_0x171==0`; otherwise calls `FUN_8001409c(0)`. `FUN_8001409c` sets or
+clears bit `0x100` on the ushort at `DAT_800140d0` and dispatches via hook
+`PTR_DAT_800140d4` with index `0x16`. Sibling apply pattern: OCF `0x45`/`0x49`
+tail-call `log_ogc3_config_apply_evt_0x4b6_if_no_patch3` after writing
+`field_0x17c`/`field_0x17e`.
+
+**Callers:** 7 xref_in per `ListUnnamed80010000.java`; primary caller is
+`OGC_3_OCF_47` (HCI vendor-config field setter documented Pass 2).
+
+**Confidence:** HIGH — decompile confirms struct-field gate and
+`FUN_8001409c` bit0x100 commit; cross-confirmed with `OGC_3_OCF_47` decompile.
+
+Region unnamed count after this pass: **236** (237 minus this rename).
+
+**Next:** Pass 7w — cold-triage next rank-1 unnamed in region `0x80010000`.
