@@ -9674,4 +9674,33 @@ inquiry/page cold-init cluster (region `0x80060000` Pass 3).
 
 Region unnamed count after this pass: **13** (14 minus this rename). Live named **1908** global.
 
+**Next:** superseded by Pass 6 continuation (300).
+
+## Pass 6 continuation (300) (2026-07-01) — SSP IO-capability 3-byte copy `FUN_800257f0`
+
+Decompiled and renamed:
+**`FUN_800257f0` → `copy_three_io_capability_bytes`**
+(14B, HIGH) via `RenamePass6Region80020000Fun800257f0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with highest xref_in≥1:
+`FUN_800257f0` (14B, xref_in=5) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=13` at pass start).
+
+**Mechanism:** Trivial 3-byte memcpy helper in the Simple Pairing IO-capability exchange
+cluster: copies `param_1[0..2]` → `param_2[0..2]` (IO Capability, OOB Authentication Data,
+Authentication Requirements per Bluetooth Core Spec). Used to stage LMP-extended PDU bytes
+from offset `+6` into per-connection crypto struct field `+0x1e1` before emitting
+`send_evt_HCI_IO_Capability_Response` and arming pairing-template staging.
+
+**Callers:** `handle_lmp_ext_io_capability_req_subopcode_0x19` (documented Pass 6 cont. 17),
+`continue_ssp_pairing_after_hci_debug_mode_write`; xref_in=5 (2 direct call sites +
+additional data/indirect refs).
+
+**Confidence:** HIGH — decompile is unambiguous 3-byte copy; caller context in documented
+SSP IO-capability req/resp handlers (Pass 6 cont. 17/18) confirms Bluetooth IO-cap triplet
+semantics.
+
+Region unnamed count after this pass: **12** (13 minus this rename). Live named **1909** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

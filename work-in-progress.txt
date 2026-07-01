@@ -11928,8 +11928,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (299);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (300): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (13 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (300) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800257f0`→`copy_three_io_capability_bytes`
+          (14B, HIGH). SSP IO-capability 3-byte memcpy helper: copies IO-cap/OOB/auth-req
+          triplet from LMP-ext PDU offset +6 into crypto struct +0x1e1; callers
+          `handle_lmp_ext_io_capability_req_subopcode_0x19` +
+          `continue_ssp_pairing_after_hci_debug_mode_write`.
+          12 unnamed remain; live named 1909.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (300);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (301): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (12 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
