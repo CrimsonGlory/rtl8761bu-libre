@@ -10016,4 +10016,33 @@ HCI-event/QoS timing helpers).
 
 Region unnamed count after this pass: **1** (2 minus this rename). Live named **1920** global.
 
-**Next:** cold-triage last rank-1 unnamed `FUN_800269e4` (4B) per `ListUnnamed80020000.java`.
+**Next:** superseded by Pass 6 continuation (312).
+
+## Pass 6 continuation (312) (2026-07-01) — link-key cluster gap stub `FUN_800269e4`
+
+Decompiled and renamed:
+**`FUN_800269e4` → `stub_return_zero_link_key_lookup_cluster_gap`**
+(4B, HIGH) via `RenamePass6Region80020000Fun800269e4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Last remaining unnamed in region `0x80020000` per `ListUnnamed80020000.java`
+(`total_unnamed=1` at pass start). Rank-1 by size (4B, xref_in=0). Sits in the stored
+link-key lookup cluster between `lookup_stored_link_key_by_bdaddr_in_seven_slot_table`
+(`0x80026994`, Pass 6 cont. 170) and
+`handle_lmp_not_accepted_opcode_0x10_encryption_key_size_finalize` (`0x800269e8`, Pass 6 cont. 131),
+adjacent to literal pool `PTR_DAT_800269e0`.
+
+**Mechanism:** Trivial `return 0;` 4-byte stub — same idiom as `just_return_0` (`0x800605a4`)
+and `noop_unused_patch_hook_slot_vsc_fc13_stub_gap_return_zero` (`0x80078830`). Orphan gap
+stub with no call sites; likely alignment/padding artifact between the link-key table walker
+and the encryption-key-size NOT-ACCEPTED handler.
+
+**Callers:** none (xref_in=0).
+
+**Confidence:** HIGH for mechanism (unambiguous `return 0`); MEDIUM for role (orphan with no
+proven call sites, but cluster placement documents it as a link-key lookup gap stub).
+
+Region unnamed count after this pass: **0** — region `0x80020000` exhaustive sweep **COMPLETE**.
+Live named **1921** global.
+
+**Next:** region `0x80020000` sweep complete; pivot to next ROM region (e.g. `0x80070000`
+HANDLER-tier continuation or `0x80050000` cold-triage).

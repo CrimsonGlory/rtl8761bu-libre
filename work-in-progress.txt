@@ -12034,8 +12034,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (311);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (312): cold-triage
-          last rank-1 unnamed `FUN_800269e4` (4B) per `ListUnnamed80020000.java`.
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (312) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800269e4`→`stub_return_zero_link_key_lookup_cluster_gap`
+          (4B, HIGH). Trivial `return 0` orphan gap stub between link-key lookup table walker
+          and encryption-key-size NOT-ACCEPTED handler; xref_in=0. Region `0x80020000` sweep
+          COMPLETE (0 unnamed remain); live named 1921.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (312);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80070000 — Pass 12fq: cold-triage rank-1 HANDLER-tier
+          unnamed per `ListRegion0x80070000.java` (13 HANDLER-tier remain after Pass 12fp).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
