@@ -1741,4 +1741,33 @@ Pass 157); cluster placement alongside masked busy-wait primitives.
 
 Region unnamed count after this pass: **221** (222 minus this rename).
 
-**Next:** Pass 91 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 91.
+
+## Pass 91 (2026-07-01) — eSCO codec table pair `FUN_80014b30`
+
+Pass 91 target from cold-triage rank-1 (4 xref_in, 118B — largest at xref=4
+tier after Pass 90). Decompiled and renamed:
+**`FUN_80014b30` → `write_esco_slot_codec_table_pair_from_role_and_byte_block`**
+(118B, HIGH) via `RenamePass91Region80010000Fun80014b30.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** eSCO-slot codec-table pair writer in the `0x80014bxx` cluster
+(sibling of `write_baseband_codec_param_triplet` and
+`clear_codec_table_entries_for_role`). Maps conn role via
+`conn_record_role_to_esco_slot_index`; when slot non-zero, computes base row
+`(slot-1)*0xc+1` and writes two consecutive rows via
+`write_codec_table_entry_and_wait_ack`, packing bytes from caller's 8-byte
+parameter block into two 32-bit values (bytes `[4..7]` then `[0..3]`).
+
+**Callers:** 4 xref_in — `role_switch_commit_staged_slot_transition`,
+`derive_sres_e1_or_e22_and_send_lmp_response` (2 confirmed via `xrefs_to`);
+also invoked from `arm_link_encryption_post_key_program` (region `0x80020000`
+Pass 6 cont.) alongside `FUN_80014ba8`.
+
+**Confidence:** HIGH — decompile confirms slot-indexed dual-row codec-table
+writes via established `write_codec_table_entry_and_wait_ack` primitive;
+cluster placement consistent with `0x800147b0`/`0x80014c58` codec-table family.
+
+Region unnamed count after this pass: **220** (221 minus this rename).
+
+**Next:** Pass 92 — cold-triage next rank-1 unnamed in region `0x80010000`.
