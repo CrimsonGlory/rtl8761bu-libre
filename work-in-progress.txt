@@ -14730,8 +14730,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 87;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 88: cold-triage next rank-1
-          unnamed function in region `0x80010000` (224 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 88 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80012820`→`apply_link_mode_change_timeout_to_bb_regs_0x6e_0x6c`
+          (156B, HIGH). Link-mode-change timeout commit: optional veto hook;
+          quality-recovery prelude; programs BB reg `0x6e` via hook
+          `PTR_DAT_800128c8`; tail `FUN_80011c60` for reg `0x6c`; callers
+          `FUN_80010814` + `apply_link_mode_change_bb_regs_and_timeout_by_phase`
+          + VSC dispatcher; 4 xref_in. 223 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 88;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 89: cold-triage next rank-1
+          unnamed function in region `0x80010000` (223 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

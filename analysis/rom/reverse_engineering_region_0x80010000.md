@@ -1649,4 +1649,35 @@ hook, disable sentinel `0xffff`, and CPB-tick + SCO-sync caller integration.
 
 Region unnamed count after this pass: **224** (225 minus this rename).
 
-**Next:** Pass 88 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 89.
+
+## Pass 88 (2026-07-01) — Link-mode timeout BB reg commit `FUN_80012820`
+
+Pass 88 target from cold-triage rank-1 (4 xref_in, 156B — largest at xref=4
+tier after Pass 87). Decompiled and renamed:
+**`FUN_80012820` → `apply_link_mode_change_timeout_to_bb_regs_0x6e_0x6c`**
+(156B, HIGH) via `RenamePass88Region80010000Fun80012820.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Link-mode-change timeout commit helper in the VSC 0xFC11 /
+`apply_link_mode_change_bb_regs_and_timeout_by_phase` cluster. Optional veto
+hook at `PTR_DAT_800128bc`; on fallback runs
+`program_bb_regs_0x188_0x18a_by_mode_byte_gated_on_config_bit0x10(0)`,
+`link_state6_quality_bit7_recovery_trigger`, and
+`link_state6_clear_bit15_if_feature_set`. Timeout value: when `param_1==0`,
+derives `((DAT_800128c0|DAT_800128c4)>>1)-0x100`; else uses `param_2`.
+Programs BB reg `0x6e` via hook `PTR_DAT_800128c8`; stores aux at
+`DAT_800128d0`; config feature mask at `+0xe4..+0xe7` may install handler at
+`DAT_800128dc`; tail calls `FUN_80011c60` (BB reg `0x6c` + status-bit commit).
+
+**Callers:** 4 xref_in — `FUN_80010814` (connection-setup path),
+`apply_link_mode_change_bb_regs_and_timeout_by_phase` (phases 1–5),
+`HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` (VSC dispatcher); 2 confirmed
+via `find_callers`.
+
+**Confidence:** HIGH — decompile confirms BB reg `0x6e`/`0x6c` timeout commit,
+quality-recovery prelude, and link-mode-change cluster integration.
+
+Region unnamed count after this pass: **223** (224 minus this rename).
+
+**Next:** Pass 89 — cold-triage next rank-1 unnamed in region `0x80010000`.
