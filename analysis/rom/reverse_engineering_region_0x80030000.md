@@ -5462,5 +5462,39 @@ set.
 Region unnamed count after this pass: **114** (115 minus this rename). Live named
 **2052** global.
 
-**Next:** Pass 177 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 177.
+
+## Pass 177 (2026-07-01) — per-link VSC FC95 + LMP268 gateway `FUN_8003fa24`
+
+Fresh `ListUnnamed80030000.java` re-run: **114 unnamed** remain in region
+(unchanged from Pass 176; rank-1 at xref=1 tier is `FUN_8003fa24` at 94B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003fa24` → `per_link_vsc_fc95_lmp268_gateway_with_param_scaled_timeout`**
+(94B, HIGH, UTILITY-tier) via
+`RenamePass177Region80030000Fun8003fa24.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-link VSC FC95 + LMP-268 pending-slot gateway. Indexes
+`big_ol_struct[param_1]`; computes timeout `max(10, (param_2*5)>>3)` from
+caller-supplied delta. When pending slot `field_0x44 == -1`, issues
+`VSC_0xfc95_called2` to fill it; then dispatches
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` with the pending value and
+computed timeout. Returns `0xff` on either step failure, `0` on success. TX-power
+cluster helper — callee of Pass 164
+`apply_random_bdaddr_tx_power_delta_via_vsc_fc95_lmp_268`; sibling of Pass 175
+`dual_pending_vsc_fc95_and_lmp268_gateway_with_config_timeout` (dual-slot variant
+with config-byte timeout scaling).
+
+**Callers:** 1 xref-in — `apply_random_bdaddr_tx_power_delta_via_vsc_fc95_lmp_268`
+(Pass 164); invoked when random-BD_ADDR TX-power delta exceeds global threshold.
+
+**Confidence:** HIGH — full 94B decompile; sentinel `-1` VSC FC95 fill +
+LMP-268 dispatch chain matches Pass 164 parent description and Pass 175
+sibling pattern; param-scaled timeout formula unambiguous.
+
+Region unnamed count after this pass: **113** (114 minus this rename). Live named
+**2053** global.
+
+**Next:** Pass 178 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
