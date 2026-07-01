@@ -14249,7 +14249,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 273;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 274: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 274 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800333d4`→`truncate_ushort_to_byte_if_conn_field0x206_eq_1`
+          (34B, HIGH, UTILITY-tier). When `big_ol_struct[slot].field200_0x206==1`,
+          masks working packet-type ushort to byte width; `0x800333xx` setup-chain
+          sibling of Pass 12cd packet-type commit. 16 unnamed remain; live named 2150.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 274;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 275: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

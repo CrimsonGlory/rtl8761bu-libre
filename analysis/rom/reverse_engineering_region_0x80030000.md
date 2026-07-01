@@ -8467,5 +8467,35 @@ call with `param_2=0` unambiguous; callee already HIGH-named in Pass 173.
 Region unnamed count after this pass: **17** (18 minus this rename). Live named
 **2149** global.
 
-**Next:** Pass 274 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 274.
+
+## Pass 274 (2026-07-01) — packet-type byte truncate `FUN_800333d4`
+
+Fresh `ListUnnamed80030000.java` re-run: **17 unnamed** remain in region
+(unchanged from Pass 273; xref_in=0 tier dominates — rank-1 is `FUN_800333d4`
+at 34B, wins on address over tied 32B sibling `FUN_80033168`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800333d4` → `truncate_ushort_to_byte_if_conn_field0x206_eq_1`**
+(34B, HIGH, UTILITY-tier) via
+`RenamePass274Region80030000Fun800333d4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Conn-slot conditional byte truncate on working packet-type mask:
+when `big_ol_struct[slot].field200_0x206 == 1`, zero-extends low byte of
+`*param_2` back into the ushort (`*param_2 = (ushort)(byte)*param_2`),
+effectively masking to `0xff`. Sibling of Pass 12cd's
+`recompute_and_store_field_0x250_packet_type_on_conn_slot` final
+`field_0x206==1` mask step and the `0x800333xx` setup-chain cluster
+(`merge_packet_type_mask_from_conn_slot_and_feature_page`,
+`mask_packet_type_bitmask_by_max_slot_fields_0x24a_0x24b`, etc.).
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 34B decompile; `field200_0x206` gate + byte
+truncate semantics unambiguous; aligns with Pass 12cd packet-type commit path.
+
+Region unnamed count after this pass: **16** (17 minus this rename). Live named
+**2150** global.
+
+**Next:** Pass 275 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
