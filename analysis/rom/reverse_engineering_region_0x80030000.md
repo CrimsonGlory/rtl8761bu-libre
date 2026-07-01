@@ -3339,5 +3339,38 @@ callees and sole HCI Reset caller anchor the role.
 Region unnamed count after this pass: **177** (178 minus this rename). Live named
 **1989** global.
 
-**Next:** Pass 114 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 114.
+
+## Pass 114 (2026-07-01) — HW channel bits9-11 read `FUN_80034884`
+
+Fresh `ListUnnamed80030000.java` re-run: **177 unnamed** remain in region
+(unchanged from Pass 113; rank-1 by size at xref=2 tier is `FUN_80034884` at
+50B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034884` → `read_hw_channel_bits9_11_by_role_index_via_esco_remap`**
+(50B, HIGH, SIMPLE-tier) via `RenamePass114Region80030000Fun80034884.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Role-index (`param_1`) + pending-eSCO flag byte (`param_2`):
+`remap_role_index_to_esco_slot_if_pending`, lookup per-slot HW-channel register
+index from table at `PTR_DAT_800348b8` (`slot*8+4` ushort), read current ushort
+at that index via `DAT_800348bc`, return bits 9–11 (`>> 9 & 7`). Read-only
+sibling of Pass 58/59's bit15 OR/AND HW-channel dispatch pair on parallel
+literal-pool tables (`80034970`/`80034910`).
+
+**Callers:** 2 confirmed via `ListXrefsTo80034884.java` —
+`LMP_INCR_POWER_REQ_0x1f` (`0x8006943c`) and `LMP_DECR_POWER_REQ_0x20`
+(`0x80069658`) — both read current TX-power level field before
+`check_power_val_below_max_limit_6` / `set_new_power_val` in the LMP
+power-increment/decrement handler cluster (region `0x80060000`).
+
+**Confidence:** HIGH — full 50B decompile; explicit eSCO remap + indexed
+HW-channel table read + 3-bit field extract; named LMP TX-power callers anchor
+the role.
+
+Region unnamed count after this pass: **176** (177 minus this rename). Live named
+**1990** global.
+
+**Next:** Pass 115 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
