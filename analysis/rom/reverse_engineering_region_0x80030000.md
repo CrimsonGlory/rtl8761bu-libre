@@ -5137,5 +5137,36 @@ HCI Reset reinit orchestrator.
 Region unnamed count after this pass: **124** (125 minus this rename). Live named
 **2042** global.
 
-**Next:** Pass 167 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (likely `FUN_80033670`, 112B at xref=1).
+**Next:** superseded by Pass 167.
+
+## Pass 167 (2026-07-01) — Calibration-mode conn-weight threshold gate `FUN_80033670`
+
+Fresh `ListUnnamed80030000.java` re-run: **124 unnamed** remain in region
+(unchanged from Pass 166; rank-1 at xref=1 tier is `FUN_80033670` at 112B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033670` → `check_calibration_mode_conn_weight_vs_config_threshold`**
+(112B, HIGH, UTILITY-tier) via
+`RenamePass167Region80030000Fun80033670.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook fptr at `PTR_DAT_800336e0` may override the
+predicate; default path gates on global flag bit4 (`PTR_DAT_800336e4 & 4`),
+`the_0x300` struct `+0x164` bit `0x10`, `byte_0x16f==0`, and
+`field_0x171==0`, then compares config `field160_0xa8`/`field161_0xa9`
+ushort threshold against per-connection `field106_0x94` at `param_1+0x94`;
+returns 1 when config threshold ≤ conn weight. TX-power/calibration cluster
+sibling of `power_level_smoothing_filter_feeding_param_dispatch` (Pass 8) which
+uses the same config threshold fields.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+invocation (consistent with hook-table / fptr dispatch).
+
+**Confidence:** HIGH — full 112B decompile; config threshold + conn-weight
+field pairing matches documented Pass 8 calibration-mode idiom.
+
+Region unnamed count after this pass: **123** (124 minus this rename). Live named
+**2043** global.
+
+**Next:** Pass 168 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
