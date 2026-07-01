@@ -3617,5 +3617,41 @@ documented apply family.
 Region unnamed count after this pass: **169** (170 minus this rename). Live named
 **1997** global.
 
-**Next:** Pass 122 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 122.
+
+## Pass 122 (2026-07-01) — `role_switch_commit_staged_slot_transition`
+
+Fresh `ListUnnamed80030000.java` re-run: **169 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003fcc8` at 604B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003fcc8` → `role_switch_commit_staged_slot_transition`**
+(604B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass122Region80030000Fun8003fcc8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Role-switch commit handler reading staged params from
+`PTR_DAT_8003ff24` (conn indices, slot types, subopcode indices). IRQ-off
+packet-type hook dispatch via `PTR_DAT_8003ff34` for old/new slots; HW channel
+table updates via `or_merge_hw_channel_table_entry_and_indexed_dispatch` /
+`and_mask_hw_channel_table_entry_and_indexed_dispatch` on `PTR_DAT_8003ff38`
+stride-8 entries. Calls `reassign_inquiry_lap_slot_refcount_pending_and_program_channel`,
+optional `LMP__25B__most_common_for_VSCs1`, subopcode descriptor init
+(`init_conn_subopcode_slot_descriptor_from_timing_templates`,
+`init_subopcode_slot_descriptor_and_assign_conn_index`), `clear_bos_e4_role_switch_hook_bit`,
+codec/crypto path when `field_0xbc` set, `sometimes_called_with_0_3_0`, and
+`reset_dual_slot_role_record_by_conn_index` on LAP refcount-zero path.
+
+**Callers:** 1 xref-in — `encryption_key_teardown_notifier` at `0x800029a4`
+(per prior cross-region xref sweep; paired with `FUN_80037804`).
+
+**Confidence:** HIGH — full 604B decompile; callees
+`reassign_inquiry_lap_slot_refcount_pending_and_program_channel` and
+`reset_dual_slot_role_record_by_conn_index` already HIGH-named; role-switch
+hook/bit clear matches documented `bos_base+0xe4` cluster.
+
+Region unnamed count after this pass: **168** (169 minus this rename). Live named
+**1998** global.
+
+**Next:** Pass 123 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
