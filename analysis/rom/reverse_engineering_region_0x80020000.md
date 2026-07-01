@@ -8206,4 +8206,35 @@ command router.
 
 Region unnamed count after this pass: **64** (65 minus this rename). Live named **1857** global.
 
+**Next:** superseded by Pass 6 continuation (249).
+
+## Pass 6 continuation (249) (2026-07-01) — HCI confirmation-reply thin wrapper `FUN_800236a0`
+
+Decompiled and renamed:
+**`FUN_800236a0` → `hci_resolve_conn_fhci_user_confirmation_request_reply_0x33`**
+(40B, HIGH) via `RenamePass6Region80020000Fun800236a0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=64` at pass start). First-listed in tied
+40B tier; sits in the `0x800236xx` SSP HCI-reply cluster alongside
+`fHCI_User_Confirmation_Request_Reply_0x33` (Pass 6 cont. 97) and sibling thin wrappers
+`hci_resolve_conn_fhci_user_passkey_request_reply_0x34` (Pass 6 cont. 248) and
+`hci_resolve_conn_tail_call_dispatch_ssp_lmp_ext_0x1b_or_dhkey_0x41` (Pass 6 cont. 247).
+
+**Mechanism:** Thin HCI command wrapper — `hci_resolve_conn_record_validate_and_complete`
+with validator `PTR_LAB_80023604_1`, then on success calls
+`fHCI_User_Confirmation_Request_Reply_0x33(conn_handle)` and returns its result; returns 0
+on conn-resolve failure. Same conn-resolve→fHCI-handler idiom as Pass 6 cont. (248)'s
+`hci_resolve_conn_fhci_user_passkey_request_reply_0x34` but targets the HCI User
+Confirmation Request Reply (opcode 0x0433 / OCF 0x33) path documented in Pass 6 cont. (97).
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` at `0x800236b8` (opcode `0x433` branch);
+xref_in=1 per Pass 6 cont. (97) caller analysis.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus call to
+documented SSP numeric-comparison confirmation reply handler; caller confirmed in SSP
+debug-mode command router.
+
+Region unnamed count after this pass: **63** (64 minus this rename). Live named **1858** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
