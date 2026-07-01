@@ -10107,8 +10107,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (100);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (101): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (212 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (101) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002fcb0`→
+          `program_sco_hw_channel_table_and_bb_regs_from_config`
+          (126B, HIGH). SCO HW channel table OR/AND-mask programmer + BB regs
+          0xd8/0x108 from config struct; xref_in=2; callers VSC vendor path +
+          `multi_field_opcode_dispatcher_type1_msg`.
+          211 unnamed remain; live named 1710.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (101);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (102): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (211 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

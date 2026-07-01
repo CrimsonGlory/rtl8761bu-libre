@@ -3754,4 +3754,37 @@ pattern from `handle_lmp_in_rand_not_accepted`'s `FUN_80025474` sibling.
 
 Region unnamed count after this pass: **212** (213 minus this rename). Live named **1709** global.
 
+**Next:** superseded by Pass 6 continuation (101).
+
+## Pass 6 continuation (101) (2026-07-01) — SCO HW channel table + BB reg programmer `FUN_8002fcb0`
+
+Decompiled and renamed:
+**`FUN_8002fcb0` → `program_sco_hw_channel_table_and_bb_regs_from_config`**
+(126B, HIGH) via `RenamePass6Region80020000Fun8002fcb0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (126B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=212` at pass start). Sibling of
+`init_sco_hw_channel_disable_be_c0_restore_saved_bb_regs` in the `0x8002fbxx` SCO HW
+channel cluster.
+
+**Mechanism:** Reads SCO config bytes from `PTR_DAT_8002fd30`. OR-merges channel-table
+entry **0x5e** with mask **0x90**; indexes 7-entry lookup table `PTR_DAT_8002fd34` by
+config byte `[8] & 7` and OR-merges that slot with **0x100**. Packs BB register **0xd8**
+value from config bytes `[2]`/`[7]` (bit-fields at `+0x900`/`+0xc00`/`+0x107` base,
+variant **0x117** when `[7]==2`) via HW-write fptr at `PTR_DAT_8002fd38`; also writes
+**0x108←3**. Clears upper bits on table entry **0x5e** via
+`and_mask_hw_channel_table_entry_and_indexed_dispatch(0x5e,0xf7ff)`; final OR-merge on
+**0x108** with **3**.
+
+**Callers:** `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` (VSC vendor path at
+`0x80031a9c`) and `multi_field_opcode_dispatcher_type1_msg` (at `0x8000f22a`) —
+confirmed via `FindCallers8002fcb0.java`.
+
+**Confidence:** HIGH — decompile confirms established channel-table OR/AND-mask idiom
+(documented in region `0x80040000` Pass 52); BB reg **0xd8**/**0x108** programming
+matches SCO/eSCO baseband setup family; two named callers tie it to VSC + mailbox
+type-1 dispatch paths.
+
+Region unnamed count after this pass: **211** (212 minus this rename). Live named **1710** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
