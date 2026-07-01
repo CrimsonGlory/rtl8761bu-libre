@@ -1696,5 +1696,37 @@ power/clock-adj semantics; caller chain documented.
 Region unnamed count after this pass: **228** (229 minus this rename). Live named
 **1938** global.
 
-**Next:** Pass 63 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 63.
+
+## Pass 63 (2026-07-01) — ACL ring-buffer flush gate `FUN_800324f4`
+
+Fresh `ListUnnamed80030000.java` re-run: **228 unnamed** remain in region
+(unchanged from Pass 62; rank-1 by xref count is `FUN_800324f4` at 62B,
+5 xref-in).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800324f4` → `trigger_acl_ring_buffer_flush_on_tracked_conn_match`**
+(62B, HIGH) via `RenamePass63Region80030000Fun800324f4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** `bool gate(char link_idx, void *ptr, char flush_flag)` gated on
+`config+0xd8` bit 0x40. When global tracked pointer at `PTR_DAT_80032538` is
+nonzero and `link_idx` matches `PTR_DAT_8003253c` and `ptr` matches the tracked
+pointer: returns 1 on probe (`flush_flag==0`); on flush (`flush_flag==1`)
+clears tracked pointer and calls `acl_packet_ring_buffer_manager`. Otherwise
+returns 0. Sibling of `invoke_acl_ring_buffer_if_config_flag_0x40_and_index_valid`
+(region `0x80070000` Pass 12br) — same config flag, different match semantics.
+
+**Callers:** 5 xref-in incl. `pdu_type_dispatch_enqueue_to_per_type_ring_and_notify`
+(region `0x80000000`) on type-4/5 PDU error/overflow paths and
+`dispatch_hci_td_connection_event_side_effects` (region `0x80020000`) on
+HCI-TD event-4 config-flag cleanup.
+
+**Confidence:** HIGH — full 62B decompile; callee `acl_packet_ring_buffer_manager`
+already HIGH from Pass 6; caller semantics confirmed via both caller decompiles.
+
+Region unnamed count after this pass: **227** (228 minus this rename). Live named
+**1939** global.
+
+**Next:** Pass 64 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

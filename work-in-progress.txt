@@ -12224,7 +12224,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 62;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 63: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 63 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (228 unnamed); decompiled+renamed rank-1
+          `FUN_800324f4`→`trigger_acl_ring_buffer_flush_on_tracked_conn_match`
+          (62B, HIGH). Config `field208_0xd8` bit 0x40 gated ACL ring-buffer flush
+          on tracked-conn match; clears `PTR_DAT_80032538` + calls
+          `acl_packet_ring_buffer_manager`; callers
+          `pdu_type_dispatch_enqueue_to_per_type_ring_and_notify` +
+          `dispatch_hci_td_connection_event_side_effects`. 227 unnamed remain;
+          live named 1939.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 63;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 64: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
