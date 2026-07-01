@@ -4905,5 +4905,40 @@ crypto init path; `field_0x173` active-slot preservation matches
 Region unnamed count after this pass: **131** (132 minus this rename). Live named
 **2035** global.
 
-**Next:** Pass 160 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 160.
+
+## Pass 160 (2026-07-01) — resource-pool chain release `FUN_80030560`
+
+Fresh `ListUnnamed80030000.java` re-run: **131 unnamed** remain in region
+(unchanged from Pass 159; rank-1 at xref=1 tier is `FUN_80030560` at 130B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80030560` → `release_resource_pool_chain_slot_type02_with_cleanup`**
+(130B, HIGH, HANDLER-tier) via
+`RenamePass160Region80030000Fun80030560.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Type-0x02 command handler (validates `param_1+2 == 0x02`, slot
+index at `param_1+4`). When resource-pool global at `PTR_DAT_800305e4` has
+active count `+0x26b != 0` and slot bitmask at `+0x270` includes the index:
+calls `release_resource_pool_chain_slot_by_type` (Pass 12fu dealloc counterpart
+to `allocate_resource_pool_chain_slots_by_type`). When pool empties
+(`+0x26b == 0`): clears bit `0x80` on `base_of_0x1ac_struct_array` entry
+`field69_0x45`, and when `field68_0x44` has bits `0x18` set invokes hook fptrs
+at `PTR_DAT_800305ec`/`PTR_DAT_800305f0`. Returns `0` on success, `0x12` when
+type/slot/bitmask gate fails. Deallocate sibling of allocate handler
+`FUN_800305f4` (sole caller of `allocate_resource_pool_chain_slots_by_type`).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch (known pattern).
+
+**Confidence:** HIGH — full 130B decompile; named callee anchors
+resource-pool chain dealloc path documented in region `0x80070000` Pass 12fu;
+type-0x02 gate and empty-pool hook cleanup consistent with HCI extended-inquiry
+feature-page staging cluster at `0x800305xx`.
+
+Region unnamed count after this pass: **130** (131 minus this rename). Live named
+**2036** global.
+
+**Next:** Pass 161 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
