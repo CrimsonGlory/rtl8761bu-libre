@@ -2197,5 +2197,39 @@ updates `PTR_DAT_80034d80` status flags. Known caller:
 Region unnamed count after this pass: **213** (214 minus this rename). Live named
 **1953** global.
 
-**Next:** Pass 78 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 78.
+
+## Pass 78 (2026-07-01) — link-mode gate status `FUN_80033a04`
+
+Fresh `ListUnnamed80030000.java` re-run: **213 unnamed** remain in region
+(unchanged from Pass 77; rank-1 by size at xref=3 tier is `FUN_80033a04` at
+188B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033a04` → `check_link_mode_change_gate_status`**
+(188B, HIGH) via `RenamePass78Region80030000Fun80033a04.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Link-mode-change precondition gate used by
+`link_mode_change_state_machine` (busy/ready/blocked status convention).
+Optional prelude hook at `PTR_DAT_80033ac0` — if installed and returns
+non-zero, skip default path. Scans 11-slot pending bitmask at
+`PTR_DAT_80033ac4` + `PTR_PTR_80033ac8` — any active slot with pending work
+returns `0xf` (busy). When link-mode housekeeping bytes at `PTR_DAT_80033acc`
+match expected state (`+6==8`, `+7/+8==0x10`) and global counters at
+`PTR_DAT_80033ad0`/`PTR_DAT_80033ad4` are zero, walks up to 4 connection
+slots via `PTR_DAT_80033ad8` checking LAP/role state on stride-0x84 entries
+against `the_0x300->_x142_LAP`. All slots clear returns `0` (ready); blocked
+precondition returns `0xff`.
+
+**Callers:** 3 xref-in (rank-1 by size at xref=3 tier).
+
+**Confidence:** HIGH — full 188B decompile; caller
+`link_mode_change_state_machine` and sibling `FUN_80033ae4` anchor the
+busy(`0xf`)/ready(`0`)/blocked(`0xff`) gate role.
+
+Region unnamed count after this pass: **212** (213 minus this rename). Live named
+**1954** global.
+
+**Next:** Pass 79 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
