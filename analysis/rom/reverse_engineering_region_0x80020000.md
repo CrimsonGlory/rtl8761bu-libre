@@ -5792,4 +5792,35 @@ sole caller is established patch-installer fptr registration site.
 
 Region unnamed count after this pass: **146** (147 minus this rename). Live named **1775** global.
 
+**Next:** superseded by Pass 6 continuation (167).
+
+## Pass 6 continuation (167) (2026-07-01) — Codec staging table init `FUN_800225a8`
+
+Decompiled and renamed:
+**`FUN_800225a8` → `populate_codec_staging_tables_from_rom`**
+(78B, HIGH) via `RenamePass6Region80020000Fun800225a8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (78B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=146` at pass start). Tied 78B cluster
+with `FUN_8002a1dc` (renamed Pass 166); first-listed `FUN_800225a8`.
+
+**Mechanism:** ROM boot-time codec JIT staging-table initializer. Called from system BT
+init `FUN_800614fc` (sole caller). Sequential staging of SCO/eSCO codec template bytes
+from ROM literals into RAM areas consumed later by `FUN_80025b68` during SSP pairing:
+(1) `FUN_8002c31c` writes `0xc4000003` to four global RAM locations,
+(2) `FUN_8002c2d8` stages codec-6 h2/h0 areas,
+(3) `optimized_memcpy` copies codec-6 h1 (`0x30`) and h2 second half (`0x18`),
+(4) `FUN_8002c2ac` stages codec-8 h2/h0 areas,
+(5) `optimized_memcpy` copies codec-8 h1 (`0x40`) and h2 second half (`0x20`).
+Full pipeline documented in `reverse_engineering_hardware_layer.md` Section 9.
+
+**Callers:** `FUN_800614fc` (1 site — system BT init; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms exact callee sequence matching
+`reverse_engineering_hardware_layer.md` Section 9 initialization call chain;
+sole caller is established system-init entry; function role already cross-referenced
+in hardware-layer codec-template pipeline analysis.
+
+Region unnamed count after this pass: **145** (146 minus this rename). Live named **1776** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
