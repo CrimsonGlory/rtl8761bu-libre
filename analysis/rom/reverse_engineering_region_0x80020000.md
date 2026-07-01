@@ -9447,4 +9447,36 @@ and event-index semantics (0–7, 0xf) already documented across prior passes re
 
 Region unnamed count after this pass: **21** (22 minus this rename). Live named **1900** global.
 
+**Next:** superseded by Pass 6 continuation (292).
+
+## Pass 6 continuation (292) (2026-07-01) — HCI BD_ADDR conn-index lookup `FUN_80022ff4`
+
+Decompiled and renamed:
+**`FUN_80022ff4` → `lookup_conn_index_from_hci_bdaddr_at_offset3`**
+(20B, HIGH) via `RenamePass6Region80020000Fun80022ff4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_80022ff4` (20B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=21` at pass start).
+
+**Mechanism:** Thin HCI command preamble helper. Takes HCI command buffer pointer
+`param_1` and connection-index output `param_2` (ushort*); calls
+`look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot(param_1 + 3, param_2)`
+to match the 6-byte BD_ADDR at HCI command offset **+3** against `big_ol_struct` slots.
+Returns **true** when lookup status is **0** (slot found). Sibling to region-`0x80010000`
+`wrap_look_for_non_matching_bdaddr_bos_index_i.e._free_connection_slot` (maps failures
+to HCI status codes 0x0b/0x0d/0x12) but this variant is a bare bool success/fail gate.
+
+**Callers:** `hci_resolve_conn_record_validate_and_complete` (`0x80023008`, Pass 6 cont.
+133 — shared OGF1/OGF3 conn-resolve + crypto-validator preamble) and
+`fHCI_Keypress_Notification_0x60` (`0x80023b40`, Pass 6 cont. 140 — opcode 0x0C60
+Keypress Notification); xref_in=2.
+
+**Confidence:** HIGH — decompile confirms unambiguous BD_ADDR-at-offset-3 lookup via
+already-named `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`;
+both callers treat zero return as Unknown Connection Identifier (status 0x02).
+
+Region unnamed count after this pass: **20** (21 minus this rename). Live named **1901** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

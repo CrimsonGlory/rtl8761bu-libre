@@ -11858,8 +11858,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (291);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (292): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (21 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (292) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80022ff4`→`lookup_conn_index_from_hci_bdaddr_at_offset3`
+          (20B, HIGH). HCI cmd BD_ADDR-at-offset-3 conn-index lookup via
+          `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`; returns
+          true on success. Callers `hci_resolve_conn_record_validate_and_complete` and
+          `fHCI_Keypress_Notification_0x60`; xref_in=2.
+          20 unnamed remain; live named 1901.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (292);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (293): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (20 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
