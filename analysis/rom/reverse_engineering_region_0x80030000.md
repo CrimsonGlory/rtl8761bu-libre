@@ -5003,5 +5003,37 @@ config `field453_0x1d1` reuse, and signed-byte clamp semantics unambiguous.
 Region unnamed count after this pass: **128** (129 minus this rename). Live named
 **2038** global.
 
-**Next:** Pass 163 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 163.
+
+## Pass 163 (2026-07-01) — link-mode cleanup logger `FUN_80034d00`
+
+Fresh `ListUnnamed80030000.java` re-run: **128 unnamed** remain in region
+(unchanged from Pass 162; rank-1 at xref=1 tier is `FUN_80034d00` at 118B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034d00` → `log_link_mode_cleanup_evt_0x3eb_or_0x2d1_if_no_patch3`**
+(118B, HIGH, UTILITY-tier) via
+`RenamePass163Region80030000Fun80034d00.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change cleanup logger callee of
+`emit_link_mode_change_cleanup_status_with_dedup`. Packs event parameter as
+`param_3 + param_1*0x100`. Selects logger context from `PTR_DAT_80034d78`
+low bits: when `(byte & 3) == 0` emits tag `0x3eb` via `PTR_DAT_80034d7c`,
+else tag `0x2d1` via `PTR_DAT_80034d84`, both through
+`possible_logger_called_if_no_patch3`. On logger failure sets housekeeping bytes
+`+0x96`/`+0x97` on `PTR_DAT_80034d80` and returns `0`; on success updates
+`+0x97` with mode nibble and returns `0xff`. Sibling of
+`log_conn_setup_commit_fallback_evt_0x2d2_if_no_patch3` (`0x80034ccc`).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; sole direct caller
+`emit_link_mode_change_cleanup_status_with_dedup` (`0x80034d88`).
+
+**Confidence:** HIGH — full 118B decompile; tag selection `0x3eb`/`0x2d1`
+matches parent dedup scan; status-byte update semantics unambiguous.
+
+Region unnamed count after this pass: **127** (128 minus this rename). Live named
+**2039** global.
+
+**Next:** Pass 164 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -13192,7 +13192,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 162;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 163: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 163 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80034d00`→`log_link_mode_cleanup_evt_0x3eb_or_0x2d1_if_no_patch3`
+          (118B, HIGH, UTILITY-tier). Link-mode cleanup logger: packs
+          `param_3+param_1*0x100`, selects tags `0x3eb`/`0x2d1` via
+          `PTR_DAT_80034d78` low bits, updates `PTR_DAT_80034d80` status bytes;
+          callee of `emit_link_mode_change_cleanup_status_with_dedup`.
+          Region unnamed 127 remain; live named 2039.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 163;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 164: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
