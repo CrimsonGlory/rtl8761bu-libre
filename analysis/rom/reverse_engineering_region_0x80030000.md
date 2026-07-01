@@ -3898,5 +3898,44 @@ documented TX-power runtime-config cluster.
 Region unnamed count after this pass: **161** (162 minus this rename). Live named
 **2005** global.
 
-**Next:** Pass 130 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 130.
+
+## Pass 130 (2026-07-01) — `validate_lmp25c_role_record_pdu_and_program_dual_slot_credits_or_reject`
+
+Fresh `ListUnnamed80030000.java` re-run: **161 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003ff44` at 256B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ff44` → `validate_lmp25c_role_record_pdu_and_program_dual_slot_credits_or_reject`**
+(256B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass130Region80030000Fun8003ff44.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LC TX-dispatch ingress gate for dual-slot LMP-0x25C role-record
+PDUs. Early-exits when `references_patch_download_mem4()` active. Parses
+connection handle (low 12 bits) and link-type nibble (bits 6–7 of byte+1);
+validates against `config_struct` fields `+0xb6`/`+0xb7`, resolves bos-array
+index via `lookup_up_to_3_bos_array_indices_by_connection_handle`, checks
+`big_ol_struct` status-byte gate for link types 1/2, then calls
+`FUN_800181f4` to populate per-PDU context at `param_1+0x206`. On success
+(credit byte nonzero in 0x84-stride role table), chains to
+`program_dual_slot_lmp25c_packet_credits_by_conn_index`. On failure: dispatches
+hook at `PTR_DAT_80040050(param_1,2)`; when `PTR_DAT_80040054` bit0 set,
+allocates buffer and transmits LMP bytes `0x10`/`0x01`/`0x02` via
+`invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`; logs rejection with
+coded reason (`1`/`4`/`8`/`0x20`/`0x40`).
+
+**Callers:** 1 xref-in — `LC_event_TX_dispatcher` at `0x800424dc`
+(documented Pass 2 region `0x80040000`).
+
+**Confidence:** HIGH — full 256B decompile; caller integration in LC TX
+dispatcher confirmed via `ListXrefsTo8003ff44.java`; callees
+`program_dual_slot_lmp25c_packet_credits_by_conn_index` and
+`lookup_up_to_3_bos_array_indices_by_connection_handle` already high-confidence;
+sibling of region `0x80040000` dual-slot LMP-0x25C role-record cluster.
+
+Region unnamed count after this pass: **160** (161 minus this rename). Live named
+**2006** global.
+
+**Next:** Pass 131 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

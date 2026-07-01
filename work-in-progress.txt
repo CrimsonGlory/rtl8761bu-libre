@@ -12881,7 +12881,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 129;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 130: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 130 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (161 unnamed); decompiled+renamed rank-1
+          `FUN_8003ff44`→`validate_lmp25c_role_record_pdu_and_program_dual_slot_credits_or_reject`
+          (256B, HIGH, HANDLER-tier). LC TX-dispatch ingress gate for dual-slot
+          LMP-0x25C role-record PDUs: validates handle/type, chains to
+          `program_dual_slot_lmp25c_packet_credits_by_conn_index` or rejects
+          with LMP `0x10`/`0x01`/`0x02`. 1 xref-in — `LC_event_TX_dispatcher`.
+          160 unnamed remain; live named 2006.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 130;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 131: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
