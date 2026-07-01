@@ -6818,4 +6818,32 @@ documented `0x8002b9xx` HW crypto/slot cluster.
 
 Region unnamed count after this pass: **111** (112 minus this rename). Live named **1810** global.
 
+**Next:** superseded by Pass 6 continuation (202).
+
+## Pass 6 continuation (202) (2026-07-01) — VSC config bits-0/1 setter `FUN_8002f9f4`
+
+Decompiled and renamed:
+**`FUN_8002f9f4` → `set_config_byte_bits0_and_1_from_enable_pair`**
+(58B, HIGH) via `RenamePass6Region80020000Fun8002f9f4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (58B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=111` at pass start). Sole 58B entry
+after Pass 201 cleared the tied `FUN_8002b8e0` (xref_in=1).
+
+**Mechanism:** VSC config-flag setter in the `0x8002f9xx`–`0x8002faxx` handler cluster
+adjacent to `VSC_0xfcf0_subcommand_dispatch` (`0x8002f95c`). When `param_2==1`, mirrors
+two enable bytes from `param_1` (inverted: `^1`) into bits 0 and 1 of config struct
+byte at `PTR_PTR_8002fa30+8`. Returns HCI status `0x12` on invalid params, `0` on
+success — same `(char*, char)` signature and return pattern as siblings
+`set_config_byte_bit4_and_status_word_bit15_from_enable_byte` (bit 4),
+`FUN_8002fa64` (bit 3), and `FUN_8002fa34` (bit 2).
+
+**Callers:** none (xref_in=0) — fn-ptr table dispatch only (consistent with siblings).
+
+**Confidence:** HIGH — decompile confirms paired bit-0/bit-1 mask idiom with inverted
+enable logic; sibling cluster with identical VSC setter signature; pre-referenced in
+Pass 186 as bits-0–1 setter.
+
+Region unnamed count after this pass: **110** (111 minus this rename). Live named **1811** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
