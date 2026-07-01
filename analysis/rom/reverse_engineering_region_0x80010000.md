@@ -2691,4 +2691,37 @@ write, and `0x230` hook dispatch; sits on documented OGC-3 config-apply chain
 
 Region unnamed count after this pass: **189** (190 minus this rename).
 
-**Next:** Pass 123 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 123.
+
+## Pass 123 (2026-07-01) — Credit-scheduler slot + BB reg armer `FUN_8001502c`
+
+Pass 123 target from cold-triage rank-1 (2 xref_in, 196B — largest at xref=2
+tier after Pass 122 cleared `FUN_80016824`). Decompiled and renamed:
+**`FUN_8001502c` → `program_credit_scheduler_slot_and_arm_bb_regs_for_index`**
+(196B, HIGH) via `RenamePass123Region80010000Fun8001502c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Per-connection-index credit-scheduler TX slot commit + BB
+register arming helper in the `0x800150xx` cluster (sibling of Pass 118's
+`program_bb_link_param_regs_0x26c_thru_0x272_with_role_clock`). Writes packet-type
+table offset `0x46` ← `10` via `write_packet_type_table_low_byte_at_offset`,
+then submits single TX descriptor at `PTR_DAT_800150f0 + index*0x20` through
+`program_single_tx_descriptor_slot_via_credit_scheduler` (type `0xf`). Builds
+halfword mask from `DAT_800150f4` and `PTR_DAT_800150f8` (bit9 from gate byte);
+optional hook at `PTR_DAT_800150fc` may set bit `0x1000`. Programs BB regs via
+hook `PTR_DAT_80015100`: reg `0x72` ← merged mask, reg `0x70` ← `0x3c0f`; two
+more hook calls at `PTR_DAT_80015104`/`PTR_DAT_80015108` with reg `0`. Optional
+veto hook at `PTR_DAT_8001510c` — when null or returns zero, fallback writes reg
+`2` ← `(index & 0x1f) << 0xb` and reg `0` ← `0xd`.
+
+**Callers:** 2 xref_in per `xrefs_to` — `VSC_0xfcd9_FUN_80062a58` (VSC
+clock-adjust path, region `0x80060000`) and
+`status_word_multiflag_link_event_dispatcher`.
+
+**Confidence:** HIGH — decompile confirms credit-scheduler descriptor submit +
+multi-register BB programmer via hook fptrs; callers are link-event dispatcher
+and VSC fcd9 cluster consistent with Pass 118 sibling.
+
+Region unnamed count after this pass: **188** (189 minus this rename).
+
+**Next:** Pass 124 — cold-triage next rank-1 unnamed in region `0x80010000`.

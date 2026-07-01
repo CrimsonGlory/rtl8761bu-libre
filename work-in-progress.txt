@@ -15069,8 +15069,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 122;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 123: cold-triage next rank-1
-          unnamed function in region `0x80010000` (189 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 123 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8001502c`→`program_credit_scheduler_slot_and_arm_bb_regs_for_index`
+          (196B, HIGH). Per-index credit-scheduler TX slot commit + BB reg arming:
+          packet-type table offset 0x46←10, hook-driven regs 0x72/0x70/0/2.
+          2 xref_in (`VSC_0xfcd9_FUN_80062a58` +
+          `status_word_multiflag_link_event_dispatcher`). 188 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 123;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 124: cold-triage next rank-1
+          unnamed function in region `0x80010000` (188 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
