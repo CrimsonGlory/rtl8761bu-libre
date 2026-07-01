@@ -2803,5 +2803,38 @@ writer cluster (`scrambled_bdaddr_field_writer_pair1/2`,
 Region unnamed count after this pass: **194** (195 minus this rename). Live named
 **1972** global.
 
-**Next:** Pass 97 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 97.
+
+## Pass 97 (2026-07-01) — BD_ADDR scramble param mask apply `FUN_8003d110`
+
+Fresh `ListUnnamed80030000.java` re-run: **194 unnamed** remain in region
+(unchanged from Pass 96; rank-1 by size at xref=2 tier is `FUN_8003d110` at
+208B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d110` → `apply_bdaddr_scramble_slots_from_param_mask_0x6000`**
+(208B, HIGH, HANDLER-tier) via `RenamePass97Region80030000Fun8003d110.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Gated on optional hook at `PTR_DAT_8003d1e0` (skip when hook
+returns non-zero). Copies status/globals `DAT_8003d1e4`→`PTR_DAT_8003d1e8`,
+`DAT_8003d1ec`→`PTR_DAT_8003d1f0`; calls `or_bits_into_global_flag_word(0xf)`.
+When `(*PTR_DAT_8003d1f4 & 0x6000)`: clears slot 2 via
+`clear_bits_in_global_0xfc39_helper(2)`, ORs `DAT_8003d1f8` into status dword;
+if `param_1 & 0x4000` applies `scrambled_bdaddr_field_writer_pair2(1,1)`; if
+`param_1 & 0x2000` applies `scrambled_bdaddr_field_writer_pair2(1,0)`; logs via
+`possible_logging_function__var_args` (tag `0x2b`). Masks status byte to `0x3f`
+on exit.
+
+**Callers:** 2 xref-in per cold-triage (indirect/connection-state invocation
+likely).
+
+**Confidence:** HIGH — full 208B decompile; BD_ADDR scramble writer cluster
+sibling of Pass 96's config-field variant
+(`apply_bdaddr_scramble_slots_from_config_fc_fd_mask` at `0x8003d204`).
+
+Region unnamed count after this pass: **193** (194 minus this rename). Live named
+**1973** global.
+
+**Next:** Pass 98 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
