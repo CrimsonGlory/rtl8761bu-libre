@@ -4680,4 +4680,38 @@ crypto sub-states `0x3a`/`0x3d` align with DHKey-check status bytes from
 
 Region unnamed count after this pass: **182** (183 minus this rename). Live named **1739** global.
 
+**Next:** superseded by Pass 6 continuation (131).
+
+## Pass 6 continuation (131) (2026-07-01) — encryption key-size NOT ACCEPTED finalize `FUN_800269e8`
+
+Decompiled and renamed:
+**`FUN_800269e8` → `handle_lmp_not_accepted_opcode_0x10_encryption_key_size_finalize`**
+(100B, HIGH) via `RenamePass6Region80020000Fun800269e8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (100B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=182` at pass start). Was tied at 100B
+with `FUN_800284e4` in Pass 6 cont. (130); now first remaining at that size tier.
+
+**Mechanism:** Primary `LMP_NOT_ACCEPTED_0x04` recovery handler for rejected opcode
+**0x10** (LMP_ENCRYPTION_KEY_SIZE_REQ). Gated by `ret_bool_based_on_crypto_struct_0x50`
+vs role bit `param_1+4&1`, unless global bypass `PTR_DAT_80026a50[2]&0x80`. When crypto
+sub-state byte at `+1` is `'J'` (0x4a, key-size-negotiation completion path), calls
+`finalize_encryption_procedure_and_notify_hci(conn, status_from_param_1+6)`. Primary-path
+sibling of alt-recovery `handle_lmp_encryption_key_size_req_not_accepted`
+(`0x80027ccc`, reached via `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`
+for the same rejected opcode). Complements
+`handle_lmp_encryption_mode_req_not_accepted` (rejected opcode 0x0F) and
+`handle_lmp_start_encryption_req_not_accepted` (alt path for rejected opcode 0x11) in the
+documented encryption-procedure NOT-ACCEPTED cluster.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site, rejected-opcode `0x10` branch) — confirmed
+via live decompile of `LMP_NOT_ACCEPTED_0x04` dispatch table.
+
+**Confidence:** HIGH — sole caller is documented `LMP_NOT_ACCEPTED_0x04` dispatch;
+role-gate + encryption-finalizer idiom matches documented NOT-ACCEPTED siblings;
+crypto sub-state `'J'` aligns with key-size negotiation completion path documented in
+`handle_lmp_encryption_key_size_req_not_accepted` alt handler.
+
+Region unnamed count after this pass: **181** (182 minus this rename). Live named **1740** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
