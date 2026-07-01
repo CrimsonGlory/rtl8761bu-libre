@@ -7670,5 +7670,36 @@ scaling, and signed-byte return semantics unambiguous.
 Region unnamed count after this pass: **44** (45 minus this rename). Live named
 **2122** global.
 
-**Next:** Pass 247 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 247.
+
+## Pass 247 (2026-07-01) — TX power table commit `FUN_80038640`
+
+Fresh `ListUnnamed80030000.java` re-run: **44 unnamed** remain in region
+(unchanged from Pass 246; xref_in=0 tier dominates — rank-1 is `FUN_80038640`
+at 130B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038640` → `apply_clamped_tx_power_to_link_class_table_with_hook_fallback`**
+(130B, HIGH, HANDLER-tier) via
+`RenamePass247Region80030000Fun80038640.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-link-class TX-power table commit in the `0x800386` cluster.
+Optional hook at `PTR_DAT_800386c4` — when non-null and returns non-zero, skips
+fallback. Otherwise calls
+`compute_clamped_tx_power_level_from_link_class_baselines` (Pass 162 sibling).
+Indexes `PTR_DAT_800386cc` at `(link_class + 0xec) * 2` stride. Mode byte
+`PTR_DAT_800386c8[2]`: when `1`, clamps computed level to `-0x80` minimum;
+else takes max of computed level and existing `*(short*)(entry+2)`. Stores
+result at `entry+2`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 130B decompile; hook-fallback idiom matches Pass 246
+`compute_scaled_tx_power_level_from_config_hook`; callee and per-link-class table
+indexing match documented TX-power cluster.
+
+Region unnamed count after this pass: **43** (44 minus this rename). Live named
+**2123** global.
+
+**Next:** Pass 248 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
