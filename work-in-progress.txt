@@ -10522,8 +10522,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (144);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (145): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (168 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (145) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80025368`→
+          `validate_stored_link_key_send_hci_notify_and_advance_state`
+          (94B, HIGH). Legacy pairing link-key memcmp validator: conditional HCI
+          Link Key Notification + BD_ADDR table clear + state-machine advance;
+          callers `LMP_SRES_0x0C`/`LMP_AU_RAND_0x0B`. 167 unnamed remain;
+          live named 1754.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (145);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (146): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (167 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

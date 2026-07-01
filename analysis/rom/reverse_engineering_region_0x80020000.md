@@ -5120,4 +5120,36 @@ advance mode 4; gates match documented phase-1 scan/arm pattern; sits adjacent t
 
 Region unnamed count after this pass: **168** (169 minus this rename). Live named **1753** global.
 
+**Next:** superseded by Pass 6 continuation (145).
+
+## Pass 6 continuation (145) (2026-07-01) — legacy pairing link-key validator `FUN_80025368`
+
+Decompiled and renamed:
+**`FUN_80025368` → `validate_stored_link_key_send_hci_notify_and_advance_state`**
+(94B, HIGH) via `RenamePass6Region80020000Fun80025368.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=168` at pass start). First-listed at
+94B (tied cluster; first entry `FUN_80025368`).
+
+**Mechanism:** Legacy pairing completion validator on per-connection crypto struct
+(`param_2`). Calls `FUN_80025318` to memcmp stored link key at `+0xbe` against
+computed key at `+0xa1`/`+0xa5`/`+0xba` (BD_ADDR-random-aware). On mismatch:
+advances pairing state machine with failure code `5` via
+`start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`.
+On match + `param_3 != 0`: unless link-key type is `0x09` (COMB_KEY) or `0x14`
+(TEMP_KEY), sends `send_evt_HCI_Link_Key_Notification`; clears matching pending
+BD_ADDR entry in 6-slot table via `FUN_8002694c` on `big_ol_struct` slot
+(`param_1 & 0xffff`); then advances state machine with success code `0`.
+
+**Callers:** `LMP_SRES_0x0C` (`0x80027204`), `LMP_AU_RAND_0x0B` (`0x80027826`) —
+xref_in=2 per `ListXrefsTo80025368.java`.
+
+**Confidence:** HIGH — decompile confirms link-key memcmp gate + conditional HCI
+Link Key Notification + BD_ADDR table clear + documented state-machine advance;
+callers are Kovah-named LMP legacy-auth handlers adjacent to
+`derive_sres_e1_or_e22_and_send_lmp_response` (Pass 6 cont. 27).
+
+Region unnamed count after this pass: **167** (168 minus this rename). Live named **1754** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
