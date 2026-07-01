@@ -188,15 +188,15 @@ bits as part of init. (3 callers across very different subsystems — boot init
 `FUN_8010ce0c` — suggests this is a shared one-shot "enable this hardware
 block" toggle rather than something with periodic re-application.)
 
-## 7. `FUN_800122b8` / `FUN_80012e38` — Config-driven AFH/feature register clear loop
+## 7. `dispatch_afh_cap_param_to_bb_register_clear_loop` / `FUN_80012e38` — Config-driven AFH/feature register clear loop
 
-`FUN_800122b8` (`0x800122b8`, 64 bytes) reads a config byte pair
+`dispatch_afh_cap_param_to_bb_register_clear_loop` (was `FUN_800122b8`, `0x800122b8`, 64 bytes) reads a config byte pair
 (`config_base->field64_0x46`/`field65_0x47`), and if bit `0x80` is set, extracts
 a 4-bit nibble selected by `param_1` (1 or 2 → low or high nibble of byte+1)
 and passes it to `FUN_80012e38`.
 
 ```c
-void FUN_800122b8(char param_1) {
+void dispatch_afh_cap_param_to_bb_register_clear_loop(char param_1) {
     uVar2 = config_base->field64_0x46 | (config_base->field65_0x47 << 8);
     if ((uVar2 & 0x80) != 0) {
         if (param_1 == 1)      uVar2 = uVar2 >> 8 & 0xf;
@@ -217,10 +217,10 @@ void FUN_80012e38(void) {  // note: Ghidra shows no formal params but uses an im
 }
 ```
 
-Callers of `FUN_800122b8`: `unknown_referencing_default_name_6` (×3),
+Callers of `dispatch_afh_cap_param_to_bb_register_clear_loop`: `unknown_referencing_default_name_6` (×3),
 `FUN_8010ce0c` (patch AFH init chain), `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`
 (vendor HCI command dispatcher), `FUN_800122fc`. Only caller of `FUN_80012e38`
-is `FUN_800122b8`.
+is `dispatch_afh_cap_param_to_bb_register_clear_loop`.
 
 **Purpose:** config-blob-gated register maintenance — when config flag bit
 `0x80` of byte `0x46/0x47` is set, clears bit `0x40` across 4 consecutive
@@ -266,7 +266,7 @@ further tracing into `FUN_8000b864`).
 | `FUN_80011584` | 66 B | Halfword-granular read wrapper around `read_baseband_register_masked_busywait` (returns `0xdead` on bad alignment) |
 | `FUN_80011a74` | 56 B | AFH-flag-gated toggle of register `0xfc` bit `0x1000` |
 | `FUN_800117a4` | 14 B | Unconditional OR `0xfc00` into a fixed register/global |
-| `FUN_800122b8` | 64 B | Config-flag-gated dispatcher to `FUN_80012e38` |
+| `dispatch_afh_cap_param_to_bb_register_clear_loop` | 64 B | Config-flag-gated dispatcher to `FUN_80012e38` |
 | `FUN_80012e38` | 70 B | Clears bit `0x40` across registers `0x170/0x174/0x178/0x17c` |
 | `FUN_8000b820` | 56 B | Packs 10-bit value into 2 state bytes + commits via `FUN_8000b864` |
 

@@ -14636,8 +14636,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7y;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7z: cold-triage next rank-1
-          unnamed function in region `0x80010000` (233 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7z (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800122b8`→`dispatch_afh_cap_param_to_bb_register_clear_loop`
+          (64B, HIGH). Config-flag-gated AFH cap-param extractor: reads
+          `config_base+0x46/+0x47`, when bit `0x80` set extracts 4-bit nibble
+          per `param_1` (1→bits[11:8], 2→bits[15:12]), dispatches `FUN_80012e38`
+          to clear bit `0x40` across BB regs `0x170/0x174/0x178/0x17c`; 6 xref_in.
+          232 unnamed remain; live named 2192.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7z;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 80: cold-triage next rank-1
+          unnamed function in region `0x80010000` (232 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

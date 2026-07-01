@@ -1406,4 +1406,31 @@ sequence + gate-byte clear; structural sibling of Pass 7k codec-config apply
 
 Region unnamed count after this pass: **233** (234 minus this rename).
 
-**Next:** Pass 7z — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7z (2026-07-01) — AFH cap-param dispatcher `FUN_800122b8`
+
+Pass 7z target from cold-triage rank-1 (6 xref_in, 64B — largest at xref=6
+tier after Pass 7y). Decompiled and renamed:
+**`FUN_800122b8` → `dispatch_afh_cap_param_to_bb_register_clear_loop`**
+(64B, HIGH) via `RenamePass7zRegion80010000Fun800122b8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Config-flag-gated AFH cap-param extractor in the `0x800122xx`
+cluster (documented previously in `reverse_engineering_baseband_reg_helpers.md`
+§7, now formally named). Reads `config_base->field64_0x46` /
+`field65_0x47`; when bit `0x80` is set, selects a 4-bit nibble by
+`param_1` (`1` → bits[11:8], `2` → bits[15:12]) and dispatches
+`FUN_80012e38` to clear bit `0x40` across BB registers
+`0x170`/`0x174`/`0x178`/`0x17c`.
+
+**Callers:** 6 xref_in per `ListUnnamed80010000.java`; includes
+`unknown_referencing_default_name_6` (link-mode reconfigure, ×3),
+patch AFH init chain `FUN_8010ce0c`, vendor HCI dispatcher
+`HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`, and `FUN_800122fc`.
+
+**Confidence:** HIGH — decompile confirms config-flag gate + nibble select +
+dispatch to documented BB-register clear loop; cross-referenced with prior
+baseband-reg-helper analysis and SCO/eSCO layer patch hook table.
+
+Region unnamed count after this pass: **232** (233 minus this rename).
+
+**Next:** Pass 80 — cold-triage next rank-1 unnamed in region `0x80010000`.
