@@ -9052,4 +9052,32 @@ matches adjacent `0x800219xx`/`0x80021axx` pool/packet-slot init cluster.
 
 Region unnamed count after this pass: **34** (35 minus this rename). Live named **1887** global.
 
+**Next:** superseded by Pass 6 continuation (279).
+
+## Pass 6 continuation (279) (2026-07-01) — crypto key-size byte getter `FUN_80021ee8`
+
+Decompiled and renamed:
+**`FUN_80021ee8` → `get_connection_crypto_encryption_key_size_byte`**
+(28B, HIGH) via `RenamePass6Region80020000Fun80021ee8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (28B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=34` at pass start). First-listed of three
+tied 28B entries (`FUN_80021ee8`, `FUN_80021a94`, `FUN_8002b394`) after Pass 6 cont. (278)
+renamed `FUN_800218ec`.
+
+**Mechanism:** Thin per-connection crypto-struct accessor in the `0x800219xx`/`0x80021fxx`
+cluster. Indexes `big_ol_struct[param_1 & 0xffff]` via `PTR_big_ol_struct_80021f04` and
+returns byte at `_x58_crypto_struct_at_least_0x27_big[0x23]` — the documented encryption
+key-size byte (`crypto+0x23`) consumed by `send_lmp_encryption_key_size_req_0x10_and_set_state_0x4a`
+and `derive_encryption_key_material_safer_plus_mode6`.
+
+**Callers:** sole xref from `0x8001a95c` (OGC-3 cluster, between `OGC_3_default_func_2` and
+`bit_test_[bit_index_at_offset_0x16f]_within_[short_at_offset_0x24]`) per
+`ListXrefsTo80021ee8.java`; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms unambiguous indexed byte read at crypto offset
+0x23; naming aligns with established `crypto+0x23` key-size semantics elsewhere in region.
+
+Region unnamed count after this pass: **33** (34 minus this rename). Live named **1888** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

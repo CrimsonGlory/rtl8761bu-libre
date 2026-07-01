@@ -11739,8 +11739,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (278);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (279): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (34 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (279) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80021ee8`→
+          `get_connection_crypto_encryption_key_size_byte`
+          (28B, HIGH) — per-conn `big_ol_struct` accessor returning
+          `_x58_crypto_struct[0x23]` encryption key-size byte; caller
+          `0x8001a95c` (OGC-3 cluster); xref_in=1; 33 unnamed remain;
+          live named 1888.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (279);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (280): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (33 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
