@@ -11885,8 +11885,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (294);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (295): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (18 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (295) (2026-07-01):
+          decompiled+renamed rank-1 orphan `FUN_8002b394`→`store_packed_dual_nibbles_with_bit8_to_global`
+          (28B, HIGH). Nibble-pack writer: `(param1&0xf)<<4|(param2&0xf)|0x100` → `DAT_8002b3b0`;
+          xref_in=0 in TX-buffer cluster before `enqueue_tx_buffer_fragments_for_slot`.
+          17 unnamed remain; live named 1904.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (295);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (296): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (17 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

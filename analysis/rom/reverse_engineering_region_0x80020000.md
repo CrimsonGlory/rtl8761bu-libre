@@ -9539,4 +9539,29 @@ bit `0x80` set.
 
 Region unnamed count after this pass: **18** (19 minus this rename). Live named **1903** global.
 
+**Next:** superseded by Pass 6 continuation (295).
+
+## Pass 6 continuation (295) (2026-07-01) — orphan nibble store `FUN_8002b394`
+
+Decompiled and renamed:
+**`FUN_8002b394` → `store_packed_dual_nibbles_with_bit8_to_global`**
+(28B, HIGH) via `RenamePass6Region80020000Fun8002b394.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (28B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=18` at pass start). First orphan-tier
+entry now that all xref_in≥1 rank-1 candidates through Pass 6 cont. (294) are exhausted;
+sits immediately before `enqueue_tx_buffer_fragments_for_slot` (`0x8002b3b4`) in the TX
+buffer cluster.
+
+**Mechanism:** Thin global-word writer. Stores `(param_1 & 0xf) << 4 | param_2 & 0xf | 0x100`
+to `DAT_8002b3b0` — packs two 4-bit nibbles into one byte with bit 8 always set.
+
+**Callers:** none (xref_in=0) — no direct call sites or data xrefs found; likely dead
+code or patch-only dispatch target not exercised in this GZF snapshot.
+
+**Confidence:** HIGH — decompile confirms unambiguous nibble-pack + fixed `0x100` flag;
+consistent with other orphan utility-tier renames in this pass series.
+
+Region unnamed count after this pass: **17** (18 minus this rename). Live named **1904** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
