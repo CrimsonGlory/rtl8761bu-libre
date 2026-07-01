@@ -919,7 +919,8 @@ sub-state byte `*pbVar7 - 6` dispatches HCI notifications:
 type. Failure paths may invoke `possible_LMP_DETACH_handler`. Advances sub-state via
 lookup table `PTR_DAT_80024bd0`, optionally invokes registered hooks at
 `PTR_DAT_80024bd4` (`+0xa0`/`+0xb0` slots), clears `+0x50` sub-flag, calls
-`FUN_80017d2c` (8-byte field clear on conn record), then tail-calls `FUN_8002a188`.
+`FUN_80017d2c` (8-byte field clear on conn record), then tail-calls
+`dispatch_master_link_key_hci_phase_per_random_bdaddr_slot`.
 
 **Confidence:** HIGH — central post-encryption-procedure HCI notifier with 7 callers
 including documented `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10`; switch cases map cleanly to
@@ -1021,7 +1022,8 @@ dispatches HCI notifications: `send_evt_HCI_Encryption_Change_v1_`,
 type. Failure paths invoke `FUN_80025b1c`/`FUN_800245cc` or set sub-state bytes
 `0x45`/`0x49`/`0x46`. Advances sub-state via lookup table `PTR_DAT_800249a0`,
 optionally invokes registered hook at `PTR_DAT_800249a4` (`+0xa8` slot), clears `+0x50`
-sub-flag, calls `FUN_80017d2c` on conn record, then tail-calls `FUN_8002a188`.
+sub-flag, calls `FUN_80017d2c` on conn record, then tail-calls
+`dispatch_master_link_key_hci_phase_per_random_bdaddr_slot`.
 
 **Confidence:** HIGH — primary caller is documented `LMP_STOP_ENCRYPTION_REQ_0x12`
 (opcode 0x12); switch cases map to standard HCI encryption/key-refresh/link-key events;
@@ -5850,5 +5852,34 @@ documented parent validator; offsets `+0xa1`/`+0xa5`/`+0xba`/`+0xbe` consistent 
 Pass 6 cont. (145) analysis; sole caller is established legacy-auth completion path.
 
 Region unnamed count after this pass: **144** (145 minus this rename). Live named **1777** global.
+
+**Next:** superseded by Pass 6 continuation (169).
+
+## Pass 6 continuation (169) (2026-07-01) — master link key phase dispatcher `FUN_8002a188`
+
+Decompiled and renamed:
+**`FUN_8002a188` → `dispatch_master_link_key_hci_phase_per_random_bdaddr_slot`**
+(74B, HIGH) via `RenamePass6Region80020000Fun8002a188.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=144` at pass start). First-listed at
+74B (tied cluster; highest size tier).
+
+**Mechanism:** Post-encryption-procedure master-link-key phase hook for random-BD_ADDR
+connections. Param: connection handle (`param_1`). Gates on `big_ol_struct[slot].bdaddr_random_`
+nonzero and status-array index `_xb2_byte_minus_4_used_as_status_array_index` in
+`{0x04, 0x0f}`. When global HCI Master Link Key phase byte at `PTR_DAT_8002a1d8+0x48`
+is `1`, calls `stage_master_link_key_for_encrypted_connection_slot`; when `3`, calls
+`arm_master_link_key_phase1_slot_lmp_0x32`.
+
+**Callers:** `finalize_encryption_procedure_and_notify_hci` (`0x80024986`),
+`finalize_stop_encryption_procedure_and_notify_hci` (`0x80024bb6`),
+`program_encryption_key_and_send_lmp_start_encryption_req` (`0x80025034`) — xref_in=3.
+
+**Confidence:** HIGH — decompile confirms phase-dispatch idiom matching documented Master
+Link Key 0x0417 pipeline siblings; gates and callees align with Pass 6 cont. (51)/(144)
+analysis; three established encryption-finalizer callers.
+
+Region unnamed count after this pass: **143** (144 minus this rename). Live named **1778** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
