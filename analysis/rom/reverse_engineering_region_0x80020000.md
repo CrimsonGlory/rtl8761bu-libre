@@ -5411,4 +5411,39 @@ Pass 6 cont. (39)/(41) now resolved.
 
 Region unnamed count after this pass: **158** (159 minus this rename). Live named **1763** global.
 
+**Next:** superseded by Pass 6 continuation (155).
+
+## Pass 6 continuation (155) (2026-07-01) — pairing COMB/UNIT key continuation `FUN_800255a0`
+
+Decompiled and renamed:
+**`FUN_800255a0` → `pairing_continue_comb_or_unit_key_lmp_and_crypto_update`**
+(86B, HIGH) via `RenamePass6Region80020000Fun800255a0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (86B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=158` at pass start). Highest xref_in
+among tied 86B cluster; first-listed `FUN_800255a0`.
+
+**Mechanism:** Legacy pairing continuation dispatcher — branches on global flag
+`PTR_DAT_800255f8[4]`:
+- Zero → outbound LMP COMB_KEY (0x09) via `derive_comb_key_xor_and_send_lmp_0x09`
+  (role bit from incoming PDU `param_3+4 & 1`), link-key type `9`
+- Non-zero → outbound LMP UNIT_KEY (0x0A) via
+  `copy_global_key_template_xor_0x51_and_send_lmp_0x0a`, link-key type `10`
+Then sets crypto sub-state `+1` to `0x1b` when `big_ol_struct[slot].field_0x214==0`, else
+`0x06`, and processes inbound key material via
+`xor_inbound_lmp_key_and_update_crypto_by_type`.
+
+**Callers:** xref_in=3 — documented pairing-continuation cluster including
+`handle_lmp_comb_key_not_accepted` (COMB_KEY NOT ACCEPTED recovery, sub-state `0x10`,
+payload `'#'`, public BD_ADDR); siblings `derive_comb_key_xor_and_send_lmp_0x09` and
+`xor_inbound_lmp_key_and_update_crypto_by_type` (Pass 6 cont. 113/114) cite this as
+their outbound/inbound pairing-continuation caller.
+
+**Confidence:** HIGH — decompile confirms symmetric COMB_KEY/UNIT_KEY outbound send +
+inbound XOR/update idiom already documented in Pass 6 cont. (113)/(114)/(137); global
+flag branch matches legacy vs unit-key pairing paths; crypto sub-states `0x1b`/`0x06`
+align with documented pairing-state cluster.
+
+Region unnamed count after this pass: **157** (158 minus this rename). Live named **1764** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
