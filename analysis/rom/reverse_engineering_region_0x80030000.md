@@ -4005,5 +4005,39 @@ init cluster confirmed via `ListXrefsTo80033048.java`.
 Region unnamed count after this pass: **158** (159 minus this rename). Live named
 **2008** global.
 
-**Next:** Pass 133 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 133.
+
+## Pass 133 (2026-07-01) — `poll_fd49_extended_diag_bb_registers_and_return_status_bytes`
+
+Fresh `ListUnnamed80030000.java` re-run: **158 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003bad4` at 244B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003bad4` → `poll_fd49_extended_diag_bb_registers_and_return_status_bytes`**
+(244B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass133Region80030000Fun8003bad4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** VSC 0xfd49 extended-diagnostic BB-register poll/read helper in the
+`PTR_DAT_8003bbc8`/`8003bbd0`/`8003bbd4` cluster (fd49-specific globals, sibling
+of `poll_and_write_bb_registers_0xda_0xd6`). When `param_1 & 0x40 == 0`:
+reference-counts session via `PTR_DAT_8003bbc8`, primes reg `0xda` with `0x100`
+via fptr at `PTR_DAT_8003bbd0`, optionally waits for bit `0x200` on status.
+Always writes `(param_1 & 0xff) << 8` to reg `0xd6` via same fptr. Poll loop
+waits for completion bit `0x80` on `DAT_8003bbe0`; timeout logs via
+`possible_logging_function__var_args`. On exit decrements session counter and
+clears `0xda` enable when count reaches zero. Returns combined status bytes from
+`DAT_8003bbd8` and `DAT_8003bbec`.
+
+**Callers:** 1 xref-in — tail-call from `VSC_0xfd49_extended_diagnostic`
+(`0x8003bbf0`) after bit-manip on `param_1` (`& 0x3f`, `| 0x40`).
+
+**Confidence:** HIGH — full 244B decompile; poll/write `0xda`/`0xd6` idiom matches
+documented `poll_and_write_bb_registers_0xda_0xd6` sibling; fd49-cluster globals
+and `VSC_0xfd49_extended_diagnostic` tail-call integration confirmed.
+
+Region unnamed count after this pass: **157** (158 minus this rename). Live named
+**2009** global.
+
+**Next:** Pass 134 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
