@@ -6343,4 +6343,33 @@ the 0x3A/0x3B key-size-mask REQ/RES pair documented since Pass 3.
 
 Region unnamed count after this pass: **127** (128 minus this rename). Live named **1794** global.
 
+**Next:** superseded by Pass 6 continuation (186).
+
+## Pass 6 continuation (186) (2026-07-01) — VSC config bit-4/status-bit15 setter `FUN_8002fa94`
+
+Decompiled and renamed:
+**`FUN_8002fa94` → `set_config_byte_bit4_and_status_word_bit15_from_enable_byte`**
+(68B, HIGH) via `RenamePass6Region80020000Fun8002fa94.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=127` at pass start). Sole 68B entry;
+next tier is 66B/xref_in=4 cluster.
+
+**Mechanism:** Config-flag setter in the `0x8002f9xx`–`0x8002faxx` VSC handler cluster
+adjacent to `VSC_0xfcf0_subcommand_dispatch` (`0x8002f95c`) and
+`VSC_0xfc93_FUN_8002fae0` (`0x8002fae0`). When `param_2==1`, reads enable boolean
+`*param_1` and mirrors it into two globals: sets bit 4 (`& 0xef | … << 4`) in config
+struct byte at `PTR_PTR_8002fad8+8`, and bit 15 (`& 0x7fff | … << 0xf`) in ushort at
+`DAT_8002fadc`. Returns HCI status `0x12` on invalid params, `0` on success — same
+pattern as sibling bit-setters `FUN_8002fa64` (bit 3), `FUN_8002fa34` (bit 2), and
+`FUN_8002f9f4` (bits 0–1) in the same cluster.
+
+**Callers:** none (xref_in=0) — fn-ptr table dispatch only (consistent with siblings).
+
+**Confidence:** HIGH — decompile confirms paired bit-4/ushort-bit-15 mask pattern;
+sibling cluster with identical `(char*, char)` signature and `0x12` invalid-params
+return; adjacent to documented VSC handlers.
+
+Region unnamed count after this pass: **126** (127 minus this rename). Live named **1795** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
