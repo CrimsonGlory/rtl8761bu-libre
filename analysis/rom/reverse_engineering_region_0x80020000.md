@@ -3525,4 +3525,33 @@ template path documented in `reverse_engineering_hardware_layer.md`.
 
 Region unnamed count after this pass: **219** (220 minus this rename). Live named **1702** global.
 
+**Next:** superseded by Pass 6 continuation (94).
+
+## Pass 6 continuation (94) (2026-07-01) — HCI link-key type changed `FUN_80029bd0`
+
+Decompiled and renamed:
+**`FUN_80029bd0` → `emit_hci_link_key_type_changed_or_lmp_detach_on_global_state_3`**
+(130B, HIGH) via `RenamePass6Region80020000Fun80029bd0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (130B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=219` at pass start). Sibling of the
+`0x80029axx` HCI Link Key Type Changed cluster (`send_evt_HCI_Link_Key_Type_Changed_0x0A`,
+`wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A`, and
+`calls_send_evt_HCI_Link_Key_Type_Changed_0x0A_and_possible_LMP_DETACH` at `0x80029c5c`).
+
+**Mechanism:** Per-connection link-key-type transition notifier gated on
+`big_ol_struct[conn].bdaddr_random_`. Public (non-random) BD_ADDR path sends
+`send_evt_HCI_Link_Key_Type_Changed_0x0A(conn, type, 0)` directly. Random-address
+path requires global struct `PTR_DAT_80029c58+0x48 == 3` (vs sibling `0x80029c5c` which
+gates on state `== 1`): on `type==0` increments retry counter `+0x8d` and emits via
+`wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A`; on nonzero type increments `+0x8e`,
+wraps-emits, decrements `+0x8e`, then calls `possible_LMP_DETACH_handler`.
+
+**Callers:** xref_in=3 (indirect/table dispatch into link-key-type transition path).
+
+**Confidence:** HIGH — mirrors documented `0x80029c5c` sibling with complementary global
+state gate (`+0x48==3` vs `==1`); callees already HIGH from Pass 5 low→high upgrade.
+
+Region unnamed count after this pass: **218** (219 minus this rename). Live named **1703** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
