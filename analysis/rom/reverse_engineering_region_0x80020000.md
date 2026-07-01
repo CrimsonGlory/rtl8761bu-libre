@@ -8862,4 +8862,30 @@ single caller with explicit enable/disable toggle vs sibling clear function.
 
 Region unnamed count after this pass: **41** (42 minus this rename). Live named **1880** global.
 
+**Next:** superseded by Pass 6 continuation (272).
+
+## Pass 6 continuation (272) (2026-07-01) — TLV walker `FUN_8002141c`
+
+Decompiled and renamed:
+**`FUN_8002141c` → `scan_length_prefixed_tlv_for_type_byte`**
+(32B, HIGH) via `RenamePass6Region80020000Fun8002141c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (32B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=41` at pass start). First-listed of
+the tied 32B cluster after Pass 6 cont. (271) renamed `FUN_80021cd4`.
+
+**Mechanism:** Length-prefixed TLV linear scanner. Walks `param_1` buffer for up to
+`param_2` bytes; each entry has length byte at `[0]` and type byte at `[1]`; advances
+by `entry[0]+1` until `entry[1]==param_3` or buffer exhausted; returns matching
+entry pointer or null. Shared utility used by HCI-reset/VSC parameter-block parsing.
+
+**Callers:** `FUN_800167cc` at `0x800167ea` (region `0x80010000`);
+`lookup_param_tlv_entry_type_0xff_if_status_0x5d` at `0x80078d9a` (region
+`0x80070000`) — confirmed via `ListXrefsTo8002141c.java`, xref_in=2.
+
+**Confidence:** HIGH — decompile confirms unambiguous TLV walk loop; callers match
+documented TLV-scan usage in region `0x80070000` Pass 12.
+
+Region unnamed count after this pass: **40** (41 minus this rename). Live named **1881** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

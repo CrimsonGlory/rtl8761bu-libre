@@ -11671,8 +11671,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (271);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (272): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (41 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (272) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002141c`→`scan_length_prefixed_tlv_for_type_byte`
+          (32B, HIGH). Length-prefixed TLV linear scanner: walk buffer advancing
+          `entry[0]+1`, return entry when `entry[1]==type`; callers `FUN_800167cc` +
+          `lookup_param_tlv_entry_type_0xff_if_status_0x5d`; xref_in=2; 40 unnamed
+          remain; live named 1881.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (272);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (273): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (40 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
