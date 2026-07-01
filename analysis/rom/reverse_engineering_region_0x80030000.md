@@ -2963,5 +2963,37 @@ gate idiom matches ROM cluster; feature-gated init context from region
 Region unnamed count after this pass: **189** (190 minus this rename). Live named
 **1977** global.
 
-**Next:** Pass 102 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 102.
+
+## Pass 102 (2026-07-01) — truncated-page counter threshold `FUN_8003ce98`
+
+Fresh `ListUnnamed80030000.java` re-run: **189 unnamed** remain in region
+(unchanged from Pass 101; rank-1 by size at xref=2 tier is `FUN_8003ce98` at
+122B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ce98` → `toggle_0x4000_status_bit_via_hook_on_trunc_page_counter_threshold`**
+(122B, HIGH, HANDLER-tier) via `RenamePass102Region80030000Fun8003ce98.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Two-path gate on arm-byte `PTR_DAT_8003cf14`. When clear: if
+slot counter `PTR_DAT_8003cf18` exceeds pow2 threshold `1 << (((config
+`PTR_DAT_8003cf24` byte+3 >> 2) & 3) << 2)`, sets status-word bit `0x4000` on
+`DAT_8003cf1c` via hook `PTR_DAT_8003cf20(0x1ee, word|0x4000)` and arms gate to
+1. When armed: if counter is zero, clears bit `0x4000` via same hook with
+`word&0xbfff` and disarms gate to 0.
+
+**Callers:** 2 xref-in per cold-triage; primary caller
+`truncated_page_complete_status_dispatcher` (`0x800022e4`) after status-code
+dispatch on bits `0x80`/`0x100`/`0x200`; truncated-page-complete cluster
+sibling documented in region `0x80000000`.
+
+**Confidence:** HIGH — full 122B decompile; pow2-threshold counter gate +
+`0x4000` status-bit toggle via `0x1ee` hook matches truncated-page cluster
+context.
+
+Region unnamed count after this pass: **188** (189 minus this rename). Live named
+**1978** global.
+
+**Next:** Pass 103 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
