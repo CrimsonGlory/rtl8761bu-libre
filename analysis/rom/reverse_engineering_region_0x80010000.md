@@ -2156,4 +2156,36 @@ helper" at field index `0xb`.
 
 Region unnamed count after this pass: **207** (208 minus this rename).
 
-**Next:** Pass 105 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 105.
+
+## Pass 105 (2026-07-01) — IRQ-masked key-block codec programmer `FUN_80014770`
+
+Pass 105 target from cold-triage rank-1 (3 xref_in, 64B — largest at xref=3
+tier after Pass 104 cleared `FUN_80012e80`). Decompiled and renamed:
+**`FUN_80014770` → `program_key_block_into_codec_table_masked`**
+(64B, HIGH) via `RenamePass105Region80010000Fun80014770.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Encryption key-block programmer in the `0x800146xx` codec-table
+cluster. Looks up role/type via `lookup_codec_or_role_type_table_7x4(param_1,
+param_2, &role_index)`; on success calls `lmp_25c_procedure_completion_waiter`,
+disables interrupts, then delegates to inner worker `FUN_800146c4(role_index,
+key_block)` which maps role → eSCO slot via `conn_record_role_to_esco_slot_index`,
+packs the caller's 16-byte key block into four dwords, and writes four consecutive
+codec-table rows via `write_codec_table_entry_and_wait_ack` (indices
+`slot*7-0x79` .. `+3`). Re-enables interrupts before return.
+
+**Callers:** `program_key_block_and_arm_mode3_encryption` (region `0x80020000`,
+thin wrapper `FUN_80014770(0,0,key_block)` + mode-3 arm),
+`arm_link_encryption_post_key_program` (debug/unprogrammed crypto `+0x214==0`
+path), and `role_switch_commit_staged_slot_transition` (role-switch codec
+reprogram) — 3 xref_in per `ListUnnamed80010000.java`.
+
+**Confidence:** HIGH — decompile confirms IRQ-masked wrapper around established
+codec-table write primitive; encryption-cluster callers in region `0x80020000`
+already documented this function by address as the key-block programming step
+before mode-3 encryption arm.
+
+Region unnamed count after this pass: **206** (207 minus this rename).
+
+**Next:** Pass 106 — cold-triage next rank-1 unnamed in region `0x80010000`.

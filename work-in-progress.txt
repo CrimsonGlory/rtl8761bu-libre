@@ -14897,8 +14897,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 104;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 105: cold-triage next rank-1
-          unnamed function in region `0x80010000` (207 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 105 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014770`→
+          `program_key_block_into_codec_table_masked`
+          (64B, HIGH). IRQ-masked 16-byte key-block programmer via
+          `lookup_codec_or_role_type_table_7x4` + inner `FUN_800146c4` four-row
+          codec-table write; callers `program_key_block_and_arm_mode3_encryption` +
+          `arm_link_encryption_post_key_program` +
+          `role_switch_commit_staged_slot_transition`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 105;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 106: cold-triage next rank-1
+          unnamed function in region `0x80010000` (206 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
