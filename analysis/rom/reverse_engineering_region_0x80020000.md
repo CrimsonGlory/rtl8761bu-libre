@@ -4872,4 +4872,31 @@ literal-pool pointer table immediately follows function body.
 
 Region unnamed count after this pass: **176** (177 minus this rename). Live named **1745** global.
 
+**Next:** superseded by Pass 6 continuation (137).
+
+## Pass 6 continuation (137) (2026-07-01) — outbound LMP key template XOR sender `FUN_80024638`
+
+Decompiled and renamed:
+**`FUN_80024638` → `copy_global_key_template_xor_0x51_and_send_lmp_0x0a`**
+(96B, HIGH) via `RenamePass6Region80020000Fun80024638.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (96B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=176` at pass start). Tied at 96B with
+`FUN_80022098`/`FUN_800285cc`/`FUN_80023b40`; selected first by list order.
+
+**Mechanism:** Outbound LMP key-material staging sender in the `0x800246xx` encryption cluster
+(sibling of Pass 5's `wrap_send_LMP_ACCEPTED_and_some_other_things` at `0x8002469c` and
+outbound `derive_comb_key_xor_and_send_lmp_0x09` at `0x80025524`). Copies 16B global
+template `PTR_DAT_80024698` into send buffer (`local+2`) and crypto `+0xa9`, XOR-combines
+send payload with existing 16B block at crypto `+0x51`, sets PDU opcode byte **0x0A**, then
+sends 18-byte LMP (`0x12`) via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+
+**Callers:** xref_in=2 per `ListUnnamed80020000.java`; direct callers not resolved this pass.
+
+**Confidence:** HIGH — unambiguous template-copy + XOR-with-`+0x51` + 18B send idiom mirrors
+outbound COMB_KEY sender and inbound `xor_inbound_lmp_key_and_update_crypto_by_type`; sits
+adjacent to established LMP ACCEPTED wrapper cluster.
+
+Region unnamed count after this pass: **175** (176 minus this rename). Live named **1746** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
