@@ -6734,4 +6734,36 @@ decompile shows direct invoke on sub-state `0x0b` path before `FUN_800255fc`.
 
 Region unnamed count after this pass: **114** (115 minus this rename). Live named **1807** global.
 
+**Next:** superseded by Pass 6 continuation (199).
+
+## Pass 6 continuation (199) (2026-07-01) — outbound encryption-mode req `FUN_80024590`
+
+Decompiled and renamed:
+**`FUN_80024590` → `send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate`**
+(60B, HIGH) via `RenamePass6Region80020000Fun80024590.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (60B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=114` at pass start). Sits in the
+`0x800245xx` encryption outbound-send cluster between
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate` (`0x80024470`) and the
+encryption-mode accept helpers at `0x800246fc`/`0x80024754`.
+
+**Mechanism:** Outbound LMP Encryption Mode Req (opcode **0x0F**) sender — builds
+3-byte PDU (`opcode=0x0f`, enable flag in byte `+1`) and transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`. Arms crypto sub-state byte
+`param_2+1` to `0x48` when `param_4==1` (start encryption) or `0x40` when disabling —
+matching the finalize paths documented in Pass 6 cont. (11)/(14).
+
+**Callers:** `fHCI_Set_Connection_Encryption_0x13` (HCI 0x0413 enable/disable kickoff);
+legacy wrapper `FUN_800245cc` (enable-only, sub-state `0x48` arm); xref_in=4 per
+`ListUnnamed80020000.java` (fourth xref likely indirect/data ref).
+
+**Confidence:** HIGH — decompile confirms opcode `0x0f` + enable-byte LMP send idiom;
+caller `fHCI_Set_Connection_Encryption_0x13` (Pass 6 cont. 47) already documents
+`FUN_80024590(slot, crypto, 3, enable_flag)` as the encryption start/stop kickoff;
+sub-state bytes `0x48`/`0x40` match `finalize_encryption_procedure_and_notify_hci` /
+`finalize_stop_encryption_procedure_and_notify_hci` cluster.
+
+Region unnamed count after this pass: **113** (114 minus this rename). Live named **1808** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
