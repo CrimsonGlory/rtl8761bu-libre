@@ -4458,3 +4458,39 @@ Region unnamed count after this pass: **144** (145 minus this rename). Live name
 
 **Next:** Pass 147 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
+
+## Pass 147 (2026-07-01) — indexed BB register burst writer `FUN_80030a74`
+
+Fresh `ListUnnamed80030000.java` re-run: **144 unnamed** remain in region
+(unchanged from Pass 146; rank-1 at xref=1 tier is `FUN_80030a74` at 178B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80030a74` → `validate_and_burst_write_indexed_bb_registers_by_role`**
+(178B, HIGH, HANDLER-tier) via
+`RenamePass147Region80030000Fun80030a74.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Role-indexed baseband register burst writer with bounds
+validation. Param block: role index at `+0x3`, start register at `+0x4`,
+byte count at `+0x6`, payload at `+0x8`. Rejects invalid role (`>=3`) or
+oversized count (`>=0xfb`). Role 0 caps start+count to `0x100`; roles 1–2 cap
+to `0x200`. On validation failure returns HCI error `0x12`. Mirrors role/start/
+count into `PTR_DAT_80030b28`. Zero-count path calls
+`baseband_reg_0x34_role_index_setter` only. Nonzero path requires magic
+`0xC6CB` at param `+0x0`, then loops
+`indexed_register_write_1byte_wrapper(role, reg++, byte)`; aborts with `3` if
+status byte `PTR_DAT_80030b28[+0x2]` nonzero. VSC-cluster sibling of
+`VSC_0xfc27_param_query` at `0x80030b2c`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — invoked via function pointer
+(indexed BB register write cluster).
+
+**Confidence:** HIGH — full 178B decompile; role-bounded validation, known ROM
+callees (`baseband_reg_0x34_role_index_setter`,
+`indexed_register_write_1byte_wrapper`), standard `0x12`/`0x3` status returns.
+
+Region unnamed count after this pass: **143** (144 minus this rename). Live named
+**2023** global.
+
+**Next:** Pass 148 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
