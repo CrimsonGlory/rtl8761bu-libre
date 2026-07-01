@@ -5030,4 +5030,35 @@ region `0x80000000`.
 
 Region unnamed count after this pass: **171** (172 minus this rename). Live named **1750** global.
 
+**Next:** superseded by Pass 6 continuation (142).
+
+## Pass 6 continuation (142) (2026-07-01) — SAFER+ BD_ADDR mix `FUN_8002cfac`
+
+Decompiled and renamed:
+**`FUN_8002cfac` → `bdaddr_pad_safer_plus_encrypt_xor6_16byte_key_block`**
+(94B, HIGH) via `RenamePass6Region80020000Fun8002cfac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=171` at pass start). First-listed at
+94B (tied cluster at 94B; highest xref_in=3).
+
+**Mechanism:** COMB_KEY / link-key BD_ADDR-mixing helper in the SAFER+ cluster — sibling
+of `pad_concat_safer_plus_encrypt_16byte_key_block` (Pass 6 cont. 89). Copies 16B from
+`param_1` into stack block, XORs byte 15 with **6** (mode-6 variant vs length-XOR in
+sibling), assembles 16B output at `param_3` from 6B BD_ADDR `param_2` via duplicate
+layout (6+6+4 bytes), then runs one `safer_plus_block_encrypt` round
+(stack_block, param_3, 1).
+
+**Callers:** `xor_inbound_lmp_key_and_update_crypto_by_type` (COMB_KEY type-9 inbound mix),
+`derive_comb_key_xor_and_send_lmp_0x09` (outbound COMB_KEY BD_ADDR mix from crypto
+`+0xa9`), and `hci_ogf1_ogf3_shared_command_complete_event_sender` (HCI 0x0C0B
+local-name/IRK fetch path) — xref_in=3 per `ListUnnamed80020000.java`; first two
+documented in Pass 6 cont. (113)/(114).
+
+**Confidence:** HIGH — decompile confirms BD_ADDR duplicate-pad + XOR-6 + single-round
+`safer_plus_block_encrypt`; callee wiring matches documented COMB_KEY inbound/outbound
+cluster; adjacent to `safer_plus_block_encrypt`/`pad_concat_safer_plus_encrypt_16byte_key_block`.
+
+Region unnamed count after this pass: **170** (171 minus this rename). Live named **1751** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
