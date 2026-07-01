@@ -2848,7 +2848,7 @@ routes overlapping but non-identical rejected-opcode recovery handlers.
 - `0x08` → `handle_lmp_in_rand_not_accepted_alt` (IN_RAND alt recovery)
 - `0x0f` → `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
 - `0x10` → `handle_lmp_encryption_key_size_req_not_accepted`
-- `0x11` → `FUN_80027b28` (start encryption recovery)
+- `0x11` → `handle_lmp_start_encryption_req_not_accepted`
 - `0x12` → `FUN_80027b9c` (stop encryption recovery)
 - `0x32` → `FUN_80029784`
 - `0x3f` → no-op (return 1)
@@ -4461,5 +4461,33 @@ subsystem init chain entry point.
 with self-pointer list heads and trailing buffer clears; unambiguous control flow.
 
 Region unnamed count after this pass: **189** (190 minus this rename). Live named **1732** global.
+
+**Next:** superseded by Pass 6 continuation (124).
+
+## Pass 6 continuation (124) (2026-07-01) — start-encryption NOT ACCEPTED recovery `FUN_80027b28`
+
+Decompiled and renamed:
+**`FUN_80027b28` → `handle_lmp_start_encryption_req_not_accepted`**
+(108B, HIGH) via `RenamePass6Region80020000Fun80027b28.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (108B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=189` at pass start). First listed among
+tied 108B siblings (`FUN_80023bdc` xref_in=1 remains).
+
+**Mechanism:** LMP START ENCRYPTION REQ (opcode 0x11) NOT ACCEPTED recovery handler.
+Per-connection `big_ol_struct[slot]` lookup; role-gated via
+`ret_bool_based_on_crypto_struct_0x50` vs LMP message bit `param_1+4 & 1`, with global
+flag `PTR_DAT_80027b98[2] & 0x80` bypass. When crypto sub-state `+1 == 'K'` and gate
+passes: calls `sometimes_called_with_0_3_0` (mode 3 = enable encryption), then
+`finalize_encryption_procedure_and_notify_hci`.
+
+**Callers:** `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` (rejected
+opcode `0x11` path) — xref_in=1.
+
+**Confidence:** HIGH — decompile confirms established NOT ACCEPTED recovery idiom;
+callees `sometimes_called_with_0_3_0` and `finalize_encryption_procedure_and_notify_hci`
+already HIGH; sits in documented alt-dispatch table at rejected opcode `0x11`.
+
+Region unnamed count after this pass: **188** (189 minus this rename). Live named **1733** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
