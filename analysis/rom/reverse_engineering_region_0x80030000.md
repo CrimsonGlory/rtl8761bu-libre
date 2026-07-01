@@ -5999,5 +5999,38 @@ with Pass 112's HIGH-named `0x800336f4` sibling confirms semantics.
 Region unnamed count after this pass: **97** (98 minus this rename). Live named
 **2069** global.
 
-**Next:** Pass 194 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 194.
+
+## Pass 194 (2026-07-01) — HW reg 0x44 bits 12-14 RMW `FUN_8003b64c`
+
+Fresh `ListUnnamed80030000.java` re-run: **97 unnamed** remain in region
+(unchanged from Pass 193; rank-1 by size at xref=1 tier is `FUN_8003b64c` at
+66B — wins on size over tied 66B/64B/62B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b64c` → `read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param`**
+(66B, HIGH, SIMPLE-tier) via
+`RenamePass194Region80030000Fun8003b64c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write HW/VSC register `0x44` bits 12-14: reads via
+indirect read fptr at `PTR_DAT_8003b690` with args `(0, 0x44, 1)`, then writes
+back via write fptr at `PTR_DAT_8003b694` with value
+`(read_val & 0x8fff) | ((param_1 & 7) << 0xc)` — clears bit 15, replaces
+bits 12-14 with the low 3 bits of `param_1`. Sibling of Pass 71's
+`read_modify_write_hw_reg_0x44_set_bit0` (bit-0 merge) in the same
+`0x8003b6xx` per-connection HW-buffer setup cluster.
+
+**Callers:** 1 xref-in — `per_connection_hw_buffer_setup_with_patch_hook` (calls
+with literal `7` as part of the setup sequence alongside `FUN_8003b604(5)`,
+`read_modify_write_hw_reg_0x44_set_bit0(1)`, and `FUN_8003b6fc(1)` before
+setting bit `0x8000` of reg `0x44`).
+
+**Confidence:** HIGH — full 66B decompile; register index `0x44` and 3-bit
+field merge at bits 12-14 unambiguous; caller context matches documented Pass 8
+item 13 per-connection HW-buffer setup cluster.
+
+Region unnamed count after this pass: **96** (97 minus this rename). Live named
+**2070** global.
+
+**Next:** Pass 195 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
