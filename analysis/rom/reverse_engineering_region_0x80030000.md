@@ -8183,5 +8183,34 @@ unambiguous.
 Region unnamed count after this pass: **27** (28 minus this rename). Live named
 **2139** global.
 
-**Next:** Pass 264 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 264.
+
+## Pass 264 (2026-07-01) — parallel-slot min-metric index selector `FUN_8003cfdc`
+
+Fresh `ListUnnamed80030000.java` re-run: **27 unnamed** remain in region
+(unchanged from Pass 263; xref_in=0 tier dominates — rank-1 is `FUN_8003cfdc`
+at 56B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cfdc` → `select_min_dword_parallel_slot_index_type_0x101`**
+(56B, HIGH, UTILITY-tier) via
+`RenamePass264Region80030000Fun8003cfdc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Parallel-slot-table min-metric index selector in the
+`0x8003cfxx`/`0x8003d0xx` cluster (address-adjacent sibling of Pass 262
+`select_max_dword_parallel_slot_type_0x101_store_byte_at_plus6` and Pass 68
+`reset_parallel_slot_table_entry_tail_state_by_index`). Scans three `0x88`-stride
+entries at `PTR_DAT_8003d014`; for each where ushort at `+4` equals `0x101`,
+picks the entry with minimum dword at `+0x30`, returns slot index (or `0xff`
+when no type-`0x101` match).
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 56B decompile; min-selection logic and slot-table
+offsets unambiguous.
+
+Region unnamed count after this pass: **26** (27 minus this rename). Live named
+**2140** global.
+
+**Next:** Pass 265 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
