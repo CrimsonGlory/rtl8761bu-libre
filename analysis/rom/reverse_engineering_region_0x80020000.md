@@ -8445,4 +8445,33 @@ caller site matches documented HCI OGF3 stored-link-key command-complete cluster
 
 Region unnamed count after this pass: **56** (57 minus this rename). Live named **1865** global.
 
+**Next:** superseded by Pass 6 continuation (257).
+
+## Pass 6 continuation (257) (2026-07-01) — LMP-ext keypress notification sender `FUN_800258c4`
+
+Decompiled and renamed:
+**`FUN_800258c4` → `send_lmp_ext_pkt_0x7f_subopcode_0x1e_keypress_notification`**
+(38B, HIGH) via `RenamePass6Region80020000Fun800258c4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (38B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=56` at pass start). First-listed in tied
+38B tier; sits in the `0x800258xx` SSP/LMP-ext send cluster alongside
+`send_lmp_ext_pkt_0x7f_subopcode_0x22` (`0x800242b0`) and
+`classify_ssp_pairing_method_from_io_capabilities` (`0x80025800`).
+
+**Mechanism:** Builds 4-byte LMP-ext PDU `{0x7f, 0x1e, notification_type}` and sends via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn_index, buf, 4, flags)`. Outbound
+complement of inbound `handle_lmp_ext_subopcode_0x1e_keypress_notification_by_ssp_state`
+(Pass 6 cont. 98), which forwards peer keypress to host via
+`send_evt_HCI_Keypress_Notification`.
+
+**Caller:** `fHCI_Keypress_Notification_0x60` at `0x80023b40` — HCI Keypress Notification
+(opcode `0x0C60`) success path after crypto sub-state `{'1','5'}` gate and notification-type
+`<5` validation; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms fixed LMP-ext 0x7f/0x1e 4-byte send idiom;
+caller documented in Pass 6 cont. (140); matches BT-spec Keypress Notification PDU layout.
+
+Region unnamed count after this pass: **55** (56 minus this rename). Live named **1866** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
