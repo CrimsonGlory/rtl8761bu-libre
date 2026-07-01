@@ -5352,4 +5352,36 @@ cluster; branch callees tie into documented `sometimes_called_with_0_3_0` /
 
 Region unnamed count after this pass: **160** (161 minus this rename). Live named **1761** global.
 
+**Next:** superseded by Pass 6 continuation (153).
+
+## Pass 6 continuation (153) (2026-07-01) — encryption-mode disable accept `FUN_80024754`
+
+Decompiled and renamed:
+**`FUN_80024754` → `accept_lmp_encryption_mode_disable_and_branch_by_bdaddr_random`**
+(88B, HIGH) via `RenamePass6Region80020000Fun80024754.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (88B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=160` at pass start). First-listed at
+88B (tied cluster; first entry `FUN_80024754`).
+
+**Mechanism:** LMP Encryption Mode Req (0x0F) **disable/stop-encryption accept** helper —
+sibling of unnamed `FUN_800246fc` (enable accept path). Extracts role bit from incoming
+PDU byte `+4`, sends `wrap_send_LMP_ACCEPTED_and_some_other_things(conn, 0xf, mode_bit)`.
+Branches on `bdaddr_random_`:
+- Public BD_ADDR → sets crypto sub-state `+1 = 0x47`
+- Random BD_ADDR → copies key-size byte from `PTR_DAT_800247b0[2]` into `crypto+0x23`,
+  calls `FUN_80024560` (sends LMP opcode **0x10** Encryption Key Size Req, 3B PDU) which
+  advances sub-state to `0x4a`
+
+**Callers:** `LMP_ENCRYPTION_MODE_REQ_0x0F` (2 sites — crypto sub-state `0x45` disable
+path and default link-type-mask disable branch with `+0x50=2`).
+
+**Confidence:** HIGH — decompile confirms symmetric disable/enable pairing with
+`FUN_800246fc` (enable → states `0x3f`/`0x41`); both callees invoked from documented
+`LMP_ENCRYPTION_MODE_REQ_0x0F` state machine; random-addr key-size-req path matches
+`dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role` (Pass 6 cont. 63) and
+`handle_lmp_encryption_mode_req_not_accepted` retry state `0x4c`→`0x47`.
+
+Region unnamed count after this pass: **159** (160 minus this rename). Live named **1762** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
