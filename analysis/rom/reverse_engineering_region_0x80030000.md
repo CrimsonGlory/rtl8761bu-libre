@@ -5747,5 +5747,36 @@ matches documented BB-reg cluster; sole caller confirmed via `ListXrefsTo8003b81
 Region unnamed count after this pass: **105** (106 minus this rename). Live named
 **2061** global.
 
-**Next:** Pass 186 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 186.
+
+## Pass 186 (2026-07-01) — LMP TX log+enqueue helper `FUN_80036da8`
+
+Fresh `ListUnnamed80030000.java` re-run: **105 unnamed** remain in region
+(unchanged from Pass 185; rank-1 by size at xref=1 tier is `FUN_80036da8` at
+74B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80036da8` → `log_lc_tx_evt_0x32a_and_enqueue_lmp_tx_pending_descriptor`**
+(74B, HIGH, UTILITY-tier) via
+`RenamePass186Region80030000Fun80036da8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Post-build helper on the `send_LMP_pkt` success path. Logs via
+`possible_logger_called_if_no_patch3` with LC TX event tag `0x32a` (member of
+`assoc_w_tLC_TX` / `LC_event_TX_dispatcher` opcode set), then calls
+`FUN_8006ad80` to init the allocated LMP TX descriptor buffer
+(`param_2`: sets `+0x1a` role-index byte, `+0x16` bosi ushort, clears
+`+0x1b`/`+0x1e`, copies `+0x1e` from XOR-mask-matched list entry) and enqueue
+into the IRQ-guarded pending-TX linked list at `PTR_DAT_8006add0`.
+
+**Callers:** 1 xref-in — `send_LMP_pkt` at `0x80061398` (region `0x80060000`,
+shared LMP-PDU-TX primitive used by all `LMP_*` handlers).
+
+**Confidence:** HIGH — full 74B decompile; logger tag `0x32a` matches
+documented LC TX opcode table; caller and callee chain confirmed via
+`ListXrefsTo80036da8` + `send_LMP_pkt` decompile.
+
+Region unnamed count after this pass: **104** (105 minus this rename). Live named
+**2062** global.
+
+**Next:** Pass 187 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

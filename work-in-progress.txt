@@ -13419,7 +13419,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 185;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 186: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 186 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80036da8`→`log_lc_tx_evt_0x32a_and_enqueue_lmp_tx_pending_descriptor`
+          (74B, HIGH, UTILITY-tier). `send_LMP_pkt` post-build helper: logs LC TX
+          evt `0x32a` via `possible_logger_called_if_no_patch3`, then
+          `FUN_8006ad80` init+enqueue of LMP TX descriptor; caller `send_LMP_pkt`.
+          104 unnamed remain; live named 2062.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 186;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 187: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
