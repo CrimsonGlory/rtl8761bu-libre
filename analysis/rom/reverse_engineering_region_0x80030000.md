@@ -5035,5 +5035,38 @@ matches parent dedup scan; status-byte update semantics unambiguous.
 Region unnamed count after this pass: **127** (128 minus this rename). Live named
 **2039** global.
 
-**Next:** Pass 164 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function.
+**Next:** superseded by Pass 164.
+
+## Pass 164 (2026-07-01) — random-BD_ADDR TX-power VSC dispatch `FUN_8003fa8c`
+
+Fresh `ListUnnamed80030000.java` re-run: **127 unnamed** remain in region
+(unchanged from Pass 163; rank-1 at xref=1 tier is `FUN_8003fa8c` at 116B —
+largest among the xref=1 cohort, tied with `FUN_8003aa7c`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003fa8c` → `apply_random_bdaddr_tx_power_delta_via_vsc_fc95_lmp_268`**
+(116B, HIGH, UTILITY-tier) via
+`RenamePass164Region80030000Fun8003fa8c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Random-BD_ADDR TX-power threshold dispatcher. Reads baseline
+`field106_0x94` from `big_ol_struct[param_1]`; when `field_0x29d==1`, scales by
+`FUN_80061c78` timing-factor helper. Only when `bdaddr_random_==1` and computed
+level exceeds global threshold `*PTR_DAT_8003fb04`, builds delta
+`(level - threshold) + field109_0x98 * -2` (16-bit wrap) and calls
+`FUN_8003fa24` (VSC `0xFC95` + LMP `0x268` path). On success (`FUN_8003fa24`
+returns 0), arms follow-up via `FUN_80017c3c(bos_connection__array_index,
+byte_0xCC)`. TX-power cluster sibling of Pass 162
+`compute_clamped_tx_power_level_from_link_class_baselines` and Pass 129
+`apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`.
+
+**Callers:** 1 xref-in per `ListXrefsTo8003fa8c`; sole direct caller
+`LC_event_TX_dispatcher` (`0x800424b0`).
+
+**Confidence:** HIGH — full 116B decompile; `bdaddr_random_` gate,
+threshold compare, and VSC FC95/LMP 268 callee chain unambiguous.
+
+Region unnamed count after this pass: **126** (127 minus this rename). Live named
+**2040** global.
+
+**Next:** Pass 165 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (likely `FUN_8003aa7c`, tied 116B at xref=1).
