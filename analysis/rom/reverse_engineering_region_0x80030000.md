@@ -4668,5 +4668,37 @@ matches established BB-reg programmer cluster.
 Region unnamed count after this pass: **138** (139 minus this rename). Live named
 **2028** global.
 
-**Next:** Pass 153 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 153.
+
+## Pass 153 (2026-07-01) — register-script context init `FUN_80039448`
+
+Fresh `ListUnnamed80030000.java` re-run: **138 unnamed** remain in region
+(unchanged from Pass 152; rank-1 at xref=1 tier is `FUN_80039448` at 154B —
+largest among the xref=1 cohort, tied with `FUN_800352d0`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039448` → `init_register_script_context_from_config_and_clear_17pair_table`**
+(154B, HIGH, SIMPLE-tier) via
+`RenamePass153Region80030000Fun80039448.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script global-context initializer in the `0x800394xx`
+cluster (sibling of Pass 135's `invoke_register_script_from_global_context_0x60_0x64`
+and upstream of Pass 151's `run_bb_reg_init_hook_chain_and_program_0x1e_5bit_field`).
+Reads config bytes at `config_struct+0x408` and `config[1]+0x1`; seeds a 6-byte
+header at `PTR_DAT_800394e4` (`[1]=config_byte`, `[2]=0xf0`, `[3]=0x10`); populates
+descriptor at `PTR_DAT_800394ec` with sentinel `0xffffffff`, magic `0xace`, and
+nine wired buffer pointers (`PTR_DAT_800394f4`–`80039510`) with size halfwords
+(100, 0x18, 6, 8, 0x26, 4); clears 17 `(dword, ushort)` pairs in
+`PTR_PTR_800394f0`; initializes `PTR_DAT_80039514` (`[0]=0x14`, `[0x13]=0`).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `find_callers` empty (likely
+indirect/data-ref invocation — same pattern as Pass 135/151).
+
+**Confidence:** HIGH — full 154B decompile; config-driven descriptor wiring idiom
+matches register-script interpreter cluster; no unresolved callees.
+
+Region unnamed count after this pass: **137** (138 minus this rename). Live named
+**2029** global.
+
+**Next:** Pass 154 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
