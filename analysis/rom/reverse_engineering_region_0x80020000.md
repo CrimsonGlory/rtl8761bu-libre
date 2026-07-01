@@ -9325,4 +9325,32 @@ sibling setter already documented in Pass 6 cont. (120)/(269).
 
 Region unnamed count after this pass: **25** (26 minus this rename). Live named **1896** global.
 
+**Next:** superseded by Pass 6 continuation (288).
+
+## Pass 6 continuation (288) (2026-07-01) — ACL reassembly gate lookup `FUN_8002adbc`
+
+Decompiled and renamed:
+**`FUN_8002adbc` → `lookup_acl_reassembly_gate_byte_for_link_substate2_or_default1`**
+(22B, HIGH) via `RenamePass6Region80020000Fun8002adbc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) and `FUN_80024004` (24B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_8002adbc` (22B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=25` at pass start). ACL-reassembly cluster sibling to Pass 6 cont. (123)'s
+`init_three_slot_0x34_linked_descriptors_and_clear_buffers`.
+
+**Mechanism:** Conditional gate-byte lookup for HCI ACL RX reassembly. When global status
+byte at `PTR_DAT_8002add4` has masked sub-state `(*byte & 0x1e) == 2`, returns config byte
+`*PTR_DAT_8002add8`; otherwise returns default **1**. Caller
+`hci_acl_data_fragment_assembler_and_enqueue` treats **0** as abort path (reject callback,
+clear per-handle reassembly state, drain pending slots, return `0xff`).
+
+**Callers:** `hci_acl_data_fragment_assembler_and_enqueue` (`0x8002a3d8`, Pass 6 cont. 3) —
+xref_in=1 per `find_callers`.
+
+**Confidence:** HIGH — decompile confirms unambiguous masked-substate gate + single-byte
+return; caller decompile shows zero-check abort semantics in ACL fragment assembler.
+
+Region unnamed count after this pass: **24** (25 minus this rename). Live named **1897** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
