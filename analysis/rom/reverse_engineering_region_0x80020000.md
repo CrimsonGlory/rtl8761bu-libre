@@ -4714,4 +4714,38 @@ crypto sub-state `'J'` aligns with key-size negotiation completion path document
 
 Region unnamed count after this pass: **181** (182 minus this rename). Live named **1740** global.
 
+**Next:** superseded by Pass 6 continuation (132).
+
+## Pass 6 continuation (132) (2026-07-01) — EIR snapshot SSP confirm precompute `FUN_80025e2c`
+
+Decompiled and renamed:
+**`FUN_80025e2c` → `precompute_dual_ssp_confirm_hmac_blocks_for_eir_snapshot`**
+(98B, HIGH) via `RenamePass6Region80020000Fun80025e2c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (98B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=181` at pass start). Tied at 98B with
+`FUN_80023008` (xref_in=13), `FUN_8002ede4`, `FUN_80029b64`, `FUN_80021a04`; selected
+first by list order.
+
+**Mechanism:** EIR/Extended-Inquiry-Response snapshot helper in the `0x80025exx` SSP
+confirm-hash cluster. Primes two 16B output buffers via `FUN_8002c838`, then invokes
+`compute_ssp_confirm_hash_hmac_variable_blocks` twice on SA-table blocks indexed by
+config byte at `+0x47`: first pass uses 6×4B blocks from base offset (`0x30` stride per
+index), second pass uses 8×4B blocks from `+0x90` offset (`0x40` stride per index).
+Results land in global buffers (`PTR_DAT_80025e90`/`98`/`a0`/`a4`) that callers copy
+out as four byte-swapped 16B chunks for HCI Command Complete payloads.
+
+**Callers:** `hci_ogf1_ogf3_shared_command_complete_event_sender` (opcode `0x0C57` Read
+Extended Inquiry Response path documented in Pass 6 cont. (5)) and `FUN_8001fb70` (opcode
+`0x0C7D` vendor EIR-snapshot variant: calls this fn then copies 4×16B with
+`swap_byte_order`).
+
+**Confidence:** HIGH — decompile confirms established SSP confirm HMAC idiom via
+`compute_ssp_confirm_hash_hmac_variable_blocks`; two documented callers in HCI
+Command-Complete / vendor-read paths; sibling of
+`derive_simple_pairing_confirm_and_send_lmp_0x3f` in the same `0x800259xx`–`0x80025fxx`
+SSP cluster.
+
+Region unnamed count after this pass: **180** (181 minus this rename). Live named **1741** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

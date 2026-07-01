@@ -10401,8 +10401,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (131);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (132): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (181 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (132): decompiled+
+          renamed rank-1 `FUN_80025e2c`→`precompute_dual_ssp_confirm_hmac_blocks_for_eir_snapshot`
+          (98B, HIGH). EIR snapshot SSP confirm precompute: dual
+          `compute_ssp_confirm_hash_hmac_variable_blocks` passes (6-block + 8-block)
+          on SA table indexed by config `+0x47`; callers
+          `hci_ogf1_ogf3_shared_command_complete_event_sender` (0x0C57) +
+          `FUN_8001fb70` (0x0C7D). 180 unnamed remain; live named 1741.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (132);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (133): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (180 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
