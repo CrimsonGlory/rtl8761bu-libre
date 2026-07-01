@@ -3851,4 +3851,36 @@ already HIGH; sits in documented alt-dispatch table at rejected opcode `0x12`.
 
 Region unnamed count after this pass: **209** (210 minus this rename). Live named **1712** global.
 
+**Next:** superseded by Pass 6 continuation (104).
+
+## Pass 6 continuation (104) (2026-07-01) — SSP 48-byte HMAC assembler `FUN_8002c758`
+
+Decompiled and renamed:
+**`FUN_8002c758` → `assemble_48byte_hmac_and_compute_safer_hash`**
+(120B, HIGH) via `RenamePass6Region80020000Fun8002c758.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (120B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=209` at pass start). Sits in the
+`0x8002c7xx` SAFER+ HMAC cluster immediately below
+`assemble_63byte_hmac_and_compute_safer_hash` (`0x8002c6c8`).
+
+**Mechanism:** SSP link-key HMAC message assembler (48-byte/`0x30` layout): copies two
+16-byte crypto key blocks (`param_2`/`param_3`), a 4-byte mode prefix (`param_4`),
+and two 6-byte BD_ADDR operands (`param_5`/`param_6`) into a fixed 48-byte message
+buffer, then invokes `hmac_ipad_opad_2pass_safer_hash_driver` with HMAC key `param_1`
+and mode byte `(param_8 & 0x3f) << 2`, writing 16-byte output to `param_7`. Sibling
+of `assemble_63byte_hmac_and_compute_safer_hash` (63-byte DHKey-check layout) with
+identical HMAC driver but shorter message (16+16+4+6+6 vs 16+16+16+3+6+6).
+
+**Caller:** `derive_link_key_hmac_on_ssp_pairing_complete` at `0x80026648` (SSP
+success path: blocks `+0x1be`/`+0xe8`/`+0xf8`, 4-byte prefix `PTR_DAT_80026604`,
+role-gated byte-swapped BD_ADDRs, output to `+0x61`) — xref_in=1, confirmed via
+caller decompilation.
+
+**Confidence:** HIGH — callee is the documented SAFER+ HMAC driver; 48-byte message
+layout matches caller operand ordering; sole caller is the confirmed SSP-complete
+link-key derivation path documented in Pass 6 cont. (77).
+
+Region unnamed count after this pass: **208** (209 minus this rename). Live named **1713** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

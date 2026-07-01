@@ -10136,8 +10136,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (103);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (104): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (209 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (104) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002c758`→`assemble_48byte_hmac_and_compute_safer_hash`
+          (120B, HIGH). SSP link-key HMAC assembler: 2×16B crypto blocks + 4B prefix +
+          2×6B BD_ADDR → 48B message → SAFER+ HMAC driver → 16B out; caller
+          `derive_link_key_hmac_on_ssp_pairing_complete`. 208 unnamed remain; live named 1713.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (104);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (105): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (208 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
