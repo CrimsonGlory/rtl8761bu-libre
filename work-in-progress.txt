@@ -10945,8 +10945,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (192);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (193): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (120 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (193) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80021d34`→`clear_connection_slot_supervision_timing_counters`
+          (66B, HIGH) — per-slot supervision/timing counter scrub on `big_ol_struct`
+          (`field_0x290`–`0x29e` + tail-call `FUN_80061e24`); caller `FUN_80067768`
+          connection-slot init at `0x800679ca`; xref_in=1; 119 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (193);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (194): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (119 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

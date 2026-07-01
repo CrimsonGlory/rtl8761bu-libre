@@ -6553,4 +6553,34 @@ paired with insert helper `FUN_80017634` on opcode `0x190` in same function.
 
 Region unnamed count after this pass: **120** (121 minus this rename). Live named **1801** global.
 
+**Next:** superseded by Pass 6 continuation (193).
+
+## Pass 6 continuation (193) (2026-07-01) — connection-slot supervision timing scrub `FUN_80021d34`
+
+Decompiled and renamed:
+**`FUN_80021d34` → `clear_connection_slot_supervision_timing_counters`**
+(66B, HIGH) via `RenamePass6Region80020000Fun80021d34.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=120` at pass start). First-listed at
+66B/xref_in=1 (tied with sibling `FUN_800219a4`).
+
+**Mechanism:** Per-connection-slot (`param_1 & 0xffff`) supervision/timing counter scrub on
+`PTR_big_ol_struct_80021d78[slot]`. Zeroes byte `field_0xc9`, five ushort word fields at
+`field_0x290`/`0x292`/`0x294`/`0x296`/`0x29a`, and byte `field_0x29e`, then tail-calls
+`FUN_80061e24` which interrupt-brackets clearing dwords `field_0x288`/`0x28c` to
+`0xffffffff` and bytes `field_0x29c`–`field_0x29f`. Complements sibling
+`clear_connection_slot_lmp_pdu_and_pending_fields` (`FUN_80021dcc`, Pass 6 cont. 122) on
+the same `big_ol_struct` during slot setup/teardown.
+
+**Callers:** `FUN_80067768` at `0x800679ca` — large per-slot connection-record initializer
+(`memset` entire struct, seeds defaults from `config_base`, then invokes this helper near
+tail of init sequence). xref_in=1 via `ListXrefsTo80021d34.java`.
+
+**Confidence:** HIGH — decompile confirms indexed slot field scrub with sentinel dword
+pattern matching `FUN_80061e24`; caller decompile shows invocation during connection-slot
+init after bulk defaults programmed.
+
+Region unnamed count after this pass: **119** (120 minus this rename). Live named **1802** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
