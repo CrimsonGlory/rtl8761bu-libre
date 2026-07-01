@@ -5291,4 +5291,33 @@ already-analyzed Master Link Key staging cluster.
 
 Region unnamed count after this pass: **162** (163 minus this rename). Live named **1759** global.
 
+**Next:** superseded by Pass 6 continuation (151).
+
+## Pass 6 continuation (151) (2026-07-01) — first-fit credit-scheduler alloc `FUN_8002bc28`
+
+Decompiled and renamed:
+**`FUN_8002bc28` → `alloc_first_free_credit_scheduler_slot_0xd`**
+(92B, HIGH) via `RenamePass6Region80020000Fun8002bc28.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (92B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=162` at pass start). First-listed at
+92B (tied cluster; first entry `FUN_8002bc28`).
+
+**Mechanism:** IRQ-masked first-fit allocator for the 13-slot (`0xd`) credit-scheduler
+descriptor table at `PTR_DAT_8002bc84`. When free-mask `*(ushort*)(base+0x9c)` is zero,
+returns sentinel `0xd` immediately. Otherwise scans bits 0..12 for the first set bit,
+marks slot in-use (`base[slot*0xc+5] |= 1`), clears the mask bit, and returns the slot
+index. Sibling of `alloc_credit_scheduler_slot_0xd` (`0x8002bc88`), which allocates a
+caller-specified slot index at `PTR_DAT_8002bcfc` and logs on failure; this variant
+performs first-free search with no failure logging.
+
+**Callers:** xref_in=0 — no direct call sites found (consistent with indirect dispatch
+or table-driven invocation in the credit-scheduler cluster).
+
+**Confidence:** HIGH — decompile confirms identical 13-slot bitmask + 0xc-stride table
+idiom as `alloc_credit_scheduler_slot_0xd`/`release_credit_scheduler_slot_clear_descriptor_flags`;
+first-fit vs indexed-alloc distinction is unambiguous from control flow.
+
+Region unnamed count after this pass: **161** (162 minus this rename). Live named **1760** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
