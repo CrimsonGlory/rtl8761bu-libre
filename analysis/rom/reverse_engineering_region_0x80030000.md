@@ -6810,5 +6810,34 @@ unambiguous; SCO BB register cluster sibling of Pass 140/208.
 Region unnamed count after this pass: **71** (72 minus this rename). Live named
 **2095** global.
 
-**Next:** Pass 220 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 220.
+
+## Pass 220 (2026-07-01) — config-bit7-gated BB reg `0x10` writer `FUN_800393ac`
+
+Fresh `ListUnnamed80030000.java` re-run: **71 unnamed** remain in region
+(unchanged from Pass 219; rank-1 by size at xref=1 tier is `FUN_800393ac` at
+34B — wins on address over tied 34B sibling `FUN_80037370`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800393ac` → `write_hw_reg_0x10_four_config_bytes_if_config_byte1_bit7_set`**
+(34B, HIGH, SIMPLE-tier) via
+`RenamePass220Region80030000Fun800393ac.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin config-bit7-gated optional hook in the `0x800393xx` BB
+register-config init cluster: when config byte `PTR_DAT_800393d0[1]` bit `0x80`
+is set, calls `write_hw_reg_0x10_four_config_bytes_via_hw_hook` (Pass 210) with
+config buffer `PTR_DAT_800393d4`. Caller-side complement of Pass 210's four-byte
+BB reg `0x10` writer; sibling of config-bit1-gated `FUN_80039358` (offset
+`0x3c` byte) and config-bit2-gated `FUN_80039234` in the same cluster.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 34B decompile; config-byte bit `0x80` gate and
+callee chain to Pass 210 unambiguous.
+
+Region unnamed count after this pass: **70** (71 minus this rename). Live named
+**2096** global.
+
+**Next:** Pass 221 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
