@@ -3209,5 +3209,36 @@ semantics, and two caller bodies anchor the role.
 Region unnamed count after this pass: **181** (182 minus this rename). Live named
 **1985** global.
 
-**Next:** Pass 110 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 110.
+
+## Pass 110 (2026-07-01) — SCO config-flag sample-delta threshold `FUN_800397d0`
+
+Fresh `ListUnnamed80030000.java` re-run: **181 unnamed** remain in region
+(unchanged from Pass 109; rank-1 by size at xref=2 tier is `FUN_800397d0` at
+74B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800397d0` → `test_config_dc_bit8_and_hook_sample_minus_0x27d_lte_threshold`**
+(74B, HIGH, SIMPLE-tier) via `RenamePass110Region80030000Fun800397d0.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Bool predicate in the `0x800397xx` SCO/eSCO packet-type cluster
+(sibling of Pass 85's `test_conn_slot_qualifies_by_mode2_or_sco_packet_type_table_lookup`).
+Seeds a local byte from `PTR_DAT_8003981c[+0xe]`, invokes measurement hook
+`PTR_PTR_80039820` into `local_18`, then returns true only when
+`config_base->field209_0xdc` bit 8 is set **and**
+`(local_18[0] - config_base->field625_0x27d) <= param_1` (unsigned-byte delta
+vs caller-supplied threshold).
+
+**Callers:** 2 xref-in (COMPUTED_CALL) —
+`init_or_reset_sco_esco_hw_registers_and_link_slots` (`0x8004d44e`) and
+`set_or_clear_esco_link_register_bit0_via_fptr_with_retry` (`0x800575b0`).
+
+**Confidence:** HIGH — full 74B decompile; explicit config offsets `0xdc`/`0x27d`,
+hook indirection, and two named SCO/eSCO lifecycle callers anchor the role.
+
+Region unnamed count after this pass: **180** (181 minus this rename). Live named
+**1986** global.
+
+**Next:** Pass 111 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

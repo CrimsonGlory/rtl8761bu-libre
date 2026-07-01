@@ -12692,7 +12692,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 109;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 110: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 110 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800397d0`→`test_config_dc_bit8_and_hook_sample_minus_0x27d_lte_threshold`
+          (74B, HIGH, SIMPLE-tier). Config `+0xdc` bit8 gate + hook sample minus
+          baseline `+0x27d` ≤ threshold; callers
+          `init_or_reset_sco_esco_hw_registers_and_link_slots`/
+          `set_or_clear_esco_link_register_bit0_via_fptr_with_retry`.
+          180 unnamed remain; live named 1986.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 110;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 111: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
