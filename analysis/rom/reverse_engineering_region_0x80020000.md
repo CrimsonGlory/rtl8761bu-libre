@@ -9901,4 +9901,32 @@ proven call sites, but status-byte semantics and cluster placement match documen
 
 Region unnamed count after this pass: **5** (6 minus this rename). Live named **1916** global.
 
+**Next:** superseded by Pass 6 continuation (308).
+
+## Pass 6 continuation (308) (2026-07-01) — literal-pool divide helper `FUN_80021290`
+
+Decompiled and renamed:
+**`FUN_80021290` → `divide_literal_0x2bf20_by_param`**
+(12B, HIGH) via `RenamePass6Region80020000Fun80021290.java` (`renamed=1`, live-verified).
+
+**Triage note:** All 5 remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_80021290` (12B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=5` at pass start). Sits in the HCI event
+suppress-bypass mask cluster between Pass 6 cont. (174)'s
+`test_hci_evt_opcode_bypass_mask_bit_0x40_0x80` at `0x80021240` and Pass 6 cont. (147)'s
+`clamp_connection_qos_poll_interval_from_stored_limits` at `0x800212a0`.
+
+**Mechanism:** Returns `0x2bf20 / param_1` (180000 decimal) where the numerator is loaded from
+the PC-relative literal pool dword at `0x8002129c` immediately following the 12-byte function
+body; `trap(7)` on `param_1 == 0`. Orphan divide-by-constant thunk — likely extracted for
+reuse by QoS/timing math in the adjacent HCI-event/QoS cluster, but no direct callers found.
+
+**Callers:** none (xref_in=0; orphan literal-pool divide helper).
+
+**Confidence:** HIGH for mechanism (unambiguous constant divide + divide-by-zero trap);
+MEDIUM for role (orphan with no proven call sites, but literal value and cluster placement
+match adjacent HCI-event/QoS helpers).
+
+Region unnamed count after this pass: **4** (5 minus this rename). Live named **1917** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
