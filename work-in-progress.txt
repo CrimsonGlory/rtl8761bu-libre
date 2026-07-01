@@ -12586,7 +12586,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 98;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 99: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 99 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033b14`→`adjust_link_mode_change_slot_budget_and_secondary_timing`
+          (188B, HIGH, HANDLER-tier). Link-mode-change slot-budget/secondary-timing
+          adjust: mode-byte dispatch subtracts config offsets from `*param_2`, sets
+          `*param_3` from BOS `+0x94` or `0xff00`; caller
+          `link_mode_change_state_machine` before VSC fc11. 191 unnamed remain; live
+          named 1975.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 99;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 100: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

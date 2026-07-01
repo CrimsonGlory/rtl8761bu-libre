@@ -791,7 +791,7 @@ a crystal/clock-trim calibration routine.
 #### 6. `link_mode_change_state_machine` (0x80035454, 456B)
 
 `(byte link_type, uint, uint)`. The core link-mode/role-switch procedure dispatcher for this
-region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`FUN_80033b14`/`FUN_80033c98`/`check_connection_setup_commit_gate_status`
+region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`adjust_link_mode_change_slot_budget_and_secondary_timing`/`FUN_80033c98`/`check_connection_setup_commit_gate_status`
 helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
 busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
 brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
@@ -2865,5 +2865,38 @@ disconnect context from Pass 6.
 Region unnamed count after this pass: **192** (193 minus this rename). Live named
 **1974** global.
 
-**Next:** Pass 99 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 99.
+
+## Pass 99 (2026-07-01) — Link-mode slot budget adjust `FUN_80033b14`
+
+Fresh `ListUnnamed80030000.java` re-run: **192 unnamed** remain in region
+(unchanged from Pass 98; rank-1 by size at xref=2 tier is `FUN_80033b14` at
+188B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033b14` → `adjust_link_mode_change_slot_budget_and_secondary_timing`**
+(188B, HIGH, HANDLER-tier) via `RenamePass99Region80030000Fun80033b14.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook at `PTR_DAT_80033bd0` (skip when hook returns
+non-zero). Mode-byte dispatch on `param_1` (0–3): modes 0/1 subtract
+config-derived slot offsets from `*param_2` using `PTR_DAT_80033bd8` bit
+masks and `field244_0xff`; mode 1 also adds `PTR_DAT_80033be0` bit5 when BOS
+`+0x10a` nonzero; mode 2 when `PTR_DAT_80033be4` bit2 set sets `*param_3` from
+ushort at BOS `+0x94` minus `field244_0xff`; mode 3 sets `*param_3=0xff00`;
+defaults `*param_3` to `0xff00` when zero. Called by
+`link_mode_change_state_machine` before VSC fc11; `local_1c` feeds
+`(clock>>1)+secondary & slot_budget` for modes 2–3.
+
+**Callers:** 2 xref-in per cold-triage; direct caller
+`link_mode_change_state_machine` (when `PTR_DAT_80035620` bit `0x20` clear).
+
+**Confidence:** HIGH — full 188B decompile; link-mode-change cluster sibling of
+`check_link_mode_change_gate_status` (Pass 78) and
+`poll_vsc_fc11_3_until_pending_clear_with_link_mode_timeouts` (Pass 94).
+
+Region unnamed count after this pass: **191** (192 minus this rename). Live named
+**1975** global.
+
+**Next:** Pass 100 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
