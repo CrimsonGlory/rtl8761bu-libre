@@ -14787,8 +14787,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 93;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 94: cold-triage next rank-1
-          unnamed function in region `0x80010000` (218 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 94 (2026-07-01): cold-triage
+          rank-1 `FUN_80012ec8`→`write_bb_reg_0x1f8_then_merge_0x144_shifted_byte_with_delay`
+          (70B, HIGH). Writes BB reg `0x1f8` from poll result, merges shifted
+          byte into BB reg `0x144` via template masks `DAT_80012f10`/`DAT_80012f14`,
+          spin delay; companion to Pass 7t poll primitive; callers
+          `FUN_80012f18` (3×) + `FUN_80012f8c`; 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 94;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 95: cold-triage next rank-1
+          unnamed function in region `0x80010000` (217 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

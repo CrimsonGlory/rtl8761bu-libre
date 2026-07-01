@@ -1830,4 +1830,32 @@ consistent with `0x80013c0c`/`0x80013cec` primitives.
 
 Region unnamed count after this pass: **218** (219 minus this rename).
 
-**Next:** Pass 94 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 94.
+
+## Pass 94 (2026-07-01) — BB reg 0x1f8/0x144 paired writer `FUN_80012ec8`
+
+Pass 94 target from cold-triage rank-1 (4 xref_in, 70B — largest at xref=4
+tier after Pass 93). Decompiled and renamed:
+**`FUN_80012ec8` → `write_bb_reg_0x1f8_then_merge_0x144_shifted_byte_with_delay`**
+(70B, HIGH) via `RenamePass94Region80010000Fun80012ec8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Companion writer to Pass 7t's
+`write_bb_reg_0x144_shifted_param_and_poll_status_irq_gated` in the
+`0x80012exx` cluster. Writes BB reg `0x1f8` from `param_2`, reads BB reg
+`0x144`, writes merged value
+`(param_1 & 0xff) >> 2 | DAT_80012f10 | DAT_80012f14 & read_mask` via
+`write_baseband_register_masked_busywait`, then
+`spin_delay_10x_iterations(100)`.
+
+**Callers:** 4 xref_in — `FUN_80012f18` (3×: IRQ-gated poll-then-commit
+sequence toggling bit0 of poll result before/after param `0x18`/`0x20` phases)
+and `FUN_80012f8c` (1×: sets BB reg `0x148` bit0 then commits with param `0`).
+
+**Confidence:** HIGH — decompile confirms `0x1f8` preamble, `0x144` RMW with
+shifted-byte + dual template masks, fixed spin delay; caller decompiles show
+paired use immediately after Pass 7t poll primitive.
+
+Region unnamed count after this pass: **217** (218 minus this rename).
+
+**Next:** Pass 95 — cold-triage next rank-1 unnamed in region `0x80010000`.
