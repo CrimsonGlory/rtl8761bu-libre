@@ -2098,4 +2098,34 @@ region `0x80030000` Pass 104 role-slot state cluster.
 
 Region unnamed count after this pass: **209** (210 minus this rename).
 
-**Next:** Pass 103 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 103.
+
+## Pass 103 (2026-07-01) — sorted-table binary search `FUN_800174a8`
+
+Pass 103 target from cold-triage rank-1 (3 xref_in, 82B — largest at xref=3
+tier after Pass 102 cleared `FUN_80015fc0`). Decompiled and renamed:
+**`FUN_800174a8` → `binary_search_sorted_table_by_ushort_key`**
+(82B, HIGH) via `RenamePass103Region80010000Fun800174a8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Textbook binary search over a `{array,capacity,count}` table
+struct (`param_1[0]` = array of record pointers, `param_1[2]` = element count).
+Compares `**(ushort **)(array[i])` against `param_2 & 0xffff`; returns 1 with
+match index via `*param_3` on hit, 0 with insertion index on miss. Structural
+twin of region `0x80040000`
+`binary_search_sorted_table_by_index_byte` (1-byte key at record `+0x10`) and
+region `0x80050000` `binary_search_sorted_table_by_8byte_key` (8-byte key at
+record `+0x8`), distinguished only by ushort key at record offset 0.
+
+**Callers:** `FUN_800174fc` (insert-if-absent with shift-right),
+`FUN_8001756c` (remove with shift-left), `FUN_800175bc` (lookup returning
+record pointer) — a complete sorted ushort-key table CRUD trio in the
+`0x800174xx` neighborhood (3 xref_in per `ListXrefsTo800174a8.java`).
+
+**Confidence:** HIGH — self-contained textbook algorithm; caller trio confirms
+sorted-table insert/lookup/remove usage pattern identical to the established
+conn-record index-table family in region `0x80040000`.
+
+Region unnamed count after this pass: **208** (209 minus this rename).
+
+**Next:** Pass 104 — cold-triage next rank-1 unnamed in region `0x80010000`.
