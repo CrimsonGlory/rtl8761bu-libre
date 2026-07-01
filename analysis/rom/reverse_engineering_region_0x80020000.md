@@ -4814,4 +4814,34 @@ through established LC TX logger-hook dispatcher (Pass 6 cont. 36); structural t
 
 Region unnamed count after this pass: **178** (179 minus this rename). Live named **1743** global.
 
+**Next:** superseded by Pass 6 continuation (135).
+
+## Pass 6 continuation (135) (2026-07-01) — HCI link-key type changed counter decay `FUN_80029b64`
+
+Decompiled and renamed:
+**`FUN_80029b64` → `decay_link_key_transition_counters_and_wrap_emit_hci_evt_if_bdaddr_random`**
+(98B, HIGH) via `RenamePass6Region80020000Fun80029b64.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (98B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=178` at pass start). Tied at 98B with
+`FUN_80021a04`; selected first by list order after Pass 6 cont. (134)'s `FUN_8002ede4`.
+
+**Mechanism:** Random-BD_ADDR-only link-key-type transition counter decay + wrapper dispatch.
+Gated on `big_ol_struct[conn].bdaddr_random_`; no-op for public addresses. Consults global
+struct `PTR_DAT_80029bcc` 3-state machine at `+0x48` (combination/temporary/semi-permanent
+phases documented in `wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` at `0x80029a98`):
+decrements pending counters at `+0x8d` (and `+0x8c` in states 1/3; state-1 also gates
+`+0x8d` decay on caller mode `param_2==2`), then invokes
+`wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A(conn, 0x1f)`.
+
+**Callers:** sole direct caller `init_per_connection_crypto_struct_for_bos_slot` at
+`0x800224d0` — ACL link-type feature-bit dispatch passes mode 1/2/3 from `DAT_80022524`/
+`DAT_80022528` masks when initializing per-connection crypto record (Pass 6 cont. 46).
+
+**Confidence:** HIGH — unambiguous `bdaddr_random_` gate + documented global counter fields
+(`+0x48`/`+0x8c`/`+0x8d`) matching the `0x80029axx` Link Key Type Changed cluster;
+caller/callee chain already HIGH from Pass 6 cont. 46 and 2026-06-26 low→high upgrade.
+
+Region unnamed count after this pass: **177** (178 minus this rename). Live named **1744** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
