@@ -2018,5 +2018,38 @@ unambiguous; caller context in TX-power init/adjust cluster matches region's
 Region unnamed count after this pass: **218** (219 minus this rename). Live named
 **1948** global.
 
-**Next:** Pass 73 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 73.
+
+## Pass 73 (2026-07-01) — HW channel merge commit `FUN_8003ca28`
+
+Fresh `ListUnnamed80030000.java` re-run: **218 unnamed** remain in region
+(unchanged from Pass 72; rank-1 by xref count is `FUN_8003ca28` at 42B,
+4 xref-in — wins xref=4 tier on size over `FUN_80039b18`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ca28` → `commit_hw_channel_merge_index_0x36_on_role_bit0`**
+(42B, HIGH) via `RenamePass73Region80030000Fun8003ca28.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin HW-channel commit stub gated on `the_0x300->byte_0x16a`
+bit 0. When set, calls
+`or_merge_hw_channel_table_entry_and_indexed_dispatch(0x36,0x2000)` then
+dispatches indexed HW writes through `PTR_DAT_8003ca58` fptr with args
+`(0,10)`. Sibling of `program_inquiry_lap_hw_channel_by_pending_slot_count`
+(Pass 65 apply_4 path: bit2 gate, index `0x32`, slot-count indexing).
+
+**Callers:** 4 xref-in incl. `remote_name_request_feature_apply_8` (commit fn
+for `field208_0xd8` bit 8 path) and `LMP_link_supervision_tick_scheduler`
+(mode-1 link-type dispatch). Inquiry/LAP cluster sibling documented since
+Pass 6/8/65.
+
+**Confidence:** HIGH — full 42B decompile; prior cross-region documentation
+already identified role as remote-name-request apply_8 HW-channel commit;
+decompile confirms bit0 gate + `or_merge_hw_channel_table_entry_and_indexed_dispatch`
+index `0x36` pattern.
+
+Region unnamed count after this pass: **217** (218 minus this rename). Live named
+**1949** global.
+
+**Next:** Pass 74 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
