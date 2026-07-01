@@ -724,7 +724,7 @@ command-word pointer (`param_1`), status byte (`param_2`), optional connection i
 return payload in a stack buffer (echoes opcode bytes, reads/writes controller
 config bytes at `PTR_DAT_80022c2c`, copies BD_ADDR from connection record or cmd
 buffer for link-control opcodes, delegates link-key reads to
-`send_evt_HCI_Return_Link_Keys`/`FUN_800268ac`/`FUN_80026874`/`FUN_80026920` on
+`send_evt_HCI_Return_Link_Keys`/`store_link_keys_in_global_slot_table`/`build_occupied_link_key_bdaddr_and_key_ptr_arrays`/`FUN_80026920` on
 `0x0C0D`/`0x0C12`, local-name/IRK fetch via `FUN_8002c838`/`FUN_8002cfac` on
 `0x0C0B`, EIR snapshot via `FUN_80025e2c` + byte-swap on `0x0C57`, AFH-assessment
 mode write via `FUN_8002572c` on `0x0C56`); always terminates with
@@ -4334,8 +4334,9 @@ Returns the number of entries stored.
 
 **Caller:** `hci_ogf1_ogf3_shared_command_complete_event_sender` (`0x80022950`) at
 `0x80022bb4` — the shared OGF1/OGF3 Command Complete formatter that delegates link-key
-read/write paths (`0x0C0D`/`0x0C12`) to this helper alongside `FUN_80026874` (pointer-array
-export) and `FUN_80026920` (slot clear). xref_in=1 via `ListXrefsTo800268ac.java`.
+read/write paths (`0x0C0D`/`0x0C12`) to this helper alongside
+`build_occupied_link_key_bdaddr_and_key_ptr_arrays` (pointer-array export) and
+`FUN_80026920` (slot clear). xref_in=1 via `ListXrefsTo800268ac.java`.
 
 **Confidence:** HIGH — decompile confirms 7-slot BD_ADDR+key store with occupied-byte
 gating; slot layout matches `send_evt_HCI_Return_Link_Keys` 6+0x10 packing; single caller
@@ -7278,5 +7279,37 @@ cluster; link-key-type `0x20` gate aligns with
 `LMP_USE_SEMI_PERMANENT_KEY_0x32` / master-link-key phase-1 armer cluster.
 
 Region unnamed count after this pass: **96** (97 minus this rename). Live named **1825** global.
+
+**Next:** superseded by Pass 6 continuation (217).
+
+## Pass 6 continuation (217) (2026-07-01) — link-key slot pointer-array builder `FUN_80026874`
+
+Decompiled and renamed:
+**`FUN_80026874` → `build_occupied_link_key_bdaddr_and_key_ptr_arrays`**
+(52B, HIGH) via `RenamePass6Region80020000Fun80026874.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=96` at pass start). First-listed
+`FUN_80026874` in tied 52B/xref_in=1 cluster; pre-cited as unnamed callee at HCI
+stored-link-key read path in `hci_ogf1_ogf3_shared_command_complete_event_sender`
+(Pass 6 cont. 5/119).
+
+**Mechanism:** Enumerates occupied entries in the 7-slot global link-key table at
+`PTR_DAT_800268a8` (0x17-byte stride: 6B BD_ADDR, 16B key, +0x16 occupied flag).
+Scans all 7 slots; for each with occupied flag set, writes parallel pointer arrays:
+`param_1[count]` → slot base (BD_ADDR), `param_2[count]` → slot+6 (link key).
+Export-side complement of `store_link_keys_in_global_slot_table` (write path) for
+HCI Read Stored Link Key (`0x0C0D`) / Delete Stored Link Key (`0x0C12`) command
+completion formatting.
+
+**Callers:** `hci_ogf1_ogf3_shared_command_complete_event_sender` (1 site — HCI
+stored-link-key read/delete path alongside `store_link_keys_in_global_slot_table` and
+`FUN_80026920`; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms 7-slot occupied-flag scan with BD_ADDR/key
+pointer export matching documented slot layout from Pass 6 cont. (119); single caller
+in documented HCI OGF3 stored-link-key command-complete cluster.
+
+Region unnamed count after this pass: **95** (96 minus this rename). Live named **1826** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
