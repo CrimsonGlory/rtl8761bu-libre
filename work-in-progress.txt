@@ -12768,7 +12768,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 117;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 118: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 118 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80036100`→`increment_esco_slot_counter_and_apply_codec_if_gate_armed`
+          (28B, HIGH, HANDLER-tier). Page/inquiry eSCO slot counter step on
+          `big_ol_struct` +0x68/+0x6a gated on `the_0x300.field_0x175`; codec
+          apply via `FUN_80014450`/`FUN_80014dac` when gate armed; sibling of
+          Pass 55 inquiry-timer cluster. 172 unnamed remain; live named 1994.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 118;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 119: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

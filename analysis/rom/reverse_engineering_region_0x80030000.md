@@ -3467,5 +3467,44 @@ live decompile of `FUN_80039194`; both callers anchor BB-reg-config role.
 Region unnamed count after this pass: **173** (174 minus this rename). Live named
 **1993** global.
 
-**Next:** Pass 118 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 118.
+
+## Pass 118 (2026-07-01) — `increment_esco_slot_counter_and_apply_codec_if_gate_armed`
+
+Fresh `ListUnnamed80030000.java` re-run: **173 unnamed** remain in region
+(unchanged from Pass 117 pre-rename list; rank-1 at xref=2 tier was
+`FUN_80036100` at 28B — largest among five tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80036100` → `increment_esco_slot_counter_and_apply_codec_if_gate_armed`**
+(28B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass118Region80030000Fun80036100.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Page/inquiry eSCO codec-slot sample-counter stepper on
+`big_ol_struct` connection records, gated on `the_0x300` timer-active byte
+`field_0x175`. When sub-counter `field_0x6a` is zero, seeds main counter
+`field_0x68` from scan-interval byte `field_0x178`; otherwise increments
+`field_0x68` by step byte `field_0x177` with clamp against
+`field90_0x82` ceiling. IRQ-disabled path then, when per-slot gate byte at
+`PTR_DAT_800361e0[slot]==1`, dispatches `FUN_80014450` +
+`FUN_80014dac` (codec-config apply pair documented in Pass 55's
+`arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots` cluster).
+Alternate entry (`param_4!=0`) programs BB/HW registers via
+`FUN_8001139c`/`FUN_8001136c`/`FUN_80011510`/`FUN_80011608` with
+`spin_delay_10x_iterations` — sibling HW-fallback path in same body.
+
+**Callers:** 2 xref_in via `ListXrefsTo80036100.java` — self PC-relative
+literal-pool READ at `0x80036102`; data READ from `FUN_80035ff4` at
+`0x80035ffc` (fptr-table reference, not direct CALL). Structural sibling of
+`FUN_800361e4` (codec-slot flush callee of `arm_page_inquiry_scan_timer`).
+
+**Confidence:** HIGH — fully decompiled; counter/step/clamp field offsets
+match `the_0x300` timer cluster from Pass 55; codec-apply callee pair
+confirmed; gate-byte dispatch pattern matches documented eSCO slot sweep
+family in region `0x80040000`.
+
+Region unnamed count after this pass: **172** (173 minus this rename). Live named
+**1994** global.
+
+**Next:** Pass 119 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
