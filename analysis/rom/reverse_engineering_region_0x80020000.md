@@ -8268,4 +8268,35 @@ alongside sibling link-key reply handlers at opcodes `0x40b`/`0x40c`/`0x40e`.
 
 Region unnamed count after this pass: **62** (63 minus this rename). Live named **1859** global.
 
+**Next:** superseded by Pass 6 continuation (251).
+
+## Pass 6 continuation (251) (2026-07-01) — HCI IO Capability Request Negative Reply `FUN_80023070`
+
+Decompiled and renamed:
+**`FUN_80023070` → `hci_resolve_conn_dispatch_ssp_io_cap_or_oob_negative_reply_0xe`**
+(40B, HIGH) via `RenamePass6Region80020000Fun80023070.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=62` at pass start). First-listed in tied
+40B tier; sits in the `0x800230xx` SSP HCI-reply cluster alongside sibling
+`hci_resolve_conn_dispatch_pairing_continuation_link_key_neg_reply_0xc` (Pass 6 cont. 250)
+and documented link-key/PIN reply handlers at opcodes `0x40b`/`0x40c`/`0x40d`/`0x40e`.
+
+**Mechanism:** Thin HCI command wrapper for opcode **0x040e** (IO Capability Request
+Negative Reply) — `hci_resolve_conn_record_validate_and_complete` with validator
+`PTR_LAB_80022640_1`, then on success calls
+`dispatch_ssp_io_cap_or_oob_negative_reply_continuation(conn_handle)` and returns
+its result; returns 0 on conn-resolve failure. Same conn-resolve→SSP-negative-reply
+idiom as documented in Pass 6 cont. (161) for this function's callee.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (opcode `0x40e` branch); xref_in=1
+per Pass 6 cont. (161) caller analysis.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus call to
+documented SSP IO-cap/OOB negative-reply continuation router; caller confirmed in SSP
+debug-mode command router alongside sibling negative-reply handlers at opcodes
+`0x40b`/`0x40c`/`0x40e`.
+
+Region unnamed count after this pass: **61** (62 minus this rename). Live named **1860** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
