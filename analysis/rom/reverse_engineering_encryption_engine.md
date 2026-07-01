@@ -331,7 +331,7 @@ ROM-resident, also requiring no libre-side action) in
 | `0x8002cd80` | `safer_plus_armenian_shuffle_block` | Armenian Shuffle 16B permutation (called 3×/round) |
 | `0x8002cf1c` | `PTR_CRYPT_SAFER_exp_tab_8002cf1c` | SAFER `45^x mod 257` exponentiation table pointer |
 | `0x8002cf20` | `PTR_CRYPT_SAFER_log_tab_8002cf20` | SAFER logarithm table pointer (inverse of exp_tab) |
-| `0x8002408c` | `FUN_8002408c` | "Start encryption" gate, checks `config_base+0x7a` bit `0x4` |
+| `0x8002408c` | `check_encryption_feature_bit2_enabled_for_conn` | Encryption-feature gate: bit 2 of `(feature_page[5] & conn[+0xe8])`; see region `0x80020000` Pass 6 cont. (293) |
 | `0x80025ea8` | `derive_dhkey_check_nonce_and_send_lmp_0x42` | SSP DHKey-check nonce sender (LMP 0x42); pause-encryption fallback when non-SSP |
 | `0x800245fc` | `send_lmp_stop_encryption_req_0x12_and_set_conn_flag_0x2b1` | LMP 0x12 stop-encryption sender + conn flag arm (HW control plane, not cipher) |
 

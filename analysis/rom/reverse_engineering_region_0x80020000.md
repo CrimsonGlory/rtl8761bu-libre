@@ -9479,4 +9479,35 @@ both callers treat zero return as Unknown Connection Identifier (status 0x02).
 
 Region unnamed count after this pass: **20** (21 minus this rename). Live named **1901** global.
 
+**Next:** superseded by Pass 6 continuation (293).
+
+## Pass 6 continuation (293) (2026-07-01) — encryption feature gate `FUN_8002408c`
+
+Decompiled and renamed:
+**`FUN_8002408c` → `check_encryption_feature_bit2_enabled_for_conn`**
+(18B, HIGH) via `RenamePass6Region80020000Fun8002408c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_8002408c` (18B, xref_in=7) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=20` at pass start).
+
+**Mechanism:** Encryption-feature capability gate. Returns nonzero when bit **2** is set
+in `(PTR_some_feature_page_base_800240a0[5] & *(byte *)(param_1 + 0xe8))`. `param_1` is
+a per-connection/crypto struct pointer; byte at `+0xe8` is the connection's local
+encryption-capability mask. Widely used across HCI encryption commands, LMP start/stop
+encryption paths, and SSP DHKey-check stall recovery to decide whether to arm LMP 0x0F
+encryption-mode-on vs. fall back to pause/stop paths.
+
+**Callers (sample):** `arm_encryption_when_crypto_substate_0x11_or_0x1e`,
+`fHCI_Refresh_Encryption_Key_0x14`, `tick_dhkey_check_stall_scan_encrypted_links_on_timer_expiry`,
+`arm_encryption_before_deferred_role_switch`, `arm_link_encryption_post_key_program` —
+xref_in=7 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous single-bit AND/shift/mask; role
+already documented as "encryption-feature gate" across prior passes and
+`reverse_engineering_encryption_engine.md`.
+
+Region unnamed count after this pass: **19** (20 minus this rename). Live named **1902** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
