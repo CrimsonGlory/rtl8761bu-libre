@@ -1834,5 +1834,38 @@ HCI Number Of Completed Packets emission path.
 Region unnamed count after this pass: **224** (225 minus this rename). Live named
 **1942** global.
 
-**Next:** Pass 67 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 67.
+
+## Pass 67 (2026-07-01) — LMP slot-offset HW programmer `FUN_800362f0`
+
+Fresh `ListUnnamed80030000.java` re-run: **224 unnamed** remain in region
+(unchanged from Pass 66; rank-1 by xref count is `FUN_800362f0` at 120B,
+4 xref-in — wins xref=4 tier on size over `FUN_8003cf28` 84B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800362f0` → `compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`**
+(120B, HIGH) via `RenamePass67Region80030000Fun800362f0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Optional patchable hook at `PTR_DAT_80036368` — when installed
+and returns non-zero, uses hook result as return byte. Default path skips when
+conn slot `bdaddr_random_==1`. Otherwise gates on `FUN_8006c9e8(conn_idx, 5,
+stack_buf)` connection-state probe; on failure programs `0` into the
+HW-register pair indexed by `byte_0xCC` via `FUN_800140d8`. On success calls
+`FUN_800334ac(timing_param, conn_idx)` to compute an LMP slot-offset byte
+(capped `0x7c`, only when `bdaddr_random_==0`), then programs that value into
+the same `byte_0xCC`-indexed HW register. Role-switch / slot-offset cluster
+sibling of `read_hw_clock_raw_dword_by_role_index` and
+`send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template`.
+
+**Callers:** 4 xref-in (role-switch / conn-timing dispatch cluster).
+
+**Confidence:** HIGH — full 120B decompile; callee `FUN_800334ac` confirms
+timing-scaled slot-offset math with `field_0x202`/`field106_0x94` inputs;
+`FUN_800140d8` confirms HW-register write path keyed on `byte_0xCC`.
+
+Region unnamed count after this pass: **223** (224 minus this rename). Live named
+**1943** global.
+
+**Next:** Pass 68 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
