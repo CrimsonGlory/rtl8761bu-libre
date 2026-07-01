@@ -3554,4 +3554,35 @@ state gate (`+0x48==3` vs `==1`); callees already HIGH from Pass 5 low→high up
 
 Region unnamed count after this pass: **218** (219 minus this rename). Live named **1703** global.
 
+**Next:** superseded by Pass 6 continuation (95).
+
+## Pass 6 continuation (95) (2026-07-01) — LMP send wrapper `FUN_80024470`
+
+Decompiled and renamed:
+**`FUN_80024470` → `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`**
+(130B, HIGH) via `RenamePass6Region80020000Fun80024470.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (130B, xref_in=25) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=218` at pass start). Central LMP transmit
+wrapper for the encryption/SSP cluster — already referenced by name in 7+ prior Pass 6
+continuations but had remained `FUN_*` in Ghidra.
+
+**Mechanism:** Thin wrapper around `send_LMP_pkt(conn, buf, len, …, 100, 0)`. For
+encryption-sensitive opcodes (`0x0f` ENCRYPTION_MODE_REQ, `0x12` long-payload marker,
+`0x42` DHKey Check, `0x7f`/`0x17` pause-encryption) calls `FUN_80017bac` with
+`big_ol_struct[conn].bos_connection__array_index` and `byte_0xCC` (8-byte hook). For
+other opcodes (except `0x3a`–`0x3b` and `0x7f`/`0x1e`) calls `FUN_80024218` validation
+gateway first. Always finishes via `send_LMP_pkt`.
+
+**Callers:** xref_in=25 — includes `derive_sres_e1_or_e22_and_send_lmp_response`,
+`program_encryption_key_and_send_lmp_start_encryption_req`,
+`derive_au_rand_and_send_lmp_0x0b`, `derive_dhkey_check_and_send_lmp_0x41`,
+`derive_simple_pairing_confirm_and_send_lmp_0x3f`,
+`derive_dhkey_check_nonce_and_send_lmp_0x42`.
+
+**Confidence:** HIGH — opcode-gated pre-send hook + validation pattern clear; sibling of
+Pass 5's `wrap_send_LMP_NOT_ACCEPTED` / `wrap_send_LMP_ACCEPTED_and_some_other_things`.
+
+Region unnamed count after this pass: **217** (218 minus this rename). Live named **1704** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
