@@ -7574,4 +7574,33 @@ HCI SSP Complete(5)); caller confirmed in SSP debug-mode command router.
 
 Region unnamed count after this pass: **86** (87 minus this rename). Live named **1835** global.
 
+**Next:** superseded by Pass 6 continuation (227).
+
+## Pass 6 continuation (227) (2026-07-01) — crypto pending-slot LMP 0x25B gateway `FUN_800223a8`
+
+Decompiled and renamed:
+**`FUN_800223a8` → `invoke_lmp_0x25b_from_crypto_pending_slot_if_active`**
+(48B, HIGH) via `RenamePass6Region80020000Fun800223a8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=86` at pass start). First-listed at 48B
+tier; successor to Pass 6 cont. (226)'s `hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x19_auth_failure`.
+
+**Mechanism:** Minimal per-connection LMP 0x25B gateway on crypto pending procedure dword
+at `big_ol_struct[slot]._x58_crypto_struct_at_least_0x27_big + 0x1ec`: when `!= -1`,
+calls `LMP__25B__most_common_for_VSCs1(crypto+0x1ec)`. Same `+0x1ec` gate idiom as
+`trigger_vsc_fc95_on_connection_crypto_pending_slot` (Pass 6 cont. 129) but without the
+follow-on `VSC_0xfc95_called2` step — pure LMP dispatch only. Sibling of
+`hci_reset_invoke_lmp_25b_when_init_enabled` (`0x80078bb4`, region `0x80070000`).
+
+**Callers:** `FUN_80067f2c` (region `0x80060000`) at `0x80067fbe` — final step of an
+8-slot `big_ol_struct` pending-LMP sweep (`+0x44`, `+0x20`, `+0x24`, `+0x28`, `+0x2c`,
+`+0x50`, `+0x2a8`, `+0x2ac`) that delegates the crypto `+0x1ec` slot to this helper;
+xref_in=1 per `ListXrefsTo800223a8.java`.
+
+**Confidence:** HIGH — decompile confirms established LMP 0x25B pending-slot gateway
+pattern; caller decompile shows role as crypto-slot tail of multi-offset LMP sweep.
+
+Region unnamed count after this pass: **85** (86 minus this rename). Live named **1836** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
