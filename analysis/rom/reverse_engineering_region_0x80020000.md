@@ -4068,4 +4068,32 @@ complements `HCI_EVT_0x1fd` forward-drain on the same descriptor table.
 
 Region unnamed count after this pass: **202** (203 minus this rename). Live named **1719** global.
 
+**Next:** superseded by Pass 6 continuation (111).
+
+## Pass 6 continuation (111) (2026-07-01) — HW slot bitmask acquire `FUN_8002b920`
+
+Decompiled and renamed:
+**`FUN_8002b920` → `acquire_active_slot_bitmask`**
+(116B, HIGH) via `RenamePass6Region80020000Fun8002b920.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (116B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=202` at pass start). Tied at 116B with
+`FUN_8002ffc4` (xref_in=1); selected first-listed. Acquire counterpart to
+`release_active_slot_bitmask` (`0x8002b9a4`) in the `0x8002b9xx` HW crypto/slot cluster.
+
+**Mechanism:** IRQ-safe acquire of per-slot active bitmask at `PTR_DAT_8002b998+0x138`.
+Validates `param_1 < *PTR_DAT_8002b994` and bit `param_1` not already set. For slot 0,
+iterates 3 dword table entries at `DAT_8002b99c`; for other slots, 1 entry — masks any
+negative (sign-bit set) dword with `DAT_8002b9a0`. On success calls `FUN_8002b8e0` to
+atomically set the bitmask bit; returns 1/0.
+
+**Callers:** `conn_status_word_state_machine_dispatcher`, `FUN_80010324`, patch
+`FUN_8010c198` (computed call) — xref_in=3.
+
+**Confidence:** HIGH — symmetric acquire/release pair with established
+`release_active_slot_bitmask`; bitmask at `+0x138`, IRQ disable/enable idiom, and
+3-slot table walk match documented SCO/crypto-engine slot programming cluster.
+
+Region unnamed count after this pass: **201** (202 minus this rename). Live named **1720** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
