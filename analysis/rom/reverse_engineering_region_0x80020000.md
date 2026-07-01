@@ -4844,4 +4844,32 @@ caller/callee chain already HIGH from Pass 6 cont. 46 and 2026-06-26 low→high 
 
 Region unnamed count after this pass: **177** (178 minus this rename). Live named **1744** global.
 
+**Next:** superseded by Pass 6 continuation (136).
+
+## Pass 6 continuation (136) (2026-07-01) — bulk pool-slot init `FUN_80021a04`
+
+Decompiled and renamed:
+**`FUN_80021a04` → `init_eleven_pool_slots_via_call_fptr_if_set_wraps_pool_slot_init_and_zero`**
+(98B, HIGH) via `RenamePass6Region80020000Fun80021a04.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (98B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=177` at pass start). Tied at 98B with
+`FUN_80029b64` (renamed Pass 6 cont. 135); selected first by list order after Pass 6 cont.
+(135)'s `FUN_80029b64`.
+
+**Mechanism:** Boot-time bulk initializer: sequentially invokes
+`call_fptr_if_set_wraps_pool_slot_init_and_zero` on eleven consecutive data-pointer slots
+`PTR_DAT_80021a68` … `PTR_DAT_80021a90` (4-byte stride). Each call optionally dispatches a
+registered hook or falls back to `func7_that_uses_structs_at_0x80100000` pool-slot
+init/zero-fill (documented in region `0x80000000`).
+
+**Callers:** xref_in=1 per `ListUnnamed80020000.java`; direct caller not resolved by
+`xrefs_to` (likely indirect via `0x80021xxx` init-chain function-pointer registration near
+`calls_reg_multiple_dptrs__FUN_80021ba0` / `calls_interesting_string_user_FUN_80021c9c`).
+
+**Confidence:** HIGH — unambiguous eleven-iteration loop over named callee with no branches;
+literal-pool pointer table immediately follows function body.
+
+Region unnamed count after this pass: **176** (177 minus this rename). Live named **1745** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
