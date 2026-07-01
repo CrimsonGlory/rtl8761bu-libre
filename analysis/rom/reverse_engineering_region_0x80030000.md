@@ -1130,7 +1130,8 @@ Fresh `ListUnnamed80030000.java` re-run: **245 unnamed** remain in region
 **`FUN_80034a24` → `read_hw_clock_raw_dword_by_role_index`**
 (20B, HIGH) via `RenamePass44Region80030000Fun80034a24.java` (`renamed=1`, live-verified).
 
-**Mechanism:** Thin wrapper tail-calling `FUN_8003497c(out_dword, NULL, role_index)` —
+**Mechanism:** Thin wrapper tail-calling
+`read_hw_clock_dword_and_optional_slot_offset_by_role_index(out_dword, NULL, role_index)` —
 i.e. reads only the raw 32-bit HW clock dword from the global clock table at
 `DAT_80034a20`, without computing the optional slot-offset short that the callee
 writes when `param_2 != NULL`. The callee remaps role indices 8–11 to eSCO slot
@@ -2269,5 +2270,37 @@ connection-setup/LMP-clk-adj gate role.
 Region unnamed count after this pass: **211** (212 minus this rename). Live named
 **1955** global.
 
-**Next:** Pass 80 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 80.
+
+## Pass 80 (2026-07-01) — HW-clock dword+slot-offset reader `FUN_8003497c`
+
+Fresh `ListUnnamed80030000.java` re-run: **211 unnamed** remain in region
+(unchanged from Pass 79; rank-1 by size at xref=3 tier is `FUN_8003497c` at
+164B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003497c` → `read_hw_clock_dword_and_optional_slot_offset_by_role_index`**
+(164B, HIGH) via `RenamePass80Region80030000Fun8003497c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Core HW-clock reader backing Pass 44's
+`read_hw_clock_raw_dword_by_role_index` thin wrapper (which passes `param_2=NULL`).
+Remaps role index via `remap_role_index_to_esco_slot_if_pending(0xff, role_index)`;
+indices 8–11 select eSCO-slot register offset triplets in global table
+`DAT_80034a20`, default path uses offsets `0x66`/`0x68`/`0x1da`. Writes
+32-bit clock dword to `*param_1` from two 16-bit halves. When `param_2 != NULL`,
+also computes slot-phase offset short: reads 10-bit field, wraps at `0x270`,
+stores `0x270 - phase`. Used across SCO/eSCO timing and global busy-spin clusters
+via the wrapper (63 xref-in) plus 3 direct xref-in at this function.
+
+**Callers:** 3 xref-in (rank-1 by size at xref=3 tier); wrapper
+`read_hw_clock_raw_dword_by_role_index` accounts for bulk of downstream use.
+
+**Confidence:** HIGH — full 164B decompile; wrapper Pass 44 and named callee
+`remap_role_index_to_esco_slot_if_pending` anchor the HW-clock table reader role.
+
+Region unnamed count after this pass: **210** (211 minus this rename). Live named
+**1956** global.
+
+**Next:** Pass 81 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -12403,7 +12403,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 79;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 80: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 80 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003497c`→`read_hw_clock_dword_and_optional_slot_offset_by_role_index`
+          (164B, HIGH). Core HW-clock dword reader from `DAT_80034a20`; remaps role
+          via `remap_role_index_to_esco_slot_if_pending`; optional `0x270`-modulo
+          slot-offset output when `param_2` non-NULL; backing callee of Pass 44's
+          `read_hw_clock_raw_dword_by_role_index`. 210 unnamed remain; live named 1956.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 80;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 81: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
