@@ -2564,4 +2564,37 @@ consistent with BB link-timing commit.
 
 Region unnamed count after this pass: **193** (194 minus this rename).
 
-**Next:** Pass 119 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 119.
+
+## Pass 119 (2026-07-01) — Role-switch LMP slot-offset kickoff `FUN_8001ab44`
+
+Pass 119 target from cold-triage rank-1 (2 xref_in, 288B — largest at xref=2
+tier after Pass 118 cleared `FUN_80015110`). Decompiled and renamed:
+**`FUN_8001ab44` → `compute_slot_offset_and_send_lmp_slot_offset_0x13_pdu`**
+(288B, HIGH) via `RenamePass119Region80010000Fun8001ab44.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Role-switch LMP kickoff: ORs conn status bits via
+`or_conn_status_byte_bits_via_role_remap`, derives backoff from retry table
+`FUN_8006ae20` × `field90_0x82` with tiered clamps (`0xee`/`0x140`), optional
+config-gated minimum 800 when `config_base+0xd8` bit `0x20` set, merges HW clock
+via `read_hw_clock_raw_dword_by_role_index`, stores result to `field_0x18`. When
+`bdaddr_random_==0`: calls `send_lmp_slot_offset_0x34_pdu_with_patch_hook_and_template`
+first. Builds 6-byte LMP PDU opcode `0x13` (`LMP_SLOT_OFFSET`) with 4-byte
+slot-offset payload via `copy_bytes_in_LSB_order`, sends via `send_LMP_pkt`.
+When `bdaddr_random_==1`: ORs status bits via `get_status_bits_by_LMP_Opcode(0x34,0)`.
+Completes role-switch chain documented in `reverse_engineering_lc_lmp_state_machine.md`
+§4 (`FUN_8001acd8` → `FUN_8001ac74` → this function).
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java` —
+`FUN_8001ac74` (role-switch kickoff/defer decision) and
+`commit_pending_role_switch_emit_hci_or_lmp_slot_offset` (region `0x80070000`,
+failure path).
+
+**Confidence:** HIGH — decompile confirms slot-offset computation + LMP 0x13 send;
+callers are role-switch initiation paths consistent with LC/LMP state-machine
+analysis.
+
+Region unnamed count after this pass: **192** (193 minus this rename).
+
+**Next:** Pass 120 — cold-triage next rank-1 unnamed in region `0x80010000`.
