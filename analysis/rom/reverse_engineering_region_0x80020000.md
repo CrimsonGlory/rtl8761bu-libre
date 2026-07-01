@@ -7808,4 +7808,32 @@ pattern matches `FUN_8001ac74` pre-condition gate.
 
 Region unnamed count after this pass: **78** (79 minus this rename). Live named **1843** global.
 
+**Next:** superseded by Pass 6 continuation (235).
+
+## Pass 6 continuation (235) (2026-07-01) — connection-slot LMP/rate-mode scrub `FUN_80021e3c`
+
+Decompiled and renamed:
+**`FUN_80021e3c` → `clear_connection_slot_lmp_pending_and_preferred_rate_mode`**
+(44B, HIGH) via `RenamePass6Region80020000Fun80021e3c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=78` at pass start). Selected from the
+`0x80021e` connection-slot init cluster alongside siblings
+`clear_connection_slot_lmp_pdu_and_pending_fields` (`0x80021dcc`) and
+`init_three_0x88_slot_tables_and_clear_crypto_globals` (`0x80021e6c`).
+
+**Mechanism:** Thin per-conn-index scrub wrapper. Calls
+`clear_connection_slot_lmp_pdu_and_pending_fields(conn & 0xffff)` then zeroes
+`big_ol_struct[conn].field_0xb7` (LMP preferred-rate mode byte consumed by
+`encode_lmp_preferred_rate_payload_byte` in region `0x80070000`).
+
+**Callers:** xref_in=1 — confirmed via `find_callers`: `FUN_80067768`
+(connection-slot init; same caller as `clear_connection_slot_supervision_timing_counters`).
+
+**Confidence:** HIGH — decompile is a two-step wrapper with named callee; `field_0xb7`
+semantics documented in region `0x80070000` Pass 12bx; caller shares established
+connection-slot init path.
+
+Region unnamed count after this pass: **77** (78 minus this rename). Live named **1844** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
