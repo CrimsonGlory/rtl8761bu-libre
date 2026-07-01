@@ -2442,4 +2442,31 @@ analysis and cross-region caller context.
 
 Region unnamed count after this pass: **197** (198 minus this rename).
 
-**Next:** Pass 115 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 115.
+
+## Pass 115 (2026-07-01) — packet-type HW mode byte reader `FUN_80014048`
+
+Pass 115 target from cold-triage rank-1 (3 xref_in, 6B — largest at xref=3
+tier after Pass 114 cleared `FUN_800117a4`). Decompiled and renamed:
+**`FUN_80014048` → `read_global_packet_type_hw_mode_byte`**
+(6B, HIGH) via `RenamePass115Region80010000Fun80014048.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Trivial global byte accessor: `return *PTR_DAT_80014050`.
+In `apply_eSCO_SCO_packet_type_params` the value is shifted `<<5` and OR'd into
+a halfword for the first HW-register hook commit during eSCO/SCO packet-type
+apply. In `lmp_pdu_received_top_level_processor` it gates HW-register bit-2 clear
+(when zero) and is stored as a dispatch flag byte for the LMP PDU continuation
+path — sibling cluster to `FUN_8001401c`/`FUN_80013ff0` HW-hook toggles at
+`0x800140xx`.
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java` cold-triage (2 confirmed
+via `xrefs_to`: `apply_eSCO_SCO_packet_type_params`,
+`lmp_pdu_received_top_level_processor`).
+
+**Confidence:** HIGH — trivial decompile; caller context in packet-type apply +
+LMP PDU processor confirms HW-mode gate semantics.
+
+Region unnamed count after this pass: **196** (197 minus this rename).
+
+**Next:** Pass 116 — cold-triage next rank-1 unnamed in region `0x80010000`.

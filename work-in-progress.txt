@@ -14990,8 +14990,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 114;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 115: cold-triage next rank-1
-          unnamed function in region `0x80010000` (197 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 115 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014048`→`read_global_packet_type_hw_mode_byte`
+          (6B, HIGH). Trivial global byte accessor `return *PTR_DAT_80014050`;
+          shifted `<<5` for eSCO packet-type HW hook commit; gates LMP PDU HW
+          bit-2 clear when zero; callers `apply_eSCO_SCO_packet_type_params` +
+          `lmp_pdu_received_top_level_processor`; 3 xref_in.
+          Region 196 unnamed remain; live named 2228.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 115;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 116: cold-triage next rank-1
+          unnamed function in region `0x80010000` (196 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
