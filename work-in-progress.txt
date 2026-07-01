@@ -13530,7 +13530,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 196;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 197: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 197 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003b6fc`→
+          `read_modify_write_hw_reg_0x44_set_bit1`
+          (62B, HIGH, SIMPLE-tier). RMW BB reg `0x44` bit 1 from 1-bit
+          param; sibling of Pass 71 bit 0, Pass 196 bits 7-10, Pass 194 bits
+          12-14; caller `per_connection_hw_buffer_setup_with_patch_hook` (arg
+          `1`).
+          93 unnamed remain; live named 2073.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 197;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 198: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

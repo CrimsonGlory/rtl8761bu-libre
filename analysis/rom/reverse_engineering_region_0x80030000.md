@@ -875,7 +875,7 @@ idiom used for the documented `bos_base+0xd8`/`+0xe4` patch hooks in `CLAUDE.md`
 different slot specific to this feature. Brackets a sequence of BB-register read-modify-writes
 (0x69/0x6a/0x6f, keyed by `conn_handle>>3` and a 16-bit size field) with VSC register 0x40
 enable(2)/disable(0), logs the final register values, then calls a small setup cluster
-(`read_modify_write_hw_reg_0x44_set_bits7_10_from_4bit_param(5)`, `read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param(7)`, `read_modify_write_hw_reg_0x44_set_bit0(1)`, `FUN_8003b6fc(1)`) and sets bit 0x8000
+(`read_modify_write_hw_reg_0x44_set_bits7_10_from_4bit_param(5)`, `read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param(7)`, `read_modify_write_hw_reg_0x44_set_bit0(1)`, `read_modify_write_hw_reg_0x44_set_bit1(1)`) and sets bit 0x8000
 of register 0x44. Counterpart of `hw_register_setup_with_patch_hook_variant2` below (different
 register set, same shape).
 
@@ -6023,7 +6023,7 @@ bits 12-14 with the low 3 bits of `param_1`. Sibling of Pass 71's
 **Callers:** 1 xref-in — `per_connection_hw_buffer_setup_with_patch_hook` (calls
 with literal `7` as part of the setup sequence alongside
 `read_modify_write_hw_reg_0x44_set_bits7_10_from_4bit_param(5)`,
-`read_modify_write_hw_reg_0x44_set_bit0(1)`, and `FUN_8003b6fc(1)` before
+`read_modify_write_hw_reg_0x44_set_bit0(1)`, and `read_modify_write_hw_reg_0x44_set_bit1(1)` before
 setting bit `0x8000` of reg `0x44`).
 
 **Confidence:** HIGH — full 66B decompile; register index `0x44` and 3-bit
@@ -6091,7 +6091,7 @@ and Pass 71's `read_modify_write_hw_reg_0x44_set_bit0` (bit 0) in the same
 **Callers:** 1 xref-in — `per_connection_hw_buffer_setup_with_patch_hook` (calls
 with literal `5` as part of the setup sequence alongside
 `read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param(7)`,
-`read_modify_write_hw_reg_0x44_set_bit0(1)`, and `FUN_8003b6fc(1)` before
+`read_modify_write_hw_reg_0x44_set_bit0(1)`, and `read_modify_write_hw_reg_0x44_set_bit1(1)` before
 setting bit `0x8000` of reg `0x44`).
 
 **Confidence:** HIGH — full 64B decompile; register index `0x44` and 4-bit
@@ -6101,5 +6101,42 @@ item 13 per-connection HW-buffer setup cluster.
 Region unnamed count after this pass: **94** (95 minus this rename). Live named
 **2072** global.
 
-**Next:** Pass 197 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 197.
+
+## Pass 197 (2026-07-01) — HW reg 0x44 bit 1 RMW `FUN_8003b6fc`
+
+Fresh `ListUnnamed80030000.java` re-run: **94 unnamed** remain in region
+(unchanged from Pass 196; rank-1 by size at xref=1 tier is `FUN_8003b6fc` at
+62B — wins on size over tied 62B/56B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b6fc` → `read_modify_write_hw_reg_0x44_set_bit1`**
+(62B, HIGH, SIMPLE-tier) via
+`RenamePass197Region80030000Fun8003b6fc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write HW/VSC register `0x44` bit 1: reads via
+indirect read fptr at `PTR_DAT_8003b73c` with args `(0, 0x44, 1)`, then writes
+back via write fptr at `PTR_DAT_8003b740` with value
+`(read_val & 0xfffd) | ((param_1 & 1) << 1)` — clears bit 1, replaces with
+the low bit of `param_1`. Sibling of Pass 71's
+`read_modify_write_hw_reg_0x44_set_bit0` (bit 0), Pass 196's
+`read_modify_write_hw_reg_0x44_set_bits7_10_from_4bit_param` (bits 7-10), and
+Pass 194's `read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param` (bits
+12-14) in the same `0x8003b6xx` per-connection HW-buffer setup cluster.
+
+**Callers:** 1 xref-in — `per_connection_hw_buffer_setup_with_patch_hook` (calls
+with literal `1` as part of the setup sequence alongside
+`read_modify_write_hw_reg_0x44_set_bits7_10_from_4bit_param(5)`,
+`read_modify_write_hw_reg_0x44_set_bits12_14_from_3bit_param(7)`,
+`read_modify_write_hw_reg_0x44_set_bit0(1)` before setting bit `0x8000` of reg
+`0x44`).
+
+**Confidence:** HIGH — full 62B decompile; register index `0x44` and bit-1
+field merge unambiguous; caller context matches documented Pass 8 item 13
+per-connection HW-buffer setup cluster.
+
+Region unnamed count after this pass: **93** (94 minus this rename). Live named
+**2073** global.
+
+**Next:** Pass 198 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
