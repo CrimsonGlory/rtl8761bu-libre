@@ -6839,5 +6839,35 @@ callee chain to Pass 210 unambiguous.
 Region unnamed count after this pass: **70** (71 minus this rename). Live named
 **2096** global.
 
-**Next:** Pass 221 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 221.
+
+## Pass 221 (2026-07-01) — SCO teardown HW init `FUN_80037370` (live rename)
+
+Fresh `ListUnnamed80030000.java` re-run: **70 unnamed** remain in region
+(unchanged from Pass 220; rank-1 by size at xref=1 tier is `FUN_80037370` at
+34B).
+
+Decompiled and live-renamed rank-1 cold-triage target (documented Pass 41/43 but
+still `FUN_*` in Ghidra until this pass):
+**`FUN_80037370` → `configure_hw_regs_and_init_for_sco_teardown`**
+(34B, HIGH, SIMPLE-tier) via
+`RenamePass221Region80030000Fun80037370.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin SCO/eSCO HW init wrapper in the `0x800373xx` cluster:
+`hw_register_config_with_timeout(1)` then
+`dispatch_bb_register_da_d6_write_with_hook(0,0,0)` then
+`init_or_clear_sco_hw_channel_subsystem(1)`. Callee of
+`reset_sco_esco_hw_subsystem_on_link_loss` (Pass 41); all three callees
+HIGH-named since Pass 42.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 34B decompile; three-callee SCO HW init chain
+unambiguous; closes Pass 41/43 documentation-vs-Ghidra naming gap.
+
+Region unnamed count after this pass: **69** (70 minus this rename). Live named
+**2097** global.
+
+**Next:** Pass 222 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
