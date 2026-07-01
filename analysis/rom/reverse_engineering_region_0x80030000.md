@@ -8613,5 +8613,32 @@ Pass 52 cluster; context pointer `PTR_DAT_800399e0` adjacent to Pass 217's
 Region unnamed count after this pass: **12** (13 minus this rename). Live named
 **2154** global.
 
-**Next:** Pass 279 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 279.
+
+## Pass 279 (2026-07-01) — dword array copy `FUN_8003b5ec`
+
+Fresh `ListUnnamed80030000.java` re-run: **12 unnamed** remain in region
+(unchanged from Pass 278; xref_in=0 tier dominates — rank-1 is `FUN_8003b5ec`
+at 22B, tied with `FUN_80039828` at 22B; first-listed wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b5ec` → `copy_dword_array_from_src_to_dst_by_count`**
+(22B, HIGH, UTILITY-tier) via
+`RenamePass279Region80030000Fun8003b5ec.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Simple dword-copy loop: for `i` in `0..param_3-1`, copies
+`*(uint32*)(param_2 + i*4)` to `param_1[i]` (dst advances by 4 each
+iteration). Thin `optimized_memcpy` sibling without byte-reversal. Lives in
+the `0x8003b5xx` BB register cluster adjacent to Pass 48's indexed BB write
+and Pass 265's reg-`0xda` fptr writer.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 22B decompile; loop structure unambiguous;
+cluster placement matches documented `0x8003b5xx` BB primitives.
+
+Region unnamed count after this pass: **11** (12 minus this rename). Live named
+**2155** global.
+
+**Next:** Pass 280 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
