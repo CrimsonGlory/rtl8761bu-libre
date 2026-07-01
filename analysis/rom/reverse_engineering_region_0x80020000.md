@@ -8970,4 +8970,31 @@ path.
 
 Region unnamed count after this pass: **37** (38 minus this rename). Live named **1884** global.
 
+**Next:** superseded by Pass 6 continuation (276).
+
+## Pass 6 continuation (276) (2026-07-01) — mode-3 encryption arm wrapper `FUN_800221f0`
+
+Decompiled and renamed:
+**`FUN_800221f0` → `program_key_block_and_arm_mode3_encryption`**
+(30B, HIGH) via `RenamePass6Region80020000Fun800221f0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (30B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=37` at pass start).
+
+**Mechanism:** Thin encryption-arming wrapper in the `0x800221xx` link-encryption cluster.
+Calls `FUN_80014770(0,0,param_1)` to program the 16-byte key block at `param_1`, then
+invokes `sometimes_called_with_0_3_0(0,3,3)` to enable mode-3 encryption (param 3).
+Encryption-cluster sibling of `arm_link_encryption_post_key_program` (Pass 6 cont. 67)
+and `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3` (Pass 6 cont. 152).
+
+**Callers:** `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3` (`0x80029978`,
+encrypted random-address link sweep arm path) and `arm_link_encryption_post_key_program`
+(`0x80022210`, public-BD_ADDR `FUN_80024020` gate on crypto key block `+0x13`).
+
+**Confidence:** HIGH — decompile confirms unambiguous two-call chain into already-named
+encryption-mode dispatcher; both callers documented in prior passes with this function
+referenced by address.
+
+Region unnamed count after this pass: **36** (37 minus this rename). Live named **1885** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
