@@ -1248,4 +1248,29 @@ pattern; cross-region callers anchor role-switch and eSCO setup paths.
 
 Region unnamed count after this pass: **239** (240 minus this rename).
 
-**Next:** Pass 7t — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7t (2026-07-01) — BB reg 0x144 shifted-param writer `FUN_80012d4c`
+
+Pass 7t target from cold-triage rank-1 (7 xref_in, 104B — largest at xref=7
+tier). Decompiled and renamed:
+**`FUN_80012d4c` → `write_bb_reg_0x144_shifted_param_and_poll_status_irq_gated`**
+(104B, HIGH) via `RenamePass7tRegion80010000Fun80012d4c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-gated baseband register programmer in the `0x80012dxx`
+cluster (sibling of `called_if_config[1]&4` at `0x80012e04`). Disables
+interrupts, reads BB reg `0x144` via `read_baseband_register_masked_busywait`,
+writes merged value `(param >> 2) | (DAT_80012db4 & read_mask)` via
+`write_baseband_register_masked_busywait`, then polls up to 100 iterations until
+`(DAT_80012db8 & read_value) != 0`. Re-enables interrupts and issues final read
+of BB reg `0x1f8`. Uses the canonical masked busy-wait R/W pair documented in
+Pass 7/7b.
+
+**Callers:** 7 xref_in per `ListUnnamed80010000.java`.
+
+**Confidence:** HIGH — decompile confirms IRQ gate, reg `0x144` RMW with
+`param >> 2` scaling, bounded status poll, and final `0x1f8` read; behavioral
+name matches decompile exactly.
+
+Region unnamed count after this pass: **238** (239 minus this rename).
+
+**Next:** Pass 7u — cold-triage next rank-1 unnamed in region `0x80010000`.

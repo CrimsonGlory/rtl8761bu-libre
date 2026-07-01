@@ -14579,8 +14579,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7s;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7t: cold-triage next rank-1
-          unnamed function in region `0x80010000` (239 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7t (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80012d4c`→`write_bb_reg_0x144_shifted_param_and_poll_status_irq_gated`
+          (104B, HIGH). IRQ-gated BB reg `0x144` writer: merges `(param>>2)` with
+          `DAT_80012db4` mask, polls up to 100 iter for `DAT_80012db8` status
+          match, final read `0x1f8`; 7 xref_in. 238 unnamed remain; live named
+          2186.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7t;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7u: cold-triage next rank-1
+          unnamed function in region `0x80010000` (238 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
