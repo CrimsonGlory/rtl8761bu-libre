@@ -429,7 +429,7 @@ Expected output:
 | `0x8003d7bc` | 1524 B | `FUN_8003d7bc` | **`apply_SCO_connection_params_to_hw`** | **HIGH** | Per-connection-index SCO/eSCO param apply: writes baseband regs `0xde`/`0x9e`/`0x5e`/`0x1ec`/`0x1ee`/`0x23c`; computes packet-type-derived link-supervision values (5/6/7 based on a role field); brackets a timing-sensitive section with disable/enable_interrupts plus calls to `FUN_80043400`/`FUN_80043438` (SCO slot scheduler) |
 | `0x80033f8c` | 930 B | `FUN_80033f8c` | **`validate_connection_setup_preconditions`** | **HIGH** | Pure boolean gate (returns 0 or 1): chains ~15 precondition checks against `bos_base` flags (offsets `0x1a4`/`0x1d0`/`0x28`/`0x44` — active-link bitfields) and clock/instant comparisons before allowing a new connection/role-switch to proceed. Highest xref count (4) in the Pass 4 tier-1 list, consistent with a shared guard function |
 | `0x8003cb80` | 686 B | `FUN_8003cb80` | **`apply_LAP_derived_hopping_params`** | **HIGH** | Reads the Bluetooth address LAP (Lower Address Part, via `_x142_LAP` struct field) and writes derived values into baseband hopping-sequence registers `0x14`/`0x16`/`0x10`/`0x12`/`0xaa`; packs LAP-derived bits together with link-policy flags into the register `0xaa` write |
-| `0x8003ec48` | 628 B | `FUN_8003ec48` | **`release_SCO_connection_resources`** | **HIGH** | Connection teardown counterpart to `apply_SCO_connection_params_to_hw`: clears connection-table entry fields, decrements two reference counters, writes baseband regs `0xee`/`0x56`/`0x260`/`0x27e`/`0xe0`/`0x298`, calls `FUN_8003d204` (cleanup) and an installed cleanup hook function pointer |
+| `0x8003ec48` | 628 B | `FUN_8003ec48` | **`release_SCO_connection_resources`** | **HIGH** | Connection teardown counterpart to `apply_SCO_connection_params_to_hw`: clears connection-table entry fields, decrements two reference counters, writes baseband regs `0xee`/`0x56`/`0x260`/`0x27e`/`0xe0`/`0x298`, calls `apply_bdaddr_scramble_slots_from_config_fc_fd_mask` (cleanup) and an installed cleanup hook function pointer |
 | `0x80037e28` | 932 B | `FUN_80037e28` | **`apply_eSCO_SCO_packet_type_params`** | **HIGH** | Selects a baseband packet-type bitmask by switching on connection-type constants `0xa000`/`0xb000`/`0xe000`/`0xf000` (matching already-documented eSCO/SCO connection-type constants elsewhere in the codebase), then applies the result via `FUN_80013be4`/`FUN_80013c0c` |
 | `0x80032540` | 2068 B | `multi-VSC_Handler_FUN_80032540` | *(unchanged — already correct)* | **HIGH** | Full decompile (401 lines) confirms a large switch/if-chain dispatching VSC opcodes `0xfc1f`, `0xfc20`, `0xfc22`, `0xfc27`, `0xfc55`, `0xfc56`, `0xfc61`, `0xfc65`, `0xfc8b`, `0xfcf0`, `0xfd41`, `0xfd49` — confirms this is the master multi-opcode VSC dispatcher for this region (was already low-confidence-named correctly; upgraded to HIGH on full-decompile confirmation) |
 
@@ -2769,5 +2769,39 @@ LMP handle absent.
 Region unnamed count after this pass: **195** (196 minus this rename). Live named
 **1971** global.
 
-**Next:** Pass 96 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** Pass 97 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
+
+## Pass 96 (2026-07-01) — BD_ADDR scramble slot apply `FUN_8003d204`
+
+Fresh `ListUnnamed80030000.java` re-run: **195 unnamed** remain in region
+(unchanged from Pass 95; rank-1 by size at xref=2 tier is `FUN_8003d204` at
+218B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003d204` → `apply_bdaddr_scramble_slots_from_config_fc_fd_mask`**
+(218B, HIGH, HANDLER-tier) via `RenamePass96Region80030000Fun8003d204.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Gated on optional hook at `PTR_DAT_8003d2e0` (skip when hook
+returns non-zero) and config struct `field241_0xfc`/`field242_0xfd` bit `0x10`.
+When active: clears slots 0–3 in global `0xfc39` via
+`clear_bits_in_global_0xfc39_helper`; for slots 4–7 reads config mask bits and
+either zeros or applies `scrambled_bdaddr_field_writer_pair1`/
+`scrambled_bdaddr_field_writer_pair2` with `DAT_8003d2e8`; logs via
+`possible_logging_function__var_args` (tag `0x2b`); copies status byte from
+`PTR_DAT_8003d2f0` → `DAT_8003d2f4`.
+
+**Callers:** 2 xref-in; includes `release_SCO_connection_resources` (Pass 5
+identified as SCO teardown cleanup) and connection-state-manager SCO path
+(HCI event `0xfa` logging).
+
+**Confidence:** HIGH — full 218B decompile; established BD_ADDR scramble
+writer cluster (`scrambled_bdaddr_field_writer_pair1/2`,
+`clear_bits_in_global_0xfc39_helper`); SCO lifecycle sibling context from Pass 5.
+
+Region unnamed count after this pass: **194** (195 minus this rename). Live named
+**1972** global.
+
+**Next:** Pass 97 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
