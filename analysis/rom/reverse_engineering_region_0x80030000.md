@@ -115,7 +115,7 @@ Expected output:
 | `0x800300c4` | 102 | `VSC_0xfc95_feature_toggle` | **HIGH** | Feature enable/disable controller; toggles 11-bit feature flags; calls LMP_25B/268 gateways |
 | `0x800303f4` | 306 | `VSC_0xfc35_config_update` | **MEDIUM-HIGH** | Device configuration loader (9B entry records, up to ~40 devices); TLV-style blob processor; calls FUN_8007442c cleanup |
 | `0x80030b2c` | 150 | `VSC_0xfc27_param_query` | **HIGH** | Parameter read/write with interrupt masking; supports 2-byte parameter pairs; read-back via capability struct |
-| `0x80030bdc` | 346 | `VSC_0xfc64_link_quality` | **MEDIUM-HIGH** | Link quality monitor: 9-case dispatch on param bits[7:4]; Adaptive Frequency Hopping (AFH) register 0x2d poll; calls cleanup FUN_8003b698/8003c41c |
+| `0x80030bdc` | 346 | `VSC_0xfc64_link_quality` | **MEDIUM-HIGH** | Link quality monitor: 9-case dispatch on param bits[7:4]; Adaptive Frequency Hopping (AFH) register 0x2d poll; calls cleanup `read_modify_write_hw_reg_0x44_set_bit0`/`FUN_8003c41c` |
 | `0x80030dd8` | 268 | `VSC_0xfc61_config_update` | **HIGH** | Hardware register reader/writer (unified I/O path); supports 1/2/4-byte sizes; alignment checks; calls ROM register R/W fns 0x800115c8/80011584/80011510/80011608 |
 | `0x80030eec` | 40 | `VSC_0xfc8b_diagnostic_query` | **HIGH** | Hardware diagnostic read (1–2 bit positions); returns register value via status struct |
 | `0x8003bbf0` | 94 | `VSC_0xfd49_extended_diagnostic` | **MEDIUM** | Extended diagnostic dispatcher (0xfd49 variant, possibly VSC 0xfd49 or multi-opcode handler); loops over diagnostic modes |
@@ -135,7 +135,7 @@ Expected output:
 
 3. **Hardware I/O Abstraction:** VSC_0xfc61 provides unified register R/W interface (calls ROM 0x800115c8/0x80011584/0x80011510/0x80011608); used by RF init chains and AFH configuration.
 
-4. **AFH Quality Control (VSC_0xfc64):** Monitors link quality via HW reg 0x2d; manages thresholds for BLE coexistence; calls cleanup tail-functions in 0x8003XXXX region (FUN_8003b698, FUN_8003c41c).
+4. **AFH Quality Control (VSC_0xfc64):** Monitors link quality via HW reg 0x2d; manages thresholds for BLE coexistence; calls cleanup tail-functions in 0x8003XXXX region (`read_modify_write_hw_reg_0x44_set_bit0`, FUN_8003c41c).
 
 5. **Device Configuration (VSC_0xfc35):** Structured loader for multi-device config (up to ~40 entries); validates TLV-style 9-byte records; post-upload calls FUN_8007442c (likely global config commit).
 
@@ -874,7 +874,7 @@ idiom used for the documented `bos_base+0xd8`/`+0xe4` patch hooks in `CLAUDE.md`
 different slot specific to this feature. Brackets a sequence of BB-register read-modify-writes
 (0x69/0x6a/0x6f, keyed by `conn_handle>>3` and a 16-bit size field) with VSC register 0x40
 enable(2)/disable(0), logs the final register values, then calls a small setup cluster
-(`FUN_8003b604(5)`, `FUN_8003b64c(7)`, `FUN_8003b698(1)`, `FUN_8003b6fc(1)`) and sets bit 0x8000
+(`FUN_8003b604(5)`, `FUN_8003b64c(7)`, `read_modify_write_hw_reg_0x44_set_bit0(1)`, `FUN_8003b6fc(1)`) and sets bit 0x8000
 of register 0x44. Counterpart of `hw_register_setup_with_patch_hook_variant2` below (different
 register set, same shape).
 
@@ -1956,5 +1956,36 @@ cleanup chain) + `FUN_8003e98c` (bitmask-sweep dispatch sibling).
 Region unnamed count after this pass: **220** (221 minus this rename). Live named
 **1946** global.
 
-**Next:** Pass 71 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 71.
+
+## Pass 71 (2026-07-01) — HW reg 0x44 bit-0 RMW `FUN_8003b698`
+
+Fresh `ListUnnamed80030000.java` re-run: **220 unnamed** remain in region
+(unchanged from Pass 70; rank-1 by xref count is `FUN_8003b698` at 60B,
+4 xref-in — wins xref=4 tier on size over `FUN_80039b18`/`FUN_8003ca28`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b698` → `read_modify_write_hw_reg_0x44_set_bit0`**
+(60B, HIGH) via `RenamePass71Region80030000Fun8003b698.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Reads VSC/hardware register `0x44` via indirect read fptr at
+`PTR_DAT_8003b6d4` with args `(0, 0x44, 1)`, then writes back via write fptr at
+`PTR_DAT_8003b6d8` with value `(read_val & 0xfffe) | (param_1 & 1)` — preserves
+all bits except bit 0, sets bit 0 from `param_1` LSB.
+
+**Callers:** `per_connection_hw_buffer_setup_with_patch_hook` (calls with `1` as
+part of the `0x8003b6xx` setup cluster before setting bit `0x8000` of reg 0x44),
+`VSC_0xfc64_link_quality` (AFH cleanup tail), and
+`conn_credit_or_counter_update_with_log` (retry-counter cleanup path when both
+directions' retry counters are nonzero).
+
+**Confidence:** HIGH — full 60B decompile; register index `0x44` and bit-0 merge
+semantics unambiguous; caller context matches documented per-connection HW-buffer
+setup cluster in Pass 8 item 13.
+
+Region unnamed count after this pass: **219** (220 minus this rename). Live named
+**1947** global.
+
+**Next:** Pass 72 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

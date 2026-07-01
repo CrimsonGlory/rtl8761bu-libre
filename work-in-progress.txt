@@ -12307,7 +12307,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 70;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 71: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 71 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003b698`→`read_modify_write_hw_reg_0x44_set_bit0`
+          (60B, HIGH, 4 xref-in). Read-modify-write HW/VSC register `0x44` bit 0:
+          read via `PTR_DAT_8003b6d4`, write via `PTR_DAT_8003b6d8` with
+          `(read & 0xfffe) | (param & 1)`. Callers
+          `per_connection_hw_buffer_setup_with_patch_hook` (setup cluster),
+          `VSC_0xfc64_link_quality`, `conn_credit_or_counter_update_with_log`.
+          219 unnamed remain; live named 1947.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 71;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 72: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
