@@ -5068,5 +5068,39 @@ threshold compare, and VSC FC95/LMP 268 callee chain unambiguous.
 Region unnamed count after this pass: **126** (127 minus this rename). Live named
 **2040** global.
 
-**Next:** Pass 165 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (likely `FUN_8003aa7c`, tied 116B at xref=1).
+**Next:** superseded by Pass 165.
+
+## Pass 165 (2026-07-01) — VSC fd49 channel diagnostic sweep `FUN_8003aa7c`
+
+Fresh `ListUnnamed80030000.java` re-run: **126 unnamed** remain in region
+(unchanged from Pass 164; rank-1 at xref=1 tier is `FUN_8003aa7c` at 116B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003aa7c` → `sweep_fd49_extended_diag_30_channels_with_bb_reg_0xe_bit2_enable`**
+(116B, HIGH, UTILITY-tier) via
+`RenamePass165Region80030000Fun8003aa7c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** VSC `0xfd49` extended-diagnostic channel sweep in the
+`0x8003aaxx` register-script cluster. Saves baseline BB reg `0x1e` 5-bit field
+via `read_bb_reg_0x1e_5bit_field_via_hook` to `PTR_DAT_8003aaf0`; brackets sweep
+by setting then clearing bit 2 of BB reg `0xe` through hook fptrs at
+`PTR_DAT_8003aaf4`/`PTR_DAT_8003aaf8`. Loops 30 iterations (`0x1e`): calls
+`VSC_0xfd49_extended_diagnostic` at indices `0x10`–`0x2d`, storing each result
+into a 30-word array at `PTR_DAT_8003aafc`. Post-sweep reads BB reg `0x21` via
+hook and stores to `PTR_PTR_8003ab00`. Diagnostic-read sibling of Pass 123
+`read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width` and Pass 127
+`program_bb_regs_6b_6c_43_6a_via_hook_and_extended_diagnostic`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `find_callers` empty —
+indirect/data-ref invocation (register-script interpreter cluster pattern).
+
+**Confidence:** HIGH — full 116B decompile; `VSC_0xfd49_extended_diagnostic`
+callee already HIGH-named; BB reg `0xe` bit-2 bracket and 30-channel index
+range unambiguous.
+
+Region unnamed count after this pass: **125** (126 minus this rename). Live named
+**2041** global.
+
+**Next:** Pass 166 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (likely `FUN_80037710`, 114B at xref=1).

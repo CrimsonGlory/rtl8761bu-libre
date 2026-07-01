@@ -13212,7 +13212,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 164;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 165: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 165 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003aa7c`→`sweep_fd49_extended_diag_30_channels_with_bb_reg_0xe_bit2_enable`
+          (116B, HIGH, UTILITY-tier). VSC fd49 extended-diagnostic channel sweep:
+          saves BB reg 0x1e baseline, brackets sweep with BB reg 0xe bit2
+          enable/disable, loops 30× `VSC_0xfd49_extended_diagnostic` at indices
+          0x10–0x2d into word array, post-reads BB reg 0x21; register-script
+          cluster sibling of Pass 123/127 fd49 helpers.
+          Region unnamed 125 remain; live named 2041.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 165;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 166: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
