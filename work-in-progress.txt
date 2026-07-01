@@ -10978,8 +10978,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (196);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (197): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (116 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (197) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002cc40`→`crypto_bignum_bit_length_of_u8_byte_array`
+          (62B, HIGH) — SSP/ECDH effective bit-length of big-endian byte array
+          (strip leading zero bytes, count MSB zero bits); callers
+          `crypto_bignum_sub_u8_byte_arrays_in_place`/`crypto_bignum_sub_u8_byte_arrays_to_dest`;
+          xref_in=3; 115 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (197);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (198): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (115 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -6676,4 +6676,34 @@ with `unscramble_codec_jit_template_and_install_hw_hook` at `0x80025b68`.
 
 Region unnamed count after this pass: **116** (117 minus this rename). Live named **1805** global.
 
+**Next:** superseded by Pass 6 continuation (197).
+
+## Pass 6 continuation (197) (2026-07-01) — SSP/ECDH byte bignum bit-length `FUN_8002cc40`
+
+Decompiled and renamed:
+**`FUN_8002cc40` → `crypto_bignum_bit_length_of_u8_byte_array`**
+(62B, HIGH) via `RenamePass6Region80020000Fun8002cc40.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (62B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=116` at pass start). Sits in the
+`0x8002ccxx` SSP/ECDH byte-bignum helper cluster between
+`crypto_bignum_write_u8_bytes_at_bit_offset` (`0x8002cbc8`) and the named subtract
+primitives at `0x8002ccac`/`0x8002d2a0`.
+
+**Mechanism:** Effective bit-length of a big-endian byte array. Starts at
+`param_2*8` bits, walks backward stripping leading zero bytes (−8 bits each), then
+counts leading zero bits in the first non-zero MSB byte. Returns the count of
+significant bits — used to align bit-offset subtract loops in the curve-constant
+cluster.
+
+**Callers:** `crypto_bignum_sub_u8_byte_arrays_in_place` (`0x8002d2a0`) and
+`crypto_bignum_sub_u8_byte_arrays_to_dest` (`0x8002ccac`) — both documented in
+Pass 6 cont. (39)/(41); xref_in=3 (third xref likely indirect/data ref).
+
+**Confidence:** HIGH — unambiguous MSB-first bit-count idiom matching standard
+big-endian bignum bit-length; both subtract callers already HIGH-named and
+documented as depending on this helper by role in prior passes.
+
+Region unnamed count after this pass: **115** (116 minus this rename). Live named **1806** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
