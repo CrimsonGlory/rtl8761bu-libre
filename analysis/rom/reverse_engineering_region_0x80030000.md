@@ -8124,5 +8124,34 @@ unambiguous.
 Region unnamed count after this pass: **29** (30 minus this rename). Live named
 **2137** global.
 
-**Next:** Pass 262 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 262.
+
+## Pass 262 (2026-07-01) — parallel-slot max-metric selector `FUN_8003cf9c`
+
+Fresh `ListUnnamed80030000.java` re-run: **29 unnamed** remain in region
+(unchanged from Pass 261; xref_in=0 tier dominates — rank-1 is `FUN_8003cf9c`
+at 60B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cf9c` → `select_max_dword_parallel_slot_type_0x101_store_byte_at_plus6`**
+(60B, HIGH, UTILITY-tier) via
+`RenamePass262Region80030000Fun8003cf9c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Parallel-slot-table selector in the `0x8003cfxx` cluster (address-
+adjacent sibling of Pass 68 `reset_parallel_slot_table_entry_tail_state_by_index`
+and Pass 228 `reset_parallel_slot_table_tail_states_slots_0_through_2`). Scans
+three `0x88`-stride entries at `PTR_DAT_8003cfd8`; for each where ushort at `+4`
+equals `0x101`, picks the entry with maximum dword at `+0x30`, stores low byte of
+ushort at `+6` into `*param_1`, returns that dword (or `0` when selected byte is
+`0xff`).
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 60B decompile; slot-table offsets and type/metric
+selection logic unambiguous.
+
+Region unnamed count after this pass: **28** (29 minus this rename). Live named
+**2138** global.
+
+**Next:** Pass 263 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
