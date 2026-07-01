@@ -2854,7 +2854,7 @@ routes overlapping but non-identical rejected-opcode recovery handlers.
 - `0x10` → `handle_lmp_encryption_key_size_req_not_accepted`
 - `0x11` → `handle_lmp_start_encryption_req_not_accepted`
 - `0x12` → `FUN_80027b9c` (stop encryption recovery)
-- `0x32` → `FUN_80029784`
+- `0x32` → `handle_lmp_use_semi_permanent_key_not_accepted_alt`
 - `0x3f` → no-op (return 1)
 - `0x40` → `handle_lmp_simple_pairing_number_not_accepted`
 - `0x41` → `FUN_80028634` (SSP confirm recovery)
@@ -7245,5 +7245,38 @@ hardware-layer Section 9 codec-6 staging sizes (`0x18` h2, `0x30` h0); sole call
 already HIGH-named; role pre-documented at Pass 6 cont. (167).
 
 Region unnamed count after this pass: **97** (98 minus this rename). Live named **1824** global.
+
+**Next:** superseded by Pass 6 continuation (216).
+
+## Pass 6 continuation (216) (2026-07-01) — LMP USE_SEMI_PERMANENT_KEY NOT ACCEPTED alt recovery `FUN_80029784`
+
+Decompiled and renamed:
+**`FUN_80029784` → `handle_lmp_use_semi_permanent_key_not_accepted_alt`**
+(52B, HIGH) via `RenamePass6Region80020000Fun80029784.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=97` at pass start). First-listed
+`FUN_80029784` in tied 52B/xref_in=1 cluster; pre-cited as unnamed callee at
+`0x32` branch of `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`
+(Pass 6 cont. 73).
+
+**Mechanism:** Alt LMP NOT ACCEPTED recovery for rejected opcode **0x32**
+(LMP USE_SEMI_PERMANENT_KEY). Sole caller
+`dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` when rejected-opcode
+byte at `param+5` is `0x32`. Simpler sibling of primary-path
+`handle_lmp_use_semi_permanent_key_not_accepted` (`0x800296d0`): gates on
+`param+4` bit 0 clear and link-key-type byte `0x20` at crypto `+1`, then invokes
+`start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+with arg `0` (no role gate, no rejected-payload byte).
+
+**Callers:** `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` (1 site,
+rejected-opcode `0x32` branch; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms alt NOT-ACCEPTED recovery idiom matching
+documented primary sibling and `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`
+cluster; link-key-type `0x20` gate aligns with
+`LMP_USE_SEMI_PERMANENT_KEY_0x32` / master-link-key phase-1 armer cluster.
+
+Region unnamed count after this pass: **96** (97 minus this rename). Live named **1825** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
