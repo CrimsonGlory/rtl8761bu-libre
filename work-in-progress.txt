@@ -12665,7 +12665,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 106;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 107: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 107 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80036670`→`poll_hook_value_until_stable_and_optional_slot_offset_0x270`
+          (86B, HIGH, HANDLER-tier). Hook fptr poll + stability spin + optional
+          `0x270` slot-phase offset via `FUN_800141c8`. Callers
+          `check_esco_timing_window_and_trigger` and
+          `compute_bb_slot_link_timing_offsets_from_status_bits`. 183 unnamed
+          remain; live named 1983.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 107;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 108: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

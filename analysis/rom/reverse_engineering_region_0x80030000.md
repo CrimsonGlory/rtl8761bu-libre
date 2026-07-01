@@ -3116,5 +3116,36 @@ link-mode-change cluster; both callers confirmed via decompile.
 Region unnamed count after this pass: **184** (185 minus this rename). Live named
 **1982** global.
 
-**Next:** Pass 107 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 107.
+
+## Pass 107 (2026-07-01) — hook poll + slot-phase offset `FUN_80036670`
+
+Fresh `ListUnnamed80030000.java` re-run: **184 unnamed** remain in region
+(unchanged from Pass 106; rank-1 by size at xref=2 tier is `FUN_80036670` at
+86B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80036670` → `poll_hook_value_until_stable_and_optional_slot_offset_0x270`**
+(86B, HIGH, HANDLER-tier) via `RenamePass107Region80030000Fun80036670.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Reads hook fptr at `PTR_DAT_800366c8` into `*param_1`. When
+`param_2 != NULL`: busy-spins re-reading hook until value stabilizes, samples
+10-bit global HW-clock phase via `FUN_800141c8`, wraps at `0x270` (624), stores
+`0x270 - phase` slot-offset remainder in `*param_2`. Same `0x270` slot-phase
+idiom as Pass 80's `read_hw_clock_dword_and_optional_slot_offset_by_role_index`
+but via hook fptr + stability spin instead of per-role HW-clock table read.
+
+**Callers:** 2 xref-in — `check_esco_timing_window_and_trigger` (region
+`0x80050000`, eSCO timing window check with `param_2=0` for value-only path) and
+`compute_bb_slot_link_timing_offsets_from_status_bits` (region `0x80070000`, BB
+slot link-timing offset seeding cluster).
+
+**Confidence:** HIGH — full 86B decompile; `0x270` slot-phase remainder matches
+documented SCO/eSCO timing cluster; both callers confirmed via xref script.
+
+Region unnamed count after this pass: **183** (184 minus this rename). Live named
+**1983** global.
+
+**Next:** Pass 108 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
