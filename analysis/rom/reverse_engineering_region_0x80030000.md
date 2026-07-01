@@ -5496,5 +5496,38 @@ sibling pattern; param-scaled timeout formula unambiguous.
 Region unnamed count after this pass: **113** (114 minus this rename). Live named
 **2053** global.
 
-**Next:** Pass 178 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 178.
+
+## Pass 178 (2026-07-01) — AFH cleanup arm gate `FUN_800388e0`
+
+Fresh `ListUnnamed80030000.java` re-run: **113 unnamed** remain in region
+(unchanged from Pass 177; rank-1 at xref=1 tier is `FUN_800388e0` at 90B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800388e0` → `arm_afh_cleanup_on_lmp_pdu_nibble_e0_f0_tid_gated`**
+(90B, HIGH, UTILITY-tier) via
+`RenamePass178Region80030000Fun800388e0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Early LMP-PDU-received AFH cleanup arm gate. Called from
+`lmp_pdu_received_top_level_processor` with `&local_76` (connection-event
+metadata byte). When two global enable flags (`PTR_DAT_8003893c`,
+`PTR_DAT_80038940`) are set and armed flag `PTR_DAT_80038944` is clear,
+checks upper nibble `0xe0`/`0xf0` plus TID bit (bit3, optionally inverted
+via `PTR_DAT_80038948`); on match clears BB reg `0x44` bit0 via
+`read_modify_write_hw_reg_0x44_set_bit0(0)` and sets armed flag to 1.
+AFH cluster sibling of `AFH_channel_map_table_builder` (`0x800386d0`) and
+`VSC_0xfc64_link_quality` cleanup tail.
+
+**Callers:** 1 xref-in — `lmp_pdu_received_top_level_processor` (`0x80003e0c`,
+region `0x80000000`); invoked at top of connection-event processing before
+optional pre-hook dispatch.
+
+**Confidence:** HIGH — full 90B decompile; nibble/TID gate + HW reg 0x44
+cleanup chain matches AFH cluster pattern; caller context unambiguous.
+
+Region unnamed count after this pass: **112** (113 minus this rename). Live named
+**2054** global.
+
+**Next:** Pass 179 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
