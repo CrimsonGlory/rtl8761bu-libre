@@ -8502,4 +8502,37 @@ invalid-params `0x12` idiom; sibling cluster context documented in Pass 6 cont. 
 
 Region unnamed count after this pass: **54** (55 minus this rename). Live named **1867** global.
 
+**Next:** superseded by Pass 6 continuation (259).
+
+## Pass 6 continuation (259) (2026-07-01) — feature-page precondition gate `FUN_80023fdc`
+
+Decompiled and renamed:
+**`FUN_80023fdc` → `get_feature_page6_bit3_when_page8_bit0_enabled_local_and_conn`**
+(36B, HIGH) via `RenamePass6Region80020000Fun80023fdc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=8) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=54` at pass start). Highest xref count in
+the tied 36B tier; sits in the `0x80023fxx`/`0x800240xx` feature-page gate cluster adjacent
+to `FUN_8002403c` (role/capability gate) and `lookup_min_encryption_key_size_from_config_tables`.
+
+**Mechanism:** Conn-record feature-page precondition probe on `big_ol_struct` pointer
+`param_1`. Default return `0` (precondition pass). When both local
+`some_feature_page_base[8]` bit `0` and conn feature byte at `+0xeb` (page 8 relative to
+`_xe3_features_pages_array_0_`) bit `0` are set, returns bit `3` of
+`(some_feature_page_base[6] & conn[+0xe9])` — i.e. page-6 bit `3` gated on bilateral
+page-8 bit `0` enablement. Naming sibling of region `0x80070000`
+`get_global_edr_feature_bit2_when_conn_page1_bit4_set`.
+
+**Callers:** `LMP_IN_RAND_0x08` (multiple sites — proceeds when return `==0` alongside
+`FUN_8002403c` gate and no pending LMP), `handle_lmp_ext_io_capability_req_subopcode_0x19`,
+`dispatch_lmp_pairing_continuation_by_crypto_state` (state `0x07` PDU `+6==6` PIN-request
+path), and `kickoff_post_role_switch_encryption_or_auth_by_link_type` (kickoff only when
+return `==0`); xref_in=8 per `ListUnnamed80020000.java` (3 direct via `xrefs_to`).
+
+**Confidence:** HIGH — decompile confirms bilateral page-8-bit0 gate + page-6-bit3 extract;
+caller decompiles show established `==0` success-path idiom paired with `FUN_8002403c`;
+prior prose references in this doc (Pass 6 cont. 20/77) now resolved.
+
+Region unnamed count after this pass: **53** (54 minus this rename). Live named **1868** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
