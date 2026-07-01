@@ -6285,4 +6285,31 @@ SCO/eSCO baseband setup family; literal-pool layout mirrors `0x8002fcb0` config 
 
 Region unnamed count after this pass: **129** (130 minus this rename). Live named **1792** global.
 
+**Next:** superseded by Pass 6 continuation (184).
+
+## Pass 6 continuation (184) (2026-07-01) — ACL reassembly multi-slot drain `FUN_8002a2ec`
+
+Decompiled and renamed:
+**`FUN_8002a2ec` → `drain_acl_reassembly_slots_0_through_2_and_clear_flags`**
+(68B, HIGH) via `RenamePass6Region80020000Fun8002a2ec.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=129` at pass start). First listed at
+68B/xref_in=2 (sibling `FUN_800244f8` also 68B but xref_in=1).
+
+**Mechanism:** Top-level ACL reassembly flush in the `0x8002a2xx` cluster alongside
+`drain_acl_reassembly_pending_ring_by_slot_and_release_buffers` (`0x8002a270`) and
+`hci_acl_data_fragment_assembler_and_enqueue` (`0x8002a3d8`). When global pending
+counter `PTR_DAT_8002a330[0xce]` is nonzero, sequentially drains slots 0, 1, and 2
+via the per-slot ring drainer (re-checking `+0xce` between each), then clears status
+bytes `+0xcc`, `+0xcd`, and `+0xce` to zero.
+
+**Caller:** `hci_acl_data_fragment_assembler_and_enqueue` (confirmed via `find_callers`).
+
+**Confidence:** HIGH — decompile matches documented per-slot drainer callee chain and
+same `+0xce` pending-counter byte used in Pass 6 cont. (110); direct caller confirmed;
+complements single-slot drain invoked from the assembler's per-handle path.
+
+Region unnamed count after this pass: **128** (129 minus this rename). Live named **1793** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
