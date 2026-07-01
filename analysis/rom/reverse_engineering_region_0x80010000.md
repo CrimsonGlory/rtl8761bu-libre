@@ -2068,4 +2068,34 @@ cluster documentation.
 
 Region unnamed count after this pass: **210** (211 minus this rename).
 
-**Next:** Pass 102 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 102.
+
+## Pass 102 (2026-07-01) — secondary VSC fc95/LMP-268 gateway `FUN_80015fc0`
+
+Pass 102 target from cold-triage rank-1 (3 xref_in, 84B — largest at xref=3
+tier after Pass 101 cleared `FUN_80015d9c`). Decompiled and renamed:
+**`FUN_80015fc0` → `feature_bit0_gated_vsc_fc95_lmp268_gateway_secondary_cfg_with_scaled_delay`**
+(84B, HIGH) via `RenamePass102Region80010000Fun80015fc0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Structural sibling of Pass 101
+`feature_bit0_gated_vsc_fc95_lmp268_gateway_with_config_scaled_delay` using a
+secondary config block at `PTR_DAT_80016014`. Gates on `cfg+0x40` bit0 (vs
+primary `cfg+0x84`). When pending slot dword at `PTR_DAT_80016018 != -1`, calls
+`LMP__25B__most_common_for_VSCs1`. When `param_1 != 0`: issues
+`VSC_0xfc95_called2(0, pending_slot, PTR_LAB_80016e0c_1_8001601c, 0, 0)` then
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` with delay
+`(ushort at cfg+0x4e) * 5 >> 3` (vs primary `cfg+0x98`). CPB disable path
+`FUN_80015dfc` calls the primary gateway with `param_1==0` before clearing
+`cfg+0x84` bit0.
+
+**Callers:** `status_word_multiflag_link_event_dispatcher`,
+`FUN_80016dac`, `FUN_800171bc` (3 xref_in per `ListXrefsTo80015fc0.java`).
+
+**Confidence:** HIGH — decompile confirms identical fc95+268 dispatch skeleton
+with alternate config offsets; caller link-event dispatcher cross-confirmed with
+region `0x80030000` Pass 104 role-slot state cluster.
+
+Region unnamed count after this pass: **209** (210 minus this rename).
+
+**Next:** Pass 103 — cold-triage next rank-1 unnamed in region `0x80010000`.

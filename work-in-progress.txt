@@ -14867,8 +14867,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 101;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 102: cold-triage next rank-1
-          unnamed function in region `0x80010000` (210 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 102 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80015fc0`→
+          `feature_bit0_gated_vsc_fc95_lmp268_gateway_secondary_cfg_with_scaled_delay`
+          (84B, HIGH). Secondary-config sibling of Pass 101 primary gateway;
+          gates `cfg+0x40` bit0; delay `(cfg+0x4e)*5>>3`; callers
+          `status_word_multiflag_link_event_dispatcher` + `FUN_80016dac` +
+          `FUN_800171bc`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 102;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 103: cold-triage next rank-1
+          unnamed function in region `0x80010000` (209 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
