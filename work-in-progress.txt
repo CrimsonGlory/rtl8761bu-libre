@@ -14383,8 +14383,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 288;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 289: fresh ListUnnamed80030000
-          re-rank; decompile+rename top rank-1 unnamed function.
+[DONE]  Full RE: ROM region 0x80030000 — Pass 289 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033b10`→`return_ff_default_link_mode_change_prehook_stub`
+          (4B, HIGH, STUB-tier). Constant `0xff` return stub adjacent to
+          `PTR_DAT_80033b0c` in link-mode-change prehook cluster before Pass 99
+          slot-budget adjust. Region unnamed 1 remain; live named 2165.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 289;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 290: fresh ListUnnamed80030000
+          re-rank; decompile+rename final remaining unnamed function
+          (`FUN_800308d9`, 1B).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -8903,5 +8903,36 @@ cluster placement matches documented ISR-dispatch and unsniff-cleanup siblings.
 Region unnamed count after this pass: **2** (3 minus this rename). Live named
 **2164** global.
 
-**Next:** Pass 289 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function.
+**Next:** superseded by Pass 289.
+
+## Pass 289 (2026-07-01) — link-mode prehook default sentinel `FUN_80033b10`
+
+Fresh `ListUnnamed80030000.java` re-run: **2 unnamed** remain in region
+(unchanged from Pass 288; xref_in=0 tier dominates — rank-1 is `FUN_80033b10`
+at 4B, tied with `FUN_800308d9` at 1B; first-listed wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033b10` → `return_ff_default_link_mode_change_prehook_stub`**
+(4B, HIGH, STUB-tier) via
+`RenamePass289Region80030000Fun80033b10.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e constant-return stub (`return 0xff`).
+Address-adjacent to `PTR_DAT_80033b0c` (optional prehook fptr consumed by Pass
+214's `invoke_link_mode_change_optional_prehook_status_byte` at `0x80033ae4`)
+and immediately before Pass 99's
+`adjust_link_mode_change_slot_budget_and_secondary_timing` at `0x80033b14` in
+the `link_mode_change_state_machine` cluster. Likely default hook sentinel
+returning `0xff` when no patch overrides `PTR_DAT_80033b0c`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table / default-hook
+invocation).
+
+**Confidence:** HIGH — trivial 4B decompile; constant `0xff` return
+unambiguous; cluster placement matches documented link-mode-change prehook
+siblings.
+
+Region unnamed count after this pass: **1** (2 minus this rename). Live named
+**2165** global.
+
+**Next:** Pass 290 — fresh `ListUnnamed80030000` re-rank; decompile+rename final
+remaining unnamed function (`FUN_800308d9`, 1B).
