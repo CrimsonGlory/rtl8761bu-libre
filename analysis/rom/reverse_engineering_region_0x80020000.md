@@ -6312,4 +6312,35 @@ complements single-slot drain invoked from the assembler's per-handle path.
 
 Region unnamed count after this pass: **128** (129 minus this rename). Live named **1793** global.
 
+**Next:** superseded by Pass 6 continuation (185).
+
+## Pass 6 continuation (185) (2026-07-01) — LMP key-size mask RES sender `FUN_800244f8`
+
+Decompiled and renamed:
+**`FUN_800244f8` → `send_lmp_encryption_key_size_mask_res_0x3b_from_config`**
+(68B, HIGH) via `RenamePass6Region80020000Fun800244f8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=128` at pass start). First listed at
+68B/xref_in=1 after Pass 184 cleared the xref_in=2 sibling.
+
+**Mechanism:** Outbound LMP **0x3B** (Encryption Key Size Mask RES) sender in the
+`0x800244xx` encryption/SSP send-wrapper cluster adjacent to
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate` (`0x80024470`). Computes a
+16-bit allowed-key-size bitmask from global config `PTR_DAT_8002453c` bytes `+2`
+(max key-size bit index) and `+3` (min key-size bit index), builds a 4-byte PDU
+(opcode `0x3b` + 16-bit mask), and transmits via the central LMP send wrapper.
+Send-side complement of the already-named recv handler
+`LMP_ENCRYPTION_KEY_SIZE_MASK_RES_0x3B` (`0x80027f30`).
+
+**Caller:** `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` (`0x80027f80`) — on master-role
+accept path when feature-page byte `+2` bit7 is set (`char < 0`), calls this
+function instead of rejecting with `LMP_NOT_ACCEPTED`.
+
+**Confidence:** HIGH — decompile confirms opcode `0x3b` literal + bitmask-from-config
+pattern; direct caller confirmed in decompile of paired recv handler; completes
+the 0x3A/0x3B key-size-mask REQ/RES pair documented since Pass 3.
+
+Region unnamed count after this pass: **127** (128 minus this rename). Live named **1794** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

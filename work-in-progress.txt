@@ -10886,8 +10886,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (184);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (185): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (128 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (185) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800244f8`→`send_lmp_encryption_key_size_mask_res_0x3b_from_config`
+          (68B, HIGH) — outbound LMP 0x3B key-size mask RES from global config min/max
+          bytes; caller `LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A`; xref_in=1; 127 unnamed
+          remain; live named 1794.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (185);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (186): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (127 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
