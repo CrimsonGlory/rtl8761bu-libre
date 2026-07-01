@@ -6456,5 +6456,34 @@ register port.
 Region unnamed count after this pass: **83** (84 minus this rename). Live named
 **2083** global.
 
-**Next:** Pass 208 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 208.
+
+## Pass 208 (2026-07-01) — cached SCO BB register pairs `FUN_8003b328`
+
+Fresh `ListUnnamed80030000.java` re-run: **83 unnamed** remain in region
+(unchanged from Pass 207; rank-1 by size at xref=1 tier is `FUN_8003b328` at
+50B — wins on address over tied 50B sibling `FUN_80039194`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b328` → `apply_cached_sco_bb_register_pairs_via_hw_hook`**
+(50B, HIGH, SIMPLE-tier) via
+`RenamePass208Region80030000Fun8003b328.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Re-applies 21 cached ushort register pairs (`0..0x14` loop) via
+hook at `PTR_DAT_8003b360`: for each index `i`, calls the hook with register
+index from static table `PTR_DAT_8003b35c[i]` and value from caller buffer
+`param_1[i]`. SCO HW init fast-path when subsystem already initialized
+(`PTR_DAT_80037320[0] != 0`): alternative to first-time
+`program_sco_bb_regs_from_config_offset_0x106_via_hw_hook` (Pass 140); buffer
+populated by `FUN_8003b2fc` before dispatch.
+
+**Callers:** 1 xref-in — `init_or_clear_sco_hw_channel_subsystem` (`0x80036fa8`).
+
+**Confidence:** HIGH — full 50B decompile; 21-pair loop + dual-table dispatch
+unambiguous; caller SCO/eSCO HW subsystem init path matches Pass 140 sibling.
+
+Region unnamed count after this pass: **82** (83 minus this rename). Live named
+**2084** global.
+
+**Next:** Pass 209 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
