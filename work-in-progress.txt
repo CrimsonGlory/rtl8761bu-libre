@@ -14720,8 +14720,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 86;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 87: cold-triage next rank-1
-          unnamed function in region `0x80010000` (225 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 87 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800152e4`→`apply_four_field_sync_timing_offsets_to_baseband_regs`
+          (166B, HIGH). Sync-timing commit tail: programs BB regs
+          `0x202`/`0x200`/`0x206`/`0x204`/`0x208` via hook `PTR_DAT_80015390`;
+          disable path writes `0xffff`; chained after Pass 86 struct writer.
+          Callers `FUN_80016934` (CPB tick, 3×) + `FUN_80016e68` (SCO sync);
+          4 xref_in. 224 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 87;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 88: cold-triage next rank-1
+          unnamed function in region `0x80010000` (224 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

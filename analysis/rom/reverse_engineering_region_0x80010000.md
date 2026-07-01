@@ -1623,4 +1623,30 @@ offset/swap semantics, hook dispatch, and CPB-tick + SCO-sync caller integration
 
 Region unnamed count after this pass: **225** (226 minus this rename).
 
-**Next:** Pass 87 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 88.
+
+## Pass 87 (2026-07-01) — Sync timing BB register commit `FUN_800152e4`
+
+Pass 87 target from cold-triage rank-1 (4 xref_in, 166B — largest at xref=4
+tier after Pass 86). Decompiled and renamed:
+**`FUN_800152e4` → `apply_four_field_sync_timing_offsets_to_baseband_regs`**
+(166B, HIGH) via `RenamePass87Region80010000Fun800152e4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Commit tail of the sync-timing pipeline (sibling of Pass 86's
+struct writer): reads four signed offsets from shared struct `PTR_DAT_8001538c`
+at `+0x12`/`+0x14`/`+0x16`/`+0x18`. When byte `+0xe` bit0 clear, programs BB
+regs `0x202`/`0x200`/`0x206`/`0x204` via hook `PTR_DAT_80015390` with those
+values; when bit0 set, writes `0xffff` to all four (disable/bypass path).
+Final write to reg `0x208` merges `DAT_80015394` with bit8 from `+0xe` bit1.
+
+**Callers:** 4 xref_in — `FUN_80016934` (CPB/page-receive periodic tick, 3
+sites) and `FUN_80016e68` (SCO sync setup); chained after
+`store_four_field_sync_timing_offsets_with_mode_adjust_and_hook` in both paths.
+
+**Confidence:** HIGH — decompile confirms four-register commit via HW-write
+hook, disable sentinel `0xffff`, and CPB-tick + SCO-sync caller integration.
+
+Region unnamed count after this pass: **224** (225 minus this rename).
+
+**Next:** Pass 88 — cold-triage next rank-1 unnamed in region `0x80010000`.
