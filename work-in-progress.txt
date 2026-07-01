@@ -14667,8 +14667,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 81;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 82: cold-triage next rank-1
-          unnamed function in region `0x80010000` (230 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 82 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80011468`→`poll_indexed_bb_register_until_stable_read`
+          (162B, HIGH). Stability-poll wrapper on alternate indexed BB read
+          `FUN_800113e4` (`DAT_80011460`); validates `param_1<2`, polls up to
+          10 iter for consecutive equal reads, logs `0x196`/`0x177` on failure;
+          callers include `feature_bit_status_reconfig_handler` +
+          `VSC_0xfc8b_diagnostic_query`. 5 xref_in.
+          229 unnamed remain; live named 2195.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 82;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 83: cold-triage next rank-1
+          unnamed function in region `0x80010000` (229 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

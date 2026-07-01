@@ -1484,4 +1484,29 @@ programming.
 
 Region unnamed count after this pass: **230** (231 minus this rename).
 
-**Next:** Pass 82 — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 82 (2026-07-01) — Stability-poll indexed BB register read `FUN_80011468`
+
+Pass 82 target from cold-triage rank-1 (5 xref_in, 162B — largest at xref=5
+tier after Pass 81). Decompiled and renamed:
+**`FUN_80011468` → `poll_indexed_bb_register_until_stable_read`**
+(162B, HIGH) via `RenamePass82Region80010000Fun80011468.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Stability-polling wrapper on alternate indexed BB register read
+`FUN_800113e4` (uses `DAT_80011460` control word, distinct from MMIO-indexed
+`read_baseband_register_mmio_indexed` at `0xb000a0bc`). Validates
+`param_1 < 2` and rejects `param_1==1` with `param_2 & 1` set; polls up to
+10 iterations until two consecutive reads match; on exhaustion logs event
+`0x196` and returns last value; invalid params log `0x177` and return
+`0xffff`.
+
+**Callers:** 5 xref_in per `ListUnnamed80010000.java`; includes
+`feature_bit_status_reconfig_handler`, `link_state_feature_bit_escalation_and_log_dispatcher`,
+and `VSC_0xfc8b_diagnostic_query`.
+
+**Confidence:** HIGH — decompile confirms stability-poll loop, parameter
+validation, error logging, and caller usage for feature/status BB register reads.
+
+Region unnamed count after this pass: **229** (230 minus this rename).
+
+**Next:** Pass 83 — cold-triage next rank-1 unnamed in region `0x80010000`.
