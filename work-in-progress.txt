@@ -10647,8 +10647,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (157);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (158): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (155 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (158) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80025dd8`→`extract_passkey_confirm_bit_and_send_lmp_0x3f`
+          (84B, HIGH). SSP passkey-entry confirm-bit step: primes `FUN_8002c838`,
+          extracts bit from `crypto+0x138` at index `+0x13c`, sends LMP 0x3f via
+          `derive_simple_pairing_confirm_and_send_lmp_0x3f`; callers
+          `dispatch_ssp_user_passkey_request_or_notification`/
+          `fHCI_Remote_OOB_Data_Request_Negative_Reply_0x2e`; xref_in=4.
+          154 unnamed remain; live named 1767.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (158);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (159): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (154 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -5514,4 +5514,35 @@ match Bluetooth Simple Pairing capability matrix; caller already documented.
 
 Region unnamed count after this pass: **155** (156 minus this rename). Live named **1766** global.
 
+**Next:** superseded by Pass 6 continuation (158).
+
+## Pass 6 continuation (158) (2026-07-01) — SSP passkey confirm-bit sender `FUN_80025dd8`
+
+Decompiled and renamed:
+**`FUN_80025dd8` → `extract_passkey_confirm_bit_and_send_lmp_0x3f`**
+(84B, HIGH) via `RenamePass6Region80020000Fun80025dd8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (84B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=155` at pass start). First-listed
+`FUN_80025dd8` in the 84B cluster.
+
+**Mechanism:** SSP passkey-entry Simple Pairing Confirm (LMP 0x3f) bit-step sender.
+Primes DHKey hash block at `crypto+0xe8` via `FUN_8002c838`, extracts the current
+passkey-confirm bit from `crypto+0x138` at index `crypto+0x13c` (mod 32), stores
+`(bit & 1) | 0x80` to `crypto+0x13d`, invokes
+`derive_simple_pairing_confirm_and_send_lmp_0x3f` with that mode byte, then
+increments the bit index at `+0x13c`. Sibling of numeric-comparison path
+`FUN_80025fb4` (Pass 6 cont. 79); documented in advance as the passkey
+bit-extraction caller of the shared SSP confirm sender.
+
+**Callers:** `dispatch_ssp_user_passkey_request_or_notification` (display-yes-no
+passkey path) and `fHCI_Remote_OOB_Data_Request_Negative_Reply_0x2e` (OOB negative
+reply when no pending LMP); xref_in=4.
+
+**Confidence:** HIGH — callee chain matches documented SSP confirm cluster (Pass 6
+cont. 79); bit-index walk over `+0x138`/`+0x13c`/`+0x13d` matches passkey-entry
+semantics; callers already named in SSP pairing-method dispatch cluster.
+
+Region unnamed count after this pass: **154** (155 minus this rename). Live named **1767** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
