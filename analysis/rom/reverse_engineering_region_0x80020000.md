@@ -4182,4 +4182,36 @@ cont. 74); callers sit in documented LMP COMB_KEY / pairing-continuation cluster
 
 Region unnamed count after this pass: **198** (199 minus this rename). Live named **1723** global.
 
+**Next:** superseded by Pass 6 continuation (115).
+
+## Pass 6 continuation (115) (2026-07-01) — LMP ext enc sub2 inner0x17 stop-encryption `FUN_80029260`
+
+Decompiled and renamed:
+**`FUN_80029260` → `handle_lmp_ext_enc_sub2_inner0x17_stop_enc_substate_c_or_finalize`**
+(112B, HIGH) via `RenamePass6Region80020000Fun80029260.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (112B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=198` at pass start). First-listed at
+112B (tied cluster with `FUN_80028550`).
+
+**Mechanism:** LMP 0x7F sub-opcode 0x02 inner-type **0x17** stop-encryption handler.
+Reached via `LMP_encryption_opcode_handlers` → `FUN_80027ae0` multiplexer when PDU
+byte at `+7 == 0x17`. Sets ack flag `*param_3 = 1`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. When crypto sub-state byte at `+1 == 0x43`
+(`'C'`): gated by `FUN_8002403c` role check unless global bypass
+`PTR_DAT_800292d4[2]&0x80` set; on pass sets status `0x3f` via `set_arg1_1_to_arg2`,
+and when pending LMP at `+0x1e8` invokes `LMP_STOP_ENCRYPTION_REQ_0x12` then
+`FUN_80025634`. Otherwise tail-calls `finalize_stop_encryption_procedure_and_notify_hci`
+with status from PDU `+8`.
+
+**Callers:** `FUN_80027ae0` (1 site at `0x80027b0a`, inner-type `0x17` branch) ←
+`LMP_encryption_opcode_handlers` (LMP 0x7F sub-opcode 0x02 case).
+
+**Confidence:** HIGH — dispatch chain confirmed via `ListXrefsTo80029260.java`; sub-state
+`0x43` retry via `LMP_STOP_ENCRYPTION_REQ_0x12` mirrors NOT-ACCEPTED recovery sibling
+`handle_lmp_encryption_mode_req_not_accepted` state `0x44`; finalize fallback uses
+documented `finalize_stop_encryption_procedure_and_notify_hci` (Pass 6 cont. 14).
+
+Region unnamed count after this pass: **197** (198 minus this rename). Live named **1724** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
