@@ -8240,5 +8240,36 @@ unambiguous.
 Region unnamed count after this pass: **25** (26 minus this rename). Live named
 **2141** global.
 
-**Next:** Pass 266 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 266.
+
+## Pass 266 (2026-07-01) — resource-pool type-03 connection-handle gate `FUN_80030530`
+
+Fresh `ListUnnamed80030000.java` re-run: **25 unnamed** remain in region
+(unchanged from Pass 265; xref_in=0 tier dominates — rank-1 is `FUN_80030530`
+at 48B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80030530` → `gate_resource_pool_chain_type03_cmd_by_connection_handle_lookup`**
+(48B, HIGH, HANDLER-tier) via
+`RenamePass266Region80030000Fun80030530.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Type-0x03 command gate in the `0x800305xx` resource-pool
+feature-page cluster (sibling of Pass 160
+`release_resource_pool_chain_slot_type02_with_cleanup` at `+0x30` and Pass 241
+allocate handler). Validates `param_1+2 == 0x03`, reads connection handle at
+`param_1+4`, stages it to shared global, then calls
+`lookup_up_to_3_bos_array_indices_by_connection_handle`. Returns `0x12` on
+wrong type, `2` when lookup reports `0xff`, `0` on success.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 48B decompile; named BOS lookup callee anchors
+connection-handle validation pattern documented across HCI/LMP handlers; type-0x03
+gate consistent with Pass 251 `clear_resource_pool_slot_occupancy_bit_hci_type03`
+in the same `0x800305xx`/`0x800309xx` cluster.
+
+Region unnamed count after this pass: **24** (25 minus this rename). Live named
+**2142** global.
+
+**Next:** Pass 267 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
