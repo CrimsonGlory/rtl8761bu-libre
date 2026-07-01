@@ -791,7 +791,7 @@ a crystal/clock-trim calibration routine.
 #### 6. `link_mode_change_state_machine` (0x80035454, 456B)
 
 `(byte link_type, uint, uint)`. The core link-mode/role-switch procedure dispatcher for this
-region's `FUN_80033a04`/`FUN_80033ae4`/`FUN_80033b14`/`FUN_80033c98`/`FUN_80035378`
+region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`FUN_80033b14`/`FUN_80033c98`/`check_connection_setup_commit_gate_status`
 helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
 busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
 brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
@@ -909,7 +909,7 @@ returns 0, falls back to a default value and returns. Otherwise computes a smoot
 power/RSSI-like value from `field_0x38` plus an antenna-path correction term
 (`field_0x2a0`/`field_0x2a1`, selected by a 2-bit mode in a hardware-config byte), averaged
 against `field106_0x94`. If calibration-mode is active and the smoothed value exceeds a
-config-defined threshold (`field160_0xa8`/`field161_0xa9`) and `FUN_80035378(1)!=0xff` and a
+config-defined threshold (`field160_0xa8`/`field161_0xa9`) and `check_connection_setup_commit_gate_status(1)!=0xff` and a
 flag bit is set, calls **`param_dispatch_with_rom_calls`** (`0x80035b4c`, already HIGH from Pass
 6) with `(smoothed_value, threshold)` — resolving one of that function's two documented callers.
 
@@ -2111,7 +2111,7 @@ live-verified).
 
 **Mechanism:** Large connection-setup mode commit orchestrator on global state
 `PTR_DAT_80035b04`. Optional prelude hooks at `PTR_DAT_80035b00` and
-`PTR_DAT_80035b18`. Gates via `FUN_80035378`, `validate_connection_setup_preconditions`,
+`PTR_DAT_80035b18`. Gates via `check_connection_setup_commit_gate_status`, `validate_connection_setup_preconditions`,
 and `gate_lmp_power_clk_adj_eligibility_by_conn_state`. Mode byte `param_1`
 (0–6) plus slot bitmask `param_2` select commit path: mode 0 dispatches
 `dispatch_lmp_25c_multi_slot_emit_with_config_gates` + `FUN_80034d88`; mode 1
@@ -2231,5 +2231,43 @@ busy(`0xf`)/ready(`0`)/blocked(`0xff`) gate role.
 Region unnamed count after this pass: **212** (213 minus this rename). Live named
 **1954** global.
 
-**Next:** Pass 79 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 79.
+
+## Pass 79 (2026-07-01) — connection setup commit gate `FUN_80035378`
+
+Fresh `ListUnnamed80030000.java` re-run: **212 unnamed** remain in region
+(unchanged from Pass 78; rank-1 by size at xref=3 tier is `FUN_80035378` at
+186B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035378` → `check_connection_setup_commit_gate_status`**
+(186B, HIGH) via `RenamePass79Region80030000Fun80035378.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Connection-setup commit precondition gate used by
+`commit_connection_setup_mode_by_slot_bitmask_and_gates`,
+`link_mode_change_state_machine`, and
+`power_level_smoothing_filter_feeding_param_dispatch`. Optional prelude hook at
+`PTR_DAT_80035434` — if installed and returns non-zero, skip default path.
+When global flag byte at `PTR_DAT_80035438+3` bit0 set: arms 5-iteration pending
+bitmask scan (bits 15–19) and sets timer/counter `0x20`; any active pending
+slot returns `0xff` (blocked). Additional global-state flag checks at
+`PTR_DAT_80035438`/`PTR_DAT_8003544c`/`PTR_DAT_80035450` plus
+`check_status_bit_0x2_of_global`. Mode byte `param_1` selects downstream gate:
+`param_1<2` → `validate_connection_setup_preconditions(0,0,1)`;
+`param_1==2` → `gate_lmp_power_clk_adj_eligibility_by_conn_state(1)`;
+`param_1==3` → `gate_lmp_power_clk_adj_eligibility_by_conn_state(0)`.
+Returns `0` (ready) or `0xff` (blocked).
+
+**Callers:** 3 xref-in (`commit_connection_setup_mode_by_slot_bitmask_and_gates`,
+`link_mode_change_state_machine`,
+`power_level_smoothing_filter_feeding_param_dispatch`).
+
+**Confidence:** HIGH — full 186B decompile; callers and named callees anchor the
+connection-setup/LMP-clk-adj gate role.
+
+Region unnamed count after this pass: **211** (212 minus this rename). Live named
+**1955** global.
+
+**Next:** Pass 80 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
