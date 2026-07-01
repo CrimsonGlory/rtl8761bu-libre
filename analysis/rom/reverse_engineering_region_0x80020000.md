@@ -5814,7 +5814,7 @@ with `FUN_8002a1dc` (renamed Pass 166); first-listed `FUN_800225a8`.
 **Mechanism:** ROM boot-time codec JIT staging-table initializer. Called from system BT
 init `FUN_800614fc` (sole caller). Sequential staging of SCO/eSCO codec template bytes
 from ROM literals into RAM areas consumed later by `FUN_80025b68` during SSP pairing:
-(1) `FUN_8002c31c` writes `0xc4000003` to four global RAM locations,
+(1) `write_dword_to_codec_staging_global_ram_cluster` writes `0xc4000003` to four global RAM locations,
 (2) `FUN_8002c2d8` stages codec-6 h2/h0 areas,
 (3) `optimized_memcpy` copies codec-6 h1 (`0x30`) and h2 second half (`0x18`),
 (4) `FUN_8002c2ac` stages codec-8 h2/h0 areas,
@@ -9615,5 +9615,34 @@ xref_in=1 via `ListXrefsTo80021910.java`.
 already HIGH-named; sole caller is documented HCI Reset teardown handler.
 
 Region unnamed count after this pass: **15** (16 minus this rename). Live named **1906** global.
+
+**Next:** superseded by Pass 6 continuation (298).
+
+## Pass 6 continuation (298) (2026-07-01) — Codec staging global dword writer `FUN_8002c31c`
+
+Decompiled and renamed:
+**`FUN_8002c31c` → `write_dword_to_codec_staging_global_ram_cluster`**
+(16B, HIGH) via `RenamePass6Region80020000Fun8002c31c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_8002c31c` (16B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=15` at pass start).
+
+**Mechanism:** Thin global-RAM dword broadcaster in the codec JIT staging init cluster
+(`0x8002c3xx`). Stores caller-supplied dword to four global RAM pointers
+(`PTR_DAT_8002c32c`, `PTR_DAT_8002c330`, `PTR_DAT_8002c334` plus adjacent slot) —
+runtime addresses `0x80120ed8`/`dc`/`e0`/`e4` per `hardware_layer.md` §9. Called from
+`populate_codec_staging_tables_from_rom` with constant **`0xc4000003`** as step (1) of
+the boot-time codec template staging pipeline.
+
+**Caller:** `populate_codec_staging_tables_from_rom` (`0x800225a8`) — sole caller in
+codec staging init chain; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms unambiguous four-pointer dword broadcast;
+role already cross-documented in Pass 6 cont. (167) and `hardware_layer.md` §9;
+caller already HIGH-named.
+
+Region unnamed count after this pass: **14** (15 minus this rename). Live named **1907** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

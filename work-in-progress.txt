@@ -11910,8 +11910,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (297);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (298): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (15 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (298) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002c31c`→`write_dword_to_codec_staging_global_ram_cluster`
+          (16B, HIGH). Codec JIT staging init dword broadcaster: stores caller dword to
+          four global RAM ptrs (`0x80120ed8`/`dc`/`e0`/`e4`); caller
+          `populate_codec_staging_tables_from_rom` passes `0xc4000003`.
+          14 unnamed remain; live named 1907.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (298);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (299): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (14 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

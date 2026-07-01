@@ -325,7 +325,8 @@ un-scrambles pre-built byte sequences from ROM-initialized RAM staging areas.
 ```
 ROM FUN_800614fc                     ← system BT init (single call site)
   └─ ROM FUN_800225a8                ← populates codec staging tables in RAM
-        ├─ FUN_8002c31c              : writes 0xc4000003 to 4 global RAM locations
+        ├─ write_dword_to_codec_staging_global_ram_cluster
+        │                              : writes 0xc4000003 to 4 global RAM locations
         │                              (0x80120ed8/dc/e0/e4)
         ├─ FUN_8002c2d8(0x801220bc, 0x8012205c)  : codec-6 h2 + h0 staging areas
         ├─ optimized_memcpy(0x8012208c, 0x80079be0, 0x30)  : codec-6 h1 staging area
