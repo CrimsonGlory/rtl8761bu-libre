@@ -7574,5 +7574,39 @@ match siblings; Pass 118 cross-ref confirms fptr-table placement.
 Region unnamed count after this pass: **47** (48 minus this rename). Live named
 **2119** global.
 
-**Next:** Pass 244 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 244.
+
+## Pass 244 (2026-07-01) — RF channel poll-table sweep `FUN_8003ada4`
+
+Fresh `ListUnnamed80030000.java` re-run: **47 unnamed** remain in region
+(unchanged from Pass 243; xref_in=0 tier dominates — rank-1 is `FUN_8003ada4`
+at 234B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ada4` → `sweep_65_rf_channels_build_poll_table_invert_checksum_and_log`**
+(234B, HIGH, HANDLER-tier) via
+`RenamePass244Region80030000Fun8003ada4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** RF calibration/diagnostic sweep in the `0x8003adxx` cluster
+adjacent to `register_script_interpreter` (`0x8003aea0`). Seeds channel index
+from `Ram8003ae90`, loops 65 iterations (`0x41`): sets control byte
+`*Ram8003ae94 = 0x80`, calls `program_rf_freq_reg_and_start_poll(channel,
+poll_buf)` (ROM `0x8000b820`), stores poll-result byte into buffer at
+`Ram8003ae98 + index + 2`, increments channel. Post-loop: writes inverted
+16-bit checksum `*buf = ~*(buf+3)`, then two `possible_logging_function__var_args`
+calls unpacking per-bit poll results from the buffer (format strings
+`0x5b6`/`0x5c0`).
+
+**Callers:** 0 xref-in (consistent with indirect init/fptr-table invocation;
+cross-ref in `reverse_engineering_baseband_reg_helpers.md` §8 documents ROM
+callee relationship to `program_rf_freq_reg_and_start_poll`).
+
+**Confidence:** HIGH — full 234B decompile; 65-iteration RF poll sweep pattern
+matches `program_rf_freq_reg_and_start_poll` semantics documented in
+`region_0x80000000`; logging bit-unpack idiom matches other diagnostic handlers.
+
+Region unnamed count after this pass: **46** (47 minus this rename). Live named
+**2120** global.
+
+**Next:** Pass 245 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
