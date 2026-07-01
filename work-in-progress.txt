@@ -10165,8 +10165,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (106);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (107): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (206 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (107) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800220fc`→`arm_encryption_before_deferred_role_switch`
+          (120B, HIGH). Encrypted-link validator/armer for deferred role-switch: gates on
+          link types `0x0c`/`0x16`, arms encryption via `FUN_800245e4` or `FUN_80025f34`,
+          advances via `FUN_80023fb8(_,6)`; caller `FUN_8001ac74`.
+          205 unnamed remain; live named 1716.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (107);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (108): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (205 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

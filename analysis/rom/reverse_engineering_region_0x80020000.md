@@ -3944,4 +3944,35 @@ dispatchers; sole caller already HIGH-named.
 
 Region unnamed count after this pass: **206** (207 minus this rename). Live named **1715** global.
 
+**Next:** superseded by Pass 6 continuation (107).
+
+## Pass 6 continuation (107) (2026-07-01) — deferred role-switch encryption armer `FUN_800220fc`
+
+Decompiled and renamed:
+**`FUN_800220fc` → `arm_encryption_before_deferred_role_switch`**
+(120B, HIGH) via `RenamePass6Region80020000Fun800220fc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (120B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=206` at pass start). Sits in the
+`0x800220xx` encryption/role-switch cluster alongside
+`tick_dhkey_check_stall_scan_encrypted_links_on_timer_expiry` (`0x80021fa0`).
+
+**Mechanism:** Per-connection encrypted-link validator and encryption armer for the
+deferred role-switch path in `FUN_8001ac74` (documented in
+`reverse_engineering_lmp_version_conn_setup.md`). Gates on crypto link-type byte
+`*crypto == 0x0c || *crypto == 0x16`; on match sets `crypto+0x50=1`, then branches on
+`FUN_8002408c()` (encryption feature gate): zero → `FUN_800245e4` (wraps
+`FUN_80024590(_,_,3,0)` legacy start-encryption), nonzero → `FUN_80025f34` (SSP
+DHKey-check path). Always finishes via `FUN_80023fb8(crypto, 6)` and returns 1;
+invalid link-type logs via `possible_logging_function__var_args` and returns 0 (caller
+maps failure to HCI status `0x1f` Parameter Out Of Range).
+
+**Caller:** `FUN_8001ac74` — role-switch state-machine kickoff; xref_in=1.
+
+**Confidence:** HIGH — decompile matches prior pseudocode in `lmp_version_conn_setup`
+and `lc_lmp_state_machine` docs; encrypted-link-type filter and callee chain align with
+sibling DHKey-check stall scanner (`0x80021fa0`); sole caller context confirmed.
+
+Region unnamed count after this pass: **205** (206 minus this rename). Live named **1716** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
