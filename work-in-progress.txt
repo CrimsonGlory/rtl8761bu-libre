@@ -14391,9 +14391,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 289;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 290: fresh ListUnnamed80030000
-          re-rank; decompile+rename final remaining unnamed function
-          (`FUN_800308d9`, 1B).
+[DONE]  Full RE: ROM region 0x80030000 — Pass 290 (2026-07-01): decompiled+
+          renamed final `FUN_800308d9`→`spurious_byte_after_type3_slot_memcpy_dest_stride_base`
+          (1B, HIGH, DATA-tier). Ghidra spurious 1B artifact adjacent to Pass 239
+          type-3 memcpy dest base; xref=0. **Region sweep complete — 0 unnamed remain**;
+          live named 2166.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 290;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80050000 — Pass 54ax: fresh
+          ColdTriageRegion80050000Pass54 re-rank; decompile+rename next xrefs=0
+          tier rank-1 (6 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

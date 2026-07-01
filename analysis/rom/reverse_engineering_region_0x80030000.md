@@ -8934,5 +8934,28 @@ siblings.
 Region unnamed count after this pass: **1** (2 minus this rename). Live named
 **2165** global.
 
-**Next:** Pass 290 — fresh `ListUnnamed80030000` re-rank; decompile+rename final
-remaining unnamed function (`FUN_800308d9`, 1B).
+**Next:** superseded by Pass 290.
+
+## Pass 290 (2026-07-01) — spurious byte after type-3 memcpy dest base `FUN_800308d9`
+
+Fresh `ListUnnamed80030000.java` re-run: **1 unnamed** remains in region
+(unchanged from Pass 289; sole survivor is `FUN_800308d9` at 1B, xref_in=0).
+
+Decompiled and renamed final cold-triage target:
+**`FUN_800308d9` → `spurious_byte_after_type3_slot_memcpy_dest_stride_base`**
+(1B, HIGH, DATA-tier) via
+`RenamePass290Region80030000Fun800308d9.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Ghidra-carved 1-byte symbol immediately after Pass 239's
+`resource_pool_chain_type3_slot_memcpy_dest_stride_base` at `0x800308d8` in the
+type-3 resource-pool chain slot memcpy cluster. Not executable code (decompile
+shows `halt_baddata`); no xrefs. Likely misidentified code/data boundary artifact
+from the adjacent address-arithmetic base symbol rather than a distinct function.
+
+**Callers:** 0 xref-in.
+
+**Confidence:** HIGH — decompile confirms non-code; address placement unambiguous
+relative to Pass 239 sibling; zero xrefs consistent with analyzer artifact.
+
+Region unnamed count after this pass: **0** — **region sweep complete** for
+substantive unnamed functions. Live named **2166** global.
