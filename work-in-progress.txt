@@ -10844,8 +10844,15 @@ sweep beyond enumeration and is the most out-of-date):
           caller `LMP_encryption_opcode_handlers`; 134 unnamed remain; live named 1787.
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (178)
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (179): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (134 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (179) (2026-07-01):
+          decompiled+renamed `FUN_8002235c`→`advance_crypto_substate_0xf_on_role_switch_conn_complete`
+          (72B, HIGH) — role-switch conn-complete crypto armer: gates sub-states 0x00/0x03/0x0b,
+          advances via `FUN_80023fb8(_,0xf)`; caller role-switch `send_evt_HCI_Connection_Complete`;
+          133 unnamed remain; live named 1788.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (179)
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (180): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (133 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

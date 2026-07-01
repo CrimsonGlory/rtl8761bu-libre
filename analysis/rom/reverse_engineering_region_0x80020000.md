@@ -6137,4 +6137,33 @@ referenced by two already-HIGH sibling handlers in passes 66 and 115.
 
 Region unnamed count after this pass: **134** (135 minus this rename). Live named **1787** global.
 
+**Next:** superseded by Pass 6 continuation (179).
+
+## Pass 6 continuation (179) (2026-07-01) — role-switch conn-complete crypto armer `FUN_8002235c`
+
+Decompiled and renamed:
+**`FUN_8002235c` → `advance_crypto_substate_0xf_on_role_switch_conn_complete`**
+(72B, HIGH) via `RenamePass6Region80020000Fun8002235c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (72B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=134` at pass start). First-listed in the
+72B/xref_in=1 tier (sibling `FUN_80027ae0` renamed in Pass 6 cont. 178).
+
+**Mechanism:** Role-switch/secondary-record path crypto armer called from the
+role-switch-aware `send_evt_HCI_Connection_Complete` variant at `0x8001d844` when
+`param_2==0`. Gates on per-connection `_x58_crypto_struct` sub-state byte `<0x0c` and
+bitmask `0x809` (states `0x00`, `0x03`, `0x0b`). When matched, advances crypto sub-state
+via `FUN_80023fb8(crypto,0xf)` then calls `FUN_80022328(conn_index)` — random-BD_ADDR
+feature-page gate that may dispatch `FUN_80024540` when `bdaddr_random_` set and feature
+bit armed.
+
+**Callers:** `send_evt_HCI_Connection_Complete` role-switch variant at `0x8001d844`
+(1 site); xref_in=1.
+
+**Confidence:** HIGH — decompile confirms tight gate + two documented callees; caller
+context already mapped in `region_0x80010000` as the bos-index bookkeeping path for
+HCI Connection Complete event 0x03.
+
+Region unnamed count after this pass: **133** (134 minus this rename). Live named **1788** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
