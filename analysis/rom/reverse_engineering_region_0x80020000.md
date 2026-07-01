@@ -5727,4 +5727,37 @@ and opcode case verified via `ListXrefsTo8002f95c.java`.
 
 Region unnamed count after this pass: **148** (149 minus this rename). Live named **1773** global.
 
+**Next:** superseded by Pass 6 continuation (165).
+
+## Pass 6 continuation (165) (2026-07-01) — LMP USE_SEMI_PERMANENT_KEY NOT ACCEPTED recovery `FUN_800296d0`
+
+Decompiled and renamed:
+**`FUN_800296d0` → `handle_lmp_use_semi_permanent_key_not_accepted`**
+(80B, HIGH) via `RenamePass6Region80020000Fun800296d0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (80B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=148` at pass start). Tied 80B cluster
+with `FUN_8002f95c` (renamed Pass 164); first-listed `FUN_800296d0`.
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcode **0x32**
+(LMP USE_SEMI_PERMANENT_KEY). Sole caller `LMP_NOT_ACCEPTED_0x04` when
+rejected-opcode byte at `param+5` is `0x32`. Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. When link-key-type byte at crypto `+1`
+is `0x20` (semi-permanent key), and role gate passes (`FUN_8002403c` unless global
+bypass `PTR_DAT_80029724[2]&0x80`), invokes
+`start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+with rejected-payload byte at `param+6`.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x80028256`, rejected-opcode
+`0x32` branch).
+
+**Confidence:** HIGH — decompile confirms NOT-ACCEPTED recovery idiom matching
+documented siblings (`handle_lmp_temp_rand_or_temp_encrypt_not_accepted`,
+`handle_lmp_encryption_mode_req_not_accepted`); sole caller is established
+`LMP_NOT_ACCEPTED_0x04` dispatcher; link-key-type `0x20` gate aligns with
+`LMP_USE_SEMI_PERMANENT_KEY_0x32` / `arm_master_link_key_phase1_slot_lmp_0x32`
+cluster.
+
+Region unnamed count after this pass: **147** (148 minus this rename). Live named **1774** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
