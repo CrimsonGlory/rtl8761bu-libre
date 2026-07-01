@@ -7836,4 +7836,33 @@ connection-slot init path.
 
 Region unnamed count after this pass: **77** (78 minus this rename). Live named **1844** global.
 
+**Next:** superseded by Pass 6 continuation (236).
+
+## Pass 6 continuation (236) (2026-07-01) — LC TX subcase-3 relay `FUN_8002ee54`
+
+Decompiled and renamed:
+**`FUN_8002ee54` → `relay_lc_tx_subcase3_hci_evt_0x454_and_completed_packets`**
+(44B, HIGH) via `RenamePass6Region80020000Fun8002ee54.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=77` at pass start). Selected first by
+list order in the `0x8002eexx` LC TX logger-hook cluster; structural twin of still-unnamed
+`FUN_8002ef18` (subcase-2, 42B, xref_in=2).
+
+**Mechanism:** LC TX logger-hook subcase-3 relay when global mode byte `field_0x179==1`.
+Three-step thin wrapper: (1) `clone_hci_evt_buffer_and_dispatch_hci_evt_0x454_logger_hook`
+(tag **0x454**), (2) `send_evt_HCI_Number_Of_Completed_Packets` with connection handle
+from `*param_1 >> 8 & 0xfff`, (3) secondary hook at `PTR_DAT_8002ee80` invoked as
+`(param_1, 3)`. Parallel to subcase-2 path through `FUN_8002ef18` → tag `0x453` /
+`PTR_DAT_8002ef44` / mode arg `2`.
+
+**Callers:** sole direct caller `dispatch_lc_tx_logger_hook_subcases_with_pending_queue`
+at `0x8002ef48` (subcase 3 arm when `field_0x179==1`; documented Pass 6 cont. 36).
+
+**Confidence:** HIGH — established LC TX subcase relay idiom with named callees and
+documented parent dispatcher; structural twin of Pass 6 cont. (81)'s `0x453` subcase-2
+path and Pass 6 cont. (134)'s `0x454` buffer-clone callee.
+
+Region unnamed count after this pass: **76** (77 minus this rename). Live named **1845** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
