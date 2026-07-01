@@ -4940,5 +4940,36 @@ feature-page staging cluster at `0x800305xx`.
 Region unnamed count after this pass: **130** (131 minus this rename). Live named
 **2036** global.
 
-**Next:** Pass 161 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 161.
+
+## Pass 161 (2026-07-01) — ring-buffer append `FUN_80032e40`
+
+Fresh `ListUnnamed80030000.java` re-run: **130 unnamed** remain in region
+(unchanged from Pass 160; rank-1 at xref=1 tier is `FUN_80032e40` at 128B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80032e40` → `irq_safe_append_bytes_to_2048b_ring_buffer`**
+(128B, HIGH, UTILITY-tier) via
+`RenamePass161Region80030000Fun80032e40.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked append to the global ring buffer at `PTR_DAT_80032ec0`.
+Capacity gate: rejects when `param_2` bytes would exceed `0x800` minus fill count
+at struct offset `+0x804` (returns `0`). On success: advances write index at
+`+0x802` (masked `0x7ff`), increments fill count, copies `param_2` bytes from
+`param_1` into the ring at `base[write_idx++]` modulo `0x800`; returns `1`.
+Sibling of initializer `called_by_function_that_uses_Logger_string_2_initialize_something_at_offset_0x800` (`0x80032e28`) which zeroes the same struct's
+`+0x800`/`+0x802`/`+0x804` metadata fields.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch (known pattern).
+
+**Confidence:** HIGH — full 128B decompile; capacity/index/fill-count semantics
+match 2048-byte ring buffer; IRQ disable/enable idiom consistent with
+`irq_safe_dequeue_16byte_from_packet_slot_ring_buffer` family.
+
+Region unnamed count after this pass: **129** (130 minus this rename). Live named
+**2037** global.
+
+**Next:** Pass 162 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
