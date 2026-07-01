@@ -9987,4 +9987,33 @@ documented link-key-type phase-dword idiom elsewhere in region).
 
 Region unnamed count after this pass: **2** (3 minus this rename). Live named **1919** global.
 
-**Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
+**Next:** superseded by Pass 6 continuation (311).
+
+## Pass 6 continuation (311) (2026-07-01) — literal-pool constant getter `FUN_80021304`
+
+Decompiled and renamed:
+**`FUN_80021304` → `return_literal_0x2bf20_constant`**
+(6B, HIGH) via `RenamePass6Region80020000Fun80021304.java` (`renamed=1`, live-verified).
+
+**Triage note:** Both remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_80021304` (6B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=2` at pass start). Sits in the HCI event
+suppress-bypass / QoS timing cluster between Pass 6 cont. (308)'s
+`divide_literal_0x2bf20_by_param` at `0x80021290` and Pass 6 cont. (53)'s
+`validate_afh_host_channel_class_params_and_store_weight` at `0x80021310`.
+
+**Mechanism:** Returns literal-pool constant `0x2bf20` (180000 decimal) loaded from the
+PC-relative dword at `0x8002130c` immediately following the 6-byte function body. Orphan
+constant-getter thunk — same numerator constant as sibling `divide_literal_0x2bf20_by_param`
+(which divides it by a parameter), but this function returns the raw constant without
+arithmetic.
+
+**Callers:** none (xref_in=0; orphan literal-pool constant getter).
+
+**Confidence:** HIGH for mechanism (unambiguous literal-pool dword return); MEDIUM for role
+(orphan with no proven call sites, but constant value and cluster placement match adjacent
+HCI-event/QoS timing helpers).
+
+Region unnamed count after this pass: **1** (2 minus this rename). Live named **1920** global.
+
+**Next:** cold-triage last rank-1 unnamed `FUN_800269e4` (4B) per `ListUnnamed80020000.java`.
