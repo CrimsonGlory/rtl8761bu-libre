@@ -9817,4 +9817,32 @@ documented cold-init chain; completes the three-function crypto-global offset wr
 
 Region unnamed count after this pass: **8** (9 minus this rename). Live named **1913** global.
 
+**Next:** superseded by Pass 6 continuation (305).
+
+## Pass 6 continuation (305) (2026-07-01) — LMP encryption handler ack stub `FUN_8002410c`
+
+Decompiled and renamed:
+**`FUN_8002410c` → `set_lmp_encryption_handler_ack_flag_one`**
+(6B, HIGH) via `RenamePass6Region80020000Fun8002410c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0), `FUN_8002963c` (22B,
+xref_in=0), `FUN_80021290` (12B, xref_in=0), and `FUN_8002adac` (10B, xref_in=0) per
+established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_8002410c` (6B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=8` at pass start).
+
+**Mechanism:** Minimal LMP encryption-dispatch handler stub in the `0x800241xx` cluster.
+Ignores `param_1`/`param_2`, sets ack/out-flag byte `*param_3 = 1`, and returns —
+the same ack-flag idiom used by full encryption/pairing handlers (e.g. Pass 6 cont. 115's
+`*param_3 = 1` on stop-encryption paths). Likely a no-op/default handler slot that always
+acks without side effects.
+
+**Callers:** `LMP_encryption_opcode_handlers` (1 site, xref_in=1, confirmed via
+`find_callers`).
+
+**Confidence:** HIGH — decompile is unambiguous single-byte store; single caller is the
+documented encryption opcode dispatcher.
+
+Region unnamed count after this pass: **7** (8 minus this rename). Live named **1914** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
