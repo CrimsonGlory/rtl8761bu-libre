@@ -14100,7 +14100,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 257;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 258: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 258 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80039128`→`config_gated_select_packet_type_for_hw_translator_4link`
+          (68B, HIGH, HANDLER-tier). Config-gated packet-type arg selector:
+          when `field620_0x278` bit 2 clear, alt struct `PTR_DAT_80039170`
+          (+1 bit0 → byte +0x27, else 0); when bit 2 set, config `+0x27a`/`+0x27b`;
+          delegates to `packet_type_to_hw_code_translator_4link`; `0x800391xx`
+          cluster; xref=0. 32 unnamed remain; live named 2134.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 258;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 259: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

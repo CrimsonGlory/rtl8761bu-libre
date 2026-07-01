@@ -8011,5 +8011,33 @@ provider pattern, and sibling noop-stub default unambiguous.
 Region unnamed count after this pass: **33** (34 minus this rename). Live named
 **2133** global.
 
-**Next:** Pass 258 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 258.
+
+## Pass 258 (2026-07-01) — packet-type selector `FUN_80039128`
+
+Fresh `ListUnnamed80030000.java` re-run: **33 unnamed** remain in region
+(unchanged from Pass 257; xref_in=0 tier dominates — rank-1 is `FUN_80039128`
+at 68B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039128` → `config_gated_select_packet_type_for_hw_translator_4link`**
+(68B, HIGH, HANDLER-tier) via
+`RenamePass258Region80030000Fun80039128.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-gated packet-type arg selector in the `0x800391xx`
+cluster (upstream of `packet_type_to_hw_code_translator_4link`). When
+`config_base->field620_0x278` bit 2 is clear, reads alt struct at
+`PTR_DAT_80039170`: if `+1` bit 0 set, uses byte at `+0x27` as short arg,
+else zero. When bit 2 set, uses config fields `+0x27a`/`+0x27b` as short arg.
+Always delegates to `packet_type_to_hw_code_translator_4link(sVar3)`.
+
+**Callers:** 0 xref-in (consistent with indirect config/BB-init dispatch).
+
+**Confidence:** HIGH — full 68B decompile; dual-source selection gated on
+config bit 2, sole callee `packet_type_to_hw_code_translator_4link` unambiguous.
+
+Region unnamed count after this pass: **32** (33 minus this rename). Live named
+**2134** global.
+
+**Next:** Pass 259 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
