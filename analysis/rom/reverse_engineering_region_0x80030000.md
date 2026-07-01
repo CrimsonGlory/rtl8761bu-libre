@@ -5622,5 +5622,35 @@ context global reference confirmed.
 Region unnamed count after this pass: **109** (110 minus this rename). Live named
 **2057** global.
 
-**Next:** Pass 182 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 182.
+
+## Pass 182 (2026-07-01) — crypto-teardown conn slot clear `FUN_80037804`
+
+Fresh `ListUnnamed80030000.java` re-run: **109 unnamed** remain in region
+(unchanged from Pass 181; rank-1 at xref=1 tier is `FUN_80037804` at 80B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037804` → `clear_conn_pending_lmp_0x50_and_pdu_on_crypto_teardown`**
+(80B, HIGH, UTILITY-tier) via
+`RenamePass182Region80030000Fun80037804.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection-slot (`param_1 & 0xffff`) partial LMP-state scrub on
+`PTR_big_ol_struct_80037854[slot]`. When `int_0x50 != -1` (pending LMP procedure
+linked), logs via `possible_logger_called_if_no_patch3` with opcode `0x25b`, then
+sets `int_0x50 = -1`. Always clears LMP PDU buffer bytes `field_0x212` and
+`field_0x215` to zero. Subset of the fuller
+`clear_connection_slot_lmp_pdu_and_pending_fields` scrub (region `0x80020000`).
+
+**Callers:** 1 xref-in — `encryption_key_teardown_notifier` at `0x800029a4`
+(paired with `role_switch_commit_staged_slot_transition` per Pass 122).
+
+**Confidence:** HIGH — full 80B decompile; field offsets match documented
+`big_ol_struct` LMP PDU/pending cluster; caller path matches encryption-key
+teardown triplet in region `0x80000000`.
+
+Region unnamed count after this pass: **108** (109 minus this rename). Live named
+**2058** global.
+
+**Next:** Pass 183 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
