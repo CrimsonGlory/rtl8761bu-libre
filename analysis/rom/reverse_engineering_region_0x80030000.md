@@ -6300,5 +6300,34 @@ merge at bits 1-3 unambiguous; caller config-gate pattern matches Pass 199's
 Region unnamed count after this pass: **88** (89 minus this rename). Live named
 **2078** global.
 
-**Next:** Pass 203 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 203.
+
+## Pass 203 (2026-07-01) — config latch `FUN_80033630`
+
+Fresh `ListUnnamed80030000.java` re-run: **88 unnamed** remain in region
+(unchanged from Pass 202; rank-1 by size at xref=1 tier is `FUN_80033630` at
+54B — wins on size over tied 52B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033630` → `latch_config_bit0x164_8_when_global_status_bit13_set`**
+(54B, HIGH, SIMPLE-tier) via
+`RenamePass203Region80030000Fun80033630.java` (`renamed=1`, live-verified).
+
+**Mechanism:** One-shot latch on config `PTR_DAT_80033668+0x164` bit `0x8`: when
+that latch bit is clear, tests global status dword at `DAT_8003366c` for bit 13
+(`>>8 & 0x20`); when set, ORs `0x8000` (bit 15) into the global and sets
+config `+0x164` bit `0x8` to prevent re-entry. Connection-setup / TX-power
+cluster sibling of `check_calibration_mode_conn_weight_vs_config_threshold`
+(which gates on `+0x164` bit `0x10`).
+
+**Callers:** 1 xref-in — patch `FUN_80110ca4` @ `0x80110cbe` (COMPUTED_CALL via
+sub-installer #3 fn-ptr installed at `0x80120600-0x80121100`).
+
+**Confidence:** HIGH — full 54B decompile; latch bit, status bit 13, and
+`0x8000` set unambiguous; patch indirect-call xref confirmed.
+
+Region unnamed count after this pass: **87** (88 minus this rename). Live named
+**2079** global.
+
+**Next:** Pass 204 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
