@@ -8805,4 +8805,32 @@ from `reset_all_connection_crypto_slots_and_link_key_table` pass.
 
 Region unnamed count after this pass: **43** (44 minus this rename). Live named **1878** global.
 
+**Next:** superseded by Pass 6 continuation (270).
+
+## Pass 6 continuation (270) (2026-07-01) — cold-init global table clear `FUN_80021ea0`
+
+Decompiled and renamed:
+**`FUN_80021ea0` → `clear_fifteen_dword_global_table_at_boot`**
+(34B, HIGH) via `RenamePass6Region80020000Fun80021ea0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (34B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=43` at pass start). First-listed of
+the tied 34B/xref_in=1 cluster after Pass 6 cont. (269) renamed `FUN_8002572c`.
+
+**Mechanism:** BT-stack cold-init global table zeroing. Fifteen-iteration loop
+(`0`..`0xe`) clears four bytes at each `0x4`-stride index from base
+`PTR_DAT_80021ec4` (15 dwords / 60 bytes total). Invoked from `FUN_800681d8`
+(region `0x80060000`) immediately before
+`init_three_0x88_slot_tables_and_clear_crypto_globals` and
+`reset_all_connection_crypto_slots_and_link_key_table` in the documented
+cold-init chain.
+
+**Caller:** `FUN_800681d8` (xref_in=1, confirmed via `find_callers`).
+
+**Confidence:** HIGH — decompile confirms unambiguous 15×dword zero loop; single
+caller in documented BT cold-init orchestrator alongside sibling
+`init_three_0x88_slot_tables_and_clear_crypto_globals` (Pass 6 cont. 219).
+
+Region unnamed count after this pass: **42** (43 minus this rename). Live named **1879** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

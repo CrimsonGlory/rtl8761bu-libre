@@ -11653,8 +11653,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (269);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (270): cold-triage
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (270): cold-triage
           next rank-1 unnamed per `ListUnnamed80020000.java` (43 remain).
+          (2026-07-01) Decompiled+renamed `FUN_80021ea0`→
+          `clear_fifteen_dword_global_table_at_boot` (34B, HIGH) — BT cold-init
+          15×dword zero loop at `PTR_DAT_80021ec4`; caller `FUN_800681d8` before
+          slot-table bootstrap; 42 unnamed remain; live named 1879.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (270);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (271): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (42 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
