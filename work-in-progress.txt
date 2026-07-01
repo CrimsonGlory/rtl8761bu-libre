@@ -14559,8 +14559,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7q;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7r: cold-triage next rank-1
-          unnamed function in region `0x80010000` (241 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7r (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800131e4`→`apply_sco_esco_credit_slot_timing_and_active_bitmask`
+          (192B, HIGH). Per-slot (0–3) SCO/eSCO credit-scheduler timing entry
+          writer: 20B stride at `DAT_800132ac`, ms-scaled timing at +0, state
+          3/6 at +8, active bitmask at `PTR_DAT_800132b0`; 7 xref_in including
+          `guarded_trampoline_to_FUN_800131e4`. 240 unnamed remain; live named
+          2184.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7r;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7s: cold-triage next rank-1
+          unnamed function in region `0x80010000` (240 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

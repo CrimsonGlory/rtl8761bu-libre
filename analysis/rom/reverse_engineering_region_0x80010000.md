@@ -1192,4 +1192,32 @@ the pair; decompile confirms complementary mask/shift pattern.
 
 Region unnamed count after this pass: **241** (242 minus this rename).
 
-**Next:** Pass 7r — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7r (2026-07-01) — SCO/eSCO credit-slot timing `FUN_800131e4`
+
+Pass 7r target from cold-triage rank-1 (7 xref_in, 192B). Decompiled and renamed:
+**`FUN_800131e4` → `apply_sco_esco_credit_slot_timing_and_active_bitmask`**
+(192B, HIGH) via `RenamePass7rRegion80010000Fun800131e4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Per-slot (index 0–3) SCO/eSCO credit-scheduler timing entry
+writer in the `0x800132xx` cluster. 20-byte stride array at `DAT_800132ac`:
+offset `+0` receives ms-scaled timing
+`((ms%1000)*(scale/1000))/1000 + (ms/1000)*(scale/1000)` using global scale
+at `PTR_DAT_800132a8`; offset `+8` receives state code `3` (enable) or `6`
+(disable). Active-slot bitmask at `PTR_DAT_800132b0` sets/clears bit
+`(1 << slot_index)`. When enabling with `param_2==0`, logs and defaults to 1.
+Invalid slot index logs error. Sibling of `sco_esco_param_pingpong_queue_rotator`
+and the `sco_esco_slot_timing_offset_calc_variant*` family in region
+`0x80000000`.
+
+**Callers:** 7 xref_in including `guarded_trampoline_to_FUN_800131e4` (region
+`0x80000000` — fixed-arg `FUN_800131e4(2,1,1)` from
+`top_level_link_event_status_dispatcher_loop2` 2nd-status-word bits `1`/`2`).
+
+**Confidence:** HIGH — decompile confirms 4-slot stride layout, ms scaling,
+bitmask, and state codes; cross-region caller already documents fixed-arg
+trampoline semantics.
+
+Region unnamed count after this pass: **240** (241 minus this rename).
+
+**Next:** Pass 7s — cold-triage next rank-1 unnamed in region `0x80010000`.
