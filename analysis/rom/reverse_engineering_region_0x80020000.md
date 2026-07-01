@@ -4963,4 +4963,39 @@ crypto sub-state `0x33` aligns with SSP confirm HCI-reply cluster
 
 Region unnamed count after this pass: **173** (174 minus this rename). Live named **1748** global.
 
+**Next:** superseded by Pass 6 continuation (140).
+
+## Pass 6 continuation (140) (2026-07-01) — HCI Keypress Notification `FUN_80023b40`
+
+Decompiled and renamed:
+**`FUN_80023b40` → `fHCI_Keypress_Notification_0x60`**
+(96B, HIGH) via `RenamePass6Region80020000Fun80023b40.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (96B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=173` at pass start). Sole remaining
+96B entry after Pass 6 cont. (139)'s `FUN_800285cc`.
+
+**Mechanism:** HCI Keypress Notification handler (router opcode **0x0C60**,
+dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` case `0xc60`). Resolves
+connection handle via `FUN_80022ff4`; on failure returns Command Complete status
+`0x02` (Unknown Connection Identifier). On success gates on crypto sub-state byte
+`+1` in `{'1','5'}` (passkey-entry phases); otherwise status `0x0c` (Command
+Disallowed). Validates notification-type byte at `param_1+9 < 5` (BT-spec range
+0–4); on violation status `0x12` (Invalid HCI Command Parameters). Success path
+sends outbound LMP-ext **`0x7f`/`0x1e`** (Keypress Notification) via
+`FUN_800258c4(conn_index, notification_type, 2|3)` — outbound complement of
+inbound `handle_lmp_ext_subopcode_0x1e_keypress_notification_by_ssp_state`
+(Pass 6 cont. 98) which forwards peer keypress to host via
+`send_evt_HCI_Keypress_Notification`. Tail-calls
+`hci_ogf1_ogf3_shared_command_complete_event_sender`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (1 site, opcode `0x0C60` branch).
+
+**Confidence:** HIGH — router opcode `0x0C60` = HCI_Keypress_Notification per BT
+spec; notification-type range check + LMP-ext 0x7f/0x1e send idiom matches
+documented inbound keypress handler; crypto sub-state `{'1','5'}` aligns with SSP
+passkey-entry cluster (`fHCI_User_Passkey_Request_Reply_0x34` sub-state `'5'`).
+
+Region unnamed count after this pass: **172** (173 minus this rename). Live named **1749** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

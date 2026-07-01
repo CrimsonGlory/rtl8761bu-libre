@@ -10475,8 +10475,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (139);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (140): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (173 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (140): cold-triage
+          rank-1 `FUN_80023b40`→`fHCI_Keypress_Notification_0x60`
+          (96B, HIGH). HCI Keypress Notification 0x0C60: gates on crypto sub-state
+          `{'1','5'}`, sends LMP-ext 0x7f/0x1e; caller
+          `HCI_Write_Simple_Pairing_Debug_Mode`. 172 unnamed remain; live named 1749.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (140);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (141): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (172 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
