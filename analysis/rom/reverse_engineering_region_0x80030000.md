@@ -1371,5 +1371,32 @@ semantics; name persisted in Ghidra.
 Region unnamed count after this pass: **238** (239 minus this rename). Live named
 **1928** global.
 
-**Next:** Pass 53 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (`FUN_8003ce50`, 24B, 11 xref_in per Pass 52 list).
+**Next:** superseded by Pass 53.
+
+## Pass 53 (2026-07-01) — AFH cleanup orchestrator `FUN_8003ce50`
+
+Fresh `ListUnnamed80030000.java` re-run: **238 unnamed** remain in region
+(unchanged from Pass 52 pre-rename list; rank-1 was `FUN_8003ce50`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ce50` → `afh_cleanup_apply_lap_hopping_and_feature_orchestrator`**
+(24B, HIGH) via `RenamePass53Region80030000Fun8003ce50.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin 24B orchestrator: `apply_LAP_derived_hopping_params(param_1)`
+then `remote_name_request_feature_apply_orchestrator()`. Fired from patch
+periodic hook at AFH BB-reg poll counter==9 (see
+`reverse_engineering_protocol_dispatch_layer.md`); also called from
+`generic_status_field_get_set_dispatcher` field-ID `0x26` path.
+
+**Callers:** 11 xref_in (rank-1 by xref count at Pass 52 list time); includes
+patch literal pool `0x8010cc78` and ROM status-field dispatcher.
+
+**Confidence:** HIGH — fully decompiled 24B thin wrapper; both callees already
+HIGH-named; name persisted in Ghidra.
+
+Region unnamed count after this pass: **237** (238 minus this rename). Live named
+**1929** global.
+
+**Next:** Pass 54 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (`FUN_80034c5c`, 72B, 8 xref_in per Pass 53 list).

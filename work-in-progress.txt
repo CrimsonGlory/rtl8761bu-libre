@@ -12122,8 +12122,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 52;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 53: fresh ListUnnamed80030000
-          re-rank; decompile+rename top rank-1 unnamed function.
+[DONE]  Full RE: ROM region 0x80030000 — Pass 53 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (238 unnamed); decompiled+renamed rank-1
+          `FUN_8003ce50`→`afh_cleanup_apply_lap_hopping_and_feature_orchestrator`
+          (24B, HIGH). Thin AFH-poll cleanup: `apply_LAP_derived_hopping_params`
+          then `remote_name_request_feature_apply_orchestrator`; patch 9-step
+          counter + status-field 0x26 path. 237 unnamed remain; live named 1929.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 53;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 54: fresh ListUnnamed80030000
+          re-rank; decompile+rename top rank-1 unnamed function
+          (`FUN_80034c5c`, 72B, 8 xref_in per Pass 53 list).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
