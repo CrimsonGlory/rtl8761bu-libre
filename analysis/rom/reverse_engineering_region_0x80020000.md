@@ -6646,4 +6646,34 @@ Pass 6 cont. (57).
 
 Region unnamed count after this pass: **117** (118 minus this rename). Live named **1804** global.
 
+**Next:** superseded by Pass 6 continuation (196).
+
+## Pass 6 continuation (196) (2026-07-01) — codec template unscramble helper `FUN_800257b0`
+
+Decompiled and renamed:
+**`FUN_800257b0` → `copy_unscramble_two_independent_half_reversals`**
+(64B, HIGH) via `RenamePass6Region80020000Fun800257b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (64B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=117` at pass start).
+
+**Mechanism:** Factored-out implementation of the codec-JIT template un-scramble
+algorithm documented in `reverse_engineering_hardware_layer.md` §9 — copies
+`param_3*8` bytes from `param_1` into `param_2` as **two independent half-reversals**
+(half-length = `param_3*4`; e.g. `param_3==6` → 0x30-byte codec-6 block,
+`param_3==8` → 0x40-byte codec-8 block). Sibling
+`unscramble_codec_jit_template_and_install_hw_hook` inlines the same loops for
+per-connection JIT install; this helper is reused where a standalone copy suffices.
+
+**Callers:** `hci_stage_8byte_param_log_0x26f_send_cmd_status` at `0x80048994`
+(unscrambles 64 bytes from HCI params into `PTR_DAT_800489dc` with `param_3==8`);
+SSP pairing cluster at `0x800266d8` (unnamed parent fn). xref_in=2 via
+`ListXrefsTo800257b0.java`.
+
+**Confidence:** HIGH — decompile matches documented two-half-reversal pseudocode;
+caller decompile shows `param_3==8` for 0x40-byte transfer; neighborhood cluster
+with `unscramble_codec_jit_template_and_install_hw_hook` at `0x80025b68`.
+
+Region unnamed count after this pass: **116** (117 minus this rename). Live named **1805** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

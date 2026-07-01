@@ -10969,8 +10969,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (195);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (196): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (117 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (196) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800257b0`→`copy_unscramble_two_independent_half_reversals`
+          (64B, HIGH) — codec template two-half byte-reversal copy (`param_3*8` bytes;
+          e.g. `param_3==6`→0x30, `param_3==8`→0x40); factored helper matching
+          `hardware_layer` §9 algorithm; callers `hci_stage_8byte_param_log_0x26f_send_cmd_status`
+          + SSP cluster `0x800266d8`; xref_in=2; 116 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (196);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (197): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (116 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
