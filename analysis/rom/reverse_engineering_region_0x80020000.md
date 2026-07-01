@@ -5936,4 +5936,34 @@ is established patch-entry invocation chain documented in `reverse_engineering_b
 
 Region unnamed count after this pass: **141** (142 minus this rename). Live named **1780** global.
 
+**Next:** superseded by Pass 6 continuation (172).
+
+## Pass 6 continuation (172) (2026-07-01) — link-key-type slot finder `FUN_80029680`
+
+Decompiled and renamed:
+**`FUN_80029680` → `find_random_bdaddr_encrypted_link_slot_for_link_key_evt`**
+(74B, HIGH) via `RenamePass6Region80020000Fun80029680.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=141` at pass start). First-listed
+`FUN_80029680` in the 74B cluster.
+
+**Mechanism:** Scans up to 10 `big_ol_struct` slots for the first random-BD_ADDR
+(`bdaddr_random_ != 0`) connection in steady-state status `0x04`/`0x0f` whose crypto
+sub-state index `(crypto_byte - 0x15)` passes the `0xfbb` eligibility bitmask (same
+idiom as `start_hci_master_link_key_0x417_phase1_across_connections`). Returns slot
+index `0`–`9`, or `0xff` if none match.
+
+**Caller:** `wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` at `0x80029aee` — during
+state-machine phase `+0x48 == 1` temporary-link-key completion, when pending counters
+balance, advances to phase `2` and uses this scan result as the connection-handle
+argument to `send_evt_HCI_Link_Key_Type_Changed_0x0A(..., 0, 1)`. xref_in=1 via
+`ListXrefsTo80029680.java`.
+
+**Confidence:** HIGH — decompile confirms pure slot-index scanner with documented
+crypto-state bitmask; caller decompile shows direct use as HCI Link Key Type Changed
+handle during temporary-key transition.
+
+Region unnamed count after this pass: **140** (141 minus this rename). Live named **1781** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
