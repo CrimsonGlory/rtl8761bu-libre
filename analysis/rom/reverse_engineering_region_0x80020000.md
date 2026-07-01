@@ -7431,4 +7431,31 @@ callers pre-documented in Pass 6 cont. (63)/(153); complements
 
 Region unnamed count after this pass: **91** (92 minus this rename). Live named **1830** global.
 
+**Next:** superseded by Pass 6 continuation (222).
+
+## Pass 6 continuation (222) (2026-07-01) — three-slot handle lookup `FUN_8002ae14`
+
+Decompiled and renamed:
+**`FUN_8002ae14` → `lookup_three_slot_0x34_record_by_connection_handle`**
+(52B, HIGH) via `RenamePass6Region80020000Fun8002ae14.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=91` at pass start). First-listed at 52B
+tier (tied with `FUN_8002a234`); successor to Pass 6 cont. (221)'s `FUN_80024560`.
+
+**Mechanism:** Maps connection handle `param_1` to one of three per-handle records by
+matching ushorts at `PTR_DAT_8002ae48+0x18`/`+0x4c`/`+0x80` (standard 3-slot ×0x34 stride
+pattern shared with ACL/SCO enqueue and `lookup_conn_record_by_lt_addr`). Returns
+`PTR_DAT_8002ae4c + index×0x34` on match, NULL otherwise. Address-adjacent sibling of
+Pass 6 cont. (50)'s `drain_sco_per_handle_pending_descriptor_queue` at `0x8002ae50`.
+
+**Callers:** none resolved (xref_in=0) — likely indirect or inlined at call sites not yet
+linked in Ghidra.
+
+**Confidence:** HIGH — decompile confirms identical idiom to documented
+`lookup_conn_record_by_lt_addr` and SCO/ACL per-handle slot clusters; literal-pool
+pointers `PTR_DAT_8002ae48`/`PTR_DAT_8002ae4c` co-located with SCO descriptor cluster.
+
+Region unnamed count after this pass: **90** (91 minus this rename). Live named **1831** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
