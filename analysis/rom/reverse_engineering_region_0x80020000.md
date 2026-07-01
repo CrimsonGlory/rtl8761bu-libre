@@ -3681,4 +3681,40 @@ global `PTR_DAT_80029360[2]&0x80`:
 
 Region unnamed count after this pass: **214** (215 minus this rename). Live named **1707** global.
 
+**Next:** superseded by Pass 6 continuation (99).
+
+## Pass 6 continuation (99) (2026-07-01) — HCI User Passkey Reply `FUN_800237c8`
+
+Decompiled and renamed:
+**`FUN_800237c8` → `fHCI_User_Passkey_Request_Reply_0x34`**
+(128B, HIGH) via `RenamePass6Region80020000Fun800237c8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (128B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=214` at pass start). Sits in the
+`0x800237xx` SSP HCI-reply cluster alongside `fHCI_User_Confirmation_Request_Reply_0x33`
+(Pass 6 cont. 97).
+
+**Mechanism:** HCI User Passkey Request **Reply** handler (router opcode **0x0434**,
+OCF 0x34). Core SSP passkey-entry confirmation path reached via thin wrapper
+`FUN_8002384c` (conn-resolve via `FUN_80023008`) and directly from
+`many_sub_if_else_cases_on_param2` internal opcode **0x34**. Operates on per-connection
+`_x58_crypto_struct`:
+- No pending LMP at `+0x1e8`: if crypto sub-state `+1 == '5'` (0x35), advance to `0x36`
+  (`'6'`) via `set_arg1_1_to_arg2` and return (success path); else invoke
+  `FUN_8002587c(conn, crypto, 3)` (passkey verification / continuation).
+- Pending LMP opcode `0x3F` (Simple Pairing Confirm) → `wrap_send_LMP_NOT_ACCEPTED`.
+- Pending LMP-ext `0x7F`/`0x1C` → clear pending via `FUN_80025634`, then
+  `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)` (Authentication Failure).
+- Other pending opcodes: clear pending via `FUN_80025634` and return.
+
+**Callers:** `FUN_8002384c` at `0x80023864` (conn-resolve wrapper); `many_sub_if_else_cases_on_param2`
+at `0x80022f3e` (internal opcode `0x34`) — confirmed via `FindCallers800237c8.java`.
+
+**Confidence:** HIGH — router opcode `0x0434` = HCI_User_Passkey_Request_Reply; SSP
+sub-state advance `0x35`→`0x36` matches documented passkey-entry flow; callee cluster
+matches `wrap_send_LMP_NOT_ACCEPTED`, `FUN_80025634` pending-clear, and HCI SSP Complete
+auth-failure idiom; sibling of `fHCI_User_Confirmation_Request_Reply_0x33`.
+
+Region unnamed count after this pass: **213** (214 minus this rename). Live named **1708** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
