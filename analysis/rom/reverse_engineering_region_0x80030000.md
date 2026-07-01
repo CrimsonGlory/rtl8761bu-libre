@@ -6721,5 +6721,34 @@ script pairs unambiguous; register-script cluster sibling of Pass 135.
 Region unnamed count after this pass: **74** (75 minus this rename). Live named
 **2092** global.
 
-**Next:** Pass 217 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 217.
+
+## Pass 217 (2026-07-01) — calibration hook byte-offset loop `FUN_800399e4`
+
+Fresh `ListUnnamed80030000.java` re-run: **74 unnamed** remain in region
+(unchanged from Pass 216; rank-1 by size at xref=1 tier is `FUN_800399e4` at
+36B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800399e4` → `invoke_calibration_hook_for_byte_offsets_0_to_0x20`**
+(36B, HIGH, SIMPLE-tier) via `RenamePass217Region80030000Fun800399e4.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Thin calibration-table hook loop in the `0x800399xx` cluster:
+iterates byte offset `0..0x20` (33 iterations), each calling hook fptr at
+`PTR_PTR_80039a08` with argument `PTR_DAT_80039a0c + offset`. Sibling of
+`clamp_byte_offset_base_plus_adj_minus_product` (`0x80039920`, Pass 52) and
+`dispatch_be_u16_pairs_reverse_step2_from_buf_via_fptr_hook` (`0x80039974`,
+Pass 87) in the calibration-table cluster near `0x80039de4`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 36B decompile; loop bound `0x21` and per-offset hook
+invoke unambiguous; calibration-table cluster sibling of Pass 52/87.
+
+Region unnamed count after this pass: **73** (74 minus this rename). Live named
+**2093** global.
+
+**Next:** Pass 218 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
