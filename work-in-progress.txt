@@ -11830,8 +11830,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (288);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (289): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (24 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (289) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80021d8c`→`init_link_slot_0x24c_from_config_and_clear_0x24d`
+          (20B, HIGH) — per-link `big_ol_struct` slot init: clears `field_0x24d`, copies
+          config byte `PTR_DAT_800623e0[0x10]` to `field_0x24c` via `FUN_800623b8`;
+          caller `init_inquiry_page_state_from_config`; xref_in=1.
+          23 unnamed remain; live named 1898.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (289);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (290): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (23 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

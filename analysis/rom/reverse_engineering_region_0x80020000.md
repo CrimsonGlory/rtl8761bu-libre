@@ -9353,4 +9353,34 @@ return; caller decompile shows zero-check abort semantics in ACL fragment assemb
 
 Region unnamed count after this pass: **24** (25 minus this rename). Live named **1897** global.
 
+**Next:** superseded by Pass 6 continuation (289).
+
+## Pass 6 continuation (289) (2026-07-01) — per-link slot field init `FUN_80021d8c`
+
+Decompiled and renamed:
+**`FUN_80021d8c` → `init_link_slot_0x24c_from_config_and_clear_0x24d`**
+(20B, HIGH) via `RenamePass6Region80020000Fun80021d8c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_80021d8c` (20B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=24` at pass start). Thin ROM wrapper in
+the `0x80021dxx` LC-global init cluster; callee body lives at `FUN_800623b8` (region
+`0x80060000`).
+
+**Mechanism:** Per-connection `big_ol_struct` slot initializer (indexed by link-slot id):
+clears `field_0x24d=0` and copies config byte `PTR_DAT_800623e0[0x10]` into
+`field_0x24c`. ROM wrapper tail-calls `FUN_800623b8(param_1)` — same field offsets
+documented in region `0x80060000` for per-link descriptor state.
+
+**Callers:** `init_inquiry_page_state_from_config` at `0x800679dc` — unconditional call
+during inquiry/page cold-init sequence alongside siblings `FUN_80021da0`/`FUN_80021d00`;
+xref_in=1 per `ListXrefsTo80021d8c.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous single-callee wrapper; callee
+decompile shows clear per-slot field writes; caller matches documented inquiry/page
+cold-init cluster.
+
+Region unnamed count after this pass: **23** (24 minus this rename). Live named **1898** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
