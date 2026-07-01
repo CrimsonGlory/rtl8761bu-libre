@@ -3533,7 +3533,8 @@ only re-arms `+0x85`; otherwise marks `+0x81=1`, clears queue/timing fields
 `PTR_DAT_8003ec1c` set, calls
 `clear_active_stride88_connection_buffers_and_drain_hci_cmds`. Timing path:
 if `+0x38==0`, reads HW clock via `read_hw_clock_raw_dword_by_role_index` and
-updates `+0x30` with wrap-aware slot arithmetic; else `FUN_8003e58c`. Gated on
+updates `+0x30` with wrap-aware slot arithmetic; else
+`poll_hw_clock_stride88_slot_and_acl_credit_consumer`. Gated on
 connection type `+0x18`, `bdaddr_random_`, and config `field208_0xd8` bit5,
 computes packet-type bitfields from per-slot ushort/byte fields and dispatches
 via hook fptr `PTR_DAT_8003ec38` (public vs random-BD_ADDR table paths through
@@ -4525,3 +4526,40 @@ params and calls `FUN_80012820(1, timeout)`; sets state `2`.
 
 Region unnamed count after this pass: **142** (143 minus this rename). Live named
 **2024** global.
+
+**Next:** Pass 150 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
+
+## Pass 149 (2026-07-01) — HW-clock ACL credit poll `FUN_8003e58c`
+
+Fresh `ListUnnamed80030000.java` re-run: **142 unnamed** remain in region
+(unchanged from Pass 148; rank-1 at xref=1 tier is `FUN_8003e58c` at 168B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e58c` → `poll_hw_clock_stride88_slot_and_acl_credit_consumer`**
+(168B, HIGH, HANDLER-tier) via
+`RenamePass149Region80030000Fun8003e58c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-role HW-clock polling loop on the stride-0x88 connection
+table (`PTR_DAT_8003e634`). Reads raw clock via
+`read_hw_clock_raw_dword_by_role_index` using the role's `big_ol_struct` byte
+at slot offset `+6`. Compares wrap-aware slot delta against dword at `+0x30`
+(masked by `DAT_8003e640`/`DAT_8003e644`). When connection type `+0x18==0` and
+pending counter `+0x38!=0`, calls
+`ACL_fragment_dequeue_and_credit_consumer(role, credit_flag)`; otherwise
+advances `+0x30` slot timing by byte credit at `+0xc`. Returns `true` when
+dequeue/credit path fails (local success flag cleared).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — timing-path callee of
+`connection_setup_arm_stride88_slot_and_apply_packet_types` when slot `+0x38`
+nonzero (Pass 119 notes: alternative to inline clock read when pending credits
+exist).
+
+**Confidence:** HIGH — full 168B decompile; stride-0x88 offsets match Pass 8
+ACL fragment cluster; callee pairing with
+`ACL_fragment_dequeue_and_credit_consumer` and
+`read_hw_clock_raw_dword_by_role_index` confirmed.
+
+Region unnamed count after this pass: **141** (142 minus this rename). Live named
+**2025** global.
