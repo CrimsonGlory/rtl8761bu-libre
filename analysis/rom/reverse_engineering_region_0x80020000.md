@@ -4748,4 +4748,36 @@ SSP cluster.
 
 Region unnamed count after this pass: **180** (181 minus this rename). Live named **1741** global.
 
+**Next:** superseded by Pass 6 continuation (133).
+
+## Pass 6 continuation (133) (2026-07-01) — HCI conn-resolve wrapper `FUN_80023008`
+
+Decompiled and renamed:
+**`FUN_80023008` → `hci_resolve_conn_record_validate_and_complete`**
+(98B, HIGH) via `RenamePass6Region80020000Fun80023008.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (98B, xref_in=13) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=180` at pass start). Highest xref_in
+among tied 98B candidates; selected first by list order.
+
+**Mechanism:** Shared HCI command preamble for OGF1/OGF3 handlers that need a
+per-connection record. Resolves connection handle via `FUN_80022ff4` into conn index
+(`param_4`); on failure sets index `0xff` and status `0x02`. On success indexes
+`PTR_big_ol_struct_8002306c`, returns record pointer in `param_5`, and runs caller-
+supplied crypto-state validator `param_2` on `_x58_crypto_struct`. Optional second
+validator `param_3` (when non-null) gates on command buffer; failure yields status
+`0x12`. Validator failure returns `0x0c`. Always tail-calls
+`hci_ogf1_ogf3_shared_command_complete_event_sender(param_1, status, conn_index)`.
+
+**Callers (13 xref_in):** documented HCI command bodies including
+`HCI_Write_Simple_Pairing_Debug_Mode`, `fHCI_PIN_Code_Request_Reply_0xd`,
+`fHCI_Remote_OOB_Data_Request_Negative_Reply_0x2e`, `many_sub_if_else_cases_on_param2`,
+and thin wrappers `FUN_8002384c`/`FUN_800239cc`.
+
+**Confidence:** HIGH — decompile confirms established conn-resolve + validator +
+Command-Complete idiom; 13 callers across documented SSP/link-key HCI handler cluster;
+sibling of Pass 6 cont. (5)'s `hci_ogf1_ogf3_shared_command_complete_event_sender`.
+
+Region unnamed count after this pass: **179** (180 minus this rename). Live named **1742** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
