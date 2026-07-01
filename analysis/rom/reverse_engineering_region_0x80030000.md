@@ -5934,5 +5934,38 @@ already HIGH-named; sole xref confirmed via `ListXrefsTo8003a5ec`.
 Region unnamed count after this pass: **99** (100 minus this rename). Live named
 **2067** global.
 
-**Next:** Pass 192 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 192.
+
+## Pass 192 (2026-07-01) — link-state advance clear + slot-timing commit `FUN_800378e4`
+
+Fresh `ListUnnamed80030000.java` re-run: **99 unnamed** remain in region
+(unchanged from Pass 191; rank-1 by size at xref=1 tier is `FUN_800378e4` at
+68B — tied with two 68B siblings, first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800378e4` → `clear_link_state_advance_pending_and_commit_conn_slot_timing_mode2`**
+(68B, HIGH, HANDLER-tier) via
+`RenamePass192Region80030000Fun800378e4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-conn-index `big_ol_struct` link-state advance teardown on
+`field_0x29d`. When `field_0x29d == 1`: clears flag to 0, calls
+`FUN_800143b0(bos_connection__array_index, byte_0xCC, 1)` (IRQ-masked HW-channel
+table merge), then
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types(param_1, 2)` (mode-2
+link-state-advance commit path). Complement of sibling `FUN_8003792c` which arms
+`field_0x29d` from 0→1 and commits with mode 1 (establish).
+
+**Callers:** 1 xref-in — `LC_event_RX_dispatcher` at `0x80042188` (LC RX event
+dispatch cluster; documented in Pass 2 region `0x80040000`).
+
+**Confidence:** HIGH — full 68B decompile; `field_0x29d` semantics match Pass
+104/126/127 link-state-advance cluster; named callee
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types` (Pass 74) anchors
+mode-2 commit; complement pair with `FUN_8003792c` confirms establish/teardown
+symmetry.
+
+Region unnamed count after this pass: **98** (99 minus this rename). Live named
+**2068** global.
+
+**Next:** Pass 193 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
