@@ -7603,4 +7603,33 @@ pattern; caller decompile shows role as crypto-slot tail of multi-offset LMP swe
 
 Region unnamed count after this pass: **85** (86 minus this rename). Live named **1836** global.
 
+**Next:** superseded by Pass 6 continuation (228).
+
+## Pass 6 continuation (228) (2026-07-01) — random-BD_ADDR LMP 0x3A gateway `FUN_80022328`
+
+Decompiled and renamed:
+**`FUN_80022328` → `on_random_bdaddr_send_lmp_0x3a_if_feature_page_bit_armed`**
+(48B, HIGH) via `RenamePass6Region80020000Fun80022328.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=85` at pass start). First-listed at 48B
+tier; successor to Pass 6 cont. (227)'s `invoke_lmp_0x25b_from_crypto_pending_slot_if_active`.
+
+**Mechanism:** Random-BD_ADDR feature-page gate on `big_ol_struct[slot]`: when
+`bdaddr_random_ != 0` and extended-features page byte `_xe3_features_pages_array_0_[2]`
+has bit 7 set (`< 0` signed), calls `FUN_80024540` which sends outbound LMP Encryption
+Key Size Mask REQ (opcode **0x3A**, 2-byte PDU) via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`. Same feature-page gate idiom as
+`LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` (`0x80027f80`); send-side pair of
+`send_lmp_encryption_key_size_mask_res_0x3b_from_config` (Pass 6 cont. 185).
+
+**Callers:** `advance_crypto_substate_0xf_on_role_switch_conn_complete` (`0x8002235c`) —
+role-switch conn-complete crypto armer tail after `FUN_80023fb8(crypto,0xf)`; xref_in=1
+(documented in Pass 6 cont. 179).
+
+**Confidence:** HIGH — decompile confirms established random-BD_ADDR + feature-bit gate
+pattern; callee `FUN_80024540` decompile confirms LMP 0x3A send; caller already named.
+
+Region unnamed count after this pass: **84** (85 minus this rename). Live named **1837** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
