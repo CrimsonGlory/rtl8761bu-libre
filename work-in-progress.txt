@@ -10851,8 +10851,15 @@ sweep beyond enumeration and is the most out-of-date):
           133 unnamed remain; live named 1788.
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (179)
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (180): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (133 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (180) (2026-07-01):
+          decompiled+renamed `FUN_80025980`→`send_lmp_simple_pairing_number_from_crypto_0xe8`
+          (70B, HIGH) — outbound LMP 0x40 sender: copies 16B from crypto `+0xe8`,
+          byte-swaps, sends via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`;
+          xref_in=10; 132 unnamed remain; live named 1789.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (180)
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (181): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (132 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

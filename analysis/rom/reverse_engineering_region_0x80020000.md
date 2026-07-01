@@ -6166,4 +6166,31 @@ HCI Connection Complete event 0x03.
 
 Region unnamed count after this pass: **133** (134 minus this rename). Live named **1788** global.
 
+**Next:** superseded by Pass 6 continuation (180).
+
+## Pass 6 continuation (180) (2026-07-01) — SSP number sender `FUN_80025980`
+
+Decompiled and renamed:
+**`FUN_80025980` → `send_lmp_simple_pairing_number_from_crypto_0xe8`**
+(70B, HIGH) via `RenamePass6Region80020000Fun80025980.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (70B, xref_in=10) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=133` at pass start).
+
+**Mechanism:** Outbound LMP Simple Pairing Number (opcode **0x40**) sender on the
+per-connection `_x58_crypto_struct` (`param_2`). Copies 16 bytes from crypto buffer
+`+0xe8`, byte-swaps via `swap_byte_order`, builds 18-byte LMP (`0x12` total) with
+opcode byte `0x40`, and transmits via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+Shared SSP pairing primitive used when the stack must emit the local random number
+during numeric-comparison, passkey, or OOB pairing continuations.
+
+**Callers:** xref_in=10; documented sites include `dispatch_ssp_remote_oob_data_request_hci`
+(master-without-OOB path), legacy OOB reply handler (`fHCI_Remote_OOB_Data_Request_Reply`
+opcode `0x430` branch), and post-verify LMP-0x40 accept continuations.
+
+**Confidence:** HIGH — decompile confirms opcode 0x40 + 16B crypto copy + central LMP
+send wrapper; prior passes already cited this address by role without decompiling it.
+
+Region unnamed count after this pass: **132** (133 minus this rename). Live named **1789** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
