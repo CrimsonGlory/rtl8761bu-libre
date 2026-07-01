@@ -1663,5 +1663,38 @@ confirmed via `apply_public_bdaddr_role_change_commit_hci_evt_sync` and
 Region unnamed count after this pass: **229** (230 minus this rename). Live named
 **1937** global.
 
-**Next:** Pass 62 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 62.
+
+## Pass 62 (2026-07-01) — LMP power/clock-adj eligibility gate `FUN_80033794`
+
+Fresh `ListUnnamed80030000.java` re-run: **229 unnamed** remain in region
+(unchanged from Pass 61; rank-1 by size at xref=5 tier is `FUN_80033794` at
+578B — previously decompiled/documented in Pass 7 but never Ghidra-renamed).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033794` → `gate_lmp_power_clk_adj_eligibility_by_conn_state`**
+(578B, HIGH) via `RenamePass62Region80030000Fun80033794.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** `bool gate(char param_1)` — optional patch-hook delegate via
+`PTR_DAT_800339d8` first; then multi-tier nested gate on config
+`field208_0xd8` bit5, `the_0x300` link-mode bytes (`field_0x179`/`field_0x17b`),
+`byte_0x16a` power-threshold compares, and `0x1ac` struct-array capability bits
+(`field40_0x28`/`field68_0x44`/`field407_0x1a4`/`field451_0x1d0`). Loops 10
+`big_ol_struct` slots rejecting any with status `0x02` + valid flag set.
+Gated on `config->_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit2. Returns
+true when LMP power/clock-adjust procedure is eligible.
+
+**Callers:** 5 xref-in incl. `dispatch_link_power_mode_by_status_bits_and_commit`
+(region `0x80050000` Pass 54ao); sibling of
+`LMP_power_and_clk_adj_procedure_orchestrator` (`0x80034ec4`).
+
+**Confidence:** HIGH — full 578B decompile (Pass 7 + Pass 62 re-verify);
+config field name `_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` confirms LMP
+power/clock-adj semantics; caller chain documented.
+
+Region unnamed count after this pass: **228** (229 minus this rename). Live named
+**1938** global.
+
+**Next:** Pass 63 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
