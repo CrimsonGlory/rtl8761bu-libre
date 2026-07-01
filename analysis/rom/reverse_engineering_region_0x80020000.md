@@ -2847,7 +2847,7 @@ routes overlapping but non-identical rejected-opcode recovery handlers.
 `param+5`:
 - `0x08` → `FUN_80027300` (IN_RAND alt recovery)
 - `0x0f` → `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
-- `0x10` → `FUN_80027ccc` (encryption key size req recovery)
+- `0x10` → `handle_lmp_encryption_key_size_req_not_accepted`
 - `0x11` → `FUN_80027b28` (start encryption recovery)
 - `0x12` → `FUN_80027b9c` (stop encryption recovery)
 - `0x32` → `FUN_80029784`
@@ -3974,5 +3974,37 @@ and `lc_lmp_state_machine` docs; encrypted-link-type filter and callee chain ali
 sibling DHKey-check stall scanner (`0x80021fa0`); sole caller context confirmed.
 
 Region unnamed count after this pass: **205** (206 minus this rename). Live named **1716** global.
+
+**Next:** superseded by Pass 6 continuation (108).
+
+## Pass 6 continuation (108) (2026-07-01) — encryption key-size NOT ACCEPTED recovery `FUN_80027ccc`
+
+Decompiled and renamed:
+**`FUN_80027ccc` → `handle_lmp_encryption_key_size_req_not_accepted`**
+(118B, HIGH) via `RenamePass6Region80020000Fun80027ccc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (118B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=205` at pass start). Sibling in the
+`0x80027cxx` LMP NOT ACCEPTED alt-recovery cluster — complements
+`handle_lmp_stop_encryption_req_not_accepted` (`0x80027b9c`) and start-encryption
+recovery at `0x80027b28`.
+
+**Mechanism:** LMP ENCRYPTION KEY SIZE REQ (opcode 0x10) NOT ACCEPTED recovery handler.
+Per-connection `big_ol_struct[slot]` lookup; role-gated via
+`ret_bool_based_on_crypto_struct_0x50` vs LMP message bit `param_1+4 & 1`, with global
+flag `PTR_DAT_80027d48[2] & 0x80` bypass. When crypto sub-state `+1 == 'J'` and gate
+passes: if `bdaddr_random_ == 0` advances sub-state via `set_arg1_1_to_arg2(_, 0x49)`;
+else calls `program_encryption_key_and_send_lmp_start_encryption_req` then advances via
+`set_arg1_1_to_arg2(_, 0x4b)`.
+
+**Callers:** `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` (rejected
+opcode `0x10` path) — xref_in=1.
+
+**Confidence:** HIGH — decompile confirms established NOT ACCEPTED recovery idiom;
+callees `program_encryption_key_and_send_lmp_start_encryption_req` and
+`set_arg1_1_to_arg2` already HIGH; sits in documented alt-dispatch table at rejected
+opcode `0x10`.
+
+Region unnamed count after this pass: **204** (205 minus this rename). Live named **1717** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
