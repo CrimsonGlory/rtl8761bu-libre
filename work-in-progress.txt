@@ -12102,7 +12102,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 50;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 51: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 51 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (240 unnamed); decompiled+renamed rank-1
+          `FUN_8003aea0`→`register_script_interpreter` (688B, HIGH, 16 xref-in)
+          — 16-opcode byte-code VM for hardware register-config scripts; top-
+          nibble dispatch to BB register r/w primitives, spin-delay `0xA`/`0xB`,
+          poll-wait `0xC`/`0xD`/`0xE`, write-mask `0xF`; 16 callers incl. patch
+          entry. Region 239 unnamed remain; live named 1927.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 51;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 52: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

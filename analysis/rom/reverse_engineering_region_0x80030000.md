@@ -1311,5 +1311,38 @@ timing confirmed live in interpreter decompile; name pre-exists and resolves.
 
 Region unnamed count unchanged: **240**. Live named **1926** global (no rename).
 
-**Next:** Pass 51 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function.
+**Next:** superseded by Pass 51.
+
+## Pass 51 (2026-07-01) — register-script interpreter `FUN_8003aea0`
+
+Fresh `ListUnnamed80030000.java` re-run: **240 unnamed** remain in region
+(unchanged from Pass 48–50 cross-region passes).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003aea0` → `register_script_interpreter`**
+(688B, HIGH) via `RenamePass51Region80030000Fun8003aea0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** 16-opcode byte-code VM for hardware register-config scripts.
+Walks `(opcode, data)` halfword pairs from `param_1` for `param_2` entries
+(stepping by 2). Top-nibble opcode dispatch:
+- `0x0`/`0x1`/`0x2`/`0x3`/`0x4`/`0x5`/`0x6`/`0x7`/`0x8`/`0x9` — indexed
+  BB register read/write and RAM table update via hook fptrs at
+  `PTR_DAT_8003b150`–`PTR_DAT_8003b160` and globals `DAT_8003b164`–`DAT_8003b16c`
+- `0xA` — `spin_delay_10x_iterations(data)` (Pass 49)
+- `0xB` — `spin_delay_10000x_iterations(data)` (Pass 50)
+- `0xC`/`0xD`/`0xE` — poll-wait loops with `spin_delay_10000x_iterations(1)`
+  retry ticks
+- `0xF` — sets running write-mask for subsequent masked ops
+
+**Callers:** 16 xref_in (rank-1 by xref count); includes patch entry installer
+region and ROM init paths — see `reverse_engineering_register_script_interpreter.md`.
+
+**Confidence:** HIGH — fully decompiled 688B VM; extensively cross-referenced
+in Passes 45–50; dedicated analysis doc exists; name persisted in Ghidra.
+
+Region unnamed count after this pass: **239** (240 minus this rename). Live named
+**1927** global.
+
+**Next:** Pass 52 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function (`FUN_80039920`, 78B, 12 xref_in per Pass 51 list).
