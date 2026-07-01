@@ -8844,5 +8844,34 @@ cluster placement matches documented parallel-slot-table siblings.
 Region unnamed count after this pass: **4** (5 minus this rename). Live named
 **2162** global.
 
-**Next:** Pass 287 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 287.
+
+## Pass 287 (2026-07-01) — unsniff/codec-slot gap noop stub `FUN_80033d2c`
+
+Fresh `ListUnnamed80030000.java` re-run: **4 unnamed** remain in region
+(unchanged from Pass 286; xref_in=0 tier dominates — rank-1 is `FUN_80033d2c`
+at 4B, tied with `FUN_80033d24`/`FUN_80033b10` at 4B; first-listed wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033d2c` → `noop_void_stub_unsniff_cleanup_to_codec_lower_triplet_gap_jr_ra`**
+(4B, HIGH, STUB-tier) via
+`RenamePass287Region80030000Fun80033d2c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e void return stub (`jr ra` + delay-slot
+`_nop`). Empty body decompiles to bare `return;`. Address-adjacent gap between
+`noop_unsniff_slave_cleanup_hook_jr_ra_stub` (`0x80033d28`, Pass 138) and
+`patch_three_bit_codec_slot_field_lower_triplet_via_hw_hook` (`0x80033d30`,
+Pass 57) in the `0x80033dxx` unsniff-cleanup / codec-slot hook cluster.
+Likely optional fptr-table placeholder or alignment padding between the unsniff
+pre-send cleanup hook and the lower-triplet codec nibble patcher.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — trivial 4B decompile; empty void body unambiguous;
+cluster placement matches documented unsniff/codec-slot siblings.
+
+Region unnamed count after this pass: **3** (4 minus this rename). Live named
+**2163** global.
+
+**Next:** Pass 288 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
