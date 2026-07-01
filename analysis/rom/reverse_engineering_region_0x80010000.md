@@ -1509,4 +1509,30 @@ validation, error logging, and caller usage for feature/status BB register reads
 
 Region unnamed count after this pass: **229** (230 minus this rename).
 
-**Next:** Pass 83 — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 83 (2026-07-01) — Conn status-byte OR via role remap `FUN_80017bac`
+
+Pass 83 target from cold-triage rank-1 (5 xref_in, 40B — sole remaining at
+xref=5 tier after Pass 82). Decompiled and renamed:
+**`FUN_80017bac` → `or_conn_status_byte_bits_via_role_remap`**
+(40B, HIGH) via `RenamePass83Region80010000Fun80017bac.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** OR-mask setter on per-connection status-byte table
+`PTR_DAT_80017bd4`: remaps `(role_index, conn_byte_0xCC)` via
+`remap_role_index_to_esco_slot_if_pending`, then
+`table[idx] |= mask`. Complement of Pass 7l's
+`clear_sync_gate_byte_bits_by_remapped_role_index` (AND-clear on sibling table
+`PTR_DAT_80017d7c`).
+
+**Callers:** 5 xref_in per `ListUnnamed80010000.java`; primary consumer
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate` invokes with mask `4` (bit 2)
+before sending encryption-sensitive LMP opcodes (`0x0f`, `0x12`, `0x42`,
+`0x7f`/`0x17`).
+
+**Confidence:** HIGH — decompile confirms remap+OR pattern, caller opcode-gate
+context from region `0x80020000` Pass 6 cont. (95), and sibling relationship to
+Pass 7l clear primitive.
+
+Region unnamed count after this pass: **228** (229 minus this rename).
+
+**Next:** Pass 84 — cold-triage next rank-1 unnamed in region `0x80010000`.
