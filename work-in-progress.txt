@@ -13055,7 +13055,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 147;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 148: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 148 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (143 unnamed); decompiled+renamed rank-1
+          `FUN_80035214`→`apply_link_mode_change_bb_regs_and_timeout_by_phase`
+          (172B, HIGH) — link-mode-change phase dispatcher: BB regs 0x6e/0x6c
+          via hook fptr, FUN_80012820 timeout helper; callee of
+          link_mode_change_state_machine; 142 unnamed remain; live named 2024.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 148;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 149: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

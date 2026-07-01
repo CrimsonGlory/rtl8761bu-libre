@@ -796,7 +796,7 @@ region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`adjust_link_mode_c
 helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
 busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
 brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
-parameters via `FUN_80033c98`/`FUN_80035214`, and on failure cleans up via `FUN_80034d88`
+parameters via `FUN_80033c98`/`apply_link_mode_change_bb_regs_and_timeout_by_phase`, and on failure cleans up via `FUN_80034d88`
 (already a known cleanup target — called from `lmp_power_regulator`'s sibling code paths).
 Optional override callback via `PTR_DAT_8003563c` can replace the return value.
 
@@ -4492,5 +4492,36 @@ callees (`baseband_reg_0x34_role_index_setter`,
 Region unnamed count after this pass: **143** (144 minus this rename). Live named
 **2023** global.
 
-**Next:** Pass 148 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** Pass 149 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
+
+## Pass 148 (2026-07-01) — link-mode-change BB reg/timeout applier `FUN_80035214`
+
+Fresh `ListUnnamed80030000.java` re-run: **143 unnamed** remain in region
+(unchanged from Pass 147; rank-1 at xref=1 tier is `FUN_80035214` at 172B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035214` → `apply_link_mode_change_bb_regs_and_timeout_by_phase`**
+(172B, HIGH, HANDLER-tier) via
+`RenamePass148Region80030000Fun80035214.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Phase-byte dispatcher for link-mode-change hardware setup.
+`(byte phase, uint timeout, byte aux)`. Phase `0`: stores timeout to
+`PTR_DAT_800352c4`, writes BB regs `0x6e` (timeout) and `0x6c` (existing
+value `| 1`) via hook fptr `PTR_DAT_800352c0`, sets state `*PTR_DAT_800352c4=1`.
+Phases `1`/`2`/`4`: stores timeout+aux, calls `FUN_80012820(1, timeout)`,
+sets state `2`. Phases `3`/`5`: gated on `PTR_DAT_800352cc[+3]` bit `0x80` —
+when clear forces timeout `0` and calls `FUN_80012820(0,0)`; else stores
+params and calls `FUN_80012820(1, timeout)`; sets state `2`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — callee of
+`link_mode_change_state_machine` (applies link parameters alongside
+`FUN_80033c98`).
+
+**Confidence:** HIGH — full 172B decompile; phase-gated BB reg pair
+`0x6e`/`0x6c` writes and `FUN_80012820` timeout helper match
+`link_mode_change_state_machine` cluster notes from Pass 8/94.
+
+Region unnamed count after this pass: **142** (143 minus this rename). Live named
+**2024** global.
