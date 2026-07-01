@@ -2469,4 +2469,36 @@ LMP PDU processor confirms HW-mode gate semantics.
 
 Region unnamed count after this pass: **196** (197 minus this rename).
 
-**Next:** Pass 116 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 116.
+
+## Pass 116 (2026-07-01) — SCO sync setup timing / role dispatch `FUN_80016e68`
+
+Pass 116 target from cold-triage rank-1 (2 xref_in, 778B — largest at xref=2
+tier after Pass 115 cleared the xref=3 tier). Decompiled and renamed:
+**`FUN_80016e68` → `apply_SCO_sync_setup_timing_or_credit_scheduler_role_dispatch`**
+(778B, HIGH) via `RenamePass116Region80010000Fun80016e68.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Dual-path SCO sync-setup dispatcher on shared state at
+`PTR_DAT_80017178`. Optional veto hook at `PTR_DAT_80017174`. When sync-record
+bit2 clear: extracts four signed timing offsets from sync record `+0xa..+0x10`,
+stores to globals, chains
+`store_four_field_sync_timing_offsets_with_mode_adjust_and_hook` →
+`apply_four_field_sync_timing_offsets_to_baseband_regs` → `FUN_800153d4`, sets
+state byte `+0x43 = 3`. When bit2 set: walks 12 role indices against bitmask at
+`+0x46`, on match allocates credit-scheduler slot `0xb`, commits HW arm
+descriptor, writes packet-type table bytes via
+`write_packet_type_table_high_byte_at_offset` /
+`write_packet_type_table_low_byte_at_offset`, logs. Fallback clears role slot,
+sets `+0x43 = 0`, optionally releases sync-record pointer.
+
+**Callers:** 2 xref_in per `xrefs_to` — `FUN_8001c14c` (HCI evt cluster) and
+`FUN_800171bc` (SCO setup chain; also calls Pass 102 gateway).
+
+**Confidence:** HIGH — decompile confirms sync-timing tail chain (Pass 86/87
+integration) plus credit-scheduler slot-0xb arm path; caller context in SCO
+setup cluster.
+
+Region unnamed count after this pass: **195** (196 minus this rename).
+
+**Next:** Pass 117 — cold-triage next rank-1 unnamed in region `0x80010000`.

@@ -15000,8 +15000,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 115;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 116: cold-triage next rank-1
-          unnamed function in region `0x80010000` (196 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 116 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80016e68`→`apply_SCO_sync_setup_timing_or_credit_scheduler_role_dispatch`
+          (778B, HIGH). Dual-path SCO sync-setup dispatcher: sync-timing four-field
+          chain (Pass 86/87) when bit2 clear; credit-scheduler slot-0xb arm +
+          packet-type table writes when bit2 set; callers `FUN_8001c14c` +
+          `FUN_800171bc`; 2 xref_in.
+          Region 195 unnamed remain; live named 2229.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 116;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 117: cold-triage next rank-1
+          unnamed function in region `0x80010000` (195 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
