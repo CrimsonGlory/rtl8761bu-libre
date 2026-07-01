@@ -8778,4 +8778,31 @@ codec-8 staging call `FUN_8002c2ac(0x8012216c, 0x801220ec)`; structural sibling 
 
 Region unnamed count after this pass: **44** (45 minus this rename). Live named **1877** global.
 
+**Next:** superseded by Pass 6 continuation (269).
+
+## Pass 6 continuation (269) (2026-07-01) — AFH assessment mode setter `FUN_8002572c`
+
+Decompiled and renamed:
+**`FUN_8002572c` → `set_afh_channel_assessment_mode_on_four_slots`**
+(34B, HIGH) via `RenamePass6Region80020000Fun8002572c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (34B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=44` at pass start). First-listed of
+the tied 34B/xref_in=1 cluster after Pass 6 cont. (268) renamed `FUN_8002c2ac`.
+
+**Mechanism:** AFH channel-assessment mode flag setter. Four-iteration loop ORs
+`0x80` on status byte at `PTR_DAT_80025750` and `0x01` on status byte at
+`PTR_DAT_80025754` — inverse pattern to sibling `FUN_80025710` (clears bit0 on
+four status bytes at `PTR_DAT_80025728` during crypto/link-key reset). Invoked from
+`hci_ogf1_ogf3_shared_command_complete_event_sender` on HCI opcode `0x0C56`
+(Write AFH Channel Assessment Mode, OGF 3 Controller & Baseband).
+
+**Caller:** `hci_ogf1_ogf3_shared_command_complete_event_sender` (xref_in=1).
+
+**Confidence:** HIGH — decompile confirms bitmask-OR loop; caller/opcode context
+pre-documented in Pass 6 cont. (5); sibling relationship to `FUN_80025710` clear
+from `reset_all_connection_crypto_slots_and_link_key_table` pass.
+
+Region unnamed count after this pass: **43** (44 minus this rename). Live named **1878** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
