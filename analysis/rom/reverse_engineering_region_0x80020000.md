@@ -9024,4 +9024,32 @@ address referenced as the shared conn-resolve gate.
 
 Region unnamed count after this pass: **35** (36 minus this rename). Live named **1886** global.
 
+**Next:** superseded by Pass 6 continuation (278).
+
+## Pass 6 continuation (278) (2026-07-01) — boot-init descriptor buffer zero `FUN_800218ec`
+
+Decompiled and renamed:
+**`FUN_800218ec` → `zero_global_slot_index_and_memset_0x114_descriptor_buffer`**
+(28B, HIGH) via `RenamePass6Region80020000Fun800218ec.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (28B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=35` at pass start). First-listed of four
+tied 28B entries (`FUN_800218ec`, `FUN_80021ee8`, `FUN_80021a94`, `FUN_8002b394`).
+
+**Mechanism:** Boot-init global-state reset in the `0x800219xx` init cluster (between
+connection-policy matchers at `0x800218xx` and pool-slot init at `0x80021a04`). Clears
+the single-byte slot index at `PTR_DAT_80021908`, then `memset(PTR_DAT_8002190c, 0, 0x114)`
+— zeroing a 276-byte descriptor record buffer. Shared core callee for two thin wrappers:
+`FUN_80021910` (returns 1) and `FUN_80018c18` (returns 0, tail of
+`boot_init_chain_string_user_baseband_and_subsystems`).
+
+**Callers:** `FUN_80021910` (`0x80021914`) and `FUN_80018c18` (`0x80018c1c`) per
+`ListXrefsTo800218ec.java`; xref_in=2.
+
+**Confidence:** HIGH — decompile confirms unambiguous byte-clear + `memset` with fixed
+0x114 length; both callers decompiled as single-call wrappers; boot-init chain context
+matches adjacent `0x800219xx`/`0x80021axx` pool/packet-slot init cluster.
+
+Region unnamed count after this pass: **34** (35 minus this rename). Live named **1887** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

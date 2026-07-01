@@ -11729,8 +11729,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (277);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (278): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (35 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (278) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800218ec`→
+          `zero_global_slot_index_and_memset_0x114_descriptor_buffer`
+          (28B, HIGH) — boot-init: clear `PTR_DAT_80021908` byte +
+          `memset(PTR_DAT_8002190c,0,0x114)`; callers `FUN_80021910`/
+          `FUN_80018c18` (boot_init_chain tail); xref_in=2; 34 unnamed remain;
+          live named 1887.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (278);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (279): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (34 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
