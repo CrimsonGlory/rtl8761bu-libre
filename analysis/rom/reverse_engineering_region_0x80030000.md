@@ -2368,5 +2368,38 @@ named IRQ-mask callees anchor the baseband register programming role.
 Region unnamed count after this pass: **208** (209 minus this rename). Live named
 **1958** global.
 
-**Next:** Pass 83 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 83.
+
+## Pass 83 (2026-07-01) — TX power dual-hook dispatcher `FUN_80039b80`
+
+Fresh `ListUnnamed80030000.java` re-run: **208 unnamed** remain in region
+(unchanged from Pass 82; rank-1 by size at xref=3 tier is `FUN_80039b80` at
+118B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039b80` → `dispatch_tx_power_config_byte_0x2c_or_0x2d_via_dual_fptr_hooks`**
+(118B, HIGH) via `RenamePass83Region80030000Fun80039b80.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Mode-byte dispatcher in the TX-power runtime-config cluster
+(`PTR_DAT_80039bf8`). When `param_2 == 1`, selects config byte at `+0x2d`;
+when `param_2` is 0 or 2..3, selects `+0x2c`; invalid modes (`>3`) log via
+`possible_logging_function__var_args` and return. Sequentially invokes two
+function-pointer hooks at `PTR_DAT_80039bfc` then `PTR_DAT_80039c00` with
+`(param_1, selected_byte)`. Sibling of Pass 72's
+`compute_tx_power_delta_from_global_baselines` and the `FUN_80039844`/
+`FUN_80039c08` init/adjust pair.
+
+**Callers:** 3 xref-in via computed call — `FUN_80039c98` (TX-power mode-change
+notifier), `conn_field_swap_and_notify_dispatcher_3_4` (conn-field swap on
+opcode 3/4), `init_connection_record`.
+
+**Confidence:** HIGH — full 118B decompile; dual-offset byte selection and
+sequential dual-fptr dispatch unambiguous; caller context in TX-power/conn-setup
+cluster matches region's power-management theme.
+
+Region unnamed count after this pass: **207** (208 minus this rename). Live named
+**1959** global.
+
+**Next:** Pass 84 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

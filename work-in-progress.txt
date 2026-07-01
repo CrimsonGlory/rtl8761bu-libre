@@ -12431,7 +12431,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 82;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 83: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 83 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_80039b80`→`dispatch_tx_power_config_byte_0x2c_or_0x2d_via_dual_fptr_hooks`
+          (118B, HIGH). TX-power mode dispatcher: selects config byte at
+          `+0x2c` (modes 0/2/3) or `+0x2d` (mode 1), invokes dual fptr hooks;
+          sibling of `compute_tx_power_delta_from_global_baselines` cluster.
+          3 xref-in (`FUN_80039c98`, `conn_field_swap_and_notify_dispatcher_3_4`,
+          `init_connection_record`).
+          207 unnamed remain; live named 1959.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 83;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 84: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
