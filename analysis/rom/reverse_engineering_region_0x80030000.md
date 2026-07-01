@@ -8300,5 +8300,34 @@ documented parallel-slot-table cluster.
 Region unnamed count after this pass: **23** (24 minus this rename). Live named
 **2143** global.
 
-**Next:** Pass 268 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 268.
+
+## Pass 268 (2026-07-01) — SCO BB reg cached lookup `FUN_8003b3b4`
+
+Fresh `ListUnnamed80030000.java` re-run: **23 unnamed** remain in region
+(unchanged from Pass 267; xref_in=0 tier dominates — rank-1 is `FUN_8003b3b4`
+at 38B, largest among xref=0 cohort; tied at 38B with `FUN_80039b50` and
+`FUN_80038f98`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b3b4` → `lookup_sco_bb_reg_cached_ushort_from_5entry_index_table`**
+(38B, HIGH, UTILITY-tier) via
+`RenamePass268Region80030000Fun8003b3b4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-side 5-entry ushort index-table lookup in the `0x8003b3xx`
+SCO/BB cluster (address-adjacent to Pass 256's
+`invoke_sco_bb_reg_hook_from_5entry_table_pack_7bit_and_flag_bits` write-side
+dispatch). When index `param_1 & 0xff > 4`, returns error sentinel `0xdead`;
+else looks up ushort offset from table `PTR_DAT_8003b3dc[index*2]` and returns
+cached ushort at `DAT_8003b3e0 + offset`.
+
+**Callers:** 0 xref-in (consistent with indirect SCO BB-reg cache read).
+
+**Confidence:** HIGH — full 38B decompile; 5-entry index gate, table→base
+cached-ushort read pattern, and `0xdead` out-of-range sentinel unambiguous.
+
+Region unnamed count after this pass: **22** (23 minus this rename). Live named
+**2144** global.
+
+**Next:** Pass 269 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
