@@ -2391,4 +2391,31 @@ documented pending-callback insert/pop/remove cluster semantics.
 
 Region unnamed count after this pass: **199** (200 minus this rename).
 
-**Next:** Pass 113 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 113.
+
+## Pass 113 (2026-07-01) — packet-type table high-byte reader `FUN_80013bcc`
+
+Pass 113 target from cold-triage rank-1 (3 xref_in, 20B — largest at xref=3
+tier after Pass 112 cleared `FUN_80017618`). Decompiled and renamed:
+**`FUN_80013bcc` → `read_packet_type_table_high_byte_at_offset`**
+(20B, HIGH) via `RenamePass113Region80010000Fun80013bcc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Read counterpart to Pass 7q's
+`write_packet_type_table_high_byte_at_offset`. Indexes
+`ushort[param_1 + DAT_80013be0]` and returns bits[15:8] (`>> 8`). Sibling
+writers at `DAT_80013c08` (high) / `DAT_80013c38` (low) use offset-indexed
+RMW; this reader uses a distinct table base `DAT_80013be0` for high-byte
+fetch during packet-type apply/consume paths.
+
+**Callers:** 3 xref_in per `ListXrefsTo80013bcc.java` —
+`status_word_multiflag_link_event_dispatcher` (link-event packet-type branch),
+`apply_eSCO_SCO_packet_type_params` (eSCO/SCO apply path), and patch
+`FUN_80110ddc` (computed call).
+
+**Confidence:** HIGH — trivial decompile; read/write pair semantics match
+documented `0x80013cxx` packet-type table cluster.
+
+Region unnamed count after this pass: **198** (199 minus this rename).
+
+**Next:** Pass 114 — cold-triage next rank-1 unnamed in region `0x80010000`.

@@ -14973,8 +14973,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 112;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 113: cold-triage next rank-1
-          unnamed function in region `0x80010000` (199 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 113 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013bcc`→`read_packet_type_table_high_byte_at_offset`
+          (20B, HIGH). Read high byte from offset-indexed packet-type table at
+          `DAT_80013be0`; callers `status_word_multiflag_link_event_dispatcher` +
+          `apply_eSCO_SCO_packet_type_params` + patch `FUN_80110ddc`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 113;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 114: cold-triage next rank-1
+          unnamed function in region `0x80010000` (198 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
