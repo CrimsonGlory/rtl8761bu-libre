@@ -7750,4 +7750,33 @@ context documented across 9+ prior pass cross-references.
 
 Region unnamed count after this pass: **80** (81 minus this rename). Live named **1841** global.
 
+**Next:** superseded by Pass 6 continuation (233).
+
+## Pass 6 continuation (233) (2026-07-01) — connection-policy mode dispatcher `FUN_800218c0`
+
+Decompiled and renamed:
+**`FUN_800218c0` → `dispatch_connection_policy_match_or_priority_by_mode`**
+(44B, HIGH) via `RenamePass6Region80020000Fun800218c0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=80` at pass start). Highest-xref
+function in the 44B tier; long referenced as unnamed dispatcher for the connection-policy
+cluster without being decompiled or renamed.
+
+**Mechanism:** Connection-policy mode dispatcher. `param_1 == 0x01` →
+`match_connection_policy_type1_by_bdaddr_or_bitmask(param_2, param_3)` (type-1 rule-table
+match, category 0x01); `param_1 == 0x02` →
+`resolve_connection_policy_priority_by_bdaddr_or_bitmask(param_2)` (priority resolver,
+category 0x02); otherwise returns 0. Completes the three-function connection-policy
+cluster documented in Pass 6 cont. (40) and (102).
+
+**Callers:** xref_in=4 — confirmed via `find_callers`: `LMP_HOST_CONNECTION_REQ_0x33`,
+`LMP_eSCO_LINK_REQ_0x7F_0C`, `FUN_8006bfec`; plus `emit_hci_inquiry_result_or_extended_and_maybe_complete`
+(per prior pass cross-references).
+
+**Confidence:** HIGH — decompile confirms unambiguous mode switch routing to two already-named
+siblings; callers span LMP connection-setup and HCI inquiry decision points.
+
+Region unnamed count after this pass: **79** (80 minus this rename). Live named **1842** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
