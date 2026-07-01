@@ -14617,8 +14617,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7w;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7x: cold-triage next rank-1
-          unnamed function in region `0x80010000` (235 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7x (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014f3c`→`program_single_tx_descriptor_slot_via_credit_scheduler`
+          (118B, HIGH). Single-slot TX descriptor commit: `LMP__25C_called2`,
+          template-merge from `DAT_80014fb4`, handle encode `(handle&0x7ff)<<2`,
+          submits via `FUN_80014e40` credit-scheduler path; 6 xref_in.
+          234 unnamed remain; live named 2190.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7x;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7y: cold-triage next rank-1
+          unnamed function in region `0x80010000` (234 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

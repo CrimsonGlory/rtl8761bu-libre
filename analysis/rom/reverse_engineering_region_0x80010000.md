@@ -1350,4 +1350,28 @@ path, and dispatch/drain fork gated on `field_0x169`; cross-confirmed with
 
 Region unnamed count after this pass: **235** (236 minus this rename).
 
-**Next:** Pass 7x — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7x (2026-07-01) — single TX descriptor credit-scheduler commit `FUN_80014f3c`
+
+Pass 7x target from cold-triage rank-1 (6 xref_in, 118B — largest at xref=6
+tier). Decompiled and renamed:
+**`FUN_80014f3c` → `program_single_tx_descriptor_slot_via_credit_scheduler`**
+(118B, HIGH) via `RenamePass7xRegion80010000Fun80014f3c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Single-slot TX descriptor commit in the `0x80014fxx` cluster
+(sibling of `program_single_tx_descriptor_slot_for_lmp_pdu_body` at Pass 7p,
+which uses `program_active_tx_descriptor_slots_to_hw_registers` instead). When
+`param_2 != 0`: calls `LMP__25C_called2` coexistence hook, builds one 4-byte
+descriptor on stack from template `DAT_80014fb4` merged with `param_1`, encodes
+ACL handle bits `(param_2 & 0x7ff) << 2`, then submits via `FUN_80014e40` with
+count=1 and slot-type bytes `param_3`/`param_4` (capped at 3).
+
+**Callers:** 6 xref_in per `ListUnnamed80010000.java`; credit-scheduler commit
+path for ACL TX descriptor programming.
+
+**Confidence:** HIGH — decompile confirms template-merge + handle encode +
+`FUN_80014e40` single-slot submit; structural sibling of Pass 7p LMP PDU path.
+
+Region unnamed count after this pass: **234** (235 minus this rename).
+
+**Next:** Pass 7y — cold-triage next rank-1 unnamed in region `0x80010000`.
