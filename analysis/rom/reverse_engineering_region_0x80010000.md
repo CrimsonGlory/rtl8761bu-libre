@@ -1433,4 +1433,29 @@ baseband-reg-helper analysis and SCO/eSCO layer patch hook table.
 
 Region unnamed count after this pass: **232** (233 minus this rename).
 
-**Next:** Pass 80 — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 80 (2026-07-01) — codec table read primitive `FUN_80013e2c`
+
+Pass 80 target from cold-triage rank-1 (6 xref_in, 60B — largest at xref=6
+tier after Pass 7z). Decompiled and renamed:
+**`FUN_80013e2c` → `read_codec_table_entry_and_wait_ready`**
+(60B, HIGH) via `RenamePass80Region80010000Fun80013e2c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Read-side counterpart of `write_codec_table_entry_and_wait_ack`
+(`0x80013dc4`). Issues row-index fetch via HW hook fptr `PTR_DAT_80013e68`
+(register `0x236`, index `param_1 & 0x1ff`), busy-polls status register
+`DAT_80013e6c` until bit `0x200` sets (write primitive polls until it
+**clears**), then reads two 16-bit halves from `DAT_80013e70`/`DAT_80013e74`
+and returns `CONCAT22(high, low)` as a 32-bit table entry.
+
+**Callers:** 6 xref_in per `ListUnnamed80010000.java`; includes
+`VSC_0xfcc2_FUN_800148f0` (codec-table lookup by role index) and
+`write_baseband_codec_param_triplet` cluster siblings.
+
+**Confidence:** HIGH — decompile confirms indexed table fetch via reg `0x236`,
+inverted ready-poll polarity vs write ack, and dword assembly from paired
+halfword registers; structural read/write pair documented in `region_0x80000000`.
+
+Region unnamed count after this pass: **231** (232 minus this rename).
+
+**Next:** Pass 81 — cold-triage next rank-1 unnamed in region `0x80010000`.

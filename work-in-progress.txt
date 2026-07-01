@@ -14646,8 +14646,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7z;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 80: cold-triage next rank-1
-          unnamed function in region `0x80010000` (232 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 80 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013e2c`→`read_codec_table_entry_and_wait_ready`
+          (60B, HIGH). Read-side counterpart of `write_codec_table_entry_and_wait_ack`:
+          row fetch via hook `PTR_DAT_80013e68` (reg `0x236`, index `param&0x1ff`),
+          polls status bit `0x200` set, returns `CONCAT22` dword from paired
+          halfword regs; 6 xref_in.
+          231 unnamed remain; live named 2193.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 80;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 81: cold-triage next rank-1
+          unnamed function in region `0x80010000` (231 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
