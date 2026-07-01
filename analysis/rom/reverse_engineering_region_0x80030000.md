@@ -1562,5 +1562,40 @@ siblings.
 Region unnamed count after this pass: **232** (233 minus this rename). Live named
 **1934** global.
 
-**Next:** Pass 59 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 59.
+
+## Pass 59 (2026-07-01) — role-switch HW channel bit15 clear `FUN_800348c0`
+
+Fresh `ListUnnamed80030000.java` re-run: **232 unnamed** remain in region
+(unchanged from Pass 58 pre-rename list; rank-1 was `FUN_800348c0` at 74B,
+6 xref-in — tied xref count with `FUN_80034e98`/`FUN_80034e6c` but largest
+among the tie; clear-bit sibling of Pass 58's `or_merge_hw_channel_bit15_...`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800348c0` → `and_clear_hw_channel_bit15_by_conn_index_via_esco_remap`**
+(74B, HIGH) via `RenamePass59Region80030000Fun800348c0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Conn-index (`param_1`) into `big_ol_struct`: calls
+`remap_role_index_to_esco_slot_if_pending` on `bos_connection__array_index` +
+`byte_0xCC`, looks up per-slot HW-channel register index from table at
+`PTR_DAT_80034910` (`slot*8+4` ushort), reads current value at that index via
+`DAT_80034914`, AND-masks `0x7fff` (clear bit15), dispatches via hook at
+`PTR_DAT_80034918`. Clear-bit sibling of Pass 58's
+`or_merge_hw_channel_bit15_by_conn_index_via_esco_remap` (OR `0x8000` set-bit
+variant on parallel literal-pool tables `80034970`/`80034974`/`80034978`).
+
+**Callers:** 6 xref-in (rank-1 by xref count); indirect via function-pointer
+slots in role-switch / LMP-25C completion cluster — notably
+`process_dual_slot_lmp25c_role_record_packet_completion` (region `0x80040000`
+Pass 52db) dispatches both clear/set siblings on role-switch LMP opcode 3.
+
+**Confidence:** HIGH — fully decompiled 74B; AND-mask bit15 clear on indexed
+HW-channel register matches documented role-switch dispatch cluster; esco-slot
+remap + conn-index lookup pattern consistent with Pass 58 set-bit sibling.
+
+Region unnamed count after this pass: **231** (232 minus this rename). Live named
+**1935** global.
+
+**Next:** Pass 60 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
