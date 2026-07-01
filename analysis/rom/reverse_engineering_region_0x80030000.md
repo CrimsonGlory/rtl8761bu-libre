@@ -6426,5 +6426,35 @@ merge at bits 14-15 unambiguous; caller config-gate pattern matches Pass 205's
 Region unnamed count after this pass: **84** (85 minus this rename). Live named
 **2082** global.
 
-**Next:** Pass 207 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 207.
+
+## Pass 207 (2026-07-01) — MIPS16e ISR dispatcher `FUN_80033ce8`
+
+Fresh `ListUnnamed80030000.java` re-run: **84 unnamed** remain in region
+(unchanged from Pass 206; rank-1 by size at xref=1 tier is `FUN_80033ce8` at
+52B — the tied sibling `FUN_80038ee0` was renamed in Pass 206).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033ce8` → `single_slot_isr_dispatcher_call_or_default_ack`**
+(52B, HIGH, HANDLER-tier) via
+`RenamePass207Region80030000Fun80033ce8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Generic single-slot ISR dispatcher (documented in
+`reverse_engineering_interrupt_vectors.md`): checks function pointer at
+`PTR_DAT_80033d1c` (default `0x80120f84`); if null, default-acks interrupt by
+setting bits `0x1` and `0x80` at MMIO `0xb000a0a0` (`DAT_80033d20`); else calls
+the registered handler. Invoked from the 32-bit MIPS context-save trampoline at
+`0x80009160` via `jalr`.
+
+**Callers:** 1 xref-in — interrupt context-save trampoline
+(`reverse_engineering_interrupt_vectors.md`).
+
+**Confidence:** HIGH — full 52B decompile; behavior matches prior interrupt-
+vector analysis; MMIO ack pattern consistent with sibling `0xb000a0bc` BB
+register port.
+
+Region unnamed count after this pass: **83** (84 minus this rename). Live named
+**2083** global.
+
+**Next:** Pass 208 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
