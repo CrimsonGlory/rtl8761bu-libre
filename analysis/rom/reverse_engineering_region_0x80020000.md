@@ -6078,4 +6078,33 @@ call). xref_in=2 via `ListXrefsTo800213d0.java`.
 
 Region unnamed count after this pass: **136** (137 minus this rename). Live named **1785** global.
 
+**Next:** superseded by Pass 6 continuation (177).
+
+## Pass 6 continuation (177) (2026-07-01) — global SHA/BLAKE PRNG state step `FUN_8002c838`
+
+Decompiled and renamed:
+**`FUN_8002c838` → `advance_global_sha_blake_prng_state_16byte`**
+(72B, HIGH) via `RenamePass6Region80020000Fun8002c838.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (72B, xref_in=17) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=136` at pass start). Highest-xref
+function in the 72B tier — central SSP/pairing nonce-priming primitive referenced
+throughout the encryption cluster.
+
+**Mechanism:** Advances the global 18-byte PRNG/hash state at `PTR_DAT_8002c880`:
+byte-wise add with carry against 16-byte addend `PTR_DAT_8002c884` via
+`crypto_bignum_add_u8_arrays_with_carry`, hashes the first 16 bytes through
+`thing_that_uses_SHA_and_BLAKE`, copies the 16-byte digest to caller buffer
+`param_1` and back into the global state, then clears bytes `+0x10`/`+0x11`.
+
+**Callers (sample):** `derive_au_rand_and_send_lmp_0x0b`, `derive_comb_key_xor_and_send_lmp_0x09`,
+`derive_dhkey_check_nonce_and_send_lmp_0x42`, `get_DHKey_to_3rd_param_p192`,
+`extract_passkey_confirm_bit_and_send_lmp_0x3f` — xref_in=17.
+
+**Confidence:** HIGH — decompile confirms pure global-state PRNG step with no
+side effects beyond the shared hash chain; role as nonce/challenge priming
+already evidenced across 10+ renamed HIGH callers in prior passes.
+
+Region unnamed count after this pass: **135** (136 minus this rename). Live named **1786** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
