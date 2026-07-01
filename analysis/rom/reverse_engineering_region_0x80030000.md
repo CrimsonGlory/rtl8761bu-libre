@@ -7950,5 +7950,35 @@ to 6 bits (`& 0x3f`), and stores at byte offset `+8` in data struct
 Region unnamed count after this pass: **35** (36 minus this rename). Live named
 **2131** global.
 
-**Next:** Pass 256 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 256.
+
+## Pass 256 (2026-07-01) — SCO BB reg hook dispatch `FUN_8003b364`
+
+Fresh `ListUnnamed80030000.java` re-run: **35 unnamed** remain in region
+(unchanged from Pass 255; xref_in=0 tier dominates — rank-1 is `FUN_8003b364`
+at 70B, largest among xref=0 cohort; tied at 70B with `FUN_80039abc`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b364` → `invoke_sco_bb_reg_hook_from_5entry_table_pack_7bit_and_flag_bits`**
+(70B, HIGH, HANDLER-tier) via
+`RenamePass256Region80030000Fun8003b364.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Single-entry SCO BB-register hook dispatcher in the
+`0x8003b3xx` cluster (sibling of Pass 208's
+`apply_cached_sco_bb_register_pairs_via_hw_hook` and Pass 219's
+`fill_sco_bb_register_pair_buffer_from_index_table`). When index
+`param_1 & 0xff < 5`, looks up BB register index from 5-entry ushort table
+`PTR_DAT_8003b3ac[index]`, packs value as
+`(param_3 & 1) << 8 | param_2 & 0x7f | (param_4 & 1) << 9` (7-bit base +
+two flag bits at positions 8/9), and invokes hook fptr at `PTR_DAT_8003b3b0`.
+
+**Callers:** 0 xref-in (consistent with indirect SCO BB-reg dispatch).
+
+**Confidence:** HIGH — full 70B decompile; 5-entry table gate, packed
+7-bit+flag value encoding, and hook invoke pattern unambiguous.
+
+Region unnamed count after this pass: **34** (35 minus this rename). Live named
+**2132** global.
+
+**Next:** Pass 257 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
