@@ -2302,5 +2302,40 @@ via the wrapper (63 xref-in) plus 3 direct xref-in at this function.
 Region unnamed count after this pass: **210** (211 minus this rename). Live named
 **1956** global.
 
-**Next:** Pass 81 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 81.
+
+## Pass 81 (2026-07-01) — LMP 0x0d power-sample report dispatcher `FUN_800321f8`
+
+Fresh `ListUnnamed80030000.java` re-run: **210 unnamed** remain in region
+(unchanged from Pass 80; rank-1 by size at xref=3 tier is `FUN_800321f8` at
+150B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800321f8` → `dispatch_lmp_0x0d_power_sample_report_via_tx_hook`**
+(150B, HIGH) via `RenamePass81Region80030000Fun800321f8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Builds and transmits an LMP PDU reporting a per-link power/RSSI
+sample value. Optional override callback at `PTR_DAT_80032290+4` (via
+`call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`) may veto TX;
+when it returns 0, assembles a 15-byte buffer: `0xff` prefix, opcode `0x0d`,
+8-byte template from `PTR_DAT_80032294`, link id (`param_2` uint16 LE), and
+sample byte (`param_3`). Dispatches via
+`invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`. Debug-logs via
+`possible_logging_function__var_args` (category `0x23`, code `0x468`).
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` tool returned
+empty — known GZF indirect-call gap). Decompiled callers in region `0x80070000`
+Pass 12fn/12fp invoke `FUN_800321f8(0, id@+0x16, sample)` on threshold-crossing
+and periodic-average flush paths in the per-link 0x1c-stride sample-record
+cluster — ties this function to the power-level smoothing/report pipeline
+alongside `power_level_smoothing_filter_feeding_param_dispatch`.
+
+**Confidence:** HIGH — full 150B decompile; PDU layout, named callees, and
+cross-region caller bodies anchor the LMP power-sample report role.
+
+Region unnamed count after this pass: **209** (210 minus this rename). Live named
+**1957** global.
+
+**Next:** Pass 82 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
