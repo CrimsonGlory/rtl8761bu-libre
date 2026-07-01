@@ -14029,7 +14029,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 249;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 250: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 250 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003a748`→`bulk_write_bb_regs_0x10_to_0x2d_with_reg0xe_bit2_gate`
+          (100B, HIGH, HANDLER-tier). Bulk BB register writer: hook-gates bit 2
+          on reg `0xe`, writes 30 halfwords from table to regs `0x10`–`0x2d`
+          via `dispatch_bb_register_da_d6_write_with_hook`; `0x8003a7` cluster
+          sibling of Pass 103. 40 unnamed remain; live named 2126.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 250;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 251: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

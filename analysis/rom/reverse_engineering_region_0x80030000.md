@@ -7761,5 +7761,33 @@ dual-index encoding match documented parallel-slot-table cluster.
 Region unnamed count after this pass: **41** (42 minus this rename). Live named
 **2125** global.
 
-**Next:** Pass 250 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 250.
+
+## Pass 250 (2026-07-01) — bulk BB register table writer `FUN_8003a748`
+
+Fresh `ListUnnamed80030000.java` re-run: **41 unnamed** remain in region
+(unchanged from Pass 249; xref_in=0 tier dominates — rank-1 is `FUN_8003a748`
+at 100B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a748` → `bulk_write_bb_regs_0x10_to_0x2d_with_reg0xe_bit2_gate`**
+(100B, HIGH, HANDLER-tier) via
+`RenamePass250Region80030000Fun8003a748.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Bulk baseband register writer in the `0x8003a7` cluster.
+Reads BB reg `0xe` via hook `PTR_DAT_8003a7ac`, sets bit 2 (`| 4`) via hook
+`PTR_DAT_8003a7b0`, loops 30 iterations writing halfwords from `param_1` table
+to regs `0x10`–`0x2d` via `dispatch_bb_register_da_d6_write_with_hook`, then
+restores reg `0xe` by clearing bit 2 (`& 0xfffb`). BB-config cluster sibling
+of Pass 103 `program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 100B decompile; hook-gated bit-2 gate on reg `0xe`
+and 30-register bulk-write loop unambiguous.
+
+Region unnamed count after this pass: **40** (41 minus this rename). Live named
+**2126** global.
+
+**Next:** Pass 251 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
