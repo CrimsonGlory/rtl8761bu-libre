@@ -15078,8 +15078,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 123;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 124: cold-triage next rank-1
-          unnamed function in region `0x80010000` (188 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 124 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014ba8`→`write_esco_slot_codec_table_quad_from_role_and_byte_block`
+          (176B, HIGH). eSCO-slot codec-table quad writer: maps role via
+          `conn_record_role_to_esco_slot_index`, writes four rows at
+          `(slot-1)*0xc+3` via `write_codec_table_entry_and_wait_ack`, packing
+          16-byte key block into four dwords; caller
+          `arm_link_encryption_post_key_program`. 2 xref_in. 187 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 124;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 125: cold-triage next rank-1
+          unnamed function in region `0x80010000` (187 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

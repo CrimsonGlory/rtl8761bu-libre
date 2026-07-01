@@ -2724,4 +2724,33 @@ and VSC fcd9 cluster consistent with Pass 118 sibling.
 
 Region unnamed count after this pass: **188** (189 minus this rename).
 
-**Next:** Pass 124 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 124.
+
+## Pass 124 (2026-07-01) — eSCO codec table quad `FUN_80014ba8`
+
+Pass 124 target from cold-triage rank-1 (2 xref_in, 176B — largest at xref=2
+tier after Pass 123 cleared `FUN_8001502c`). Decompiled and renamed:
+**`FUN_80014ba8` → `write_esco_slot_codec_table_quad_from_role_and_byte_block`**
+(176B, HIGH) via `RenamePass124Region80010000Fun80014ba8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** eSCO-slot codec-table quad writer in the `0x80014bxx` cluster
+(sibling of Pass 91's `write_esco_slot_codec_table_pair_from_role_and_byte_block`).
+Maps conn role via `conn_record_role_to_esco_slot_index`; when slot non-zero,
+computes base row `(slot-1)*0xc+3` and writes four consecutive rows via
+`write_codec_table_entry_and_wait_ack`, packing caller's 16-byte parameter block
+into four 32-bit values (bytes `[12..15]` then `[8..11]` then `[4..7]` then
+`[0..3]`).
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java` — includes
+`arm_link_encryption_post_key_program` (region `0x80020000` Pass 6 cont.),
+which applies crypto `+0x13` 16-byte key block via this helper alongside the
+Pass 91 pair writer.
+
+**Confidence:** HIGH — decompile confirms slot-indexed four-row codec-table
+writes via established `write_codec_table_entry_and_wait_ack` primitive;
+16-byte packing matches encryption key-block programming idiom.
+
+Region unnamed count after this pass: **187** (188 minus this rename).
+
+**Next:** Pass 125 — cold-triage next rank-1 unnamed in region `0x80010000`.
