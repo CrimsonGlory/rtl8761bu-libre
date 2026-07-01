@@ -8873,5 +8873,35 @@ cluster placement matches documented unsniff/codec-slot siblings.
 Region unnamed count after this pass: **3** (4 minus this rename). Live named
 **2163** global.
 
-**Next:** Pass 288 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 288.
+
+## Pass 288 (2026-07-01) — ISR-dispatch/unsniff gap noop stub `FUN_80033d24`
+
+Fresh `ListUnnamed80030000.java` re-run: **3 unnamed** remain in region
+(unchanged from Pass 287; xref_in=0 tier dominates — rank-1 is `FUN_80033d24`
+at 4B, tied with `FUN_80033b10` at 4B; first-listed wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033d24` → `noop_void_stub_isr_dispatch_data_to_unsniff_cleanup_gap_jr_ra`**
+(4B, HIGH, STUB-tier) via
+`RenamePass288Region80030000Fun80033d24.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e void return stub (`jr ra` + delay-slot
+`_nop`). Empty body decompiles to bare `return;`. Address-adjacent gap between
+the ISR-dispatcher literal-pool cluster (`PTR_DAT_80033d1c`/`DAT_80033d20` at
+`0x80033d1c`/`0x80033d20`, Pass 207 `single_slot_isr_dispatcher_call_or_default_ack`
+at `0x80033ce8`) and `noop_unsniff_slave_cleanup_hook_jr_ra_stub`
+(`0x80033d28`, Pass 138) in the `0x80033dxx` hook/fptr-table cluster.
+Likely optional fptr-table placeholder or alignment padding between the
+interrupt-dispatch data literals and the unsniff pre-send cleanup hook.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — trivial 4B decompile; empty void body unambiguous;
+cluster placement matches documented ISR-dispatch and unsniff-cleanup siblings.
+
+Region unnamed count after this pass: **2** (3 minus this rename). Live named
+**2164** global.
+
+**Next:** Pass 289 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
