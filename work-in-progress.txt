@@ -14804,8 +14804,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 95;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 96: cold-triage next rank-1
-          unnamed function in region `0x80010000` (216 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 96 (2026-07-01): cold-triage
+          rank-1 `FUN_800179a8`→`conn_slot_table_entry_ptr_from_index_stride_0x1c`
+          (16B, HIGH). Conn-slot table index-to-pointer helper
+          (`PTR_PTR_800179b8 + index*0x1c`); callers
+          `role_switch_packet_type_reset_and_log` +
+          `program_dual_slot_lmp25c_packet_credits_by_conn_index` (3×); 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 96;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 97: cold-triage next rank-1
+          unnamed function in region `0x80010000` (215 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1885,4 +1885,29 @@ Section 5 now formalized with persisted rename.
 
 Region unnamed count after this pass: **216** (217 minus this rename).
 
-**Next:** Pass 96 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 96.
+
+## Pass 96 (2026-07-01) — conn-slot table index-to-pointer helper `FUN_800179a8`
+
+Pass 96 target from cold-triage rank-1 (4 xref_in, 16B — sole rank-1 at
+xref=4 tier after Pass 95). Decompiled and renamed:
+**`FUN_800179a8` → `conn_slot_table_entry_ptr_from_index_stride_0x1c`**
+(16B, HIGH) via `RenamePass96Region80010000Fun800179a8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Index-to-pointer helper in the `0x800179xx` conn-slot table
+cluster (sibling of `FUN_800179bc` equality-check and `FUN_800177a4` linked-list
+sweep). Returns `PTR_PTR_800179b8 + (param_1 & 0xff) * 0x1c` — 28-byte stride
+per connection-slot index.
+
+**Callers:** 4 xref_in — `role_switch_packet_type_reset_and_log` (1×) +
+`program_dual_slot_lmp25c_packet_credits_by_conn_index` (3×); confirmed via
+`ListXrefsTo800179a8.java`.
+
+**Confidence:** HIGH — decompile confirms pure index×stride table lookup;
+caller context ties to role-switch teardown and dual-slot LMP-25C packet-credit
+programming paths.
+
+Region unnamed count after this pass: **215** (216 minus this rename).
+
+**Next:** Pass 97 — cold-triage next rank-1 unnamed in region `0x80010000`.
