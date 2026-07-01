@@ -4971,5 +4971,37 @@ match 2048-byte ring buffer; IRQ disable/enable idiom consistent with
 Region unnamed count after this pass: **129** (130 minus this rename). Live named
 **2037** global.
 
-**Next:** Pass 162 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 162.
+
+## Pass 162 (2026-07-01) — TX power level `FUN_8003b920`
+
+Fresh `ListUnnamed80030000.java` re-run: **129 unnamed** remain in region
+(unchanged from Pass 161; rank-1 at xref=1 tier is `FUN_8003b920` at 120B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b920` → `compute_clamped_tx_power_level_from_link_class_baselines`**
+(120B, HIGH, UTILITY-tier) via
+`RenamePass162Region80030000Fun8003b920.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Signed-byte TX-power level calculator. When global flag
+`PTR_DAT_8003b998` bit `0x10` is clear, uses baseline short at
+`PTR_DAT_8003b99c+0xe`; when set, selects among three per-link-class baselines
+at `+0xe`/`+0x10`/`+0x12` via `param_1 % 3`. Adds `param_3*2`,
+`config.field453_0x1d1`, baseline, and a `param_2`-derived nibble shift (with
+alternate path when low 16 bits exceed `0x3ff`). Clamps result to signed
+8-bit `[-128,127]` before return. TX-power cluster sibling of
+`compute_tx_power_delta_from_global_baselines` and
+`init_tx_power_runtime_from_config_blob_and_halve_delta_baselines`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty — indirect
+fptr dispatch (known pattern).
+
+**Confidence:** HIGH — full 120B decompile; per-class baseline selection,
+config `field453_0x1d1` reuse, and signed-byte clamp semantics unambiguous.
+
+Region unnamed count after this pass: **128** (129 minus this rename). Live named
+**2038** global.
+
+**Next:** Pass 163 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
