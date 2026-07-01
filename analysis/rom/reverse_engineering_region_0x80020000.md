@@ -3883,4 +3883,34 @@ link-key derivation path documented in Pass 6 cont. (77).
 
 Region unnamed count after this pass: **208** (209 minus this rename). Live named **1713** global.
 
+**Next:** superseded by Pass 6 continuation (105).
+
+## Pass 6 continuation (105) (2026-07-01) — SSP/ECDH bit-aligned byte writer `FUN_8002cbc8`
+
+Decompiled and renamed:
+**`FUN_8002cbc8` → `crypto_bignum_write_u8_bytes_at_bit_offset`**
+(120B, HIGH) via `RenamePass6Region80020000Fun8002cbc8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (120B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=208` at pass start). Sits in the
+`0x8002cbxx` SSP/ECDH byte-bignum helper cluster between SAFER+ key-schedule
+(`safer_plus_key_schedule`) and the named subtract primitives at `0x8002ccxx`.
+
+**Mechanism:** Bit-aligned byte-range writer for big-endian byte-array bignum math.
+`param_3` encodes combined start-byte index (`>>3`) and intra-byte bit offset (`&7`);
+copies `(param_4 - start_byte)` bytes from source `param_1` into a stack buffer,
+then writes bit-shifted bytes into destination `param_2` from `start_byte` through
+`param_4` (first byte left-shifted by bit offset, subsequent bytes merged from
+adjacent shifted pairs). Helper for bit-aligned subtract loops in the
+`0x8002ccxx`/`0x8002d2xx` curve-constant cluster.
+
+**Callers:** `crypto_bignum_sub_u8_byte_arrays_in_place` (`0x8002d2a0`) and
+`crypto_bignum_sub_u8_byte_arrays_to_dest` (`0x8002ccac`) — both documented in
+Pass 6 cont. (39)/(41); xref_in=2.
+
+**Confidence:** HIGH — unambiguous bit-shift/store idiom; both callers already
+HIGH-named subtract primitives that reference this helper by role in prior passes.
+
+Region unnamed count after this pass: **207** (208 minus this rename). Live named **1714** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
