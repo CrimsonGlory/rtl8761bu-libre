@@ -1951,7 +1951,8 @@ clears 0x3c bytes at offset `+0x34`. Always tail-calls
 of `reinit_hci_cmd_list_clear_active_descriptor_tails_and_drain`.
 
 **Callers:** `connection_teardown_finalize_and_reset` (link-supervision-loss
-cleanup chain) + `FUN_8003e98c` (bitmask-sweep dispatch sibling).
+cleanup chain) + `connection_setup_arm_stride88_slot_and_apply_packet_types`
+(bitmask-sweep dispatch sibling).
 
 **Confidence:** HIGH — full 68B decompile; stride/offset semantics match Pass 8
 `connection_teardown_finalize_and_reset` cluster.
@@ -3506,5 +3507,48 @@ family in region `0x80040000`.
 Region unnamed count after this pass: **172** (173 minus this rename). Live named
 **1994** global.
 
-**Next:** Pass 119 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 119.
+
+## Pass 119 (2026-07-01) — `connection_setup_arm_stride88_slot_and_apply_packet_types`
+
+Fresh `ListUnnamed80030000.java` re-run: **172 unnamed** remain in region
+(unchanged from Pass 118; rank-1 at xref=1 tier is `FUN_8003e98c` at 644B —
+largest among nine tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e98c` → `connection_setup_arm_stride88_slot_and_apply_packet_types`**
+(644B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass119Region80030000Fun8003e98c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-event connection-setup handler on the shared stride-0x88
+per-connection table (`PTR_DAT_8003ec18`, same family as
+`connection_teardown_finalize_and_reset` / `ACL_fragment_dequeue_and_credit_consumer`).
+Optional guard fptr at `PTR_DAT_8003ec10` may veto; else
+`FUN_8006c81c` resolves the connection index. When slot `+0x81` already set,
+only re-arms `+0x85`; otherwise marks `+0x81=1`, clears queue/timing fields
+`+0x70..0x82`, copies timing dword from `+0x30`. When global flag
+`PTR_DAT_8003ec1c` set, calls
+`clear_active_stride88_connection_buffers_and_drain_hci_cmds`. Timing path:
+if `+0x38==0`, reads HW clock via `read_hw_clock_raw_dword_by_role_index` and
+updates `+0x30` with wrap-aware slot arithmetic; else `FUN_8003e58c`. Gated on
+connection type `+0x18`, `bdaddr_random_`, and config `field208_0xd8` bit5,
+computes packet-type bitfields from per-slot ushort/byte fields and dispatches
+via hook fptr `PTR_DAT_8003ec38` (public vs random-BD_ADDR table paths through
+`PTR_DAT_8003ec40` / `PTR_DAT_8003ec44`). Tail:
+`remap_role_index_to_esco_slot_if_pending` then
+`FUN_80013be4`/`FUN_80013c0c` eSCO packet-type apply (same pair as
+`apply_eSCO_SCO_packet_type_params`).
+
+**Callers:** 1 xref_in — indirect via
+`bitmask_sweep_dispatch_to_8003e98c_3entry` in region `0x80000000`
+(`top_level_link_event_status_dispatcher_loop` status-bit `0x400` path).
+
+**Confidence:** HIGH — full 644B decompile; stride-0x88 offsets match Pass 8
+cluster; setup/teardown sibling pairing with `connection_teardown_finalize_and_reset`
+confirmed; eSCO tail matches documented packet-type apply family.
+
+Region unnamed count after this pass: **171** (172 minus this rename). Live named
+**1995** global.
+
+**Next:** Pass 120 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
