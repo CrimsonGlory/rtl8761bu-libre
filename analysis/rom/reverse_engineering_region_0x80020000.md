@@ -3427,4 +3427,38 @@ idiom parallels Pass 6 cont. (84)'s receiver-side handler; both callers confirme
 
 Region unnamed count after this pass: **222** (223 minus this rename). Live named **1699** global.
 
+**Next:** superseded by Pass 6 continuation (91).
+
+## Pass 6 continuation (91) (2026-07-01) — SSP IO-cap continuation `FUN_80023a80`
+
+Decompiled and renamed:
+**`FUN_80023a80` → `dispatch_ssp_pairing_continuation_lmp_ext_0x19_auth_failure`**
+(132B, HIGH) via `RenamePass6Region80020000Fun80023a80.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (132B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=222` at pass start). Sits in the
+`0x80023axx` SSP pairing-continuation cluster alongside
+`dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41` (Pass 6 cont. 90) and
+`handle_lmp_ext_io_capability_req_subopcode_0x19` (Pass 6 cont. 17).
+
+**Mechanism:** Per-connection SSP pairing continuation keyed on pending LMP at
+`crypto+0x1e8` and crypto sub-state byte `+1`:
+- No pending LMP (`+0x1e8==0`): when sub-state `0x1e`, send LMP-ext `0x7f`/`0x19` via
+  `FUN_800243b8(conn, 0x7f, 0x19, 2, param_2)`.
+- Pending opcode `0x7F` extended sub-opcode `0x19`: resend via `FUN_800243b8` with role
+  bit from pending LMP byte 4 bit 0, then clear pending via `FUN_80025634`.
+- Wrong pending opcode: clear pending via `FUN_80025634` and return without SSP Complete.
+- On the send paths: always finishes with `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)`
+  (auth failure).
+
+**Callers:** `many_sub_if_else_cases_on_param2` at `0x80022f2e` (internal opcode router);
+thin wrapper `FUN_80023b08` at `0x80023b26` — confirmed via inline
+`ListXrefsTo80023a80.java`.
+
+**Confidence:** HIGH — callee cluster matches documented LMP-ext NOT_ACCEPTED sender
+(`FUN_800243b8` with `0x7f`/`0x19`) and SSP Simple Pairing Complete auth-failure idiom;
+sibling of Pass 6 cont. (90)'s `0x1b`/DHKey-check continuation; both callers confirmed.
+
+Region unnamed count after this pass: **221** (222 minus this rename). Live named **1700** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
