@@ -2501,4 +2501,35 @@ setup cluster.
 
 Region unnamed count after this pass: **195** (196 minus this rename).
 
-**Next:** Pass 117 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 117.
+
+## Pass 117 (2026-07-01) — SCO sync setup primary init `FUN_800172bc`
+
+Pass 117 target from cold-triage rank-1 (2 xref_in, 410B — largest at xref=2
+tier after Pass 116 cleared `FUN_80016e68`). Decompiled and renamed:
+**`FUN_800172bc` → `init_SCO_sync_setup_state_apply_primary_hw_hooks_vsc_fc95_lmp268`**
+(410B, HIGH) via `RenamePass117Region80010000Fun800172bc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Primary SCO sync-setup state initializer on the shared 0xac-byte
+struct at `PTR_DAT_80017458`: `memset` + default timing/flag fields (`0x40`,
+`0x80`, `0x2000`, `0xcc18`, role bytes `0x1a`/`0x41`/`0xaa`), 10-byte copy
+from `PTR_DAT_80017460`, optional `LMP__25B__most_common_for_VSCs1` when pending
+slots != -1. Commits HW hooks via `PTR_DAT_80017470` at opcodes `0x230` and
+`0x21c`; calls `FUN_800154f0` (four-field timing offset precompute); clears
+globals; tail issues `VSC_0xfc95_called2` +
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` — same gateway pattern as
+Pass 101/102 but as the boot/reset primary-config path (not the secondary
+`feature_bit0_gated_*` gateways).
+
+**Callers:** 2 xref_in per `ListXrefsTo800172bc.java` —
+`fHCI_Reset_0x03_full_subsystem_teardown` (HCI reset) and
+`boot_init_chain_string_user_baseband_and_subsystems` (boot init).
+
+**Confidence:** HIGH — decompile confirms full struct init + dual HW-hook commits
++ VSC fc95/LMP-268 tail; callers are boot + HCI-reset paths consistent with
+primary subsystem setup.
+
+Region unnamed count after this pass: **194** (195 minus this rename).
+
+**Next:** Pass 118 — cold-triage next rank-1 unnamed in region `0x80010000`.
