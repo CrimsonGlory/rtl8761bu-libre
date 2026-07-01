@@ -14420,9 +14420,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7b;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7c: ListUnnamed80010000 re-rank;
-          decompile+rename rank-1 `FUN_8001136c` (34B, 27 xref_in, ROM HW
-          register read protocol per `reverse_engineering_rom_regs.md`).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7c (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8001136c`→`read_baseband_register_mmio_indexed`
+          (34B, HIGH). Canonical MMIO read at `0xb000a0bc`; 6-bit index in
+          bits[21:16], returns 16-bit value; distinct from masked_busywait read
+          primitive. 27 xref_in; 255 unnamed remain; live named 2169.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7c;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7d: decompile+rename
+          `FUN_8001139c` (46B, write-side counterpart of
+          `read_baseband_register_mmio_indexed`, same MMIO protocol per
+          `reverse_engineering_rom_regs.md`).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

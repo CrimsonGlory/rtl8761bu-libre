@@ -827,5 +827,24 @@ live decompile matches; rename closes read-side of the masked busy-wait pair.
 
 Region unnamed count after this pass: **256** (257 minus this rename).
 
-**Next:** Pass 7c — decompile+rename rank-1 `FUN_8001136c` (34B, 27 xref_in,
-ROM HW register read protocol per `reverse_engineering_rom_regs.md`).
+## Pass 7c (2026-07-01) — MMIO indexed register read `FUN_8001136c`
+
+Pass 7c target from cold-triage rank-1 (27 xref_in, 34B). Decompiled and renamed:
+**`FUN_8001136c` → `read_baseband_register_mmio_indexed`**
+(34B, HIGH) via `RenamePass7cRegion80010000Fun8001136c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Canonical baseband HW register read via MMIO at `0xb000a0bc`
+(documented in `reverse_engineering_rom_regs.md`). RMW control word: masks
+preserve status bits, inserts 6-bit register index into bits[21:16], returns
+16-bit value from bits[15:0]. Distinct from `read_baseband_register_masked_busywait`
+(Pass 7b) which uses a separate control window with IRQ disable and busy-wait
+polling. Sole access path for patch and `FUN_80009980` HW init per project docs.
+
+**Confidence:** HIGH — mechanism pre-documented in `reverse_engineering_rom_regs.md`;
+live decompile matches exactly; 27 xref_in confirms generic primitive status.
+
+Region unnamed count after this pass: **255** (256 minus this rename).
+
+**Next:** Pass 7d — decompile+rename `FUN_8001139c` (46B, write-side counterpart
+of `read_baseband_register_mmio_indexed`, same MMIO protocol).
