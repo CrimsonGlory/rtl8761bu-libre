@@ -1897,5 +1897,36 @@ indices 0..2.
 Region unnamed count after this pass: **222** (223 minus this rename). Live named
 **1944** global.
 
-**Next:** Pass 69 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 69.
+
+## Pass 69 (2026-07-01) — ilog2 helper `FUN_80038b64`
+
+Fresh `ListUnnamed80030000.java` re-run: **222 unnamed** remain in region
+(unchanged from Pass 68; rank-1 by xref count is `FUN_80038b64` at 82B,
+4 xref-in — wins xref=4 tier on size over `FUN_8003e648` 68B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038b64` → `ilog2_floor_plus_two_dword`**
+(82B, HIGH) via `RenamePass69Region80030000Fun80038b64.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** 32-bit MSB scan from bit 30 downward (sign bit excluded).
+For nonnegative `*param_1`: returns `floor(log2(n)) + 2` when `n > 0`, or `1`
+when `n == 0` — e.g. `n=1→2`, `n=8→5`. For negative values: walks while bits
+are set from bit 30 down, returns when the first clear bit is found (complement
+path for two's-complement magnitudes). Pure bit-scan utility; sibling of ROM
+`count_leading_zeros_32` (`0x8000937c`) but uses iterative shift-test rather
+than divide-and-conquer CLZ.
+
+**Callers:** 4 xref-in at `0x80038bc2`/`bca`/`bd2`/`bda` (inline calls in
+adjacent code block immediately following this function — Ghidra has not bounded
+a containing parent function).
+
+**Confidence:** HIGH — full 82B decompile; nonnegative path semantics verified
+by bit-index trace; name matches `+2` offset from MSB bit position.
+
+Region unnamed count after this pass: **221** (222 minus this rename). Live named
+**1945** global.
+
+**Next:** Pass 70 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

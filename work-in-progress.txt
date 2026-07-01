@@ -12289,7 +12289,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 68;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 69: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 69 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80038b64`→`ilog2_floor_plus_two_dword`
+          (82B, HIGH). 32-bit MSB scan from bit 30 down; nonnegative path
+          returns `floor(log2(n))+2`; sibling of `count_leading_zeros_32`.
+          4 xref-in at adjacent inline-call block. 221 unnamed remain;
+          live named 1945.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 69;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 70: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
