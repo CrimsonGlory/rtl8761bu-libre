@@ -12352,7 +12352,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 74;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 75: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 75 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80035768`→`commit_connection_setup_mode_by_slot_bitmask_and_gates`
+          (920B, HIGH, 3 xref-in). Connection-setup mode commit orchestrator on
+          `PTR_DAT_80035b04`: mode byte 0–6 + slot bitmask gates via
+          `validate_connection_setup_preconditions` +
+          `gate_lmp_power_clk_adj_eligibility_by_conn_state`; dispatches
+          LMP-0x25c multi-slot, LAP hopping, inquiry HW-channel, feature-page
+          merge; caller `dispatch_link_power_mode_by_status_bits_and_commit`.
+          215 unnamed remain; live named 1951.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 75;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 76: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

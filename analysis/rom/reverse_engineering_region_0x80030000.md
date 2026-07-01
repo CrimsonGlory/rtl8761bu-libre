@@ -2095,5 +2095,39 @@ establish/teardown packet-type and HW-register commit paths.
 Region unnamed count after this pass: **216** (217 minus this rename). Live named
 **1950** global.
 
-**Next:** Pass 75 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 75.
+
+## Pass 75 (2026-07-01) — connection setup commit `FUN_80035768`
+
+Fresh `ListUnnamed80030000.java` re-run: **216 unnamed** remain in region
+(unchanged from Pass 74; rank-1 by size at xref=3 tier is `FUN_80035768` at
+920B — Pass 74 sibling `recompute_and_commit_conn_slot_timing_hw_and_packet_types`
+already renamed).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035768` → `commit_connection_setup_mode_by_slot_bitmask_and_gates`**
+(920B, HIGH) via `RenamePass75Region80030000Fun80035768.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Large connection-setup mode commit orchestrator on global state
+`PTR_DAT_80035b04`. Optional prelude hooks at `PTR_DAT_80035b00` and
+`PTR_DAT_80035b18`. Gates via `FUN_80035378`, `validate_connection_setup_preconditions`,
+and `gate_lmp_power_clk_adj_eligibility_by_conn_state`. Mode byte `param_1`
+(0–6) plus slot bitmask `param_2` select commit path: mode 0 dispatches
+`dispatch_lmp_25c_multi_slot_emit_with_config_gates` + `FUN_80034d88`; mode 1
+runs `apply_LAP_derived_hopping_params(1)` + `reconcile_nonmatching_bdaddr_slot_and_dispatch_lmp_259`
++ `commit_hw_channel_merge_index_0x36_on_role_bit0`; mode 2 runs inquiry LAP
+path via `program_inquiry_lap_hw_channel_by_pending_slot_count`; modes 3/4/6
+handle LMP power/CLK-adj and feature-page merge when config bit2 set.
+
+**Callers:** 3 xref-in incl. `dispatch_link_power_mode_by_status_bits_and_commit`
+(`0x8005bf4c`) tail via `gate_lmp_power_clk_adj_eligibility_by_conn_state`.
+
+**Confidence:** HIGH — full 920B decompile; multiple named callees anchor the
+page/inquiry/LMP-0x25c/HW-channel commit paths.
+
+Region unnamed count after this pass: **215** (216 minus this rename). Live named
+**1951** global.
+
+**Next:** Pass 76 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
