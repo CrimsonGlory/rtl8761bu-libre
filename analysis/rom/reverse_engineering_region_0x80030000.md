@@ -2736,5 +2736,38 @@ fields `+0x10a`/`+0x164` match `link_mode_change_state_machine` decompile.
 Region unnamed count after this pass: **196** (197 minus this rename). Live named
 **1970** global.
 
-**Next:** Pass 95 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 95.
+
+## Pass 95 (2026-07-01) — packet-completion ring enqueuer `FUN_8003e0d4`
+
+Fresh `ListUnnamed80030000.java` re-run: **196 unnamed** remain in region
+(unchanged from Pass 94; rank-1 by size at xref=2 tier is `FUN_8003e0d4` at
+236B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e0d4` → `enqueue_connection_packet_completion_ring_or_overflow_dispatch`**
+(236B, HIGH, HANDLER-tier) via `RenamePass95Region80030000Fun8003e0d4.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked enqueue into the stride-0x88 connection table's
+12-entry packet-completion ring at `PTR_DAT_8003e1c0` (enqueue sibling of Pass
+66's `drain_connection_packet_completion_ring_and_emit_hci_num_completed`).
+When `+0x38`+`+0x3a` sum `< 0xc`, stores `param_1` at ring slot
+`(idx+0xe)*4+8`, advances `+0x35` index (wraps at 0xc), increments `+0x38`.
+Overflow path: when `field_0x179!=2`, dispatches immediately via
+`PTR_DAT_8003e1cc` fptr `(param_1,3)` and logs tag `0x675`; when
+`field_0x179==2`, buffer cleanup via
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests`.
+
+**Callers:** 2 xref-in per cold-triage; incl. ACL single-packet direct TX fast-path
+in region `0x80020000` (`acl_single_packet_direct_tx_program_descriptor`) when
+LMP handle absent.
+
+**Confidence:** HIGH — full 236B decompile; ring-buffer fields `+0x35`/`+0x38`/
+`+0x3a` match Pass 66 drainer; ACL TX cluster cross-reference confirms role.
+
+Region unnamed count after this pass: **195** (196 minus this rename). Live named
+**1971** global.
+
+**Next:** Pass 96 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
