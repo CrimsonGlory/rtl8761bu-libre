@@ -1800,4 +1800,34 @@ semantics on both HCI 0x07 command-status paths.
 
 Region unnamed count after this pass: **219** (220 minus this rename).
 
-**Next:** Pass 93 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 93.
+
+## Pass 93 (2026-07-01) — sub-opcode BB reg write dispatcher `FUN_80013c64`
+
+Pass 93 target from cold-triage rank-1 (4 xref_in, 78B — tied largest at
+xref=4 tier with `FUN_80012ec8`/`FUN_80011a74`/`FUN_800179a8` after Pass 92).
+Decompiled and renamed:
+**`FUN_80013c64` → `write_baseband_reg_by_subopcode_byte_via_hook`**
+(78B, HIGH) via `RenamePass93Region80010000Fun80013c64.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Sub-opcode-gated baseband register write dispatcher in the
+`0x80013cxx` cluster (sibling of `write_packet_type_table_low_byte_at_offset`
+and `clear_indexed_channel_slot_bit4_and_invoke_release_hook`). When
+`(param_2 & 0xff) < 4`, sub-opcode 0 merges `param_1 << 12` into stored word
+`DAT_80013cb4` (`& 0xcfff`) and writes BB reg `0x16`; sub-opcodes 1–3 look up
+register ID from `PTR_DAT_80013cb8[index*2]`; all paths dispatch via hook
+`PTR_DAT_80013cbc(reg_id, param_1)`.
+
+**Callers:** 4 xref_in — connection-setup finalize step in
+`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` (region
+`0x80040000` Pass 52ei) plus sibling dual-slot accept and
+`LMP_accept_or_mirror_connection_handler` paths.
+
+**Confidence:** HIGH — decompile confirms 4-slot gate, sub-opcode-0 template
+merge, table-indirected register IDs, and hook dispatch; cluster placement
+consistent with `0x80013c0c`/`0x80013cec` primitives.
+
+Region unnamed count after this pass: **218** (219 minus this rename).
+
+**Next:** Pass 94 — cold-triage next rank-1 unnamed in region `0x80010000`.

@@ -14775,8 +14775,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 92;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 93: cold-triage next rank-1
-          unnamed function in region `0x80010000` (219 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 93 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013c64`→
+          `write_baseband_reg_by_subopcode_byte_via_hook`
+          (78B, HIGH). Sub-opcode-gated BB reg write dispatcher in `0x80013cxx`
+          cluster; sub-opcode 0 merges template at `DAT_80013cb4` + writes reg
+          `0x16`, sub-opcodes 1–3 table lookup via `PTR_DAT_80013cb8`, dispatch
+          via `PTR_DAT_80013cbc`; callers connection-setup finalize
+          (`accept_lmp_conn_setup_and_program_baseband_from_unpacked_pdu` +
+          siblings); 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 93;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 94: cold-triage next rank-1
+          unnamed function in region `0x80010000` (218 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
