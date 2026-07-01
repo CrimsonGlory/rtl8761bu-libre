@@ -14824,8 +14824,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 97;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 98: cold-triage next rank-1
-          unnamed function in region `0x80010000` (214 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 98 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014e40`→`alloc_and_commit_credit_scheduler_tx_descriptor_batch`
+          (244B, HIGH). Multi-descriptor credit-scheduler commit: batch-copies 8B
+          TX descriptors into 0xc-stride slot via `alloc_credit_scheduler_slot_0xd`,
+          merges ACL-handle bits, `LMP__25C_called2` +
+          `commit_credit_scheduler_slot_hw_arm_descriptor`; callers include
+          `program_single_tx_descriptor_slot_via_credit_scheduler` +
+          `ACL_fragment_dequeue_and_credit_consumer`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 98;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 99: cold-triage next rank-1
+          unnamed function in region `0x80010000` (213 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

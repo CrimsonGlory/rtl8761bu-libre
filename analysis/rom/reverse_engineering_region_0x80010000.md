@@ -1941,4 +1941,36 @@ caller list in region `0x80020000` Pass 6.
 
 Region unnamed count after this pass: **214** (215 minus this rename).
 
-**Next:** Pass 98 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 98.
+
+## Pass 98 (2026-07-01) — credit-scheduler TX descriptor batch commit `FUN_80014e40`
+
+Pass 98 target from cold-triage rank-1 (3 xref_in, 244B — largest at xref=3
+tier after Pass 97 cleared xref=3 `FUN_8001fd20`). Decompiled and renamed:
+**`FUN_80014e40` → `alloc_and_commit_credit_scheduler_tx_descriptor_batch`**
+(244B, HIGH) via `RenamePass98Region80010000Fun80014e40.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Core multi-descriptor credit-scheduler commit primitive in the
+`0x80014fxx` cluster (callee of Pass 7x
+`program_single_tx_descriptor_slot_via_credit_scheduler` for count=1 submits).
+When `param_1` buffer has non-zero length bits at `+2` and `param_2` count≠0:
+allocates slot via `alloc_credit_scheduler_slot_0xd` (slot index from
+`param_4+2` when `param_5==0` and `param_3≠0`, else default `9`), copies
+`param_2` 8-byte TX descriptor pairs into the 0xc-stride slot table at
+`PTR_DAT_80014f34`, merges ACL-handle bits from each descriptor's `ushort` at
+`+2` into the slot pending dword, optionally sets high bits from `param_6` when
+`param_5≠0`, then calls `LMP__25C_called2` coexistence hook and
+`commit_credit_scheduler_slot_hw_arm_descriptor`.
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java`; includes
+`program_single_tx_descriptor_slot_via_credit_scheduler` (Pass 7x) and
+`ACL_fragment_dequeue_and_credit_consumer` (region `0x80030000` Pass 8).
+
+**Confidence:** HIGH — decompile confirms batch copy loop, handle-bit merge,
+and credit-scheduler alloc/arm choreography; closes the long-standing
+`FUN_80014e40` gap referenced by Pass 7x and ACL fragment consumer docs.
+
+Region unnamed count after this pass: **213** (214 minus this rename).
+
+**Next:** Pass 99 — cold-triage next rank-1 unnamed in region `0x80010000`.
