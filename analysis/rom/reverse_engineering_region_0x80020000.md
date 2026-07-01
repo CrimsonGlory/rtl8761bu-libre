@@ -2349,7 +2349,7 @@ dispatched from `HCI_Write_Simple_Pairing_Debug_Mode` opcode switch case `0x40d`
 Resolves connection via `FUN_80023008` with validator callbacks at `PTR_LAB_80022640`
 and `PTR_LAB_80022654`. Copies PIN length from cmd byte `+9` to `crypto+0xde` and
 16-byte PIN material from `+10` to `crypto+0xce` via `optimized_memcpy`. When conn
-sub-state `+1 != 0x17`: if no pending LMP at `+0x1e8`, calls `FUN_80025410` (AU_RAND
+sub-state `+1 != 0x17`: if no pending LMP at `+0x1e8`, calls `derive_pin_safer_plus_au_rand_and_send_lmp_0x0b` (AU_RAND
 LMP send) + `set_arg1_1_to_arg2(0xb)`; else when pending-LMP type bit `>>1 != 8`,
 either rejects via `wrap_send_LMP_NOT_ACCEPTED(0x8, reason 0x23)` or sets `+0x50=3`
 before `FUN_80025474` pairing continuation. Always clears pending via `FUN_80025634`.
@@ -5060,5 +5060,35 @@ documented in Pass 6 cont. (113)/(114).
 cluster; adjacent to `safer_plus_block_encrypt`/`pad_concat_safer_plus_encrypt_16byte_key_block`.
 
 Region unnamed count after this pass: **170** (171 minus this rename). Live named **1751** global.
+
+**Next:** superseded by Pass 6 continuation (143).
+
+## Pass 6 continuation (143) (2026-07-01) — PIN-reply AU_RAND sender `FUN_80025410`
+
+Decompiled and renamed:
+**`FUN_80025410` → `derive_pin_safer_plus_au_rand_and_send_lmp_0x0b`**
+(94B, HIGH) via `RenamePass6Region80020000Fun80025410.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=170` at pass start). First-listed at
+94B (tied cluster; highest xref_in=3 with `FUN_80025410`).
+
+**Mechanism:** Legacy PIN-authentication AU_RAND (opcode **0x0b**) sender — sibling of
+`derive_au_rand_and_send_lmp_0x0b` but PIN-specific. Primes 16B challenge via
+`FUN_8002c838`, then runs `pad_concat_safer_plus_encrypt_16byte_key_block` over PIN
+material at crypto `+0xce` (length byte `+0xde`), per-connection BD_ADDR table entry
+(`×0x2b8` stride), and existing 16B block at crypto `+0x51`. Sends 18-byte LMP
+(`0x12`) via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+
+**Callers:** xref_in=3 per `ListUnnamed80020000.java`; documented path includes
+`fHCI_PIN_Code_Request_Reply_0xd` (Pass 6 cont. 56) — after HCI PIN Code Request Reply
+stages PIN to `+0xce`/`+0xde`, invokes this AU_RAND send when no pending LMP at `+0x1e8`.
+
+**Confidence:** HIGH — decompile confirms PIN-offset idiom matching Pass 6 cont. (56)
+HCI PIN reply handler; `pad_concat_safer_plus_encrypt` + 18B LMP send mirrors outbound
+COMB_KEY/AU_RAND cluster; sits in `0x800254xx` between `derive_au_rand_and_send_lmp_0x0b`
+and `xor_inbound_lmp_key_and_update_crypto_by_type`.
+
+Region unnamed count after this pass: **169** (170 minus this rename). Live named **1752** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
