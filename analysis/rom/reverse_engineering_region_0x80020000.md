@@ -1116,7 +1116,7 @@ Decompiled and renamed:
 per-connection crypto sub-state `+1`. Primary success path when state `== 0x1d`:
 copies IO-cap bytes from PDU offset `+6` into crypto struct `+0x1e1` via
 `FUN_800257f0`, emits `send_evt_HCI_IO_Capability_Response`, runs SSP helper
-`FUN_80025910`, then arms pairing-template staging via `FUN_80025b68(role_bit)`.
+`send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto`, then arms pairing-template staging via `FUN_80025b68(role_bit)`.
 Alternate path when state `== 0x14` delegates to `FUN_8002403c`/`some_case_0x2d`.
 Error paths validate link/crypto preconditions (`FUN_8002403c`, `FUN_80023fdc`) and
 reply `FUN_800243b8(conn, 0x7f, 0x19, role_bit, reason)` (LMP ext NOT_ACCEPTED).
@@ -1353,11 +1353,11 @@ Decompiled and renamed:
 Debug Mode. Resolves connection via `FUN_80023008`, copies 9 debug-mode bytes into
 per-connection `_x58_crypto_struct` at `+0x1de`, normalizes OOB-mode byte `+0x1df`
 when `+0x214` pairing-mode flag is set. Primary path when crypto sub-state `== 0x1e`:
-runs `FUN_80025910` then arms codec JIT via
+runs `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto` then arms codec JIT via
 `unscramble_codec_jit_template_and_install_hw_hook`. Alternate paths inspect pending
 LMP slot at `+0x1e8`: when empty, `FUN_80025948` + status `0x15`; when holding LMP
 ext IO-cap req (`0x7f`/`0x19`), either copies IO-cap bytes, emits
-`send_evt_HCI_IO_Capability_Response`, runs `FUN_80025910`, installs codec hook
+`send_evt_HCI_IO_Capability_Response`, runs `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto`, installs codec hook
 (non-OOB path), or rejects via `FUN_800243b8`. Always finishes via `FUN_80025634`
 pairing continuation on non-`0x1e` fallthrough.
 
@@ -6998,5 +6998,37 @@ idiom; sole caller is the documented HCI command router; callee
 and documents this function as its HCI command-path caller.
 
 Region unnamed count after this pass: **105** (106 minus this rename). Live named **1816** global.
+
+**Next:** superseded by Pass 6 continuation (208).
+
+## Pass 6 continuation (208) (2026-07-01) — LMP ext IO-cap resp sender `FUN_80025910`
+
+Decompiled and renamed:
+**`FUN_80025910` → `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto`**
+(54B, HIGH) via `RenamePass6Region80020000Fun80025910.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (54B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=105` at pass start). Sits in the
+`0x800259xx` SSP IO-capability outbound sender cluster; sibling
+`FUN_80025948` (rank-2, 54B) sends sub-opcode `0x19` (IO-cap req) from the same
+crypto offsets.
+
+**Mechanism:** Outbound LMP-extended IO Capability Response sender. Builds 6-byte PDU:
+opcode `0x7F`, sub-opcode `0x1A`, three IO-capability bytes copied from per-connection
+crypto struct at `+0x1de`/`+0x1df`/`+0x1e0`, then transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`. Complement of inbound handler
+`handle_lmp_ext_io_capability_resp_subopcode_0x1a` (`0x80029364`).
+
+**Callers:** `handle_lmp_ext_io_capability_req_subopcode_0x19` (SSP state `0x1d` path
+after HCI IO-cap event); `continue_ssp_pairing_after_hci_debug_mode_write` (crypto
+sub-state `0x1e` primary path and LMP-ext IO-cap req pending-slot branch); xref_in=3
+per `ListUnnamed80020000.java` / `find_callers` reports 2 direct call sites.
+
+**Confidence:** HIGH — decompile confirms fixed 0x7F/0x1A PDU template with crypto
+struct IO-cap byte copy idiom; both callers already Pass-6 HIGH-named SSP pairing
+continuations that documented this callee by role; sibling `FUN_80025948` mirrors
+with sub-opcode `0x19`.
+
+Region unnamed count after this pass: **104** (105 minus this rename). Live named **1817** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
