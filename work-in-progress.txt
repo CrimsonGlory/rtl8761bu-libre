@@ -10420,8 +10420,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (133);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (134): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (179 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (134): decompiled+
+          renamed rank-1 `FUN_8002ede4`→`clone_hci_evt_buffer_and_dispatch_hci_evt_0x454_logger_hook`
+          (98B, HIGH). HCI event 0x454 buffer clone + patch-hook logger dispatch;
+          caller `FUN_8002ee54` (LC TX subcase-3 from
+          `dispatch_lc_tx_logger_hook_subcases_with_pending_queue` when
+          `field_0x179==1`); sibling of `0x453` relay at `0x8002ee84`. 178 unnamed
+          remain; live named 1743.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (134);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (135): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (178 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
