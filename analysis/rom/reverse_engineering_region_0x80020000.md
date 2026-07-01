@@ -2410,7 +2410,7 @@ Decompiled and renamed:
 `send_evt_HCI_Command_Status`, clears pending counter at `PTR_DAT_80029e0c+0x8c`, then
 walks 10 `big_ol_struct` slots. For active links (status `0x04`/`0x0f`), classifies
 crypto sub-state via `(crypto_byte - 0x15)` bitmask tables (`0xfb8`/`0xfbb`); eligible
-slots with `(state_index & 3) != 0` invoke per-slot armer `FUN_80029cfc` (LMP 0x32 send +
+slots with `(state_index & 3) != 0` invoke per-slot armer `arm_master_link_key_phase1_slot_lmp_0x32` (LMP 0x32 send +
 link-key-type `0x20` + encryption-state advance via `FUN_80023fb8(_,4)`). Status `0x0b`
 slots increment the pending counter without arming. On completion clears `+0x8d`/`+0x8e`
 and advances global phase dword `+0x48` from `2` → `3` for phase-2
@@ -5090,5 +5090,34 @@ COMB_KEY/AU_RAND cluster; sits in `0x800254xx` between `derive_au_rand_and_send_
 and `xor_inbound_lmp_key_and_update_crypto_by_type`.
 
 Region unnamed count after this pass: **169** (170 minus this rename). Live named **1752** global.
+
+**Next:** superseded by Pass 6 continuation (144).
+
+## Pass 6 continuation (144) (2026-07-01) — Master Link Key phase-1 slot armer `FUN_80029cfc`
+
+Decompiled and renamed:
+**`FUN_80029cfc` → `arm_master_link_key_phase1_slot_lmp_0x32`**
+(94B, HIGH) via `RenamePass6Region80020000Fun80029cfc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=169` at pass start). First-listed at
+94B (tied cluster; highest xref_in=2 with `FUN_80029cfc`).
+
+**Mechanism:** HCI Master Link Key (`0x0417`) phase-1 per-slot armer — sibling callee of
+`start_hci_master_link_key_0x417_phase1_across_connections` (Pass 6 cont. 58). Gates on
+encrypted link (`bdaddr_random_` set), connection status `0x04`/`0x0f`, and crypto sub-state
+`(*crypto - 0x15) <= 1`. On pass: sets `crypto+0x50=1`, sends LMP **0x32** (USE_SEMI_PERMANENT_KEY)
+via `FUN_80029cdc`, sets link-key type `0x20` via `set_arg1_1_to_arg2`, advances encryption
+state via `FUN_80023fb8(crypto, 4)`. Returns 1 when armed, 0 when gated out.
+
+**Callers:** xref_in=2 per `ListUnnamed80020000.java`; documented path is
+`start_hci_master_link_key_0x417_phase1_across_connections` (Pass 6 cont. 58) when
+`(state_index & 3) != 0`.
+
+**Confidence:** HIGH — decompile confirms LMP 0x32 send + link-key-type `0x20` + encryption
+advance mode 4; gates match documented phase-1 scan/arm pattern; sits adjacent to
+`FUN_80029cdc` (2B LMP 0x32 wrapper) and `LMP_USE_SEMI_PERMANENT_KEY_0x32` handler cluster.
+
+Region unnamed count after this pass: **168** (169 minus this rename). Live named **1753** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
