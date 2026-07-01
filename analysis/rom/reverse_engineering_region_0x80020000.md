@@ -9645,4 +9645,33 @@ caller already HIGH-named.
 
 Region unnamed count after this pass: **14** (15 minus this rename). Live named **1907** global.
 
+**Next:** superseded by Pass 6 continuation (299).
+
+## Pass 6 continuation (299) (2026-07-01) — inquiry/page scan-slot table init `FUN_80021d7c`
+
+Decompiled and renamed:
+**`FUN_80021d7c` → `init_inquiry_page_scan_slot_table_from_counter`**
+(16B, HIGH) via `RenamePass6Region80020000Fun80021d7c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_80021d7c` (16B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=14` at pass start).
+
+**Mechanism:** Thin ROM wrapper in the `0x80021dxx` LC-global init cluster; tail-calls
+`FUN_80062368` (region `0x80060000`), which reads a counter byte from `PTR_DAT_800623b0`
+and seeds a 3-entry scan-slot descriptor table at `PTR_DAT_800623b4` (header fields
+`+0xc`–`+0x10` plus three 4-byte slot records with timing derived from the counter).
+
+**Callers:** `init_inquiry_page_state_from_config` — conditional call when config byte
+`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bit 0 is set, after siblings
+`init_lc_global_psm_qos_enable_and_default_timing_intervals` and
+`init_lc_global_eir_fec_tail_fields_from_config`; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms unambiguous single-callee wrapper; callee
+decompile shows clear scan-slot table initialization; caller matches documented
+inquiry/page cold-init cluster (region `0x80060000` Pass 3).
+
+Region unnamed count after this pass: **13** (14 minus this rename). Live named **1908** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
