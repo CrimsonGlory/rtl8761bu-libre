@@ -8153,5 +8153,35 @@ selection logic unambiguous.
 Region unnamed count after this pass: **28** (29 minus this rename). Live named
 **2138** global.
 
-**Next:** Pass 263 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 263.
+
+## Pass 263 (2026-07-01) — public-BD_ADDR BOS slot finder `FUN_8003f9bc`
+
+Fresh `ListUnnamed80030000.java` re-run: **28 unnamed** remain in region
+(unchanged from Pass 262; xref_in=0 tier dominates — rank-1 is `FUN_8003f9bc`
+at 58B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003f9bc` → `find_public_bdaddr_bos_slot_index_by_byte_0xCC`**
+(58B, HIGH, UTILITY-tier) via
+`RenamePass263Region80030000Fun8003f9bc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** `big_ol_struct` connection-slot lookup in the `0x8003f9xx`
+cluster (address-adjacent sibling of Pass 89
+`dispatch_fptr_opcodes_0x8f_0x82_with_status_bytes_set_to_ff` and Pass 218
+`program_dual_slot_lmp25c_credits_if_role_record_byte1_set`). Scans up to 10
+entries at `PTR_big_ol_struct_8003f9f8`; returns first index where
+`bos_entry_valid_==1`, `bdaddr_random_==0` (public BD_ADDR), and
+`byte_0xCC==param_2` (HW-channel index). Stores index into `*param_1` and
+returns it (or `0` when no match within 10 slots).
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 58B decompile; slot-filter criteria and loop bound
+unambiguous.
+
+Region unnamed count after this pass: **27** (28 minus this rename). Live named
+**2139** global.
+
+**Next:** Pass 264 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
