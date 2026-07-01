@@ -1273,4 +1273,28 @@ name matches decompile exactly.
 
 Region unnamed count after this pass: **238** (239 minus this rename).
 
-**Next:** Pass 7u — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7u (2026-07-01) — channel slot bit4 clear + release hook `FUN_80013cec`
+
+Pass 7u target from cold-triage rank-1 (7 xref_in, 62B — tied largest at
+xref=7 tier with `FUN_8001a0c8`). Decompiled and renamed:
+**`FUN_80013cec` → `clear_indexed_channel_slot_bit4_and_invoke_release_hook`**
+(62B, HIGH) via `RenamePass7uRegion80010000Fun80013cec.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Indexed channel-slot release primitive in the `0x80013cxx`
+cluster. When `(param_1 & 0xff) < 4`, looks up a ushort offset from
+`PTR_DAT_80013d2c[index*2]`, reads the halfword record at
+`DAT_80013d30 + offset`, clears bit 4 (`& 0xffef`), and dispatches via hook
+`PTR_DAT_80013d34` with `(offset, masked_value)`. Cross-region callers use this
+during ACL finalization slot-reuse (`region_0x80070000`) and page-response
+channel-table teardown (`region_0x80000000`).
+
+**Callers:** 7 xref_in per `ListUnnamed80010000.java`.
+
+**Confidence:** HIGH — decompile confirms 4-slot index gate, table-indirected
+record read, bit-4 clear, and hook dispatch; behavioral name matches decompile
+exactly.
+
+Region unnamed count after this pass: **237** (238 minus this rename).
+
+**Next:** Pass 7v — cold-triage next rank-1 unnamed in region `0x80010000`.
