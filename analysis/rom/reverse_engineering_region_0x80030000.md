@@ -5563,5 +5563,33 @@ gates (`byte_0x16a`, `int_0x10`, `field_0x17c`) unambiguous.
 Region unnamed count after this pass: **111** (112 minus this rename). Live named
 **2055** global.
 
-**Next:** Pass 180 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 180.
+
+## Pass 180 (2026-07-01) — Newton floor-sqrt `FUN_8003b428`
+
+Fresh `ListUnnamed80030000.java` re-run: **111 unnamed** remain in region
+(unchanged from Pass 179; rank-1 at xref=1 tier is `FUN_8003b428` at 86B —
+largest among the xref=1 cohort, tied with `FUN_8003ac28` on size).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b428` → `newton_floor_sqrt_lower16_shifted_left_6`**
+(86B, HIGH, UTILITY-tier) via
+`RenamePass180Region80030000Fun8003b428.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Pure math utility. Computes floor integer square root of
+`(param_1 & 0xffff) << 6` via MSB position scan (from bit 24 downward) then
+Newton divide-and-average iteration (`guess = (n/guess + guess) / 2`) until
+convergence (`guess <= new_guess`), returning lower 16 bits. Zero input returns
+0 without iteration.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` (no containing function found
+via `xrefs_to` — likely indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 86B decompile; classic integer sqrt Newton loop
+structure unambiguous (MSB initial guess + division/average convergence).
+
+Region unnamed count after this pass: **110** (111 minus this rename). Live named
+**2056** global.
+
+**Next:** Pass 181 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

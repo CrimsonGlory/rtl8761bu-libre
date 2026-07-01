@@ -13363,7 +13363,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 179;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 180: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 180 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003b428`→`newton_floor_sqrt_lower16_shifted_left_6`
+          (86B, HIGH, UTILITY-tier). Newton integer floor-sqrt of
+          `(param & 0xffff) << 6`; MSB scan + divide-average iteration.
+          110 unnamed remain; live named 2056.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 180;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 181: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
