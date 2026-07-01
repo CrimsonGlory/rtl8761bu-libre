@@ -4240,7 +4240,8 @@ branch).
 
 **Confidence:** HIGH — dispatch chain confirmed via `ListXrefsTo80028550.java`;
 role-gate + SSP-complete emitter idiom matches documented NOT-ACCEPTED siblings
-(`handle_lmp_encryption_mode_req_not_accepted`, `FUN_800284e4` for opcode `0x41`).
+(`handle_lmp_encryption_mode_req_not_accepted`,
+`handle_lmp_not_accepted_opcode_0x41_dhkey_check_ssp_complete` for opcode `0x41`).
 
 Region unnamed count after this pass: **196** (197 minus this rename). Live named **1725** global.
 
@@ -4645,5 +4646,38 @@ crypto struct `+0x1ec` pending slot; lives in documented `0x800222xx`–`0x80022
 connection-crypto cluster.
 
 Region unnamed count after this pass: **183** (184 minus this rename). Live named **1738** global.
+
+**Next:** superseded by Pass 6 continuation (130).
+
+## Pass 6 continuation (130) (2026-07-01) — LMP DHKey Check NOT ACCEPTED `FUN_800284e4`
+
+Decompiled and renamed:
+**`FUN_800284e4` → `handle_lmp_not_accepted_opcode_0x41_dhkey_check_ssp_complete`**
+(100B, HIGH) via `RenamePass6Region80020000Fun800284e4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (100B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=183` at pass start). Tied at 100B with
+`FUN_800269e8`; selected first by list order.
+
+**Mechanism:** Primary `LMP_NOT_ACCEPTED_0x04` recovery handler for rejected opcode
+**0x41** (LMP_DHKEY_CHECK). Gated by `ret_bool_based_on_crypto_struct_0x50` vs role bit
+`param_1+4&1`, unless global bypass `PTR_DAT_8002854c[2]&0x80`. When crypto sub-state
+byte at `+1` is `':'` (0x3a, DHKey-check success path) or `'='` (0x3d, alternate SSP
+status), emits `call_send_evt_HCI_Simple_Pairing_Complete(conn, status_from_param_1+6)`.
+Primary-path sibling of alt-recovery `handle_lmp_simple_pairing_confirm_not_accepted`
+(`0x80028634`, reached via `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`
+for the same rejected opcode). Complements
+`handle_lmp_not_accepted_opcode_0x40_ssp_complete_by_state_bitmask` (rejected opcode
+0x40) in the documented SSP NOT-ACCEPTED cluster.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x80028246`, rejected-opcode `0x41`
+branch) — confirmed via `ListXrefsTo800284e4.java`.
+
+**Confidence:** HIGH — sole caller is documented `LMP_NOT_ACCEPTED_0x04` dispatch;
+role-gate + SSP-complete emitter idiom matches documented NOT-ACCEPTED siblings;
+crypto sub-states `0x3a`/`0x3d` align with DHKey-check status bytes from
+`derive_dhkey_check_and_send_lmp_0x41` cluster.
+
+Region unnamed count after this pass: **182** (183 minus this rename). Live named **1739** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
