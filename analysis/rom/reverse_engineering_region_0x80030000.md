@@ -6032,5 +6032,38 @@ item 13 per-connection HW-buffer setup cluster.
 Region unnamed count after this pass: **96** (97 minus this rename). Live named
 **2070** global.
 
-**Next:** Pass 195 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 195.
+
+## Pass 195 (2026-07-01) — link-state advance arm + slot-timing commit `FUN_8003792c`
+
+Fresh `ListUnnamed80030000.java` re-run: **96 unnamed** remain in region
+(unchanged from Pass 194; rank-1 by size at xref=1 tier is `FUN_8003792c` at
+66B — wins on size over tied 64B/62B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003792c` → `arm_link_state_advance_pending_and_commit_conn_slot_timing_mode1`**
+(66B, HIGH, HANDLER-tier) via
+`RenamePass195Region80030000Fun8003792c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-conn-index `big_ol_struct` link-state advance establish on
+`field_0x29d`. When `field_0x29d == 0`: sets flag to 1, calls
+`FUN_800143b0(bos_connection__array_index, byte_0xCC, 1)` (IRQ-masked HW-channel
+table merge), then
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types(param_1, 1)` (mode-1
+link-state-advance commit path). Complement of Pass 192's
+`clear_link_state_advance_pending_and_commit_conn_slot_timing_mode2` which tears
+down `field_0x29d` from 1→0 and commits with mode 2.
+
+**Callers:** 1 xref-in — `LC_event_RX_dispatcher` (LC RX event dispatch cluster;
+documented in Pass 2 region `0x80040000`).
+
+**Confidence:** HIGH — full 66B decompile; `field_0x29d` semantics match Pass
+192 complement pair; named callee
+`recompute_and_commit_conn_slot_timing_hw_and_packet_types` (Pass 74) anchors
+mode-1 commit; establish/teardown symmetry with Pass 192 confirmed.
+
+Region unnamed count after this pass: **95** (96 minus this rename). Live named
+**2071** global.
+
+**Next:** Pass 196 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
