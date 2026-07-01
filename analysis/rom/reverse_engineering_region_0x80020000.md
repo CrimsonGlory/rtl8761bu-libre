@@ -5446,4 +5446,35 @@ align with documented pairing-state cluster.
 
 Region unnamed count after this pass: **157** (158 minus this rename). Live named **1764** global.
 
+**Next:** superseded by Pass 6 continuation (156).
+
+## Pass 6 continuation (156) (2026-07-01) — per-slot encryption disable `FUN_80022190`
+
+Decompiled and renamed:
+**`FUN_80022190` → `disable_link_encryption_per_slot_and_public_crypto_table`**
+(86B, HIGH) via `RenamePass6Region80020000Fun80022190.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (86B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=157` at pass start). Highest xref_in
+among tied 86B cluster; first-listed `FUN_80022190`.
+
+**Mechanism:** Per-connection encryption teardown helper — takes conn slot index
+`param_1` and flag `param_2`. When `param_2 != 0`: calls
+`sometimes_called_with_0_3_0(bos_connection__array_index, byte_0xCC, 0)` (per-slot
+mode-3 encryption disable). Independently, for public BD_ADDR links (`bdaddr_random_==0`)
+whose crypto link-type byte (`*crypto − 9`) is `< 0x18` and
+`PTR_DAT_800221ec[link_type] != 0`: falls through to `FUN_8002217c` →
+`sometimes_called_with_0_3_0(0,3,0)` (global mode-3 encryption disable). Encryption
+teardown sibling of `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3`
+(Pass 6 cont. 152) and `arm_link_encryption_post_key_program` (Pass 6 cont. 67).
+
+**Callers:** `lmp_pdu_received_top_level_processor` (xref_in=2 per listing script).
+
+**Confidence:** HIGH — decompile confirms per-slot + public-link lookup-table gating
+idiom; callees tie into documented `sometimes_called_with_0_3_0` /
+`start_encryption_vsc_pair_on_mode3_enable` encryption cluster; caller is the
+central LMP PDU processor.
+
+Region unnamed count after this pass: **156** (157 minus this rename). Live named **1765** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
