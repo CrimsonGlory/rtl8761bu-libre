@@ -8330,4 +8330,34 @@ alongside sibling `FUN_80021d00`/`FUN_80021d7c` helpers already flagged in regio
 
 Region unnamed count after this pass: **60** (61 minus this rename). Live named **1861** global.
 
+**Next:** superseded by Pass 6 continuation (253).
+
+## Pass 6 continuation (253) (2026-07-01) — LC global EIR/FEC tail fields `FUN_80021d00`
+
+Decompiled and renamed:
+**`FUN_80021d00` → `init_lc_global_eir_fec_tail_fields_from_config`**
+(40B, HIGH) via `RenamePass6Region80020000Fun80021d00.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per prior
+`ListUnnamed80020000.java` run (`total_unnamed=60` at pass start). Sibling of Pass 6
+continuation (252)'s `init_lc_global_psm_qos_enable_and_default_timing_intervals` in the
+`0x80021dxx` LC-global init cluster; flagged in region `0x80060000` Pass 3 as callee of
+`init_inquiry_page_state_from_config`.
+
+**Mechanism:** Global `struct_of_at_least_0x300_size` (`PTR_struct_of_at_least_0x300_size_80021d28`)
+initializer fragment: stores config data pointer at offset `+4` (`*(ptVar2+1)=PTR_DAT_80021d2c`),
+clears EIR/FEC tail bytes `FEC_0x2fc`, `byte_0x2fe`, `EIR_FEQ_Required_0x2ff`, copies config
+byte into `field_0x185` from `PTR_DAT_80021d30`, clears `byte_0x184`. Complements Pass 6
+continuation (252)'s PSM/QoS timing defaults on the same global during cold-init.
+
+**Callers:** `init_inquiry_page_state_from_config` at `0x80067c4e` — unconditional tail
+call in inquiry/page cold-init sequence alongside `FUN_80021da0` and conditional
+`FUN_80021d7c`; xref_in=1 per region `0x80060000` Pass 3.
+
+**Confidence:** HIGH — decompile confirms field-level writes on documented LC global EIR/FEC
+tail offsets; caller context matches inquiry/page cold-init cluster already documented in
+region `0x80060000`.
+
+Region unnamed count after this pass: **59** (60 minus this rename). Live named **1862** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
