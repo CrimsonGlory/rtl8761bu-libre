@@ -9080,4 +9080,36 @@ and `derive_encryption_key_material_safer_plus_mode6`.
 
 Region unnamed count after this pass: **33** (34 minus this rename). Live named **1888** global.
 
+**Next:** superseded by Pass 6 continuation (280).
+
+## Pass 6 continuation (280) (2026-07-01) — boot-init wrapper `FUN_80021a94`
+
+Decompiled and renamed:
+**`FUN_80021a94` → `init_pool_slots_flush_packet_slots_and_initialize_global_struct`**
+(28B, HIGH) via `RenamePass6Region80020000Fun80021a94.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (28B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=33` at pass start). First-listed of two
+tied 28B entries with xref_in≥1 (`FUN_80021a94`, `FUN_8002b394` has xref_in=0) after Pass 6
+cont. (279) renamed `FUN_80021ee8`.
+
+**Mechanism:** Thin boot-init sequencing wrapper in the `0x800219xx`/`0x80021axx` cluster.
+Calls three already-named init helpers in order:
+1. `init_eleven_pool_slots_via_call_fptr_if_set_wraps_pool_slot_init_and_zero` — eleven
+   pool-slot inits via `call_fptr_if_set_wraps_pool_slot_init_and_zero`
+2. `flush_check_seven_packet_slots_via_call_fptr_if_set_wraps_packet_slot_flush_check` —
+   seven packet-slot flush-checks
+3. `initialize_some_global_struct_FUN_80021924` — copies constant DAT values into two
+   8-word global struct arrays
+
+Parallel to `calls_interesting_string_user_FUN_80021c9c` (28B sibling wrapper that ends with
+the same `initialize_some_global_struct_FUN_80021924` call but uses different upstream inits).
+
+**Callers:** sole xref from `0x8001f456` per `ListXrefsTo80021a94.java`; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms unambiguous three-call init sequence; naming aligns
+with established `0x80021xxx` boot-init cluster semantics.
+
+Region unnamed count after this pass: **32** (33 minus this rename). Live named **1889** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
