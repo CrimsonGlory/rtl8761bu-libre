@@ -9041,10 +9041,10 @@ tied 28B entries (`FUN_800218ec`, `FUN_80021ee8`, `FUN_80021a94`, `FUN_8002b394`
 connection-policy matchers at `0x800218xx` and pool-slot init at `0x80021a04`). Clears
 the single-byte slot index at `PTR_DAT_80021908`, then `memset(PTR_DAT_8002190c, 0, 0x114)`
 — zeroing a 276-byte descriptor record buffer. Shared core callee for two thin wrappers:
-`FUN_80021910` (returns 1) and `FUN_80018c18` (returns 0, tail of
+`zero_descriptor_buffer_and_return_success` (returns 1) and `FUN_80018c18` (returns 0, tail of
 `boot_init_chain_string_user_baseband_and_subsystems`).
 
-**Callers:** `FUN_80021910` (`0x80021914`) and `FUN_80018c18` (`0x80018c1c`) per
+**Callers:** `zero_descriptor_buffer_and_return_success` (`0x80021914`) and `FUN_80018c18` (`0x80018c1c`) per
 `ListXrefsTo800218ec.java`; xref_in=2.
 
 **Confidence:** HIGH — decompile confirms unambiguous byte-clear + `memset` with fixed
@@ -9588,5 +9588,32 @@ connection event side-effects).
 already HIGH-named and documented.
 
 Region unnamed count after this pass: **16** (17 minus this rename). Live named **1905** global.
+
+**Next:** superseded by Pass 6 continuation (297).
+
+## Pass 6 continuation (297) (2026-07-01) — HCI Reset descriptor-buffer zero wrapper `FUN_80021910`
+
+Decompiled and renamed:
+**`FUN_80021910` → `zero_descriptor_buffer_and_return_success`**
+(18B, HIGH) via `RenamePass6Region80020000Fun80021910.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_80021910` (18B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=16` at pass start).
+
+**Mechanism:** Thin wrapper in the `0x800219xx` boot-init/descriptor cluster. Calls
+`zero_global_slot_index_and_memset_0x114_descriptor_buffer()` (Pass 6 cont. 278) and
+returns **1** — success-path sibling of `FUN_80018c18` (returns 0, tail of
+`boot_init_chain_string_user_baseband_and_subsystems`).
+
+**Caller:** `fHCI_Reset_0x03_full_subsystem_teardown` at `0x8001f45c` — HCI Reset
+subsystem teardown invokes this wrapper during descriptor-buffer reinitialization;
+xref_in=1 via `ListXrefsTo80021910.java`.
+
+**Confidence:** HIGH — decompile confirms single callee + constant return 1; callee
+already HIGH-named; sole caller is documented HCI Reset teardown handler.
+
+Region unnamed count after this pass: **15** (16 minus this rename). Live named **1906** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
