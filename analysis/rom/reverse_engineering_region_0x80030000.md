@@ -792,7 +792,7 @@ a crystal/clock-trim calibration routine.
 #### 6. `link_mode_change_state_machine` (0x80035454, 456B)
 
 `(byte link_type, uint, uint)`. The core link-mode/role-switch procedure dispatcher for this
-region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`adjust_link_mode_change_slot_budget_and_secondary_timing`/`check_link_mode_change_slot_budget_timing_gate_status`/`check_connection_setup_commit_gate_status`
+region's `check_link_mode_change_gate_status`/`invoke_link_mode_change_optional_prehook_status_byte`/`adjust_link_mode_change_slot_budget_and_secondary_timing`/`check_link_mode_change_slot_budget_timing_gate_status`/`check_connection_setup_commit_gate_status`
 helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
 busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
 brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
@@ -6632,5 +6632,34 @@ documented callees unambiguous; INIT-tier boot-init cluster sibling of
 Region unnamed count after this pass: **77** (78 minus this rename). Live named
 **2089** global.
 
-**Next:** Pass 214 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 214.
+
+## Pass 214 (2026-07-01) — link-mode optional prehook `FUN_80033ae4`
+
+Fresh `ListUnnamed80030000.java` re-run: **77 unnamed** remain in region
+(unchanged from Pass 213; rank-1 by size at xref=1 tier is `FUN_80033ae4` at
+40B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033ae4` → `invoke_link_mode_change_optional_prehook_status_byte`**
+(40B, HIGH) via `RenamePass214Region80030000Fun80033ae4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin optional-prehook wrapper in the `link_mode_change_state_machine`
+cluster (sibling of `check_link_mode_change_gate_status` at `0x80033a04`): when
+hook fptr at `PTR_DAT_80033b0c` is non-null, calls it with `(out_buf, param_1)`;
+if hook returns non-zero, returns `out_buf[0]` status byte; else returns `0`.
+Complements the full gate logic in Pass 78's `check_link_mode_change_gate_status`
+which embeds its own optional prelude at `PTR_DAT_80033ac0`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` (indirect dispatch —
+`xrefs_to`/`find_callers` empty).
+
+**Confidence:** HIGH — full 40B decompile; hook-null/zero-return default and
+status-byte return path unambiguous; link-mode-change cluster sibling of Pass 78.
+
+Region unnamed count after this pass: **76** (77 minus this rename). Live named
+**2090** global.
+
+**Next:** Pass 215 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
