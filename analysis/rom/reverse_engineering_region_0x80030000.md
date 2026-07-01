@@ -3973,5 +3973,37 @@ documented VSC 0xfd49 extended-diagnostic cluster.
 Region unnamed count after this pass: **159** (160 minus this rename). Live named
 **2007** global.
 
-**Next:** Pass 132 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 132.
+
+## Pass 132 (2026-07-01) — `copy_config_sco_timing_triplets_to_globals_and_toggle_0x2000_bit`
+
+Fresh `ListUnnamed80030000.java` re-run: **159 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_80033048` at 246B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033048` → `copy_config_sco_timing_triplets_to_globals_and_toggle_0x2000_bit`**
+(246B Ghidra boundary, HIGH, INIT-tier) via
+`RenamePass132Region80030000Fun80033048.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-blob mirror helper in the SCO HW-channel init cluster.
+Copies three dwords from `config_base` offsets `+0x1c`/`+0x20`/`+0x24` into
+`PTR_DAT_80033144`/`80033148`/`8003314c` runtime globals; mirrors byte `+0x1e6`,
+bytes `+0x28`/`+0x29`, and ushort `+0x1de` into sibling `PTR_DAT` slots. Toggles
+bit `0x2000` on the config ushort at `+0x44` (`field62_0x44`/`field63_0x45`)
+based on bit0 of `+0x1e6` (set when clear, clear when set). When the mirrored
+`+0x28` byte has bit `0x10` set, additionally copies dword `+0x2c` to
+`PTR_DAT_80033160`.
+
+**Callers:** 1 xref-in — `init_sco_hw_channel_8plus4_slot_program_and_bb_regs`
+at `0x8003769c` (Pass 93 SCO HW-channel init path).
+
+**Confidence:** HIGH — full 246B decompile; config-field copy pattern and
+`0x2000` link-capability bit toggle unambiguous; caller integration in SCO
+init cluster confirmed via `ListXrefsTo80033048.java`.
+
+Region unnamed count after this pass: **158** (159 minus this rename). Live named
+**2008** global.
+
+**Next:** Pass 133 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
