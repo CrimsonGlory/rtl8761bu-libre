@@ -2307,4 +2307,32 @@ setup dispatch chain.
 
 Region unnamed count after this pass: **202** (203 minus this rename).
 
-**Next:** Pass 110 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 110.
+
+## Pass 110 (2026-07-01) — packet-type table bits[14:15] writer `FUN_80013c3c`
+
+Pass 110 target from cold-triage rank-1 (3 xref_in, 36B — largest at xref=3
+tier after Pass 109 cleared `FUN_80019024`). Decompiled and renamed:
+**`FUN_80013c3c` → `write_packet_type_table_bits_14_15_at_global_ptr`**
+(36B, HIGH) via `RenamePass110Region80010000Fun80013c3c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Fixed-pointer read-modify-write on the eSCO/SCO packet-type
+table cluster (sibling of Pass 7e/7q offset-indexed byte writers). Patches
+bits[15:14] of `*DAT_80013c60`: `entry = (flags << 14) | (entry & 0x3fff)`.
+Distinct from the offset-based low/high-byte pair at `DAT_80013c38` /
+`DAT_80013c08` — this targets a single global ushort pointer used during
+baseband train programming.
+
+**Callers:** 3 xref_in per `ListXrefsTo80013c3c.java` —
+`program_page_train_baseband_regs_and_start_paging` (page-train sync-word
+flags after BD_ADDR-derived access-code programming),
+`configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` (inquiry-train
+setup), and `apply_LAP_derived_hopping_params` (LAP hopping table apply).
+
+**Confidence:** HIGH — trivial decompile; callers tie to documented
+page/inquiry/LAP baseband programming paths in `lc_lmp_state_machine.md`.
+
+Region unnamed count after this pass: **201** (202 minus this rename).
+
+**Next:** Pass 111 — cold-triage next rank-1 unnamed in region `0x80010000`.

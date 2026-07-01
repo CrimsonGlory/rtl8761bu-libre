@@ -14948,8 +14948,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 109;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 110: cold-triage next rank-1
-          unnamed function in region `0x80010000` (202 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 110 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013c3c`→`write_packet_type_table_bits_14_15_at_global_ptr`
+          (36B, HIGH). RMW bits[15:14] of `*DAT_80013c60` in packet-type table
+          cluster; callers `program_page_train_baseband_regs_and_start_paging` +
+          `configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp` +
+          `apply_LAP_derived_hopping_params`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 110;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 111: cold-triage next rank-1
+          unnamed function in region `0x80010000` (201 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
