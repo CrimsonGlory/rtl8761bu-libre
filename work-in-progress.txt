@@ -10929,8 +10929,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (190);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (191): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (122 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (191) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002155c`→`validate_hci_inquiry_length_and_lap_range`
+          (66B, HIGH) — HCI Inquiry param validator: coexistence-busy bit, length
+          `[1,0x30]` at `+6`, 3-byte LAP+global `<0x40`; returns `0`/`0x0c`/`0x12`;
+          callers `fHCI_Inquiry_0x01`/`0x8010de38`; xref_in=2; 121 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (191);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (192): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (121 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

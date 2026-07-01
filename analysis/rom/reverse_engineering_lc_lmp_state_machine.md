@@ -139,7 +139,7 @@ and calls `fHCI_Inquiry_0x01` (`0x8001bfa0`, 50 bytes):
 ```c
 int fHCI_Inquiry_0x01(int param_1)
 {
-  int iVar2 = FUN_8002155c();        // validate inquiry length + LAP range
+  int iVar2 = validate_hci_inquiry_length_and_lap_range();  // validate inquiry length + LAP range
   if (iVar2 == 0) {
     *PTR_DAT_8001bfd4 = param_1[7];   // stash num_responses
     iVar2 = called_by_fHCI_Remote_Name_Request_5(param_1);
@@ -149,7 +149,7 @@ int fHCI_Inquiry_0x01(int param_1)
 }
 ```
 
-`FUN_8002155c` (`0x8002155c`, 66 bytes) is a pure parameter validator: checks
+`validate_hci_inquiry_length_and_lap_range` (`0x8002155c`, 66 bytes) is a pure parameter validator: checks
 a "coexistence busy" bit (`bit_test__bit_index_at_offset_0x16f__within__short_at_offset_0x24_`)
 and that the inquiry length byte is in range `[1, 0x30]` and the 3-byte LAP
 value plus a global offset stays `< 0x40`. Returns `0xc` (Connection

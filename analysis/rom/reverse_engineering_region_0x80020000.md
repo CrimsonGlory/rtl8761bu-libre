@@ -6066,7 +6066,7 @@ command buffer: rejects when max-period uint3 at `+7` plus global `DAT_80021418`
 `0x3f`, period-length byte at `+10` is outside `[1,0x30]`, ushort ordering at `+3`/`+5`
 fails, or max-period ushort at `+5` is not greater than length byte at `+10`. Returns `0`
 on success, `0x12` (Invalid HCI Command Parameters) on failure. Sibling of standard-Inquiry
-validator `FUN_8002155c` (Pass 6 cont. pending rename).
+validator `validate_hci_inquiry_length_and_lap_range` (`FUN_8002155c`, Pass 6 cont. 191).
 
 **Callers:** `fHCI_Periodic_Inquiry_Mode_0x03` at `0x8001bf4c` (ROM thin wrapper — gates
 configure path on return `0`); patch firmware `FUN_8010dd1c` at `0x8010de64` (computed
@@ -6494,5 +6494,34 @@ before `LMP__271__FUN_80025cb4`; second site `0x80028b2c` (unnamed SSP handler i
 recovery path (Pass 6 cont. 31).
 
 Region unnamed count after this pass: **122** (123 minus this rename). Live named **1799** global.
+
+**Next:** superseded by Pass 6 continuation (191).
+
+## Pass 6 continuation (191) (2026-07-01) — HCI Inquiry param validator `FUN_8002155c`
+
+Decompiled and renamed:
+**`FUN_8002155c` → `validate_hci_inquiry_length_and_lap_range`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002155c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=122` at pass start). First-listed at
+66B/xref_in=2 after Pass 190 cleared the sibling `FUN_8002600c`.
+
+**Mechanism:** HCI Inquiry (OGF 0x01 OCF 0x01) parameter validator on the command buffer:
+rejects when coexistence-busy bit test (`bit_test__bit_index_at_offset_0x16f__within__short_at_offset_0x24_`)
+returns `1` (→ `0x0c` Connection Rejected), inquiry-length byte at `+6` is outside `[1,0x30]`,
+or 3-byte LAP at `+3` plus global `DAT_800215a0` is `>= 0x40` (→ `0x12` Invalid HCI Command
+Parameters). Returns `0` on success. Sibling of `validate_hci_periodic_inquiry_mode_params`
+(`FUN_800213d0`, Pass 6 cont. 176).
+
+**Callers:** `fHCI_Inquiry_0x01` at `0x8001bfa6` (ROM thin wrapper — gates inquiry start on
+return `0`); patch firmware computed call at `0x8010de38`. xref_in=2 via
+`ListXrefsTo8002155c.java`.
+
+**Confidence:** HIGH — decompile confirms pure param-range validator with HCI error codes
+`0x0c`/`0x12`; ROM caller decompile shows standard validate-then-dispatch flow into
+`called_by_fHCI_Remote_Name_Request_5`; cross-documented in `reverse_engineering_lc_lmp_state_machine.md`.
+
+Region unnamed count after this pass: **121** (122 minus this rename). Live named **1800** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
