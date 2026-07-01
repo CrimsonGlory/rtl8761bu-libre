@@ -3272,5 +3272,38 @@ pattern, and named crystal-trim calibration caller anchor the role.
 Region unnamed count after this pass: **179** (180 minus this rename). Live named
 **1987** global.
 
-**Next:** Pass 112 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 112.
+
+## Pass 112 (2026-07-01) — connection-setup BB reg programmer `FUN_800336f4`
+
+Fresh `ListUnnamed80030000.java` re-run: **179 unnamed** remain in region
+(unchanged from Pass 111; rank-1 by size at xref=2 tier is `FUN_800336f4` at
+68B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800336f4` → `clear_connection_setup_flag_and_program_bb_regs_0x36_bit13_and_0x8e_via_hook`**
+(68B, HIGH, SIMPLE-tier) via `RenamePass112Region80030000Fun800336f4.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Clears byte at `PTR_DAT_80033738+0x104` (connection-setup status
+flag used across link-power and commit-gate paths), reads ushort from
+`DAT_8003373c`, masks with `0xdfff` (clears bit 13 / `0x2000`), then invokes
+hook fptr `PTR_DAT_80033740` twice: `(reg 0x36, masked_value)` then
+`(reg 0, 0x8e)`. Sibling of Pass 75's
+`commit_hw_channel_merge_index_0x36_on_role_bit0` which ORs `0x2000` into the
+same HW-channel index `0x36`; this function clears that bit before programming
+reg `0` to `0x8e`.
+
+**Callers:** 2 confirmed via `find_callers` —
+`commit_connection_setup_mode_by_slot_bitmask_and_gates` (`0x80035768`) and
+`param_dispatch_with_rom_calls` (`0x80035b4c`); the latter documents this
+address as one of its four ROM dispatch targets.
+
+**Confidence:** HIGH — full 68B decompile; explicit hook indirection, bitmask,
+and two named connection-setup dispatch callers anchor the role.
+
+Region unnamed count after this pass: **178** (179 minus this rename). Live named
+**1988** global.
+
+**Next:** Pass 113 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
