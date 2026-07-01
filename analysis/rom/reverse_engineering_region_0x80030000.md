@@ -2636,5 +2636,41 @@ offset scaler indexed by low byte of `param_1`.
 Region unnamed count after this pass: **199** (200 minus this rename). Live named
 **1967** global.
 
-**Next:** Pass 92 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 92.
+
+## Pass 92 (2026-07-01) — SCO/eSCO link setup orchestrator `FUN_8003ef10`
+
+Fresh `ListUnnamed80030000.java` re-run: **199 unnamed** remain in region
+(unchanged from Pass 91; rank-1 by size at xref=2 tier is `FUN_8003ef10` at
+2484B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ef10` → `orchestrate_sco_esco_link_setup_baseband_regs_collision_and_afh`**
+(2484B, HIGH, HANDLER-tier) via `RenamePass92Region80030000Fun8003ef10.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Per-connection-slot SCO/eSCO link-setup orchestrator
+(`param_1` = slot index, `param_2` = role byte). Optional pre-hook at
+`PTR_DAT_8003f8d0` may veto early. Calls
+`program_baseband_regs_0x23e_0x254_0x25e_via_patch_hook`, indexes per-slot
+0x88-stride config table `PTR_DAT_8003f8d8`, and programs extensive baseband
+registers (`0xee`/`0x60`/`0xde`/`0x9e`/`0x1ec`/`0x1ee`/`0x23c`/`0x254`/`0x25e`
+and more) via `PTR_DAT_8003f8ec` hardware-write hook. Packet-type branches
+(`0x2c`/`0x3d`/`0xc`/`0xd`) toggle global bitmasks; may call
+`allocate_sco_hw_link_descriptor_slot`. IRQ-masked HW-clock reads feed
+`piconet_slot_collision_avoidance_scheduler`; tail calls
+`register_afh_lap_group_slot_with_collision_check` and
+`remote_name_request_feature_apply_orchestrator`. Sibling of Pass 5's
+`apply_SCO_connection_params_to_hw` / `release_SCO_connection_resources`
+lifecycle pair.
+
+**Callers:** 2 xref-in (per `ListUnnamed80030000`).
+
+**Confidence:** HIGH — full 2484B decompile; SCO/eSCO BB-reg cluster and
+lifecycle context unambiguous.
+
+Region unnamed count after this pass: **198** (199 minus this rename). Live named
+**1968** global.
+
+**Next:** Pass 93 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
