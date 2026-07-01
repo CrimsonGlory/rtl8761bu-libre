@@ -6999,5 +6999,33 @@ naming gap.
 Region unnamed count after this pass: **65** (66 minus this rename). Live named
 **2101** global.
 
-**Next:** Pass 226 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 226.
+
+## Pass 226 (2026-07-01) — SCO/eSCO dual fptr hook invoker `FUN_80039738`
+
+Fresh `ListUnnamed80030000.java` re-run: **65 unnamed** remain in region
+(unchanged from Pass 225; rank-1 by size at xref=1 tier is `FUN_80039738` at
+28B — wins on address over tied 28B sibling `FUN_8003013c`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039738` → `invoke_sco_esco_required_then_optional_fptr_hooks`**
+(28B, HIGH, SIMPLE-tier) via
+`RenamePass226Region80030000Fun80039738.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin dual function-pointer invoker in the `0x800397xx`
+SCO/eSCO packet-type cluster: unconditionally calls hook at `PTR_PTR_80039754`,
+then calls hook at `PTR_PTR_80039758` when non-null. Regional sibling of Pass
+85's `test_conn_slot_qualifies_by_mode2_or_sco_packet_type_table_lookup` and
+Pass 110's `test_config_dc_bit8_and_hook_sample_minus_0x27d_lte_threshold`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; sole caller is master VSC
+dispatcher `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` via computed call.
+
+**Confidence:** HIGH — full 28B decompile; required-then-optional dual-fptr
+invoke pattern unambiguous.
+
+Region unnamed count after this pass: **64** (65 minus this rename). Live named
+**2102** global.
+
+**Next:** Pass 227 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -13796,7 +13796,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 225;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 226: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 226 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80039738`→`invoke_sco_esco_required_then_optional_fptr_hooks`
+          (28B, HIGH, SIMPLE-tier). Dual fptr invoker in SCO/eSCO cluster: required
+          hook `PTR_PTR_80039754` then optional `PTR_PTR_80039758`; caller master
+          VSC dispatcher. Region 64 unnamed remain; live named 2102.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 226;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 227: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
