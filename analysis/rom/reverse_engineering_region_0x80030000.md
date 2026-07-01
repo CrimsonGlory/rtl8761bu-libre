@@ -6515,5 +6515,35 @@ Pass 117.
 Region unnamed count after this pass: **81** (82 minus this rename). Live named
 **2085** global.
 
-**Next:** Pass 210 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 210.
+
+## Pass 210 (2026-07-01) — BB reg `0x10` four-byte writer `FUN_8003937c`
+
+Fresh `ListUnnamed80030000.java` re-run: **81 unnamed** remain in region
+(unchanged from Pass 209; rank-1 by size at xref=1 tier is `FUN_8003937c` at
+44B — wins on size over tied 42B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003937c` → `write_hw_reg_0x10_four_config_bytes_via_hw_hook`**
+(44B, HIGH, SIMPLE-tier) via
+`RenamePass210Region80030000Fun8003937c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Loops `i=0..3`, calling hook fptr at `PTR_DAT_800393a8` with
+`(reg_index=0x10, *(byte)(param_1 + i))` — writes four sequential config bytes
+to BB register `0x10` via the patchable HW-write hook. Core callee of
+`FUN_800393ac` (config-bit7-gated optional hook: when `PTR_DAT_800393d0[1]`
+bit `0x80` set, passes config buffer `PTR_DAT_800393d4`) in the `0x800393xx`
+BB register-config init cluster; sibling of Pass 202/204 RMW helpers for regs
+`0x16`/`0x17`.
+
+**Callers:** 1 xref-in — `FUN_800393ac` (config-bit7-gated optional hook).
+
+**Confidence:** HIGH — full 44B decompile; register index `0x10` and 4-iteration
+byte-write loop unambiguous; caller config-gate pattern matches Pass 202's
+`FUN_80039358` sibling (config bit `0x2`, offset `0x3c`).
+
+Region unnamed count after this pass: **80** (81 minus this rename). Live named
+**2086** global.
+
+**Next:** Pass 211 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
