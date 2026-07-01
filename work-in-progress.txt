@@ -13109,7 +13109,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 153;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 154: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 154 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800352d0`→`evaluate_lmp_3ee_link_mode_phase_with_retry_counter`
+          (154B, HIGH, HANDLER-tier). Link-mode-change LMP 0x3ee phase evaluator
+          with retry counter at workspace +0x98/+0x9a; caller
+          `link_mode_change_state_machine`. Region 136 unnamed remain; live
+          named 2030.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 154;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 155: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

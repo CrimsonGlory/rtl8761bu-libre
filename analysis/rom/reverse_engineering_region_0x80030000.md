@@ -4700,5 +4700,36 @@ matches register-script interpreter cluster; no unresolved callees.
 Region unnamed count after this pass: **137** (138 minus this rename). Live named
 **2029** global.
 
-**Next:** Pass 154 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 154.
+
+## Pass 154 (2026-07-01) — LMP 0x3ee retry counter `FUN_800352d0`
+
+Fresh `ListUnnamed80030000.java` re-run: **137 unnamed** remain in region
+(unchanged from Pass 153; rank-1 at xref=1 tier is `FUN_800352d0` at 154B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800352d0` → `evaluate_lmp_3ee_link_mode_phase_with_retry_counter`**
+(154B, HIGH, HANDLER-tier) via
+`RenamePass154Region80030000Fun800352d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change cluster LMP 0x3ee phase evaluator. Optional
+hook at `PTR_DAT_8003536c` short-circuits when it returns non-zero. Otherwise
+dispatches `LMP_CH__0x3ee__case1_if_FUN_80011fc0()`; on case1==1 or
+(param_1>1 && case1==2) resets retry counter at `PTR_DAT_80035370+0x98` and
+returns 0; else invokes `LMP_CH__0x3ee__case2_else_2_FUN_80011d9c` when
+case1!=0, increments counter, returns 0xf; on overflow vs threshold at `+0x9a`
+logs via `possible_logging_function` and returns 0xff.
+
+**Callers:** 1 xref-in — `link_mode_change_state_machine`.
+
+**Confidence:** HIGH — full 154B decompile; LMP 0x3ee branch idiom matches
+sibling `zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`
+(Pass 134); retry-counter fields `+0x98`/`+0x9a` on link-mode workspace
+confirmed.
+
+Region unnamed count after this pass: **136** (137 minus this rename). Live named
+**2030** global.
+
+**Next:** Pass 155 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
