@@ -3018,7 +3018,8 @@ param_1)` then programs BB registers via hook at `PTR_DAT_8003a820`:
 `0x10`→reg `0x46`, `0`→reg `0x47`. Register-script interpreter cluster
 sibling of `dispatch_bb_register_da_d6_write_with_hook`.
 
-**Callers:** 2 xref-in per cold-triage; direct callers `FUN_8003ab74` and
+**Callers:** 2 xref-in per cold-triage; direct callers
+`preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle` and
 `FUN_8003ac28` (register-script interpreter callees that compute three ushort
 params via `FUN_8003ab04` before invoking this helper).
 
@@ -4388,5 +4389,39 @@ confirmed.
 Region unnamed count after this pass: **146** (147 minus this rename). Live named
 **2020** global.
 
-**Next:** Pass 145 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 145.
+
+## Pass 145 (2026-07-01) — `preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle`
+
+Fresh `ListUnnamed80030000.java` re-run: **146 unnamed** remain in region
+(unchanged from Pass 144; rank-1 at xref=1 tier is `FUN_8003ab74` at 180B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ab74` → `preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle`**
+(180B, HIGH, HANDLER-tier) via
+`RenamePass145Region80030000Fun8003ab74.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script interpreter cluster callee that preserves BB regs
+`0x5a`/`0x5c` around an intermediate hook call (`DAT_801205b4` with script
+context `+0x80`/`+0x84`), restores the saved values, then computes three ushort
+params via `FUN_8003ab04` (VSC `0xfd49` extended-diagnostic + BB reg `0x7e`
+reads with `0x41` mode select `0x21`/`0x20`), IRQ-disables, and invokes
+`program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch`. Optional
+diagnostic log when `DAT_801233d0` bit 8 set. Gated wrapper sibling
+`FUN_8003ac28` calls this path when fd49-diag context bit0 clear.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — `register_script_interpreter`
+(`0x8003aea0`) plus gated invoke via `FUN_8003ac28` (fd49 extended-diagnostic
+cluster).
+
+**Confidence:** HIGH — full 180B decompile; BB `0x5a`/`0x5c` save/restore +
+hook + `FUN_8003ab04` triple-compute + BB bundle programmer matches Pass 103
+register-script cluster; fd49-diag integration confirmed via `FUN_8003ac28`
+decompile.
+
+Region unnamed count after this pass: **145** (146 minus this rename). Live named
+**2021** global.
+
+**Next:** Pass 146 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
