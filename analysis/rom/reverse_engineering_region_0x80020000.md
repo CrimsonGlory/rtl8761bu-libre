@@ -5699,4 +5699,32 @@ idiom matching siblings `dispatch_ssp_user_passkey_request_or_notification` and
 
 Region unnamed count after this pass: **149** (150 minus this rename). Live named **1772** global.
 
+**Next:** superseded by Pass 6 continuation (164).
+
+## Pass 6 continuation (164) (2026-07-01) — VSC 0xFCF0 subcommand dispatcher `FUN_8002f95c`
+
+Decompiled and renamed:
+**`FUN_8002f95c` → `VSC_0xfcf0_subcommand_dispatch`**
+(80B, HIGH) via `RenamePass6Region80020000Fun8002f95c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (80B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=149` at pass start). Tied 80B cluster
+with `FUN_800296d0`; first-listed `FUN_8002f95c`.
+
+**Mechanism:** HCI VSC **0xFCF0** subcommand dispatcher. Requires non-zero enable byte at
+`param+2`; subcommand index at `param+3` must be ≤6. On invalid params stores `0xffff` to
+`PTR_DAT_8002f9ac` and returns HCI status `0x12`. On success records subcommand to
+`PTR_DAT_8002f9ac`, lazily initializes context struct at `PTR_DAT_8002f9b0` (state byte
+`+0x268`→`2`), then dispatches via 7-entry function-pointer table at `PTR_PTR_8002f9b4`
+(indexed by subcommand). Sets `*param_2=1` (send HCI response) and `*param_3=0`.
+
+**Callers:** `HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c` (1 site, opcode `0xfcf0` case;
+xref_in=1). Also listed in secondary multi-VSC dispatcher `multi-VSC_Handler_FUN_80032540`.
+
+**Confidence:** HIGH — decompile confirms bounded subcommand table dispatch matching
+sibling VSC handlers (`VSC_0xfc93_FUN_8002fae0` invalid-params `0x12` pattern); caller
+and opcode case verified via `ListXrefsTo8002f95c.java`.
+
+Region unnamed count after this pass: **148** (149 minus this rename). Live named **1773** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
