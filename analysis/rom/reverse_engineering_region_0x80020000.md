@@ -5823,4 +5823,32 @@ in hardware-layer codec-template pipeline analysis.
 
 Region unnamed count after this pass: **145** (146 minus this rename). Live named **1776** global.
 
+**Next:** superseded by Pass 6 continuation (168).
+
+## Pass 6 continuation (168) (2026-07-01) — link-key memcmp helper `FUN_80025318`
+
+Decompiled and renamed:
+**`FUN_80025318` → `memcmp_computed_link_key_against_stored_bdaddr_aware`**
+(76B, HIGH) via `RenamePass6Region80020000Fun80025318.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (76B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=145` at pass start). First-listed at
+76B (tied 74B+ cluster below; highest size tier).
+
+**Mechanism:** Legacy pairing link-key comparison helper on per-connection crypto
+struct (`param_1`). 4-byte `memcmp` of stored link key at `+0xbe` against computed
+key variant selected by BD_ADDR-random state: when `+0x214==0` uses offset `+0xba`;
+else indexes `big_ol_struct` slot `+0x213` and picks `+0xa5` (random BD_ADDR) or
+`+0xa1` (public). Returns boolean match. Child callee of
+`validate_stored_link_key_send_hci_notify_and_advance_state` (Pass 6 cont. 145).
+
+**Callers:** `validate_stored_link_key_send_hci_notify_and_advance_state` (1 site —
+xref_in=1).
+
+**Confidence:** HIGH — decompile confirms BD_ADDR-random-aware memcmp idiom matching
+documented parent validator; offsets `+0xa1`/`+0xa5`/`+0xba`/`+0xbe` consistent with
+Pass 6 cont. (145) analysis; sole caller is established legacy-auth completion path.
+
+Region unnamed count after this pass: **144** (145 minus this rename). Live named **1777** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
