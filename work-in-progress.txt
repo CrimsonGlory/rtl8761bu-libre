@@ -14490,8 +14490,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7j;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7k: cold-triage next rank-1
-          unnamed function in region `0x80010000` (248 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7k (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014dac`→`apply_esco_codec_config_via_hw_register_programmer`
+          (138B, HIGH). eSCO codec-config apply: IRQ-disabled four-register HW
+          programmer sequence via `PTR_DAT_80014e38`, arms gate byte at
+          `PTR_DAT_80014e3c`; codec-config apply half of `FUN_80014450` pair;
+          11 xref_in including role-switch completion and eSCO counter/flush
+          sweepers. 247 unnamed remain; live named 2177.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7k;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7l: cold-triage next rank-1
+          unnamed function in region `0x80010000` (247 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1017,4 +1017,28 @@ HW programmer callee; cross-region callers already document release semantics.
 
 Region unnamed count after this pass: **248** (249 minus this rename).
 
-**Next:** Pass 7k — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7k (2026-07-01) — eSCO codec config apply `FUN_80014dac`
+
+Pass 7k target from cold-triage rank-1 (11 xref_in, 138B). Decompiled and renamed:
+**`FUN_80014dac` → `apply_esco_codec_config_via_hw_register_programmer`**
+(138B, HIGH) via `RenamePass7kRegion80010000Fun80014dac.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** eSCO codec-config apply primitive in the `0x80014dxx` cluster.
+Remaps role index via `remap_role_index_to_esco_slot_if_pending`, IRQ-disables,
+reads HW clock via `read_hw_clock_raw_dword_by_role_index`, then issues four
+register writes through hook fptr `PTR_DAT_80014e38` (regs `2`, `0x48`, `0x4e`,
+`0`) encoding role/slot bits, clock-derived timing, and codec type
+(`param_2 & 0xffff`). Arms per-slot gate byte at `PTR_DAT_80014e3c[remapped_index]`.
+Codec-config apply half of the `FUN_80014450`/`FUN_80014dac` pair documented
+across eSCO counter/flush paths in regions `0x80030000`/`0x80040000`.
+
+**Callers:** 11 xref_in including `role_switch_completion_or_abort_handler`
+(region `0x80000000`), eSCO codec counter/flush sweepers (`increment_esco_slot_counter_and_apply_codec_if_gate_armed`, `flush_armed_esco_codec_slots_up_to_12_and_apply` in `0x80030000`), and conn-table codec-config sweeps in `0x80040000`.
+
+**Confidence:** HIGH — decompile confirms IRQ-gated four-register HW programmer
+sequence + established cross-region caller semantics as codec-config apply.
+
+Region unnamed count after this pass: **247** (248 minus this rename).
+
+**Next:** Pass 7l — cold-triage next rank-1 unnamed in region `0x80010000`.
