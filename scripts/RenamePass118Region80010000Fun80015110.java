@@ -1,0 +1,20 @@
+// RenamePass118Region80010000Fun80015110.java — Pass 118 cold-triage rank-1 rename
+import ghidra.app.script.GhidraScript;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.symbol.SourceType;
+
+public class RenamePass118Region80010000Fun80015110 extends GhidraScript {
+    @Override
+    public void run() throws Exception {
+        long addr = 0x80015110L;
+        String newName = "program_bb_link_param_regs_0x26c_thru_0x272_with_role_clock";
+        Function fn = getFunctionAt(toAddr(addr));
+        if (fn == null) {
+            println("MISSING at 0x" + Long.toHexString(addr));
+            return;
+        }
+        String old = fn.getName();
+        fn.setName(newName, SourceType.USER_DEFINED);
+        println("renamed=1 old=" + old + " new=" + newName);
+    }
+}

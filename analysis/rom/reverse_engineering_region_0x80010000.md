@@ -2532,4 +2532,36 @@ primary subsystem setup.
 
 Region unnamed count after this pass: **194** (195 minus this rename).
 
-**Next:** Pass 118 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 118.
+
+## Pass 118 (2026-07-01) — BB link param programmer `FUN_80015110`
+
+Pass 118 target from cold-triage rank-1 (2 xref_in, 348B — largest at xref=2
+tier after Pass 117 cleared `FUN_800172bc`). Decompiled and renamed:
+**`FUN_80015110` → `program_bb_link_param_regs_0x26c_thru_0x272_with_role_clock`**
+(348B, HIGH) via `RenamePass118Region80010000Fun80015110.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** BB link-parameter register programmer in the `0x800151xx` cluster
+(sibling of `0x800152xx` sync-timing commit tail). Reads HW clock via
+`read_hw_clock_raw_dword_by_role_index`, then issues four register writes through
+hook fptr `PTR_DAT_8001526c`: reg `0x270` ← `(param_4 - 1)`; reg `0x26c` ←
+`(param_3 < 0x138) + param_2*2` (0x138 = 312 slot-phase threshold); reg `0x26e`
+← `role<<12 | 0x8000 | high(param_2)`; reg `0x272` ← packed 10-bit phase from
+`param_3` + high bits of `param_4`. Optional veto hook at `PTR_DAT_80015274`
+may skip debug logging; otherwise logs via `possible_logging_function__var_args`
+(class `0x89`/`0x55`, event `0x1236`) with clock + register snapshot fields.
+Same `0x26c`–`0x272` BB-offset family as `program_bb_link_param_regs_0x26e_0x274`
+(region `0x80070000` Pass 12i).
+
+**Callers:** 2 xref_in per `ListXrefsTo80015110.java` —
+`VSC_0xfcd9_FUN_80062a58` (VSC clock-adjust path, region `0x80060000`) and
+`LMP_CLK_ADJ_0x7F_0x05` (LMP clock-adjust opcode 0x7F ext 0x05).
+
+**Confidence:** HIGH — decompile confirms four-register HW programmer with
+role/clock/slot-phase encoding; callers are clock-adjust VSC + LMP paths
+consistent with BB link-timing commit.
+
+Region unnamed count after this pass: **193** (194 minus this rename).
+
+**Next:** Pass 119 — cold-triage next rank-1 unnamed in region `0x80010000`.
