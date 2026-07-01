@@ -1374,4 +1374,36 @@ path for ACL TX descriptor programming.
 
 Region unnamed count after this pass: **234** (235 minus this rename).
 
-**Next:** Pass 7y — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7y (2026-07-01) — packet-type HW register apply `FUN_80014450`
+
+Pass 7y target from cold-triage rank-1 (6 xref_in, 94B — largest at xref=6
+tier after Pass 7x). Decompiled and renamed:
+**`FUN_80014450` → `apply_packet_type_via_hw_register_programmer`**
+(94B, HIGH) via `RenamePass7yRegion80010000Fun80014450.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Packet-type apply primitive in the `0x800144xx` cluster (sibling
+of `apply_esco_codec_config_via_hw_register_programmer` at Pass 7k). Remaps role
+index via `remap_role_index_to_esco_slot_if_pending`, IRQ-disables, issues two
+register writes through hook fptr `PTR_DAT_800144b0` (reg `2` encoding
+`(param_2 & 0x1f) << 0xb | (param_1 & 0xff) << 5`, then reg `0` with commit
+byte `0x31`), clears per-slot gate byte at `PTR_DAT_800144b4[remapped_index]`.
+Packet-type apply half of the `apply_packet_type_via_hw_register_programmer` /
+`apply_esco_codec_config_via_hw_register_programmer` pair documented across
+eSCO counter/flush and conn-table codec paths in regions `0x80030000` /
+`0x80040000`.
+
+**Callers:** 6 xref_in per `ListUnnamed80010000.java`; eSCO codec counter/flush
+sweepers (`increment_esco_slot_counter_and_apply_codec_if_gate_armed`,
+`step_conn_esco_codec_counter_and_apply_if_gate_armed`,
+`flush_armed_esco_codec_slots_up_to_12_and_apply` in `0x80030000`) and
+conn-table codec sweeps (`sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
+in `0x80040000`).
+
+**Confidence:** HIGH — decompile confirms IRQ-gated two-register HW programmer
+sequence + gate-byte clear; structural sibling of Pass 7k codec-config apply
+(final commit bytes `0x31` vs `0x30`).
+
+Region unnamed count after this pass: **233** (234 minus this rename).
+
+**Next:** Pass 7z — cold-triage next rank-1 unnamed in region `0x80010000`.

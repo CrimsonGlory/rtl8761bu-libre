@@ -14626,8 +14626,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7x;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7y: cold-triage next rank-1
-          unnamed function in region `0x80010000` (234 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7y (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80014450`→`apply_packet_type_via_hw_register_programmer`
+          (94B, HIGH). IRQ-gated packet-type apply: two-register HW programmer
+          via `PTR_DAT_800144b0` (reg `2` + commit `0x31`), clears gate byte at
+          `PTR_DAT_800144b4`; packet-type apply half of
+          `apply_esco_codec_config_via_hw_register_programmer` pair; 6 xref_in.
+          233 unnamed remain; live named 2191.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7y;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7z: cold-triage next rank-1
+          unnamed function in region `0x80010000` (233 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
