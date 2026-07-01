@@ -5529,5 +5529,39 @@ cleanup chain matches AFH cluster pattern; caller context unambiguous.
 Region unnamed count after this pass: **112** (113 minus this rename). Live named
 **2054** global.
 
-**Next:** Pass 179 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 179.
+
+## Pass 179 (2026-07-01) — VSC FCC0/feature-page dispatch `FUN_8003ca5c`
+
+Fresh `ListUnnamed80030000.java` re-run: **112 unnamed** remain in region
+(unchanged from Pass 178; rank-1 at xref=1 tier is `FUN_8003ca5c` at 86B —
+largest among the xref=1 cohort, tied with `FUN_8003b428` on size).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ca5c` → `dispatch_vsc_fcc0_or_feature_page_fptr_on_role_bit0`**
+(86B, HIGH, UTILITY-tier) via
+`RenamePass179Region80030000Fun8003ca5c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Inquiry/LAP cluster VSC FCC0 or feature-page hook dispatcher.
+Gated on `the_0x300->byte_0x16a` bit 0 (role bit) and `int_0x10 & 3 == 0`
+(idle link mode). When global flag `PTR_DAT_8003cab8` bit 2 clear and
+`field_0x17c == 0x80` (LAP byte written by `OGC_3_OCF_45`), calls
+`wraps_calls_to_VSC_0xfcc0_then_calls_fptr()`. Otherwise checks feature-page
+`PTR_some_feature_page_base_8003cabc[3]` bit 3 (8): dispatches
+`PTR_DAT_8003cac0` hook fptr with arg `2` (clear) or `10` (set) depending on
+feature-page bit. Sibling of `commit_hw_channel_merge_index_0x36_on_role_bit0`
+(`0x8003ca28`, same `byte_0x16a` bit0 gate, HW-channel commit path).
+
+**Callers:** 1 xref-in at `0x8003cac8` — no containing function (orphan/indirect
+call site; consistent with fptr-table dispatch).
+
+**Confidence:** HIGH — full 86B decompile; VSC FCC0 wrapper + feature-page
+fptr dispatch pattern matches Pass 73 inquiry/LAP cluster and
+`remote_name_request_feature_apply_8` feature-page bit-8 gating; struct-field
+gates (`byte_0x16a`, `int_0x10`, `field_0x17c`) unambiguous.
+
+Region unnamed count after this pass: **111** (112 minus this rename). Live named
+**2055** global.
+
+**Next:** Pass 180 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
