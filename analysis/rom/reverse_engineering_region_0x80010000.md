@@ -846,5 +846,29 @@ live decompile matches exactly; 27 xref_in confirms generic primitive status.
 
 Region unnamed count after this pass: **255** (256 minus this rename).
 
-**Next:** Pass 7d — decompile+rename `FUN_8001139c` (46B, write-side counterpart
-of `read_baseband_register_mmio_indexed`, same MMIO protocol).
+## Pass 7d (2026-07-01) — MMIO indexed register write `FUN_8001139c`
+
+Pass 7d target from cold-triage (write-side counterpart of Pass 7c, 46B).
+Decompiled and renamed:
+**`FUN_8001139c` → `write_baseband_register_mmio_indexed`**
+(46B, HIGH) via `RenamePass7dRegion80010000Fun8001139c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Canonical baseband HW register write via MMIO at `0xb000a0bc`
+(documented in `reverse_engineering_rom_regs.md`). RMW control word: masks
+preserve status bits, inserts 6-bit register index into bits[21:16], ORs
+16-bit value into bits[15:0], then performs **two** MMIO writes — first
+latches index+value, second ORs trigger bit from `DAT_800113dc` to commit.
+Write-side counterpart of `read_baseband_register_mmio_indexed` (Pass 7c);
+distinct from `write_baseband_register_masked_busywait` (Pass 7) which uses
+IRQ-masked busy-wait on a separate control window.
+
+**Confidence:** HIGH — mechanism pre-documented in `reverse_engineering_rom_regs.md`;
+live decompile matches exactly; 3 direct callers confirmed (`FUN_80110b54`,
+`LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10`,
+`program_link_mode_bb_regs_merge_ram_timing_and_arm_status`); also invoked
+indirectly via function pointers project-wide.
+
+Region unnamed count after this pass: **254** (255 minus this rename).
+
+**Next:** Pass 7e — cold-triage next rank-1 unnamed in region `0x80010000`.
