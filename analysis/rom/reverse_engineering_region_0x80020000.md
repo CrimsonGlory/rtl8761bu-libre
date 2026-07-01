@@ -4929,4 +4929,38 @@ invoked from defer path in `apply_or_defer_conn_role_change_emit_hci_evt_sync` w
 
 Region unnamed count after this pass: **174** (175 minus this rename). Live named **1747** global.
 
+**Next:** superseded by Pass 6 continuation (139).
+
+## Pass 6 continuation (139) (2026-07-01) — LMP SSP Confirm NOT ACCEPTED `FUN_800285cc`
+
+Decompiled and renamed:
+**`FUN_800285cc` → `handle_lmp_not_accepted_opcode_0x3f_ssp_complete`**
+(96B, HIGH) via `RenamePass6Region80020000Fun800285cc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (96B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=174` at pass start). Tied at 96B with
+`FUN_80023b40`; selected first by list order after Pass 6 cont. (138)'s `FUN_80022098`.
+
+**Mechanism:** Primary `LMP_NOT_ACCEPTED_0x04` recovery handler for rejected opcode
+**0x3F** (LMP_SIMPLE_PAIRING_CONFIRM). Gated by `ret_bool_based_on_crypto_struct_0x50`
+vs role bit `param_1+4&1`, unless global bypass `PTR_DAT_80028630[2]&0x80`. When crypto
+sub-state byte at `+1` is `'3'` (0x33, SSP confirm completion path), emits
+`call_send_evt_HCI_Simple_Pairing_Complete(conn, status_from_param_1+6)`. Primary-path
+sibling of alt-recovery `handle_lmp_simple_pairing_confirm_not_accepted` (`0x80028634`,
+reached via `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` for rejected
+opcode `0x41`). Complements
+`handle_lmp_not_accepted_opcode_0x40_ssp_complete_by_state_bitmask` (0x40) and
+`handle_lmp_not_accepted_opcode_0x41_dhkey_check_ssp_complete` (0x41) in the documented
+SSP NOT-ACCEPTED cluster.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (rejected-opcode `0x3F` branch) — confirmed via
+live decompile of `LMP_NOT_ACCEPTED_0x04` dispatch table.
+
+**Confidence:** HIGH — sole caller is documented `LMP_NOT_ACCEPTED_0x04` handler;
+role-gate + SSP-complete emitter idiom matches documented NOT-ACCEPTED siblings;
+crypto sub-state `0x33` aligns with SSP confirm HCI-reply cluster
+(`fHCI_User_Confirmation_Request_Reply_0x33`).
+
+Region unnamed count after this pass: **173** (174 minus this rename). Live named **1748** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

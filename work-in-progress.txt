@@ -10467,8 +10467,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (138);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (139): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (174 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (139): cold-triage
+          rank-1 `FUN_800285cc`→`handle_lmp_not_accepted_opcode_0x3f_ssp_complete`
+          (96B, HIGH). LMP NOT ACCEPTED rejected-opcode 0x3F: role-gated SSP-complete
+          emitter when crypto sub-state `0x33`; caller `LMP_NOT_ACCEPTED_0x04`.
+          173 unnamed remain; live named 1748.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (139);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (140): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (173 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
