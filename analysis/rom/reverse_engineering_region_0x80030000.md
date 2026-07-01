@@ -7424,5 +7424,43 @@ chain (`0x24` stride) documented in region `0x80070000`.
 Region unnamed count after this pass: **51** (52 minus this rename). Live named
 **2115** global.
 
-**Next:** Pass 240 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 240.
+
+## Pass 240 (2026-07-01) — config AFH channel-map BB programmer `FUN_8003bde4`
+
+Fresh `ListUnnamed80030000.java` re-run: **51 unnamed** remain in region
+(unchanged from Pass 239; xref_in=0 tier now dominates — rank-1 is `FUN_8003bde4`
+at 932B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003bde4` → `program_config_afh_channel_map_all_64ch_to_bb_regs_0x5e_0x5f`**
+(932B, HIGH, HANDLER-tier) via
+`RenamePass240Region80030000Fun8003bde4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Comprehensive AFH channel-map hardware programmer in the
+`0x8003bdxx` BB-config cluster adjacent to `dispatch_bb_register_da_d6_write_with_hook`
+(`0x8003bd94`) and `hw_register_config_with_timeout`. Reads per-channel
+classification bytes from `config_struct` fields `0x164`–`0x173` (and tail byte
+`0x162`–`0x163`), iterates all 64 channels (`0`–`0x3f`), and for each channel
+computes masked register values written to BB regs `0x5e`/`0x5f` via
+`dispatch_bb_register_da_d6_write_with_hook` and `VSC_0xfd49_extended_diagnostic`.
+Mode flags in `config_struct+0x1d0` (bits 0/1/2/4) select direct BB writes vs.
+optional hook dispatch through `PTR_DAT_8003c18c` (opcodes `8`–`0xc`). When bit2
+clear, a three-phase table dump programs additional channel entries from
+`PTR_DAT_8003c190` (40 entries), `PTR_DAT_8003c194` (64 entries), and
+`PTR_DAT_8003c198` (7 entries) before restoring reg `0x5e`. Companion to
+`AFH_channel_map_hw_register_programmer` (`0x8003a824`) but sources data from
+`config_struct` rather than a caller-supplied packed classification buffer.
+
+**Callers:** 0 xref-in (consistent with indirect/timer or fptr-table invocation).
+
+**Confidence:** HIGH — full 932B decompile; register-script shape, 64-channel
+iteration, and `config_struct` field usage match AFH channel-map programming;
+cluster placement beside Pass 8's `dispatch_bb_register_da_d6_write_with_hook` and
+`AFH_channel_map_table_builder`/`AFH_channel_map_hw_register_programmer` siblings.
+
+Region unnamed count after this pass: **50** (51 minus this rename). Live named
+**2116** global.
+
+**Next:** Pass 241 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
