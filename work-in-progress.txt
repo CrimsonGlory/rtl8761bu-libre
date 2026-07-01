@@ -13278,7 +13278,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 171;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 172: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 172 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (119 unnamed); decompiled+renamed rank-1
+          `FUN_8003ab04`→`read_fd49_diag_and_bb_reg_7e_pair_via_mode_41_select`
+          (102B, HIGH, HANDLER-tier). Register-script fd49-diag triple compute:
+          `VSC_0xfd49_extended_diagnostic(0x21)` + dual BB reg `0x7e` reads via
+          `0x41` mode `0x21`/`0x20`; callee of
+          `preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle`.
+          Region unnamed 118 remain; live named 2048.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 172;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 173: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

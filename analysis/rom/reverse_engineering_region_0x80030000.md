@@ -5292,5 +5292,38 @@ completion-callback idiom matches sibling `0x80035xxx` handlers.
 Region unnamed count after this pass: **119** (120 minus this rename). Live named
 **2047** global.
 
-**Next:** Pass 172 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 172.
+
+## Pass 172 (2026-07-01) — fd49-diag triple compute `FUN_8003ab04`
+
+Fresh `ListUnnamed80030000.java` re-run: **119 unnamed** remain in region
+(unchanged from Pass 171; rank-1 at xref=1 tier is `FUN_8003ab04` at 102B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ab04` → `read_fd49_diag_and_bb_reg_7e_pair_via_mode_41_select`**
+(102B, HIGH, HANDLER-tier) via
+`RenamePass172Region80030000Fun8003ab04.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script cluster triple-compute helper (previously
+referenced by Pass 145/103 parent analysis). Calls
+`VSC_0xfd49_extended_diagnostic(0x21, 0)` into `*param_1`; selects BB reg
+`0x41` mode `0x21` via hook fptr at `PTR_DAT_8003ab6c`, reads BB reg `0x7e`
+via hook fptr at `PTR_DAT_8003ab70` into `*param_3` (`& 0x3ff`); repeats with
+mode `0x20` and second `0x7e` read into `*param_2`. Outputs feed
+`program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch` via caller
+`preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — callee of
+`preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle` (Pass 145)
+and gated wrapper `FUN_8003ac28`.
+
+**Confidence:** HIGH — full 102B decompile; fd49-diag + dual BB `0x7e` read
+with `0x41` mode-select `0x21`/`0x20` matches Pass 145 parent description;
+`VSC_0xfd49_extended_diagnostic` callee anchors register-script cluster.
+
+Region unnamed count after this pass: **118** (119 minus this rename). Live named
+**2048** global.
+
+**Next:** Pass 173 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
