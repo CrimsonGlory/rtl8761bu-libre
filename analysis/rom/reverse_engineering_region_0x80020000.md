@@ -4214,4 +4214,34 @@ documented `finalize_stop_encryption_procedure_and_notify_hci` (Pass 6 cont. 14)
 
 Region unnamed count after this pass: **197** (198 minus this rename). Live named **1724** global.
 
+**Next:** superseded by Pass 6 continuation (116).
+
+## Pass 6 continuation (116) (2026-07-01) — LMP NOT ACCEPTED opcode 0x40 SSP-complete `FUN_80028550`
+
+Decompiled and renamed:
+**`FUN_80028550` → `handle_lmp_not_accepted_opcode_0x40_ssp_complete_by_state_bitmask`**
+(112B, HIGH) via `RenamePass6Region80020000Fun80028550.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (112B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=197` at pass start).
+
+**Mechanism:** Primary `LMP_NOT_ACCEPTED_0x04` recovery handler for rejected opcode
+**0x40** (Simple Pairing Number). Gated by `ret_bool_based_on_crypto_struct_0x50` vs
+role bit `param_1+4&1`, unless global bypass `PTR_DAT_800285c4[2]&0x80`. When crypto
+sub-state byte at `+1` maps to index `(state-0x25)` in range `0..0x14` (states
+`0x25`..`0x39`) **and** the corresponding bit is set in `DAT_800285c8`, emits
+`call_send_evt_HCI_Simple_Pairing_Complete(conn, status_from_param_1+6)`. Sibling of
+the fuller alt-recovery path `handle_lmp_simple_pairing_number_not_accepted` (reached
+via `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` for the same rejected
+opcode).
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x8002823e`, rejected-opcode `0x40`
+branch).
+
+**Confidence:** HIGH — dispatch chain confirmed via `ListXrefsTo80028550.java`;
+role-gate + SSP-complete emitter idiom matches documented NOT-ACCEPTED siblings
+(`handle_lmp_encryption_mode_req_not_accepted`, `FUN_800284e4` for opcode `0x41`).
+
+Region unnamed count after this pass: **196** (197 minus this rename). Live named **1725** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
