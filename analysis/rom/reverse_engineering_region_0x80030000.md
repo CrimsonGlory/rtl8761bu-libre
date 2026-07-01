@@ -5389,5 +5389,42 @@ sibling; caller config-flag gate unambiguous.
 Region unnamed count after this pass: **116** (117 minus this rename). Live named
 **2050** global.
 
-**Next:** Pass 175 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 175.
+
+## Pass 175 (2026-07-01) — VSC FC95 + LMP268 dual-slot gateway `FUN_8003a630`
+
+Fresh `ListUnnamed80030000.java` re-run: **116 unnamed** remain in region
+(unchanged from Pass 174; rank-1 at xref=1 tier is `FUN_8003a630` at 98B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a630` → `dual_pending_vsc_fc95_and_lmp268_gateway_with_config_timeout`**
+(98B, HIGH, HANDLER-tier) via
+`RenamePass175Region80030000Fun8003a630.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Dual pending-slot VSC FC95 / LMP-0x268 gateway in the
+`0x8003a6xx` register-script cluster (sibling of Pass 157's
+`config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays`). State struct at
+`PTR_DAT_8003a694` holds two pending connection slots (dwords at `+0` and
+`+4`); sentinel `-1` on each slot triggers `VSC_0xfc95_called2` with
+alternate param ptrs (`PTR_PTR_8003a698`/`PTR_PTR_8003a6a0`,
+`PTR_DAT_8003a6a4`). When `config_base->field0_0x0[1] != 0`, dispatches
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` on the first slot with
+timeout `config_byte × 1000` ms. Always finishes with
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` on the second slot value
+with fixed 1000 ms timeout.
+
+**Callers:** 1 xref-in — `dispatch_optional_subsystem_hooks_during_hw_reg_config`
+at `0x8003959e` (COMPUTED_CALL); register-script interpreter cluster indirect
+invocation.
+
+**Confidence:** HIGH — full 98B decompile; `VSC_0xfc95_called2` and
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch` callees already HIGH-named;
+dual-slot sentinel `-1` → FC95 then LMP-268 sequencing matches documented
+VSC/LMP gateway idiom (Pass 166 boot-init FC95 sibling).
+
+Region unnamed count after this pass: **115** (116 minus this rename). Live named
+**2051** global.
+
+**Next:** Pass 176 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
