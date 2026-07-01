@@ -942,5 +942,30 @@ primitive status; behavioral name matches decompile exactly.
 
 Region unnamed count after this pass: **251** (252 minus this rename).
 
-**Next:** Pass 7h — cold-triage next rank-1 unnamed in region `0x80010000`
-(`FUN_80011584`, 13 xref, 66B).
+## Pass 7h (2026-07-01) — halfword read wrapper `FUN_80011584`
+
+Pass 7h target from cold-triage rank-1 (13 xref_in, 66B). Decompiled and renamed:
+**`FUN_80011584` → `read_baseband_register_halfword_masked_busywait`**
+(66B, HIGH) via `RenamePass7hRegion80010000Fun80011584.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Halfword-granular read wrapper on top of
+`read_baseband_register_masked_busywait` (Pass 7b). When `param_1 & 3 == 2`,
+reads the containing word at `param_1 & 0xfffc` with width 2 and shifts down
+the upper halfword; when `param_1 & 3 == 0`, reads directly with width 1;
+otherwise returns sentinel `0xdead` for misaligned
+offsets 1 or 3 mod 4. Byte-granular counterpart is sibling `FUN_800115c8`
+(62B) at `0x800115c8`.
+
+**Callers (13 xref_in):** patch `FUN_8010c278` (7 sites), `FUN_8010ce0c`,
+`VSC_0xfc61_config_update`, `FUN_800122fc`, `generic_status_field_get_set_dispatcher`,
+plus 2 data-block call sites.
+
+**Confidence:** HIGH — trivial decompile; pre-documented in
+`reverse_engineering_baseband_reg_helpers.md`; 13 xref_in confirms generic
+primitive status; behavioral name matches decompile exactly.
+
+Region unnamed count after this pass: **250** (251 minus this rename).
+
+**Next:** Pass 7i — cold-triage next rank-1 unnamed in region `0x80010000`
+(`FUN_800115c8`, byte-extraction read wrapper sibling, 62B).

@@ -14461,9 +14461,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7g;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7h: cold-triage next rank-1
-          unnamed function in region `0x80010000` (`FUN_80011584`, 13 xref, 66B;
-          251 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7h (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80011584`→`read_baseband_register_halfword_masked_busywait`
+          (66B, HIGH). Halfword-granular read wrapper on
+          `read_baseband_register_masked_busywait`; word-aligned offset 2 shifts
+          upper halfword; misaligned offsets 1/3 return `0xdead` sentinel; 13
+          xref_in across patch RF paths, VSC_0xfc61, and status dispatcher;
+          live named 2174.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7h;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7i: cold-triage next rank-1
+          unnamed function in region `0x80010000` (`FUN_800115c8`, byte-extraction
+          read wrapper sibling, 62B; 250 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
