@@ -8915,4 +8915,32 @@ matches documented Master Link Key phase-1 arm path; sibling of
 
 Region unnamed count after this pass: **39** (40 minus this rename). Live named **1882** global.
 
+**Next:** superseded by Pass 6 continuation (274).
+
+## Pass 6 continuation (274) (2026-07-01) — LMP 0x3A sender `FUN_80024540`
+
+Decompiled and renamed:
+**`FUN_80024540` → `send_lmp_encryption_key_size_mask_req_0x3a`**
+(32B, HIGH) via `RenamePass6Region80020000Fun80024540.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (32B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=39` at pass start).
+
+**Mechanism:** Outbound LMP **0x3A** (ENCRYPTION_KEY_SIZE_MASK_REQ) 2-byte PDU sender —
+builds buffer `{0x3a}` and dispatches via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn, buf, 2, 3)`. Leaf send
+primitive for the random-BD_ADDR feature-page gate and inbound
+`LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` handler cluster; send-side pair of
+`send_lmp_encryption_key_size_mask_res_0x3b_from_config`.
+
+**Caller:** `on_random_bdaddr_send_lmp_0x3a_if_feature_page_bit_armed` at `0x80022328`
+(xref_in=1, documented in Pass 6 cont. 228).
+
+**Confidence:** HIGH — decompile confirms unambiguous 2B LMP 0x3A wrapper; caller
+already named and documents this callee; sibling of inbound
+`LMP_ENCRYPTION_KEY_SIZE_MASK_REQ_0x3A` and outbound
+`send_lmp_encryption_key_size_mask_res_0x3b_from_config`.
+
+Region unnamed count after this pass: **38** (39 minus this rename). Live named **1883** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
