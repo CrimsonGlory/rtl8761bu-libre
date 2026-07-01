@@ -5573,4 +5573,36 @@ Bluetooth pairing flow; prior cold-triage notes at lines 1076/2582/4265 corrobor
 
 Region unnamed count after this pass: **153** (154 minus this rename). Live named **1768** global.
 
+**Next:** superseded by Pass 6 continuation (160).
+
+## Pass 6 continuation (160) (2026-07-01) — encryption-mode enable accept `FUN_800246fc`
+
+Decompiled and renamed:
+**`FUN_800246fc` → `accept_lmp_encryption_mode_enable_and_branch_by_bdaddr_random`**
+(84B, HIGH) via `RenamePass6Region80020000Fun800246fc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (84B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=153` at pass start). First-listed
+`FUN_800246fc` in the 84B cluster.
+
+**Mechanism:** LMP Encryption Mode Req (0x0F) **enable/start-encryption accept** helper —
+symmetric sibling of `accept_lmp_encryption_mode_disable_and_branch_by_bdaddr_random`
+(Pass 6 cont. 153). Extracts role bit from incoming PDU byte `+4`, sends
+`wrap_send_LMP_ACCEPTED_and_some_other_things(conn, 0xf, mode_bit)`. Branches on
+`bdaddr_random_`:
+- Public BD_ADDR → sets crypto sub-state `+1 = 0x3f`
+- Random BD_ADDR → calls `FUN_800245fc` (encryption-on HW toggle), sets sub-state
+  `+1 = 0x41`
+
+**Callers:** `LMP_ENCRYPTION_MODE_REQ_0x0F` (enable path — crypto sub-state `0x3e`
+and default link-type-mask enable branch with `+0x50=1`); xref_in=2.
+
+**Confidence:** HIGH — decompile confirms symmetric disable/enable pairing with
+`accept_lmp_encryption_mode_disable_and_branch_by_bdaddr_random` (disable → states
+`0x47`/`0x4a`); both invoked from documented `LMP_ENCRYPTION_MODE_REQ_0x0F` state
+machine; random-addr encryption-on toggle path matches
+`dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role` (Pass 6 cont. 63).
+
+Region unnamed count after this pass: **152** (153 minus this rename). Live named **1769** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
