@@ -13136,7 +13136,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 156;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 157: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 157 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003a6a8`→`config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays`
+          (136B, HIGH, HANDLER-tier). Config-gated BB reg 0x75 bit0 pulse with
+          spin delays between read-modify-write hook calls; caller `FUN_80038f98`
+          via fptr. Region 133 unnamed remain; live named 2033.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 157;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 158: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

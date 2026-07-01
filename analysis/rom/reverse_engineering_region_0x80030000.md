@@ -4803,5 +4803,39 @@ documented remote-name-request apply paths.
 Region unnamed count after this pass: **134** (135 minus this rename). Live named
 **2032** global.
 
-**Next:** Pass 157 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 157.
+
+## Pass 157 (2026-07-01) — BB reg 0x75 bit0 pulse `FUN_8003a6a8`
+
+Fresh `ListUnnamed80030000.java` re-run: **134 unnamed** remain in region
+(unchanged from Pass 156; rank-1 at xref=1 tier is `FUN_8003a6a8` at 136B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a6a8` → `config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays`**
+(136B, HIGH, HANDLER-tier) via
+`RenamePass157Region80030000Fun8003a6a8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-gated BB register pulse helper. When
+`config_base->field1018_0x406 != 0`: saves dword at `DAT_8003a734`, temporarily
+masks/ORs with constants at `DAT_8003a738`/`DAT_8003a740`, reads BB reg `0x75`
+via hook at `PTR_DAT_8003a73c` (bank 6), writes with bit0 set via hook at
+`PTR_DAT_8003a744`, `spin_delay_10x_iterations(1)`, re-reads and clears bit0,
+delays again, then restores the saved dword. Register-script interpreter
+cluster sibling of `program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch`
+(Pass 103).
+
+**Callers:** 1 xref-in — `FUN_80038f98` at `0x80038fb4` (COMPUTED_CALL);
+thin wrapper that optionally copies a byte to `config_base->field1020_0x408` when
+status byte bit `0x20` set, then tail-calls through `PTR_PTR_80038fc8`.
+
+**Confidence:** HIGH — full 136B decompile; read-modify-write pulse on BB reg
+`0x75` bit0 with inter-write spin delays matches documented register-programming
+cluster; config byte `0x406` gate and hook-dispatch idiom consistent with
+neighboring `0x8003a7xx` helpers.
+
+Region unnamed count after this pass: **133** (134 minus this rename). Live named
+**2033** global.
+
+**Next:** Pass 158 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
