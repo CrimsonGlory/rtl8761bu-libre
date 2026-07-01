@@ -4553,4 +4553,32 @@ opcode `0x41` assignment matches Pass 6 cont. (73) dispatch table.
 
 Region unnamed count after this pass: **186** (187 minus this rename). Live named **1735** global.
 
+**Next:** superseded by Pass 6 continuation (127).
+
+## Pass 6 continuation (127) (2026-07-01) — SSP confirm HMAC `FUN_8002c7d0`
+
+Decompiled and renamed:
+**`FUN_8002c7d0` → `compute_ssp_confirm_hash_hmac_variable_blocks`**
+(102B, HIGH) via `RenamePass6Region80020000Fun8002c7d0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (102B, xref_in=5) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=186` at pass start). Closes the
+long-standing unnamed reference in SSP confirm/OOB verifier passes (24/26/79).
+
+**Mechanism:** Variable-length SSP Simple Pairing Confirm hash primitive. Concatenates
+two caller-supplied blocks (`param_1`, `param_2`) each `param_6×4` bytes wide (curve-width
+scalar selects P-256 vs legacy block sizes), appends low byte of `param_4` as trailing
+message byte, HMACs via `hmac_ipad_opad_2pass_safer_hash_driver` with 16-byte key
+`param_3`, writes 16-byte digest to `param_5`.
+
+**Callers:** `verify_ssp_oob_confirmation_hash`, `verify_ssp_numeric_comparison_confirmation_hash`
+(confirmed via xrefs); also used by `derive_simple_pairing_confirm_and_send_lmp_0x3f` per
+Pass 6 cont. (79) analysis.
+
+**Confidence:** HIGH — decompile confirms dual-block concat + trailing-byte HMAC idiom;
+sole callee is documented `hmac_ipad_opad_2pass_safer_hash_driver`; all known callers
+are established SSP confirm/OOB verification paths.
+
+Region unnamed count after this pass: **185** (186 minus this rename). Live named **1736** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

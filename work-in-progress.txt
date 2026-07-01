@@ -10354,8 +10354,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (126);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (127): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (186 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (127): decompiled+
+          renamed rank-1 `FUN_8002c7d0`→`compute_ssp_confirm_hash_hmac_variable_blocks`
+          (102B, HIGH). Variable-length SSP confirm HMAC: dual-block concat
+          (`param_6×4` each) + trailing byte → `hmac_ipad_opad_2pass_safer_hash_driver`
+          → 16B digest; callers `verify_ssp_oob_confirmation_hash` +
+          `verify_ssp_numeric_comparison_confirmation_hash`. Region 185 unnamed remain;
+          live named 1736.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (127);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (128): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (185 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
