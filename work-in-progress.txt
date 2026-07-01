@@ -13489,7 +13489,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 192;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 193: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 193 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033744`→
+          `clear_connection_setup_flag_and_program_bb_regs_0x32_bit13_and_0x8f_via_hook`
+          (68B, HIGH, SIMPLE-tier). Sibling of Pass 112's `0x36`/`0x8e` path:
+          clears setup flag `+0x104`, masks bit13, hook-writes BB reg `0x32`
+          then reg `0`=`0x8f`; caller `param_dispatch_with_rom_calls`
+          (`DAT_80125b56` bit2 branch).
+          97 unnamed remain; live named 2069.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 193;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 194: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

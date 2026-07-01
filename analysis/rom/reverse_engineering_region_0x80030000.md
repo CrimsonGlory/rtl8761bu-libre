@@ -5967,5 +5967,37 @@ symmetry.
 Region unnamed count after this pass: **98** (99 minus this rename). Live named
 **2068** global.
 
-**Next:** Pass 193 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 193.
+
+## Pass 193 (2026-07-01) — connection-setup BB reg programmer `FUN_80033744`
+
+Fresh `ListUnnamed80030000.java` re-run: **98 unnamed** remain in region
+(unchanged from Pass 192; rank-1 by size at xref=1 tier is `FUN_80033744` at
+68B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033744` → `clear_connection_setup_flag_and_program_bb_regs_0x32_bit13_and_0x8f_via_hook`**
+(68B, HIGH, SIMPLE-tier) via
+`RenamePass193Region80030000Fun80033744.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sibling of Pass 112's
+`clear_connection_setup_flag_and_program_bb_regs_0x36_bit13_and_0x8e_via_hook`
+(`0x800336f4`). Clears byte at `PTR_DAT_80033788+0x104` (connection-setup
+status flag), reads ushort from `DAT_8003378c`, masks with `0xdfff` (clears bit
+13 / `0x2000`), then invokes hook fptr `PTR_DAT_80033790` twice:
+`(reg 0x32, masked_value)` then `(reg 0, 0x8f)`. Same flag-clear + bit13-mask
++ dual hook-write idiom as the `0x36`/`0x8e` sibling, but targets BB register
+`0x32` and programs reg `0` to `0x8f` instead of `0x8e`.
+
+**Callers:** 1 xref-in — `param_dispatch_with_rom_calls` at `0x80035bf0`
+(`DAT_80125b56 & 2` branch of connection-setup commit dispatch).
+
+**Confidence:** HIGH — full 68B decompile; explicit hook indirection, bitmask,
+and named connection-setup dispatch caller anchor the role; structural symmetry
+with Pass 112's HIGH-named `0x800336f4` sibling confirms semantics.
+
+Region unnamed count after this pass: **97** (98 minus this rename). Live named
+**2069** global.
+
+**Next:** Pass 194 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
