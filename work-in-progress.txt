@@ -12788,7 +12788,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 119;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 120: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 120 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80037b94`→`role_switch_apply_packet_types_on_stride84_slot`
+          (622B, HIGH, HANDLER-tier). Stride-0x84 role-switch packet-type updater:
+          role-index nibble validate, connection-type branch on `field_0xb7`,
+          hook dispatch + eSCO apply via `FUN_80013be4`/`FUN_80013c0c`; indirect
+          caller `status_word_multiflag_link_event_dispatcher`. 170 unnamed remain;
+          live named 1996.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 120;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 121: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

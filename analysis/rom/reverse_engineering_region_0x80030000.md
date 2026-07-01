@@ -3550,5 +3550,38 @@ confirmed; eSCO tail matches documented packet-type apply family.
 Region unnamed count after this pass: **171** (172 minus this rename). Live named
 **1995** global.
 
-**Next:** Pass 120 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 120.
+
+## Pass 120 (2026-07-01) — `role_switch_apply_packet_types_on_stride84_slot`
+
+Fresh `ListUnnamed80030000.java` re-run: **171 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_80037b94` at 622B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037b94` → `role_switch_apply_packet_types_on_stride84_slot`**
+(622B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass120Region80030000Fun80037b94.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Role-switch packet-type updater on the stride-0x84 per-connection
+table (`PTR_DAT_80037e04`). Validates role-index nibble against per-slot state,
+writes `param_1 << 12` to slot `+0x2c`. Branches on
+`big_ol_struct.field_0xb7` (SCO vs eSCO connection types `0x4000`/`0x8000`/
+`0xa000`/`0xb000` vs `0x3000` paths) to index packet-type ceiling tables
+`PTR_DAT_80037e14`/`PTR_DAT_80037e18`. Merges packet-type ushorts from
+`+0x2e`/`+0x0a`/`+0x2c` and dispatches via hook `PTR_DAT_80037e1c`. Tail
+applies eSCO packet types via `FUN_80013be4`/`FUN_80013c0c` (same family as
+Pass 119). Sets global flag `PTR_DAT_80037e20=1` and logs via
+`possible_logger_called_if_no_patch3`.
+
+**Callers:** 0 direct xrefs (indirect via
+`status_word_multiflag_link_event_dispatcher` per `region_0x80000000`).
+
+**Confidence:** HIGH — full 622B decompile; eSCO tail matches documented
+packet-type apply family; role-switch context confirmed by master dispatcher doc.
+
+Region unnamed count after this pass: **170** (171 minus this rename). Live named
+**1996** global.
+
+**Next:** Pass 121 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
