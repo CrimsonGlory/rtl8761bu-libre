@@ -7945,4 +7945,32 @@ siblings `set_config_byte_bit3_from_enable_byte` (bit 3),
 
 Region unnamed count after this pass: **73** (74 minus this rename). Live named **1848** global.
 
+**Next:** superseded by Pass 6 continuation (240).
+
+## Pass 6 continuation (240) (2026-07-01) — LMP-ext 0x7F/0x01 send + crypto pending LMP 0x268 gateway `FUN_80024400`
+
+Decompiled and renamed:
+**`FUN_80024400` → `send_lmp_ext_0x7f_subopcode_0x01_then_invoke_crypto_pending_lmp_0x268`**
+(44B, HIGH) via `RenamePass6Region80020000Fun80024400.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=73` at pass start). First-listed in tied
+44B tier; deferred sibling from Pass 6 cont. (238)/(239) VSC config bit-setter cluster.
+
+**Mechanism:** Two-step encryption/SSP send prelude in the `0x800244xx` cluster. First
+calls `FUN_800615e8` (region `0x80060000`) which transmits LMP-ext opcode `0x7F` with
+sub-opcode `0x01` and 5-byte PDU via `send_LMP_pkt`; then unconditionally calls
+`invoke_lmp_0x268_from_crypto_pending_slot_if_active` (Pass 6 cont. 232) to dispatch
+LMP 0x268 when crypto `+0x1ec` pending-slot dword is active. Mechanical composition of
+the LMP-ext 0x7F send idiom (sibling of `send_lmp_ext_pkt_0x7f_subopcode_0x22` at
+`0x800242b0`) with the established crypto pending-slot 0x268 gateway.
+
+**Callers:** none found (xref_in=0) — indirect handler-table dispatch like cluster peers.
+
+**Confidence:** HIGH — decompile confirms two-callee glue with named callees; send pattern
+matches documented LMP-ext 0x7F cluster; pending-slot gateway already HIGH from Pass 6
+cont. (232).
+
+Region unnamed count after this pass: **72** (73 minus this rename). Live named **1849** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
