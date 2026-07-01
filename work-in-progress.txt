@@ -14110,7 +14110,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 258;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 259: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 259 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003b3e4`→`compute_2d_squared_distance_clamp_0xffff_at_threshold`
+          (64B, HIGH, UTILITY-tier). Squared Euclidean distance utility in
+          `0x8003b3xx` SCO/BB cluster: `(x1−x2)²+(y1−y2)²`, clamped to
+          `0xffff` when ≥ `DAT_8003b424`. No callers found (xref=0).
+          31 unnamed remain; live named 2135.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 259;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 260: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

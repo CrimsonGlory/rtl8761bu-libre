@@ -8039,5 +8039,33 @@ config bit 2, sole callee `packet_type_to_hw_code_translator_4link` unambiguous.
 Region unnamed count after this pass: **32** (33 minus this rename). Live named
 **2134** global.
 
-**Next:** Pass 259 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 259.
+
+## Pass 259 (2026-07-01) — 2D distance clamp `FUN_8003b3e4`
+
+Fresh `ListUnnamed80030000.java` re-run: **32 unnamed** remain in region
+(unchanged from Pass 258; xref_in=0 tier dominates — rank-1 is `FUN_8003b3e4`
+at 64B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b3e4` → `compute_2d_squared_distance_clamp_0xffff_at_threshold`**
+(64B, HIGH, UTILITY-tier) via
+`RenamePass259Region80030000Fun8003b3e4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Squared Euclidean distance utility in the `0x8003b3xx` SCO/BB
+cluster (address-adjacent to Pass 256's
+`invoke_sco_bb_reg_hook_from_5entry_table_pack_7bit_and_flag_bits`). Computes
+`(param_1−param_3)² + (param_2−param_4)²`; when result ≥
+`DAT_8003b424` threshold, returns `0xffff`, else returns distance squared
+masked to ushort.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 64B decompile; squared-distance formula and
+threshold clamp to `0xffff` unambiguous.
+
+Region unnamed count after this pass: **31** (32 minus this rename). Live named
+**2135** global.
+
+**Next:** Pass 260 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
