@@ -6329,5 +6329,37 @@ sub-installer #3 fn-ptr installed at `0x80120600-0x80121100`).
 Region unnamed count after this pass: **87** (88 minus this rename). Live named
 **2079** global.
 
-**Next:** Pass 204 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 204.
+
+## Pass 204 (2026-07-01) — HW reg 0x17 bits 0-2 RMW `FUN_800392f8`
+
+Fresh `ListUnnamed80030000.java` re-run: **87 unnamed** remain in region
+(unchanged from Pass 203; rank-1 by size at xref=1 tier is `FUN_800392f8` at
+52B — wins on address over tied 52B siblings).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800392f8` → `read_modify_write_hw_reg_0x17_set_bits0_2_from_3bit_param`**
+(52B, HIGH, SIMPLE-tier) via
+`RenamePass204Region80030000Fun800392f8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write HW/VSC register `0x17` bits 0-2: reads via
+indirect read fptr at `PTR_DAT_8003932c` with arg `0x17`, then writes back via
+write fptr at `PTR_DAT_80039330` with value
+`(read_val & 0xfff8) | (param_1 & 7)` — clears bits 0-2, replaces with the low
+3 bits of `param_1`. Sibling of Pass 202's
+`read_modify_write_hw_reg_0x16_set_bits1_3_from_3bit_param` in the `0x800391xx`
+BB register-config init cluster.
+
+**Callers:** 1 xref-in — `FUN_80039334` (config-bit1-gated optional hook: when
+`PTR_DAT_80039354[0]` bit 1 (`0x2`) set, passes config byte at offset `0x39`
+to program bits 0-2 of reg `0x17`).
+
+**Confidence:** HIGH — full 52B decompile; register index `0x17` and 3-bit field
+merge at bits 0-2 unambiguous; caller config-gate pattern matches Pass 202's
+`FUN_80039358` sibling (config bit `0x2`, offset `0x3c`).
+
+Region unnamed count after this pass: **86** (87 minus this rename). Live named
+**2080** global.
+
+**Next:** Pass 205 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
