@@ -3613,4 +3613,41 @@ sibling cluster of `compute_slot_table_base_ptr_by_type` / `release_active_slot_
 
 Region unnamed count after this pass: **216** (217 minus this rename). Live named **1705** global.
 
+**Next:** superseded by Pass 6 continuation (97).
+
+## Pass 6 continuation (97) (2026-07-01) — HCI User Confirmation Reply `FUN_80023618`
+
+Decompiled and renamed:
+**`FUN_80023618` → `fHCI_User_Confirmation_Request_Reply_0x33`**
+(130B, HIGH) via `RenamePass6Region80020000Fun80023618.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (130B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=216` at pass start). Deferred in Pass 6
+cont. (96) in favor of tied-size `FUN_8002b65c` (same 130B/xref_in=2, listed second).
+
+**Mechanism:** HCI User Confirmation Request **Reply** handler (router opcode **0x0433**,
+OCF 0x33). Core SSP numeric-comparison confirmation path reached via `FUN_800236a0`
+(conn-resolve wrapper) from `HCI_Write_Simple_Pairing_Debug_Mode`, and directly from
+`many_sub_if_else_cases_on_param2` internal opcode **0x35**. Operates on per-connection
+`_x58_crypto_struct`:
+- No pending LMP at `+0x1e8`: if crypto sub-state `+1 != '#'` (0x23), clears `+0x1e6`,
+  advances sub-state to `0x27` (`'`) for DHKey-check wait and returns (success path);
+  if sub-state `'#'`, sends LMP-ext `0x7F`/`0x1D` via `FUN_80025858`.
+- Pending LMP: opcode `0x40` (Simple Pairing Number) → `wrap_send_LMP_NOT_ACCEPTED`;
+  sub-opcode at pending `+5 != 0x1d` → clear pending via `FUN_80025634` and return;
+  else clear pending.
+- Tail on rejection paths: `call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)`
+  (Authentication Failure).
+
+**Callers:** `FUN_800236a0` at `0x800236b8` (`HCI_Write_Simple_Pairing_Debug_Mode`
+opcode `0x433` branch); `many_sub_if_else_cases_on_param2` at `0x80022f46` (internal
+opcode `0x35`).
+
+**Confidence:** HIGH — router opcode `0x0433` = HCI_User_Confirmation_Request_Reply;
+SSP state-advance idiom (`0x27` DHKey-check wait) and LMP-ext `0x7F`/`0x1D` send match
+documented SSP cluster (`handle_lmp_ext_dhkey_check_subopcode_0x1d_by_ssp_state`);
+sibling of `fHCI_Remote_OOB_Data_Request_Reply_0x30` at `0x800236cc`.
+
+Region unnamed count after this pass: **215** (216 minus this rename). Live named **1706** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
