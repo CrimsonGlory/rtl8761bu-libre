@@ -7504,5 +7504,39 @@ documented in Pass 160.
 Region unnamed count after this pass: **49** (50 minus this rename). Live named
 **2117** global.
 
-**Next:** Pass 242 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 242.
+
+## Pass 242 (2026-07-01) — HCI feature-page resource-pool configure `FUN_80030950`
+
+Fresh `ListUnnamed80030000.java` re-run: **49 unnamed** remain in region
+(unchanged from Pass 241; xref_in=0 tier dominates — rank-1 is `FUN_80030950`
+at 288B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80030950` → `configure_resource_pool_feature_page_slot_bind_0x1ac_struct`**
+(288B, HIGH, HANDLER-tier) via
+`RenamePass242Region80030000Fun80030950.java` (`renamed=1`, live-verified).
+
+**Mechanism:** HCI feature-page resource-pool configure handler (sibling of Pass
+241's `allocate_resource_pool_chain_slots_hci_feature_page_bind_0x1ac_struct`).
+Requires HCI cmd type byte `7` at `param+2`. Validates channel byte
+(`param+8`, range `1..0x3c`), slot index (`param+4`, `<0x1b`), min/max slot
+indices (`param+6`/`+7`). For indices `<0x10`: resolves BOS array index via
+`lookup_up_to_3_bos_array_indices_by_connection_handle`, sets occupancy bit in
+`PTR_DAT_80030a70+0x10`. For indices `≥0x10`: resolves `0x1ac` struct via
+`query_config_struct_0x1ac_by_index`, sets occupancy bit in
+`PTR_DAT_80030a70+2`. On success populates `0x1c`-stride entry at
+`PTR_DAT_80030a70` with min/max indices, channel×10 timer, flags cleared, and
+slot index stored at `+0x32`. Returns HCI `0x12` on validation failure, `2` on
+lookup miss, `0xc` if slot already occupied, `0` on success.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table HCI dispatch).
+
+**Confidence:** HIGH — full 288B decompile; shares `0x1ac` struct + `PTR_DAT_80030a70`
+table with allocate/dealloc siblings Pass 241/160.
+
+Region unnamed count after this pass: **48** (49 minus this rename). Live named
+**2118** global.
+
+**Next:** Pass 243 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
