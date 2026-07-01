@@ -9564,4 +9564,29 @@ consistent with other orphan utility-tier renames in this pass series.
 
 Region unnamed count after this pass: **17** (18 minus this rename). Live named **1904** global.
 
+**Next:** superseded by Pass 6 continuation (296).
+
+## Pass 6 continuation (296) (2026-07-01) — HCI TD side-effects thunk `FUN_8002f39c`
+
+Decompiled and renamed:
+**`FUN_8002f39c` → `thunk_dispatch_hci_td_connection_event_side_effects`**
+(18B, HIGH) via `RenamePass6Region80020000Fun8002f39c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_8002f39c` (18B, xref_in=3) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=17` at pass start).
+
+**Mechanism:** Thin 3-arg thunk in the `tHCI_TD` cluster (`0x8002f0xx`). Drops middle
+argument and tail-calls `dispatch_hci_td_connection_event_side_effects(conn_ptr,
+event_byte)` — the 414B post-processor renamed in Pass 6 cont. (15).
+
+**Callers:** xref_in=3 per `ListUnnamed80020000.java` (HCI TD dispatch paths into
+connection event side-effects).
+
+**Confidence:** HIGH — decompile confirms single tail-call with arg reorder; callee
+already HIGH-named and documented.
+
+Region unnamed count after this pass: **16** (17 minus this rename). Live named **1905** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

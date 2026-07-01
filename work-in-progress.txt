@@ -11893,8 +11893,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (295);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (296): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (17 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (296) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002f39c`→`thunk_dispatch_hci_td_connection_event_side_effects`
+          (18B, HIGH). Thin 3-arg thunk tail-calls `dispatch_hci_td_connection_event_side_effects`
+          (conn_ptr, event_byte); xref_in=3 in `tHCI_TD` cluster.
+          16 unnamed remain; live named 1905.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (296);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (297): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (16 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
