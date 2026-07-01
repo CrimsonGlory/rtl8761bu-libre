@@ -2418,4 +2418,28 @@ documented `0x80013cxx` packet-type table cluster.
 
 Region unnamed count after this pass: **198** (199 minus this rename).
 
-**Next:** Pass 114 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 114.
+
+## Pass 114 (2026-07-01) — AFH global mask OR `FUN_800117a4`
+
+Pass 114 target from cold-triage rank-1 (3 xref_in, 14B — largest at xref=3
+tier after Pass 113 cleared `FUN_80013bcc`). Decompiled and renamed:
+**`FUN_800117a4` → `or_global_afh_mask_bits_fc00`**
+(14B, HIGH) via `RenamePass114Region80010000Fun800117a4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Trivial one-shot global OR-mask: `*PTR_DAT_800117b4 |= 0xfc00`
+sets AFH channel-mask bits [15:10]. Documented previously in
+`reverse_engineering_baseband_reg_helpers.md` §6; AFH init chain entry via
+patch `FUN_8010ce0c` (`DAT_8010d140`).
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java` cold-triage —
+`FUN_80000d78` (boot init), `FUN_80037460` (region `0x80030000`), and patch
+`FUN_8010ce0c` (AFH init chain).
+
+**Confidence:** HIGH — trivial decompile; purpose confirmed by prior thematic
+analysis and cross-region caller context.
+
+Region unnamed count after this pass: **197** (198 minus this rename).
+
+**Next:** Pass 115 — cold-triage next rank-1 unnamed in region `0x80010000`.
