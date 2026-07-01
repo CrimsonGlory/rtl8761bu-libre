@@ -2661,4 +2661,34 @@ test with HCI error codes; callers sit on documented sync-conn setup chain
 
 Region unnamed count after this pass: **190** (191 minus this rename).
 
-**Next:** Pass 122 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 122.
+
+## Pass 122 (2026-07-01) — OGC-3 config bit1 sync `FUN_80016824`
+
+Pass 122 target from cold-triage rank-1 (2 xref_in, 202B — largest at xref=2
+tier after Pass 121 cleared `FUN_80018f38`). Decompiled and renamed:
+**`FUN_80016824` → `sync_ogc3_config_bit1_from_tlv_gate_and_dispatch_0x230`**
+(202B, HIGH) via `RenamePass122Region80010000Fun80016824.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** OGC-3 vendor-config apply helper in the `0x800168xx` cluster
+(sibling of Pass 7v's `conditionally_apply_ogc3_ocf47_hw_bit0x100_when_idle`).
+Gates on `config_base->field217_0xe4` bit 1 (`& 2`). Calls `FUN_800167cc` —
+which scans TLV type `0xff` for entry type `0x06`/short `0x000f` via
+`scan_length_prefixed_tlv_for_type_byte` (region `0x80020000` Pass 6 cont. 272)
+— to decide whether to set or clear bit 1 in global state byte
+`PTR_DAT_800168f4`. Sets `0x300`-byte struct `field_0x17c` to `0x80` when TLV
+gate passes, else `0`. On bit-1 transition: dispatches hook at `PTR_DAT_800168fc`
+with index `0x230` and packed flags from state bytes `+0x34`/`+0x35`. Logs via
+`possible_logging_function__var_args` (class `0x50`/event `0x80b`).
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java` cold-triage (xref script
+deferred — project lock during parallel Ghidra run).
+
+**Confidence:** HIGH — decompile confirms TLV-gated bit1 sync, `field_0x17c`
+write, and `0x230` hook dispatch; sits on documented OGC-3 config-apply chain
+(Pass 7v `field_0x17c`/`field_0x17e` siblings).
+
+Region unnamed count after this pass: **189** (190 minus this rename).
+
+**Next:** Pass 123 — cold-triage next rank-1 unnamed in region `0x80010000`.
