@@ -7516,4 +7516,33 @@ sibling `log_hci_evt_0x1f9_qos_conn_mode_and_reason_if_no_patch3` and
 
 Region unnamed count after this pass: **88** (89 minus this rename). Live named **1833** global.
 
+**Next:** superseded by Pass 6 continuation (225).
+
+## Pass 6 continuation (225) (2026-07-01) — random-BD_ADDR LMP detach gate `FUN_80029944`
+
+Decompiled and renamed:
+**`FUN_80029944` → `on_random_bdaddr_lmp_detach_if_reason_set`**
+(48B, HIGH) via `RenamePass6Region80020000Fun80029944.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=88` at pass start). First-listed at 48B
+tier; successor to Pass 6 cont. (224)'s `log_hci_evt_0x1f8_qos_conn_reason_if_no_patch3`.
+
+**Mechanism:** Minimal random-BD_ADDR LMP-detach gate — when
+`big_ol_struct[conn].bdaddr_random_` is set and detach reason `param_2` is nonzero,
+invokes `possible_LMP_DETACH_handler(conn, reason)`. Unlike the 54B siblings
+`on_random_bdaddr_encryption_finalize_lmp_detach_and_scan_links` and
+`on_random_bdaddr_stop_encrypt_finalize_lmp_detach_and_scan_links`, does **not**
+call `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3` afterward.
+
+**Callers:** `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update?`
+(crypto sub-states `0x17`/`0x1e` failure path: after `send_evt_HCI_Authentication_Complete_0x06`,
+invokes this detach gate before common tail); xref_in=1 per `ListXrefsTo80029944.java`.
+
+**Confidence:** HIGH — decompile confirms identical `bdaddr_random_` + reason gate idiom to
+documented 54B finalize tails; caller decompile shows role in SSP-complete authentication
+failure teardown.
+
+Region unnamed count after this pass: **87** (88 minus this rename). Live named **1834** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
