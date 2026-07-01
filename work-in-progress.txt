@@ -12927,7 +12927,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 133;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 134: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 134 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (157 unnamed); decompiled+renamed rank-1
+          `FUN_80035e64`→`zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`
+          (226B, HIGH, INIT-tier). Link-mode-change BOS/workspace zero+init;
+          memset 0x16c, LMP 0x3ee case2 branch, primes BB timing +0x168/+0x16a.
+          156 unnamed remain; live named 2010.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 134;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 135: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -4039,5 +4039,39 @@ and `VSC_0xfd49_extended_diagnostic` tail-call integration confirmed.
 Region unnamed count after this pass: **157** (158 minus this rename). Live named
 **2009** global.
 
-**Next:** Pass 134 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 134.
+
+## Pass 134 (2026-07-01) — `zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`
+
+Fresh `ListUnnamed80030000.java` re-run: **157 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_80035e64` at 226B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035e64` → `zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`**
+(226B Ghidra boundary, HIGH, INIT-tier) via
+`RenamePass134Region80030000Fun80035e64.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change cluster BOS/workspace initializer on
+`PTR_DAT_80035f48`. `memset` zeroes 0x16c bytes, primes scalar timing fields
+(`+0x9a`=100, `+0x9e`=0xfa), clears companion globals. When
+`DAT_80035f5c >> 8 & 0x80` is clear, dispatches optional hook at
+`PTR_DAT_80035f60`; otherwise sets bit 2 on `PTR_DAT_80035f64` and invokes
+`LMP_CH__0x3ee__case2_else_1_FUN_80011fc0FUN_80011e10` +
+`LMP_CH__0x3ee__case2_else_2_FUN_80011d9c`, merging `+0x164` link-mode byte.
+Copies `+0x10a` from global bit `>>4`, stores timeout pointer `0x2580` at
+offset +300 (`0x12c`), merges mask constants into `+0x164`, and primes BB
+timing pair `+0x168`=9 / `+0x16a`=0x6228 (same offsets used by SCO HW-channel
+init and `poll_vsc_fc11_3_until_pending_clear_with_link_mode_timeouts`).
+
+**Callers:** 1 xref-in (caller name unresolved this pass).
+
+**Confidence:** HIGH — full 226B decompile; `+0x10a`/`+0x164`/`+0x168`/`+0x16a`
+field layout matches documented link-mode-change cluster; LMP 0x3ee case2 branch
+idiom matches sibling `FUN_800352d0`.
+
+Region unnamed count after this pass: **156** (157 minus this rename). Live named
+**2010** global.
+
+**Next:** Pass 135 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
