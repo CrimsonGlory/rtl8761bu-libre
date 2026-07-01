@@ -7027,5 +7027,36 @@ invoke pattern unambiguous.
 Region unnamed count after this pass: **64** (65 minus this rename). Live named
 **2102** global.
 
-**Next:** Pass 227 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 227.
+
+## Pass 227 (2026-07-01) — VSC vendor-config subcmd 0 credit-scheduler byte store `FUN_8003013c`
+
+Fresh `ListUnnamed80030000.java` re-run: **64 unnamed** remain in region
+(unchanged from Pass 226; rank-1 at xref=1 tier is `FUN_8003013c` at 28B —
+largest among tied 28B xref=1 cohort after Pass 226 renamed sibling
+`FUN_80039738`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003013c` → `vsc_vendor_config_subcmd0_store_credit_scheduler_global_byte`**
+(28B, HIGH, SIMPLE-tier) via
+`RenamePass227Region80030000Fun8003013c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** VSC vendor-config subcmd-0 delegate invoked from
+`dispatch_vsc_vendor_config_subcmd_write_feature_flags` (Pass 139). When
+`param_2 == 1`, stores `*param_1` via ROM helper
+`store_byte_at_credit_scheduler_global_context_offset_0x21` (`0x8004f24c`);
+returns `0` on success, HCI error `0x12` (Invalid HCI Command Parameters)
+otherwise.
+
+**Callers:** 1 xref-in — sole caller is
+`dispatch_vsc_vendor_config_subcmd_write_feature_flags` (`0x80030158`) via
+subcmd-0 switch arm.
+
+**Confidence:** HIGH — full 28B decompile; subcmd-0 credit-scheduler byte-store
+path closes gap noted in Pass 139 mechanism section.
+
+Region unnamed count after this pass: **63** (64 minus this rename). Live named
+**2103** global.
+
+**Next:** Pass 228 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
