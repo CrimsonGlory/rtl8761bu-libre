@@ -13874,7 +13874,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 233;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 234: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 234 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033ec4`→`invoke_vsc_fc56_rf_reconfig_with_stack_arg_one`
+          (18B, HIGH, SIMPLE-tier). Thin boot-init wrapper calling
+          `vsc_0xfc56_payload_apply_and_rf_reconfig` with 12-byte stack buffer +
+          `param_2=1`; caller `copy_nine_dispatch_slots_and_init_baseband_subsystems`
+          when status bits `0x1e==6`. Corrects Pass 128 provisional alias.
+          Region unnamed 56 remain; live named 2110.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 234;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 235: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

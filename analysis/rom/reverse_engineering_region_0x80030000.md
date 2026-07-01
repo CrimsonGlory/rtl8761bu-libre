@@ -3848,7 +3848,7 @@ dword values into `DAT_80034788` base) — gated on `config_struct.field59_0x41 
 3` (mode `1` copies once; mode `0` copies after `clear_global_status_bit_0x400`).
 Sets status byte bit0 at `DAT_80034790`, calls
 `conditional_table_entry_registration_init(1)`. When status byte bits `0x1e==6`,
-calls `FUN_80033ec4` (`vsc_0xfc56_payload_apply_and_rf_reconfig`). Mode `0` also
+calls `invoke_vsc_fc56_rf_reconfig_with_stack_arg_one`. Mode `0` also
 calls `FUN_800122fc`. Clears status bits `2`/`4`/`8`/`0x10` on `DAT_80034798`,
 zeroes 16-byte buffer at `PTR_DAT_8003479c`. Sibling of region `0x80020000`'s
 `copy_eight_literal_pool_globals_and_init_baseband_hw` but nine-slot indexed
@@ -7242,5 +7242,35 @@ vs link-mode cleanup fork; cluster placement beside Pass 6/75/77/115 siblings.
 Region unnamed count after this pass: **57** (58 minus this rename). Live named
 **2109** global.
 
-**Next:** Pass 234 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 234.
+
+## Pass 234 (2026-07-01) — VSC FC56 RF-reconfig invoke wrapper `FUN_80033ec4`
+
+Fresh `ListUnnamed80030000.java` re-run: **57 unnamed** remain in region
+(unchanged from Pass 233; rank-1 at xref=1 tier is `FUN_80033ec4` at 18B —
+largest among tied xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033ec4` → `invoke_vsc_fc56_rf_reconfig_with_stack_arg_one`**
+(18B, HIGH, SIMPLE-tier) via
+`RenamePass234Region80030000Fun80033ec4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin boot-init wrapper in the `0x80033e` cluster. Allocates a
+12-byte stack buffer and calls `vsc_0xfc56_payload_apply_and_rf_reconfig`
+(region `0x80000000`, 430B payload-apply body for VSC `0xfc56`) with constant
+`param_2=1`. Corrects Pass 128's provisional alias that mislabeled this
+18B wrapper as the 430B callee itself.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` —
+`copy_nine_dispatch_slots_and_init_baseband_subsystems` when status byte bits
+`0x1e==6`; `xrefs_to` empty (indirect dispatch).
+
+**Confidence:** HIGH — full 18B decompile; sole callee is already
+high-confidence `vsc_0xfc56_payload_apply_and_rf_reconfig`; boot-init cluster
+placement beside `materialize_indexed_lut_5_ushort_buf0_18_ushort_buf1`.
+
+Region unnamed count after this pass: **56** (57 minus this rename). Live named
+**2110** global.
+
+**Next:** Pass 235 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
