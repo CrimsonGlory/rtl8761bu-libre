@@ -4244,4 +4244,37 @@ role-gate + SSP-complete emitter idiom matches documented NOT-ACCEPTED siblings
 
 Region unnamed count after this pass: **196** (197 minus this rename). Live named **1725** global.
 
+**Next:** superseded by Pass 6 continuation (117).
+
+## Pass 6 continuation (117) (2026-07-01) — post role-switch crypto kickoff `FUN_800222b0`
+
+Decompiled and renamed:
+**`FUN_800222b0` → `kickoff_post_role_switch_encryption_or_auth_by_link_type`**
+(110B, HIGH) via `RenamePass6Region80020000Fun800222b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (110B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=196` at pass start). Tied at 110B with
+three xref_in=1 functions; selected for higher xref count.
+
+**Mechanism:** Post-LMP-accepted role-switch encryption/auth kickoff helper on
+`big_ol_struct[slot]._x58_crypto_struct`. Stores slot index at crypto `+0x213`, gates on
+`FUN_80023fdc` (feature-page precondition — returns 0 when pass). By link-type byte
+`*crypto`: types `0x02`/`0x0a` set `crypto+0x50=3` and return 1; type `0x00` with global
+`PTR_DAT_80022324` non-zero sets `crypto+0x50=1`, advances via `FUN_80023fb8(crypto,0)`,
+then `FUN_80022f9c` (link-key lookup / auth pairing flow); else returns 0. Callers invoke
+`crypto_state_machine_finalizer` only when this returns 0 — i.e. kickoff succeeded vs
+needs immediate finalize.
+
+**Callers:** `FUN_80060898` (region `0x80060000` — sends `send_LMP_ACCEPTED(conn,0x33,…)`
+then this helper; documented in `region_0x80070000` Pass 12hh as callee of
+`thunk_send_lmp_accepted_0x33_and_finalize_crypto`) and `FUN_8006ac14` (same kickoff
+without LMP send) — xref_in=2 via `ListXrefsTo800222b0.java`.
+
+**Confidence:** HIGH — decompile confirms link-type branching + `crypto+0x50` state
+advance idiom shared with `arm_encryption_before_deferred_role_switch` /
+`fHCI_Authentication_Requested_0x11`; callee chain (`FUN_80023fb8`, `FUN_80022f9c`) already
+HIGH-named; caller context matches documented LMP-accepted-0x33 role-switch path.
+
+Region unnamed count after this pass: **195** (196 minus this rename). Live named **1726** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
