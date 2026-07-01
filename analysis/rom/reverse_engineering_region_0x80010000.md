@@ -2188,4 +2188,35 @@ before mode-3 encryption arm.
 
 Region unnamed count after this pass: **206** (207 minus this rename).
 
-**Next:** Pass 106 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 106.
+
+## Pass 106 (2026-07-01) — linked-list conn-slot timing clear `FUN_800177a4`
+
+Pass 106 target from cold-triage rank-1 (3 xref_in, 64B — largest at xref=3
+tier after Pass 105 cleared `FUN_80014770`). Decompiled and renamed:
+**`FUN_800177a4` → `sweep_linked_conn_slots_clear_pending_timing_by_index_and_type`**
+(64B, HIGH) via `RenamePass106Region80010000Fun800177a4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Singly-linked conn-slot list sweep in the `0x800177xx` cluster
+(sibling of `conn_slot_table_entry_ptr_from_index_stride_0x1c` and inverse of
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type`). Skips when
+`param_1` equals the indexed table entry at
+`PTR_PTR_800177e4 + (param_2 & 0xff) * 0x1c`; otherwise walks `param_1` via
+`+0x408`, matching subrecords at `+0x40c` where bytes `+0xd` (conn-array index)
+and `+0xf` (type) match the head node's pair. On match clears pending byte
+`+0xe`, zeroes ushort `+6`, copies ushort `+10` → `+4`, clears byte `+0xc`.
+
+**Callers:** `commit_dual_slot_lmp25c_role_record_state_and_chain_credits`
+(region `0x80040000`, `+0x2e` pending path), `FUN_80017c5c` (unnamed sibling
+in `0x80017cxx` cluster), and `program_dual_slot_lmp25c_packet_credits_by_conn_index`
+(region `0x80040000`) — 3 xref_in per `ListXrefsTo800177a4.java`.
+
+**Confidence:** HIGH — decompile confirms linked-list sweep matching index+type
+bytes with timing-field reset; callers tie to dual-slot LMP-25C role-record
+commit and packet-credit programming paths already documented in region
+`0x80040000`.
+
+Region unnamed count after this pass: **205** (206 minus this rename).
+
+**Next:** Pass 107 — cold-triage next rank-1 unnamed in region `0x80010000`.
