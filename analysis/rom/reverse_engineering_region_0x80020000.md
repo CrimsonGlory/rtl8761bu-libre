@@ -8564,4 +8564,33 @@ show established HCI event-buffer ring enqueue/drain choreography.
 
 Region unnamed count after this pass: **52** (53 minus this rename). Live named **1869** global.
 
+**Next:** superseded by Pass 6 continuation (261).
+
+## Pass 6 continuation (261) (2026-07-01) — HCI evt status/conn-handle extractor `FUN_8002f454`
+
+Decompiled and renamed:
+**`FUN_8002f454` → `hci_evt_try_extract_status_and_conn_handle_when_03_08_or_30`**
+(36B, HIGH) via `RenamePass6Region80020000Fun8002f454.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=52` at pass start). Highest xref count in
+the tied 36B tier (others at 36B have xref_in=1).
+
+**Mechanism:** HCI event header field extractor. When event code byte `*param_1` is
+`0x03` (Connection Complete), `0x08` (Read Remote Version Information Complete), or
+`0x30`, copies status byte at `param_1[2]` to `*param_2` and connection handle
+`*(ushort*)(param_1+3)` to `*param_3`, returns `1`; otherwise returns `0`.
+
+**Callers:** `dispatch_hci_td_connection_event_side_effects` (`0x8002f10a`) — invoked
+indirectly via `PTR_DAT_8002f200` when config mask `field217_0xe4..0xe7 & DAT_8002f1fc`
+is non-zero; on success with status==0 logs via `possible_logger_called_if_no_patch3`;
+`assoc_w_tHCI_TD_FUN_8002f518` (`0x8002f594`) — HCI TD association table dispatch path;
+xref_in=2 via `ListXrefsTo8002f454.java`.
+
+**Confidence:** HIGH — decompile confirms standard HCI evt status+handle layout for
+0x03/0x08; caller decompile shows config-gated indirect dispatch idiom matching
+documented HCI TD connection-event side-effect cluster.
+
+Region unnamed count after this pass: **51** (52 minus this rename). Live named **1870** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
