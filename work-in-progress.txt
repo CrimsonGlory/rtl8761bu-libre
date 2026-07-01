@@ -13259,7 +13259,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 169;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 170: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 170 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80037790`→`dispatch_acl_tx_by_handle_to_completion_or_pending_queue`
+          (108B, HIGH, HANDLER-tier). ACL TX packet router: 12-bit handle from
+          descriptor, LMP-handle lookup → completion-ring enqueue, else pending-queue
+          or overflow fptr dispatch. Region unnamed 120 remain; live named 2046.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 170;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 171: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

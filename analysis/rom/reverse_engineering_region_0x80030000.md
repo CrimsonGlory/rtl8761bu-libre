@@ -5229,5 +5229,36 @@ previously referenced by name in Pass 106 parent analysis.
 Region unnamed count after this pass: **121** (122 minus this rename). Live named
 **2045** global.
 
-**Next:** Pass 170 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 170.
+
+## Pass 170 (2026-07-01) — ACL TX dispatch router `FUN_80037790`
+
+Fresh `ListUnnamed80030000.java` re-run: **121 unnamed** remain in region
+(unchanged from Pass 169; rank-1 at xref=1 tier is `FUN_80037790` at 108B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037790` → `dispatch_acl_tx_by_handle_to_completion_or_pending_queue`**
+(108B, HIGH, HANDLER-tier) via
+`RenamePass170Region80030000Fun80037790.java` (`renamed=1`, live-verified).
+
+**Mechanism:** ACL TX packet router. Extracts 12-bit connection handle from
+`*param_1 >> 8 & 0xfff`. On successful `called_by_fHCI_Read_LMP_Handle_3`
+lookup, enqueues via `enqueue_connection_packet_completion_ring_or_overflow_dispatch`;
+else tries `lookup_some_sort_of_connection_struct_index_by_connection_handle` —
+on miss enqueues via `enqueue_acl_tx_descriptor_to_per_handle_pending_queue`
+(returning early on success), on hit logs via `possible_logging_function__var_args`;
+fallback dispatches via `PTR_DAT_80037800` fptr with arg 3.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` (indirect dispatch table;
+`xrefs_to` returns none — consistent with function-pointer registration).
+
+**Confidence:** HIGH — full 108B decompile; callees all named (Pass 95
+`enqueue_connection_packet_completion_ring_or_overflow_dispatch`, region
+`0x80020000` `enqueue_acl_tx_descriptor_to_per_handle_pending_queue`).
+
+Region unnamed count after this pass: **120** (121 minus this rename). Live named
+**2046** global.
+
+**Next:** Pass 171 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
