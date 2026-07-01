@@ -8640,5 +8640,34 @@ cluster placement matches documented `0x8003b5xx` BB primitives.
 Region unnamed count after this pass: **11** (12 minus this rename). Live named
 **2155** global.
 
-**Next:** Pass 280 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 280.
+
+## Pass 280 (2026-07-01) — config-gated byte reader `FUN_80039828`
+
+Fresh `ListUnnamed80030000.java` re-run: **11 unnamed** remain in region
+(unchanged from Pass 279; xref_in=0 tier dominates — rank-1 is `FUN_80039828`
+at 22B, now first after Pass 279 cleared tied sibling `FUN_8003b5ec`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039828` → `read_config_signed_byte_at_0x279_when_field620_bit2_set`**
+(22B, HIGH, UTILITY-tier) via
+`RenamePass280Region80030000Fun80039828.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-gated signed-byte reader in the `0x800398xx` TX-power
+cluster. When `config_base->field620_0x278` bit 2 is set, returns signed byte
+at `field621_0x279`; otherwise returns 0. Same `field620_0x278` bit-2 gate as
+Pass 258's `config_gated_select_packet_type_for_hw_translator_4link` and Pass
+246's `compute_scaled_tx_power_level_from_config_hook`, but a minimal
+single-field accessor rather than a selector/calculator.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 22B decompile; bit-2 gate and signed-byte return
+semantics unambiguous; cluster placement matches documented `0x800398xx`
+TX-power/config primitives.
+
+Region unnamed count after this pass: **10** (11 minus this rename). Live named
+**2156** global.
+
+**Next:** Pass 281 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
