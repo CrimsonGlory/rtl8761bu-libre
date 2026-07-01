@@ -6750,5 +6750,34 @@ invoke unambiguous; calibration-table cluster sibling of Pass 52/87.
 Region unnamed count after this pass: **73** (74 minus this rename). Live named
 **2093** global.
 
-**Next:** Pass 218 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 218.
+
+## Pass 218 (2026-07-01) — gated LMP-25C credit programmer `FUN_8003f9fc`
+
+Fresh `ListUnnamed80030000.java` re-run: **73 unnamed** remain in region
+(unchanged from Pass 217; rank-1 by size at xref=1 tier is `FUN_8003f9fc` at
+34B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003f9fc` → `program_dual_slot_lmp25c_credits_if_role_record_byte1_set`**
+(34B, HIGH, SIMPLE-tier) via `RenamePass218Region80030000Fun8003f9fc.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Thin gated wrapper on the dual-slot LMP-0x25C role-record table
+at `PTR_DAT_8003fa20`: if credit byte `entry[(conn_index & 0xff) * 0x84 + 1]` is
+nonzero, calls `program_dual_slot_lmp25c_packet_credits_by_conn_index`
+(`0x80043e04`, region `0x80040000`). Sibling of
+`dispatch_fptr_opcodes_0x8f_0x82_with_status_bytes_set_to_ff` (`0x8003f980`,
+Pass 89) in the `0x8003f9xx` cluster.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 34B decompile; 0x84-stride table index + credit-byte
+gate + callee chain unambiguous.
+
+Region unnamed count after this pass: **72** (73 minus this rename). Live named
+**2094** global.
+
+**Next:** Pass 219 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

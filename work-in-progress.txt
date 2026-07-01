@@ -13713,7 +13713,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 217;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 218: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 218 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003f9fc`→`program_dual_slot_lmp25c_credits_if_role_record_byte1_set`
+          (34B, HIGH, SIMPLE-tier). Gated wrapper on 0x84-stride role table
+          `PTR_DAT_8003fa20` calling `program_dual_slot_lmp25c_packet_credits_by_conn_index`
+          when credit byte `entry[+1]` nonzero; LMP-25C cluster sibling of Pass 89.
+          72 unnamed remain; live named 2094.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 218;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 219: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
