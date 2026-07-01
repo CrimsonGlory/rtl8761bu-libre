@@ -14920,8 +14920,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 106;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 107: cold-triage next rank-1
-          unnamed function in region `0x80010000` (205 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 107 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80011a3c`→
+          `set_or_clear_bb_reg_0xfc_bit_0x1000_by_param`
+          (54B, HIGH). Param-gated RMW on BB reg `0xfc` bit `0x1000`: clear
+          when param==1, else set; sibling of
+          `afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000`; callers
+          `unknown_referencing_default_name_6` +
+          `calls_to_0x8010a001_as_fptr_to_install_patches`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 107;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 108: cold-triage next rank-1
+          unnamed function in region `0x80010000` (204 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

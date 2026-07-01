@@ -2219,4 +2219,36 @@ commit and packet-credit programming paths already documented in region
 
 Region unnamed count after this pass: **205** (206 minus this rename).
 
-**Next:** Pass 107 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 107.
+
+## Pass 107 (2026-07-01) — param-gated BB reg 0xfc bit 0x1000 writer `FUN_80011a3c`
+
+Pass 107 target from cold-triage rank-1 (3 xref_in, 54B — largest at xref=3
+tier after Pass 106 cleared `FUN_800177a4`; tied with `FUN_80018dcc` at 54B,
+selected first by address order). Decompiled and renamed:
+**`FUN_80011a3c` → `set_or_clear_bb_reg_0xfc_bit_0x1000_by_param`**
+(54B, HIGH) via `RenamePass107Region80010000Fun80011a3c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Param-gated read-modify-write on baseband register `0xfc` bit
+`0x1000` via the IRQ-masked busy-wait primitives
+(`read_baseband_register_masked_busywait` /
+`write_baseband_register_masked_busywait`). When `param_1==1`, clears bit
+`0x1000` (`& 0xffffefff`); otherwise sets it (`| 0x1000`). Direct
+caller-controlled sibling of Pass 95's
+`afh_flag_gated_set_or_clear_bb_reg_0xfc_bit_0x1000` (`0x80011a74`), which
+derives set/clear from AFH capability flags at `*DAT_80011aac` instead of an
+explicit byte parameter.
+
+**Callers:** `unknown_referencing_default_name_6` (link-mode bitmask
+reconfigure handler at `0x80012768`), patch installer
+`calls_to_0x8010a001_as_fptr_to_install_patches` (`0x80010d2a`), plus one raw
+data reference at `0x80073d72` — 3 xref_in per `ListXrefsTo80011a3c.java`.
+
+**Confidence:** HIGH — self-contained RMW bit toggle; callers tie to
+link-mode/AFH reconfigure path already documented as conditionally invoking
+this function alongside the AFH-flag-gated variant.
+
+Region unnamed count after this pass: **204** (205 minus this rename).
+
+**Next:** Pass 108 — cold-triage next rank-1 unnamed in region `0x80010000`.
