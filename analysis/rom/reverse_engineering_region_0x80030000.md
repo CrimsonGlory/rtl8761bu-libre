@@ -7117,5 +7117,38 @@ unambiguous; naming mirrors Pass 135 sibling.
 Region unnamed count after this pass: **61** (62 minus this rename). Live named
 **2105** global.
 
-**Next:** Pass 230 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 230.
+
+## Pass 230 (2026-07-01) — Register-script invoke wrapper `FUN_80039174`
+
+Fresh `ListUnnamed80030000.java` re-run: **61 unnamed** remain in region
+(unchanged from Pass 229; rank-1 at xref=1 tier is `FUN_80039174` at 22B —
+largest among tied 22B xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039174` → `invoke_register_script_from_global_context_0x38_0x3c`**
+(22B, HIGH, SIMPLE-tier) via
+`RenamePass230Region80030000Fun80039174.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin register-script interpreter invocation wrapper in the
+`0x800391xx` cluster. Loads global context `PTR_PTR_8003918c`, calls through
+hook fptr at `PTR_DAT_80039190` with `(script_ptr, num_halfwords)` =
+`(*(ctx+0x38), *(ushort*)(ctx+0x3c))` — matching
+`register_script_interpreter` signature. Sibling of
+`invoke_register_script_from_global_context_0x58_0x5c` (Pass 229, offsets
+`+0x58`/`+0x5c`), `invoke_register_script_from_global_context_0x60_0x64`
+(Pass 135), and `invoke_register_script_dual_from_global_context_pairs`
+(Pass 216). Caller of `register_script_interpreter` per
+`reverse_engineering_register_script_interpreter.md`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 22B decompile; offset-pair invoke pattern
+unambiguous; naming mirrors Pass 135/229 siblings.
+
+Region unnamed count after this pass: **60** (61 minus this rename). Live named
+**2106** global.
+
+**Next:** Pass 231 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
