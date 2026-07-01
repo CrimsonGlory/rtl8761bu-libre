@@ -12845,7 +12845,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 125;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 126: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 126 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003851c`→`check_role_slot_timing_deadline_overrun_and_set_flag`
+          (276B, HIGH, HANDLER-tier). Per-role-slot timing-deadline overrun checker
+          on `big_ol_struct` fields `0x288`–`0x29f`; caller
+          `conn_event_packet_type_update_and_reschedule`. 164 unnamed remain;
+          live named 2002.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 126;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 127: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -3750,5 +3750,41 @@ already HIGH-named; per-conn flag semantics match documented ACL reassembly clus
 Region unnamed count after this pass: **165** (166 minus this rename). Live named
 **2001** global.
 
-**Next:** Pass 126 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 126.
+
+## Pass 126 (2026-07-01) — `check_role_slot_timing_deadline_overrun_and_set_flag`
+
+Fresh `ListUnnamed80030000.java` re-run: **165 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003851c` at 276B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003851c` → `check_role_slot_timing_deadline_overrun_and_set_flag`**
+(276B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass126Region80030000Fun8003851c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-role-slot `big_ol_struct` timing-deadline overrun checker gated
+on `field_0x29c` in {2,3}, `field_0x28c != 0xffffffff`, `field_0x29e == 0`,
+`field_0x29d == 0`, and `field_0x29f == 0`. Reads halved HW clock via
+`read_hw_clock_raw_dword_by_role_index(byte_0xCC)`. When `field_0x29c == 2`:
+compares clock against absolute deadline at `field_0x288` (+2, masked by
+`DAT_80038634`); on overrun logs opcode `0x27` subcode `0x1bc`/`0x125` and sets
+`field_0x29f = 3`. When `field_0x29c == 3` and `field_0x28c != -1`: computes
+elapsed since captured timestamp with wrap via `DAT_8003863c`, threshold from
+max of `field_0x298`/`field_0x294`/`(field106_0x94 & 0x7fff)<<1`; on overrun
+logs opcode `0x27` subcode `0x1d1`/`0x126` and sets `field_0x29f = 1`. Sibling
+of Pass 104's `advance_role_slot_link_state_and_capture_halved_hw_clock`.
+
+**Callers:** 1 xref-in — `conn_event_packet_type_update_and_reschedule` at
+`0x800046b8` (invoked when current packet type is eSCO class `0xc00`/`0x1c00`/
+`0xc000` during per-connection-event packet-type refresh).
+
+**Confidence:** HIGH — full 276B decompile; role-slot field cluster `0x288`–
+`0x29f` matches Pass 104 sibling; dual absolute/relative deadline paths with
+documented logging opcodes; caller integration in eSCO packet-type sweep confirmed.
+
+Region unnamed count after this pass: **164** (165 minus this rename). Live named
+**2002** global.
+
+**Next:** Pass 127 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
