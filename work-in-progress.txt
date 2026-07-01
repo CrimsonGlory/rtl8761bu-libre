@@ -14689,8 +14689,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 83;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 84: cold-triage next rank-1
-          unnamed function in region `0x80010000` (228 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 84 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800122fc`→`apply_config_status_feature_bits_to_baseband_registers`
+          (772B, HIGH). Hook-gated config→BB applier at `PTR_PTR_80012600`;
+          default path merges config fields into status dword + BB regs
+          `0x4`/`0x15c`/`0x1fc`, calls `feature_bit_status_word_propagator` +
+          `dispatch_afh_cap_param_to_bb_register_clear_loop(1)`; boot-init callers
+          `copy_eight_literal_pool_globals_and_init_baseband_hw` +
+          `copy_nine_dispatch_slots_and_init_baseband_subsystems`. 4 xref_in.
+          227 unnamed remain; live named 2197.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 84;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 85: cold-triage next rank-1
+          unnamed function in region `0x80010000` (227 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

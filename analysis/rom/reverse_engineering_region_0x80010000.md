@@ -1535,4 +1535,34 @@ Pass 7l clear primitive.
 
 Region unnamed count after this pass: **228** (229 minus this rename).
 
-**Next:** Pass 84 — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 84 (2026-07-01) — Config status/feature BB register applier `FUN_800122fc`
+
+Pass 84 target from cold-triage rank-1 (4 xref_in, 772B — largest at xref=4
+tier after Pass 83). Decompiled and renamed:
+**`FUN_800122fc` → `apply_config_status_feature_bits_to_baseband_registers`**
+(772B, HIGH) via `RenamePass84Region80010000Fun800122fc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Hook-gated config→baseband applier at `PTR_PTR_80012600`; when
+NULL, default path merges `config_struct` fields `0x44`–`0x46`, `0xd2`–`0xd3`,
+and `0xec` into shared status dword `DAT_80012608` and BB registers `0x4`,
+`0x15c`, `0x1fc` (via `read_baseband_register_*` /
+`write_baseband_register_masked_busywait`). Mode-gated branches on
+`PTR_DAT_80012604 & 0x1e` (`6` sets BB reg `0x4` bit `0x200`; `2` ORs extra
+status bits when `config+0x3f` bit `0x10` clear). Tail calls
+`feature_bit_status_word_propagator`, clears AFH cap params via
+`dispatch_afh_cap_param_to_bb_register_clear_loop(1)`, and conditionally invokes
+`FUN_80011ab0` when `config+0x3e` bit `0x40` set.
+
+**Callers:** 4 xref_in per `ListUnnamed80010000.java`; boot-init consumers
+`copy_eight_literal_pool_globals_and_init_baseband_hw` (when
+`config.field59_0x41&3==1`) and
+`copy_nine_dispatch_slots_and_init_baseband_subsystems`.
+
+**Confidence:** HIGH — decompile confirms hook-or-default structure, config-field
+bit unpacking into BB MMIO writes, and integration with established
+`feature_bit_status_word_propagator` / AFH-cap dispatch primitives.
+
+Region unnamed count after this pass: **227** (228 minus this rename).
+
+**Next:** Pass 85 — cold-triage next rank-1 unnamed in region `0x80010000`.
