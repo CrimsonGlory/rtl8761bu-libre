@@ -6792,4 +6792,30 @@ both callers already HIGH-named and document this function by role.
 
 Region unnamed count after this pass: **112** (113 minus this rename). Live named **1809** global.
 
+**Next:** superseded by Pass 6 continuation (201).
+
+## Pass 6 continuation (201) (2026-07-01) — slot bitmask bit-set helper `FUN_8002b8e0`
+
+Decompiled and renamed:
+**`FUN_8002b8e0` → `irq_safe_set_active_slot_bit_at_0x138`**
+(58B, HIGH) via `RenamePass6Region80020000Fun8002b8e0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (58B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=112` at pass start). Tied at 58B with
+`FUN_8002f9f4` (xref_in=0); selected higher-xref entry first.
+
+**Mechanism:** IRQ-safe helper that sets one bit in the per-slot active bitmask ushort at
+`PTR_DAT_8002b91c+0x138`. Bounds-checks `param_1 < 4`, skips if bit already set, otherwise
+ORs `(1 << slot)` into the ushort under `disable_interrupts`/`enable_interrupts`.
+Factored-out set half of the acquire path — `release_active_slot_bitmask` clears bits inline
+instead of calling a sibling helper.
+
+**Callers:** `acquire_active_slot_bitmask` (`0x8002b920`, Pass 6 cont. 111) — xref_in=1.
+
+**Confidence:** HIGH — decompile confirms IRQ-masked bit-set idiom; sole caller already
+HIGH-named as acquire counterpart to `release_active_slot_bitmask`; offset `+0x138` matches
+documented `0x8002b9xx` HW crypto/slot cluster.
+
+Region unnamed count after this pass: **111** (112 minus this rename). Live named **1810** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
