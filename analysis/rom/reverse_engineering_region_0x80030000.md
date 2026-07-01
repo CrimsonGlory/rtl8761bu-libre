@@ -785,7 +785,8 @@ No parameters. Classic measure-average-correct-apply calibration loop: saves/set
 times reading status register 0x7f and accumulating a sum (with optional per-iteration debug
 log). Restores the three registers to their original/cleared state, computes a correction value
 `((sum>>6)+0x80)&0xff`, clamps it against two threshold fields, derives a final trim value
-`(0x1000 - (val&0x7f)) & 0x7f`, and applies it via `FUN_80038e24`. Matches the textbook shape of
+`(0x1000 - (val&0x7f)) & 0x7f`, and applies it via
+`program_bb_reg_0x6f_7bit_field_at_bits7_13_via_hook`. Matches the textbook shape of
 a crystal/clock-trim calibration routine.
 
 #### 6. `link_mode_change_state_machine` (0x80035454, 456B)
@@ -3240,5 +3241,36 @@ hook indirection, and two named SCO/eSCO lifecycle callers anchor the role.
 Region unnamed count after this pass: **180** (181 minus this rename). Live named
 **1986** global.
 
-**Next:** Pass 111 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 111.
+
+## Pass 111 (2026-07-01) — BB reg 0x6f 7-bit trim field `FUN_80038e24`
+
+Fresh `ListUnnamed80030000.java` re-run: **180 unnamed** remain in region
+(unchanged from Pass 110; rank-1 by size at xref=2 tier is `FUN_80038e24` at
+70B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038e24` → `program_bb_reg_0x6f_7bit_field_at_bits7_13_via_hook`**
+(70B, HIGH, SIMPLE-tier) via `RenamePass111Region80030000Fun80038e24.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write on baseband register `0x6f` (bank `3`, mode `1`)
+via hook fptr pair `PTR_DAT_80038e6c` (read) / `PTR_DAT_80038e70` (write): reads
+current value, masks with `0xc07f` (preserves bits 0–6 and ≥14), ORs
+`(param_1 & 0x7f) << 7` into bits 7–13, writes back. Sibling of Pass 109's
+`program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3` in the `0x80038exx` BB-reg
+programmer cluster.
+
+**Callers:** 1 confirmed via `find_callers` —
+`clock_trim_calibration_measure_apply` (`0x8003a180`) applies the derived trim
+value `(0x1000 - (val&0x7f)) & 0x7f` after its 16-iteration measurement loop
+(documented Pass 8). ListUnnamed reports 2 xref-in (second likely COMPUTED_CALL).
+
+**Confidence:** HIGH — full 70B decompile; explicit hook indirection, mask/OR
+pattern, and named crystal-trim calibration caller anchor the role.
+
+Region unnamed count after this pass: **179** (180 minus this rename). Live named
+**1987** global.
+
+**Next:** Pass 112 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
