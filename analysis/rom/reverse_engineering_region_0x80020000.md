@@ -6846,4 +6846,38 @@ Pass 186 as bits-0–1 setter.
 
 Region unnamed count after this pass: **110** (111 minus this rename). Live named **1811** global.
 
+**Next:** superseded by Pass 6 continuation (203).
+
+## Pass 6 continuation (203) (2026-07-01) — LMP stop-encryption sender `FUN_800245fc`
+
+Decompiled and renamed:
+**`FUN_800245fc` → `send_lmp_stop_encryption_req_0x12_and_set_conn_flag_0x2b1`**
+(56B, HIGH) via `RenamePass6Region80020000Fun800245fc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (56B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=110` at pass start). Highest xref_in
+in the 56B tier; sits in the `0x800245xx` LMP encryption control-plane cluster between
+`send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate` (`0x80024590`) and the
+encryption-mode accept helpers at `0x800246fc`/`0x80024754`.
+
+**Mechanism:** Outbound LMP Stop Encryption Req (opcode **0x12**) sender — builds
+2-byte PDU (`opcode=0x12`) and transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`. Sets per-connection
+`big_ol_struct[slot].field_0x2b1 = 1` (HW/crypto control-plane flag, not cipher math).
+Used on random-BD_ADDR branches where encryption start requires this stop-req +
+flag arm before crypto sub-state advances — prior passes called it informally
+"encryption-on toggle."
+
+**Callers:** `accept_lmp_encryption_mode_enable_and_branch_by_bdaddr_random`
+(random-BD_ADDR enable-accept path); `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
+(SSP Number `0x40` random-BD_ADDR path); xref_in=4 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms opcode `0x12` + 2B LMP send idiom;
+callers already HIGH-named and document this function by role; cluster siblings
+`send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate` and
+`accept_lmp_encryption_mode_enable_and_branch_by_bdaddr_random` provide encryption
+procedure context.
+
+Region unnamed count after this pass: **109** (110 minus this rename). Live named **1812** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
