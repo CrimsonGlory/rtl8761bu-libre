@@ -9266,4 +9266,34 @@ passes (encryption key-program cluster at `0x800222xx`).
 
 Region unnamed count after this pass: **27** (28 minus this rename). Live named **1894** global.
 
+**Next:** superseded by Pass 6 continuation (286).
+
+## Pass 6 continuation (286) (2026-07-01) — global status flag clearer `FUN_80021cb8`
+
+Decompiled and renamed:
+**`FUN_80021cb8` → `clear_global_status_bit3_on_four_slots`**
+(24B, HIGH) via `RenamePass6Region80020000Fun80021cb8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_80021cb8` (24B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=27` at pass start). Sibling disable path
+to Pass 6 cont. (271)'s `set_global_status_bit7_and_bit3_on_four_slots`.
+
+**Mechanism:** Global status-flag clearer (disable path). Four-iteration loop ANDs
+`0xf7` (clears bit3) on status byte at `PTR_DAT_80021cd0` — inverse pattern to sibling
+`set_global_status_bit7_and_bit3_on_four_slots` (ORs bit7/bit3 on `PTR_DAT_80021cf8`/
+`PTR_DAT_80021cfc`). Invoked from HCI handler `FUN_8001f908` (region `0x80010000`) when
+mode byte at `param+3 != 1`; enable branch calls sibling setter. Also called during
+subsystem-wide crypto/link-key reset in
+`reset_all_connection_crypto_slots_and_link_key_table` (Pass 6 cont. 120).
+
+**Callers:** `FUN_8001f908` (disable path when mode byte≠1);
+`reset_all_connection_crypto_slots_and_link_key_table` (`0x80022530`) — xref_in=2 per
+`ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous 4× bit3-clear loop; sibling
+enable/disable toggle documented in Pass 6 cont. (271); both callers already identified.
+
+Region unnamed count after this pass: **26** (27 minus this rename). Live named **1895** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
