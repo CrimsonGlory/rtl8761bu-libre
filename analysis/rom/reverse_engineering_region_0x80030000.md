@@ -8757,5 +8757,34 @@ cluster placement matches documented `0x8003b7xx` HW-buffer setup primitives.
 Region unnamed count after this pass: **7** (8 minus this rename). Live named
 **2159** global.
 
-**Next:** Pass 284 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 284.
+
+## Pass 284 (2026-07-01) — global dword OR-mask `FUN_8003b744`
+
+Fresh `ListUnnamed80030000.java` re-run: **7 unnamed** remain in region
+(unchanged from Pass 283; xref_in=0 tier dominates — rank-1 is `FUN_8003b744`
+at 12B, the tied OR sibling deferred from Pass 283).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b744` → `or_mask_into_global_dword_at_indirect_ptr`**
+(12B, HIGH, UTILITY-tier) via
+`RenamePass284Region80030000Fun8003b744.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial global-dword bit-set via OR mask: loads pointer from
+`DAT_8003b750`, mask from `PTR_exception_handler_save_regs_and_dispatch_8003b754`,
+executes `*ptr |= mask`. Complementary OR primitive to Pass 283's
+`and_mask_into_global_dword_at_indirect_ptr` (`*ptr &= mask`). Lives in the
+same `0x8003b7xx` per-connection HW-buffer / BB-reg hook cluster adjacent to
+Pass 197's `read_modify_write_hw_reg_0x44_set_bit1` and Pass 152's
+`program_bb_regs_0x220_0x222_0x224_via_hook_with_masked_params`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — trivial 12B decompile; OR-mask semantics unambiguous;
+cluster placement matches documented `0x8003b7xx` HW-buffer setup primitives.
+
+Region unnamed count after this pass: **6** (7 minus this rename). Live named
+**2160** global.
+
+**Next:** Pass 285 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
