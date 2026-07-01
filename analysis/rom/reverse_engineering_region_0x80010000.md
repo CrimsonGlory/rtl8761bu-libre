@@ -1337,7 +1337,7 @@ count at `+0x110` reaches `0x11`, logs via `possible_logging_function__var_args`
 `PTR_DAT_80020098 + index*4`, stores `*(ushort*)(param_1+2)` at
 `(index+0x44)*2`, clears pending flag at `(index+0x32)*4+4`, increments write
 index modulo 17 and count. If config `field_0x169` is `1` or `3`, tail-calls
-`FUN_8001fd20` (ring drain); else directly calls
+`drain_hci_evt_ring17_and_mode2_dispatch` (ring drain); else directly calls
 `hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2`.
 
 **Callers:** 6 xref_in per `ListUnnamed80010000.java`; enqueue entry point for
@@ -1910,4 +1910,35 @@ programming paths.
 
 Region unnamed count after this pass: **215** (216 minus this rename).
 
-**Next:** Pass 97 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 97.
+
+## Pass 97 (2026-07-01) — HCI event ring-17 drain `FUN_8001fd20`
+
+Pass 97 target from cold-triage rank-1 (3 xref_in, 380B — largest at xref=3
+tier after Pass 96 cleared xref=4). Decompiled and renamed:
+**`FUN_8001fd20` → `drain_hci_evt_ring17_and_mode2_dispatch`**
+(380B, HIGH) via `RenamePass97Region80010000Fun8001fd20.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** HCI event-buffer ring drain companion to
+`enqueue_hci_evt_to_ring17_and_dispatch_or_drain` (Pass 7w). Gated on config
+`field_0x169` ∈ {1,3} and pending ring state at `PTR_DAT_8001fea0/+0x4` and
+`PTR_DAT_8001fea4/+0x110`. Dequeues current slot at index `+0x113`, copies
+4-byte header via `optimized_memcpy`, may split buffer when remaining bytes exceed
+slot capacity, dispatches segment via
+`hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2`, updates per-slot
+offset at `(index+0x54)*2+2`, increments `bos_base[field_0x9e]` on successful
+`lookup_up_to_3_bos_array_indices_by_connection_handle`, decrements pending count.
+
+**Callers:** 3 xref_in via `ListXrefsTo8001fd20.java` —
+`enqueue_hci_evt_to_ring17_and_dispatch_or_drain` (1×),
+`HCI_EVT_0x1f6_FUN_8001fef8` (1×), `FUN_8001feb0` (1×).
+
+**Confidence:** HIGH — decompile confirms 17-slot ring drain semantics, buffer
+split path, and mode-2 dispatch choreography; cross-confirmed with Pass 7w
+enqueue/drain fork and `hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2`
+caller list in region `0x80020000` Pass 6.
+
+Region unnamed count after this pass: **214** (215 minus this rename).
+
+**Next:** Pass 98 — cold-triage next rank-1 unnamed in region `0x80010000`.
