@@ -871,4 +871,26 @@ indirectly via function pointers project-wide.
 
 Region unnamed count after this pass: **254** (255 minus this rename).
 
-**Next:** Pass 7e — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7e (2026-07-01) — packet-type table low-byte writer `FUN_80013c0c`
+
+Pass 7e target from cold-triage rank-1 (18 xref_in, 44B). Decompiled and renamed:
+**`FUN_80013c0c` → `write_packet_type_table_low_byte_at_offset`**
+(44B, HIGH) via `RenamePass7eRegion80010000Fun80013c0c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Low-byte half of the eSCO/SCO packet-type table writer pair
+(documented cross-region in `region_0x80030000` as the apply path inside
+`apply_eSCO_SCO_packet_type_params`). Indexes `ushort[param_1 + DAT_80013c38]`
+and patches bits[7:0]: `entry = (entry & 0xff00) | (param_2 & 0xff)`.
+High-byte counterpart is sibling `FUN_80013be4` (36B, 8 xref) at
+`DAT_80013c08`, which ORs `param_2 << 8` into bits[15:8]. Called together
+from connection-setup, role-switch, and LMP PDU paths project-wide.
+
+**Confidence:** HIGH — trivial decompile; 18 xref_in confirms generic primitive
+status; cross-region callers (`apply_eSCO_SCO_packet_type_params`,
+`connection_setup_arm_stride88_slot_and_apply_packet_types`,
+`role_switch_apply_packet_types_on_stride84_slot`) already document the pair.
+
+Region unnamed count after this pass: **253** (254 minus this rename).
+
+**Next:** Pass 7f — cold-triage next rank-1 unnamed in region `0x80010000`.
