@@ -3179,5 +3179,35 @@ patch-download caller body anchor the LMP QoS-request TX role.
 Region unnamed count after this pass: **182** (183 minus this rename). Live named
 **1984** global.
 
-**Next:** Pass 109 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 109.
+
+## Pass 109 (2026-07-01) — BB reg 0x1e/0x1c programmer `FUN_80038d98`
+
+Fresh `ListUnnamed80030000.java` re-run: **182 unnamed** remain in region
+(unchanged from Pass 108; rank-1 by size at xref=2 tier is `FUN_80038d98` at
+84B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038d98` → `program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3`**
+(84B, HIGH, SIMPLE-tier) via `RenamePass109Region80030000Fun80038d98.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write via fptr pair at `PTR_DAT_80038dec` (read) /
+`PTR_DAT_80038df0` (write): programs BB reg `0x1e` bits 5–9 from
+`param_1 & 0x1f`, then clears bit 3 on BB reg `0x1c` (`& 0xfff7`). BB-register
+programming sibling in the `0x80038dxx` cluster near
+`FUN_80038d7c` (reads current `0x1e` field) and wrapper `FUN_80038df4` (selects
+byte from config `+0x24` or computed default, then calls this function).
+
+**Callers:** 2 xref-in — `FUN_80038df4` (config-flag-gated wrapper in same
+cluster) and `FUN_800395f0` (158B BB-reg init sequence: passes `*PTR_DAT_800396a4`
+after programming multiple table-driven registers).
+
+**Confidence:** HIGH — full 84B decompile; explicit reg IDs `0x1e`/`0x1c`, mask
+semantics, and two caller bodies anchor the role.
+
+Region unnamed count after this pass: **181** (182 minus this rename). Live named
+**1985** global.
+
+**Next:** Pass 110 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
