@@ -1987,5 +1987,36 @@ setup cluster in Pass 8 item 13.
 Region unnamed count after this pass: **219** (220 minus this rename). Live named
 **1947** global.
 
-**Next:** Pass 72 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 72.
+
+## Pass 72 (2026-07-01) — TX power delta `FUN_80039b18`
+
+Fresh `ListUnnamed80030000.java` re-run: **219 unnamed** remain in region
+(unchanged from Pass 71; rank-1 by xref count is `FUN_80039b18` at 48B,
+4 xref-in — wins xref=4 tier on size over `FUN_8003ca28`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039b18` → `compute_tx_power_delta_from_global_baselines`**
+(48B, HIGH) via `RenamePass72Region80030000Fun80039b18.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Signed-byte TX-power delta helper. Computes
+`(param_1 & 0xff) - PTR_DAT_80039b48[+0x35]`; when `param_2 == 0` returns
+that signed delta, else subtracts `*PTR_DAT_80039b4c` and returns the
+sign-extended result. Literal pool `PTR_DAT_80039b48` resolves to the
+`0x80047f14` max-TX-power region documented in `reverse_engineering_vsc_dispatcher.md`.
+
+**Callers:** Invoked via function pointer — `FUN_80039844` (TX-power config
+init: calls twice with `param_2=0`, stores `(result >> 1)` halved into
+runtime globals), `FUN_80039c08` (TX-power adjustment dispatcher: passes
+`param_2` 0 or 1 per mode byte), plus one patch/RAM call site at `0x8010bc96`.
+
+**Confidence:** HIGH — full 48B decompile; dual-baseline subtraction semantics
+unambiguous; caller context in TX-power init/adjust cluster matches region's
+`idk_takes_new_new_power_val` / `set_new_power_val` pair.
+
+Region unnamed count after this pass: **218** (219 minus this rename). Live named
+**1948** global.
+
+**Next:** Pass 73 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
