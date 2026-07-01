@@ -9296,4 +9296,33 @@ enable/disable toggle documented in Pass 6 cont. (271); both callers already ide
 
 Region unnamed count after this pass: **26** (27 minus this rename). Live named **1895** global.
 
+**Next:** superseded by Pass 6 continuation (287).
+
+## Pass 6 continuation (287) (2026-07-01) — global status flag clearer `FUN_80025710`
+
+Decompiled and renamed:
+**`FUN_80025710` → `clear_global_status_bit0_on_four_slots`**
+(24B, HIGH) via `RenamePass6Region80020000Fun80025710.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_80025710` (24B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=26` at pass start). Sibling disable path
+to Pass 6 cont. (269)'s `set_afh_channel_assessment_mode_on_four_slots`.
+
+**Mechanism:** Global status-flag clearer (crypto-reset path). Four-iteration loop ANDs
+`0xfe` (clears bit0) on status byte at `PTR_DAT_80025728` — inverse pattern to sibling
+`set_afh_channel_assessment_mode_on_four_slots` (ORs `0x80`/`0x01` on `PTR_DAT_80025750`/
+`PTR_DAT_80025754` for HCI Write AFH Channel Assessment Mode `0x0C56`). Invoked during
+subsystem-wide crypto/link-key reset in
+`reset_all_connection_crypto_slots_and_link_key_table` alongside
+`clear_global_status_bit3_on_four_slots` (Pass 6 cont. 286).
+
+**Callers:** `reset_all_connection_crypto_slots_and_link_key_table` (`0x80022530`) —
+xref_in=1 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous 4× bit0-clear loop; caller and
+sibling setter already documented in Pass 6 cont. (120)/(269).
+
+Region unnamed count after this pass: **25** (26 minus this rename). Live named **1896** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
