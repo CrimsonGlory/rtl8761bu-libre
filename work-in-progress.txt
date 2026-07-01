@@ -14500,8 +14500,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7k;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7l: cold-triage next rank-1
-          unnamed function in region `0x80010000` (247 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7l (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80017d2c`→`clear_sync_gate_byte_bits_by_remapped_role_index`
+          (78B, HIGH). Per-slot sync-gate byte AND-mask clear via
+          `remap_role_index_to_esco_slot_if_pending` on `PTR_DAT_80017d7c`;
+          callers pass role `0xCC` with mask `4` (conn-sync after role change)
+          or `0xffff` (feature finalizer); 11 xref_in including
+          `apply_or_defer_conn_role_change_emit_hci_evt_sync`. 246 unnamed remain;
+          live named 2178.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7l;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7m: cold-triage next rank-1
+          unnamed function in region `0x80010000` (246 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -1041,4 +1041,28 @@ sequence + established cross-region caller semantics as codec-config apply.
 
 Region unnamed count after this pass: **247** (248 minus this rename).
 
-**Next:** Pass 7l — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7l (2026-07-01) — sync gate byte bit-clear `FUN_80017d2c`
+
+Pass 7l target from cold-triage rank-1 (11 xref_in, 78B). Decompiled and renamed:
+**`FUN_80017d2c` → `clear_sync_gate_byte_bits_by_remapped_role_index`**
+(78B, HIGH) via `RenamePass7lRegion80010000Fun80017d2c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Per-slot sync-gate byte bit-clear primitive in the `0x80017dxx`
+cluster. Remaps conn/role index via `remap_role_index_to_esco_slot_if_pending`,
+then AND-clears bits in `PTR_DAT_80017d7c[remapped_index]` using mask
+`~param_3`. Logs via `possible_logger_called_if_no_patch3` with code `0x326`.
+Callers pass role byte `0xCC` with masks `4` (clear bit 2 — conn-sync after
+role-change apply) or `0xffff` (full clear — connection-setup feature finalizer).
+
+**Callers:** 11 xref_in including `apply_or_defer_conn_role_change_emit_hci_evt_sync`
+(region `0x80070000` — role-change conn sync), `LMP__267__FUN_800714a0`
+(connection-setup feature/timer finalizer), and crypto-state role-switch paths in
+region `0x80020000`.
+
+**Confidence:** HIGH — decompile confirms esco-remap + gate-byte AND-mask clear;
+cross-region callers already document role-switch/conn-sync semantics.
+
+Region unnamed count after this pass: **246** (247 minus this rename).
+
+**Next:** Pass 7m — cold-triage next rank-1 unnamed in region `0x80010000`.
