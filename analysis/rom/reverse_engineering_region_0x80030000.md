@@ -2436,5 +2436,37 @@ slot-timing clusters anchor the HW-channel commit role.
 Region unnamed count after this pass: **206** (207 minus this rename). Live named
 **1960** global.
 
-**Next:** Pass 85 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 85.
+
+## Pass 85 (2026-07-01) — SCO packet-type qualification predicate `FUN_8003975c`
+
+Fresh `ListUnnamed80030000.java` re-run: **206 unnamed** remain in region
+(unchanged from Pass 84; rank-1 by size at xref=3 tier is `FUN_8003975c` at
+106B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003975c` → `test_conn_slot_qualifies_by_mode2_or_sco_packet_type_table_lookup`**
+(106B, HIGH) via `RenamePass85Region80030000Fun8003975c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Conn-index qualification predicate in the `0x800397xx`
+SCO/eSCO packet-type cluster. When `field_0xc2==0`, returns true iff mode byte
+`field_0xb7==2`. Otherwise indexes `PTR_DAT_800397cc` by 3-bit packet-type code
+`(field_0xc3>>4)&7` with column offset `+6` (random BD_ADDR) or `+7` (public);
+returns true when lookup char is `'&'`, `'7'`, or `','`, else compares against
+`'='`.
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap); SCO connection-lifecycle dispatch cluster sibling of
+`apply_SCO_connection_params_to_hw` / `apply_eSCO_SCO_packet_type_params`.
+
+**Confidence:** HIGH — full 106B decompile; `field_0xc3` packet-type/link-mode
+bits and `bdaddr_random_` column select documented in conn-record subsystem;
+table-index formula and dual-path mode-byte vs packet-type char gate are
+unambiguous.
+
+Region unnamed count after this pass: **205** (206 minus this rename). Live named
+**1961** global.
+
+**Next:** Pass 86 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
