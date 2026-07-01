@@ -7865,4 +7865,31 @@ path and Pass 6 cont. (134)'s `0x454` buffer-clone callee.
 
 Region unnamed count after this pass: **76** (77 minus this rename). Live named **1845** global.
 
+**Next:** superseded by Pass 6 continuation (237).
+
+## Pass 6 continuation (237) (2026-07-01) — LMP-ext 0x22 reply sender `FUN_800242b0`
+
+Decompiled and renamed:
+**`FUN_800242b0` → `send_lmp_ext_pkt_0x7f_subopcode_0x22`**
+(44B, HIGH) via `RenamePass6Region80020000Fun800242b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=76` at pass start). First-listed in tied
+44B tier ahead of xref_in=0 peers; callee deferred from Pass 6 cont. (218)'s
+`handle_lmp_ext_subopcode_0x21_reply_0x22_when_pairing_mode`.
+
+**Mechanism:** Thin LMP transmit wrapper: builds 3-byte LMP-ext PDU `{0x7f, 0x22}` on stack
+and calls `send_LMP_pkt(conn_handle, buf, 3, role_bit, 100, 0)`. Outbound reply arm for
+LMP extended opcode `0x7F` / sub-opcode `0x22`, invoked when pairing-mode flag
+`crypto+0x214` is set after inbound `0x21` handling.
+
+**Callers:** sole direct caller `handle_lmp_ext_subopcode_0x21_reply_0x22_when_pairing_mode`
+at `0x800242dc` (Pass 6 cont. 218).
+
+**Confidence:** HIGH — decompile confirms minimal LMP-ext send idiom matching documented
+`0x7F`/`0x22` reply path; single caller in named parent handler; complements outbound
+`vsc_fc95_slot0_send_lmp_ext_0x7f_0x21_and_lmp_268` (Pass 6 cont. 87).
+
+Region unnamed count after this pass: **75** (76 minus this rename). Live named **1846** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
