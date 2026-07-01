@@ -1597,5 +1597,36 @@ remap + conn-index lookup pattern consistent with Pass 58 set-bit sibling.
 Region unnamed count after this pass: **231** (232 minus this rename). Live named
 **1935** global.
 
-**Next:** Pass 60 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 60.
+
+## Pass 60 (2026-07-01) — OGC-3 config apply logger `FUN_80034e98`
+
+Fresh `ListUnnamed80030000.java` re-run: **231 unnamed** remain in region
+(unchanged from Pass 59 pre-rename list; rank-1 was `FUN_80034e98` at 38B,
+6 xref-in — tied xref count with `FUN_80034e6c` at same size; first by sort
+order).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034e98` → `log_ogc3_config_apply_evt_0x4b6_if_no_patch3`**
+(38B, HIGH) via `RenamePass60Region80030000Fun80034e98.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin `possible_logger_called_if_no_patch3` tail-call stub with
+event tag `0x4b6`; context pointer from `PTR_DAT_80034ec0`. Called after
+OGF=3 vendor-config field writes — notably `OGC_3_OCF_45` (writes
+`the_0x300->field_0x17c`) and `OGC_3_OCF_49` (writes `field_0x17e`) in region
+`0x80010000`. Sibling of `FUN_80034e6c` (same shape, tag `0x330`, role-switch
+housekeeping cluster).
+
+**Callers:** 6 xref-in (rank-1 by xref count); OGC-3 config-apply cluster +
+indirect dispatch slots.
+
+**Confidence:** HIGH — fully decompiled 38B; logger-stub idiom matches
+documented `possible_logger_called_if_no_patch3` cluster; caller semantics
+confirmed via `OGC_3_OCF_45`/`OGC_3_OCF_49` decompile.
+
+Region unnamed count after this pass: **230** (231 minus this rename). Live named
+**1936** global.
+
+**Next:** Pass 61 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
