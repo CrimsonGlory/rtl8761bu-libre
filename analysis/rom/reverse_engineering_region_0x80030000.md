@@ -2163,5 +2163,39 @@ role remap, LMP-0x268 timer dispatch, and eSCO packet-type programming paths.
 Region unnamed count after this pass: **214** (215 minus this rename). Live named
 **1952** global.
 
-**Next:** Pass 77 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 77.
+
+## Pass 77 (2026-07-01) — link-mode cleanup status emit `FUN_80034d88`
+
+Fresh `ListUnnamed80030000.java` re-run: **214 unnamed** remain in region
+(unchanged from Pass 76; rank-1 by size at xref=3 tier is `FUN_80034d88` at
+212B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034d88` → `emit_link_mode_change_cleanup_status_with_dedup`**
+(212B, HIGH) via `RenamePass77Region80030000Fun80034d88.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Link-mode-change failure/cleanup status emitter. Optional
+prelude hook at `PTR_DAT_80034e5c` — if installed and returns non-zero, skip
+default path. Sets global link-mode housekeeping bytes on `PTR_DAT_80034e60`
+(`+0x6d=0`, `+0x6e=8`, `+0x97` state tracking). When already armed, scans
+circular pending-event buffer at `PTR_PTR_80034e68` for duplicate HCI status
+tags `0x3eb` or `0x2d1` (selected by `PTR_DAT_80034e64` bit0:1) and returns
+early if already queued. `param_1` modes 0–3 select cleanup subtype; pulls
+stored params from `+0x90`/`+0x8d` and delegates to callee
+`FUN_80034d00` which emits via `possible_logger_called_if_no_patch3` and
+updates `PTR_DAT_80034d80` status flags. Known caller:
+`link_mode_change_state_machine` failure path; also
+`param_dispatch_with_rom_calls`.
+
+**Callers:** 3 xref-in (rank-1 by size at xref=3 tier).
+
+**Confidence:** HIGH — full 212B decompile; callee `FUN_80034d00` and caller
+`link_mode_change_state_machine` anchor the cleanup/status-emit role.
+
+Region unnamed count after this pass: **213** (214 minus this rename). Live named
+**1953** global.
+
+**Next:** Pass 78 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

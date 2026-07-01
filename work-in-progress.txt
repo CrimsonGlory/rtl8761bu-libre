@@ -12372,7 +12372,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 76;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 77: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 77 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80034d88`→`emit_link_mode_change_cleanup_status_with_dedup`
+          (212B, HIGH). Link-mode-change failure/cleanup status emitter with
+          pending-event dedup guard (`0x3eb`/`0x2d1`); delegates to
+          `FUN_80034d00`; caller `link_mode_change_state_machine`. 213 unnamed
+          remain; live named 1953.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 77;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 78: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
