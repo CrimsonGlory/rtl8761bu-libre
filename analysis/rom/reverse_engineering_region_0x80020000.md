@@ -6941,4 +6941,33 @@ and IN_RAND pairing flows in Pass 6 cont. 44/198.
 
 Region unnamed count after this pass: **107** (108 minus this rename). Live named **1814** global.
 
+**Next:** superseded by Pass 6 continuation (206).
+
+## Pass 6 continuation (206) (2026-07-01) — SSP passkey LCG derive `FUN_800260b8`
+
+Decompiled and renamed:
+**`FUN_800260b8` → `derive_ssp_numeric_passkey_from_lcg_prng_and_mask`**
+(56B, HIGH) via `RenamePass6Region80020000Fun800260b8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (56B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=107` at pass start). Sits in the
+`0x800260xx` SSP passkey cluster immediately below Pass 6 cont. (69)'s
+`dispatch_ssp_user_passkey_request_or_notification` (`0x800260f4`), which already
+documented this callee as the passkey-derive helper before naming.
+
+**Mechanism:** Fills `*param_1` with a 24-bit SSP numeric passkey: three successive
+calls to `advance_lcg_prng_state_and_return_high_byte()` assemble bytes at bit
+positions 0/8/16, then `& DAT_800260f0` masks to the valid passkey range (6-digit
+Bluetooth Simple Pairing passkey ceiling).
+
+**Callers:** `dispatch_ssp_user_passkey_request_or_notification` (HCI User Passkey
+Notification path before `send_evt_HCI_User_Passkey_Notification`); xref_in=2 per
+`ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms LCG PRNG sibling of `advance_lcg_prng_state_and_return_high_byte`
+(`0x80071948`); sole documented caller already named in SSP passkey HCI dispatcher
+cluster (Pass 6 cont. 69); mechanism matches Bluetooth SSP passkey-entry flow.
+
+Region unnamed count after this pass: **106** (107 minus this rename). Live named **1815** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

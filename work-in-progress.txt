@@ -11058,8 +11058,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (205);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (206): cold-triage
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (206): cold-triage
           next rank-1 unnamed per `ListUnnamed80020000.java` (107 remain).
+          Decompiled+renamed `FUN_800260b8`→`derive_ssp_numeric_passkey_from_lcg_prng_and_mask`
+          (56B, HIGH). SSP passkey LCG derive: three PRNG high-byte calls + mask
+          `DAT_800260f0`; caller `dispatch_ssp_user_passkey_request_or_notification`;
+          xref_in=2; 106 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (206);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (207): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (106 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
