@@ -5237,4 +5237,30 @@ caller is the renamed SAFER+ block-encrypt core.
 
 Region unnamed count after this pass: **164** (165 minus this rename). Live named **1757** global.
 
+**Next:** superseded by Pass 6 continuation (149).
+
+## Pass 6 continuation (149) (2026-07-01) — SAFER+ Armenian shuffle `FUN_8002cd80`
+
+Decompiled and renamed:
+**`FUN_8002cd80` → `safer_plus_armenian_shuffle_block`**
+(92B, HIGH) via `RenamePass6Region80020000Fun8002cd80.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (92B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=164` at pass start). First-listed at
+92B (tied cluster; first entry `FUN_8002cd80`).
+
+**Mechanism:** In-place fixed 16-byte byte permutation on cipher state — the SAFER+
+"Armenian Shuffle" linear-layer diffusion step. Copies block to stack, then writes
+back with a fixed reordering (e.g. `out[0]=in[8]`, `out[12]=in[0]`, etc.). Called
+3× per round from `safer_plus_block_encrypt` after inline PHT-style 2-2 butterfly
+mixing passes.
+
+**Caller:** `safer_plus_block_encrypt` (`0x8002cddc`, xref_in=1).
+
+**Confidence:** HIGH — decompile confirms pure permutation with no arithmetic;
+matches `reverse_engineering_encryption_engine.md` §5 linear-layer description;
+caller is the renamed SAFER+ block-encrypt core.
+
+Region unnamed count after this pass: **163** (164 minus this rename). Live named **1758** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

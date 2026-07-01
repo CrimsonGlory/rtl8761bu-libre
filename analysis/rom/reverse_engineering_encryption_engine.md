@@ -55,7 +55,7 @@ LMP_encryption_opcode_handlers (0x80028264)        ROM LMP PDU dispatcher
   FUN_8002ca2c   per-byte XOR/ADD combiner (round key application)
   FUN_8002cb2c   SAFER+ KEY SCHEDULE (round-key generator)
   FUN_8002ca88   SAFER+ BIAS function (fixed additive/XOR constants, round 1)
-  FUN_8002cd80   SAFER+ "Armenian"/2-2 PHT-style mixing layer (3x per round)
+  safer_plus_armenian_shuffle_block   SAFER+ Armenian Shuffle linear permutation (3x per round)
   PTR_CRYPT_SAFER_exp_tab_8002cf1c / PTR_CRYPT_SAFER_log_tab_8002cf20
                   SAFER 45^x mod 257 exponential / logarithm S-box tables
 ```
@@ -80,7 +80,7 @@ void FUN_8002cddc(undefined4 param_1 /*key*/, int param_2 /*block, in-place*/, u
   //     else:                          byte = LOG_TAB[byte]   // nonlinear layer (S-box 2)
   //   FUN_8002cb2c(key, round_key_buf, 2*round)          // derive even round key
   //   FUN_8002ca2c(key, round_key_buf, 2)                // ADD round key
-  //   3x: PHT-style 2-2 mixing pass over all 16 bytes, then FUN_8002cd80(state)  // linear diffusion layer
+  //   3x: PHT-style 2-2 mixing pass over all 16 bytes, then safer_plus_armenian_shuffle_block(state)
   //   final unkeyed 2-2 mixing pass
   // end loop
   // FUN_8002cb2c(key, round_key_buf, 2*rounds+1); FUN_8002ca2c(key, ..., 1)  // output transform XOR
@@ -160,7 +160,7 @@ in `FUN_8002cb2c`/`FUN_8002cddc`'s caller). The specific byte values
 constants published in the SAFER+ Bluetooth submission and present
 byte-for-byte in reference open-source SAFER+ implementations (e.g. BlueZ).
 
-## 5. Linear mixing layer — `FUN_8002cd80` and `FUN_8002ca2c`
+## 5. Linear mixing layer — `safer_plus_armenian_shuffle_block` and `safer_plus_round_key_xor_or_add_block`
 
 - **`safer_plus_round_key_xor_or_add_block`** (`0x8002ca2c`, 92 bytes): per-byte combiner over a
   16-byte block, mode selected by `param_3` (1 = XOR if bit set in mask
@@ -168,14 +168,10 @@ byte-for-byte in reference open-source SAFER+ implementations (e.g. BlueZ).
   alternating ADD/XOR combination of round key into the cipher state
   (used identically in `FUN_8002cddc`'s round loop for both the nonlinear-layer
   key injection and round-key XOR/ADD).
-- **`FUN_8002cd80`** was referenced (called 3x per round from `FUN_8002cddc`)
-  but not separately decompiled this pass — its call site context (three
-  successive calls forming the PHT-like 2-2 diffusion network, bracketed by
-  the per-byte `cVar3 = cVar1 + *pcVar5; *(pcVar7) = cVar3 + cVar1; *pcVar5 = cVar3;`
-  butterfly pattern visible inline in `FUN_8002cddc`) is consistent with
-  SAFER+'s linear transform layer. Flagged as a small follow-up if anyone
-  wants 100% closure on every primitive (low priority — the cipher identity
-  is already established beyond reasonable doubt by sections 2–4).
+- **`safer_plus_armenian_shuffle_block`** (`0x8002cd80`, 92 bytes): in-place fixed
+  16-byte byte permutation (the SAFER+ "Armenian Shuffle"). Called 3× per round
+  from `safer_plus_block_encrypt` after inline PHT-style 2-2 butterfly mixing.
+  Decompiled+renamed Pass 6 cont. (149) 2026-07-01 — see `region_0x80020000.md`.
 
 ---
 
@@ -332,7 +328,7 @@ ROM-resident, also requiring no libre-side action) in
 | `0x8002cb2c` | `FUN_8002cb2c` | **SAFER+ key schedule** — 17-byte extended key, 3-bit rotation, bias table |
 | `0x8002ca88` | `FUN_8002ca88` | **SAFER+ bias-1 constant** application (fixed add/XOR bytes) |
 | `0x8002ca2c` | `safer_plus_round_key_xor_or_add_block` | Per-byte XOR/ADD combiner (round-key injection) |
-| `0x8002cd80` | `FUN_8002cd80` | Linear mixing layer (called 3x/round); not separately decompiled |
+| `0x8002cd80` | `safer_plus_armenian_shuffle_block` | Armenian Shuffle 16B permutation (called 3×/round) |
 | `0x8002cf1c` | `PTR_CRYPT_SAFER_exp_tab_8002cf1c` | SAFER `45^x mod 257` exponentiation table pointer |
 | `0x8002cf20` | `PTR_CRYPT_SAFER_log_tab_8002cf20` | SAFER logarithm table pointer (inverse of exp_tab) |
 | `0x8002408c` | `FUN_8002408c` | "Start encryption" gate, checks `config_base+0x7a` bit `0x4` |
@@ -353,6 +349,6 @@ ROM-resident, also requiring no libre-side action) in
   uninformative/stale on this binary, and the decompile-driven call-chain
   trace (handler → wrapper → cipher core) was sufficient to reach a confident
   conclusion without them.
-- `FUN_8002cd80` and `FUN_8002c338` (referenced but not separately
-  decompiled) are flagged as small follow-up items, not blockers — the SAFER+
-  identification does not depend on them.
+- `FUN_8002c338` (referenced but not separately decompiled) remains a small
+  follow-up item, not a blocker — the SAFER+ identification does not depend on it.
+  (`safer_plus_armenian_shuffle_block` decompiled+renamed Pass 6 cont. (149).)
