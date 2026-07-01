@@ -12170,7 +12170,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 57;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 58: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 58 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (233 unnamed); decompiled+renamed rank-1
+          `FUN_8003491c`→`or_merge_hw_channel_bit15_by_conn_index_via_esco_remap`
+          (78B, HIGH, 6 xref-in). Conn-index role-switch dispatch: esco-slot remap,
+          lookup HW-channel register index from table, OR-merge bit15 via hook;
+          set-bit sibling of `FUN_800348c0`; caller cluster includes
+          `process_dual_slot_lmp25c_role_record_packet_completion`. 232 unnamed
+          remain; live named 1934.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 58;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 59: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

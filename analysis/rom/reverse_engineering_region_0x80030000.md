@@ -1526,5 +1526,41 @@ dispatch idiom.
 Region unnamed count after this pass: **233** (234 minus this rename). Live named
 **1933** global.
 
-**Next:** Pass 58 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 58.
+
+## Pass 58 (2026-07-01) — role-switch HW channel bit15 OR `FUN_8003491c`
+
+Fresh `ListUnnamed80030000.java` re-run: **233 unnamed** remain in region
+(unchanged from Pass 57 pre-rename list; rank-1 was `FUN_8003491c` at 78B,
+6 xref-in — tied xref count with `FUN_800348c0`/`FUN_80034e98`/`FUN_80034e6c`
+but largest among the tie).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003491c` → `or_merge_hw_channel_bit15_by_conn_index_via_esco_remap`**
+(78B, HIGH) via `RenamePass58Region80030000Fun8003491c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Conn-index (`param_1`) into `big_ol_struct`: calls
+`remap_role_index_to_esco_slot_if_pending` on `bos_connection__array_index` +
+`byte_0xCC`, looks up per-slot HW-channel register index from table at
+`PTR_DAT_80034970` (`slot*8+4` ushort), reads current value at that index via
+`DAT_80034974`, OR-merges `0x8000` (bit15), dispatches via hook at
+`PTR_DAT_80034978`. Set-bit sibling of unnamed `FUN_800348c0` (AND `0x7fff`
+clear-bit variant on parallel literal-pool tables).
+
+**Callers:** 6 xref-in (rank-1 by xref count); indirect via function-pointer
+slots in role-switch / LMP-25C completion cluster — notably
+`process_dual_slot_lmp25c_role_record_packet_completion` (region `0x80040000`
+Pass 52db) dispatches both `FUN_800348c0`/`FUN_8003491c` on role-switch LMP
+opcode 3.
+
+**Confidence:** HIGH — fully decompiled 78B; OR-merge bit15 on indexed HW-channel
+register matches documented `or_merge_hw_channel_table_entry_and_indexed_dispatch`
+cluster idiom; esco-slot remap + conn-index lookup pattern consistent with
+siblings.
+
+Region unnamed count after this pass: **232** (233 minus this rename). Live named
+**1934** global.
+
+**Next:** Pass 59 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
