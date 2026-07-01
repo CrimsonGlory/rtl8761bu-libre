@@ -8722,4 +8722,32 @@ explicit `0x10` mode gate; consistent with other orphan utility-tier renames in 
 
 Region unnamed count after this pass: **46** (47 minus this rename). Live named **1875** global.
 
+**Next:** superseded by Pass 6 continuation (267).
+
+## Pass 6 continuation (267) (2026-07-01) — pending-callback clearer `FUN_80025634`
+
+Decompiled and renamed:
+**`FUN_80025634` → `wrap_release_and_clear_pending_callback_at_crypto_0x1e8`**
+(34B, HIGH) via `RenamePass6Region80020000Fun80025634.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (34B, xref_in=39) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=46` at pass start). Highest xref_in of
+the tied 34B cluster — central pairing/crypto utility referenced throughout LMP/SSP paths.
+
+**Mechanism:** Per-connection crypto struct pending-callback teardown. Invokes
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests` with hook fptr from
+`PTR_DAT_80025658` and the dword at `crypto+0x1e8` (pending LMP/timer callback slot),
+then zeroes `+0x1e8`. Complements the reject helpers
+`reject_pending_lmp_with_not_accepted_reason6_and_clear` /
+`reject_pending_lmp_with_not_accepted_reason0x18_and_clear` which send NOT_ACCEPTED first.
+
+**Callers:** 39 inbound xrefs — pervasive across pairing continuation, encryption
+procedure completion, SSP negative-reply paths, crypto struct init, and LMP handler
+retry/cleanup arms (documented in prior passes as "clear pending via FUN_80025634").
+
+**Confidence:** HIGH — decompile confirms unambiguous wrap-then-zero pattern on the
+well-documented `+0x1e8` pending-callback field; xref density corroborates utility role.
+
+Region unnamed count after this pass: **45** (46 minus this rename). Live named **1876** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
