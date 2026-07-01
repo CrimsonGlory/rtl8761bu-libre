@@ -9383,4 +9383,36 @@ cold-init cluster.
 
 Region unnamed count after this pass: **23** (24 minus this rename). Live named **1898** global.
 
+**Next:** superseded by Pass 6 continuation (290).
+
+## Pass 6 continuation (290) (2026-07-01) — global mode-3 encryption disable wrapper `FUN_8002217c`
+
+Decompiled and renamed:
+**`FUN_8002217c` → `disable_global_mode3_encryption_via_sometimes_called`**
+(20B, HIGH) via `RenamePass6Region80020000Fun8002217c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_8002217c` (20B, xref_in=5) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=23` at pass start). Thin ROM wrapper
+sibling to Pass 6 cont. (276)'s `program_key_block_and_arm_mode3_encryption` — inverse
+path calling `sometimes_called_with_0_3_0(0,3,0)` (global mode-3 encryption disable).
+
+**Mechanism:** Zero-argument tail-call wrapper invoking
+`sometimes_called_with_0_3_0(0,3,0)` — bos_index=0, mode byte=3, param_3=0 selects the
+mode-disable branch (`stop_encryption_lmp_25c_pair_on_mode_disable`) rather than the
+mode-3-enable branch (`start_encryption_vsc_pair_on_mode3_enable`). Used when public-BD_ADDR
+crypto link-type table entry is zero or random-bdaddr sweep finds no armable encrypted slot.
+
+**Callers:** `disable_link_encryption_per_slot_and_public_crypto_table` (`0x800221d8`),
+`scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3` (`0x800299c4`),
+`wraps_send_evt_HCI_Link_Key_Type_Changed_0x0A` (3 call sites: `0x80029ac2`/`0x80029b14`/
+`0x80029b46`) — xref_in=5 per `ListXrefsTo8002217c.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous single-callee wrapper with fixed
+(0,3,0) args; callers and sibling `program_key_block_and_arm_mode3_encryption` already
+documented in Pass 6 cont. (152)/(156)/(276).
+
+Region unnamed count after this pass: **22** (23 minus this rename). Live named **1899** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
