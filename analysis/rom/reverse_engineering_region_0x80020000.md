@@ -5141,7 +5141,7 @@ advances pairing state machine with failure code `5` via
 `start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`.
 On match + `param_3 != 0`: unless link-key type is `0x09` (COMB_KEY) or `0x14`
 (TEMP_KEY), sends `send_evt_HCI_Link_Key_Notification`; clears matching pending
-BD_ADDR entry in 6-slot table via `FUN_8002694c` on `big_ol_struct` slot
+BD_ADDR entry in 7-slot table via `clear_matching_bdaddr_occupied_flag_in_7slot_table` on `big_ol_struct` slot
 (`param_1 & 0xffff`); then advances state machine with success code `0`.
 
 **Callers:** `LMP_SRES_0x0C` (`0x80027204`), `LMP_AU_RAND_0x0B` (`0x80027826`) —
@@ -6434,5 +6434,36 @@ descriptor tail-clear idiom matching Pass 6 cont. (123) cluster, and terminal HC
 cmd-completion drain; direct caller confirmed via `find_callers`.
 
 Region unnamed count after this pass: **124** (125 minus this rename). Live named **1797** global.
+
+**Next:** superseded by Pass 6 continuation (189).
+
+## Pass 6 continuation (189) (2026-07-01) — 7-slot BD_ADDR occupied-flag clear `FUN_8002694c`
+
+Decompiled and renamed:
+**`FUN_8002694c` → `clear_matching_bdaddr_occupied_flag_in_7slot_table`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002694c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=124` at pass start). First-listed at
+66B/xref_in=2 after Pass 188 cleared the xref_in=3 sibling `FUN_8002b15c`.
+
+**Mechanism:** Scans all 7 slots of the global table at `PTR_DAT_80026990` (0x17-byte
+stride: 6-byte BD_ADDR at base, +0x16 occupied flag). For each occupied slot, `memcmp`s
+the BD_ADDR against `param_1`; on match clears the occupied flag and returns `1`. Returns
+`0` if no match. Sibling of `store_link_keys_in_global_slot_table` (`PTR_DAT_8002691c`)
+and `lookup_stored_link_key_by_bdaddr_in_seven_slot_table` (`PTR_DAT_800269e0`) in the
+`0x800269xx` link-key table cluster — this table uses the same 0x17 layout but only
+clears occupancy without touching the 16-byte key field.
+
+**Callers:** `validate_stored_link_key_send_hci_notify_and_advance_state` (`0x800253be`) —
+passes `big_ol_struct` BD_ADDR after successful legacy link-key validation;
+`hci_ogf1_ogf3_shared_command_complete_event_sender` (`0x80022bde`) — HCI stored-link-key
+delete path alongside `store_link_keys_in_global_slot_table`/`FUN_80026920`. xref_in=2 via
+`ListXrefsTo8002694c.java`.
+
+**Confidence:** HIGH — decompile confirms 7-slot BD_ADDR memcmp + occupied-flag clear;
+both callers confirmed; layout matches documented link-key table cluster.
+
+Region unnamed count after this pass: **123** (124 minus this rename). Live named **1798** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
