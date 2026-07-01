@@ -10291,8 +10291,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (119);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (120): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (193 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (120) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80022530`→
+          `reset_all_connection_crypto_slots_and_link_key_table`
+          (110B, HIGH). Subsystem-wide reset: memset 10 crypto structs (+0x1ec=-1,
+          +0x1f1=6 E1 mode), clear 7 link-key slots, clear global status bitmasks;
+          caller `FUN_800681d8` (region 0x80060000). 192 unnamed remain; live named 1729.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (120);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (121): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (192 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

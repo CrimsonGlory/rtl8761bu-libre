@@ -4338,4 +4338,38 @@ in documented HCI stored-link-key command-complete path.
 
 Region unnamed count after this pass: **193** (194 minus this rename). Live named **1728** global.
 
+**Next:** superseded by Pass 6 continuation (120).
+
+## Pass 6 continuation (120) (2026-07-01) — global crypto/link-key reset `FUN_80022530`
+
+Decompiled and renamed:
+**`FUN_80022530` → `reset_all_connection_crypto_slots_and_link_key_table`**
+(110B, HIGH) via `RenamePass6Region80020000Fun80022530.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (110B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=193` at pass start). Was tied at 110B with
+`FUN_800268ac`/`FUN_8002b1f8` in prior passes; selected first-listed address after Pass 6
+cont. (119) renamed `FUN_800268ac`.
+
+**Mechanism:** Subsystem-wide crypto/link-key bootstrap reset. Clears 0xbc bytes at
+`PTR_DAT_800225a0` and seeds bytes `+2=0x10`, `+3=1`. Loops all 10 `big_ol_struct` slots:
+`memset` each `_x58_crypto_struct` to 0x218 bytes, sets pending-LMP dword at `+0x1ec` to
+`0xffffffff`, and defaults pairing-mode byte `+0x1f1` to `6` (E1 derivation path). Then
+chains three global clears: `FUN_80026854` clears occupied flags on all 7 link-key table
+slots at `PTR_DAT_80026870` (sibling of `store_link_keys_in_global_slot_table`);
+`FUN_80025710` clears bit0 on four status bytes at `PTR_DAT_80025728`;
+`FUN_80021cb8` clears bit3 on four status bytes at `PTR_DAT_80021cd0`.
+
+**Caller:** `FUN_800681d8` (region `0x80060000`, 422B) at `0x80068352` — xref_in=1 via
+`ListXrefsTo80022530.java`. Sits in the `0x80022xxx` connection/crypto-init cluster
+alongside `init_per_connection_crypto_struct_for_bos_slot` (per-slot variant).
+
+**Confidence:** HIGH — decompile confirms 10-slot crypto memset with `+0x1ec/+0x1f1`
+defaults matching documented pairing-mode idiom (`+0x1f1==6` → E1 path in
+`derive_sres_e1_or_e22_and_send_lmp_response`); link-key table clear matches
+`store_link_keys_in_global_slot_table` slot layout; single caller in region `0x80060000`
+init/teardown cluster.
+
+Region unnamed count after this pass: **192** (193 minus this rename). Live named **1729** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
