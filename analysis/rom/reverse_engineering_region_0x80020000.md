@@ -8943,4 +8943,31 @@ already named and documents this callee; sibling of inbound
 
 Region unnamed count after this pass: **38** (39 minus this rename). Live named **1883** global.
 
+**Next:** superseded by Pass 6 continuation (275).
+
+## Pass 6 continuation (275) (2026-07-01) — SCO pending-queue drain wrapper `FUN_8002af24`
+
+Decompiled and renamed:
+**`FUN_8002af24` → `drain_sco_pending_queue_by_conn_index`**
+(30B, HIGH) via `RenamePass6Region80020000Fun8002af24.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (30B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=38` at pass start).
+
+**Mechanism:** Thin conn-index wrapper — maps `param_1 & 0xff` into
+`PTR_some_connection_struct_array_8002af44` (0x28-byte stride), loads the per-connection
+handle ushort at offset +4, and calls `drain_sco_per_handle_pending_descriptor_queue`.
+SCO-cluster sibling of Pass 6 cont. (50)'s per-handle drain and Pass 6 cont. (222)'s
+`lookup_three_slot_0x34_record_by_connection_handle`.
+
+**Caller:** `conn_state2_packet_type_reprogram_or_credit_dispatch` at `0x800051d4`
+(role-switch-adjacent callback pair before `sco_esco_packet_credit_scheduler`; xref_in=3
+includes indirect/baseband-dispatcher paths documented in region `0x80000000`).
+
+**Confidence:** HIGH — decompile confirms unambiguous index→handle→drain chain; callee
+and connection-array pointer already named; caller context matches SCO credit-scheduling
+path.
+
+Region unnamed count after this pass: **37** (38 minus this rename). Live named **1884** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

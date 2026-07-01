@@ -11698,8 +11698,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (274);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (275): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (38 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (275) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002af24`→`drain_sco_pending_queue_by_conn_index`
+          (30B, HIGH). Conn-index wrapper: maps index into
+          `PTR_some_connection_struct_array_8002af44` (0x28 stride, +4 handle), calls
+          `drain_sco_per_handle_pending_descriptor_queue`; caller
+          `conn_state2_packet_type_reprogram_or_credit_dispatch`; xref_in=3; 37 unnamed
+          remain; live named 1884.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (275);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (276): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (37 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
