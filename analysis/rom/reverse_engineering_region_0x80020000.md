@@ -9510,4 +9510,33 @@ already documented as "encryption-feature gate" across prior passes and
 
 Region unnamed count after this pass: **19** (20 minus this rename). Live named **1902** global.
 
+**Next:** superseded by Pass 6 continuation (294).
+
+## Pass 6 continuation (294) (2026-07-01) — LMP role gate `FUN_8002403c`
+
+Decompiled and renamed:
+**`FUN_8002403c` → `check_local_role_byte_matches_lmp_pdu_role_bit`**
+(18B, HIGH) via `RenamePass6Region80020000Fun8002403c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_8002403c` (18B, xref_in=47) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=19` at pass start).
+
+**Mechanism:** LMP role/capability gate used across encryption, pairing, and NOT_ACCEPTED
+recovery handlers. Returns true when local role byte at `big_ol_struct+0xd0` equals bit **0**
+of LMP PDU byte at `param_2+4` (master/slave role bit in rejected-payload or procedure
+context). Handlers typically bypass this gate when a global config flag at `PTR+2` has
+bit `0x80` set.
+
+**Callers (sample):** `LMP_NOT_ACCEPTED_0x04` alt-recovery cluster, `LMP_ENCRYPTION_MODE_REQ_0x0F`,
+`LMP_START_ENCRYPTION_REQ_0x11`, `handle_lmp_ext_io_capability_req_subopcode_0x19`,
+`handle_lmp_temp_rand_or_temp_encrypt_not_accepted` — xref_in=47 per
+`ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous byte equality on `+0xd0` vs
+`param+4&1`; role-gate role already documented across 50+ prior pass references.
+
+Region unnamed count after this pass: **18** (19 minus this rename). Live named **1903** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -11877,8 +11877,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (293);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (294): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (19 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (294) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002403c`→`check_local_role_byte_matches_lmp_pdu_role_bit`
+          (18B, HIGH) — LMP role gate: `big_ol_struct+0xd0` vs LMP PDU `param+4&1`;
+          xref_in=47 across encryption/pairing/NOT_ACCEPTED handlers.
+          18 unnamed remain; live named 1903.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (294);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (295): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (18 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
