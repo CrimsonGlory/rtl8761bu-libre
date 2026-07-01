@@ -4599,3 +4599,41 @@ fields match inquiry/EIR cluster notes from Pass 8/12da.
 
 Region unnamed count after this pass: **140** (141 minus this rename). Live named
 **2026** global.
+
+**Next:** superseded by Pass 151.
+
+## Pass 151 (2026-07-01) — BB reg init hook chain `FUN_800395f0`
+
+Fresh `ListUnnamed80030000.java` re-run: **140 unnamed** remain in region
+(unchanged from Pass 150; rank-1 at xref=1 tier is `FUN_800395f0` at 158B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800395f0` → `run_bb_reg_init_hook_chain_and_program_0x1e_5bit_field`**
+(158B, HIGH, HANDLER-tier) via
+`RenamePass151Region80030000Fun800395f0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BB-register initialization orchestrator in the `0x800395xx`
+cluster. Walks table `PTR_PTR_80039690` through hook fptr at `PTR_DAT_80039694`
+with multiple `(dword, ushort)` register-programming pairs; dispatches additional
+hooks from `PTR_PTR_8003969c`, `PTR_PTR_800396a0`, and a seven-entry chain from
+`PTR_PTR_80039698` (+4/+0xc/+0x10/+0x14/+0x18/+0x20); tail calls
+`program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3(*PTR_DAT_800396a4)` then
+two more hook fptrs (including `0x21` + ushort from `PTR_PTR_800396b0`).
+Register-script interpreter caller (×4 per
+`reverse_engineering_register_script_interpreter.md`); callee of
+`apply_hw_reg_0x2b_slot_nibble_if_config_bit3` (Pass 117) and
+`program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3` (Pass 109).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `find_callers` empty (likely
+indirect/data-ref invocation — same pattern as Pass 135/136).
+
+**Confidence:** HIGH — full 158B decompile; hook-table dispatch idiom matches
+`dispatch_optional_subsystem_hooks_during_hw_reg_config` cluster; tail callee
+pairing with Pass 109 programmer confirmed.
+
+Region unnamed count after this pass: **139** (140 minus this rename). Live named
+**2027** global.
+
+**Next:** Pass 152 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
