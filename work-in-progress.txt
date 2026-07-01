@@ -11962,8 +11962,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (303);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (304): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (9 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (304) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80021f08`→
+          `store_dword_pair_to_crypto_global_offsets_a8_ac` (14B, HIGH).
+          Second sibling BT cold-init crypto global dword-pair writer (`+0xa8/+0xac`);
+          caller `FUN_800681d8`; completes three-offset cluster with Pass 6 cont. (302)/(303).
+          8 unnamed remain; live named 1913.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (304);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (305): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (8 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

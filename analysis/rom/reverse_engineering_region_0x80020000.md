@@ -9789,4 +9789,32 @@ documented cold-init chain.
 
 Region unnamed count after this pass: **9** (10 minus this rename). Live named **1912** global.
 
+**Next:** superseded by Pass 6 continuation (304).
+
+## Pass 6 continuation (304) (2026-07-01) — crypto global dword-pair writer `FUN_80021f08`
+
+Decompiled and renamed:
+**`FUN_80021f08` → `store_dword_pair_to_crypto_global_offsets_a8_ac`**
+(14B, HIGH) via `RenamePass6Region80020000Fun80021f08.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with highest xref_in≥1:
+`FUN_80021f08` (14B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=9` at pass start).
+
+**Mechanism:** Second sibling in the BT-stack cold-init crypto global dword-pair writer
+cluster. Stores `param_1` and `param_2` to `PTR_DAT_80021f18+0xa8` and `+0xac`, returns 1.
+Complements Pass 6 cont. (302)'s `store_dword_pair_to_crypto_global_offsets_a0_a4` (`+0xa0/+0xa4`)
+and Pass 6 cont. (303)'s `store_dword_pair_to_crypto_global_offsets_b0_b4` (`+0xb0/+0xb4`).
+Called from `FUN_800681d8` (region `0x80060000`) during cold-init alongside the other pair
+writers — completes the three-offset dword-pair seeding sequence.
+
+**Callers:** `FUN_800681d8` (xref_in=1) — BT stack cold-init orchestrator (same caller as
+siblings at `+0xa0/+0xa4` and `+0xb0/+0xb4`).
+
+**Confidence:** HIGH — decompile confirms unambiguous dual-dword store; single caller in
+documented cold-init chain; completes the three-function crypto-global offset writer cluster.
+
+Region unnamed count after this pass: **8** (9 minus this rename). Live named **1913** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
