@@ -14539,8 +14539,18 @@ sweep beyond enumeration and is the most out-of-date):
           9 xref_in; 243 unnamed remain.
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7o
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7p: cold-triage next rank-1
-          unnamed function in region `0x80010000` (243 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7p (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800145e8`→`program_single_tx_descriptor_slot_for_lmp_pdu_body`
+          (106B, HIGH). LMP PDU TX descriptor commit: `LMP__25C_called2`, merges
+          buffer with template globals, encodes handle, submits via
+          `program_active_tx_descriptor_slots_to_hw_registers`; allocate-side
+          counterpart of Pass 7j release; 8 xref_in conn-event ring LMP builders.
+          242 unnamed remain; live named 2182.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7p;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7q: cold-triage next rank-1
+          unnamed function in region `0x80010000` (242 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

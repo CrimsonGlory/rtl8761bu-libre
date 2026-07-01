@@ -1143,4 +1143,33 @@ cached halfword return; sentinel on out-of-range index; sits in established
 
 Region unnamed count after this pass: **243** (244 minus this rename).
 
-**Next:** Pass 7p — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7p (2026-07-01) — LMP PDU TX descriptor commit `FUN_800145e8`
+
+Pass 7p target from cold-triage rank-1 (8 xref_in, 106B). Decompiled and renamed:
+**`FUN_800145e8` → `program_single_tx_descriptor_slot_for_lmp_pdu_body`**
+(106B, HIGH) via `RenamePass7pRegion80010000Fun800145e8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Single-slot TX descriptor commit primitive in the `0x800145xx`
+cluster — allocate-side counterpart of Pass 7j's
+`release_active_tx_descriptor_slots_via_hw_programmer`. Calls
+`LMP__25C_called2()` (BLE coexistence hook) first. When `param_2 & 0xffff`
+(handle) is non-zero, merges buffer content at `param_1` with template globals
+(`DAT_80014654`, `DAT_80014658`), encodes connection handle
+`(param_2 & 0x7ff) << 2` into the descriptor word, and submits the single
+4-byte entry via `program_active_tx_descriptor_slots_to_hw_registers`
+(count=1, poll flag `param_3`).
+
+**Callers:** 8 xref_in including conn-event ring LMP PDU builders in region
+`0x80040000` (`build_and_submit_sco_esco_lmp_pdu_for_conn_type_1_or_2`,
+`build_and_submit_lmp_0x480_for_conn_type_3`,
+`gate_conn_event_ring_dequeue_by_sco_esco_type_flags`) — all invoke as
+`(buf+4, handle, 0)` to fill LMP PDU body before submit.
+
+**Confidence:** HIGH — decompile confirms template-merge + handle encode +
+established HW programmer callee; cross-region callers already document LMP PDU
+body semantics; pairs with Pass 7j release primitive.
+
+Region unnamed count after this pass: **242** (243 minus this rename).
+
+**Next:** Pass 7q — cold-triage next rank-1 unnamed in region `0x80010000`.
