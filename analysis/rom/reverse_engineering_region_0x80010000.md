@@ -1595,4 +1595,32 @@ integration.
 
 Region unnamed count after this pass: **226** (227 minus this rename).
 
-**Next:** Pass 86 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 87.
+
+## Pass 86 (2026-07-01) — Four-field sync timing offset writer `FUN_80015614`
+
+Pass 86 target from cold-triage rank-1 (4 xref_in, 292B — largest at xref=4
+tier after Pass 85). Decompiled and renamed:
+**`FUN_80015614` → `store_four_field_sync_timing_offsets_with_mode_adjust_and_hook`**
+(292B, HIGH) via `RenamePass86Region80010000Fun80015614.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Stores four signed timing offsets into shared struct
+`PTR_DAT_80015738` at `+0x12`/`+0x14`/`+0x16`/`+0x18`, combining caller
+params with base offset `*PTR_PTR_8001573c` (half/full rounding for params 2–3).
+Mode byte `PTR_DAT_80015744[1]` gates adjustment: bits `0x18` select half (`0x8`)
+or full (`0x10`) base-offset addend; bit `1` swaps the four stored quadrants;
+when mode clear and `param_1<0`, zeros `+0x12`. Optional completion hook at
+`PTR_DAT_80015748`; logs before/after via `possible_logging_function__var_args`.
+
+**Callers:** 4 xref_in — `FUN_80016934` (CPB/page-receive periodic tick, 3
+sites; passes four literal-pool shorts then chains `FUN_800152e4`/`FUN_800153d4`)
+and `FUN_80016e68` (SCO sync setup; extracts four signed offsets from sync
+record then invokes same tail chain).
+
+**Confidence:** HIGH — decompile confirms four-field struct writer, mode-gated
+offset/swap semantics, hook dispatch, and CPB-tick + SCO-sync caller integration.
+
+Region unnamed count after this pass: **225** (226 minus this rename).
+
+**Next:** Pass 87 — cold-triage next rank-1 unnamed in region `0x80010000`.
