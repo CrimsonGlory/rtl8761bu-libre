@@ -12054,8 +12054,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 44;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 45: cold-triage rank-2 unnamed
-          `FUN_8003c69c` (66B, xref_in=40 per `ListUnnamed80030000.java`).
+[DONE]  Full RE: ROM region 0x80030000 — Pass 45 (2026-07-01): decompiled+renamed rank-2
+          `FUN_8003c69c`→`read_indexed_bb_register_low16_by_byte_index` (66B, HIGH).
+          IRQ-masked indexed BB register read with optional hook; register-script
+          interpreter callee. Region 243 unnamed remain; live named 1923.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 45;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 46: cold-triage rank-2 unnamed
+          `FUN_8003c5b8` (46B, masked indexed-read sibling in `0x8003c6xx` cluster).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

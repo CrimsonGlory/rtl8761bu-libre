@@ -1144,4 +1144,31 @@ callers already documented under the old `FUN_80034a24` alias.
 
 Region unnamed count after this pass: **244** (245 minus this rename). Live named **1922** global.
 
-**Next:** Pass 45 — cold-triage rank-2 `FUN_8003c69c` (66B, xref_in=40).
+**Next:** superseded by Pass 45.
+
+## Pass 45 (2026-07-01) — indexed BB register read `FUN_8003c69c`
+
+Decompiled and renamed rank-2 cold-triage target:
+**`FUN_8003c69c` → `read_indexed_bb_register_low16_by_byte_index`**
+(66B, HIGH) via `RenamePass45Region80030000Fun8003c69c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked indexed baseband register read primitive. Optional override
+hook at `PTR_DAT_8003c6e0`: if installed and returns non-zero, returns the hook's
+16-bit output. Default path: disable interrupts, write `(index & 0xff) << 0x16` to
+MMIO `DAT_8003c6e4` (select register by byte index in upper 16 bits), read back
+low 16 bits, re-enable interrupts. Sibling of unnamed `FUN_8003c5b8` (masked
+variant with `FUN_800092dc` poll) and `FUN_8003c608` (write-side with same hook
+pattern at `PTR_DAT_8003c67c`). Register-script interpreter (`0x8003aea0`) callee
+alongside those two — used for scripted BB register poll/read steps.
+
+**Callers (6 computed xrefs):** `FUN_8003aea0` (register-script interpreter),
+`AFH_channel_map_hw_register_programmer`, `packet_type_to_hw_code_translator_4link`,
+`multi-VSC_Handler_FUN_80032540`, `FUN_80039c98`, patch `FUN_8010fcac`.
+
+**Confidence:** HIGH — clear IRQ-masked MMIO index-select + low-word readback idiom;
+hook/default split matches documented `FUN_8003c608` write primitive; register-script
+interpreter integration already noted in patch-installer analysis.
+
+Region unnamed count after this pass: **243** (244 minus this rename). Live named **1923** global.
+
+**Next:** Pass 46 — cold-triage rank-2 `FUN_8003c5b8` (46B, masked indexed-read sibling in `0x8003c6xx` cluster).
