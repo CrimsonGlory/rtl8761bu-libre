@@ -2468,5 +2468,37 @@ unambiguous.
 Region unnamed count after this pass: **205** (206 minus this rename). Live named
 **1961** global.
 
-**Next:** Pass 86 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 86.
+
+## Pass 86 (2026-07-01) — Dual fptr hook dispatcher `FUN_8003b86c`
+
+Fresh `ListUnnamed80030000.java` re-run: **205 unnamed** remain in region
+(unchanged from Pass 85; rank-1 by size at xref=3 tier is `FUN_8003b86c` at
+82B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b86c` → `dispatch_dual_fptr_hooks_by_flag_with_config_field285_bits_or_const_0x41`**
+(82B, HIGH) via `RenamePass86Region80030000Fun8003b86c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Flag-selected dual function-pointer dispatcher in the
+`0x8003b8xx` BB-register programming cluster (`PTR_DAT_8003b8c0` /
+`PTR_PTR_8003b8c4`). When `param_1==0`, calls hook2 `(0,0)` then hook1
+`(0,0x41)`; when non-zero, calls hook1 `(0,0x40)` then hook2 with
+`config_base->field285_0x129` bits 1 and 2. Regional sibling of
+`dual_fptr_dispatch_by_flag_wrapper` (`0x8000ebfc`) and Pass 83's
+`dispatch_tx_power_config_byte_0x2c_or_0x2d_via_dual_fptr_hooks`; neighbors
+`read_modify_write_hw_reg_0x44_set_bit0` and
+`write_indexed_bb_register_low16_with_global_mask`.
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap).
+
+**Confidence:** HIGH — full 82B decompile; swapped dual-fptr sequencing with
+config-bit vs constant `0x41` argument selection unambiguous.
+
+Region unnamed count after this pass: **204** (205 minus this rename). Live named
+**1962** global.
+
+**Next:** Pass 87 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

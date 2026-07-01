@@ -12466,7 +12466,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 85;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 86: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 86 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003b86c`→`dispatch_dual_fptr_hooks_by_flag_with_config_field285_bits_or_const_0x41`
+          (82B, HIGH). Flag-selected dual fptr hook dispatcher: `param_1==0` →
+          hook2 `(0,0)` then hook1 `(0,0x41)`; else hook1 `(0,0x40)` then hook2
+          with `field285_0x129` bits 1/2. BB-register cluster sibling of
+          `dual_fptr_dispatch_by_flag_wrapper`. 3 xref-in (indirect-call gap).
+          204 unnamed remain; live named 1962.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 86;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 87: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
