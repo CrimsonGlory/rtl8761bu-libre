@@ -4614,4 +4614,36 @@ established connection-setup cluster helpers.
 
 Region unnamed count after this pass: **184** (185 minus this rename). Live named **1737** global.
 
+**Next:** superseded by Pass 6 continuation (129).
+
+## Pass 6 continuation (129) (2026-07-01) — VSC 0xFC95 crypto pending-slot trigger `FUN_800223dc`
+
+Decompiled and renamed:
+**`FUN_800223dc` → `trigger_vsc_fc95_on_connection_crypto_pending_slot`**
+(102B, HIGH) via `RenamePass6Region80020000Fun800223dc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (102B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=184` at pass start). Tied at 102B with
+`validate_hci_create_connection_params` (`0x800214f4`, already renamed Pass 128);
+selected as next largest remaining tie.
+
+**Mechanism:** Per-connection VSC `0xFC95` trigger on crypto pending-LMP slot. Takes
+connection index `param_1 & 0xffff`, resolves
+`big_ol_struct[slot]._x58_crypto_struct_at_least_0x27_big`. When pending procedure
+dword at `+0x1ec != -1`, calls `LMP__25B__most_common_for_VSCs1(crypto+0x1ec)`.
+Then invokes `VSC_0xfc95_called2(0, crypto+0x1ec, PTR_LAB_8002565c_1, slot, 0)`;
+logs via `possible_logging_function__var_args` (tag `0x171`) on nonzero return.
+Sibling of `kickoff_post_role_switch_encryption_or_auth_by_link_type` (`0x800222b0`)
+and `start_encryption_vsc_pair_on_mode3_enable` (`0x80024154`) in the documented
+VSC 0xFC95 + LMP 0x25B cluster.
+
+**Callers:** xref_in=1 per `ListUnnamed80020000.java`; `find_callers` returned no direct
+call sites (consistent with indirect/timer or data-table dispatch).
+
+**Confidence:** HIGH — decompile confirms established VSC 0xFC95 + LMP 0x25B idiom on
+crypto struct `+0x1ec` pending slot; lives in documented `0x800222xx`–`0x800225xx`
+connection-crypto cluster.
+
+Region unnamed count after this pass: **183** (184 minus this rename). Live named **1738** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
