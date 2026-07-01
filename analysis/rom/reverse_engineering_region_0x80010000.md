@@ -2280,4 +2280,31 @@ constant and documented sync-conn callers.
 
 Region unnamed count after this pass: **203** (204 minus this rename).
 
-**Next:** Pass 109 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 109.
+
+## Pass 109 (2026-07-01) — sync-conn feature-page gate `FUN_80019024`
+
+Pass 109 target from cold-triage rank-1 (3 xref_in, 42B — largest at xref=3
+tier after Pass 108 cleared `FUN_80018dcc`). Decompiled and renamed:
+**`FUN_80019024` → `validate_sync_conn_feature_page_and_reject_conn_status_0x03`**
+(42B, HIGH) via `RenamePass109Region80010000Fun80019024.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin sync-connection setup gate in the `0x800190xx` cluster
+(sibling of `FUN_80018f38` feature-page validator and Pass 108's
+`reject_lmp_sco_link_req_0x2b_not_accepted_and_cleanup`). Delegates to
+`FUN_80018f38(conn_index)`; when that returns 0 (validation OK) and the
+connection-record status byte at `param_2+0xe` equals **0x03**, overrides
+return to **0x12** (HCI Command Disallowed).
+
+**Callers:** 3 xref_in — `FUN_80019050`, `FUN_800191a8`, `FUN_800192c4`
+(eSCO link-setup path: first gate before `esco_link_setup_gate_default_return_zero`
+and LMP TX dispatch).
+
+**Confidence:** HIGH — decompile confirms stereotyped validator wrapper with
+explicit status-byte gate; callers sit on documented HCI sync-conn / eSCO
+setup dispatch chain.
+
+Region unnamed count after this pass: **202** (203 minus this rename).
+
+**Next:** Pass 110 — cold-triage next rank-1 unnamed in region `0x80010000`.

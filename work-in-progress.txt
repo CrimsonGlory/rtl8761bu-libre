@@ -14940,8 +14940,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 108;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 109: cold-triage next rank-1
-          unnamed function in region `0x80010000` (203 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 109 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80019024`→`validate_sync_conn_feature_page_and_reject_conn_status_0x03`
+          (42B, HIGH). Sync-conn feature-page gate via `FUN_80018f38`; rejects
+          with HCI 0x12 when conn-record status byte at `+0xe==0x03`; callers
+          `FUN_80019050`/`FUN_800191a8`/`FUN_800192c4`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 109;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 110: cold-triage next rank-1
+          unnamed function in region `0x80010000` (202 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
