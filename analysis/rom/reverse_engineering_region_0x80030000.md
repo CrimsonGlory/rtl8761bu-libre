@@ -1762,5 +1762,42 @@ confirms dual-half usage pattern.
 Region unnamed count after this pass: **226** (227 minus this rename). Live named
 **1940** global.
 
-**Next:** Pass 65 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 65.
+
+## Pass 65 (2026-07-01) — inquiry LAP HW channel programmer `FUN_8003c94c`
+
+Fresh `ListUnnamed80030000.java` re-run: **226 unnamed** remain in region
+(unchanged from Pass 64; rank-1 by xref count is `FUN_8003c94c` at 190B,
+4 xref-in — tied at xref=4 tier, wins on size over `FUN_8003e1d4` 176B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003c94c` → `program_inquiry_lap_hw_channel_by_pending_slot_count`**
+(190B, HIGH) via `RenamePass65Region80030000Fun8003c94c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked inquiry/LAP HW-channel programming commit path gated
+on `the_0x300->byte_0x16a` bit 2 and optional veto hook at `PTR_DAT_8003ca0c`.
+Calls `count_consecutive_inquiry_lap_pending_slot_flags()`; when count `< 4`,
+indexes ushort table at `PTR_DAT_8003ca18`, programs HW channel via
+`or_merge_hw_channel_table_entry_and_indexed_dispatch(0x32,0x2000)`, then
+dispatches indexed HW writes through `PTR_DAT_8003ca20` fptr (conditional on
+channel bit14, slot-index shift `<<0xb`, final opcode `0/4`). Stores active
+count to `PTR_DAT_8003ca24`. When count `>= 4`, logs via
+`possible_logging_function__var_args` (tag `0x26e`).
+
+**Callers:** 4 xref-in incl. `remote_name_request_feature_apply_4` (commit fn
+for `field208_0xd8` bit 4 path) and `LMP_link_supervision_tick_scheduler`
+(mode-1 link-type dispatch). Inquiry/LAP cluster sibling of
+`count_consecutive_inquiry_lap_pending_slot_flags` and
+`remote_name_request_feature_apply_8` commit `FUN_8003ca28`.
+
+**Confidence:** HIGH — full 190B decompile; prior Pass 6/8/52gc documentation
+already identified role as remote-name-request apply_4 HW-channel commit;
+decompile confirms `count_consecutive_inquiry_lap_pending_slot_flags` index
+pattern and `or_merge_hw_channel_table_entry_and_indexed_dispatch` usage.
+
+Region unnamed count after this pass: **225** (226 minus this rename). Live named
+**1941** global.
+
+**Next:** Pass 66 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
