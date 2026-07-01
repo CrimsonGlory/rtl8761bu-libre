@@ -8329,5 +8329,32 @@ cached-ushort read pattern, and `0xdead` out-of-range sentinel unambiguous.
 Region unnamed count after this pass: **22** (23 minus this rename). Live named
 **2144** global.
 
-**Next:** Pass 269 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 269.
+
+## Pass 269 (2026-07-01) — TX power sum `FUN_80039b50`
+
+Fresh `ListUnnamed80030000.java` re-run: **22 unnamed** remain in region
+(unchanged from Pass 268; xref_in=0 tier dominates — rank-1 is `FUN_80039b50`
+at 38B, tied at 38B with `FUN_80038f98`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039b50` → `compute_tx_power_sum_from_doubled_index_and_global_baselines`**
+(38B, HIGH, UTILITY-tier) via
+`RenamePass269Region80030000Fun80039b50.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Additive TX-power sum helper in the `0x80039bxx` cluster.
+Computes `(param_1 * 2) + PTR_DAT_80039b78[+0x35]`; when `param_2 != 0` also
+adds `*PTR_DAT_80039b7c`. Additive counterpart to Pass 72's
+`compute_tx_power_delta_from_global_baselines` (subtract variant using adjacent
+literal-pool `PTR_DAT_80039b48`/`PTR_DAT_80039b4c`).
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 38B decompile; dual-baseline addition semantics
+mirror Pass 72's subtract helper; same `+0x35` baseline offset pattern.
+
+Region unnamed count after this pass: **21** (22 minus this rename). Live named
+**2145** global.
+
+**Next:** Pass 270 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
