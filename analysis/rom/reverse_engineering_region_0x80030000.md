@@ -6475,7 +6475,8 @@ index from static table `PTR_DAT_8003b35c[i]` and value from caller buffer
 `param_1[i]`. SCO HW init fast-path when subsystem already initialized
 (`PTR_DAT_80037320[0] != 0`): alternative to first-time
 `program_sco_bb_regs_from_config_offset_0x106_via_hw_hook` (Pass 140); buffer
-populated by `FUN_8003b2fc` before dispatch.
+populated by `fill_sco_bb_register_pair_buffer_from_index_table` (Pass 219)
+before dispatch.
 
 **Callers:** 1 xref-in — `init_or_clear_sco_hw_channel_subsystem` (`0x80036fa8`).
 
@@ -6779,5 +6780,35 @@ gate + callee chain unambiguous.
 Region unnamed count after this pass: **72** (73 minus this rename). Live named
 **2094** global.
 
-**Next:** Pass 219 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 219.
+
+## Pass 219 (2026-07-01) — SCO BB register buffer fill `FUN_8003b2fc`
+
+Fresh `ListUnnamed80030000.java` re-run: **72 unnamed** remain in region
+(unchanged from Pass 218; rank-1 by size at xref=1 tier is `FUN_8003b2fc` at
+34B — wins on address over tied 34B siblings `FUN_800393ac`/`FUN_80037370`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b2fc` → `fill_sco_bb_register_pair_buffer_from_index_table`**
+(34B, HIGH, SIMPLE-tier) via
+`RenamePass219Region80030000Fun8003b2fc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin SCO BB register value buffer filler in the `0x8003b2xx`
+cluster: loops indices `0..0x14` (21 ushort pairs), for each index `i` reads
+register index from static table `PTR_DAT_8003b320[i]` and looks up cached
+ushort value from `DAT_8003b324 + index`, writing into caller buffer
+`param_1[i]`. Upstream prep for `apply_cached_sco_bb_register_pairs_via_hw_hook`
+(Pass 208) before SCO init fast-path dispatch; sibling of
+`program_sco_bb_regs_from_config_offset_0x106_via_hw_hook` (Pass 140).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 34B decompile; 21-pair index-table lookup loop
+unambiguous; SCO BB register cluster sibling of Pass 140/208.
+
+Region unnamed count after this pass: **71** (72 minus this rename). Live named
+**2095** global.
+
+**Next:** Pass 220 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
