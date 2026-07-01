@@ -1493,5 +1493,38 @@ dispatch idiom.
 Region unnamed count after this pass: **234** (235 minus this rename). Live named
 **1932** global.
 
-**Next:** Pass 57 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 57.
+
+## Pass 57 (2026-07-01) — codec 3-bit field patch `FUN_80033d30`
+
+Fresh `ListUnnamed80030000.java` re-run: **234 unnamed** remain in region
+(unchanged from Pass 56 pre-rename list; rank-1 was `FUN_80033d30`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033d30` → `patch_three_bit_codec_slot_field_lower_triplet_via_hw_hook`**
+(104B, HIGH) via `RenamePass57Region80030000Fun80033d30.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** For codec slot index `param_1` (0–11) and 3-bit value
+`param_2`, maps slot to one of three packed ushort config fields at struct
+offsets `0x1cc`/`0x1ce`/`0x1d0` (slots 0–4, 5–9, 10–11 respectively), clears
+the target 3-bit nibble with `~(7 << (slot*3))`, ORs in `(param_2 & 7)`, and
+dispatches the merged ushort via hook at `PTR_DAT_80033d9c`. Sibling of
+`patch_three_bit_codec_slot_field_upper_triplet_via_hw_hook` (upper triplet
+`0x1d0`/`0x1d2`/`0x1d4`).
+
+**Callers:** 6 xref-in (rank-1 by xref count); indirect via function-pointer
+slots including `VSC_0xfd40_FUN_8002fd3c` (`PTR_DAT_8002fe9c`),
+`idk_takes_new_new_power_val` (`PTR_DAT_80034bdc`), and
+`init_or_clear_sco_hw_channel_subsystem` — TX-power / VSC-fd40 / SCO-init
+codec-config cluster (same caller set as Pass 56 upper-triplet sibling).
+
+**Confidence:** HIGH — fully decompiled 104B; 3-bit nibble pack/unpack into
+lower triplet ushort fields matches documented codec-slot writers and hook
+dispatch idiom.
+
+Region unnamed count after this pass: **233** (234 minus this rename). Live named
+**1933** global.
+
+**Next:** Pass 58 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
