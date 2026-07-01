@@ -2930,5 +2930,38 @@ BB-config path.
 Region unnamed count after this pass: **190** (191 minus this rename). Live named
 **1976** global.
 
-**Next:** Pass 101 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 101.
+
+## Pass 101 (2026-07-01) — BB reg triplet snapshot `FUN_80037af0`
+
+Fresh `ListUnnamed80030000.java` re-run: **190 unnamed** remain in region
+(unchanged from Pass 100; rank-1 by size at xref=2 tier is `FUN_80037af0` at
+142B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037af0` → `query_bb_regs_76_77_78_snapshot_and_log_when_gated`**
+(142B, HIGH, HANDLER-tier) via `RenamePass101Region80030000Fun80037af0.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook at `PTR_DAT_80037b80` (skip when hook returns
+non-zero). Gate on status struct `PTR_DAT_80037b84`: bits `0x180` set OR
+per-connection `field_0xb9` clear in `big_ol_struct[slot from byte+1>>2&0xf]`.
+When gated open: clears ushort fields at `+4`/`+6`; queries BB registers
+`0x76`/`0x77`/`0x78` via hook `PTR_DAT_80037b8c(0, reg, 1)` storing results at
+`+0xa`/`+0xc`/`+0xe`; copies 16-byte status snapshot and logs via
+`possible_logger_called_if_no_patch3` with tag from `PTR_DAT_80037b90`.
+
+**Callers:** 2 xref-in per cold-triage; direct caller
+`conditional_feature_gated_init_wrapper` (`0x800045b4`) when feature flag +
+config-blob field both indicate enabled; also reached from
+`ring_buffer_event_drain_dispatch_loop` ring-buffer event path.
+
+**Confidence:** HIGH — full 142B decompile; BB register-query + optional-hook
+gate idiom matches ROM cluster; feature-gated init context from region
+`0x80000000`.
+
+Region unnamed count after this pass: **189** (190 minus this rename). Live named
+**1977** global.
+
+**Next:** Pass 102 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
