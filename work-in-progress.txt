@@ -11198,8 +11198,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (219);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (220): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (93 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (220) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80029e78`→
+          `send_master_link_key_hci_event_0x0d_from_template` (50B, HIGH).
+          Master Link Key HCI event 0x0d emitter (sibling of Pass 6 cont. 150's
+          0x0e event): copies 16B template `PTR_DAT_80029eac`, sends 0x12-byte
+          packet via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`; caller
+          `stage_master_link_key_for_encrypted_connection_slot` (first event in
+          two-event notification sequence). 92 unnamed remain; live named 1829.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (220);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (221): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (92 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

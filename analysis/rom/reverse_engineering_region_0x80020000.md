@@ -7374,4 +7374,33 @@ reset; single caller in documented cold-init chain alongside
 
 Region unnamed count after this pass: **93** (94 minus this rename). Live named **1828** global.
 
+**Next:** superseded by Pass 6 continuation (220).
+
+## Pass 6 continuation (220) (2026-07-01) — Master link key HCI event 0x0d `FUN_80029e78`
+
+Decompiled and renamed:
+**`FUN_80029e78` → `send_master_link_key_hci_event_0x0d_from_template`**
+(50B, HIGH) via `RenamePass6Region80020000Fun80029e78.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed with xref_in≥1 (50B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=93` at pass start). First-listed at 50B tier
+after 52B tier exhausted (both entries xref_in=0); successor to Pass 6 cont. (219)'s
+`FUN_80021e6c`.
+
+**Mechanism:** First HCI event emitter in the Master Link Key staging pair (sibling of
+`derive_master_link_key_hci_event_0x0e_via_safer_plus_xor` event `0x0e`, Pass 6 cont. 150).
+Builds 0x12-byte packet with event code `0x0d`, copies 16B template from `PTR_DAT_80029eac`
+into payload via `optimized_memcpy`, and transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+
+**Caller:** `stage_master_link_key_for_encrypted_connection_slot` (`0x80029eb0`, Pass 6
+cont. 51) — xref_in=1; first event in the two-event notification sequence before the
+SAFER+-encrypted 0x0e event.
+
+**Confidence:** HIGH — decompile confirms template-copy + 0x12-byte event `0x0d` dispatch;
+documented caller from Pass 6 cont. (51); complements the already-analyzed Master Link Key
+staging cluster (sibling of Pass 6 cont. 150's `derive_master_link_key_hci_event_0x0e_via_safer_plus_xor`).
+
+Region unnamed count after this pass: **92** (93 minus this rename). Live named **1829** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
