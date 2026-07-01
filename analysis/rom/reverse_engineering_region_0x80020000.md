@@ -5636,4 +5636,36 @@ HCI SSP negative-reply entry points.
 
 Region unnamed count after this pass: **151** (152 minus this rename). Live named **1770** global.
 
+**Next:** superseded by Pass 6 continuation (162).
+
+## Pass 6 continuation (162) (2026-07-01) — LMP TEMP_RAND/TEMP_ENCRYPT NOT ACCEPTED recovery `FUN_80029728`
+
+Decompiled and renamed:
+**`FUN_80029728` → `handle_lmp_temp_rand_or_temp_encrypt_not_accepted`**
+(84B, HIGH) via `RenamePass6Region80020000Fun80029728.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (84B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=151` at pass start). First-listed
+`FUN_80029728` in the 84B cluster.
+
+**Mechanism:** LMP NOT ACCEPTED recovery handler for rejected opcodes **0x0D**
+(LMP TEMP_RAND) and **0x0E** (LMP TEMP_ENCRYPT). Sole caller
+`LMP_NOT_ACCEPTED_0x04` when rejected-opcode byte at `param+5` is `>= 0x0D` and
+`< 0x10` (opcodes `0x0C`/`0x0F` handled by siblings). Operates on per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. When crypto sub-state `+1` is `0x05` or
+`0x12`, and role gate passes (`FUN_8002403c` unless global bypass
+`PTR_DAT_80029780[2]&0x80`), invokes
+`start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+with rejected-payload byte at `param+6`.
+
+**Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site at `0x8002824e`, rejected-opcode
+`0x0D`/`0x0E` branch).
+
+**Confidence:** HIGH — decompile confirms NOT-ACCEPTED recovery idiom matching
+documented siblings (`handle_lmp_in_rand_not_accepted`, `handle_lmp_encryption_mode_req_not_accepted`);
+sole caller is established `LMP_NOT_ACCEPTED_0x04` dispatcher; crypto sub-states
+`0x05`/`0x12` align with TEMP_RAND/TEMP_ENCRYPT pairing phases.
+
+Region unnamed count after this pass: **150** (151 minus this rename). Live named **1771** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
