@@ -2705,5 +2705,36 @@ and region-`0x80020000`'s `init_sco_hw_channel_disable_be_c0_restore_saved_bb_re
 Region unnamed count after this pass: **197** (198 minus this rename). Live named
 **1969** global.
 
-**Next:** Pass 94 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 94.
+
+## Pass 94 (2026-07-01) — VSC fc11 polling waiter `FUN_80035104`
+
+Fresh `ListUnnamed80030000.java` re-run: **197 unnamed** remain in region
+(unchanged from Pass 93; rank-1 by size at xref=2 tier is `FUN_80035104` at
+242B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035104` → `poll_vsc_fc11_3_until_pending_clear_with_link_mode_timeouts`**
+(242B, HIGH, HANDLER-tier) via `RenamePass94Region80030000Fun80035104.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked VSC `0xfc11` variant-3 polling waiter in the
+`link_mode_change_state_machine` cluster (sibling of `FUN_80035214` at
+`0x80035214`). Early-exit when BOS `+0x10a` set: programs timeout `0x4e20` and
+status `0x47` from config mask `DAT_80035204`, restores IRQs. Main path enables
+IM3, sets bit 6 in global dword `DAT_8003520c`, branches on connection state
+`(bos+0x164 & 0x7f80) == 0x300` for timeout/status selection (`0x4e20`+`0x47`
+vs `DAT_80035210`+`0xa54e`), then spins calling
+`VSC_0xfc11_3_in_while_loop_FUN_80009148` until pending dword at
+`PTR_DAT_800351f8` clears.
+
+**Callers:** 2 xref-in per cold-triage (indirect/timer invocation likely).
+
+**Confidence:** HIGH — full 242B decompile; VSC fc11 family + link-mode BOS
+fields `+0x10a`/`+0x164` match `link_mode_change_state_machine` decompile.
+
+Region unnamed count after this pass: **196** (197 minus this rename). Live named
+**1970** global.
+
+**Next:** Pass 95 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
