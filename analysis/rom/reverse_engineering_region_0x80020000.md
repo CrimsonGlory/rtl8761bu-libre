@@ -5605,4 +5605,35 @@ machine; random-addr encryption-on toggle path matches
 
 Region unnamed count after this pass: **152** (153 minus this rename). Live named **1769** global.
 
+**Next:** superseded by Pass 6 continuation (161).
+
+## Pass 6 continuation (161) (2026-07-01) — SSP negative-reply continuation `FUN_80022694`
+
+Decompiled and renamed:
+**`FUN_80022694` → `dispatch_ssp_io_cap_or_oob_negative_reply_continuation`**
+(84B, HIGH) via `RenamePass6Region80020000Fun80022694.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (84B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=152` at pass start). First-listed
+`FUN_80022694` in the 84B cluster.
+
+**Mechanism:** SSP pairing continuation for HCI negative-reply paths. Indexes per-connection
+`big_ol_struct[slot]._x58_crypto_struct`. When crypto sub-state `+1 == 0x0a` and no
+pending callback at `+0x1e8`, advances SSP complete state machine via
+`start_with_fptr_called_by_call_send_evt_HCI_Simple_Pairing_Complete__state_machine_update_`
+with mode `0x18`. Otherwise: if pending LMP exists with opcode `>>1 == 8` (IN_RAND),
+rejects via `FUN_80022664` (`wrap_send_LMP_NOT_ACCEPTED` + `FUN_80025634` clear); else
+clears pending via `FUN_80025634` only.
+
+**Callers:** `many_sub_if_else_cases_on_param2` (opcode `0x16` — HCI Remote OOB Data
+Request Reply path) and `FUN_80023070` (HCI IO Capability Request Negative Reply
+`0x040e` wrapper via `hci_resolve_conn_record_validate_and_complete`); xref_in=2.
+
+**Confidence:** HIGH — decompile confirms SSP state-machine tail matching documented
+`dispatch_pairing_continuation_by_crypto_state_and_pending_lmp` sibling (opcode `0x17`);
+pending IN_RAND reject idiom matches `FUN_800226ec` cluster; both callers are established
+HCI SSP negative-reply entry points.
+
+Region unnamed count after this pass: **151** (152 minus this rename). Live named **1770** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

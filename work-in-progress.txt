@@ -10680,8 +10680,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (160);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (161): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (152 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (161) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80022694`→
+          `dispatch_ssp_io_cap_or_oob_negative_reply_continuation` (84B, HIGH).
+          SSP negative-reply continuation: sub-state `0x0a` + no pending →
+          SSP state-machine update `0x18`; pending IN_RAND → NOT_ACCEPTED via
+          `FUN_80022664`; else clear pending via `FUN_80025634`; callers
+          `many_sub_if_else_cases_on_param2` (opcode `0x16`)/`FUN_80023070`
+          (HCI `0x040e`); xref_in=2. 151 unnamed remain; live named 1770.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (161);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (162): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (151 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
