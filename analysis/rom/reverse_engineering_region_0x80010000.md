@@ -1565,4 +1565,34 @@ bit unpacking into BB MMIO writes, and integration with established
 
 Region unnamed count after this pass: **227** (228 minus this rename).
 
-**Next:** Pass 85 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 86.
+
+## Pass 85 (2026-07-01) — ACL TX completion credit processor `FUN_8001840c`
+
+Pass 85 target from cold-triage rank-1 (4 xref_in, 558B — largest at xref=4
+tier after Pass 84). Decompiled and renamed:
+**`FUN_8001840c` → `process_acl_tx_completion_credits_and_emit_hci_completed_packets`**
+(558B, HIGH) via `RenamePass85Region80010000Fun8001840c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Gated on `PTR_DAT_8001863c`; resolves connection slot via
+`lookup_up_to_3_bos_array_indices_by_connection_handle`, accumulates TX credit
+counters on conn subrecord (`+10`/`+4`/`+6` fields), walks singly-linked ACL
+buffer list (`+0x204` chain) matching type-mask `DAT_80018648`. When credits
+exhausted, calls `FUN_80017748` per buffer, dispatches completion hook at
+`PTR_DAT_8001864c`, increments per-link stats on `big_ol_struct`, and emits
+`thunk_send_evt_HCI_Number_Of_Completed_Packets` when `param_3==1`. Integrates
+`probe_lmp_25c_scheduling_readiness_by_credit_window` for LMP-25C gating and
+`FUN_80018314` for slot reschedule.
+
+**Callers:** 4 xref_in per `ListUnnamed80010000.java`; includes
+`sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type` (region
+`0x80040000` Pass 52v) which invokes this when timing window elapses.
+
+**Confidence:** HIGH — decompile confirms ACL TX buffer walk, credit accounting,
+HCI event `0x13` emission path, and established LMP-25C scheduling-readiness
+integration.
+
+Region unnamed count after this pass: **226** (227 minus this rename).
+
+**Next:** Pass 86 — cold-triage next rank-1 unnamed in region `0x80010000`.

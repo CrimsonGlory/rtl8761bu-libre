@@ -14701,8 +14701,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 84;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 85: cold-triage next rank-1
-          unnamed function in region `0x80010000` (227 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 85 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8001840c`→`process_acl_tx_completion_credits_and_emit_hci_completed_packets`
+          (558B, HIGH). ACL TX credit accounting + linked-buffer walk; emits
+          `thunk_send_evt_HCI_Number_Of_Completed_Packets`; integrates
+          `probe_lmp_25c_scheduling_readiness_by_credit_window`; caller
+          `sweep_linked_conn_slots_reschedule_timing_window_by_index_and_type`.
+          4 xref_in. 226 unnamed remain; live named 2198.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 85;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 86: cold-triage next rank-1
+          unnamed function in region `0x80010000` (226 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
