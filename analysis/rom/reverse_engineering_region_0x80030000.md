@@ -3147,5 +3147,37 @@ documented SCO/eSCO timing cluster; both callers confirmed via xref script.
 Region unnamed count after this pass: **183** (184 minus this rename). Live named
 **1983** global.
 
-**Next:** Pass 108 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 108.
+
+## Pass 108 (2026-07-01) — LMP 0x2a QoS req dispatcher `FUN_8003024c`
+
+Fresh `ListUnnamed80030000.java` re-run: **183 unnamed** remain in region
+(unchanged from Pass 107; rank-1 by size at xref=2 tier is `FUN_8003024c` at
+86B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003024c` → `dispatch_lmp_0x2a_qos_req_via_tx_hook`**
+(86B, HIGH, HANDLER-tier) via `RenamePass108Region80030000Fun8003024c.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional alloc hook at `PTR_DAT_800302a4+4` (via
+`call_fptr_if_set_with_2_args_possibly_allocates_buf_at_arg2_`); when it returns
+0, assembles a 10-byte LMP PDU buffer: `0xff` prefix, length `0x08`, opcode
+`0x2a` (`LMP_QUALITY_OF_SERVICE_REQ`), patch-index byte (`param_1`), ushort from
+`PTR_DAT_800302a8`, and dword payload (`param_2` LE at +6/+8). Dispatches via
+`invoke_lmp_tx_hook_with_length_word_from_pdu_buffer`. TX-side sibling of RX
+handler `LMP_QUALITY_OF_SERVICE_REQ_0x2A` (`0x8001aa3c`); same `0x2a` opcode
+cluster as Pass 81's `dispatch_lmp_0x0d_power_sample_report_via_tx_hook`.
+
+**Callers:** 2 xref-in — `references_patch_download_mem4` (patch-fragment download
+completion path: `FUN_8003024c(patch_index, accumulated_size)`) and
+`calls_to_0x8010a001_as_fptr_to_install_patches` (patch-installer fptr table).
+
+**Confidence:** HIGH — full 86B decompile; opcode `0x2a`, named callees, and
+patch-download caller body anchor the LMP QoS-request TX role.
+
+Region unnamed count after this pass: **182** (183 minus this rename). Live named
+**1984** global.
+
+**Next:** Pass 109 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
