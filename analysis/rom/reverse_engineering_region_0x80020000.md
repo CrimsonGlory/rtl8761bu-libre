@@ -628,7 +628,7 @@ Decompiled and renamed:
 `+0xc8`/`+0xe8`; limb counts at `+0x128`/`+0x12a`/`+0x12c`/`+0x12e`/`+0x130`; curve width
 selector at `+0x138` (6 or 8 limbs → `PTR_DAT_8002e554` / `PTR_DAT_8002e558` curve prime).
 Repeated square/mul via `crypto_bignum_multiply_square_v1` +
-`crypto_bignum_multiply_variable_len`, mod reduction via `FUN_8002dfd4` (6-limb →
+`crypto_bignum_multiply_variable_len`, mod reduction via `crypto_bignum_reduce_mod_curve_prime_by_limb_count` (6-limb →
 `crypto_bignum_reduce_mod_6limb_curve_prime`, 8-limb → `crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`),
 compare/subtract/add-mod-p via `compare_uint32_arrays_lexicographic_msb_to_lsb` + conditional
 prime add + `crypto_bignum_sub_u32_arrays_with_borrow`; left-shift via
@@ -1881,7 +1881,7 @@ three partial 6-limb addends, zeros the upper half, chains three
 `PTR_DAT_8002d814`. Clears dest with `crypto_bignum_fill_u32_words` and writes back
 the reduced lower 6 limbs.
 
-**Callers:** `crypto_ec_jacobian_point_add_mod_curve_prime` (via `FUN_8002dfd4`),
+**Callers:** `crypto_ec_jacobian_point_add_mod_curve_prime` (via `crypto_bignum_reduce_mod_curve_prime_by_limb_count`),
 `crypto_ec_affine_to_jacobian_mod_curve_prime`, and
 `crypto_ec_validate_affine_point_on_curve_mod_prime` — all branch on curve width
 selector (6 vs 8 limbs) at struct `+0x138`.
@@ -8114,5 +8114,34 @@ inlines equivalent loops for per-connection codec-6 (`0x30`) template install.
 codec unscramble cluster between 48B/64B hardcoded siblings and parameterized helper.
 
 Region unnamed count after this pass: **67** (68 minus this rename). Live named **1854** global.
+
+**Next:** superseded by Pass 6 continuation (246).
+
+## Pass 6 continuation (246) (2026-07-01) — curve-prime mod-reduction limb-count dispatcher `FUN_8002dfd4`
+
+Decompiled and renamed:
+**`FUN_8002dfd4` → `crypto_bignum_reduce_mod_curve_prime_by_limb_count`**
+(40B, HIGH) via `RenamePass6Region80020000Fun8002dfd4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=26) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=67` at pass start). Highest xref_in in
+the tied 40B tier; sits in the SSP/ECDH bignum cluster between
+`crypto_bignum_reduce_mod_6limb_curve_prime` and
+`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction`.
+
+**Mechanism:** Thin dispatcher on `param_3` limb-count selector: `6` →
+`crypto_bignum_reduce_mod_6limb_curve_prime()` (no args — uses globals), `8` →
+`crypto_bignum_reduce_mod_curve_prime_by_constant_subtraction(param_1, param_2)`.
+Shared mod-reduction gateway invoked throughout Jacobian add/double/affine-to-Jacobian
+and point-on-curve validation paths documented in Pass 6 continuation (2) and (42).
+
+**Callers:** xref_in=26 — heavy use from `crypto_ec_jacobian_point_add_mod_curve_prime`,
+`crypto_ec_jacobian_point_double_mod_curve_prime`, `crypto_ec_affine_to_jacobian_mod_curve_prime`,
+and related EC/bignum helpers.
+
+**Confidence:** HIGH — decompile is a two-branch dispatch to already-documented reducers;
+xref density confirms hot-path utility role.
+
+Region unnamed count after this pass: **66** (67 minus this rename). Live named **1855** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
