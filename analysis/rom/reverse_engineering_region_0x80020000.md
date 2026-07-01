@@ -6766,4 +6766,30 @@ sub-state bytes `0x48`/`0x40` match `finalize_encryption_procedure_and_notify_hc
 
 Region unnamed count after this pass: **113** (114 minus this rename). Live named **1808** global.
 
+**Next:** superseded by Pass 6 continuation (200).
+
+## Pass 6 continuation (200) (2026-07-01) — HCI cmd-completion list init `FUN_8002b118`
+
+Decompiled and renamed:
+**`FUN_8002b118` → `init_12slot_hci_cmd_completion_linked_list`**
+(58B, HIGH) via `RenamePass6Region80020000Fun8002b118.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (58B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=113` at pass start). Previously
+referenced only as an unnamed callee in Pass 6 cont. (123)/(188).
+
+**Mechanism:** Boot/reinit helper for the 12-entry HCI command-completion freelist at
+`PTR_DAT_8002b154`. `memset` zeros `0xc0` bytes (12 nodes × `0x10` stride), chains
+each node's `+0xc` next-pointer to the following slot (indices `0..0xa`), terminates
+the last node with `0`, and stores the list head in `PTR_PTR_8002b158`.
+
+**Callers:** `init_three_slot_0x34_linked_descriptors_and_clear_buffers` (`0x8002ad30`,
+Pass 6 cont. 123 boot-init path); `reinit_hci_cmd_list_clear_active_descriptor_tails_and_drain`
+(`0x8002b15c`, Pass 6 cont. 188 packet-type reprogram reset). xref_in=2.
+
+**Confidence:** HIGH — decompile confirms classic singly-linked freelist init idiom;
+both callers already HIGH-named and document this function by role.
+
+Region unnamed count after this pass: **112** (113 minus this rename). Live named **1809** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
