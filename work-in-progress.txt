@@ -11283,8 +11283,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (228);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (229): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (84 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (229) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8002f9b8`→`set_vsc_fcf0_active_byte_from_subcmd1_gated_on_status_bit2`
+          (48B, HIGH). VSC 0xFCF0 cluster active-byte arm/clear: enable-byte gate at
+          `param+2`, subcmd byte at `param+3`; when subcmd==1 and `DAT_8002f9e8` bit 2
+          clear sets `*PTR_DAT_8002f9ec=1` and clears `*PTR_DAT_8002f9f0`; else clears
+          active byte. xref_in=0 (fn-ptr dispatch). Region 83 unnamed remain; live named 1838.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (229);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (230): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (83 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

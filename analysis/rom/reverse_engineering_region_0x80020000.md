@@ -7632,4 +7632,34 @@ pattern; callee `FUN_80024540` decompile confirms LMP 0x3A send; caller already 
 
 Region unnamed count after this pass: **84** (85 minus this rename). Live named **1837** global.
 
+**Next:** superseded by Pass 6 continuation (229).
+
+## Pass 6 continuation (229) (2026-07-01) — VSC 0xFCF0 active-byte setter `FUN_8002f9b8`
+
+Decompiled and renamed:
+**`FUN_8002f9b8` → `set_vsc_fcf0_active_byte_from_subcmd1_gated_on_status_bit2`**
+(48B, HIGH) via `RenamePass6Region80020000Fun8002f9b8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=84` at pass start). First-listed at 48B
+tier; successor to Pass 6 cont. (228)'s `on_random_bdaddr_send_lmp_0x3a_if_feature_page_bit_armed`.
+
+**Mechanism:** VSC **0xFCF0** cluster state setter in the `0x8002f9xx` handler block adjacent
+to `VSC_0xfcf0_subcommand_dispatch` (`0x8002f95c`). Requires enable byte at `param+2==1`;
+otherwise returns HCI status `0x12`. When enabled: if subcommand byte at `param+3==1` and
+status word `DAT_8002f9e8` bit 2 clear (`& 2 == 0`), sets active flag `*PTR_DAT_8002f9ec=1`
+and clears dword `*PTR_DAT_8002f9f0=0`; else clears `*PTR_DAT_8002f9ec=0`. Same
+enable-byte / invalid-params `0x12` idiom as sibling config-bit setters
+`set_config_byte_bits0_and_1_from_enable_pair` and `FUN_8002fa64`, but operates on
+FCF0 session globals rather than config-struct bit masks.
+
+**Callers:** none (xref_in=0) — function-pointer dispatch only (consistent with VSC 0xFCF0
+cluster siblings).
+
+**Confidence:** HIGH — decompile confirms established VSC 0xFCF0 enable-byte gate and
+status-bit-2 conditional arm/clear pattern; sibling cluster context documented in Pass 6
+cont. (164)/(202).
+
+Region unnamed count after this pass: **83** (84 minus this rename). Live named **1838** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
