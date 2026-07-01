@@ -1867,5 +1867,35 @@ timing-scaled slot-offset math with `field_0x202`/`field106_0x94` inputs;
 Region unnamed count after this pass: **223** (224 minus this rename). Live named
 **1943** global.
 
-**Next:** Pass 68 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 68.
+
+## Pass 68 (2026-07-01) — Parallel slot-table tail reset `FUN_8003cf28`
+
+Fresh `ListUnnamed80030000.java` re-run: **223 unnamed** remain in region
+(unchanged from Pass 67; rank-1 by xref count is `FUN_8003cf28` at 84B,
+4 xref-in — wins xref=4 tier on size over `FUN_80038b64` 82B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cf28` → `reset_parallel_slot_table_entry_tail_state_by_index`**
+(84B, HIGH) via `RenamePass68Region80030000Fun8003cf28.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Resets tail-state fields in one entry of the parallel three-slot
+table at `PTR_DAT_8003cf7c` (0x88 stride, indexed by `param_1 & 0xff`):
+arms `+0x78=1`, sets `+0x79=0xff`, clears dword at `+0x7c`, masks bottom two
+bits of `+0x7a`, zeroes `+0x7b` and `+0x80..+0x85`. Wrapper
+`FUN_8003cf80` calls this for indices 0/1/2 during BT cold-init alongside
+`init_three_0x88_slot_tables_and_clear_crypto_globals` (region `0x80020000`
+Pass 6 cont. 219).
+
+**Callers:** 4 xref-in (cold-init + slot-table management cluster).
+
+**Confidence:** HIGH — full 84B decompile; 0x88-stride slot tail-reset idiom
+matches documented parallel three-slot init chain; sibling wrapper confirms
+indices 0..2.
+
+Region unnamed count after this pass: **222** (223 minus this rename). Live named
+**1944** global.
+
+**Next:** Pass 69 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
