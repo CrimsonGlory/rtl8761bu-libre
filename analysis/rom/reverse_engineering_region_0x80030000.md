@@ -4221,5 +4221,32 @@ caller anchors VSC vendor-config path.
 Region unnamed count after this pass: **151** (152 minus this rename). Live named
 **2015** global.
 
-**Next:** Pass 140 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 140.
+
+## Pass 140 (2026-07-01) — SCO BB register programmer from config `FUN_8003b220`
+
+Fresh `ListUnnamed80030000.java` re-run: **151 unnamed** remain in region
+(unchanged from Pass 139; rank-1 at xref=1 tier is `FUN_8003b220` at 208B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b220` → `program_sco_bb_regs_from_config_offset_0x106_via_hw_hook`**
+(208B, HIGH) via
+`RenamePass140Region80030000Fun8003b220.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Reads nine ushort pairs from `config_struct` offsets `+0x106`–`+0x117`
+and dispatches each via hook at `PTR_DAT_8003b2f4` to BB registers
+`0xc6`/`0xc8`/`0xca`/`0xcc`/`0xce`/`0xd0`/`0xd2`/`0xd4`/`0xc2`; final call
+writes `DAT_8003b2f8 | 0x4000` to register `0xac`. SCO HW init cluster helper
+alongside `program_sco_hw_channel_table_and_bb_regs_from_config`.
+
+**Callers:** 1 xref-in — `init_or_clear_sco_hw_channel_subsystem` (`0x80036fa8`).
+
+**Confidence:** HIGH — decompile confirms config-driven BB register hook dispatch;
+caller anchors SCO/eSCO HW subsystem init path.
+
+Region unnamed count after this pass: **150** (151 minus this rename). Live named
+**2016** global.
+
+**Next:** Pass 141 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
