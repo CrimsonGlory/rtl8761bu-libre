@@ -1458,4 +1458,30 @@ halfword registers; structural read/write pair documented in `region_0x80000000`
 
 Region unnamed count after this pass: **231** (232 minus this rename).
 
-**Next:** Pass 81 — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 81 (2026-07-01) — A5-framed scheduler slot write `FUN_800136b8`
+
+Pass 81 target from cold-triage rank-1 (5 xref_in, 200B — largest at xref=5
+tier after Pass 80). Decompiled and renamed:
+**`FUN_800136b8` → `emit_a5_framed_scheduler_slot_write_command`**
+(200B, HIGH) via `RenamePass81Region80010000Fun800136b8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** A5-framed write-command emitter in the `0x800135xx` scheduler
+cluster (uses Pass 7f primitive `busywait_status_bits_0x60_then_write_byte`).
+Protocol: sync `0xa5/0xa5`, command byte `0x46` (address-only) or `0x4e`
+(with payload), delimiter `0x5a`, 32-bit target address (`param_1`), three
+zero padding bytes; when `param_2 != 0` emits word-count
+`(param_2+3)>>2`, copies `param_2` bytes from `param_3`, then zero-pads to
+4-byte alignment.
+
+**Callers:** 5 xref_in per `ListUnnamed80010000.java`; primary consumer
+`FUN_80013780` issues writes to slot addresses `0xffdc` (24-byte CP0 register
+snapshot), `0xffdd` (4-byte dword), and `0xffde` (address-only commits).
+
+**Confidence:** HIGH — decompile confirms full A5-framed protocol sequence,
+4-byte alignment padding, and caller-side usage pattern for scheduler slot
+programming.
+
+Region unnamed count after this pass: **230** (231 minus this rename).
+
+**Next:** Pass 82 — cold-triage next rank-1 unnamed in region `0x80010000`.

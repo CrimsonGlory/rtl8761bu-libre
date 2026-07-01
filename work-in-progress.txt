@@ -14656,8 +14656,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 80;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 81: cold-triage next rank-1
-          unnamed function in region `0x80010000` (231 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 81 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800136b8`→`emit_a5_framed_scheduler_slot_write_command`
+          (200B, HIGH). A5-framed scheduler-slot write emitter in `0x800135xx`
+          cluster: sync `0xa5/0xa5`, cmd `0x46`/`0x4e`, delim `0x5a`, 32-bit
+          addr + optional payload with 4-byte pad via
+          `busywait_status_bits_0x60_then_write_byte`; caller `FUN_80013780`
+          programs slot addrs `0xffdc`/`0xffdd`/`0xffde`. 5 xref_in.
+          230 unnamed remain; live named 2194.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 81;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 82: cold-triage next rank-1
+          unnamed function in region `0x80010000` (230 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
