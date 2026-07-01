@@ -4767,5 +4767,41 @@ matches documented BB-reg hook programmers; `field_0x173` gate and
 Region unnamed count after this pass: **135** (136 minus this rename). Live named
 **2031** global.
 
-**Next:** Pass 156 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 156.
+
+## Pass 156 (2026-07-01) — LMP-268 random delay arm `FUN_8003cae0`
+
+Fresh `ListUnnamed80030000.java` re-run: **135 unnamed** remain in region
+(unchanged from Pass 155; rank-1 at xref=1 tier is `FUN_8003cae0` at 140B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003cae0` → `arm_lmp268_random_delay_and_remote_name_feature_apply_4`**
+(140B, HIGH, HANDLER-tier) via
+`RenamePass156Region80030000Fun8003cae0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Remote-name-request feature-4 LMP-268 timer armer. Draws a
+bounded random delay via `lcg_prng_bounded_modulo` (max `0x7f` or `0x3ff`
+depending on `the_0x300->field_0x1c` threshold `0x800`), floors at `0x32` when
+below, dispatches `LMP__268__most_common_for_VSCs2_checks_fptr_patch` with
+scaled timer `(delay*5)>>3`, calls fptr at `PTR_DAT_8003cb74` for a baseline
+offset, writes combined delay `delay*2 + baseline` to struct field `+0x11c`.
+When `byte_0x16a` bit2 clear or config ushort bit4 set: clears mode-active bit0
+at `+0x164`. Else when `+0x164` bit `0x20` set: tail-calls
+`remote_name_request_feature_apply_4` — the apply-side sibling documented in
+region `0x80040000` Pass 6.
+
+**Callers:** 1 xref-in — `status_word_multiflag_link_event_dispatcher` at
+`0x80002686` (region `0x80000000`); inquiry/LAP link-event path into the
+remote-name-request feature cluster.
+
+**Confidence:** HIGH — full 140B decompile; LMP-268 random-delay + `+0x11c`
+write idiom matches `remote_name_request_feature_apply_8`/`_4` structural twins;
+gating fields (`byte_0x16a` bit2, config bit4, `+0x164` bit `0x20`) align with
+documented remote-name-request apply paths.
+
+Region unnamed count after this pass: **134** (135 minus this rename). Live named
+**2032** global.
+
+**Next:** Pass 157 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
