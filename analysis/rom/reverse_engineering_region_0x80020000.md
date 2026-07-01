@@ -6107,4 +6107,34 @@ already evidenced across 10+ renamed HIGH callers in prior passes.
 
 Region unnamed count after this pass: **135** (136 minus this rename). Live named **1786** global.
 
+**Next:** superseded by Pass 6 continuation (178).
+
+## Pass 6 continuation (178) (2026-07-01) — LMP ext-enc sub2 inner-opcode dispatcher `FUN_80027ae0`
+
+Decompiled and renamed:
+**`FUN_80027ae0` → `dispatch_lmp_ext_enc_sub2_inner_opcode`**
+(72B, HIGH) via `RenamePass6Region80020000Fun80027ae0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (72B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=135` at pass start). Tied with
+`FUN_8002235c` at same size/xref tier; selected first-listed. Completes naming of
+the `LMP_encryption_opcode_handlers` → ext-enc sub-opcode 0x02 multiplexer whose
+three leaf handlers (`0x17`/`0x19` branches + `0x18` finalize path) were already
+renamed in prior passes.
+
+**Mechanism:** LMP 0x7F extended-encryption sub-opcode 0x02 inner-type dispatcher.
+Reads inner-type byte at `param_1+7` and connection handle `param_2`:
+`0x17` → `handle_lmp_ext_enc_sub2_inner0x17_stop_enc_substate_c_or_finalize`;
+`0x18` → `finalize_encryption_procedure_and_notify_hci` (status byte at `param_1+8`);
+`0x19` → `handle_lmp_ext_enc_sub2_inner0x19_ssp_state_0x15`;
+`0x1a` → return `1` (no-op ack); unknown → return `0`.
+
+**Callers:** `LMP_encryption_opcode_handlers` (1 site); xref_in=1.
+
+**Confidence:** HIGH — decompile confirms pure switch-dispatch with no side effects
+beyond delegated handlers; closes the long-standing `FUN_80027ae0` placeholder
+referenced by two already-HIGH sibling handlers in passes 66 and 115.
+
+Region unnamed count after this pass: **134** (135 minus this rename). Live named **1787** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

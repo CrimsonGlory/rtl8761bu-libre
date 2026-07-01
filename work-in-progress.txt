@@ -10838,8 +10838,14 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (177);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (178): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (135 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (178) (2026-07-01):
+          decompiled+renamed `FUN_80027ae0`→`dispatch_lmp_ext_enc_sub2_inner_opcode`
+          (72B, HIGH) — LMP 0x7F ext-enc sub2 inner-type multiplexer; xref_in=1;
+          caller `LMP_encryption_opcode_handlers`; 134 unnamed remain; live named 1787.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (178)
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (179): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (134 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
