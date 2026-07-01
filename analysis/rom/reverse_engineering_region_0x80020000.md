@@ -9202,4 +9202,36 @@ sub-state `0x40`/`0x48` pairing matches `send_lmp_encryption_mode_req_0x0f_and_a
 
 Region unnamed count after this pass: **29** (30 minus this rename). Live named **1892** global.
 
+**Next:** superseded by Pass 6 continuation (284).
+
+## Pass 6 continuation (284) (2026-07-01) — LMP encryption-mode-on wrapper `FUN_800245cc`
+
+Decompiled and renamed:
+**`FUN_800245cc` → `send_lmp_encryption_mode_req_0x0f_mode_on_wrapper`**
+(24B, HIGH) via `RenamePass6Region80020000Fun800245cc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_800245cc` (24B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=29` at pass start). Sits in the
+`0x800245xx` encryption outbound-send cluster as the mode-on sibling of Pass 6 cont. (283)'s
+`send_lmp_encryption_mode_req_0x0f_mode_off_wrapper` (`0x800245e4`).
+
+**Mechanism:** Thin wrapper tail-calling
+`send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate(param_1, param_2, 3, 1)` —
+sends outbound LMP Encryption Mode Req (opcode **0x0F**) with enable-byte **1** (encryption
+on) and arms crypto sub-state byte `param_2+1` to **0x48** (enable path). Complements
+the mode-off wrapper at `0x800245e4` (enable-byte 0 → sub-state **0x40**).
+
+**Callers:** `arm_encryption_when_crypto_substate_0x11_or_0x1e` (`0x80022098`) — legacy path
+when `FUN_8002408c()` encryption-feature gate returns zero; starts encryption via LMP 0x0F
+mode-on before sub-state advance via `FUN_80023fb8(crypto, 7)`; xref_in=2 per
+`ListUnnamed80020000.java` (second xref likely indirect/data ref).
+
+**Confidence:** HIGH — decompile confirms single callee with fixed trailing `param_4=1`;
+sub-state `0x40`/`0x48` pairing matches `send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate`
+(Pass 6 cont. 199); caller decompile shows consistent legacy encryption-feature-gate branch
+(mirror of mode-off path in `arm_encryption_before_deferred_role_switch`).
+
+Region unnamed count after this pass: **28** (29 minus this rename). Live named **1893** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
