@@ -5717,5 +5717,35 @@ already HIGH-named; conn-field branch matches documented ACL reassembly cluster.
 Region unnamed count after this pass: **106** (107 minus this rename). Live named
 **2060** global.
 
-**Next:** Pass 185 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 185.
+
+## Pass 185 (2026-07-01) — BB status-bit fptr hook `FUN_8003b818`
+
+Fresh `ListUnnamed80030000.java` re-run: **106 unnamed** remain in region
+(unchanged from Pass 184; rank-1 by size at xref=1 tier is `FUN_8003b818` at
+76B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b818` → `merge_status_high_bits_2_3_and_dispatch_fptr_hook_0x27c`**
+(76B, HIGH, UTILITY-tier) via
+`RenamePass185Region80030000Fun8003b818.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BB-register cluster status-word patcher. Reads ushort at
+`DAT_8003b864`, clears then sets high-byte bits 2 and 3 from `param_1` bit0
+and `param_2` bit0 (mask `0xf3` on high byte), then invokes patchable fptr at
+`PTR_DAT_8003b868` with opcode `0x27c` and the merged ushort. Sibling of
+`dispatch_dual_fptr_hooks_by_flag_with_config_field285_bits_or_const_0x41`
+(Pass 86) and `program_bb_regs_0x220_0x222_0x224_via_hook_with_masked_params`
+(Pass 152) in the `0x8003b8xx` BB-reg hook-programming family.
+
+**Callers:** 1 xref-in — patch firmware `FUN_8010c43c` at `0x8010c482`
+(COMPUTED_CALL; T1 hook slot `0x8012067c` per patch-installer audit).
+
+**Confidence:** HIGH — full 76B decompile; bit-merge + fptr-dispatch idiom
+matches documented BB-reg cluster; sole caller confirmed via `ListXrefsTo8003b818`.
+
+Region unnamed count after this pass: **105** (106 minus this rename). Live named
+**2061** global.
+
+**Next:** Pass 186 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
