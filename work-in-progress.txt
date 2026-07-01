@@ -13669,7 +13669,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 212;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 213: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 213 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800347a0`→`boot_init_optional_hook_or_dispatch_slots_and_crypto_reinit`
+          (42B, HIGH, INIT-tier) — hook-null default path sets
+          `PTR_DAT_800347d0[0x10b]=1`, calls Pass 128/159 dispatch+crypto
+          reinit pair; optional hook at `PTR_DAT_800347cc`.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 213;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 214: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

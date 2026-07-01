@@ -6602,5 +6602,35 @@ unambiguous; caller matches BB reg-config optional-hook cluster (Pass 151).
 Region unnamed count after this pass: **78** (79 minus this rename). Live named
 **2088** global.
 
-**Next:** Pass 213 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 213.
+
+## Pass 213 (2026-07-01) — boot-init optional-hook wrapper `FUN_800347a0`
+
+Fresh `ListUnnamed80030000.java` re-run: **78 unnamed** remain in region
+(unchanged from Pass 212; rank-1 by size at xref=1 tier is `FUN_800347a0` at
+42B — tied 42B sibling `FUN_80038df4` renamed in Pass 212, wins by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800347a0` → `boot_init_optional_hook_or_dispatch_slots_and_crypto_reinit`**
+(42B, HIGH, INIT-tier) via
+`RenamePass213Region80030000Fun800347a0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Boot-init optional-hook wrapper in the `0x800347xx` cluster: when
+hook fptr at `PTR_DAT_800347cc` is null, sets byte `0x10b` on global
+`PTR_DAT_800347d0`, then calls `copy_nine_dispatch_slots_and_init_baseband_subsystems`
+(Pass 128) and `reinit_conn_table_crypto_preserve_active_slot_record` (Pass 159);
+else invokes the hook directly. Parent wrapper for the nine-slot dispatch-table
+copy + conn-table crypto reinit pair documented in Passes 128/159.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` (indirect dispatch — `xrefs_to`/
+`find_callers` empty).
+
+**Confidence:** HIGH — full 42B decompile; hook-null default path and both
+documented callees unambiguous; INIT-tier boot-init cluster sibling of
+`copy_eight_literal_pool_globals_and_init_baseband_hw` in region `0x80020000`.
+
+Region unnamed count after this pass: **77** (78 minus this rename). Live named
+**2089** global.
+
+**Next:** Pass 214 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
