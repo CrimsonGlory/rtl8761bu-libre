@@ -14072,7 +14072,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 254;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 255: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 255 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003a124`→`config_gated_read_hook_arg4_cache_6bit_at_data_offset8`
+          (72B, HIGH) — when `config_base->field1018_0x406` set, hook-read arg `4`,
+          cache lower 6 bits at data offset `+8`; `0x8003a1xx` clock-trim cluster;
+          xref=0. 35 unnamed remain; live named 2131.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 255;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 256: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

@@ -7917,5 +7917,38 @@ offset-add pattern unambiguous.
 Region unnamed count after this pass: **36** (37 minus this rename). Live named
 **2130** global.
 
-**Next:** Pass 255 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 255.
+
+## Pass 255 (2026-07-01) — config-gated hook read cache `FUN_8003a124`
+
+Fresh `ListUnnamed80030000.java` re-run: **36 unnamed** remain in region
+(unchanged from Pass 254; xref_in=0 tier dominates — rank-1 is `FUN_8003a124`
+at 72B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a124` → `config_gated_read_hook_arg4_cache_6bit_at_data_offset8`**
+(72B, HIGH, HANDLER-tier) via
+`RenamePass255Region80030000Fun8003a124.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-flag-gated hook-read cache in the `0x8003a1xx`
+clock-trim / PHY-read cluster. When `config_base->field1018_0x406` is set,
+invokes hook fptr at `PTR_DAT_8003a170` with constant arg `4`, masks result
+to 6 bits (`& 0x3f`), and stores at byte offset `+8` in data struct
+`PTR_DAT_8003a174`. When `PTR_DAT_8003a178[0x36] & 2`, optionally logs via
+`possible_logging_function__var_args` (format `0x688`). Sibling of Pass 157's
+`config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays` (same
+`field1018_0x406` gate) and Pass 215's
+`dispatch_clock_trim_or_bb_reg_0x6f_by_config_flag0x8`; uses the same
+`0x8003a110`/`0x8003a114` PHY hook neighborhood documented in Pass 6's
+`lmp_power_regulator` cluster.
+
+**Callers:** 0 xref-in (consistent with indirect clock-trim / PHY dispatch).
+
+**Confidence:** HIGH — full 72B decompile; config gate, hook invoke arg `4`,
+6-bit cache at `+8`, and optional log branch unambiguous.
+
+Region unnamed count after this pass: **35** (36 minus this rename). Live named
+**2131** global.
+
+**Next:** Pass 256 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
