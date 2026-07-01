@@ -11146,8 +11146,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (214);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (215): cold-triage
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (215): cold-triage
           next rank-1 unnamed per `ListUnnamed80020000.java` (98 remain).
+          decompiled+renamed rank-1 `FUN_8002c2d8`→`copy_codec6_h2_h0_rom_templates_to_staging`
+          (52B, HIGH). Codec-6 h2/h0 ROM template staging helper: `optimized_memcpy`
+          0x12 scratch + 0x18 h2-first-half + 0x30 h0 from ROM literals; caller
+          `populate_codec_staging_tables_from_rom`; xref_in=1.
+          97 unnamed remain; live named 1824.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (215);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (216): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (97 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

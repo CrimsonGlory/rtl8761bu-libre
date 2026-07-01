@@ -7215,4 +7215,35 @@ Bluetooth changed-link-key types cited at Pass 6 cont. (71); all callees already
 
 Region unnamed count after this pass: **98** (99 minus this rename). Live named **1823** global.
 
+**Next:** superseded by Pass 6 continuation (215).
+
+## Pass 6 continuation (215) (2026-07-01) — codec-6 h2/h0 staging `FUN_8002c2d8`
+
+Decompiled and renamed:
+**`FUN_8002c2d8` → `copy_codec6_h2_h0_rom_templates_to_staging`**
+(52B, HIGH) via `RenamePass6Region80020000Fun8002c2d8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=98` at pass start). First-listed
+`FUN_8002c2d8` in tied 52B/xref_in=1 cluster; pre-cited as unnamed callee of
+`populate_codec_staging_tables_from_rom` at Pass 6 cont. (167).
+
+**Mechanism:** Codec-6 ROM template staging helper. Called from
+`populate_codec_staging_tables_from_rom` with args `(0x801220bc, 0x8012205c)` —
+codec-6 h2 first-half and h0 RAM staging destinations. Copies:
+(1) `0x12` bytes between two global RAM scratch pointers,
+(2) `0x18` bytes from ROM literal pool to `param_1` (h2 first half),
+(3) `0x30` bytes from ROM literal pool to `param_2` (h0).
+Sibling of `FUN_8002c2ac` (codec-8 h2/h0 staging, still unnamed). Full pipeline
+documented in `reverse_engineering_hardware_layer.md` Section 9.
+
+**Callers:** `populate_codec_staging_tables_from_rom` (1 site — codec staging init
+chain step 2; xref_in=1).
+
+**Confidence:** HIGH — decompile confirms three `optimized_memcpy` calls matching
+hardware-layer Section 9 codec-6 staging sizes (`0x18` h2, `0x30` h0); sole caller
+already HIGH-named; role pre-documented at Pass 6 cont. (167).
+
+Region unnamed count after this pass: **97** (98 minus this rename). Live named **1824** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
