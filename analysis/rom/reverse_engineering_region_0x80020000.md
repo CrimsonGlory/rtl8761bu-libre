@@ -4153,4 +4153,33 @@ cites `FUN_800255a0`).
 
 Region unnamed count after this pass: **199** (200 minus this rename). Live named **1722** global.
 
+**Next:** superseded by Pass 6 continuation (114).
+
+## Pass 6 continuation (114) (2026-07-01) — inbound LMP key XOR `FUN_800254b0`
+
+Decompiled and renamed:
+**`FUN_800254b0` → `xor_inbound_lmp_key_and_update_crypto_by_type`**
+(112B, HIGH) via `RenamePass6Region80020000Fun800254b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (112B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=199` at pass start). First-listed at
+112B (tied cluster at 112B).
+
+**Mechanism:** Inbound LMP key-material processor — inbound counterpart to outbound
+`derive_comb_key_xor_and_send_lmp_0x09` (Pass 6 cont. 113). XOR-combines 16B incoming
+payload (offset +5) with existing block at crypto `+0x51`; when link-key type byte
+(`payload[4]>>1`) is **0x09** (COMB_KEY), mixes BD_ADDR via `FUN_8002cfac` from
+`big_ol_struct[slot]`; otherwise copies to stack; then delegates to
+`update_crypto_struct_key_material_xor_or_copy_by_type` for `+0x61`/`+0xb9` update.
+
+**Callers:** `LMP_COMB_KEY_0x09` at `0x80027020`, `FUN_800255a0` (pairing continuation)
+at `0x800255e6`, and `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2` at `0x80026ee6`
+— confirmed via `ListXrefsTo800254b0.java`.
+
+**Confidence:** HIGH — XOR-with-`+0x51` + COMB_KEY type-9 BD_ADDR mix mirrors outbound
+sender; sole callee to `update_crypto_struct_key_material_xor_or_copy_by_type` (Pass 6
+cont. 74); callers sit in documented LMP COMB_KEY / pairing-continuation cluster.
+
+Region unnamed count after this pass: **198** (199 minus this rename). Live named **1723** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

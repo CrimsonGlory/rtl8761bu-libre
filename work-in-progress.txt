@@ -10231,8 +10231,21 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (113);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (114): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (199 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (114) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800254b0`→
+          `xor_inbound_lmp_key_and_update_crypto_by_type` (112B, HIGH).
+          Inbound LMP key-material processor: XOR 16B payload with crypto `+0x51`,
+          COMB_KEY type-9 BD_ADDR mix via `FUN_8002cfac`, then
+          `update_crypto_struct_key_material_xor_or_copy_by_type`; inbound
+          counterpart to `derive_comb_key_xor_and_send_lmp_0x09`; callers
+          `LMP_COMB_KEY_0x09`/`FUN_800255a0`/
+          `LMP_ENCRYPTION_KEY_SIZE_REQ_0x10_possibility2`. 198 unnamed remain;
+          live named 1723.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (114);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (115): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (198 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
