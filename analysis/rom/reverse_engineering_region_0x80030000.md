@@ -4563,3 +4563,39 @@ ACL fragment cluster; callee pairing with
 
 Region unnamed count after this pass: **141** (142 minus this rename). Live named
 **2025** global.
+
+**Next:** Pass 151 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
+
+## Pass 150 (2026-07-01) — Link-mode EIR budget counter `FUN_80033be8`
+
+Fresh `ListUnnamed80030000.java` re-run: **141 unnamed** remain in region
+(unchanged from Pass 149; rank-1 at xref=1 tier is `FUN_80033be8` at 160B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033be8` → `reset_link_mode_phase_marker_and_update_eir_budget_counter`**
+(160B, HIGH, HANDLER-tier) via
+`RenamePass150Region80030000Fun80033be8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** First-step preprocessor invoked at entry of
+`link_mode_change_state_machine(phase)`. Optional hook at `PTR_DAT_80033c88`
+delegates entirely when set. Otherwise: (1) sets link-mode config byte at
+`PTR_DAT_80033c94[+0x8c]` to `0xff` (phase-marker reset); (2) gated on BOS
+`byte_0x16a` bit 2, `field_0x173`, and `0x1ac` connection-struct capability
+bits — when gates pass, accumulates ushort at
+`the_0x300[1].ptr_to_EIR_data+2` plus config ushort at `+0x9c`, capped against
+threshold at `+0x94`, setting overflow flag byte at `ptr_to_EIR_data` (0=under
+cap, 1=exceeded); when gates fail, clears counter and flag to zero.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` and `find_callers` —
+`link_mode_change_state_machine` (always invoked before gate/slot-budget/VSC
+fc11 path).
+
+**Confidence:** HIGH — full 160B decompile; link-mode-change cluster sibling
+of `adjust_link_mode_change_slot_budget_and_secondary_timing` (Pass 99) and
+`apply_link_mode_change_bb_regs_and_timeout_by_phase` (Pass 148); EIR budget
+fields match inquiry/EIR cluster notes from Pass 8/12da.
+
+Region unnamed count after this pass: **140** (141 minus this rename). Live named
+**2026** global.
