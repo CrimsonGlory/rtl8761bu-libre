@@ -4423,5 +4423,38 @@ decompile.
 Region unnamed count after this pass: **145** (146 minus this rename). Live named
 **2021** global.
 
-**Next:** Pass 146 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 146.
+
+## Pass 146 (2026-07-01) — TX power runtime init `FUN_80039844`
+
+Fresh `ListUnnamed80030000.java` re-run: **145 unnamed** remain in region
+(unchanged from Pass 145; rank-1 at xref=1 tier is `FUN_80039844` at 180B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039844` → `init_tx_power_runtime_from_config_blob_and_halve_delta_baselines`**
+(180B, HIGH, HANDLER-tier) via
+`RenamePass146Region80030000Fun80039844.java` (`renamed=1`, live-verified).
+
+**Mechanism:** TX-power runtime-config initializer. Invokes first hook fptr at
+`PTR_PTR_800398f8`, then copies config-blob fields `+0x27c` through `+0x28b`
+(and related bytes at `+0x280`–`+0x286`, `+0x2`–`+0x6`) from
+`PTR_config_base_80039904` into the runtime buffer `PTR_DAT_800398fc`.
+Derives a decremented counter from config byte `+0x5` and mirrors it into
+three globals plus a fourth keyed by `+0x283`. Twice calls
+`compute_tx_power_delta_from_global_baselines` via fptr `PTR_PTR_80039900`
+with `param_2=0`, storing halved results (`result >> 1`) into runtime globals.
+Sibling of Pass 72's delta helper and the `FUN_80039c08` adjust path.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — invoked via function pointer
+(TX-power boot/init cluster).
+
+**Confidence:** HIGH — full 180B decompile; config-blob field copy layout and
+dual halved-delta baseline calls match Pass 72 caller notes and the region's
+TX-power management theme.
+
+Region unnamed count after this pass: **144** (145 minus this rename). Live named
+**2022** global.
+
+**Next:** Pass 147 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
