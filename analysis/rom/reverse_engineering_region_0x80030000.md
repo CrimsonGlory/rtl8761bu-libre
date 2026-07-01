@@ -2898,5 +2898,37 @@ defaults `*param_3` to `0xff00` when zero. Called by
 Region unnamed count after this pass: **191** (192 minus this rename). Live named
 **1975** global.
 
-**Next:** Pass 100 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 100.
+
+## Pass 100 (2026-07-01) — HW-reg-config optional hook table `FUN_80039518`
+
+Fresh `ListUnnamed80030000.java` re-run: **191 unnamed** remain in region
+(unchanged from Pass 99; rank-1 by size at xref=2 tier is `FUN_80039518` at
+158B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039518` → `dispatch_optional_subsystem_hooks_during_hw_reg_config`**
+(158B, HIGH, HANDLER-tier) via `RenamePass100Region80030000Fun80039518.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional-hook dispatch table walker gated by `param_1`: when
+`param_1==0`, invokes ~20 optional fptr hooks from literal pools (two arrays of
+6 and 9 entries with null-skip, plus individual hooks at `PTR_PTR_800395b8`…
+`PTR_PTR_800395e8`); when `param_1!=0`, calls single hook at
+`PTR_DAT_800395ec`. Called from `hw_register_config_with_timeout` when primary
+hook `PTR_PTR_8003c92c` is absent and `config_base+0x1ce` is negative — BB
+register-config init/teardown subsystem hook chain.
+
+**Callers:** 2 xref-in per cold-triage; direct caller
+`hw_register_config_with_timeout` (also used by
+`configure_hw_regs_and_init_for_sco_teardown` with `param_1=1`).
+
+**Confidence:** HIGH — full 158B decompile; override+fallback optional-hook
+table idiom matches ROM cluster; caller context in `hw_register_config_with_timeout`
+BB-config path.
+
+Region unnamed count after this pass: **190** (191 minus this rename). Live named
+**1976** global.
+
+**Next:** Pass 101 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
