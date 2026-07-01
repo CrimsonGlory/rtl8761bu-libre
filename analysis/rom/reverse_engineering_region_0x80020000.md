@@ -8237,4 +8237,35 @@ debug-mode command router.
 
 Region unnamed count after this pass: **63** (64 minus this rename). Live named **1858** global.
 
+**Next:** superseded by Pass 6 continuation (250).
+
+## Pass 6 continuation (250) (2026-07-01) — HCI Link Key Request Negative Reply `FUN_80023154`
+
+Decompiled and renamed:
+**`FUN_80023154` → `hci_resolve_conn_dispatch_pairing_continuation_link_key_neg_reply_0xc`**
+(40B, HIGH) via `RenamePass6Region80020000Fun80023154.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=63` at pass start). First-listed in tied
+40B tier; sits in the `0x800231xx` link-key HCI-reply cluster alongside sibling
+`fHCI_Link_Key_Request_Reply_0xb` (Pass 6 cont. 207) and thin wrappers
+`hci_resolve_conn_fhci_user_confirmation_request_reply_0x33` (Pass 6 cont. 249) /
+`hci_resolve_conn_fhci_user_passkey_request_reply_0x34` (Pass 6 cont. 248).
+
+**Mechanism:** Thin HCI command wrapper for opcode **0x040c** (Link Key Request Negative
+Reply) — `hci_resolve_conn_record_validate_and_complete` with validator
+`PTR_LAB_8002262c_1`, then on success calls
+`dispatch_pairing_continuation_by_crypto_state_and_pending_lmp(conn_handle)` and returns
+its result; returns 0 on conn-resolve failure. Same conn-resolve→pairing-continuation
+idiom as documented in Pass 6 cont. (75) for this function's callee cluster.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (opcode `0x40c` branch); xref_in=1
+per Pass 6 cont. (75) caller analysis.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus call to
+documented pairing-continuation router; caller confirmed in SSP debug-mode command router
+alongside sibling link-key reply handlers at opcodes `0x40b`/`0x40c`/`0x40e`.
+
+Region unnamed count after this pass: **62** (63 minus this rename). Live named **1859** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
