@@ -7090,4 +7090,33 @@ from region `0x80010000`.
 
 Region unnamed count after this pass: **102** (103 minus this rename). Live named **1819** global.
 
+**Next:** superseded by Pass 6 continuation (211).
+
+## Pass 6 continuation (211) (2026-07-01) — random-BD_ADDR encryption finalize tail `FUN_80029a14`
+
+Decompiled and renamed:
+**`FUN_80029a14` → `on_random_bdaddr_encryption_finalize_lmp_detach_and_scan_links`**
+(54B, HIGH) via `RenamePass6Region80020000Fun80029a14.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (54B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=102` at pass start). First-listed
+`FUN_80029a14` in the 54B cluster.
+
+**Mechanism:** Random-BD_ADDR encryption-procedure finalize tail helper. Gates on
+`big_ol_struct[conn].bdaddr_random_`; when set, optionally invokes
+`possible_LMP_DETACH_handler(conn, detach_reason)` when `param_2 != 0`, then always
+calls `scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3()` to sweep other
+random-address links for encrypted crypto states and arm/disable mode-3 encryption.
+Thin callee of `finalize_encryption_procedure_and_notify_hci` failure/teardown path.
+
+**Callers:** `finalize_encryption_procedure_and_notify_hci` at `0x80024b40`; xref_in=1
+per `ListXrefsTo80029a14.java`.
+
+**Confidence:** HIGH — decompile confirms `bdaddr_random_` gate idiom used across
+region; callees already Pass-6 HIGH (`scan_random_bdaddr_links_for_encrypted_crypto_arm_or_mode3`
+Pass 6 cont. 152, `possible_LMP_DETACH_handler` region `0x80070000`); caller already
+Pass-6 HIGH encryption-finalize dispatcher documented this callee by role.
+
+Region unnamed count after this pass: **101** (102 minus this rename). Live named **1820** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
