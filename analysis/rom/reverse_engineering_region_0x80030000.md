@@ -5426,5 +5426,41 @@ VSC/LMP gateway idiom (Pass 166 boot-init FC95 sibling).
 Region unnamed count after this pass: **115** (116 minus this rename). Live named
 **2051** global.
 
-**Next:** Pass 176 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 176.
+
+## Pass 176 (2026-07-01) — BOS role-slot snapshot walker `FUN_8003436c`
+
+Fresh `ListUnnamed80030000.java` re-run: **115 unnamed** remain in region
+(unchanged from Pass 175; rank-1 at xref=1 tier is `FUN_8003436c` at 96B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003436c` → `walk_10_bos_slots_snapshot_last_valid_role_merge_crypto_to_slot0`**
+(96B, HIGH, HANDLER-tier) via
+`RenamePass176Region80030000Fun8003436c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode role-slot snapshot helper in the `0x800343xx` cluster
+(sibling callee of Pass 106's
+`commit_link_mode_snapshot_role_slots_and_materialize_lut`). When config struct
+`field_0x173` at `PTR_struct_of_at_least_0x300_size_800343cc` is clear, writes
+sentinel `0xff` to role-index output at `PTR_DAT_800343d4` and returns. When
+set, walks slots 0–9 of the `big_ol_struct` array at `PTR_big_ol_struct_800343d0`:
+for each entry with `bos_entry_valid_ == 1`, records slot index to
+`PTR_DAT_800343d4`, copies full struct to `PTR_DAT_800343d8` via
+`optimized_memcpy`, and for non-zero slots merges `0x218` bytes of
+`_x58_crypto_struct` into slot-0's crypto area (last valid slot wins index +
+struct copy).
+
+**Callers:** 1 xref-in — `commit_link_mode_snapshot_role_slots_and_materialize_lut`
+(Pass 106); invoked during hook-veto-gated link-mode commit when `field_0x10a` is
+set.
+
+**Confidence:** HIGH — full 96B decompile; 10-slot `big_ol_struct` walk +
+`optimized_memcpy` idiom matches Pass 106 parent description; config
+`field_0x173` disable path with `0xff` sentinel unambiguous.
+
+Region unnamed count after this pass: **114** (115 minus this rename). Live named
+**2052** global.
+
+**Next:** Pass 177 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

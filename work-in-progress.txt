@@ -13320,7 +13320,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 175;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 176: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 176 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003436c`→`walk_10_bos_slots_snapshot_last_valid_role_merge_crypto_to_slot0`
+          (96B, HIGH) — link-mode role-slot snapshot: 10-slot `big_ol_struct`
+          walk, `optimized_memcpy` to buffer, crypto merge to slot 0; callee of
+          `commit_link_mode_snapshot_role_slots_and_materialize_lut`.
+          Region unnamed 114 remain; live named 2052.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 176;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 177: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
