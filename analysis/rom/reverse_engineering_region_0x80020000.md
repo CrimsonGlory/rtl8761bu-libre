@@ -6048,4 +6048,34 @@ split; sub-state bytes `0x49`/`0x4b` match stop-encryption finalizer failure pat
 
 Region unnamed count after this pass: **137** (138 minus this rename). Live named **1784** global.
 
+**Next:** superseded by Pass 6 continuation (176).
+
+## Pass 6 continuation (176) (2026-07-01) — HCI Periodic Inquiry param validator `FUN_800213d0`
+
+Decompiled and renamed:
+**`FUN_800213d0` → `validate_hci_periodic_inquiry_mode_params`**
+(72B, HIGH) via `RenamePass6Region80020000Fun800213d0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (72B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=137` at pass start). First-listed
+`FUN_800213d0` in the 72B cluster (tied with `FUN_8002c838`/`FUN_80027ae0`/`FUN_8002235c`,
+picked by list order).
+
+**Mechanism:** HCI Periodic Inquiry Mode (OGF 0x04 OCF 0x03) parameter validator on the
+command buffer: rejects when max-period uint3 at `+7` plus global `DAT_80021418` exceeds
+`0x3f`, period-length byte at `+10` is outside `[1,0x30]`, ushort ordering at `+3`/`+5`
+fails, or max-period ushort at `+5` is not greater than length byte at `+10`. Returns `0`
+on success, `0x12` (Invalid HCI Command Parameters) on failure. Sibling of standard-Inquiry
+validator `FUN_8002155c` (Pass 6 cont. pending rename).
+
+**Callers:** `fHCI_Periodic_Inquiry_Mode_0x03` at `0x8001bf4c` (ROM thin wrapper — gates
+configure path on return `0`); patch firmware `FUN_8010dd1c` at `0x8010de64` (computed
+call). xref_in=2 via `ListXrefsTo800213d0.java`.
+
+**Confidence:** HIGH — decompile confirms pure param-range validator with HCI error code
+`0x12`; ROM caller decompile shows standard validate-then-configure flow into
+`configure_periodic_inquiry_lap_delays_baseband_and_arm_lmp`.
+
+Region unnamed count after this pass: **136** (137 minus this rename). Live named **1785** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
