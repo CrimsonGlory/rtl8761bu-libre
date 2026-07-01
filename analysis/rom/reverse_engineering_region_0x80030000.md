@@ -8385,5 +8385,33 @@ dispatch to Pass 157 callee unambiguous; closes caller-side naming gap.
 Region unnamed count after this pass: **20** (21 minus this rename). Live named
 **2146** global.
 
-**Next:** Pass 271 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 271.
+
+## Pass 271 (2026-07-01) — scatter LUT writer `FUN_80033e98`
+
+Fresh `ListUnnamed80030000.java` re-run: **20 unnamed** remain in region
+(unchanged from Pass 270; xref_in=0 tier dominates — rank-1 is `FUN_80033e98`
+at 36B, wins on address over tied 36B sibling `FUN_80033e6c`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033e98` → `scatter_9_uint32_from_buffer_to_lut_indexed_base`**
+(36B, HIGH, UTILITY-tier) via
+`RenamePass271Region80030000Fun80033e98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Scatter-write loop (9 iterations): for each index `i`, writes
+`*(uint32*)(param_1 + i*4)` to destination
+`*(uint32*)(DAT_80033ec0 + *(ushort*)(PTR_DAT_80033ebc + i*2))`.
+Inverse gather sibling is still-unnamed `FUN_80033e6c` (reads 9 uint32s from
+LUT-indexed base into buffer). Part of the `0x80033e` indexed-LUT cluster
+alongside Pass 189's `materialize_indexed_lut_5_ushort_buf0_18_ushort_buf1`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 36B decompile; 9-iteration scatter via ushort LUT
++ base unambiguous; gather inverse at `FUN_80033e6c` confirms semantics.
+
+Region unnamed count after this pass: **19** (20 minus this rename). Live named
+**2147** global.
+
+**Next:** Pass 272 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

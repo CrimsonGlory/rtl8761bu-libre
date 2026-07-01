@@ -14225,7 +14225,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 270;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 271: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 271 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033e98`→`scatter_9_uint32_from_buffer_to_lut_indexed_base`
+          (36B, HIGH, UTILITY-tier). Scatter-write 9 uint32 values from buffer
+          to LUT-indexed destinations via `PTR_DAT_80033ebc`/`DAT_80033ec0`;
+          gather inverse `FUN_80033e6c`. 19 unnamed remain; live named 2147.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 271;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 272: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
