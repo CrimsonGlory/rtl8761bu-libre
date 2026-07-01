@@ -5545,4 +5545,32 @@ semantics; callers already named in SSP pairing-method dispatch cluster.
 
 Region unnamed count after this pass: **154** (155 minus this rename). Live named **1767** global.
 
+**Next:** superseded by Pass 6 continuation (159).
+
+## Pass 6 continuation (159) (2026-07-01) — BD_ADDR link-key lookup `FUN_80022f9c`
+
+Decompiled and renamed:
+**`FUN_80022f9c` → `lookup_bdaddr_link_key_dispatch_auth_or_request_hci_key`**
+(84B, HIGH) via `RenamePass6Region80020000Fun80022f9c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (84B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=154` at pass start). First-listed
+`FUN_80022f9c` in the 84B cluster.
+
+**Mechanism:** Per-connection BD_ADDR link-key resolver. Indexes `big_ol_struct[conn]`,
+calls `FUN_80026994` to look up stored link key by BD_ADDR; on miss emits
+`send_evt_HCI_Link_Key_Request`, on hit forwards key to
+`apply_link_key_and_dispatch_auth_pairing_flow`. Primes auth context via
+`set_arg1_1_to_arg2` before lookup.
+
+**Callers:** `fHCI_Authentication_Requested_0x11` (HCI Authentication Requested),
+`kickoff_post_role_switch_encryption_or_auth_by_link_type` (post role-switch type
+`0x00` auth path), and one additional xref; xref_in=3.
+
+**Confidence:** HIGH — callee chain matches documented auth/link-key cluster (Pass 6
+cont. 16/64/117); branch semantics (HCI Link Key Request vs auth dispatch) match
+Bluetooth pairing flow; prior cold-triage notes at lines 1076/2582/4265 corroborate.
+
+Region unnamed count after this pass: **153** (154 minus this rename). Live named **1768** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
