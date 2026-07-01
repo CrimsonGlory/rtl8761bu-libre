@@ -12964,7 +12964,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 137;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 138: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 138 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80033d28`→`noop_unsniff_slave_cleanup_hook_jr_ra_stub`
+          (4B, HIGH, STUB-tier). Trivial `jr ra` noop pre-send cleanup hook in
+          `LMP_0x18_LMP_UNSNIFF_REQ` when `bdaddr_random` set; sibling of Pass 137
+          config-dispatch noop stub. 152 unnamed remain; live named 2014.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 138;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 139: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

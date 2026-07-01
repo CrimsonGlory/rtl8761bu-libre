@@ -458,7 +458,7 @@ undefined4 LMP_0x18_LMP_UNSNIFF_REQ(uint conn_idx)
 {
   record = bos_base[conn_idx];
   if (record.bdaddr_random == 1) {           // currently the "non-master" side of sniff?
-    FUN_80033d28(conn_idx);                    // (not traced; sniff-state cleanup)
+    noop_unsniff_slave_cleanup_hook_jr_ra_stub(conn_idx);  // noop jr-ra stub; see region_0x80030000 Pass 138
     record.field_0x205 = *PTR_DAT_8001b014;
     possible_logging_function__var_args(...);
   }
@@ -469,7 +469,7 @@ undefined4 LMP_0x18_LMP_UNSNIFF_REQ(uint conn_idx)
 
 This confirms `LMP_UNSNIFF_REQ` (opcode `0x18`) is sent unconditionally to
 exit sniff mode, with an extra conditional cleanup step
-(`FUN_80033d28`, untraced) when the local role flag (`bdaddr_random`) is set.
+(`noop_unsniff_slave_cleanup_hook_jr_ra_stub`, Pass 138) when the local role flag (`bdaddr_random`) is set.
 This is a 2-byte PDU (opcode only, no parameters) consistent with the BT
 spec's `LMP_UNSNIFF_REQ` having no payload.
 
@@ -526,7 +526,7 @@ and are legitimate future-work targets, not failures:
    (the precursor) was found in `FUN_8001ab44`; the actual switch-request PDU
    send is presumably triggered later in the procedure (possibly from the
    LMP-receive dispatcher in item 5, once `LMP_SLOT_OFFSET` is acknowledged).
-8. **`FUN_8004090c`, `FUN_800362b4`, `FUN_80033d28`, `FUN_800721a0`,
+8. **`FUN_8004090c`, `FUN_800362b4`, `FUN_800721a0`,
    `calls_fptr_down_LMP__47E_path`** — five small functions touched by the
    chains above whose names suggest relevance (timer arming, sniff cleanup,
    role-flag side-effects) but were not independently decompiled this pass.

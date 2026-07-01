@@ -4162,5 +4162,35 @@ dual conditional hook-fptr dispatch pattern matching noop-default stub role.
 Region unnamed count after this pass: **153** (154 minus this rename). Live named
 **2013** global.
 
-**Next:** Pass 138 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 138.
+
+## Pass 138 (2026-07-01) — unsniff slave-cleanup noop hook stub `FUN_80033d28`
+
+Fresh `ListUnnamed80030000.java` re-run: **153 unnamed** remain in region
+(unchanged from Pass 137; rank-1 at xref=2 tier is `FUN_80033d28` at 4B —
+sole remaining xref=2 candidate after Pass 137 renamed `FUN_80039a10`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033d28` → `noop_unsniff_slave_cleanup_hook_jr_ra_stub`**
+(4B, HIGH, STUB-tier) via
+`RenamePass138Region80030000Fun80033d28.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e return stub (`jr ra` + delay-slot `_nop`).
+Optional pre-send cleanup hook invoked by `LMP_0x18_LMP_UNSNIFF_REQ` when the
+connection record's `bdaddr_random` flag is set (slave/non-master role on
+unsniff exit): calls this stub, then copies `*PTR_DAT_8001b014` into
+`field_0x205` and logs before unconditionally sending `LMP_UNSNIFF_REQ`
+(opcode `0x18`). Sibling noop-stub pattern to Pass 137's config-dispatch hook.
+
+**Callers:** 2 xref-in per cold-triage — `LMP_0x18_LMP_UNSNIFF_REQ` at
+`0x8001af9c` (confirmed via decompile); second xref unresolved (`find_callers`
+empty — likely data-ref or computed-call).
+
+**Confidence:** HIGH — decompile confirms empty body; caller body anchors
+unsniff/slave-role cleanup hook role per `lc_lmp_state_machine` trace.
+
+Region unnamed count after this pass: **152** (153 minus this rename). Live named
+**2014** global.
+
+**Next:** Pass 139 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
