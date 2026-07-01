@@ -6706,4 +6706,32 @@ documented as depending on this helper by role in prior passes.
 
 Region unnamed count after this pass: **115** (116 minus this rename). Live named **1806** global.
 
+**Next:** superseded by Pass 6 continuation (198).
+
+## Pass 6 continuation (198) (2026-07-01) — IN_RAND accept helper `FUN_800253cc`
+
+Decompiled and renamed:
+**`FUN_800253cc` → `accept_in_rand_safer_plus_pin_encrypt_and_send_lmp_0x08`**
+(62B, HIGH) via `RenamePass6Region80020000Fun800253cc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (62B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=115` at pass start).
+
+**Mechanism:** Legacy (non-SSP) LMP IN_RAND (opcode **0x08**) accept path — sibling of
+outbound `derive_pin_safer_plus_au_rand_and_send_lmp_0x0b` (Pass 6 cont. 143). Runs
+`pad_concat_safer_plus_encrypt_16byte_key_block` over IN_RAND PDU bytes at `param_3+5`,
+PIN material at crypto `+0xce` (length `+0xde`), and existing 16B block at `+0x51`;
+then sends `wrap_send_LMP_ACCEPTED_and_some_other_things(conn, 0x08, mode_bit)` where
+mode_bit is PDU byte `+4 & 1`.
+
+**Callers:** `LMP_IN_RAND_0x08` at `0x80027542` when crypto sub-state `+1 == 0x0b`
+(legacy PIN phase); `FUN_80025474` at `0x8002549a` on non-SSP pairing-continuation
+branch (sets sub-state `0x1a` after accept). xref_in=2 via `ListXrefsTo800253cc.java`.
+
+**Confidence:** HIGH — decompile confirms SAFER+ PIN-offset idiom matching
+`derive_pin_safer_plus_au_rand_and_send_lmp_0x0b`; caller `LMP_IN_RAND_0x08`
+decompile shows direct invoke on sub-state `0x0b` path before `FUN_800255fc`.
+
+Region unnamed count after this pass: **114** (115 minus this rename). Live named **1807** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
