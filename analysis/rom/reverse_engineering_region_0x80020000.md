@@ -6405,4 +6405,34 @@ documented SCO/eSCO HW-commit paths.
 
 Region unnamed count after this pass: **125** (126 minus this rename). Live named **1796** global.
 
+**Next:** superseded by Pass 6 continuation (188).
+
+## Pass 6 continuation (188) (2026-07-01) — HCI cmd-list reinit + descriptor tail clear `FUN_8002b15c`
+
+Decompiled and renamed:
+**`FUN_8002b15c` → `reinit_hci_cmd_list_clear_active_descriptor_tails_and_drain`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002b15c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=125` at pass start). First listed at
+66B/xref_in=3 after Pass 187 cleared the xref_in=4 sibling.
+
+**Mechanism:** Connection-state-2 packet-type reprogramming reset helper in the
+`0x8002b1xx` cluster adjacent to `init_three_slot_0x34_linked_descriptors_and_clear_buffers`
+(`0x8002ad30`). Reinitializes the 12-entry HCI command-completion linked list via
+`FUN_8002b118` (zeros `0xc0` at `PTR_DAT_8002b154`, chains 12×`0x10` nodes), then
+for each of 3 active slots in the `0x34`-stride descriptor table at `PTR_DAT_8002b1a0
+(when short at `+0x18 != -1`) clears tail payload dwords at `+0x20`–`+0x2c` and
+shorts at `+0x30`/`+0x32`, and finishes with `drain_all_hci_cmd_completion_slots_once`.
+
+**Caller:** `conn_state2_packet_type_reprogram_or_credit_dispatch` (`0x800051d4`,
+region `0x80000000`) — invoked when global flag `PTR_DAT_80005354[0]` is set during
+non-state-2 packet-type reprogram / SCO credit scheduling path.
+
+**Confidence:** HIGH — decompile confirms 12-slot list reinit callee, 3-slot `0x34`
+descriptor tail-clear idiom matching Pass 6 cont. (123) cluster, and terminal HCI
+cmd-completion drain; direct caller confirmed via `find_callers`.
+
+Region unnamed count after this pass: **124** (125 minus this rename). Live named **1797** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
