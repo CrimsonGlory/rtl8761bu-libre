@@ -1220,4 +1220,32 @@ trampoline semantics.
 
 Region unnamed count after this pass: **240** (241 minus this rename).
 
-**Next:** Pass 7s — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7s (2026-07-01) — conn-CC-indexed HW register byte-half writer `FUN_800140d8`
+
+Pass 7s target from cold-triage rank-1 (7 xref_in, 122B). Decompiled and renamed:
+**`FUN_800140d8` → `write_hw_register_by_conn_cc_index_byte_half`**
+(122B, HIGH) via `RenamePass7sRegion80010000Fun800140d8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Programs one of two baseband HW register pairs indexed by conn
+`byte_0xCC` (selector `param_2`, values 0–3). Selectors 0–1 merge into cached
+halfword at `DAT_8001415c` and write BB register `0x50`; selectors 2–3 merge
+into `DAT_80014154` and write BB register `0x192`. Even selectors patch the
+low byte (`entry & 0xff00 | value`); odd selectors patch the high byte
+(`(value << 8) | entry & 0xff`). Commit via indirect callback at
+`PTR_DAT_80014158` (indexed BB register write primitive). Role-switch /
+LMP-slot-offset / class-mode cluster sibling already referenced from region
+`0x80030000` Pass 67 (`compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`).
+
+**Callers:** 7 xref_in per `ListUnnamed80010000.java`; 5 direct call sites
+confirmed via `xrefs_to` including
+`apply_conn_class_mode_afh_role_remap_and_esco_ptype`,
+`orchestrate_sco_esco_link_setup_baseband_regs_collision_and_afh`,
+`conn_teardown_and_link_loss_cleanup_handler`.
+
+**Confidence:** HIGH — decompile confirms dual register-pair + byte-half merge
+pattern; cross-region callers anchor role-switch and eSCO setup paths.
+
+Region unnamed count after this pass: **239** (240 minus this rename).
+
+**Next:** Pass 7t — cold-triage next rank-1 unnamed in region `0x80010000`.

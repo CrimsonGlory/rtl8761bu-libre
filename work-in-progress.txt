@@ -14569,8 +14569,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7r;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7s: cold-triage next rank-1
-          unnamed function in region `0x80010000` (240 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7s (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800140d8`→`write_hw_register_by_conn_cc_index_byte_half`
+          (122B, HIGH). Conn `byte_0xCC`-indexed BB register pair writer: selectors
+          0–1→reg `0x50`/`DAT_8001415c`, 2–3→reg `0x192`/`DAT_80014154`; even=
+          low-byte, odd=high-byte merge; commit via `PTR_DAT_80014158`. 7 xref_in
+          including role-switch/eSCO setup cluster. 239 unnamed remain; live named
+          2185.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7s;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7t: cold-triage next rank-1
+          unnamed function in region `0x80010000` (239 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
