@@ -10052,8 +10052,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (95);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (96): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (217 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (96) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002b65c`→
+          `finalize_hw_crypto_slot_table_entry_and_set_exception_handler` (130B, HIGH) —
+          HW crypto slot-table finalizer: iterates 1/3 dword entries, logs on negative
+          value, masks/ORs state bits, ORs `exception_handler_save_regs_and_dispatch`;
+          xref_in=2; caller `FUN_80053cec` crypto-engine programming path;
+          via `RenamePass6Region80020000Fun8002b65c.java`, `renamed=1`, live-verified.
+          216 unnamed remain; live named 1705.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (96);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (97): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (216 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -3585,4 +3585,32 @@ Pass 5's `wrap_send_LMP_NOT_ACCEPTED` / `wrap_send_LMP_ACCEPTED_and_some_other_t
 
 Region unnamed count after this pass: **217** (218 minus this rename). Live named **1704** global.
 
+**Next:** superseded by Pass 6 continuation (96).
+
+## Pass 6 continuation (96) (2026-07-01) — HW crypto slot finalizer `FUN_8002b65c`
+
+Decompiled and renamed:
+**`FUN_8002b65c` → `finalize_hw_crypto_slot_table_entry_and_set_exception_handler`**
+(130B, HIGH) via `RenamePass6Region80020000Fun8002b65c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (130B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=217` at pass start). Tied at 130B with
+`FUN_80023618`; selected first-listed. HW crypto-engine slot-table finalizer — counterpart
+to slot programming in region `0x80050000` (`FUN_80053cec` acquire→program→release path).
+
+**Mechanism:** `param_1` selects slot index/mode. When `param_1==0`, iterates 3 slot
+entries; otherwise 1 entry at `(uVar6+param_1)` in dword table `DAT_8002b6e0`. For each
+entry: if value has sign bit set, logs via `possible_logging_function__var_args`; when
+`param_1!=3`, masks entry with `DAT_8002b6ec` and ORs state bits from
+`PTR_DAT_8002b6e8[0xa8]&3` at bit 22; always ORs in
+`exception_handler_save_regs_and_dispatch` pointer from literal pool.
+
+**Callers:** xref_in=2 — includes `FUN_80053cec` (crypto-engine slot programming release
+path, region `0x80050000` Pass 11).
+
+**Confidence:** HIGH — slot-table finalize + exception-handler install pattern clear;
+sibling cluster of `compute_slot_table_base_ptr_by_type` / `release_active_slot_bitmask`.
+
+Region unnamed count after this pass: **216** (217 minus this rename). Live named **1705** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
