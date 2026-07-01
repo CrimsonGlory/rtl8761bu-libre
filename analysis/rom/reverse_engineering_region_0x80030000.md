@@ -8528,5 +8528,34 @@ unambiguous; aligns with `0x800333xx` packet-type cluster.
 Region unnamed count after this pass: **15** (16 minus this rename). Live named
 **2151** global.
 
-**Next:** Pass 276 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 276.
+
+## Pass 276 (2026-07-01) — config-bit6-gated HW reg 0x23 hook `FUN_800392d4`
+
+Fresh `ListUnnamed80030000.java` re-run: **15 unnamed** remain in region
+(unchanged from Pass 275; xref_in=0 tier dominates — rank-1 is `FUN_800392d4`
+at 30B, wins on size over tied 26B siblings `FUN_8003b6dc`/`FUN_800399c4`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800392d4` → `read_modify_write_hw_reg_0x23_bits5_7_if_config_byte1_bit6_set`**
+(30B, HIGH, UTILITY-tier) via
+`RenamePass276Region80030000Fun800392d4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-bit6-gated optional hook: when `PTR_DAT_800392f4[1]` bit 6
+(`0x40`) set, calls Pass 205's
+`read_modify_write_hw_reg_0x23_set_bits5_7_from_3bit_param` with config byte at
+offset `0x30` to program bits 5-7 of HW/VSC register `0x23`. Sibling of Pass
+224's `read_modify_write_hw_reg_0x22_bits7_9_if_config_byte1_bit2_set` and Pass
+225's `read_modify_write_hw_reg_0x18_bits14_15_if_config_byte1_bit4_set` in the
+`0x800392xx` BB register-config init cluster.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 30B decompile; config-gate + callee semantics
+unambiguous; matches Pass 205 caller description.
+
+Region unnamed count after this pass: **14** (15 minus this rename). Live named
+**2152** global.
+
+**Next:** Pass 277 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
