@@ -3820,4 +3820,35 @@ dispatcher at `FUN_800218c0` routes mode 0x01→this fn, mode 0x02→priority re
 
 Region unnamed count after this pass: **210** (211 minus this rename). Live named **1711** global.
 
+**Next:** superseded by Pass 6 continuation (103).
+
+## Pass 6 continuation (103) (2026-07-01) — stop-encryption NOT ACCEPTED recovery `FUN_80027b9c`
+
+Decompiled and renamed:
+**`FUN_80027b9c` → `handle_lmp_stop_encryption_req_not_accepted`**
+(124B, HIGH) via `RenamePass6Region80020000Fun80027b9c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (124B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=210` at pass start). Sibling in the
+`0x80027bxx` LMP NOT ACCEPTED alt-recovery cluster — complements
+`handle_lmp_encryption_mode_req_not_accepted` and the start/key-size recovery handlers
+at `0x80027b28`/`0x80027ccc`.
+
+**Mechanism:** LMP STOP ENCRYPTION REQ (opcode 0x12) NOT ACCEPTED recovery handler.
+Per-connection `big_ol_struct[slot]` lookup; role-gated via
+`ret_bool_based_on_crypto_struct_0x50` vs LMP message bit `param_1+4 & 1`, with global
+flag `PTR_DAT_80027c1c[2] & 0x80` bypass. When crypto sub-state `+1 == 'A'` and gate
+passes: calls `sometimes_called_with_0_3_0` (mode 0 = disable encryption), then
+`finalize_stop_encryption_procedure_and_notify_hci`; sets crypto `+0x212` when `+0x214`
+flag active.
+
+**Callers:** `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` (rejected
+opcode `0x12` path) — xref_in=1.
+
+**Confidence:** HIGH — decompile confirms established NOT ACCEPTED recovery idiom;
+callees `sometimes_called_with_0_3_0` and `finalize_stop_encryption_procedure_and_notify_hci`
+already HIGH; sits in documented alt-dispatch table at rejected opcode `0x12`.
+
+Region unnamed count after this pass: **209** (210 minus this rename). Live named **1712** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

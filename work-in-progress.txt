@@ -10127,8 +10127,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (102);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (103): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (210 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (103) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80027b9c`→`handle_lmp_stop_encryption_req_not_accepted`
+          (124B, HIGH). LMP STOP ENCRYPTION REQ (0x12) NOT ACCEPTED recovery: role-gated
+          via `ret_bool_based_on_crypto_struct_0x50`, disables encryption + finalizes stop
+          procedure; caller `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode`.
+          209 unnamed remain; live named 1712.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (103);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (104): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (209 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
