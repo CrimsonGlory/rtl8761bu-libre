@@ -1171,4 +1171,30 @@ interpreter integration already noted in patch-installer analysis.
 
 Region unnamed count after this pass: **243** (244 minus this rename). Live named **1923** global.
 
-**Next:** Pass 46 — cold-triage rank-2 `FUN_8003c5b8` (46B, masked indexed-read sibling in `0x8003c6xx` cluster).
+**Next:** superseded by Pass 46.
+
+## Pass 46 (2026-07-01) — masked indexed BB register read `FUN_8003c5b8`
+
+Decompiled and renamed rank-2 cold-triage target:
+**`FUN_8003c5b8` → `read_indexed_bb_register_low16_with_mask_and_poll`**
+(46B, HIGH) via `RenamePass46Region80030000Fun8003c5b8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked indexed baseband register read with global mask and poll.
+No optional hook (unlike Pass 45's `read_indexed_bb_register_low16_by_byte_index`).
+Disables interrupts, writes
+`((subfield & 0x3f) << 0x10 | (index & 0xff) << 0x16) & DAT_8003c600` to
+MMIO `DAT_8003c604`, calls `FUN_800092dc()` (empty poll/wait stub), reads back,
+re-enables interrupts, returns low 16 bits. Masked sibling of Pass 45's unmasked
+read; write-side counterpart is unnamed `FUN_8003c608` at `PTR_DAT_8003c67c`.
+
+**Callers:** register-script interpreter (`0x8003aea0`) callee per patch-installer
+analysis; no direct xrefs resolved via MCP `xrefs_to` (likely indirect/script-table
+dispatch).
+
+**Confidence:** HIGH — clear IRQ-masked MMIO index-select + mask + poll idiom;
+structural sibling of Pass 45's documented read primitive; register-script
+interpreter integration already noted.
+
+Region unnamed count after this pass: **242** (243 minus this rename). Live named **1924** global.
+
+**Next:** Pass 47 — cold-triage rank-2 `FUN_8003c608` (write-side sibling in `0x8003c6xx` cluster).
