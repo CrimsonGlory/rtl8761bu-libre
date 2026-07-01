@@ -9929,4 +9929,32 @@ match adjacent HCI-event/QoS helpers).
 
 Region unnamed count after this pass: **4** (5 minus this rename). Live named **1917** global.
 
+**Next:** superseded by Pass 6 continuation (309).
+
+## Pass 6 continuation (309) (2026-07-01) — three-slot descriptor global flag getter `FUN_8002adac`
+
+Decompiled and renamed:
+**`FUN_8002adac` → `get_three_slot_descriptor_global_flag_byte`**
+(10B, HIGH) via `RenamePass6Region80020000Fun8002adac.java` (`renamed=1`, live-verified).
+
+**Triage note:** All 4 remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_8002adac` (10B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=4` at pass start). Sits in the ACL
+three-slot-descriptor cluster between Pass 6 cont. (123)'s
+`init_three_slot_0x34_linked_descriptors_and_clear_buffers` at `0x8002ad30` and Pass 6 cont. (288)'s
+`lookup_acl_reassembly_gate_byte_for_link_substate2_or_default1` at `0x8002adbc`.
+
+**Mechanism:** Returns global flag byte `*PTR_DAT_8002adb8` where the literal-pool pointer at
+`0x8002adb8` resolves to `PTR_DAT_8002ada0` — the same global byte cleared to zero by
+`init_three_slot_0x34_linked_descriptors_and_clear_buffers` during boot init. Minimal
+PC-relative indirect-byte getter thunk.
+
+**Callers:** none (xref_in=0; orphan getter — likely inlined tail-call target or dead
+compile-time helper extracted as standalone thunk).
+
+**Confidence:** HIGH for mechanism (unambiguous indirect-byte load); MEDIUM for role (orphan with
+no proven call sites, but pointer target and cluster placement match documented init sibling).
+
+Region unnamed count after this pass: **3** (4 minus this rename). Live named **1918** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
