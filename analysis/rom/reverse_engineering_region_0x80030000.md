@@ -4352,5 +4352,41 @@ family.
 Region unnamed count after this pass: **147** (148 minus this rename). Live named
 **2019** global.
 
-**Next:** Pass 144 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 144.
+
+## Pass 144 (2026-07-01) — `flush_armed_esco_codec_slots_up_to_12_and_apply`
+
+Fresh `ListUnnamed80030000.java` re-run: **147 unnamed** remain in region
+(unchanged from Pass 143; rank-1 at xref=1 tier is `FUN_800361e4` at 184B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800361e4` → `flush_armed_esco_codec_slots_up_to_12_and_apply`**
+(184B, HIGH, HANDLER-tier) via
+`RenamePass144Region80030000Fun800361e4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** 12-slot eSCO codec-slot flush sweep on `the_0x300` timer cluster,
+gated on `field_0x175` (timer-active byte). Clears `field_0x175` on entry, then
+iterates slots 0..11: resolves per-slot connection index from
+`PTR_DAT_800362a0[slot*8+3]`, and when gate byte `PTR_DAT_800362a4[slot]==1`,
+IRQ-disables and dispatches `FUN_80014450` + `FUN_80014dac` codec-config apply
+pair on `big_ol_struct[conn_index]`. When `the_0x300.int_0x10 != 0` and status
+halfwords at `DAT_800362ac`/`DAT_800362b0` have bits `0x200`/`0x10` set,
+issues a second `FUN_80014dac` with halved ceiling. 12-way sweep variant of
+Pass 143's per-connection indexed stepper
+`step_conn_esco_codec_counter_and_apply_if_gate_armed`; flush callee of
+`arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots` (Pass 55).
+
+**Callers:** 1 xref-in (per `ListUnnamed80030000`; `find_callers` empty — known
+MIPS16e indirect-call limitation) — documented caller
+`arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots` at `0x800362b4`.
+
+**Confidence:** HIGH — full 184B decompile; gate-byte + codec-apply pair matches
+Pass 55/118/143 eSCO slot cluster; 12-slot sweep loop and `field_0x175` clear
+confirmed.
+
+Region unnamed count after this pass: **146** (147 minus this rename). Live named
+**2020** global.
+
+**Next:** Pass 145 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

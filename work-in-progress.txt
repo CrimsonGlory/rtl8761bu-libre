@@ -13019,7 +13019,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 143;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 144: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 144 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (147 unnamed); decompiled+renamed rank-1
+          `FUN_800361e4`→`flush_armed_esco_codec_slots_up_to_12_and_apply`
+          (184B, HIGH, HANDLER-tier). 12-slot eSCO codec flush sweep gated on
+          `the_0x300.field_0x175`; gate-armed `FUN_80014450`/`FUN_80014dac`
+          apply; caller `arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots`.
+          146 unnamed remain; live named 2020.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 144;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 145: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
