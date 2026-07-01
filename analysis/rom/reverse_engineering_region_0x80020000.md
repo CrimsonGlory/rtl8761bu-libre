@@ -1505,7 +1505,7 @@ slot index at crypto struct `+0x213`. Classifies IO-capability pairing method vi
 reference tables may normalize `+0x1e5` to `3`. Dispatches by classifier result:
 - `0` → numeric-comparison path (`FUN_80025fb4` — HCI events `0x2a`/`0x2f`)
 - `1` → passkey path (`dispatch_ssp_user_passkey_request_or_notification` — User Passkey Request/Notification)
-- `2` → OOB path (`FUN_800263e4` — Remote OOB Data Request)
+- `2` → OOB path (`dispatch_ssp_remote_oob_data_request_hci` — Remote OOB Data Request)
 
 **Callers:** 2 sites at `0x800266ea` and `0x80026804` in Ghidra-unbounded code
 immediately after `call_send_evt_HCI_Simple_Pairing_Complete` (SSP-complete cluster).
@@ -3912,5 +3912,36 @@ Pass 6 cont. (39)/(41); xref_in=2.
 HIGH-named subtract primitives that reference this helper by role in prior passes.
 
 Region unnamed count after this pass: **207** (208 minus this rename). Live named **1714** global.
+
+**Next:** superseded by Pass 6 continuation (106).
+
+## Pass 6 continuation (106) (2026-07-01) — SSP OOB HCI dispatcher `FUN_800263e4`
+
+Decompiled and renamed:
+**`FUN_800263e4` → `dispatch_ssp_remote_oob_data_request_hci`**
+(120B, HIGH) via `RenamePass6Region80020000Fun800263e4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (120B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=207` at pass start). Sits in the
+`0x800263xx` SSP pairing-method dispatch cluster alongside
+`dispatch_ssp_user_passkey_request_or_notification` (`0x800260f4`).
+
+**Mechanism:** SSP OOB pairing-method HCI dispatcher (IO-cap method `2` path from
+`dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook`). Resolves connection slot,
+clears crypto pending state via `FUN_80026050`, primes OOB response flags at
+`+0x1e6`/`+0x1e7`, then role-gates on `crypto+0x50`: master with no local OOB
+(`+0x1df==0`) calls `FUN_80025980` (sub-state 3) and arms status `0x25`; master
+with OOB sends `send_evt_HCI_Remote_OOB_Data_Request` and arms `0x23`; slave
+without OOB arms `0x27`; slave with OOB sends the same HCI event and arms `0x26`.
+All paths exit via `set_arg1_1_to_arg2`.
+
+**Caller:** `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` — xref_in=1,
+documented in Pass 6 cont. (30) as the `2` → OOB path.
+
+**Confidence:** HIGH — decompile matches documented SSP pairing-method dispatch
+table; HCI event and status-byte assignments align with sibling passkey/numeric
+dispatchers; sole caller already HIGH-named.
+
+Region unnamed count after this pass: **206** (207 minus this rename). Live named **1715** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

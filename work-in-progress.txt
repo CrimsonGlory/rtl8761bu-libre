@@ -10156,8 +10156,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (105);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (106): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (207 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (106) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800263e4`→`dispatch_ssp_remote_oob_data_request_hci`
+          (120B, HIGH). SSP OOB pairing-method HCI dispatcher: role-gated Remote OOB
+          Data Request event + status 0x23/0x25/0x26/0x27; caller
+          `dispatch_ssp_pairing_method_via_lmp_0x266_dhkey_hook` (method 2 path).
+          206 unnamed remain; live named 1715.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (106);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (107): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (206 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
