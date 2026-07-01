@@ -3408,5 +3408,32 @@ semantics confirmed via live decompile of parent dispatchers.
 Region unnamed count after this pass: **175** (176 minus this rename). Live named
 **1991** global.
 
-**Next:** Pass 116 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+## Pass 116 (2026-07-01) — `build_16bit_inclusive_bit_range_mask`
+
+**Method:** Fresh `ListUnnamed80030000` re-rank → **174 unnamed** remain
+(unchanged from Pass 115 pre-rename list; rank-1 at xref=2 tier was
+`FUN_80038f6c` at 44B — largest among seven tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038f6c` → `build_16bit_inclusive_bit_range_mask`**
+(44B, HIGH, SIMPLE-tier) via `RenamePass116Region80030000Fun80038f6c.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Inclusive 16-bit bit-range mask builder: loops from
+`param_1` through `param_2` (byte-truncated), OR-ing `1 << bit` into a
+`0xffff`-clamped accumulator. Pure utility with no side effects.
+
+**Callers:** 2 xref-in (both COMPUTED_CALL from patch `FUN_801103d4` at
+`0x801104be`/`0x801104ca`) — invoked via `DAT_80110520` fptr to build
+3-bit subfield masks (`local_18`..`local_34`, spans 0–2/3–5/6–8/9–11)
+that are AND-merged into HW-channel register writes during per-link
+packet-type programming.
+
+**Confidence:** HIGH — fully decompiled 44B; loop semantics unambiguous;
+caller context confirmed via patch-side decompile of `FUN_801103d4`.
+
+Region unnamed count after this pass: **174** (175 minus this rename). Live named
+**1992** global.
+
+**Next:** Pass 117 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
