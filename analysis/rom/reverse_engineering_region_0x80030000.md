@@ -7822,5 +7822,39 @@ and bitmask clear at `+0x10`/`+2` match documented configure/dealloc cluster.
 Region unnamed count after this pass: **39** (40 minus this rename). Live named
 **2127** global.
 
-**Next:** Pass 252 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 252.
+
+## Pass 252 (2026-07-01) — BB reg 0x111 bit2 + regscript invoke `FUN_8003b170`
+
+Fresh `ListUnnamed80030000.java` re-run: **39 unnamed** remain in region
+(unchanged from Pass 251; xref_in=0 tier dominates — rank-1 is `FUN_8003b170`
+at 84B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b170` → `or_bb_reg_0x111_bit2_delay_invoke_regscript_from_context_0x68_0x6c`**
+(84B, HIGH, HANDLER-tier) via
+`RenamePass252Region80030000Fun8003b170.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script interpreter cluster callee in the `0x8003b1xx`
+TX-power / literal-pool neighborhood. When `DAT_8012023e` bit 2 (`0x4`) set,
+optionally calls config hook `called_if_config_1__4` gated on bit 1 (`0x2`).
+Reads BB reg `0x111` via `FUN_800115c8`, ORs bit 2 and writes back via
+`FUN_80011608`, spins `spin_delay_10x_iterations(0x19)`, then invokes hook
+fptr at `DAT_801205b4` (`register_script_interpreter` / `FUN_8003aea0`)
+with `(script_ptr, num_halfwords)` from RAM context offsets `+0x68`/`+0x6c`
+(referenced via literal pool `iRam8003b1c8`). BB-reg prep + delay before
+regscript dispatch — sibling of thin `invoke_register_script_from_global_context_*`
+wrappers but with explicit `0x111` bit-2 strobe first.
+
+**Callers:** 0 xref-in (consistent with indirect register-script interpreter
+dispatch table).
+
+**Confidence:** HIGH — full 84B decompile; `0x111` RMW bit-2, fixed delay,
+and `DAT_801205b4` hook invoke with `+0x68`/`+0x6c` context pair match
+documented register-script cluster.
+
+Region unnamed count after this pass: **38** (39 minus this rename). Live named
+**2128** global.
+
+**Next:** Pass 253 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
