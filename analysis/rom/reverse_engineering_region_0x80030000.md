@@ -8356,5 +8356,34 @@ mirror Pass 72's subtract helper; same `+0x35` baseline offset pattern.
 Region unnamed count after this pass: **21** (22 minus this rename). Live named
 **2145** global.
 
-**Next:** Pass 270 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 270.
+
+## Pass 270 (2026-07-01) — status-bit wrapper `FUN_80038f98`
+
+Fresh `ListUnnamed80030000.java` re-run: **21 unnamed** remain in region
+(unchanged from Pass 269; xref_in=0 tier dominates — rank-1 is `FUN_80038f98`
+at 38B, wins on address over tied 36B siblings).
+
+Decompiled and renamed rank-1 cold-triage target (caller side documented Pass
+157 but remained `FUN_*` in Ghidra until this pass):
+**`FUN_80038f98` → `copy_status_byte_to_config_if_bit0x20_then_dispatch_bb_reg_pulse`**
+(38B, HIGH, UTILITY-tier) via
+`RenamePass270Region80030000Fun80038f98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin status-byte-gated config copy + fptr dispatch wrapper in the
+`0x80038fxx` BB register-config cluster: when status byte at `PTR_DAT_80038fc0`
+bit `0x20` is set, copies byte at offset `0x25` into
+`config_base->field1020_0x408`; always tail-calls through `PTR_PTR_80038fc8` to
+`config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays` (Pass 157). Caller-side
+complement closing the documentation-vs-Ghidra naming gap for Pass 157's callee.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 38B decompile; status-bit `0x20` gate and fptr
+dispatch to Pass 157 callee unambiguous; closes caller-side naming gap.
+
+Region unnamed count after this pass: **20** (21 minus this rename). Live named
+**2146** global.
+
+**Next:** Pass 271 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
