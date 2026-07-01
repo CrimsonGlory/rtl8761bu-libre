@@ -5873,5 +5873,37 @@ documented link-mode-commit cluster; sole caller confirmed via
 Region unnamed count after this pass: **101** (102 minus this rename). Live named
 **2065** global.
 
-**Next:** Pass 190 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 190.
+
+## Pass 190 (2026-07-01) — config-flag dispatcher `FUN_8003aa20`
+
+Fresh `ListUnnamed80030000.java` re-run: **101 unnamed** remain in region
+(unchanged from Pass 189; rank-1 by size at xref=1 tier is `FUN_8003aa20` at
+68B — tied with three 68B siblings, first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003aa20` → `dispatch_config_flag_bit2_afh_or_fptr_pair_store_status_byte`**
+(68B, HIGH, HANDLER-tier) via
+`RenamePass190Region80030000Fun8003aa20.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-flag dispatcher in the `0x8003aaxx` register-script
+cluster (caller of Pass 174's
+`program_afh_channel_map_16ch_at_offset_20_with_bb_reg_0xe_bracket`). When
+`PTR_DAT_8003aa64` bit2 (`0x4`) is set, calls the AFH channel-map programmer
+then copies `pbVar1[0x25]` as status byte; else invokes two hook fptrs at
+`PTR_DAT_8003aa70` and `PTR_PTR_8003aa74` (first passes context fields from
+`PTR_PTR_8003aa6c`), then reads status from `PTR_DAT_8003aa78[8]`. Stores
+result to `PTR_DAT_8003aa68[1]`.
+
+**Callers:** 1 xref-in — patch RAM `0x8011059e` COMPUTED_CALL (register-script
+interpreter dispatch path; indirect call, no named enclosing function).
+
+**Confidence:** HIGH — full 68B decompile; config-flag bit2 gate and AFH callee
+already HIGH-named from Pass 174; dual-fptr fallback path matches register-script
+cluster idiom; sole xref confirmed via `ListXrefsTo8003aa20`.
+
+Region unnamed count after this pass: **100** (101 minus this rename). Live named
+**2066** global.
+
+**Next:** Pass 191 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
