@@ -7180,5 +7180,33 @@ pattern unambiguous; naming mirrors Pass 135/216/229/230 siblings.
 Region unnamed count after this pass: **59** (60 minus this rename). Live named
 **2107** global.
 
-**Next:** Pass 232 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 232.
+
+## Pass 232 (2026-07-01) — Global ushort high-nibble reader `FUN_8003b55c`
+
+Fresh `ListUnnamed80030000.java` re-run: **59 unnamed** remain in region
+(unchanged from Pass 231; rank-1 at xref=1 tier is `FUN_8003b55c` at 20B —
+largest among tied 20B xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b55c` → `read_high_nibble_from_global_ushort_at_DAT_8003b570`**
+(20B, HIGH, SIMPLE-tier) via
+`RenamePass232Region80030000Fun8003b55c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin global ushort accessor in the `0x8003b5xx` BB register cluster.
+Loads pointer `DAT_8003b570`, returns `(*puVar1) >> 0xc` — extracts bits 15:12
+(high nibble) from the global ushort. Sibling of
+`write_indexed_bb_register_low16_with_global_mask` (Pass 48, uses `DAT_8003b5e4`
+mask component in dword composition).
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 20B decompile; `>>0xc` high-nibble extract
+unambiguous; cluster placement beside Pass 48 BB register write primitive.
+
+Region unnamed count after this pass: **58** (59 minus this rename). Live named
+**2108** global.
+
+**Next:** Pass 233 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
