@@ -4036,4 +4036,36 @@ alt-dispatch table at rejected opcode `0x08`.
 
 Region unnamed count after this pass: **203** (204 minus this rename). Live named **1718** global.
 
+**Next:** superseded by Pass 6 continuation (110).
+
+## Pass 6 continuation (110) (2026-07-01) — ACL reassembly pending-ring drainer `FUN_8002a270`
+
+Decompiled and renamed:
+**`FUN_8002a270` → `drain_acl_reassembly_pending_ring_by_slot_and_release_buffers`**
+(116B, HIGH) via `RenamePass6Region80020000Fun8002a270.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (116B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=203` at pass start). Sibling in the
+`0x8002a2xx` HCI ACL fragment reassembly cluster alongside
+`hci_acl_data_fragment_assembler_and_enqueue` (`0x8002a3d8`) and
+`HCI_EVT_0x1fd_FUN_8002a334` (`0x8002a334`).
+
+**Mechanism:** Per-slot (0–3) drain of the 16-entry ACL reassembly pending ring at
+`PTR_DAT_8002a2e4` (same `0x44`-stride descriptor table written by the assembler at
+`PTR_DAT_8002a864`). While read index `+0x41` != write index `+0x40` and count `+0x42`
+nonzero: pops buffer pointer from ring slot, calls
+`wraps_uninteresting_if_0x80100000__0_which_its_not_in_my_tests` to release/wrap it,
+advances read index (`+1 & 0xf`), decrements count and global pending counter at `+0xce`.
+On exit clears all four ring control bytes (`+0x40`–`+0x43`) for the slot.
+
+**Caller:** `hci_acl_data_fragment_assembler_and_enqueue` — invoked when a per-handle
+pending flag is cleared before continuing fragment accumulation (conn handle slot from
+`byte@+0x1a >> 6 & 3`).
+
+**Confidence:** HIGH — decompile matches documented assembler enqueue path (same ring
+layout, mask `0xf`, `wraps_uninteresting` release callee); sole direct caller confirmed;
+complements `HCI_EVT_0x1fd` forward-drain on the same descriptor table.
+
+Region unnamed count after this pass: **202** (203 minus this rename). Live named **1719** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
