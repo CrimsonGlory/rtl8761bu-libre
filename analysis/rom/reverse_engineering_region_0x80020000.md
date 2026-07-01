@@ -4372,4 +4372,35 @@ init/teardown cluster.
 
 Region unnamed count after this pass: **192** (193 minus this rename). Live named **1729** global.
 
+**Next:** superseded by Pass 6 continuation (121).
+
+## Pass 6 continuation (121) (2026-07-01) — credit-scheduler slot release `FUN_8002bae0`
+
+Decompiled and renamed:
+**`FUN_8002bae0` → `release_credit_scheduler_slot_clear_descriptor_flags`**
+(108B, HIGH) via `RenamePass6Region80020000Fun8002bae0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (108B, xref_in=7) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=192` at pass start). Highest xref_in at
+this size tier — long-documented as the teardown complement of
+`commit_credit_scheduler_slot_hw_arm_descriptor` and callee of
+`role_index_remap_gate_invoke_connection_slot_reuse`.
+
+**Mechanism:** IRQ-masked credit-scheduler slot release for mode index `param_1` (0–12).
+When slot bit is clear in 13-bit free-mask at `PTR_DAT_8002bb4c+0x9c` (slot allocated),
+sets the bit (marks free) and clears per-slot descriptor flags in the 0xc-stride table:
+`+5` bit0 (in-use), `+4` low 2 bits, `+9` bits 1–3, `+7` bits 2–3. Inverse of
+`alloc_credit_scheduler_slot_0xd` (which clears mask bit and sets `+5` bit0).
+
+**Callers:** 7 xref_in including `role_index_remap_gate_invoke_connection_slot_reuse`
+(`0x8002bb50`), `page_response_timing_and_afh_update_counters` (`0x80002048`,
+region `0x80000000`), and `status_word_multiflag_link_event_dispatcher` (`0x80002488`,
+region `0x80000000`) — link-quality/role-switch/teardown and page-response paths.
+
+**Confidence:** HIGH — decompile confirms 13-slot (`<0xd`) bitmask + 0xc-stride table
+idiom matching `alloc_credit_scheduler_slot_0xd`/`commit_credit_scheduler_slot_hw_arm_descriptor`;
+prior Pass 6 cont. (49)/(54) caller documentation aligns with slot-reuse/teardown semantics.
+
+Region unnamed count after this pass: **191** (192 minus this rename). Live named **1730** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

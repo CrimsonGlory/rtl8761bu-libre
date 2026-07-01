@@ -10300,8 +10300,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (120);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (121): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (192 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (121) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002bae0`→
+          `release_credit_scheduler_slot_clear_descriptor_flags`
+          (108B, HIGH). IRQ-gated 13-slot credit-scheduler release: sets free-mask
+          bit at `PTR_DAT_8002bb4c+0x9c`, clears 0xc-stride descriptor flags;
+          complement of `alloc_credit_scheduler_slot_0xd`; callers include
+          `role_index_remap_gate_invoke_connection_slot_reuse`. 191 unnamed remain;
+          live named 1730.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (121);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (122): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (191 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
