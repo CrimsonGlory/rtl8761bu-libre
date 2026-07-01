@@ -2291,9 +2291,10 @@ tier after Pass 108 cleared `FUN_80018dcc`). Decompiled and renamed:
 live-verified).
 
 **Mechanism:** Thin sync-connection setup gate in the `0x800190xx` cluster
-(sibling of `FUN_80018f38` feature-page validator and Pass 108's
-`reject_lmp_sco_link_req_0x2b_not_accepted_and_cleanup`). Delegates to
-`FUN_80018f38(conn_index)`; when that returns 0 (validation OK) and the
+(sibling of `validate_sync_conn_feature_page_capability_and_encode_field_c4`
+and Pass 108's `reject_lmp_sco_link_req_0x2b_not_accepted_and_cleanup`).
+Delegates to `validate_sync_conn_feature_page_capability_and_encode_field_c4(conn_index)`;
+when that returns 0 (validation OK) and the
 connection-record status byte at `param_2+0xe` equals **0x03**, overrides
 return to **0x12** (HCI Command Disallowed).
 
@@ -2627,4 +2628,37 @@ link-mode-change commit paths.
 
 Region unnamed count after this pass: **191** (192 minus this rename).
 
-**Next:** Pass 121 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 121.
+
+## Pass 121 (2026-07-01) — Sync-conn feature-page validator `FUN_80018f38`
+
+Pass 121 target from cold-triage rank-1 (2 xref_in, 222B — largest at xref=2
+tier after Pass 120 cleared `FUN_80012af8`). Decompiled and renamed:
+**`FUN_80018f38` → `validate_sync_conn_feature_page_capability_and_encode_field_c4`**
+(222B, HIGH) via `RenamePass121Region80010000Fun80018f38.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Core sync-connection (eSCO/SCO) feature-page capability validator
+in the `0x800190xx` cluster (sibling of Pass 109's
+`validate_sync_conn_feature_page_and_reject_conn_status_0x03` wrapper). Reads
+packet-type flags from `param_2+10` (low bits `&3` = link-type index, bits
+`0x100`/`0x200` = EV3/2-EV3 class flags). When both `0x300` bits are not set,
+compares global feature page `PTR_some_feature_page_base_80019018` against
+per-connection page `big_ol_struct[conn]._xe3_features_pages_array_0_` for the
+requested link-type bit; returns **0x1a** (Unsupported Feature) when conn page
+lacks capability. On match: logs via `possible_logging_function__var_args`
+(class `0x313`/event `0x948`), calls `FUN_80013f0c` to encode packet-type/state
+bits into conn-record `field_0xc4`, returns **0** when `FUN_80013f0c` succeeds
+and `*(ushort*)(param_2+8) > 3`, else **0x12** (Command Disallowed).
+
+**Callers:** 2 xref_in per `ListXrefsTo80018f38.java` —
+`validate_sync_conn_feature_page_and_reject_conn_status_0x03` (eSCO setup gate)
+and `FUN_800194a0` (sync-conn reject path at `0x800194ac`).
+
+**Confidence:** HIGH — decompile confirms dual global+per-conn feature-page bit
+test with HCI error codes; callers sit on documented sync-conn setup chain
+(Pass 108–109 cluster).
+
+Region unnamed count after this pass: **190** (191 minus this rename).
+
+**Next:** Pass 122 — cold-triage next rank-1 unnamed in region `0x80010000`.
