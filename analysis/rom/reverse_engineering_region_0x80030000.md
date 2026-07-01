@@ -1417,7 +1417,7 @@ call pairs: `0x1c00→0xc000` (eSCO→max-rate-SCO), `0xc000→0x1c00`
 (SCO→max-rate-SCO).
 
 **Callers:** 4 direct call sites via `find_callers`:
-`conn_event_packet_type_update_and_reschedule`, `FUN_800366cc`,
+`conn_event_packet_type_update_and_reschedule`, `apply_conn_class_mode_afh_role_remap_and_esco_ptype`,
 `recompute_and_commit_conn_slot_timing_hw_and_packet_types`, and
 `sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
 (region `0x80040000` Pass 52cp). Sibling of
@@ -2129,5 +2129,39 @@ page/inquiry/LMP-0x25c/HW-channel commit paths.
 Region unnamed count after this pass: **215** (216 minus this rename). Live named
 **1951** global.
 
-**Next:** Pass 76 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 76.
+
+## Pass 76 (2026-07-01) — conn class-mode apply `FUN_800366cc`
+
+Fresh `ListUnnamed80030000.java` re-run: **215 unnamed** remain in region
+(unchanged from Pass 75; rank-1 by size at xref=3 tier is `FUN_800366cc` at
+252B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800366cc` → `apply_conn_class_mode_afh_role_remap_and_esco_ptype`**
+(252B, HIGH) via `RenamePass76Region80030000Fun800366cc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Conn-slot class-mode apply helper on `big_ol_struct` indexed by
+`param_1`. Optional prelude hook at `PTR_DAT_800367c8` — if installed and
+returns non-zero, skip default path. Otherwise: `LMP__25C_called2()`;
+`remap_role_index_to_esco_slot_if_pending`; HW/LMP housekeeping via
+`FUN_800140d8`/`FUN_800143b0`/`FUN_80014dac`; when global `PTR_DAT_800367d0`
+bit `0x8` set, calls `dispatch_lmp_268_timers_with_hook_and_config_gates`;
+`clear_afh_lap_channel_map_for_matching_group`; when `bdaddr_random_==1`,
+programs eSCO packet type via `program_packet_type_if_stored_matches_expected`
+(`0xc000→0x1c00`); decrements `PTR_struct_of_at_least_0x300_size_800367d8`
+counter `field_0x186`; logging via `possible_logging_function__var_args` +
+`possible_logger_called_if_no_patch3`. Sibling of
+`conn_class_mode_apply_and_log` success-path AFH/role-remap cluster.
+
+**Callers:** 3 xref-in (rank-1 by size at xref=3 tier).
+
+**Confidence:** HIGH — full 252B decompile; named callees anchor AFH LAP clear,
+role remap, LMP-0x268 timer dispatch, and eSCO packet-type programming paths.
+
+Region unnamed count after this pass: **214** (215 minus this rename). Live named
+**1952** global.
+
+**Next:** Pass 77 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
