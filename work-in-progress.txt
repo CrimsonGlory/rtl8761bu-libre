@@ -11486,8 +11486,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (251);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (252): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (61 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (252) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80021da0`→
+          `init_lc_global_psm_qos_enable_and_default_timing_intervals`
+          (40B, HIGH). LC global `struct_of_at_least_0x300_size` init: clears
+          `0x17c`–`0x180`, sets `field_0x181=1` (PSM/QoS enable), seeds ushort
+          pair `0x28`/`0x2a` to 16000; caller `init_inquiry_page_state_from_config`;
+          xref_in=1; 60 unnamed remain; live named 1861.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (252);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (253): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (60 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

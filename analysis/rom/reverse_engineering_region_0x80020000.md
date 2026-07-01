@@ -8299,4 +8299,35 @@ debug-mode command router alongside sibling negative-reply handlers at opcodes
 
 Region unnamed count after this pass: **61** (62 minus this rename). Live named **1860** global.
 
+**Next:** superseded by Pass 6 continuation (252).
+
+## Pass 6 continuation (252) (2026-07-01) — LC global PSM/QoS timing defaults `FUN_80021da0`
+
+Decompiled and renamed:
+**`FUN_80021da0` → `init_lc_global_psm_qos_enable_and_default_timing_intervals`**
+(40B, HIGH) via `RenamePass6Region80020000Fun80021da0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=61` at pass start). First-listed in tied
+40B tier alongside sibling `FUN_80021d00`; sits in the `0x80021dxx` LC-global init cluster
+documented as callee of `init_inquiry_page_state_from_config` (region `0x80060000` Pass 3).
+
+**Mechanism:** Global `struct_of_at_least_0x300_size` (`PTR_struct_of_at_least_0x300_size_80021dc8`)
+initializer fragment: clears five bytes at offsets `0x17c`–`0x180`, sets `field_0x181=1`
+(PSM/QoS enable flag — gates the fast-path template merge documented in region
+`0x80070000`), and seeds adjacent ushort timing fields at `0x28`/`0x2a` to **16000**
+(`0x3E80`). Sibling `FUN_80021d00` (next in rank-1 list) handles EIR/FEC tail fields on
+the same global during the same cold-init tail sequence.
+
+**Callers:** `init_inquiry_page_state_from_config` at `0x80067c4e` — unconditional tail
+call after GIAC LAP seeding and inquiry/page scan defaults programmed; xref_in=1 via
+`ListXrefsTo80021da0.java`.
+
+**Confidence:** HIGH — decompile confirms field-level writes on the documented LC global
+state block; caller decompile shows invocation in the inquiry/page cold-init sequence
+alongside sibling `FUN_80021d00`/`FUN_80021d7c` helpers already flagged in region
+`0x80060000` Pass 3.
+
+Region unnamed count after this pass: **60** (61 minus this rename). Live named **1861** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
