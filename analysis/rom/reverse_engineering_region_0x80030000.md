@@ -2337,5 +2337,36 @@ cross-region caller bodies anchor the LMP power-sample report role.
 Region unnamed count after this pass: **209** (210 minus this rename). Live named
 **1957** global.
 
-**Next:** Pass 82 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 82.
+
+## Pass 82 (2026-07-01) — BB regs 0x188/0x18a mode programmer `FUN_8003c6e8`
+
+Fresh `ListUnnamed80030000.java` re-run: **209 unnamed** remain in region
+(unchanged from Pass 81; rank-1 by size at xref=3 tier is `FUN_8003c6e8` at
+138B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003c6e8` → `program_bb_regs_0x188_0x18a_by_mode_byte_gated_on_config_bit0x10`**
+(138B, HIGH) via `RenamePass82Region80030000Fun8003c6e8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Optional veto hook at `PTR_DAT_8003c774` may skip the body. When
+`config_struct.field452_0x1d0` bit `0x10` is clear, writes status byte at
+`PTR_DAT_8003c784` with `0`; when set, IRQ-masked path selects template ushort
+from `PTR_DAT_8003c780` (`param_1==0`) or `PTR_DAT_8003c77c` (non-zero), writes
+BB registers `0x188` and `0x18a` via hook at `PTR_DAT_8003c788` (second value
+from `PTR_DAT_8003c78c` with `>>1|0x3c0`), then stores `param_1` to status byte.
+Sibling of `hw_register_config_with_timeout` (`0x8003c7cc`) BB-config cluster;
+`FUN_8003c790` calls with `param_1=0` then clears config bit `0x10`.
+
+**Callers:** 3 xref-in (`FUN_8003c790` @ `0x8003c79e`, `FUN_80012820` @
+`0x80012838`, `FUN_80013840` @ `0x800138ae`).
+
+**Confidence:** HIGH — full 138B decompile; BB register pair, config gate, and
+named IRQ-mask callees anchor the baseband register programming role.
+
+Region unnamed count after this pass: **208** (209 minus this rename). Live named
+**1958** global.
+
+**Next:** Pass 83 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
