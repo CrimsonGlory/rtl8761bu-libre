@@ -753,7 +753,7 @@ pending/active and logs via `possible_logger_called_if_no_patch3`; for SCO-type 
 (`*piVar11==5`) with sufficient buffered data, calls a hardware kick fptr. Final block: when a
 "flush" flag (`+0x85`) is set, zeroes out the connection's queue-pointer fields (`+0x70..0x82`)
 — the connection-teardown reset; otherwise, on a different condition, calls
-`FUN_8003e1d4`+`FUN_8002bb50`+optional `FUN_8003e648`+indirect fptr+log (link-supervision-loss
+`drain_connection_packet_completion_ring_and_emit_hci_num_completed`+`FUN_8002bb50`+optional `FUN_8003e648`+indirect fptr+log (link-supervision-loss
 path).
 
 #### 3. `slot_timing_delta_calc_and_log` (0x8003894c, 494B)
@@ -1799,5 +1799,40 @@ pattern and `or_merge_hw_channel_table_entry_and_indexed_dispatch` usage.
 Region unnamed count after this pass: **225** (226 minus this rename). Live named
 **1941** global.
 
-**Next:** Pass 66 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 66.
+
+## Pass 66 (2026-07-01) — connection packet-completion ring drainer `FUN_8003e1d4`
+
+Fresh `ListUnnamed80030000.java` re-run: **225 unnamed** remain in region
+(unchanged from Pass 65; rank-1 by xref count is `FUN_8003e1d4` at 176B,
+4 xref-in — tied at xref=4 tier, wins on size over `FUN_800362f0` 120B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e1d4` → `drain_connection_packet_completion_ring_and_emit_hci_num_completed`**
+(176B, HIGH) via `RenamePass66Region80030000Fun8003e1d4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked drain of the stride-0x88 connection table's
+12-entry (`+0x39` index, wraps at 0xc) packet-completion ring at
+`PTR_DAT_8003e284`. Gated on per-conn `+4==1` (active) and `+0x18!=1`.
+While `+0x3a` pending count nonzero, dispatches each non-null ring slot at
+`(idx+0xe)*4+8` via completion fptr (`PTR_DAT_8003e290`, arg `3`) or patch-hook
+path (`PTR_DAT_8003e28c` when `field_0x179==2`), clears slot, advances index,
+increments `+0x19` completed counter. When `field_0x179==2`, emits
+`send_evt_HCI_Number_Of_Completed_Packets()` after drain. Completion-callback
+sibling of `ACL_fragment_dequeue_and_credit_consumer` on the same table.
+
+**Callers:** 4 xref-in incl. `connection_teardown_finalize_and_reset`
+(link-supervision-loss cleanup chain) and `baseband_event_status_dispatcher_0xd`
+(per-slot config `field+7` bit2 branch).
+
+**Confidence:** HIGH — full 176B decompile; Pass 8 already identified role in
+connection-teardown cleanup chain; decompile confirms ring-buffer drain shape
+matching `ACL_fragment_dequeue_and_credit_consumer` (+0x39/+0x3a fields) and
+HCI Number Of Completed Packets emission path.
+
+Region unnamed count after this pass: **224** (225 minus this rename). Live named
+**1942** global.
+
+**Next:** Pass 67 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -12260,7 +12260,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 65;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 66: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 66 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (225 unnamed); decompiled+renamed rank-1
+          `FUN_8003e1d4`→`drain_connection_packet_completion_ring_and_emit_hci_num_completed`
+          (176B, HIGH). IRQ-masked 12-entry packet-completion ring drain on
+          stride-0x88 table; emits `send_evt_HCI_Number_Of_Completed_Packets`
+          when `field_0x179==2`; callers `connection_teardown_finalize_and_reset`
+          + `baseband_event_status_dispatcher_0xd`. 224 unnamed remain; live named
+          1942.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 66;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 67: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
