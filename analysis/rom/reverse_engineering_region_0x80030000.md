@@ -3786,5 +3786,42 @@ documented logging opcodes; caller integration in eSCO packet-type sweep confirm
 Region unnamed count after this pass: **164** (165 minus this rename). Live named
 **2002** global.
 
-**Next:** Pass 127 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 127.
+
+## Pass 127 (2026-07-01) — `program_bb_regs_6b_6c_43_6a_via_hook_and_extended_diagnostic`
+
+Fresh `ListUnnamed80030000.java` re-run: **164 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003c19c` at 274B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003c19c` → `program_bb_regs_6b_6c_43_6a_via_hook_and_extended_diagnostic`**
+(274B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass127Region80030000Fun8003c19c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook at `PTR_DAT_8003c2b0` may veto entire sequence.
+When hook unset or returns 0: brackets BB-register RMW writes with VSC reg `0x40`
+enable modes (`2` then `0` then `3` then `0`×2). Reads current values via
+`VSC_0xfd49_extended_diagnostic`, merges four params into regs `0x6b`/`0x6c`/
+`0x43`/`0x6a`: `param_2` → `0x6b` bits 13–15; `param_1` → `0x6c` low 3 bits +
+bit 3; `param_3` → `0x6c` bit 15; `param_4` → `0x43` bits 8–13; then ORs bit 0
+into `0x6a` and `0x1000` into `0x6b`. All writes via
+`dispatch_bb_register_da_d6_write_with_hook`. Tail of
+`hw_register_setup_with_patch_hook_variant2` (`0x8003c2b4`) which calls with
+`(3,3,0,0xf)` — secondary-path counterpart to `per_connection_hw_buffer_setup_with_patch_hook`
+(`0x8003c41c`) register set `0x69`/`0x6a`/`0x6f`.
+
+**Callers:** 1 xref-in — `hw_register_setup_with_patch_hook_variant2` at
+`0x8003c2b4` (documented Pass 8; tail call after reg `0x6b`/`0x6e`/`0x6c`/
+`0x6d`/`0x68` setup).
+
+**Confidence:** HIGH — full 274B decompile; register-family pattern matches
+`program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch` sibling; VSC `0x40`
+enable/disable bracketing and `VSC_0xfd49_extended_diagnostic` read-modify-write
+idiom confirmed; caller integration in documented TX/RX hw-buffer-setup pair.
+
+Region unnamed count after this pass: **163** (164 minus this rename). Live named
+**2003** global.
+
+**Next:** Pass 128 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
