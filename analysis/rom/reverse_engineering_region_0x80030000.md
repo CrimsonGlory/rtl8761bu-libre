@@ -7272,5 +7272,37 @@ placement beside `materialize_indexed_lut_5_ushort_buf0_18_ushort_buf1`.
 Region unnamed count after this pass: **56** (57 minus this rename). Live named
 **2110** global.
 
-**Next:** Pass 235 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 235.
+
+## Pass 235 (2026-07-01) — TX power formula mid-entry `FUN_8003b1c4`
+
+Fresh `ListUnnamed80030000.java` re-run: **56 unnamed** remain in region
+(unchanged from Pass 234; rank-1 at xref=1 tier is `FUN_8003b1c4` at 12B —
+largest among tied xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b1c4` → `get_tx_power_byte_config_field453_formula_mid_entry`**
+(12B, HIGH, SIMPLE-tier) via
+`RenamePass235Region80030000Fun8003b1c4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Ghidra-carved 12B mid-function entry at `0x8003b1c4` into the
+TX-power formula/clamp path of
+`get_tx_power_byte_from_config_field453_plus_channel_or_hook` (Pass 187,
+`0x8003b1d0`). Decompiler shows identical high-level logic: optional hook at
+`PTR_DAT_8003b218` or fallback
+`config.field453_0x1d1 + 0x5a + (param_1 & 0xff) * 2` clamped to signed 8-bit.
+Disassembly confirms four instructions (`0x8003b1c8`–`0x8003b1ce`) are
+embedded inside the 72B parent body, not a separate algorithm.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` (symbol READ from `0x8003b174`
+in TX-power cluster); no direct `CALL` sites found.
+
+**Confidence:** HIGH — decompile matches Pass 187 sibling; `config.field453_0x1d1`
+reuse and hook-override idiom unambiguous; mid-entry relationship confirmed via
+`InspectFun8003b1c4.java` disassembly vs parent at `0x8003b1d0`.
+
+Region unnamed count after this pass: **55** (56 minus this rename). Live named
+**2111** global.
+
+**Next:** Pass 236 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
