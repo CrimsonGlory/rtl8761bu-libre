@@ -813,7 +813,8 @@ always logs the role byte on exit.
 `(int* out[2], int* in[2], short b, char op, ushort shift)`. Generic MIPS16e 64-bit-emulation
 helper: selects add/sub/mul/div (`op` 0-3, default = passthrough) on a 32-bit value combined
 with a 64-bit (as two 32-bit halves) operand, then performs a variable-width signed
-right-shift of the 64-bit result via two calls to `FUN_80038c94` (sign-extend/shift) with manual
+right-shift of the 64-bit result via two calls to `compute_int64_halves_signed_shift_width`
+(sign-extend/shift) with manual
 sign-bit replication for shift amounts > 32. Division by zero traps via `trap(7)`. Purely a
 compiler-support arithmetic primitive — no protocol-specific meaning.
 
@@ -1728,5 +1729,38 @@ already HIGH from Pass 6; caller semantics confirmed via both caller decompiles.
 Region unnamed count after this pass: **227** (228 minus this rename). Live named
 **1939** global.
 
-**Next:** Pass 64 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 64.
+
+## Pass 64 (2026-07-01) — int64 signed-shift width helper `FUN_80038c94`
+
+Fresh `ListUnnamed80030000.java` re-run: **227 unnamed** remain in region
+(unchanged from Pass 63; rank-1 by xref count is `FUN_80038c94` at 228B,
+4 xref-in — tied at xref=4 tier, wins on size).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038c94` → `compute_int64_halves_signed_shift_width`**
+(228B, HIGH) via `RenamePass64Region80030000Fun80038c94.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** MIPS16e 64-bit-emulation runtime helper:
+`uint width(int halves[2], ushort shift_amt)` where `halves[0]` is the low
+32-bit dword, `halves[1]` (byte at +4) holds sign-extension bit pattern, and
+byte at +6 records whether the sign bit at `(shift_amt-1)` is set. Counts
+leading sign/run bits and returns effective signed right-shift width (0–40,
+`0x28` base). Optional override hook at `PTR_DAT_80038d78` can short-circuit
+return 1. Pure compiler-support primitive — no protocol-specific meaning.
+
+**Callers:** 4 xref-in incl. `int64_arith_op_and_signed_shift_right`
+(Pass 8 — called twice per shift, low/high halves) and `FUN_8003ac7c`
+(VSC `0xfd49` extended-diagnostic register read path building sign bytes
+before shift-width store at `+5`).
+
+**Confidence:** HIGH — full 228B decompile; Pass 8 already documented role as
+sign-extend/shift helper; caller `int64_arith_op_and_signed_shift_right` decompile
+confirms dual-half usage pattern.
+
+Region unnamed count after this pass: **226** (227 minus this rename). Live named
+**1940** global.
+
+**Next:** Pass 65 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

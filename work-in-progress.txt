@@ -12236,7 +12236,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 63;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 64: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 64 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (227 unnamed); decompiled+renamed rank-1
+          `FUN_80038c94`→`compute_int64_halves_signed_shift_width` (228B, HIGH).
+          MIPS16e 64-bit signed-shift width helper: counts sign/run bits in
+          dword+sign-byte pair, returns 0–40 effective shift width; optional
+          hook `PTR_DAT_80038d78`; callers `int64_arith_op_and_signed_shift_right`
+          (×2 per shift) + `FUN_8003ac7c` VSC diagnostic path. 226 unnamed
+          remain; live named 1940.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 64;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 65: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
