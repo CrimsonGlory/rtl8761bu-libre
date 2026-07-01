@@ -967,5 +967,28 @@ primitive status; behavioral name matches decompile exactly.
 
 Region unnamed count after this pass: **250** (251 minus this rename).
 
-**Next:** Pass 7i — cold-triage next rank-1 unnamed in region `0x80010000`
-(`FUN_800115c8`, byte-extraction read wrapper sibling, 62B).
+## Pass 7i (2026-07-01) — byte read wrapper `FUN_800115c8`
+
+Pass 7i target from cold-triage rank-1 (62B). Decompiled and renamed:
+**`FUN_800115c8` → `read_baseband_register_byte_masked_busywait`**
+(62B, HIGH) via `RenamePass7iRegion80010000Fun800115c8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Byte-granular read wrapper on top of
+`read_baseband_register_masked_busywait` (Pass 7b). When `param_1 & 3 == 0`,
+reads directly with width 0 (byte); otherwise rounds down to word boundary
+(`param_1 & 0xfffc`), reads with width 2, and shifts right by
+`(param_1 & 3) << 3` to extract the target byte. Returns `uVar1 & 0xff`.
+Halfword counterpart is sibling `read_baseband_register_halfword_masked_busywait`
+(Pass 7h). Already documented in `reverse_engineering_baseband_reg_helpers.md`.
+
+**Callers:** patch `FUN_8010c260`, `FUN_801106bc`, `FUN_80011b6c`,
+`VSC_0xfc61_config_update`, `FUN_8003b170`.
+
+**Confidence:** HIGH — trivial decompile; pre-documented mechanism; behavioral
+name matches decompile exactly; completes the byte/halfword extraction wrapper
+pair atop the masked busy-wait read primitive.
+
+Region unnamed count after this pass: **249** (250 minus this rename).
+
+**Next:** Pass 7j — cold-triage next rank-1 unnamed in region `0x80010000`.
