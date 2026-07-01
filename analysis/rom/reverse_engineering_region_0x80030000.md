@@ -4133,5 +4133,34 @@ match Pass 109 programmer; caller body anchors role.
 Region unnamed count after this pass: **154** (155 minus this rename). Live named
 **2012** global.
 
-**Next:** Pass 137 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 137.
+
+## Pass 137 (2026-07-01) — config-dispatch noop hook stub `FUN_80039a10`
+
+Fresh `ListUnnamed80030000.java` re-run: **154 unnamed** remain in region
+(unchanged from Pass 136; rank-1 at xref=2 tier is `FUN_80039a10` at 4B —
+tied with `FUN_80033d28`, first by address sort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039a10` → `noop_config_dispatch_hook_fptr_jr_ra_stub`**
+(4B, HIGH, STUB-tier) via
+`RenamePass137Region80030000Fun80039a10.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Trivial 4-byte MIPS16e return stub (`jr ra` + delay-slot `_nop`).
+Serves as the default no-op target for optional hook fptr slots in the
+`0x80039abc` config-dispatch cluster (`PTR_PTR_80039b0c` / `PTR_DAT_80039b14`):
+when a hook slot is not overridden, indirect calls through those pointers land
+here and return immediately without side effects.
+
+**Callers:** 2 xref-in — `FUN_80039abc` (COMPUTED_CALL at `0x80039af6`, confirmed
+via decompile of config-dispatch body); patch `FUN_8011006c` (COMPUTED_CALL at
+`0x8011009e`, likely parallel hook-slot install path).
+
+**Confidence:** HIGH — disasm confirms `jr ra`; caller `FUN_80039abc` body shows
+dual conditional hook-fptr dispatch pattern matching noop-default stub role.
+
+Region unnamed count after this pass: **153** (154 minus this rename). Live named
+**2013** global.
+
+**Next:** Pass 138 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
