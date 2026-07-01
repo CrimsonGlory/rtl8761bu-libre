@@ -5325,5 +5325,36 @@ with `0x41` mode-select `0x21`/`0x20` matches Pass 145 parent description;
 Region unnamed count after this pass: **118** (119 minus this rename). Live named
 **2048** global.
 
-**Next:** Pass 173 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 173.
+
+## Pass 173 (2026-07-01) — BB reg 0x62/0x63 packer `FUN_80038e74`
+
+Fresh `ListUnnamed80030000.java` re-run: **118 unnamed** remain in region
+(unchanged from Pass 172; rank-1 at xref=1 tier is `FUN_80038e74` at 102B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038e74` → `pack_bitmasked_bytes_into_bb_regs_0x62_low_0x63_high_via_hook`**
+(102B, HIGH, HANDLER-tier) via
+`RenamePass173Region80030000Fun80038e74.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BB-register programmer in the `0x80038exx` cluster (sibling of
+Pass 111's `program_bb_reg_0x6f_7bit_field_at_bits7_13_via_hook` and
+`packet_type_to_hw_code_translator_4link`). Walks bits 0–7 of `param_2`;
+for each set bit, ORs `param_1[i] << shift` into a 32-bit accumulator (shift
+starts at 28, decrements by 4). Splits result into low/high 16-bit halves and
+writes via hook fptr `PTR_DAT_80038edc`: `(3, 0x62, 1, low)` and
+`(3, 99, 1, high)` — BB regs `0x62`/`0x63` in bank 3.
+
+**Callers:** 1 xref-in — `FUN_80038f1c` (config-flag wrapper at `0x80038f1c`):
+when `*PTR_DAT_80038f40 & 0x80`, calls with `param_2=0` (zero-clear path).
+
+**Confidence:** HIGH — full 102B decompile; explicit hook indirection with
+`(bank, reg, mode, value)` tuple matches sibling BB programmers; caller body
+anchors config-flag-gated clear use.
+
+Region unnamed count after this pass: **117** (118 minus this rename). Live named
+**2049** global.
+
+**Next:** Pass 174 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
