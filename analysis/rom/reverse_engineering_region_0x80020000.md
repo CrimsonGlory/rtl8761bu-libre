@@ -6221,4 +6221,37 @@ role already documented in 15+ prior pass cross-references.
 
 Region unnamed count after this pass: **131** (132 minus this rename). Live named **1790** global.
 
+**Next:** superseded by Pass 6 continuation (182).
+
+## Pass 6 continuation (182) (2026-07-01) — SSP DHKey-check armer `FUN_80025f34`
+
+Decompiled and renamed:
+**`FUN_80025f34` → `arm_ssp_dhkey_check_send_lmp_0x42_set_crypto_status`**
+(68B, HIGH) via `RenamePass6Region80020000Fun80025f34.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (68B, xref_in=6) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=131` at pass start). Highest-xref
+function in the 68B tier (siblings at xref_in=2/2/1/0).
+
+**Mechanism:** Thin SSP encryption-armer called after `crypto+0x50=1` is set on
+encrypted-link paths (`0x0c`/`0x16`). Invokes
+`derive_dhkey_check_nonce_and_send_lmp_0x42(conn, crypto, 3)` to transmit LMP
+opcode **0x42** (DHKey Check), then branches on per-connection `bdaddr_random_`:
+public BD_ADDR → `set_arg1_1_to_arg2(crypto, 0x3f)`; random BD_ADDR → status
+`0x42`. Shared continuation primitive for DHKey-check stall recovery, deferred
+role-switch encryption arming, HCI Refresh Encryption Key, and auth-retry
+escalation paths — prior passes cited it by address without decompiling.
+
+**Callers:** xref_in=6; documented sites include
+`tick_dhkey_check_stall_scan_encrypted_links_on_timer_expiry` (`0x80021fa0`),
+`arm_encryption_before_deferred_role_switch` (`0x800220fc`),
+`fHCI_Refresh_Encryption_Key_0x14` (`0x80023bdc`), and
+`auth_retry_counter_escalation_handler` (`0x80002cc0`).
+
+**Confidence:** HIGH — decompile confirms callee chain into documented LMP 0x42
+sender + bdaddr-random-aware status assignment; role already mapped across 6+
+prior pass cross-references.
+
+Region unnamed count after this pass: **130** (131 minus this rename). Live named **1791** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
