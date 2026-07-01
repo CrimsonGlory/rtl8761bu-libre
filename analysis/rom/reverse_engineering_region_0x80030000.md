@@ -7789,5 +7789,38 @@ and 30-register bulk-write loop unambiguous.
 Region unnamed count after this pass: **40** (41 minus this rename). Live named
 **2126** global.
 
-**Next:** Pass 251 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 251.
+
+## Pass 251 (2026-07-01) — resource-pool slot occupancy clear `FUN_800308ec`
+
+Fresh `ListUnnamed80030000.java` re-run: **40 unnamed** remain in region
+(unchanged from Pass 250; xref_in=0 tier dominates — rank-1 is `FUN_800308ec`
+at 96B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800308ec` → `clear_resource_pool_slot_occupancy_bit_hci_type03`**
+(96B, HIGH, HANDLER-tier) via
+`RenamePass251Region80030000Fun800308ec.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Type-0x03 HCI command handler in the `0x800305xx`–`0x800309xx`
+resource-pool feature-page cluster (sibling of Pass 160 type-0x02 dealloc,
+Pass 241 allocate, Pass 242 type-7 configure). Requires cmd type byte `3` at
+`param+2` and slot index (`param+4`, `<0x1b`). For indices `<0x10`: resolves
+BOS array index via `lookup_up_to_3_bos_array_indices_by_connection_handle`,
+clears occupancy bit in `PTR_DAT_8003094c+0x10`. For indices `≥0x10`: resolves
+`0x1ac` struct via `query_config_struct_0x1ac_by_index`, clears occupancy bit in
+`PTR_DAT_8003094c+2`. Returns HCI `0x12` on validation failure, `2` on lookup
+miss, `0` on success. Bit-clear inverse of Pass 242 configure's occupancy-bit
+set path; does not invoke `release_resource_pool_chain_slot_by_type` (lighter
+unbind than Pass 160 full chain release).
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table HCI dispatch).
+
+**Confidence:** HIGH — full 96B decompile; type-0x03 gate, dual lookup paths,
+and bitmask clear at `+0x10`/`+2` match documented configure/dealloc cluster.
+
+Region unnamed count after this pass: **39** (40 minus this rename). Live named
+**2127** global.
+
+**Next:** Pass 252 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
