@@ -6524,4 +6524,33 @@ return `0`); patch firmware computed call at `0x8010de38`. xref_in=2 via
 
 Region unnamed count after this pass: **121** (122 minus this rename). Live named **1800** global.
 
+**Next:** superseded by Pass 6 continuation (192).
+
+## Pass 6 continuation (192) (2026-07-01) — HCI TD pending-callback pop/dispatch `FUN_8002f478`
+
+Decompiled and renamed:
+**`FUN_8002f478` → `pop_pending_callback_by_handle_invoke_after_remove`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002f478.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=121` at pass start). First-listed at
+66B/xref_in=1 (tied cluster of three at 66B).
+
+**Mechanism:** HCI TD (`tHCI_TD`) pending-callback dispatcher keyed by connection handle
+(`ushort param_1`). Looks up entry via sorted table `PTR_LAB_80017630` (`FUN_80017618`);
+if found, saves fn-ptr at entry `+0xc`, pops pending context dword from entry `+4` via
+`FUN_800176d8` (clears `+4`/`+8`), removes handle from companion table `PTR_LAB_80017668`
+(`FUN_80017650`), runs one `spin_delay_10000x_iterations(1)` tick, then invokes stored
+callback with popped context when both are non-null. Insert-side sibling is
+`FUN_80017634` (called from opcode `0x190` path in same handler).
+
+**Callers:** `assoc_w_tHCI_TD_FUN_8002f518` at `0x8002f8b0` — opcode `0x193` branch passes
+conn handle from `param_1`. xref_in=1 via `ListXrefsTo8002f478.java`.
+
+**Confidence:** HIGH — decompile confirms lookup/pop/remove/delay/invoke table pattern;
+caller decompile shows dedicated `0x193` dispatch arm in documented `tHCI_TD` handler;
+paired with insert helper `FUN_80017634` on opcode `0x190` in same function.
+
+Region unnamed count after this pass: **120** (121 minus this rename). Live named **1801** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
