@@ -12495,7 +12495,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 88;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 89: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 89 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (202 unnamed); decompiled+renamed rank-1
+          `FUN_8003f980`→`dispatch_fptr_opcodes_0x8f_0x82_with_status_bytes_set_to_ff`
+          (48B, HIGH). Invokes `PTR_DAT_8003f9b0` fptr with opcodes `0x8f`/`0x82`
+          interleaved with `0xff` writes to `PTR_DAT_8003f9b4`/`PTR_DAT_8003f9b8`;
+          dual-opcode fptr-dispatch cluster sibling. 3 xref-in.
+          201 unnamed remain; live named 1965.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 89;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 90: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

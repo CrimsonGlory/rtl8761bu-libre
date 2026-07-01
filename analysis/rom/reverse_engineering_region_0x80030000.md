@@ -2557,5 +2557,33 @@ mask and fptr dispatch unambiguous.
 Region unnamed count after this pass: **202** (203 minus this rename). Live named
 **1964** global.
 
-**Next:** Pass 89 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 89.
+
+## Pass 89 (2026-07-01) — dual fptr opcode dispatch + status-byte init `FUN_8003f980`
+
+Fresh `ListUnnamed80030000.java` re-run: **202 unnamed** remain in region
+(unchanged from Pass 88; rank-1 by size at xref=3 tier is `FUN_8003f980` at
+48B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003f980` → `dispatch_fptr_opcodes_0x8f_0x82_with_status_bytes_set_to_ff`**
+(48B, HIGH) via `RenamePass89Region80030000Fun8003f980.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Invokes the patchable fptr at `PTR_DAT_8003f9b0` twice with
+`(0, 0x8f)` then `(0, 0x82)`, writing `0xff` to the byte globals at
+`PTR_DAT_8003f9b4` and `PTR_DAT_8003f9b8` between the two calls. Dual-opcode
+fptr-dispatch cluster sibling of `dispatch_dual_fptr_hooks_by_flag_with_config_field285_bits_or_const_0x41`
+(`0x8003b86c`).
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap).
+
+**Confidence:** HIGH — full 48B decompile; interleaved fptr opcode pair and
+status-byte `0xff` init sequence unambiguous.
+
+Region unnamed count after this pass: **201** (202 minus this rename). Live named
+**1965** global.
+
+**Next:** Pass 90 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
