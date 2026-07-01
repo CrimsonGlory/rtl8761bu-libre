@@ -7150,5 +7150,35 @@ unambiguous; naming mirrors Pass 135/229 siblings.
 Region unnamed count after this pass: **60** (61 minus this rename). Live named
 **2106** global.
 
-**Next:** Pass 231 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 231.
+
+## Pass 231 (2026-07-01) — Register-script invoke wrapper `FUN_8003b9a4`
+
+Fresh `ListUnnamed80030000.java` re-run: **60 unnamed** remain in region
+(unchanged from Pass 230; rank-1 at xref=1 tier is `FUN_8003b9a4` at 20B —
+largest among tied 20B xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b9a4` → `invoke_register_script_from_literal_pool_with_num_halfwords_0x40`**
+(20B, HIGH, SIMPLE-tier) via
+`RenamePass231Region80030000Fun8003b9a4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin register-script interpreter invocation wrapper in the
+`0x8003b9xx` cluster. Loads hook fptr at `PTR_DAT_8003b9b8`, calls with
+`(script_ptr, num_halfwords)` = `(PTR_PTR_8003b9bc, 0x40)` — script pointer
+from literal pool with fixed 64-halfword count (differs from Pass 135/229/230
+siblings that read `(script_ptr, num_halfwords)` from context offsets).
+Caller of `register_script_interpreter` per
+`reverse_engineering_register_script_interpreter.md`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 20B decompile; literal-pool + fixed-count invoke
+pattern unambiguous; naming mirrors Pass 135/216/229/230 siblings.
+
+Region unnamed count after this pass: **59** (60 minus this rename). Live named
+**2107** global.
+
+**Next:** Pass 232 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
