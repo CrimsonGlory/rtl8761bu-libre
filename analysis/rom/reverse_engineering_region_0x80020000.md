@@ -9171,4 +9171,35 @@ decompiled and show consistent buffer-forward dispatch pattern.
 
 Region unnamed count after this pass: **30** (31 minus this rename). Live named **1891** global.
 
+**Next:** superseded by Pass 6 continuation (283).
+
+## Pass 6 continuation (283) (2026-07-01) — LMP encryption-mode-off wrapper `FUN_800245e4`
+
+Decompiled and renamed:
+**`FUN_800245e4` → `send_lmp_encryption_mode_req_0x0f_mode_off_wrapper`**
+(24B, HIGH) via `RenamePass6Region80020000Fun800245e4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_800245e4` (24B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=30` at pass start). Sits in the
+`0x800245xx` encryption outbound-send cluster as the mode-off sibling of unnamed
+`FUN_800245cc` (mode-on wrapper, `send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate(_,_,3,1)`).
+
+**Mechanism:** Thin wrapper tail-calling
+`send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate(param_1, param_2, 3, 0)` —
+sends outbound LMP Encryption Mode Req (opcode **0x0F**) with enable-byte **0** (encryption
+off) and arms crypto sub-state byte `param_2+1` to **0x40** (disable path). Complements
+the mode-on wrapper at `0x800245cc` (enable-byte 1 → sub-state **0x48**).
+
+**Callers:** `arm_encryption_before_deferred_role_switch` (`0x800220fc`) — legacy path when
+`FUN_8002408c()` encryption-feature gate returns zero; pauses encryption via LMP 0x0F
+mode-off before deferred role-switch sub-state advance via `FUN_80023fb8(crypto, 6)`;
+xref_in=2 per `ListUnnamed80020000.java` (second xref likely indirect/data ref).
+
+**Confidence:** HIGH — decompile confirms single callee with fixed trailing `param_4=0`;
+sub-state `0x40`/`0x48` pairing matches `send_lmp_encryption_mode_req_0x0f_and_arm_crypto_substate`
+(Pass 6 cont. 199); caller decompile shows consistent legacy encryption-feature-gate branch.
+
+Region unnamed count after this pass: **29** (30 minus this rename). Live named **1892** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
