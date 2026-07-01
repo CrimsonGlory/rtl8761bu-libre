@@ -3787,4 +3787,37 @@ type-1 dispatch paths.
 
 Region unnamed count after this pass: **211** (212 minus this rename). Live named **1710** global.
 
+**Next:** superseded by Pass 6 continuation (102).
+
+## Pass 6 continuation (102) (2026-07-01) — connection policy type-1 matcher `FUN_80021838`
+
+Decompiled and renamed:
+**`FUN_80021838` → `match_connection_policy_type1_by_bdaddr_or_bitmask`**
+(126B, HIGH) via `RenamePass6Region80020000Fun80021838.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (126B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=211` at pass start). Sibling of
+`resolve_connection_policy_priority_by_bdaddr_or_bitmask` in the `0x800217xx`
+QoS/policy cluster — the type-1 boolean matcher complementing the type-2 priority
+resolver.
+
+**Mechanism:** Backward-walking connection-policy rule-table matcher in the
+`PTR_DAT_800218bc` table (20-byte/`0x14` stride entries, count at
+`PTR_DAT_800218b8`), considering only entries with category byte `+0x11 == 0x01`.
+Three match modes at `+0x12`: `0x00` catch-all (immediate match), `0x01` bitmask
+`((param_2 XOR value) & mask) == 0` (or value==0), `0x02` 6-byte BD_ADDR `memcmp`
+against `entry+0x08` (or value==0). Returns 1 on match, 0 when entries exhausted
+without match.
+
+**Callers:** `FUN_800218c0` (connection-policy dispatcher: mode `0x01` path) —
+itself called from `LMP_HOST_CONNECTION_REQ_0x33`, `LMP_eSCO_LINK_REQ_0x7F_0C`,
+`emit_hci_inquiry_result_or_extended_and_maybe_complete`, and `FUN_8006bfec`.
+
+**Confidence:** HIGH — unambiguous rule-table walk with established BD_ADDR/bitmask
+match idiom; sits adjacent to `resolve_connection_policy_priority_by_bdaddr_or_bitmask`
+(category 0x02) and `compute_and_store_connection_qos_poll_interval`; paired
+dispatcher at `FUN_800218c0` routes mode 0x01→this fn, mode 0x02→priority resolver.
+
+Region unnamed count after this pass: **210** (211 minus this rename). Live named **1711** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
