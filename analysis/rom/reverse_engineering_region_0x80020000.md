@@ -5991,4 +5991,32 @@ sub-struct `+0xe0` (hardware_layer §12).
 
 Region unnamed count after this pass: **139** (140 minus this rename). Live named **1782** global.
 
+**Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000`.
+
+## Pass 6 continuation (174) (2026-07-01) — HCI event suppress-bypass mask `FUN_80021240`
+
+Decompiled and renamed:
+**`FUN_80021240` → `test_hci_evt_opcode_bypass_mask_bit_0x40_0x80`**
+(74B, HIGH) via `RenamePass6Region80020000Fun80021240.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=139` at pass start). First-listed
+`FUN_80021240` in the 74B cluster (tied with `FUN_800240a4` in prior pass, now
+resolved as rank-1 after that rename).
+
+**Mechanism:** Complement of `HCI_EVT_0x452_if_arg<0x41_copy_8_bytes` (`0x800211f4`):
+for HCI event opcodes `0x40`–`0x80`, tests the opcode's bit in the 64-bit mask at
+`PTR_DAT_8002128c` (low dword for `0x40`–`0x60`, high dword for `0x61`–`0x80`).
+Returns `1` when the bit is set or opcode is out of range; returns `0` when in-range
+but bit clear.
+
+**Caller:** `hci_event_sender` — when config suppression flags
+(`_x7a_enable_LMP_POWER_REQ_RES_and_CLK_ADJ` bits 2/4/8 and `field208_0xd8` bits
+0x1000/0x2000) would block TX, a set bypass-mask bit still allows the event through.
+
+**Confidence:** HIGH — decompile confirms bitmask test sibling of the already-named
+`0x800211f4` helper; sole caller `hci_event_sender` decompile shows OR-bypass gate.
+
+Region unnamed count after this pass: **138** (139 minus this rename). Live named **1783** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
