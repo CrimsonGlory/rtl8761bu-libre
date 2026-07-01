@@ -14286,7 +14286,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 277;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 278: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 278 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800399c4`→`clamp_byte_in_place_to_context_bounds_at_offsets_0xf_0x10`
+          (26B, HIGH, UTILITY-tier). In-place byte clamp to ctx min/max at offsets
+          `0x10`/`0xf` via `PTR_DAT_800399e0`; `0x800399xx` calibration cluster
+          sibling of Pass 52. No callers found (indirect fptr invocation).
+          12 unnamed remain; live named 2154.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 278;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 279: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

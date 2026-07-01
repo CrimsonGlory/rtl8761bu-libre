@@ -8584,5 +8584,34 @@ unambiguous; sibling RMW cluster context from Pass 71/194/196/197.
 Region unnamed count after this pass: **13** (14 minus this rename). Live named
 **2153** global.
 
-**Next:** Pass 278 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 278.
+
+## Pass 278 (2026-07-01) — in-place byte clamp `FUN_800399c4`
+
+Fresh `ListUnnamed80030000.java` re-run: **13 unnamed** remain in region
+(unchanged from Pass 277; xref_in=0 tier dominates — rank-1 is `FUN_800399c4`
+at 26B, now first after Pass 277 cleared tied sibling `FUN_8003b6dc`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800399c4` → `clamp_byte_in_place_to_context_bounds_at_offsets_0xf_0x10`**
+(26B, HIGH, UTILITY-tier) via
+`RenamePass278Region80030000Fun800399c4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** In-place byte clamp via context at `PTR_DAT_800399e0`: if
+`*param_1 > ctx[0xf]` (max at offset `0xf`), store `ctx[0xf]`; else if
+`*param_1 < ctx[0x10]` (min at offset `0x10`), store `ctx[0x10]`. Same
+min/max bound offsets as Pass 52's `clamp_byte_offset_base_plus_adj_minus_product`
+but applied to an existing byte pointer rather than computing a new offset.
+`0x800399xx` calibration-table cluster sibling of Pass 52/87/217.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 26B decompile; bound offsets `0xf`/`0x10` match
+Pass 52 cluster; context pointer `PTR_DAT_800399e0` adjacent to Pass 217's
+`invoke_calibration_hook_for_byte_offsets_0_to_0x20`.
+
+Region unnamed count after this pass: **12** (13 minus this rename). Live named
+**2154** global.
+
+**Next:** Pass 279 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
