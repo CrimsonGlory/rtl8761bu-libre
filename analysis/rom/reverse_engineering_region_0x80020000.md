@@ -4899,4 +4899,34 @@ adjacent to established LMP ACCEPTED wrapper cluster.
 
 Region unnamed count after this pass: **175** (176 minus this rename). Live named **1746** global.
 
+**Next:** superseded by Pass 6 continuation (138).
+
+## Pass 6 continuation (138) (2026-07-01) — pairing-substate encryption armer `FUN_80022098`
+
+Decompiled and renamed:
+**`FUN_80022098` → `arm_encryption_when_crypto_substate_0x11_or_0x1e`**
+(96B, HIGH) via `RenamePass6Region80020000Fun80022098.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (96B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=175` at pass start). Tied at 96B with
+`FUN_800285cc`/`FUN_80023b40`; selected first by list order after Pass 6 cont. (137).
+
+**Mechanism:** Per-connection encryption armer in the `0x800220xx` role-switch/encryption
+cluster (sibling of `arm_encryption_before_deferred_role_switch` at `0x800220fc`). Gates on
+crypto sub-state byte `*crypto == 0x11 || *crypto == 0x1e`; on match sets `crypto+0x50=1`,
+advances via `FUN_80023fb8(crypto, 7)`, then branches on `FUN_8002408c` encryption-feature
+gate: zero → `FUN_800245cc` (legacy `FUN_80024590(_,_,3,1)` start-encryption), nonzero →
+`FUN_80025b1c` (SSP path: `program_encryption_key_and_send_lmp_start_encryption_req` or
+`FUN_800258ec` by `bdaddr_random_`, arms sub-states `0x49`/`0x4b`). Returns 1 on success,
+0 when sub-state gate fails.
+
+**Callers:** `LMP_role_switch_completion_handler` (confirmed via `find_callers`); also
+invoked from defer path in `apply_or_defer_conn_role_change_emit_hci_evt_sync` when
+`field_0xb8==1` per region `0x80070000` Pass 12fk.
+
+**Confidence:** HIGH — sub-state gate and callee chain mirror documented SSP recovery paths
+(Pass 6 cont. 35/107); sits adjacent to established `0x800220xx` encryption armer cluster.
+
+Region unnamed count after this pass: **174** (175 minus this rename). Live named **1747** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
