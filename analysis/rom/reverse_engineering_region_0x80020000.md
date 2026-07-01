@@ -9415,4 +9415,36 @@ documented in Pass 6 cont. (152)/(156)/(276).
 
 Region unnamed count after this pass: **22** (23 minus this rename). Live named **1899** global.
 
+**Next:** superseded by Pass 6 continuation (291).
+
+## Pass 6 continuation (291) (2026-07-01) — crypto substate transition table `FUN_80023fb8`
+
+Decompiled and renamed:
+**`FUN_80023fb8` → `advance_crypto_substate_via_transition_table`**
+(20B, HIGH) via `RenamePass6Region80020000Fun80023fb8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0), `FUN_80024004` (24B,
+xref_in=0), and `FUN_8002963c` (22B, xref_in=0) per established cold-triage convention;
+selected rank-1 with xref_in≥1: `FUN_80023fb8` (20B, xref_in=24) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=22` at pass start).
+
+**Mechanism:** Crypto substate byte transition via 16-byte-per-row lookup table at
+`PTR_DAT_80023fcc`: `*param_1 = table[(uint)*param_1 * 0x10 + (param_2 & 0xff)]`.
+`param_1` points at the crypto struct's substate byte (offset +0x00 within the crypto
+block); `param_2` is the event/column index. Central dispatcher invoked by virtually
+every encryption/pairing/link-key HCI and LMP handler in this region to advance the
+crypto state machine.
+
+**Callers (sample):** `fHCI_Set_Connection_Encryption_0x13`, `fHCI_Change_Connection_Link_Key_0x15`,
+`fHCI_Refresh_Encryption_Key_0x14`, `arm_encryption_before_deferred_role_switch`,
+`arm_encryption_when_crypto_substate_0x11_or_0x1e`, `advance_crypto_substate_0xf_on_role_switch_conn_complete`,
+`kickoff_post_role_switch_encryption_or_auth_by_link_type` — xref_in=24 per
+`ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms unambiguous table-indexed byte write; 24 callers
+and event-index semantics (0–7, 0xf) already documented across prior passes referencing
+`FUN_80023fb8`.
+
+Region unnamed count after this pass: **21** (22 minus this rename). Live named **1900** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
