@@ -1322,4 +1322,32 @@ tail-call `log_ogc3_config_apply_evt_0x4b6_if_no_patch3` after writing
 
 Region unnamed count after this pass: **236** (237 minus this rename).
 
-**Next:** Pass 7w — cold-triage next rank-1 unnamed in region `0x80010000`.
+## Pass 7w (2026-07-01) — HCI event ring-17 enqueue `FUN_8001ffdc`
+
+Pass 7w target from cold-triage rank-1 (6 xref_in, 188B — largest at xref=6
+tier after Pass 7v cleared xref=7). Decompiled and renamed:
+**`FUN_8001ffdc` → `enqueue_hci_evt_to_ring17_and_dispatch_or_drain`**
+(188B, HIGH) via `RenamePass7wRegion80010000Fun8001ffdc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** HCI event-buffer enqueue into a 17-slot ring (`mod 0x11`). When
+count at `+0x110` reaches `0x11`, logs via `possible_logging_function__var_args`
+(tag `0x931`) instead of enqueueing. Otherwise: copies 4-byte header from
+`param_1` into slot buffer at `PTR_DAT_800200a0`, stores pointer at
+`PTR_DAT_80020098 + index*4`, stores `*(ushort*)(param_1+2)` at
+`(index+0x44)*2`, clears pending flag at `(index+0x32)*4+4`, increments write
+index modulo 17 and count. If config `field_0x169` is `1` or `3`, tail-calls
+`FUN_8001fd20` (ring drain); else directly calls
+`hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2`.
+
+**Callers:** 6 xref_in per `ListUnnamed80010000.java`; enqueue entry point for
+HCI event producers when ring-buffer mode is active.
+
+**Confidence:** HIGH — decompile confirms 17-slot ring semantics, overflow log
+path, and dispatch/drain fork gated on `field_0x169`; cross-confirmed with
+`hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2` caller list in region
+`0x80020000` Pass 6.
+
+Region unnamed count after this pass: **235** (236 minus this rename).
+
+**Next:** Pass 7x — cold-triage next rank-1 unnamed in region `0x80010000`.

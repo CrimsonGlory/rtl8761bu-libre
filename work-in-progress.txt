@@ -14606,8 +14606,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7v;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7w: cold-triage next rank-1
-          unnamed function in region `0x80010000` (236 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7w (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8001ffdc`→`enqueue_hci_evt_to_ring17_and_dispatch_or_drain`
+          (188B, HIGH). HCI event-buffer enqueue into 17-slot ring (`mod 0x11`);
+          overflow log tag `0x931` when count==0x11; copies 4-byte header, stores
+          pointer + ushort at buf+2; dispatches via
+          `hci_evt_buffer_mode2_dispatch_offset4_u16_from_buf_plus2` or drains via
+          `FUN_8001fd20` when config `field_0x169` is 1/3; 6 xref_in.
+          235 unnamed remain; live named 2189.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7w;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7x: cold-triage next rank-1
+          unnamed function in region `0x80010000` (235 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
