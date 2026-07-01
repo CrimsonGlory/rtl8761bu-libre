@@ -11549,8 +11549,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (257);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (258): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (55 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (258) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_8002f930`→
+          `set_vsc_fcf0_context_byte_0x269_from_enable2_and_mode_byte` (38B, HIGH).
+          VSC 0xFCF0 context byte +0x269 setter: enable2 gate, mode byte at param+4<2;
+          returns 0/0x0C/0x12; xref_in=0 fptr table entry.
+          54 unnamed remain; live named 1867.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (258);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (259): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (54 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

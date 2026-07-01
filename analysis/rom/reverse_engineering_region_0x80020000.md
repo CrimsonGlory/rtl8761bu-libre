@@ -8474,4 +8474,32 @@ caller documented in Pass 6 cont. (140); matches BT-spec Keypress Notification P
 
 Region unnamed count after this pass: **55** (56 minus this rename). Live named **1866** global.
 
+**Next:** superseded by Pass 6 continuation (258).
+
+## Pass 6 continuation (258) (2026-07-01) — VSC 0xFCF0 context substate setter `FUN_8002f930`
+
+Decompiled and renamed:
+**`FUN_8002f930` → `set_vsc_fcf0_context_byte_0x269_from_enable2_and_mode_byte`**
+(38B, HIGH) via `RenamePass6Region80020000Fun8002f930.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (38B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=55` at pass start). First-listed at 38B
+tier; successor to Pass 6 cont. (257)'s `send_lmp_ext_pkt_0x7f_subopcode_0x1e_keypress_notification`.
+
+**Mechanism:** VSC **0xFCF0** cluster context-byte setter in the `0x8002f9xx` handler block
+adjacent to `VSC_0xfcf0_subcommand_dispatch` (`0x8002f95c`). Requires enable byte at
+`param+2==0x02` (distinct from sibling setters using `0x01`); mode byte at `param+4` must
+be `<2` (0 or 1). On valid params: if context struct byte at `PTR_DAT_8002f958+0x269` differs
+from mode, writes mode and returns HCI status `0x00`; if already equal returns `0x0C` (Command
+Disallowed); invalid params return `0x12`. Offset `+0x269` is adjacent to the `+0x268` state
+byte initialized by the FCF0 dispatcher.
+
+**Callers:** none (xref_in=0) — function-pointer dispatch via `PTR_PTR_8002f9b4` table
+(consistent with VSC 0xFCF0 cluster siblings).
+
+**Confidence:** HIGH — decompile confirms established VSC 0xFCF0 enable-byte gate and
+invalid-params `0x12` idiom; sibling cluster context documented in Pass 6 cont. (164)/(229).
+
+Region unnamed count after this pass: **54** (55 minus this rename). Live named **1867** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
