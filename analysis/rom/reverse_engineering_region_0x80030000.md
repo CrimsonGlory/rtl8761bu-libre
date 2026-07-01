@@ -2585,5 +2585,32 @@ status-byte `0xff` init sequence unambiguous.
 Region unnamed count after this pass: **201** (202 minus this rename). Live named
 **1965** global.
 
-**Next:** Pass 90 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 90.
+
+## Pass 90 (2026-07-01) — dword mask-merge + BOS bit3 clear `FUN_800335f0`
+
+Fresh `ListUnnamed80030000.java` re-run: **201 unnamed** remain in region
+(unchanged from Pass 89; rank-1 by size at xref=3 tier is `FUN_800335f0` at
+44B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800335f0` → `mask_merge_dword_globals_or3_and_clear_bos_bit3_at_0x164`**
+(44B, HIGH) via `RenamePass90Region80030000Fun800335f0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Mask-merges dword at `DAT_8003361c` via `(*ptr & mask) | value`
+using constants from `DAT_80033620`/`DAT_80033624`; ORs low bits `3` into dword
+at `DAT_80033628`; clears bit 3 (`& 0xf7`) on byte at offset `+0x164` in
+`PTR_DAT_8003362c` BOS struct.
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`); 2 patch computed-call sites
+(`FUN_8010d434`, `FUN_8010d890`); ROM direct callers not in GZF xref cache.
+
+**Confidence:** HIGH — full 44B decompile; mask-merge/OR/clear-bit3 sequence
+unambiguous.
+
+Region unnamed count after this pass: **200** (201 minus this rename). Live named
+**1966** global.
+
+**Next:** Pass 91 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
