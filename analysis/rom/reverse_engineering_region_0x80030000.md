@@ -753,7 +753,7 @@ pending/active and logs via `possible_logger_called_if_no_patch3`; for SCO-type 
 (`*piVar11==5`) with sufficient buffered data, calls a hardware kick fptr. Final block: when a
 "flush" flag (`+0x85`) is set, zeroes out the connection's queue-pointer fields (`+0x70..0x82`)
 — the connection-teardown reset; otherwise, on a different condition, calls
-`drain_connection_packet_completion_ring_and_emit_hci_num_completed`+`FUN_8002bb50`+optional `FUN_8003e648`+indirect fptr+log (link-supervision-loss
+`drain_connection_packet_completion_ring_and_emit_hci_num_completed`+`FUN_8002bb50`+optional `clear_active_stride88_connection_buffers_and_drain_hci_cmds`+indirect fptr+log (link-supervision-loss
 path).
 
 #### 3. `slot_timing_delta_calc_and_log` (0x8003894c, 494B)
@@ -1928,5 +1928,33 @@ by bit-index trace; name matches `+2` offset from MSB bit position.
 Region unnamed count after this pass: **221** (222 minus this rename). Live named
 **1945** global.
 
-**Next:** Pass 70 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 70.
+
+## Pass 70 (2026-07-01) — connection buffer clear `FUN_8003e648`
+
+Fresh `ListUnnamed80030000.java` re-run: **221 unnamed** remain in region
+(unchanged from Pass 69; rank-1 by xref count is `FUN_8003e648` at 68B,
+4 xref-in — wins xref=4 tier on size).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003e648` → `clear_active_stride88_connection_buffers_and_drain_hci_cmds`**
+(68B, HIGH) via `RenamePass70Region80030000Fun8003e648.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** When global `the_0x300->field_0x171` is set, loops indices 0..2
+on stride-0x88 table `PTR_DAT_8003e690`; for entries with `+4==0x01`, `memset`
+clears 0x3c bytes at offset `+0x34`. Always tail-calls
+`drain_all_hci_cmd_completion_slots_once` — connection-teardown cleanup sibling
+of `reinit_hci_cmd_list_clear_active_descriptor_tails_and_drain`.
+
+**Callers:** `connection_teardown_finalize_and_reset` (link-supervision-loss
+cleanup chain) + `FUN_8003e98c` (bitmask-sweep dispatch sibling).
+
+**Confidence:** HIGH — full 68B decompile; stride/offset semantics match Pass 8
+`connection_teardown_finalize_and_reset` cluster.
+
+Region unnamed count after this pass: **220** (221 minus this rename). Live named
+**1946** global.
+
+**Next:** Pass 71 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

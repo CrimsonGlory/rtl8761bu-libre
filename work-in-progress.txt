@@ -12298,7 +12298,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 69;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 70: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 70 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003e648`→`clear_active_stride88_connection_buffers_and_drain_hci_cmds`
+          (68B, HIGH). When `field_0x171` set, memset 0x3c at `+0x34` on active
+          stride-0x88 entries 0..2; always drains HCI cmd slots. Callers
+          `connection_teardown_finalize_and_reset` + `FUN_8003e98c`. 220 unnamed
+          remain; live named 1946.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 70;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 71: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
