@@ -12892,7 +12892,21 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 130;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 131: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 131 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (160 unnamed); decompiled+renamed rank-1
+          `FUN_8003b9c0`→`log_eight_rotating_ring_buffer_dword_pairs_when_diag_gates_active`
+          (250B, HIGH, SIMPLE-tier). VSC 0xfd49 extended-diagnostic ring-buffer
+          snapshot logger: triple gate check on `PTR_DAT_8003babc`/`bac0`/`bac4`,
+          modulo ring index from ushort globals, walks eight 8-byte dword-pair
+          slots from param_1 buffer and logs via `possible_logging_function__var_args`
+          (event `0x28`/tag `0xed1`); increments ring counter. 1 xref-in at
+          `0x80010e14` (no Ghidra containing function — fptr-dispatch gap).
+          Sibling of `FUN_8003bad4` VSC 0xfd49 tail. 159 unnamed remain; live
+          named 2007.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 131;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 132: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

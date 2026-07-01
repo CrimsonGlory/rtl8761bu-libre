@@ -3937,5 +3937,41 @@ sibling of region `0x80040000` dual-slot LMP-0x25C role-record cluster.
 Region unnamed count after this pass: **160** (161 minus this rename). Live named
 **2006** global.
 
-**Next:** Pass 131 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 131.
+
+## Pass 131 (2026-07-01) — `log_eight_rotating_ring_buffer_dword_pairs_when_diag_gates_active`
+
+Fresh `ListUnnamed80030000.java` re-run: **160 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003b9c0` at 250B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b9c0` → `log_eight_rotating_ring_buffer_dword_pairs_when_diag_gates_active`**
+(250B Ghidra boundary, HIGH, SIMPLE-tier) via
+`RenamePass131Region80030000Fun8003b9c0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** VSC 0xfd49 extended-diagnostic ring-buffer snapshot logger in the
+`PTR_DAT_8003babc`/`PTR_DAT_8003bac0`/`PTR_DAT_8003bac4` gate cluster. When all
+three diagnostic-enable gates are active (`PTR_DAT_8003babc` nonzero,
+`PTR_DAT_8003bac0` nonzero, `PTR_DAT_8003bac4` counter nonzero), computes a
+rotating start index `(counter << 6) % ring_size` from ushort globals at
+`PTR_DAT_8003bac8`/`PTR_DAT_8003bacc`, then walks eight consecutive 8-byte
+(dword-pair) slots from the `param_1` ring buffer (64 bytes total) and logs
+each pair via `possible_logging_function__var_args` (event class `0x28`, tag
+`0xed1`). Post-loop increments the ring counter at `PTR_DAT_8003bac8`. Sibling
+of `FUN_8003bad4` (`VSC_0xfd49_extended_diagnostic` tail) and
+`read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width` (Pass 123).
+
+**Callers:** 1 xref-in — unconditional call at `0x80010e14` (Ghidra has no
+containing function at call site; likely fptr-dispatch gap in region
+`0x80010000`).
+
+**Confidence:** HIGH — full 250B decompile; triple diagnostic-gate pattern,
+modulo ring-index math, eight-slot dword-pair walk, and varargs logger match
+documented VSC 0xfd49 extended-diagnostic cluster.
+
+Region unnamed count after this pass: **159** (160 minus this rename). Live named
+**2007** global.
+
+**Next:** Pass 132 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
