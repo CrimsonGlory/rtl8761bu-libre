@@ -5356,5 +5356,38 @@ anchors config-flag-gated clear use.
 Region unnamed count after this pass: **117** (118 minus this rename). Live named
 **2049** global.
 
-**Next:** Pass 174 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 174.
+
+## Pass 174 (2026-07-01) — AFH channel-map slice `FUN_8003a9b0`
+
+Fresh `ListUnnamed80030000.java` re-run: **117 unnamed** remain in region
+(unchanged from Pass 173; rank-1 at xref=1 tier is `FUN_8003a9b0` at 100B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a9b0` → `program_afh_channel_map_16ch_at_offset_20_with_bb_reg_0xe_bracket`**
+(100B, HIGH, HANDLER-tier) via
+`RenamePass174Region80030000Fun8003a9b0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** AFH channel-map slice programmer in the `0x8003aaxx` register-script
+cluster (sibling of Pass 165's
+`sweep_fd49_extended_diag_30_channels_with_bb_reg_0xe_bit2_enable`). Brackets
+`AFH_channel_map_hw_register_programmer(channel_map_ptr, 0x14, 0x10)` — 16
+channels starting at offset 20 — with BB reg `0xe` read-modify-write via hook
+fptrs at `PTR_DAT_8003aa14`/`PTR_DAT_8003aa18`: sets bit2 (`| 4`), sets bit5
+and clears bits4–5 (`& 0xffcf | 0x20`), then clears bit2 (`& 0xfffb`) after the
+AFH write. Channel-map data pointer from `PTR_DAT_801234bc_3_8003aa1c`.
+
+**Callers:** 1 xref-in — `FUN_8003aa20` config-flag dispatcher: when
+`PTR_DAT_8003aa64` bit2 (`0x4`) is set, calls this helper then copies
+`pbVar1[0x25]` to output byte.
+
+**Confidence:** HIGH — full 100B decompile; `AFH_channel_map_hw_register_programmer`
+callee already HIGH-named; BB reg `0xe` bit-bracket idiom matches Pass 165
+sibling; caller config-flag gate unambiguous.
+
+Region unnamed count after this pass: **116** (117 minus this rename). Live named
+**2050** global.
+
+**Next:** Pass 175 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
