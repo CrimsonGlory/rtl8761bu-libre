@@ -1280,6 +1280,36 @@ interpreter decompile; name pre-exists and resolves.
 
 Region unnamed count unchanged: **240**. Live named **1926** global (no rename).
 
-**Next:** Pass 50 — cold-triage rank-3 register-script interpreter callee
-`FUN_80009694` (`spin_delay_10000x_iterations`; opcode `0xB000` + poll-wait
-inter-retry timing).
+**Next:** superseded by Pass 50.
+
+## Pass 50 (2026-07-01) — register-script opcode `0xB000` delay callee `spin_delay_10000x_iterations`
+
+Cross-region cold-triage of rank-3 register-script interpreter callee
+**`FUN_80009694` → `spin_delay_10000x_iterations`** (`0x80009694`, 22B, HIGH).
+Already named in region `0x80000000` out-of-gap-scope pass 2 (2026-06-27); no
+Ghidra rename needed — this pass confirms register-script integration from the
+interpreter side.
+
+**Mechanism:** Bare spin-wait loop: `for (i = 0; i < param_1 * 10000; i++)`.
+Script data word `uVar10` from each `(opcode, data)` pair is passed as
+`param_1`, so effective iteration count is `data × 10000`.
+
+**Register-script integration:** Live decompile of `FUN_8003aea0` confirms:
+- Opcode top-nibble `0xB000`: direct call `spin_delay_10000x_iterations(uVar10)` —
+  long busy-wait between register-script steps (contrast Pass 49's `0xA000` /
+  `spin_delay_10x_iterations`).
+- Poll-wait opcodes `0xC000`/`0xD000`/`0xE000`: each retry loop calls
+  `spin_delay_10000x_iterations(1)` between status polls, decrementing the script
+  data word as a retry budget.
+
+**Callers:** Direct callee of register-script interpreter; also used by
+`hw_register_config_with_timeout` (`0x8003c7cc`) and link-status escalation
+paths per region `0x80000000` pass 2.
+
+**Confidence:** HIGH — trivial decompile; opcode dispatch and poll-loop inter-retry
+timing confirmed live in interpreter decompile; name pre-exists and resolves.
+
+Region unnamed count unchanged: **240**. Live named **1926** global (no rename).
+
+**Next:** Pass 51 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.
