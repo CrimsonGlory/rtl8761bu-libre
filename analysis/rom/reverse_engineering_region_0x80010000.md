@@ -780,3 +780,30 @@ via `decompile_function`.
 (`0x8001fce0`, `0x8001fef8`) carry recommended renames (not applied, rename
 bug); the other 5 confirmed accurate as-is. 0 low-confidence functions remain
 in this region.
+
+## Pass 7 (2026-07-01) — baseband register write primitive `FUN_80011608`
+
+Fresh `ListUnnamed80010000.java` cold-triage: **408 total**, **150 named**,
+**258 unnamed** (pre-rename). Rank-1 by xref_in: `FUN_80011608` (110B, 65
+xrefs). Decompiled and renamed:
+**`FUN_80011608` → `write_baseband_register_masked_busywait`**
+(110B, HIGH) via `RenamePass7Region80010000Fun80011608.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked baseband MMIO register write primitive (write-side
+counterpart of `FUN_80011510`). Gates on address alignment via
+`((1 << (param_3 & 0x1f)) - 1) & param_1`. When width selector `param_3` is
+byte-mode (`& 0xff == 0`), left-shifts `param_2` into the correct byte lane by
+`(param_1 & 3) << 3`. Under interrupt disable: writes data to `DAT_8001167c`,
+strobes request word at `DAT_80011680` (OR with `DAT_80011684` then clean write),
+busy-waits up to 20000 iterations for ready bit, then re-enables interrupts.
+Already extensively cross-referenced project-wide (VSC 0xFC61, RF init chains,
+patch installer hooks) — see `reverse_engineering_baseband_reg_helpers.md`.
+
+**Confidence:** HIGH — mechanism fully documented in prior thematic pass;
+live decompile matches; rename closes the last major unnamed gap in the
+baseband R/W primitive pair.
+
+Region unnamed count after this pass: **257** (258 minus this rename).
+
+**Next:** Pass 7b — rename read-side counterpart `FUN_80011510` (98B, 59 xref_in).

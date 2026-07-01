@@ -60,9 +60,9 @@ address, it returns the fallback value without touching hardware.
 **Purpose:** generic masked/width-aware baseband register read with hardware
 busy-wait and a safe fallback on timeout or misalignment.
 
-## 2. `FUN_80011608` — Baseband register write (busy-wait, masked, with merge)
+## 2. `write_baseband_register_masked_busywait` — Baseband register write (busy-wait, masked, with merge)
 
-`0x80011608`, 110 bytes. Callers: 50+, same population as `FUN_80011510`
+`0x80011608`, 110 bytes (renamed Pass 7 region `0x80010000`, 2026-07-01). Callers: 50+, same population as `FUN_80011510`
 (its write-side counterpart).
 
 ```c
