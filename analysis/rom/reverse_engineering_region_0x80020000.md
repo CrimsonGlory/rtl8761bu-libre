@@ -2556,7 +2556,7 @@ byte at `crypto_struct+1`. Early-outs unless global `PTR_DAT_80027cc8[2]&0x80` i
 - Pending **`0x40`** (SSP Number): public BD_ADDR (`bdaddr_random_==0`) → pairing state
   `0x3f` via `set_arg1_1_to_arg2`; random BD_ADDR → `FUN_800245fc` encryption-on toggle.
 - Pending **`0x48`** (DHkey Check): random BD_ADDR → `FUN_80024050` stores byte at
-  `crypto+0x23` then `FUN_80024560`; public BD_ADDR → pairing state `0x47`.
+  `crypto+0x23` then `send_lmp_encryption_key_size_req_0x10_and_set_state_0x4a`; public BD_ADDR → pairing state `0x47`.
 
 **Callers:** `FUN_80027d4c` (sole xref from `0x80027da6`).
 
@@ -5375,7 +5375,7 @@ PDU byte `+4`, sends `wrap_send_LMP_ACCEPTED_and_some_other_things(conn, 0xf, mo
 Branches on `bdaddr_random_`:
 - Public BD_ADDR → sets crypto sub-state `+1 = 0x47`
 - Random BD_ADDR → copies key-size byte from `PTR_DAT_800247b0[2]` into `crypto+0x23`,
-  calls `FUN_80024560` (sends LMP opcode **0x10** Encryption Key Size Req, 3B PDU) which
+  calls `send_lmp_encryption_key_size_req_0x10_and_set_state_0x4a` (sends LMP opcode **0x10** Encryption Key Size Req, 3B PDU) which
   advances sub-state to `0x4a`
 
 **Callers:** `LMP_ENCRYPTION_MODE_REQ_0x0F` (2 sites — crypto sub-state `0x45` disable
@@ -7402,5 +7402,33 @@ documented caller from Pass 6 cont. (51); complements the already-analyzed Maste
 staging cluster (sibling of Pass 6 cont. 150's `derive_master_link_key_hci_event_0x0e_via_safer_plus_xor`).
 
 Region unnamed count after this pass: **92** (93 minus this rename). Live named **1829** global.
+
+**Next:** superseded by Pass 6 continuation (221).
+
+## Pass 6 continuation (221) (2026-07-01) — LMP Encryption Key Size Req `FUN_80024560`
+
+Decompiled and renamed:
+**`FUN_80024560` → `send_lmp_encryption_key_size_req_0x10_and_set_state_0x4a`**
+(48B, HIGH) via `RenamePass6Region80020000Fun80024560.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed with xref_in≥1 (48B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=92` at pass start). First-listed at 48B tier after
+52B tier entries (both xref_in=0); successor to Pass 6 cont. (220)'s `FUN_80029e78`.
+
+**Mechanism:** Outbound LMP Encryption Key Size Request (opcode **0x10**): builds 3-byte PDU
+with opcode byte `0x10` and key-size byte from `crypto+0x23`, sends via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`, then advances crypto sub-state `+1` to `0x4a`.
+
+**Callers:** `accept_lmp_encryption_mode_disable_and_branch_by_bdaddr_random` (Pass 6 cont. 153
+random-BD_ADDR disable-accept path), `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
+(Pass 6 cont. 63 DHkey-Check random-BD_ADDR path), plus one additional encryption-pairing cluster
+caller (xref_in=3 total).
+
+**Confidence:** HIGH — decompile confirms LMP 0x10 3B PDU + crypto sub-state `0x4a` advance;
+callers pre-documented in Pass 6 cont. (63)/(153); complements
+`LMP_ENCRYPTION_KEY_SIZE_REQ_0x10` inbound handler and
+`handle_lmp_encryption_key_size_req_not_accepted` recovery path.
+
+Region unnamed count after this pass: **91** (92 minus this rename). Live named **1830** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
