@@ -14453,9 +14453,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7f;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 7g: cold-triage next rank-1
-          unnamed function in region `0x80010000` (`FUN_80013e78`, 14 xref, 98B;
-          252 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 7g (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013e78`→`program_bb_regs_0xee_0x60_0xa_0_via_hook`
+          (98B, HIGH). Four-register BB programming via HW hook fptr in
+          `0x80013exx` cluster; `param_4` gates `0xee` bit0/bit5 mode; 14 xref_in
+          across ACL TX/RX and SCO setup paths; live named 2173.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 7g;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 7h: cold-triage next rank-1
+          unnamed function in region `0x80010000` (`FUN_80011584`, 13 xref, 66B;
+          251 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

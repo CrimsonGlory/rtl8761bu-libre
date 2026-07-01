@@ -912,5 +912,35 @@ status; behavioral name matches decompile exactly.
 
 Region unnamed count after this pass: **252** (253 minus this rename).
 
-**Next:** Pass 7g — cold-triage next rank-1 unnamed in region `0x80010000`
-(`FUN_80013e78`, 14 xref, 98B).
+## Pass 7g (2026-07-01) — four-register BB hook writer `FUN_80013e78`
+
+Pass 7g target from cold-triage rank-1 (14 xref_in, 98B). Decompiled and renamed:
+**`FUN_80013e78` → `program_bb_regs_0xee_0x60_0xa_0_via_hook`**
+(98B, HIGH) via `RenamePass7gRegion80010000Fun80013e78.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Four-register baseband programming primitive in the `0x80013exx`
+cluster (sibling of cleanup `FUN_80013ee8` which programs regs `0xa`/`0x0` only).
+Invokes HW-write callback at `PTR_DAT_80013ee0` four times:
+`(0xee, mode_word)`, `(0x60, *PTR_DAT_80013ee4 | param_2)`, `(10, param_3)`,
+`(0, 0xc)`. Reg `0xee` mode word derived from `DAT_80013edc`: when
+`param_4 == 0` clears bit 5 and sets bit 0 (`& ~0x20 | 1`); else ORs `0x21`
+(bits 0+5). Used across ACL TX/RX fragment paths, SCO connection setup
+(`apply_SCO_connection_params_to_hw`, `allocate_sco_hw_link_descriptor_slot`),
+and slot-reset dispatch.
+
+**Callers (14 xref_in):** `hci_acl_data_fragment_assembler_and_enqueue` (4),
+`dispatch_acl_fragment_with_per_conn_reassembly_flags` (3),
+`apply_SCO_connection_params_to_hw` (2),
+`allocate_sco_hw_link_descriptor_slot` (2),
+`dispatch_acl_rx_continuation_or_procedure_hook_by_conn_flag_0x23`,
+`transmit_acl_single_packet_direct_via_hw_tx_descriptor`,
+`reset_slot_tail_and_hook_dispatch_status_upper_bits_if_idle`.
+
+**Confidence:** HIGH — clear four-call hook pattern; 14 xref_in confirms generic
+primitive status; behavioral name matches decompile exactly.
+
+Region unnamed count after this pass: **251** (252 minus this rename).
+
+**Next:** Pass 7h — cold-triage next rank-1 unnamed in region `0x80010000`
+(`FUN_80011584`, 13 xref, 66B).
