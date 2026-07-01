@@ -8144,4 +8144,35 @@ xref density confirms hot-path utility role.
 
 Region unnamed count after this pass: **66** (67 minus this rename). Live named **1855** global.
 
+**Next:** superseded by Pass 6 continuation (247).
+
+## Pass 6 continuation (247) (2026-07-01) — HCI SSP pairing thin wrapper `FUN_800239cc`
+
+Decompiled and renamed:
+**`FUN_800239cc` → `hci_resolve_conn_tail_call_dispatch_ssp_lmp_ext_0x1b_or_dhkey_0x41`**
+(40B, HIGH) via `RenamePass6Region80020000Fun800239cc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (40B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=66` at pass start). First-listed in tied
+40B tier; sits in the `0x800239xx` SSP pairing-continuation cluster alongside
+`dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41` (Pass 6 cont. 90) and
+sibling thin wrapper `hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x19_auth_failure`
+(Pass 6 cont. 226).
+
+**Mechanism:** Thin HCI command wrapper — `hci_resolve_conn_record_validate_and_complete`
+with validator `PTR_LAB_800235b8_1`, then on success tail-calls
+`dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41(conn_handle)`; returns 0
+on conn-resolve failure. Same conn-resolve→dispatch idiom as Pass 6 cont. (226)'s
+`hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x19_auth_failure` but targets the
+LMP-ext `0x1b`/DHKey-check continuation path.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` at `0x800234fc`; xref_in=1 per
+Pass 6 cont. (90) `ListXrefsTo800239cc.java`.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus
+tail-call to documented SSP LMP-ext `0x1b`/DHKey-check continuation; caller confirmed
+in SSP debug-mode command router.
+
+Region unnamed count after this pass: **65** (66 minus this rename). Live named **1856** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
