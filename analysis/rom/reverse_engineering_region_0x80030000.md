@@ -7638,5 +7638,37 @@ standard complex arithmetic on int pairs.
 Region unnamed count after this pass: **45** (46 minus this rename). Live named
 **2121** global.
 
-**Next:** Pass 246 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 246.
+
+## Pass 246 (2026-07-01) — TX power level `FUN_80039a14`
+
+Fresh `ListUnnamed80030000.java` re-run: **45 unnamed** remain in region
+(unchanged from Pass 245; xref_in=0 tier dominates — rank-1 is `FUN_80039a14`
+at 156B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039a14` → `compute_scaled_tx_power_level_from_config_hook`**
+(156B, HIGH, HANDLER-tier) via
+`RenamePass246Region80030000Fun80039a14.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Signed-byte TX-power level calculator in the `0x80039a` config
+cluster. Invokes hook fptr `PTR_PTR_80039ab4` with `config.field1020_0x408` to
+obtain a baseline multiplier; selects offset byte from either
+`config.field640_0x28c` or `config.field1020_0x408 << 2` depending on
+`config.field620_0x278` bit 2 and `0x28c != 0xff`. Scales
+`baseline * (PTR_DAT_80039ab8[+8] - offset/4)` by `0x55f/10000` (1375/10000),
+adds `+0x41` when intermediate exceeds 1999, rounds with ±0x32 bias, and
+returns signed `(result/100)` as a byte. TX-power cluster sibling of
+`noop_config_dispatch_hook_fptr_jr_ra_stub` (`0x80039a10`) and
+`compute_tx_power_delta_from_global_baselines`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 156B decompile; config-byte selection, fixed-point
+scaling, and signed-byte return semantics unambiguous.
+
+Region unnamed count after this pass: **44** (45 minus this rename). Live named
+**2122** global.
+
+**Next:** Pass 247 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

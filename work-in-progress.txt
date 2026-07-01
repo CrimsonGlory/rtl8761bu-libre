@@ -13992,7 +13992,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 245;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 246: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 246 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80039a14`→`compute_scaled_tx_power_level_from_config_hook`
+          (156B, HIGH, HANDLER-tier). TX-power level calculator: hook fptr with
+          config `field1020_0x408`, scales via `PTR_DAT_80039ab8[+8]` and
+          config `0x28c`/`0x278` bit2; `0x80039a` cluster sibling of
+          `noop_config_dispatch_hook_fptr_jr_ra_stub`. 0 xref-in.
+          Region unnamed 44 remain; live named 2122.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 246;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 247: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
