@@ -6174,5 +6174,38 @@ busy(`0xf`)/ready(`0`)/blocked(`0xff`) convention match siblings
 Region unnamed count after this pass: **92** (93 minus this rename). Live named
 **2074** global.
 
-**Next:** Pass 199 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 199.
+
+## Pass 199 (2026-07-01) — HW reg 0x22 bits 7-9 RMW `FUN_800391d0`
+
+Fresh `ListUnnamed80030000.java` re-run: **92 unnamed** remain in region
+(unchanged from Pass 198; rank-1 by size at xref=1 tier is `FUN_800391d0` at
+56B — wins on size over tied 56B/54B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800391d0` → `read_modify_write_hw_reg_0x22_set_bits7_9_from_3bit_param`**
+(56B, HIGH, SIMPLE-tier) via
+`RenamePass199Region80030000Fun800391d0.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-modify-write HW/VSC register `0x22` bits 7-9: reads via
+indirect read fptr at `PTR_DAT_80039208` with arg `0x22`, then writes back via
+write fptr at `PTR_DAT_8003920c` with value
+`(read_val & 0xfc7f) | ((param_1 & 7) << 7)` — clears bits 7-9, replaces with
+the low 3 bits of `param_1`. Sibling of Pass 117's
+`apply_hw_reg_0x2b_slot_nibble_if_config_bit3` / callee `FUN_80039194` (reg
+`0x2b` upper-nibble merge) in the `0x800391xx` BB register-config init
+cluster.
+
+**Callers:** 1 xref-in — `FUN_80039234` (config-bit2-gated optional hook: when
+`PTR_DAT_80039254[1]` bit 2 (`0x4`) set, passes config byte at offset `0x3d`
+to program bits 7-9 of reg `0x22`).
+
+**Confidence:** HIGH — full 56B decompile; register index `0x22` and 3-bit field
+merge at bits 7-9 unambiguous; caller config-gate pattern matches Pass 117's
+`apply_hw_reg_0x2b_slot_nibble_if_config_bit3` sibling.
+
+Region unnamed count after this pass: **91** (92 minus this rename). Live named
+**2075** global.
+
+**Next:** Pass 200 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
