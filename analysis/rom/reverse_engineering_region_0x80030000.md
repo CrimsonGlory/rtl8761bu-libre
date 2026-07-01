@@ -3372,5 +3372,41 @@ the role.
 Region unnamed count after this pass: **176** (177 minus this rename). Live named
 **1990** global.
 
-**Next:** Pass 115 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 115.
+
+## Pass 115 (2026-07-01) — conn-setup commit fallback logger `FUN_80034ccc`
+
+Fresh `ListUnnamed80030000.java` re-run: **176 unnamed** remain in region
+(unchanged from Pass 114 pre-rename list; rank-1 at xref=2 tier was
+`FUN_80034ccc` at 48B — largest among eight tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034ccc` → `log_conn_setup_commit_fallback_evt_0x2d2_if_no_patch3`**
+(48B, HIGH, SIMPLE-tier) via `RenamePass115Region80030000Fun80034ccc.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Thin `possible_logger_called_if_no_patch3` tail-call stub with
+event tag `0x2d2` (722); context pointer from `PTR_DAT_80034cfc`. Fallback
+logging path when config byte at `PTR_DAT_80035cd0[1]` / `PTR_DAT_8005c060[1]`
+has bit 4 set — bypasses the normal
+`commit_connection_setup_mode_by_slot_bitmask_and_gates` /
+`gate_lmp_power_clk_adj_eligibility_by_conn_state` commit path and instead
+sets housekeeping byte `+0x8c` (link-power-mode tail) before emitting the
+logger event. Sibling of Pass 60/61's `log_ogc3_config_apply_evt_0x4b6` /
+`log_role_switch_housekeeping_evt_0x330` logger stubs (same shape, different
+tags).
+
+**Callers:** 2 confirmed via decompile — `param_dispatch_with_rom_calls`
+(region `0x80030000`, connection-setup param-dispatch cluster) and
+`dispatch_link_power_mode_by_status_bits_and_commit` (region `0x80050000`,
+link power-mode transition tail).
+
+**Confidence:** HIGH — fully decompiled 48B; logger-stub idiom matches
+documented `possible_logger_called_if_no_patch3` cluster; both caller
+semantics confirmed via live decompile of parent dispatchers.
+
+Region unnamed count after this pass: **175** (176 minus this rename). Live named
+**1991** global.
+
+**Next:** Pass 116 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
