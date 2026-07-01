@@ -8212,5 +8212,33 @@ offsets unambiguous.
 Region unnamed count after this pass: **26** (27 minus this rename). Live named
 **2140** global.
 
-**Next:** Pass 265 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 265.
+
+## Pass 265 (2026-07-01) — BB reg `0xda` fptr writer `FUN_8003b574`
+
+Fresh `ListUnnamed80030000.java` re-run: **26 unnamed** remain in region
+(unchanged from Pass 264; xref_in=0 tier dominates — rank-1 is `FUN_8003b574`
+at 56B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b574` → `invoke_bb_reg_0xda_writer_merge_global_low10_with_param_bits_4_15`**
+(56B, HIGH, UTILITY-tier) via
+`RenamePass265Region80030000Fun8003b574.java` (`renamed=1`, live-verified).
+
+**Mechanism:** BB register `0xda` write helper in the `0x8003b5xx` cluster
+(sibling of Pass 48 `write_indexed_bb_register_low16_with_global_mask` and
+Pass 232 `read_high_nibble_from_global_ushort_at_DAT_8003b570`). Caches
+`param_1` bits 4–15 to global `PTR_DAT_8003b5ac`, then invokes hook fptr at
+`PTR_DAT_8003b5b4` with opcode `0xda` and merged value
+`(*DAT_8003b5b0 & 0x3ff) | (param_1 bits 4–15)`.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 56B decompile; global cache + fptr dispatch pattern
+unambiguous.
+
+Region unnamed count after this pass: **25** (26 minus this rename). Live named
+**2141** global.
+
+**Next:** Pass 266 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
