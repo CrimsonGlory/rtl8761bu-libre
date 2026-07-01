@@ -4731,5 +4731,41 @@ confirmed.
 Region unnamed count after this pass: **136** (137 minus this rename). Live named
 **2030** global.
 
-**Next:** Pass 155 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 155.
+
+## Pass 155 (2026-07-01) — SCO teardown table commit `FUN_800347d4`
+
+Fresh `ListUnnamed80030000.java` re-run: **136 unnamed** remain in region
+(unchanged from Pass 154; rank-1 at xref=1 tier is `FUN_800347d4` at 142B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800347d4` → `commit_sco_teardown_bb_hook_pairs_and_18pair_param_table`**
+(142B, HIGH, HANDLER-tier) via
+`RenamePass155Region80030000Fun800347d4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** SCO/eSCO link-loss teardown table-commit helper. Loops 5 times
+calling hook fptr at `PTR_DAT_80034868` with uint16 pairs from ROM table
+`PTR_DAT_80034864` and caller buffer `param_1` (BB register programming via
+hook). Loops 18 times (`0x12`) copying uint16 values from `param_2` into
+indexed destinations via `PTR_DAT_8003486c` + base `DAT_80034870`. Sets global
+mode ushort at `DAT_80034874` to `4`. When
+`PTR_struct_of_at_least_0x300_size_80034878->field_0x173 != 0` and slot index
+at `PTR_DAT_8003487c` is `< 10`, calls `sometimes_called_with_0_3_0` with
+per-connection `(bos_connection__array_index, byte_0xCC, field_0xbc)` from
+`PTR_big_ol_struct_80034880` — encryption-mode disable per active slot.
+
+**Callers:** 1 xref-in (COMPUTED_CALL) — `reset_sco_esco_hw_subsystem_on_link_loss`
+at `0x800373e6` via fptr at `PTR_DAT_80037448` with buffers
+`PTR_DAT_80037450`/`PTR_DAT_8003744c`; sibling of Pass 43's
+`disable_esco_hw_slot_for_each_active_connection` in the same teardown branch.
+
+**Confidence:** HIGH — full 142B decompile; 5-hook + 18-pair table-commit idiom
+matches documented BB-reg hook programmers; `field_0x173` gate and
+`sometimes_called_with_0_3_0` per-slot tail match Pass 43 SCO teardown cluster.
+
+Region unnamed count after this pass: **135** (136 minus this rename). Live named
+**2031** global.
+
+**Next:** Pass 156 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
