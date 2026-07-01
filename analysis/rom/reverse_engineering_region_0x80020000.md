@@ -2845,7 +2845,7 @@ routes overlapping but non-identical rejected-opcode recovery handlers.
 
 **Mechanism:** LMP NOT ACCEPTED (opcode 0x04) rejected-opcode byte dispatch at
 `param+5`:
-- `0x08` → `FUN_80027300` (IN_RAND alt recovery)
+- `0x08` → `handle_lmp_in_rand_not_accepted_alt` (IN_RAND alt recovery)
 - `0x0f` → `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`
 - `0x10` → `handle_lmp_encryption_key_size_req_not_accepted`
 - `0x11` → `FUN_80027b28` (start encryption recovery)
@@ -4006,5 +4006,34 @@ callees `program_encryption_key_and_send_lmp_start_encryption_req` and
 opcode `0x10`.
 
 Region unnamed count after this pass: **204** (205 minus this rename). Live named **1717** global.
+
+**Next:** superseded by Pass 6 continuation (109).
+
+## Pass 6 continuation (109) (2026-07-01) — LMP IN_RAND alt NOT ACCEPTED recovery `FUN_80027300`
+
+Decompiled and renamed:
+**`FUN_80027300` → `handle_lmp_in_rand_not_accepted_alt`**
+(118B, HIGH) via `RenamePass6Region80020000Fun80027300.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (118B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=204` at pass start). Alt-recovery sibling
+of `handle_lmp_in_rand_not_accepted` (`0x80027380`) — routed via
+`dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` rejected-opcode `0x08` path
+(documented Pass 6 cont. 73).
+
+**Mechanism:** LMP IN_RAND (opcode 0x08) NOT ACCEPTED alt-recovery handler. Per-connection
+`big_ol_struct[slot]._x58_crypto_struct` lookup; role-gated via `FUN_8002403c` unless global
+bypass `PTR_DAT_8002737c[2]&0x80`. Dispatches on crypto sub-state byte at `+1`:
+- `0x0b` (AU_RAND phase): on gate pass, calls `FUN_800255fc` (link-key-type continuation)
+- `0x19` (SSP phase): on gate pass, advances sub-state via `set_arg1_1_to_arg2(_, 0x1a)`
+
+**Callers:** `dispatch_lmp_not_accepted_recovery_alt_by_rejected_opcode` (rejected
+opcode `0x08` path) — xref_in=1.
+
+**Confidence:** HIGH — decompile confirms established NOT ACCEPTED alt-recovery idiom;
+simpler two-branch variant of main `handle_lmp_in_rand_not_accepted`; sits in documented
+alt-dispatch table at rejected opcode `0x08`.
+
+Region unnamed count after this pass: **203** (204 minus this rename). Live named **1718** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
