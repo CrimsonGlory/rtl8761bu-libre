@@ -12068,8 +12068,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 46;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 47: cold-triage rank-2 unnamed
-          `FUN_8003c608` (write-side sibling in `0x8003c6xx` cluster).
+[DONE]  Full RE: ROM region 0x80030000 — Pass 47 (2026-07-01): decompiled+renamed rank-2
+          `FUN_8003c608`→`write_indexed_bb_register_low16_with_mask_and_hook` (114B, HIGH).
+          IRQ-masked indexed BB register write with optional hook; write-side sibling
+          completing `0x8003c6xx` cluster. Region 241 unnamed remain; live named 1925.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 47;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 48: cold-triage rank-2 unnamed
+          `FUN_8003b5b8` (register-script interpreter callee sibling of `0x8003c6xx` cluster).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

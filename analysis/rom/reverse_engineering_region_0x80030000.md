@@ -1197,4 +1197,30 @@ interpreter integration already noted.
 
 Region unnamed count after this pass: **242** (243 minus this rename). Live named **1924** global.
 
-**Next:** Pass 47 — cold-triage rank-2 `FUN_8003c608` (write-side sibling in `0x8003c6xx` cluster).
+**Next:** superseded by Pass 47.
+
+## Pass 47 (2026-07-01) — masked indexed BB register write `FUN_8003c608`
+
+Decompiled and renamed rank-2 cold-triage target:
+**`FUN_8003c608` → `write_indexed_bb_register_low16_with_mask_and_hook`**
+(114B, HIGH) via `RenamePass47Region80030000Fun8003c608.java` (`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked indexed baseband register write primitive with optional
+override hook at `PTR_DAT_8003c67c`: if installed and returns non-zero, the hook
+handles the write. Default path: disable interrupts, compose masked dword from
+globals `DAT_8003c680`–`DAT_8003c698`, write low 16 bits of `param_2` with byte
+index `param_1` in upper 16 bits to MMIO `DAT_8003c690` (two-phase masked write
+pattern matching the read primitives' hook/default split), re-enable interrupts.
+Write-side counterpart to Pass 45/46 read primitives in the `0x8003c6xx` cluster.
+
+**Callers:** register-script interpreter (`0x8003aea0`) callee per patch-installer
+analysis; no direct xrefs resolved via MCP `xrefs_to` (likely indirect/script-table
+dispatch).
+
+**Confidence:** HIGH — clear IRQ-masked MMIO index-select + mask + optional-hook
+idiom; structural write-side sibling of Pass 45/46 documented read primitives;
+register-script interpreter integration already noted.
+
+Region unnamed count after this pass: **241** (242 minus this rename). Live named **1925** global.
+
+**Next:** Pass 48 — cold-triage rank-2 `FUN_8003b5b8` (register-script interpreter callee sibling of `0x8003c6xx` cluster).
