@@ -2612,5 +2612,29 @@ unambiguous.
 Region unnamed count after this pass: **200** (201 minus this rename). Live named
 **1966** global.
 
-**Next:** Pass 91 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 91.
+
+## Pass 91 (2026-07-01) — timing offset scaler `FUN_800396c8`
+
+Fresh `ListUnnamed80030000.java` re-run: **200 unnamed** remain in region
+(unchanged from Pass 90; rank-1 by size at xref=3 tier is `FUN_800396c8` at
+30B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800396c8` → `compute_timing_offset_from_table_base_step_and_index_div10`**
+(30B, HIGH) via `RenamePass91Region80030000Fun800396c8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Reads ushort base at `PTR_DAT_800396e8+0xc` and step at
+`+0x10`; returns `(base + 5 + (param_1 & 0xff) * step) / 10` — linear timing
+offset scaler indexed by low byte of `param_1`.
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`).
+
+**Confidence:** HIGH — full 30B decompile; formula unambiguous.
+
+Region unnamed count after this pass: **199** (200 minus this rename). Live named
+**1967** global.
+
+**Next:** Pass 92 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
