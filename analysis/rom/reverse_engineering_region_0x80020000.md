@@ -9873,4 +9873,32 @@ table variant in the encryption key-program cluster.
 
 Region unnamed count after this pass: **6** (7 minus this rename). Live named **1915** global.
 
+**Next:** superseded by Pass 6 continuation (307).
+
+## Pass 6 continuation (307) (2026-07-01) — connection status predicate `FUN_8002963c`
+
+Decompiled and renamed:
+**`FUN_8002963c` → `is_conn_status_04_or_0f_at_offset_b2`**
+(22B, HIGH) via `RenamePass6Region80020000Fun8002963c.java` (`renamed=1`, live-verified).
+
+**Triage note:** All 6 remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_8002963c` (22B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=6` at pass start). Sits in the `0x800296xx`
+link-key-type / master-link-key cluster adjacent to Pass 6 cont. (172)'s
+`find_random_bdaddr_encrypted_link_slot_for_link_key_evt` at `0x80029680`.
+
+**Mechanism:** Returns true when per-connection status byte at offset **0xb2**
+(`_x30_status_byte_by_index_at_0xb2` in the `big_ol_struct` layout) equals **0x04** or **0x0f**
+— the steady-state active-encrypted-link status idiom used throughout encryption/link-key
+handlers (e.g. `find_random_bdaddr_encrypted_link_slot_for_link_key_evt`,
+`arm_master_link_key_phase1_slot_lmp_0x32`, `dispatch_master_link_key_hci_phase_per_random_bdaddr_slot`).
+
+**Callers:** none (xref_in=0; orphan predicate — likely inlined tail-call target or dead
+compile-time helper extracted as standalone thunk).
+
+**Confidence:** HIGH for mechanism (unambiguous byte compare); MEDIUM for role (orphan with no
+proven call sites, but status-byte semantics and cluster placement match documented siblings).
+
+Region unnamed count after this pass: **5** (6 minus this rename). Live named **1916** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
