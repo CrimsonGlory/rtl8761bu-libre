@@ -5882,4 +5882,29 @@ analysis; three established encryption-finalizer callers.
 
 Region unnamed count after this pass: **143** (144 minus this rename). Live named **1778** global.
 
+**Next:** superseded by Pass 6 continuation (170).
+
+## Pass 6 continuation (170) (2026-07-01) — stored link-key BD_ADDR lookup `FUN_80026994`
+
+Decompiled and renamed:
+**`FUN_80026994` → `lookup_stored_link_key_by_bdaddr_in_seven_slot_table`**
+(74B, HIGH) via `RenamePass6Region80020000Fun80026994.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=143` at pass start). First-listed
+`FUN_80026994` in the 74B cluster.
+
+**Mechanism:** Seven-slot stored link-key table walker at `PTR_DAT_800269e0`. Each
+entry is 0x17 bytes: 6-byte BD_ADDR at base, active flag at `+0x16`. Scans indices
+0–6; on active+memcmp hit writes key pointer (`entry+6`) to out-param and returns 1;
+returns 0 on miss.
+
+**Callers:** `lookup_bdaddr_link_key_dispatch_auth_or_request_hci_key` (Pass 6 cont.
+159 auth/link-key resolver) plus one additional xref; xref_in=2.
+
+**Confidence:** HIGH — decompile confirms table-walk idiom; callee chain documented in
+Pass 6 cont. (159)/(16); 0x17 stride and `+0x16` active gate match link-key store layout.
+
+Region unnamed count after this pass: **142** (143 minus this rename). Live named **1779** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

@@ -10765,8 +10765,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (169);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (170): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (143 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (170) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80026994`→`lookup_stored_link_key_by_bdaddr_in_seven_slot_table`
+          (74B, HIGH). Seven-slot link-key table BD_ADDR lookup (0x17 stride, +0x16 active
+          flag); caller `lookup_bdaddr_link_key_dispatch_auth_or_request_hci_key`. 142 unnamed
+          remain; live named 1779.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (170);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (171): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (142 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
