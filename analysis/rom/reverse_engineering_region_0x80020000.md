@@ -5966,4 +5966,29 @@ handle during temporary-key transition.
 
 Region unnamed count after this pass: **140** (141 minus this rename). Live named **1781** global.
 
+## Pass 6 continuation (173) (2026-07-01) — codec JIT +0xe0 byte selector `FUN_800240a4`
+
+Decompiled and renamed:
+**`FUN_800240a4` → `select_bdaddr_random_or_mode_byte_for_codec_jit_e0`**
+(74B, HIGH) via `RenamePass6Region80020000Fun800240a4.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (74B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=140` at pass start). First-listed
+`FUN_800240a4` in the 74B cluster (tied with `FUN_80021240`, picked by list order).
+
+**Mechanism:** Two-argument selector on connection index + mode byte: modes `0`/`1`
+return the mode byte itself; mode `2` returns `big_ol_struct[slot].bdaddr_random_`;
+mode `3` returns `bdaddr_random_ ^ 1`; other modes return `0`.
+
+**Caller:** `unscramble_codec_jit_template_and_install_hw_hook` at `0x80025b8a` —
+stores the returned byte into per-connection crypto sub-struct `+0xe0` before
+un-scrambling MIPS16e codec templates and installing the `+0xe4` hardware-write hook.
+xref_in=1 via `ListXrefsTo800240a4.java`.
+
+**Confidence:** HIGH — decompile confirms pure selector with documented
+`bdaddr_random_` paths; sole caller decompile shows direct store to codec-JIT
+sub-struct `+0xe0` (hardware_layer §12).
+
+Region unnamed count after this pass: **139** (140 minus this rename). Live named **1782** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
