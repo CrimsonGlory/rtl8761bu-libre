@@ -7342,4 +7342,36 @@ encryption dispatcher `0x7F` switch; lives in `0x800241xx`–`0x800243xx` cluste
 
 Region unnamed count after this pass: **94** (95 minus this rename). Live named **1827** global.
 
+**Next:** superseded by Pass 6 continuation (219).
+
+## Pass 6 continuation (219) (2026-07-01) — cold-init slot-table bootstrap `FUN_80021e6c`
+
+Decompiled and renamed:
+**`FUN_80021e6c` → `init_three_0x88_slot_tables_and_clear_crypto_globals`**
+(52B, HIGH) via `RenamePass6Region80020000Fun80021e6c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=94` at pass start). First-listed
+`FUN_80021e6c` in tied 52B/xref_in=1 cluster (successor to Pass 6 cont. (218)'s
+`FUN_800242dc`).
+
+**Mechanism:** BT-stack cold-init slot-table bootstrap called from `FUN_800681d8`
+(region `0x80060000`) immediately before `reset_all_connection_crypto_slots_and_link_key_table`
+(Pass 6 cont. 120). Seeds three `0x88`-stride entries in `PTR_DAT_8006d338` via
+`FUN_8006d2e4(0,1)`/`(1,2)`/`(2,3)` (memset slot, assign IDs 1..3, prime `+0x70/+0x74=1`),
+initializes three parallel slots in `PTR_DAT_8003cf7c` via `FUN_8003cf80`/`FUN_8003cf28`,
+clears a fourth single-slot buffer at `PTR_DAT_8006d2e0` via `FUN_8006d2bc`, then resets
+global crypto-state bytes via `FUN_8006d45c` (clears `struct+0x171`, four status bytes,
+conditionally arms enable byte from config-mode check).
+
+**Callers:** `FUN_800681d8` at `0x80068346` (xref_in=1, confirmed via
+`ListXrefsTo80021e6c.java`) — BT stack cold-init orchestrator in region `0x80060000`.
+
+**Confidence:** HIGH — decompile confirms three-slot `0x88`-stride table init idiom with
+sequential IDs 1..3, sibling init of parallel three-slot table, and global crypto-flag
+reset; single caller in documented cold-init chain alongside
+`reset_all_connection_crypto_slots_and_link_key_table`.
+
+Region unnamed count after this pass: **93** (94 minus this rename). Live named **1828** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
