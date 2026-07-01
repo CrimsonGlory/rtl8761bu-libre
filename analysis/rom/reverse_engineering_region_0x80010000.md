@@ -983,7 +983,7 @@ reads directly with width 0 (byte); otherwise rounds down to word boundary
 Halfword counterpart is sibling `read_baseband_register_halfword_masked_busywait`
 (Pass 7h). Already documented in `reverse_engineering_baseband_reg_helpers.md`.
 
-**Callers:** patch `FUN_8010c260`, `FUN_801106bc`, `FUN_80011b6c`,
+**Callers:** patch `FUN_8010c260`, `FUN_801106bc`, `pulse_bb_regs_0x00_0x10_with_cc_mode_bits_and_spin_delays`,
 `VSC_0xfc61_config_update`, `FUN_8003b170`.
 
 **Confidence:** HIGH — trivial decompile; pre-documented mechanism; behavioral
@@ -1712,4 +1712,33 @@ triplet referenced from region `0x80030000`.
 
 Region unnamed count after this pass: **222** (223 minus this rename).
 
-**Next:** Pass 90 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 90.
+
+## Pass 90 (2026-07-01) — BB reg pulse `FUN_80011b6c`
+
+Pass 90 target from cold-triage rank-1 (4 xref_in, 134B — largest at xref=4
+tier after Pass 89). Decompiled and renamed:
+**`FUN_80011b6c` → `pulse_bb_regs_0x00_0x10_with_cc_mode_bits_and_spin_delays`**
+(134B, HIGH) via `RenamePass90Region80010000Fun80011b6c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Transient baseband register pulse primitive in the `0x80011bxx`
+cluster (sibling of masked busy-wait R/W primitives from Pass 7/7b). Saves BB
+reg `0xcc` byte via `read_baseband_register_byte_masked_busywait`, temporarily
+sets bits 2–3 (`| 0xc`), pulses reg `0x10` bit 0, delays via
+`spin_delay_10x_iterations(1)`, pulses reg `0` bit 10 (`0x400`), longer delay
+(`spin_delay_10x_iterations(0x14)`), clears reg `0` bit 1, then restores
+`0xcc` (`& 0xf3`).
+
+**Callers:** 4 xref_in — ROM direct call from `FUN_80011bf4` (sibling in
+`0x80011bxx` cluster) plus three patch-firmware computed-call sites
+(`FUN_8010c854`, `FUN_8010c160`, `FUN_8010d2e8`).
+
+**Confidence:** HIGH — decompile confirms save/pulse/restore sequence on BB regs
+`0x00`/`0x10`/`0xcc` with spin delays; naming consistent with
+`config_gated_pulse_bb_reg_0x75_bit0_with_spin_delays` (region `0x80030000`
+Pass 157); cluster placement alongside masked busy-wait primitives.
+
+Region unnamed count after this pass: **221** (222 minus this rename).
+
+**Next:** Pass 91 — cold-triage next rank-1 unnamed in region `0x80010000`.

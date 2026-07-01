@@ -14748,8 +14748,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 89;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 90: cold-triage next rank-1
-          unnamed function in region `0x80010000` (222 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 90 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80011b6c`→`pulse_bb_regs_0x00_0x10_with_cc_mode_bits_and_spin_delays`
+          (134B, HIGH). Transient BB reg pulse: saves/restores `0xcc` mode bits,
+          pulses regs `0x00`/`0x10` with `spin_delay_10x_iterations`; ROM caller
+          `FUN_80011bf4` + 3 patch computed-call sites; 4 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 90;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 91: cold-triage next rank-1
+          unnamed function in region `0x80010000` (221 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

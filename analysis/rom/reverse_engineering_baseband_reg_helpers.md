@@ -96,7 +96,7 @@ the same low-level register access primitive as `read_baseband_register_masked_b
 ## 3. `FUN_800115c8` — Byte-extraction wrapper around `read_baseband_register_masked_busywait`
 
 `0x800115c8`, 62 bytes. Callers: `FUN_8010c260` (patch), `FUN_801106bc`,
-`FUN_80011b6c`, `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8`, `FUN_8003b170`.
+`pulse_bb_regs_0x00_0x10_with_cc_mode_bits_and_spin_delays`, `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8`, `FUN_8003b170`.
 
 ```c
 uint FUN_800115c8(uint param_1)
