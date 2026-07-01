@@ -9142,4 +9142,33 @@ already analyzed in Pass 6 cont. (120).
 
 Region unnamed count after this pass: **31** (32 minus this rename). Live named **1890** global.
 
+**Next:** superseded by Pass 6 continuation (282).
+
+## Pass 6 continuation (282) (2026-07-01) — HCI evt buffer fptr dispatch mode-0 `FUN_8002ed9c`
+
+Decompiled and renamed:
+**`FUN_8002ed9c` → `hci_evt_buffer_fptr_dispatch_mode0_forward`**
+(24B, HIGH) via `RenamePass6Region80020000Fun8002ed9c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_8002b394` (28B, xref_in=0) per established cold-triage
+convention; selected rank-1 with xref_in≥1: `FUN_8002ed9c` (24B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=31` at pass start). Sits in the `0x8002edxx`
+HCI event-buffer fptr-dispatch cluster immediately after sibling
+`hci_evt_buffer_fptr_dispatch_mode2_computed_ushort_range` (`FUN_8002ed70`).
+
+**Mechanism:** Loads function pointer from `PTR_DAT_8002edb4` and tail-calls
+`fptr(param_1, param_2, param_3, 0)` — thin forwarder that always passes trailing argument
+`0` to the registered HCI event-buffer dispatch hook. Callers supply the mode-like first
+argument (`3` or `4` for buffer-forward paths).
+
+**Callers:** `HCI_EVT_0x1fd_FUN_8002a334` (ring-buffer drain, passes mode `3` + buffer ptr +
+byte offset) and `assoc_w_tHCI_TD_FUN_8002f518` (HCI transport-dispatch handler, passes
+mode `3`/`4`/`2` depending on opcode path); xref_in=2 via `find_callers`.
+
+**Confidence:** HIGH — decompile confirms single fptr load + 4-arg tail-call with fixed
+trailing zero; sibling mode-2 thunk already analyzed in Pass 6 cont. (255); both callers
+decompiled and show consistent buffer-forward dispatch pattern.
+
+Region unnamed count after this pass: **30** (31 minus this rename). Live named **1891** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
