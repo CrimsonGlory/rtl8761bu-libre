@@ -1754,7 +1754,8 @@ leading sign/run bits and returns effective signed right-shift width (0–40,
 return 1. Pure compiler-support primitive — no protocol-specific meaning.
 
 **Callers:** 4 xref-in incl. `int64_arith_op_and_signed_shift_right`
-(Pass 8 — called twice per shift, low/high halves) and `FUN_8003ac7c`
+(Pass 8 — called twice per shift, low/high halves) and
+`read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width`
 (VSC `0xfd49` extended-diagnostic register read path building sign bytes
 before shift-width store at `+5`).
 
@@ -3653,5 +3654,37 @@ hook/bit clear matches documented `bos_base+0xe4` cluster.
 Region unnamed count after this pass: **168** (169 minus this rename). Live named
 **1998** global.
 
-**Next:** Pass 123 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 123.
+
+## Pass 123 (2026-07-01) — `read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width`
+
+Fresh `ListUnnamed80030000.java` re-run: **168 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_8003ac7c` at 296B —
+largest among tied 1-xref candidates, tied with `FUN_800334ac` at 296B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ac7c` → `read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width`**
+(296B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass123Region80030000Fun8003ac7c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script interpreter cluster helper: programs BB regs
+`0x40`/`0x41` via `dispatch_bb_register_da_d6_write_with_hook`, then reads
+four extended-diagnostic values through `VSC_0xfd49_extended_diagnostic` at
+indices `0xc035`–`0xc038` and `0xc03d`. Stores paired dword halves into two
+parallel 0x20-stride slot records (`param_2` index and scaled offset), builds
+per-bit masks at byte `+4` (low nibble vs `>>7` high-nibble paths), then calls
+`compute_int64_halves_signed_shift_width` to store signed-shift width at byte
+`+5` on both records.
+
+**Callers:** 1 xref-in — data reference from `FUN_8003ac28` at `0x8003ac48`
+(register-script interpreter dispatch cluster; indirect/script-table path).
+
+**Confidence:** HIGH — full 296B decompile; `VSC_0xfd49_extended_diagnostic` and
+`compute_int64_halves_signed_shift_width` callees already HIGH-named; BB
+register indices match documented diagnostic-read cluster (Pass 64 cross-ref).
+
+Region unnamed count after this pass: **167** (168 minus this rename). Live named
+**1999** global.
+
+**Next:** Pass 124 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
