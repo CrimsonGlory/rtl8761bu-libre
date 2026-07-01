@@ -8698,4 +8698,28 @@ idiom; structural sibling of Pass 6 cont. (263)/(264)'s `0x1b`/`0x1c` senders.
 
 Region unnamed count after this pass: **47** (48 minus this rename). Live named **1874** global.
 
+**Next:** superseded by Pass 6 continuation (266).
+
+## Pass 6 continuation (266) (2026-07-01) — big-endian uint reader `FUN_800211d0`
+
+Decompiled and renamed:
+**`FUN_800211d0` → `read_be_uint_from_u8_buf_when_mode_0x10`**
+(36B, HIGH) via `RenamePass6Region80020000Fun800211d0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=47` at pass start). Sole 36B entry after
+Pass 6 cont. (265) exhausted the tied LMP-ext sender cluster at `0x800258xx`.
+
+**Mechanism:** Gated big-endian byte-array-to-uint reader. When `param_3==0x10`, walks
+`param_2` bytes from `param_1` in descending index order, shifting each byte into the
+accumulator (`uVar1 = byte | uVar1<<8`); returns 0 when mode byte is not `0x10`. Utility
+tier in the `0x800211xx` HCI/crypto helper neighborhood.
+
+**Callers:** none (xref_in=0) — no direct call sites or data xrefs found.
+
+**Confidence:** HIGH — decompile confirms unambiguous MSB-first byte assembly loop with
+explicit `0x10` mode gate; consistent with other orphan utility-tier renames in this pass.
+
+Region unnamed count after this pass: **46** (47 minus this rename). Live named **1875** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.

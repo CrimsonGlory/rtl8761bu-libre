@@ -11621,8 +11621,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (265);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (266): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (47 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (266) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800211d0`→`read_be_uint_from_u8_buf_when_mode_0x10`
+          (36B, HIGH) — gated big-endian byte-array-to-uint reader when param_3==0x10;
+          xref_in=0.
+          46 unnamed remain; live named 1875.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (266);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (267): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (46 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
