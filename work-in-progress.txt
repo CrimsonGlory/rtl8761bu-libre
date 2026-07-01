@@ -15040,8 +15040,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 119;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 120: cold-triage next rank-1
-          unnamed function in region `0x80010000` (192 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 120 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80012af8`→`commit_hw_reg_bitmask_with_link_mode_and_lmp_power_clk_gate`
+          (264B, HIGH). VSC fc11 HW reg bitmask commit: seeds `DAT_80012c00|3`,
+          gates via `gate_lmp_power_clk_adj_eligibility_by_conn_state(0)` +
+          BOS `+0x164` update, encodes link-mode bits from `PTR_DAT_80012c0c`,
+          optional hook at `PTR_PTR_80012c10`, commits masked value to globals.
+          Callers `VSC_0xfc11_1_FUN_80012c18` + `FUN_80010660` (link-mode-change
+          state machine). 191 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 120;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 121: cold-triage next rank-1
+          unnamed function in region `0x80010000` (191 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

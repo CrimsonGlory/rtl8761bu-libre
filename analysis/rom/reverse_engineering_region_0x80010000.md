@@ -718,7 +718,7 @@ confirmed accurate against the decompile, with one correction found.
 
 | Address | Size | Name | Confirmed purpose |
 |---------|------|------|--------------------|
-| `0x80012c18` | 164B | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 handler: calls a validator fptr first; on failure/absence, disables IRQs to clear HW register bits 0xfc00 (mask `0xffff03ff`), re-enables IRQs, calls `FUN_80012af8`, then conditionally sends multi-VSC event 0x6e via the shared `ptr_ptr_call_to_multi_VSC...` fptr. |
+| `0x80012c18` | 164B | `VSC_0xfc11_1_FUN_80012c18` | VSC 0xfc11 handler: calls a validator fptr first; on failure/absence, disables IRQs to clear HW register bits 0xfc00 (mask `0xffff03ff`), re-enables IRQs, calls `commit_hw_reg_bitmask_with_link_mode_and_lmp_power_clk_gate`, then conditionally sends multi-VSC event 0x6e via the shared `ptr_ptr_call_to_multi_VSC...` fptr. |
 | `0x80013074` | 144B | `VSC_0xfc39_2_FUN_80013074` | VSC 0xfc39 part 2: 4-mode dispatcher (param 0-3) each masking/setting different HW register bits, then calling delay/log helper `FUN_80012e80(0, mode_code, 10)`. |
 | `0x8001343c` | 40B | `second_set_func_in_set_two_global_ptrs` | Getter pairing with a (separately-named) "first" func: checks `config_struct+0xd8` flag bit 0x40 and a sentinel byte, returns whether a global toggle value == 0. |
 | `0x80013474` | 4B | `return_1` | Trivial: `return 1`. |
@@ -2597,4 +2597,34 @@ analysis.
 
 Region unnamed count after this pass: **192** (193 minus this rename).
 
-**Next:** Pass 120 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 120.
+
+## Pass 120 (2026-07-01) — HW reg bitmask commit `FUN_80012af8`
+
+Pass 120 target from cold-triage rank-1 (2 xref_in, 264B — largest at xref=2
+tier after Pass 119 cleared `FUN_8001ab44`). Decompiled and renamed:
+**`FUN_80012af8` → `commit_hw_reg_bitmask_with_link_mode_and_lmp_power_clk_gate`**
+(264B, HIGH) via `RenamePass120Region80010000Fun80012af8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** VSC 0xfc11 cluster HW-register bitmask commit helper. Seeds
+bitmask from `DAT_80012c00 | 3`; when link-state byte at `PTR_DAT_80012c04+2`
+has bit `0x80` and `gate_lmp_power_clk_adj_eligibility_by_conn_state(0)` returns
+1, clears bit 1 and updates BOS `+0x164` with mask `0x807f | 0x300`. Encodes
+link-mode subfield from `PTR_DAT_80012c0c` status bytes `(byte[1]>>2 & 3)` and
+`byte[0]&1` into bitmask bit positions 2/3/5. Optional veto hook at
+`PTR_PTR_80012c10`; on null or zero return, commits masked value
+(`& 0xffbd80ff`) to `PTR_DAT_80012c14` and `DAT_80012c00`.
+
+**Callers:** 2 xref_in per `ListXrefsTo80012af8.java` —
+`VSC_0xfc11_1_FUN_80012c18` (post-IRQ HW reg `0xfc00` clear path) and
+`FUN_80010660` (link-mode-change state machine: pool drain + `VSC_0xfc11_2` +
+`FUN_800117b8` tail).
+
+**Confidence:** HIGH — decompile confirms bitmask construction with LMP
+power/clock gate + link-mode encoding; callers are VSC fc11 cluster and
+link-mode-change commit paths.
+
+Region unnamed count after this pass: **191** (192 minus this rename).
+
+**Next:** Pass 121 — cold-triage next rank-1 unnamed in region `0x80010000`.
