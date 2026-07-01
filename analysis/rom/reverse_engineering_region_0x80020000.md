@@ -7312,4 +7312,34 @@ in documented HCI OGF3 stored-link-key command-complete cluster.
 
 Region unnamed count after this pass: **95** (96 minus this rename). Live named **1826** global.
 
+**Next:** superseded by Pass 6 continuation (218).
+
+## Pass 6 continuation (218) (2026-07-01) — LMP ext 0x21 reply handler `FUN_800242dc`
+
+Decompiled and renamed:
+**`FUN_800242dc` → `handle_lmp_ext_subopcode_0x21_reply_0x22_when_pairing_mode`**
+(52B, HIGH) via `RenamePass6Region80020000Fun800242dc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (52B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=95` at pass start). First-listed
+`FUN_800242dc` in tied 52B/xref_in=1 cluster (ahead of `FUN_80021e6c`).
+
+**Mechanism:** LMP extended-opcode `0x7F` / sub-opcode `0x21` inbound handler dispatched
+from `LMP_encryption_opcode_handlers` (`0x7F` switch case `0x21`). Sets success flag
+`*param_3=1`; when per-connection pairing-mode flag
+`big_ol_struct[conn]._x58_crypto_struct_at_least_0x27_big[0x214]` is non-zero, calls
+unnamed callee `FUN_800242b0` to send 3-byte LMP-ext reply `0x7f`/`0x22` via
+`send_LMP_pkt` (role bit from `param_1+4` bit0). Complements outbound
+`vsc_fc95_slot0_send_lmp_ext_0x7f_0x21_and_lmp_268` (Pass 6 cont. 87) and status-byte
+`0x21`/`0x22` codec-JIT finish path (Pass 6 cont. 23).
+
+**Callers:** `LMP_encryption_opcode_handlers` at `0x800284ac` (xref_in=1, confirmed via
+`ListXrefsTo800242dc.java`) — `0x7F` extended sub-opcode `0x21` case.
+
+**Confidence:** HIGH — decompile confirms pairing-mode-flag gate on documented crypto
+offset `+0x214` and conditional LMP-ext `0x22` reply send; single caller in documented
+encryption dispatcher `0x7F` switch; lives in `0x800241xx`–`0x800243xx` cluster.
+
+Region unnamed count after this pass: **94** (95 minus this rename). Live named **1827** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
