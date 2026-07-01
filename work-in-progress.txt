@@ -11292,8 +11292,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (229);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (230): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (83 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (230) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800226ec`→`reject_pending_lmp_with_not_accepted_reason6_and_clear`
+          (46B, HIGH). Pending-LMP reject helper: reads opcode byte at `*(crypto+0x1e8)+4`,
+          sends `wrap_send_LMP_NOT_ACCEPTED` reason 6, clears via `FUN_80025634`; caller
+          `dispatch_pairing_continuation_by_crypto_state_and_pending_lmp`. 82 unnamed remain;
+          live named 1839.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (230);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (231): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (82 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

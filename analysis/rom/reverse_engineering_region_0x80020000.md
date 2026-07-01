@@ -7662,4 +7662,33 @@ cont. (164)/(202).
 
 Region unnamed count after this pass: **83** (84 minus this rename). Live named **1838** global.
 
+**Next:** superseded by Pass 6 continuation (230).
+
+## Pass 6 continuation (230) (2026-07-01) — pending-LMP NOT ACCEPTED rejector `FUN_800226ec`
+
+Decompiled and renamed:
+**`FUN_800226ec` → `reject_pending_lmp_with_not_accepted_reason6_and_clear`**
+(46B, HIGH) via `RenamePass6Region80020000Fun800226ec.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (46B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=83` at pass start). First-listed at
+46B tier; successor to Pass 6 cont. (229)'s
+`set_vsc_fcf0_active_byte_from_subcmd1_gated_on_status_bit2`.
+
+**Mechanism:** Pairing/crypto pending-LMP reject helper. Reads pending LMP opcode byte
+at `*(crypto+0x1e8)+4`, splits into opcode (`>>1`) and transaction-ID bit (`&1`), sends
+`wrap_send_LMP_NOT_ACCEPTED(handle, opcode, tid, 6)` (LMP error reason **6**), then
+clears the pending callback via `FUN_80025634`. Same two-step idiom as sibling
+`FUN_80022664` (46B, xref_in=1) in the SSP negative-reply cluster.
+
+**Callers:** `dispatch_pairing_continuation_by_crypto_state_and_pending_lmp`
+(`0x80022e54`) — crypto sub-state `0x16` reject path and pending opcode `0x0B`
+(AU_RAND) branch; xref_in=2 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms established pending-LMP opcode extraction +
+`wrap_send_LMP_NOT_ACCEPTED` + `FUN_80025634` clear pattern; caller already named and
+documented in Pass 6 cont. (75).
+
+Region unnamed count after this pass: **82** (83 minus this rename). Live named **1839** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
