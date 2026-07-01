@@ -4998,4 +4998,36 @@ passkey-entry cluster (`fHCI_User_Passkey_Request_Reply_0x34` sub-state `'5'`).
 
 Region unnamed count after this pass: **172** (173 minus this rename). Live named **1749** global.
 
+**Next:** superseded by Pass 6 continuation (141).
+
+## Pass 6 continuation (141) (2026-07-01) — Boot init literal-pool staging `FUN_8002f3b0`
+
+Decompiled and renamed:
+**`FUN_8002f3b0` → `copy_eight_literal_pool_globals_and_init_baseband_hw`**
+(94B, HIGH) via `RenamePass6Region80020000Fun8002f3b0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=172` at pass start). First of three
+tied 94B/xref_in=1 entries (`FUN_8002f3b0`, `FUN_80026050`, `FUN_800212a0`).
+
+**Mechanism:** Early boot-init sub-step (second call in `FUN_8002a1dc` after
+`calls_interesting_string_user_FUN_80021c9c`). Copies eight ROM literal-pool
+constant dwords (`DAT_8002f410`…`DAT_8002f448`) into eight RAM pointer targets
+(`PTR_DAT_8002f414`…`PTR_DAT_8002f44c`) — same idiom as
+`initialize_some_global_struct_FUN_80021924` but single-dword stores. Then calls
+`init_baseband_hw_from_config_struct` (programs MMIO regs from config blob).
+When `config_struct.field59_0x41 & 3 == 1`, also calls
+`codec_config_param_table_initializer` + unnamed `FUN_800122fc` (772B baseband
+init cluster). Returns 0.
+
+**Callers:** `FUN_8002a1dc` (1 site) — mid-level boot wrapper chaining string-user
+registration, this literal-pool/baseband init, and further subsystem inits.
+
+**Confidence:** HIGH — decompile confirms eight literal-pool→RAM copies plus
+documented `init_baseband_hw_from_config_struct`/`codec_config_param_table_initializer`
+callees; config-flag gate on `field59_0x41` matches other feature-mask gating in
+region `0x80000000`.
+
+Region unnamed count after this pass: **171** (172 minus this rename). Live named **1750** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
