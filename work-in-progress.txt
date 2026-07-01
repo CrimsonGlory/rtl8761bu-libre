@@ -10542,8 +10542,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (146);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (147): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (166 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (147) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_800212a0`→
+          `clamp_connection_qos_poll_interval_from_stored_limits` (94B, HIGH).
+          QoS poll-interval clamp: min of `field_0x62`/`field90_0x82`/`field_0x64`/
+          `field_0x66` → `_x60_ushort_QoS_Poll_Interval`; caller
+          `LMP_QUALITY_OF_SERVICE_REQ_0x2A`. 165 unnamed remain; live named 1756.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (147);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (148): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (165 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

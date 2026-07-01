@@ -5181,4 +5181,33 @@ SSP crypto-struct layout; sole caller already HIGH-named.
 
 Region unnamed count after this pass: **166** (167 minus this rename). Live named **1755** global.
 
+**Next:** superseded by Pass 6 continuation (147).
+
+## Pass 6 continuation (147) (2026-07-01) — QoS poll-interval clamp `FUN_800212a0`
+
+Decompiled and renamed:
+**`FUN_800212a0` → `clamp_connection_qos_poll_interval_from_stored_limits`**
+(94B, HIGH) via `RenamePass6Region80020000Fun800212a0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (94B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=166` at pass start). First-listed at
+94B (tied cluster; first entry `FUN_800212a0`).
+
+**Mechanism:** Per-connection QoS poll-interval clamp on `big_ol_struct[conn]`.
+Takes the minimum low-byte across four stored per-connection limits
+(`field_0x62`, `field90_0x82`, `field_0x64`, `field_0x66`) and writes the result
+to `_x60_ushort_QoS_Poll_Interval`. Sibling of
+`compute_and_store_connection_qos_poll_interval` (Pass 6 cont. 22), which
+derives intervals from HCI QoS latency/token-rate; this helper instead reconciles
+already-stored byte limits into the active poll-interval field.
+
+**Caller:** `LMP_QUALITY_OF_SERVICE_REQ_0x2A` (`0x8001aaf4`) — xref_in=1 per
+`ListXrefsTo800212a0.java`.
+
+**Confidence:** HIGH — decompile confirms four-field min clamp into
+`_x60_ushort_QoS_Poll_Interval`; caller is Kovah-named LMP QoS request handler
+adjacent to the Pass 6 cont. (22) QoS cluster.
+
+Region unnamed count after this pass: **165** (166 minus this rename). Live named **1756** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
