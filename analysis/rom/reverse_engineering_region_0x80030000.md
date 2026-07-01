@@ -6545,5 +6545,33 @@ byte-write loop unambiguous; caller config-gate pattern matches Pass 202's
 Region unnamed count after this pass: **80** (81 minus this rename). Live named
 **2086** global.
 
-**Next:** Pass 211 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 211.
+
+## Pass 211 (2026-07-01) — global status bit `0x10` toggle `FUN_8003ce68`
+
+Fresh `ListUnnamed80030000.java` re-run: **80 unnamed** remain in region
+(unchanged from Pass 210; rank-1 by size at xref=1 tier is `FUN_8003ce68` at
+42B — wins on size over tied 40B/38B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ce68` → `toggle_global_status_bit0x10_by_enable_flag`**
+(42B, HIGH, SIMPLE-tier) via
+`RenamePass211Region80030000Fun8003ce68.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Boolean-driven set/clear of bit `0x10` on global status word
+`DAT_8003ce94`: when `param_1==0`, clears bit if set; when `param_1!=0`, sets
+bit if clear. `0x8003cexx` cluster sibling of Pass 102's
+`toggle_0x4000_status_bit_via_hook_on_trunc_page_counter_threshold` and Pass 53's
+`afh_cleanup_apply_lap_hopping_and_feature_orchestrator`.
+
+**Callers:** 1 xref-in — `FUN_800681d8` (inquiry-page boot init path calls with
+`0` to clear bit during subsystem setup).
+
+**Confidence:** HIGH — full 42B decompile; bit `0x10` toggle pattern
+unambiguous; boot-init caller context confirmed.
+
+Region unnamed count after this pass: **79** (80 minus this rename). Live named
+**2087** global.
+
+**Next:** Pass 212 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
