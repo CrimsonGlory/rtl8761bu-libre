@@ -7208,5 +7208,39 @@ unambiguous; cluster placement beside Pass 48 BB register write primitive.
 Region unnamed count after this pass: **58** (59 minus this rename). Live named
 **2108** global.
 
-**Next:** Pass 233 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 233.
+
+## Pass 233 (2026-07-01) — Conn-setup commit gate dispatch `FUN_80035cac`
+
+Fresh `ListUnnamed80030000.java` re-run: **58 unnamed** remain in region
+(unchanged from Pass 232; rank-1 at xref=1 tier is `FUN_80035cac` at 20B —
+largest among tied 20B xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80035cac` → `gate_conn_setup_commit_vs_link_mode_cleanup_dispatch`**
+(20B, HIGH, SIMPLE-tier) via
+`RenamePass233Region80030000Fun80035cac.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin conn-setup tail dispatcher in the `0x80035c` cluster adjacent
+to `param_dispatch_with_rom_calls` (`0x80035b4c`). Gates on `DAT_801200ea` bit
+2 plus `PTR_base_of_0x1ac_struct_array_0xA_large2_80035cc0` fields `+0x28`/`+0x44`
+bit0 — when gates fail clears `DAT_80125cf0`. Ready path (`in_v0==0`): if config
+byte at `PTR_DAT_80035cd0[+1]` bit4 set, sets `DAT_80123054` and calls
+`log_conn_setup_commit_fallback_evt_0x2d2_if_no_patch3`; else calls
+`commit_connection_setup_mode_by_slot_bitmask_and_gates` with globals
+`DAT_80123036`/`37`/`35`. Blocked path calls
+`emit_link_mode_change_cleanup_status_with_dedup`. Extracted sibling of the
+inner dispatch block inside `param_dispatch_with_rom_calls` when `pbRam80035cb0`
+bit `0x10` is set.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 20B decompile; named callees anchor conn-setup commit
+vs link-mode cleanup fork; cluster placement beside Pass 6/75/77/115 siblings.
+
+Region unnamed count after this pass: **57** (58 minus this rename). Live named
+**2109** global.
+
+**Next:** Pass 234 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
