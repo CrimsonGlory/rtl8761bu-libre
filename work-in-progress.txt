@@ -12636,7 +12636,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 103;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 104: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 104 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800384ac`→`advance_role_slot_link_state_and_capture_halved_hw_clock`
+          (102B, HIGH, HANDLER-tier). Per-role-slot `big_ol_struct` state updater:
+          when `field_0x29d==1` logs (opcode `0x27`/499) and sets `field_0x29f=2`;
+          when `field_0x29c==3` captures halved HW clock into `field_0x28c`.
+          Callers `status_word_multiflag_link_event_dispatcher` and
+          `role_switch_confirmation_matcher`. 186 unnamed remain; live named 1980.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 104;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 105: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
