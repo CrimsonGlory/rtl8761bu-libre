@@ -4434,4 +4434,32 @@ ambiguous control flow.
 
 Region unnamed count after this pass: **190** (191 minus this rename). Live named **1731** global.
 
+**Next:** superseded by Pass 6 continuation (123).
+
+## Pass 6 continuation (123) (2026-07-01) — three-slot linked-descriptor init `FUN_8002ad30`
+
+Decompiled and renamed:
+**`FUN_8002ad30` → `init_three_slot_0x34_linked_descriptors_and_clear_buffers`**
+(108B, HIGH) via `RenamePass6Region80020000Fun8002ad30.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (108B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=190` at pass start). Tied largest size tier
+with siblings `FUN_80027b28`/`FUN_80023bdc` (each xref_in=1); first listed by sort order.
+
+**Mechanism:** Boot/init helper for a 3-entry descriptor table at `PTR_DAT_8002ad9c`
+(`0x34` stride). For each index `0..2`: seeds slot-id byte at `+0x1a` as `index<<6`
+(values `0`/`0x40`/`0x80`), zeroes header fields, sets self-referential dwords at
+`+0x08` and `+0x14` (empty doubly-linked list heads), and primes sentinel dword
+`+0x1c` to `0xffffffff`. Clears global byte at `PTR_DAT_8002ada0`, calls
+`FUN_8002b118`, then `memset` side buffers at `PTR_DAT_8002ada4` (`0x40`) and
+`PTR_DAT_8002ada8` (`0xd0`).
+
+**Callers:** Sole direct caller `FUN_80036f60` (`0x80036f96`, region `0x80030000`) —
+subsystem init chain entry point.
+
+**Confidence:** HIGH — decompile confirms classic 3-slot linked-descriptor init idiom
+with self-pointer list heads and trailing buffer clears; unambiguous control flow.
+
+Region unnamed count after this pass: **189** (190 minus this rename). Live named **1732** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
