@@ -4490,4 +4490,35 @@ already HIGH; sits in documented alt-dispatch table at rejected opcode `0x11`.
 
 Region unnamed count after this pass: **188** (189 minus this rename). Live named **1733** global.
 
+**Next:** superseded by Pass 6 continuation (125).
+
+## Pass 6 continuation (125) (2026-07-01) — HCI Refresh Encryption Key `FUN_80023bdc`
+
+Decompiled and renamed:
+**`FUN_80023bdc` → `fHCI_Refresh_Encryption_Key_0x14`**
+(108B, HIGH) via `RenamePass6Region80020000Fun80023bdc.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (108B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=188` at pass start). First listed among
+tied 108B siblings.
+
+**Mechanism:** HCI Refresh Encryption Key (OGF1 OCF 0x14 / opcode `0x0414`) command
+handler in the `0x80023xxx` encryption-command cluster between
+`send_evt_HCI_Encryption_Key_Refresh_Complete` (`0x80023ba4`) and
+`fHCI_Set_Connection_Encryption_0x13` (`0x800231d8`). Resolves connection slot via
+`FUN_800231bc`; on success emits `send_evt_HCI_Command_Status`. Validates encrypted
+link-type byte `*crypto` is `0x0c` or `0x16` and `FUN_8002408c()` encryption-feature
+gate is set; failure path emits `send_evt_HCI_Encryption_Key_Refresh_Complete` with
+error `0x0c`. Success path sets `crypto+0x50=1`, calls `FUN_80025f34` (SSP
+DHKey-check/encryption arm), and advances encryption state via `FUN_80023fb8(crypto, 5)`.
+
+**Callers:** xref_in=1 (HCI command router — not resolved this pass).
+
+**Confidence:** HIGH — decompile confirms standard HCI encryption-command idiom with
+documented link-type filter (`0x0c`/`0x16`), encryption-feature gate, and callee chain
+matching sibling handlers (`arm_encryption_before_deferred_role_switch`, Pass 6 cont. 88
+DHKey-check stall timer).
+
+Region unnamed count after this pass: **187** (188 minus this rename). Live named **1734** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
