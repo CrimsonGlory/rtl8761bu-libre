@@ -7887,5 +7887,35 @@ Pass 126 deadline-overrun threshold idiom exactly.
 Region unnamed count after this pass: **37** (38 minus this rename). Live named
 **2129** global.
 
-**Next:** Pass 254 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 254.
+
+## Pass 254 (2026-07-01) — u16 quantization lookup `FUN_8003b8cc`
+
+Fresh `ListUnnamed80030000.java` re-run: **37 unnamed** remain in region
+(unchanged from Pass 253; xref_in=0 tier dominates — rank-1 is `FUN_8003b8cc`
+at 78B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b8cc` → `quantize_u16_x4_shift_via_highest_bit_scan_and_byte_table_lookup`**
+(78B, HIGH, HANDLER-tier) via
+`RenamePass254Region80030000Fun8003b8cc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Nonlinear u16 quantization helper in the `0x8003b8xx` BB-register /
+TX-power cluster (embedded byte table at `PTR_DAT_8003b91c` immediately after
+function body). Left-shifts input `param & 0xffff` by 2, scans for highest set
+bit in 2-bit steps from bit 16 downward, derives offset `iVar3 = bit_pos*3-6`
+(or 0 if no high bits), caps residual index to 0xf, returns
+`table[index] + offset`. Piecewise encoding map sibling of Pass 162's
+`compute_clamped_tx_power_level_from_link_class_baselines` and Pass 86's
+`dispatch_dual_fptr_hooks_by_flag_with_config_field285_bits_or_const_0x41`.
+
+**Callers:** 0 xref-in (consistent with indirect TX-power / BB-reg dispatch).
+
+**Confidence:** HIGH — full 78B decompile; bit-scan + capped table-index +
+offset-add pattern unambiguous.
+
+Region unnamed count after this pass: **36** (37 minus this rename). Live named
+**2130** global.
+
+**Next:** Pass 255 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
