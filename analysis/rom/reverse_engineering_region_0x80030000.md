@@ -2672,5 +2672,38 @@ lifecycle context unambiguous.
 Region unnamed count after this pass: **198** (199 minus this rename). Live named
 **1968** global.
 
-**Next:** Pass 93 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 93.
+
+## Pass 93 (2026-07-01) — SCO HW channel 8+4 slot init `FUN_800375f8`
+
+Fresh `ListUnnamed80030000.java` re-run: **198 unnamed** remain in region
+(unchanged from Pass 92; rank-1 by size at xref=2 tier is `FUN_800375f8` at
+250B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800375f8` → `init_sco_hw_channel_8plus4_slot_program_and_bb_regs`**
+(250B, HIGH, INIT-tier) via `RenamePass93Region80030000Fun800375f8.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** IRQ-masked SCO HW channel subsystem initializer. Disables BB
+regs `0xbe`/`0xc0` via `PTR_DAT_800376f4` hardware-write hook; loops 8 slots
+programming channel indices via `PTR_DAT_800376f8`/`PTR_DAT_800376fc` tables
+with `and_mask_hw_channel_table_entry_and_indexed_dispatch(...,0xfeff)`; loops
+4 more slots via `PTR_DAT_80037700`/`PTR_DAT_80037704`; re-enables interrupts;
+calls `init_or_clear_sco_hw_channel_subsystem(0)`,
+`config_triplet_hw_register_init_with_power_gate()`, and three init-chain
+callees; sets BB reg `0x11c` with `0x800` bit via `DAT_80037708`; optional
+post-hook at `PTR_PTR_8003770c`.
+
+**Callers:** `fHCI_Reset_0x03_full_subsystem_teardown` + `FUN_80037710`
+(3 call sites via `find_callers`).
+
+**Confidence:** HIGH — full 250B decompile; SCO channel-init cluster and HCI
+Reset context unambiguous; sibling of `init_or_clear_sco_hw_channel_subsystem`
+and region-`0x80020000`'s `init_sco_hw_channel_disable_be_c0_restore_saved_bb_regs`.
+
+Region unnamed count after this pass: **197** (198 minus this rename). Live named
+**1969** global.
+
+**Next:** Pass 94 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
