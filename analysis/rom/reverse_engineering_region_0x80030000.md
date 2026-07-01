@@ -8441,5 +8441,31 @@ confirms semantics.
 Region unnamed count after this pass: **18** (19 minus this rename). Live named
 **2148** global.
 
-**Next:** Pass 273 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 273.
+
+## Pass 273 (2026-07-01) — config-flag BB-pack dispatcher `FUN_80038f1c`
+
+Fresh `ListUnnamed80030000.java` re-run: **18 unnamed** remain in region
+(unchanged from Pass 272; xref_in=0 tier dominates — rank-1 is `FUN_80038f1c`
+at 34B, caller wrapper for Pass 173's BB-reg packer).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038f1c` → `dispatch_bb_reg_pack_zero_clear_if_config_bit0x80`**
+(34B, HIGH, UTILITY-tier) via
+`RenamePass273Region80030000Fun80038f1c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-flag gate: when `*PTR_DAT_80038f40 & 0x80`, calls
+`pack_bitmasked_bytes_into_bb_regs_0x62_low_0x63_high_via_hook(PTR_DAT_80038f44, 0)`
+— the zero-clear path documented as caller in Pass 173. Completes the
+caller-side naming for the `0x80038e`/`0x80038f` BB-reg pack cluster.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 34B decompile; config-bit `0x80` gate + callee
+call with `param_2=0` unambiguous; callee already HIGH-named in Pass 173.
+
+Region unnamed count after this pass: **17** (18 minus this rename). Live named
+**2149** global.
+
+**Next:** Pass 274 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
