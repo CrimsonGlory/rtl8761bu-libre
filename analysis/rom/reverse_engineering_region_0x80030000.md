@@ -792,11 +792,11 @@ a crystal/clock-trim calibration routine.
 #### 6. `link_mode_change_state_machine` (0x80035454, 456B)
 
 `(byte link_type, uint, uint)`. The core link-mode/role-switch procedure dispatcher for this
-region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`adjust_link_mode_change_slot_budget_and_secondary_timing`/`FUN_80033c98`/`check_connection_setup_commit_gate_status`
+region's `check_link_mode_change_gate_status`/`FUN_80033ae4`/`adjust_link_mode_change_slot_budget_and_secondary_timing`/`check_link_mode_change_slot_budget_timing_gate_status`/`check_connection_setup_commit_gate_status`
 helper cluster (all in this same region, none yet independently decompiled). Uses an explicit
 busy(`0xf`)/idle(`0xff`) status convention. Issues a vendor command `VSC_0xfc11_2_FUN_800120ac`,
 brackets the critical section with `disable_interrupts_`/`enable_interrupts_`, applies link
-parameters via `FUN_80033c98`/`apply_link_mode_change_bb_regs_and_timeout_by_phase`, and on failure cleans up via `FUN_80034d88`
+parameters via `check_link_mode_change_slot_budget_timing_gate_status`/`apply_link_mode_change_bb_regs_and_timeout_by_phase`, and on failure cleans up via `FUN_80034d88`
 (already a known cleanup target — called from `lmp_power_regulator`'s sibling code paths).
 Optional override callback via `PTR_DAT_8003563c` can replace the return value.
 
@@ -4518,7 +4518,7 @@ params and calls `FUN_80012820(1, timeout)`; sets state `2`.
 
 **Callers:** 1 xref-in per `ListUnnamed80030000` — callee of
 `link_mode_change_state_machine` (applies link parameters alongside
-`FUN_80033c98`).
+`check_link_mode_change_slot_budget_timing_gate_status`).
 
 **Confidence:** HIGH — full 172B decompile; phase-gated BB reg pair
 `0x6e`/`0x6c` writes and `FUN_80012820` timeout helper match
@@ -6138,5 +6138,41 @@ per-connection HW-buffer setup cluster.
 Region unnamed count after this pass: **93** (94 minus this rename). Live named
 **2073** global.
 
-**Next:** Pass 198 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 198.
+
+## Pass 198 (2026-07-01) — link-mode slot-budget timing gate `FUN_80033c98`
+
+Fresh `ListUnnamed80030000.java` re-run: **93 unnamed** remain in region
+(unchanged from Pass 197; rank-1 by size at xref=1 tier is `FUN_80033c98` at
+62B — wins on size over tied 56B/54B siblings, first by address).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80033c98` → `check_link_mode_change_slot_budget_timing_gate_status`**
+(62B, HIGH, SIMPLE-tier) via
+`RenamePass198Region80030000Fun80033c98.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-change slot-budget timing gate in the
+`link_mode_change_state_machine` cluster. Computes masked budget
+`(DAT_80033cd8 | param_2) - param_3 & DAT_80033cdc`. Phase byte `param_1`
+selects config field extraction from `PTR_DAT_80033ce0`: phase `0` uses bits
+5–7 (`>>5`), else bit 7 (`>>7`). Derives power-of-2 lower threshold
+`2 << ((field & 3) + 1)` (4/8/16/32). Returns `0` (ready) when budget lies
+strictly between threshold and upper bound `DAT_80033ce4`; else `0xff`
+(blocked). For phases 2/3 caller pre-adjusts budget via
+`(hw_clock >> 1) + secondary_timing & mask` before invoking.
+
+**Callers:** 1 xref-in — `link_mode_change_state_machine` (after
+`adjust_link_mode_change_slot_budget_and_secondary_timing` and VSC fc11
+critical section; gates progression to
+`apply_link_mode_change_bb_regs_and_timeout_by_phase`).
+
+**Confidence:** HIGH — full 62B decompile; caller context and
+busy(`0xf`)/ready(`0`)/blocked(`0xff`) convention match siblings
+`check_link_mode_change_gate_status` and
+`check_connection_setup_commit_gate_status`.
+
+Region unnamed count after this pass: **92** (93 minus this rename). Live named
+**2074** global.
+
+**Next:** Pass 199 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
