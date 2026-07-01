@@ -3823,5 +3823,43 @@ idiom confirmed; caller integration in documented TX/RX hw-buffer-setup pair.
 Region unnamed count after this pass: **163** (164 minus this rename). Live named
 **2003** global.
 
-**Next:** Pass 128 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 128.
+
+## Pass 128 (2026-07-01) — `copy_nine_dispatch_slots_and_init_baseband_subsystems`
+
+Fresh `ListUnnamed80030000.java` re-run: **163 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_80034674` at 266B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034674` → `copy_nine_dispatch_slots_and_init_baseband_subsystems`**
+(266B Ghidra boundary, HIGH, INIT-tier) via
+`RenamePass128Region80030000Fun80034674.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Boot/subsystem init sub-step (default path of `FUN_800347a0` when
+hook at `PTR_DAT_800347cc` is null). Logs via `function_that_uses_Logger_string`,
+calls `init_baseband_hw_from_config_struct`, then copies nine indexed dispatch
+slots from ROM tables (`PTR_DAT_80034784` ushort offsets + `PTR_DAT_8003478c`
+dword values into `DAT_80034788` base) — gated on `config_struct.field59_0x41 &
+3` (mode `1` copies once; mode `0` copies after `clear_global_status_bit_0x400`).
+Sets status byte bit0 at `DAT_80034790`, calls
+`conditional_table_entry_registration_init(1)`. When status byte bits `0x1e==6`,
+calls `FUN_80033ec4` (`vsc_0xfc56_payload_apply_and_rf_reconfig`). Mode `0` also
+calls `FUN_800122fc`. Clears status bits `2`/`4`/`8`/`0x10` on `DAT_80034798`,
+zeroes 16-byte buffer at `PTR_DAT_8003479c`. Sibling of region `0x80020000`'s
+`copy_eight_literal_pool_globals_and_init_baseband_hw` but nine-slot indexed
+table copy with richer status-bit housekeeping.
+
+**Callers:** 1 xref-in — `FUN_800347a0` at `0x800347b8` (hook-null default init
+wrapper that also calls `FUN_800343dc`).
+
+**Confidence:** HIGH — full 266B decompile; register-family and config-flag
+gating match documented boot-init cluster; callees
+`init_baseband_hw_from_config_struct`/`conditional_table_entry_registration_init`/
+`clear_global_status_bit_0x400` already high-confidence.
+
+Region unnamed count after this pass: **162** (163 minus this rename). Live named
+**2004** global.
+
+**Next:** Pass 129 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
