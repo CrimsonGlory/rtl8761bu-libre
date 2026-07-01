@@ -7545,4 +7545,33 @@ failure teardown.
 
 Region unnamed count after this pass: **87** (88 minus this rename). Live named **1834** global.
 
+**Next:** superseded by Pass 6 continuation (226).
+
+## Pass 6 continuation (226) (2026-07-01) — HCI SSP IO-cap auth-failure wrapper `FUN_80023b08`
+
+Decompiled and renamed:
+**`FUN_80023b08` → `hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x19_auth_failure`**
+(48B, HIGH) via `RenamePass6Region80020000Fun80023b08.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=87` at pass start). First-listed at 48B
+tier; successor to Pass 6 cont. (225)'s `on_random_bdaddr_lmp_detach_if_reason_set`.
+
+**Mechanism:** Thin HCI command wrapper — resolves connection via
+`hci_resolve_conn_record_validate_and_complete(param_1, PTR_LAB_80023578_1, PTR_LAB_800235a4_1,
+&conn_handle, &status)` then on success tail-calls
+`dispatch_ssp_pairing_continuation_lmp_ext_0x19_auth_failure(conn_handle, param_1+9 byte)`.
+Same conn-resolve→dispatch idiom as sibling wrappers
+`hci_resolve_conn_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41` (Pass 6 cont. 92)
+and `FUN_800239cc`←`HCI_Write_Simple_Pairing_Debug_Mode`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` at `0x800234ec`; xref_in=1 per
+`ListXrefsTo80023b08.java`.
+
+**Confidence:** HIGH — decompile confirms standard HCI conn-resolve preamble plus
+tail-call to documented SSP IO-cap auth-failure continuation (LMP-ext 0x7f/0x19 +
+HCI SSP Complete(5)); caller confirmed in SSP debug-mode command router.
+
+Region unnamed count after this pass: **86** (87 minus this rename). Live named **1835** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
