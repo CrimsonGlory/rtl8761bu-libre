@@ -8672,4 +8672,30 @@ idiom; structural sibling of Pass 6 cont. (263)'s `0x1b` sender.
 
 Region unnamed count after this pass: **48** (49 minus this rename). Live named **1873** global.
 
+**Next:** superseded by Pass 6 continuation (265).
+
+## Pass 6 continuation (265) (2026-07-01) — LMP-ext SSP DHKey-check sender `FUN_80025858`
+
+Decompiled and renamed:
+**`FUN_80025858` → `send_lmp_ext_pkt_0x7f_subopcode_0x1d_ssp_dhkey_check_rsp`**
+(36B, HIGH) via `RenamePass6Region80020000Fun80025858.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=48` at pass start). Last sibling in the
+tied 36B cluster after Pass 6 cont. (264)'s `0x8002587c` (`0x80025858`/`0x8002587c`/`0x800258a0`).
+
+**Mechanism:** Thin outbound LMP-ext sender: builds 3-byte PDU with bytes `0x7f`/`0x1d`
+and transmits via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn, buf, 3, param_3)`.
+Outbound complement of inbound `handle_lmp_ext_dhkey_check_subopcode_0x1d_by_ssp_state`
+(Pass 6 cont. 76) which receives `0x7f`/`0x1d` SSP DHKey-check requests.
+
+**Callers:** `fHCI_User_Confirmation_Request_Reply_0x33` — no-pending-LMP path when crypto
+sub-state is `'#'` (0x23) invokes this for DHKey-check continuation; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms fixed LMP-ext opcode pair; caller already
+documented in Pass 6 cont. (97) with matching sub-state `'#'` → LMP-ext `0x7F`/`0x1D` send
+idiom; structural sibling of Pass 6 cont. (263)/(264)'s `0x1b`/`0x1c` senders.
+
+Region unnamed count after this pass: **47** (48 minus this rename). Live named **1874** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
