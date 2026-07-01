@@ -12626,7 +12626,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 102;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 103: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 103 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_8003a7b4`→`program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch`
+          (108B, HIGH, HANDLER-tier). Da/d6 opcode `0x21` plus hook writes to
+          BB regs `0x41`/`0x43`/`0x44`/`0x46`/`0x47`. Callers `FUN_8003ab74`/
+          `FUN_8003ac28` (register-script interpreter cluster). 187 unnamed remain;
+          live named 1979.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 103;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 104: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

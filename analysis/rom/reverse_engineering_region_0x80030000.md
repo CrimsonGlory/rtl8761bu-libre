@@ -2995,5 +2995,35 @@ context.
 Region unnamed count after this pass: **188** (189 minus this rename). Live named
 **1978** global.
 
-**Next:** Pass 103 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 103.
+
+## Pass 103 (2026-07-01) — BB register bundle programmer `FUN_8003a7b4`
+
+Fresh `ListUnnamed80030000.java` re-run: **188 unnamed** remain in region
+(unchanged from Pass 102; rank-1 by size at xref=2 tier is `FUN_8003a7b4` at
+108B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003a7b4` → `program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch`**
+(108B, HIGH, HANDLER-tier) via `RenamePass103Region80030000Fun8003a7b4.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Calls `dispatch_bb_register_da_d6_write_with_hook(0x21, 0,
+param_1)` then programs BB registers via hook at `PTR_DAT_8003a820`:
+`param_2`→reg `0x43`, `param_3`→reg `0x44`, fixed `0x20`→reg `0x41`,
+`0x10`→reg `0x46`, `0`→reg `0x47`. Register-script interpreter cluster
+sibling of `dispatch_bb_register_da_d6_write_with_hook`.
+
+**Callers:** 2 xref-in per cold-triage; direct callers `FUN_8003ab74` and
+`FUN_8003ac28` (register-script interpreter callees that compute three ushort
+params via `FUN_8003ab04` before invoking this helper).
+
+**Confidence:** HIGH — full 108B decompile; multi-register BB hook dispatch
+with da/d6 opcode `0x21` matches documented register-programming cluster;
+register-script interpreter integration path confirmed via caller decompile.
+
+Region unnamed count after this pass: **187** (188 minus this rename). Live named
+**1979** global.
+
+**Next:** Pass 104 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
