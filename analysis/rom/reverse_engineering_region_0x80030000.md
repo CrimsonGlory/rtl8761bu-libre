@@ -1223,4 +1223,31 @@ register-script interpreter integration already noted.
 
 Region unnamed count after this pass: **241** (242 minus this rename). Live named **1925** global.
 
-**Next:** Pass 48 — cold-triage rank-2 `FUN_8003b5b8` (register-script interpreter callee sibling of `0x8003c6xx` cluster).
+**Next:** superseded by Pass 48.
+
+## Pass 48 (2026-07-01) — indexed BB register write `FUN_8003b5b8`
+
+Decompiled and renamed rank-2 cold-triage target:
+**`FUN_8003b5b8` → `write_indexed_bb_register_low16_with_global_mask`**
+(44B, HIGH) via `RenamePass48Region80030000Fun8003b5b8.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Lightweight indexed baseband register write primitive (no IRQ
+masking, no poll, no hook): when either `param_1` or `param_2` low byte is
+non-zero, composes dword
+`(param_1&0xff)<<0x16 | DAT_8003b5e4 | param_4&0xffff | (param_2&0x3f)<<0x10`
+and writes to MMIO `DAT_8003b5e8`. Same index/subfield/value composition
+pattern as the `0x8003c6xx` cluster but without the IRQ/poll/hook overhead.
+Register-script interpreter (`0x8003aea0`) callee; also reached via
+`dual_fptr_dispatch_by_flag_wrapper` (`0x8000ebfc`) flag-selected dispatch
+alongside Pass 46's masked read.
+
+**Callers:** register-script interpreter callee per patch-installer analysis;
+`dual_fptr_dispatch_by_flag_wrapper` (`0x8000ebfc`) when direction flag non-zero.
+
+**Confidence:** HIGH — trivial decompile; dword composition matches documented
+`0x8003c6xx` cluster pattern; register-script interpreter + dual-fptr dispatch
+integration already noted.
+
+Region unnamed count after this pass: **240** (241 minus this rename). Live named **1926** global.
+
+**Next:** Pass 49 — cold-triage rank-3 register-script interpreter callee `FUN_80009680` (delay/wait primitive).
