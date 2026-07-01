@@ -1398,5 +1398,35 @@ HIGH-named; name persisted in Ghidra.
 Region unnamed count after this pass: **237** (238 minus this rename). Live named
 **1929** global.
 
-**Next:** Pass 54 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
-rank-1 unnamed function (`FUN_80034c5c`, 72B, 8 xref_in per Pass 53 list).
+**Next:** superseded by Pass 54.
+
+## Pass 54 (2026-07-01) — conditional packet-type programmer `FUN_80034c5c`
+
+Decompiled and renamed rank-1 cold-triage target from Pass 53 list:
+**`FUN_80034c5c` → `program_packet_type_if_stored_matches_expected`**
+(72B, HIGH) via `RenamePass54Region80030000Fun80034c5c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked conditional packet-type transition helper. Compares
+`param_1` (expected current packet-type word) against the stored value at index
+`(param_3 & 0xffff)` in table `DAT_80034ca4`; on match, invokes hook at
+`PTR_DAT_80034ca8(conn_index, param_2)` to program the new packet type. Typical
+call pairs: `0x1c00→0xc000` (eSCO→max-rate-SCO), `0xc000→0x1c00`
+(max-rate-SCO→eSCO), `0xc000→0xc00` (max-rate-SCO→SCO), `0xc00→0xc000`
+(SCO→max-rate-SCO).
+
+**Callers:** 4 direct call sites via `find_callers`:
+`conn_event_packet_type_update_and_reschedule`, `FUN_800366cc`,
+`FUN_800367e4`, and `sweep_conn_table_program_esco_packet_type_and_clear_gate_bytes`
+(region `0x80040000` Pass 52cp). Sibling of
+`select_and_program_sco_esco_packet_type_for_conn` / `program_packet_type_with_default_fallback`
+in region `0x80000000`.
+
+**Confidence:** HIGH — fully decompiled 72B; hook indirection + packet-type
+constant pairs match documented eSCO/SCO codec-type cluster.
+
+Region unnamed count after this pass: **236** (237 minus this rename). Live named
+**1930** global.
+
+**Next:** Pass 55 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+rank-1 unnamed function.

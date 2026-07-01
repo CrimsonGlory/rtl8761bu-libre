@@ -12131,9 +12131,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 53;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 54: fresh ListUnnamed80030000
-          re-rank; decompile+rename top rank-1 unnamed function
-          (`FUN_80034c5c`, 72B, 8 xref_in per Pass 53 list).
+[DONE]  Full RE: ROM region 0x80030000 — Pass 54 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80034c5c`→`program_packet_type_if_stored_matches_expected`
+          (72B, HIGH, 4 call sites). IRQ-masked conditional packet-type transition:
+          if stored type at indexed table `DAT_80034ca4` matches expected
+          `param_1`, hook at `PTR_DAT_80034ca8` programs `param_2`; typical
+          pairs `0x1c00↔0xc000`/`0xc000↔0xc00` in eSCO/SCO codec cluster.
+          236 unnamed remain; live named 1930.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 54;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 55: fresh ListUnnamed80030000
+          re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
