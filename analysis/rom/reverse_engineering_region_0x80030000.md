@@ -7462,5 +7462,47 @@ cluster placement beside Pass 8's `dispatch_bb_register_da_d6_write_with_hook` a
 Region unnamed count after this pass: **50** (51 minus this rename). Live named
 **2116** global.
 
-**Next:** Pass 241 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 241.
+
+## Pass 241 (2026-07-01) — HCI feature-page resource-pool allocate `FUN_800305f4`
+
+Fresh `ListUnnamed80030000.java` re-run: **50 unnamed** remain in region
+(unchanged from Pass 240; xref_in=0 tier dominates — rank-1 is `FUN_800305f4`
+at 730B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800305f4` → `allocate_resource_pool_chain_slots_hci_feature_page_bind_0x1ac_struct`**
+(730B, HIGH, HANDLER-tier) via
+`RenamePass241Region80030000Fun800305f4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** HCI extended-inquiry / feature-page resource-pool allocate handler
+(sibling of Pass 160's `release_resource_pool_chain_slot_type02_with_cleanup`).
+Parses HCI command buffer: validates length, slot indices (`param+4`/`+5` ≤
+`0x14`), channel byte (`param+6`), type byte (`param+8` in `1..4`). Type 1:
+allocates `local_2c` consecutive type-1 slots via
+`allocate_resource_pool_chain_slots_by_type`, copies variable-length TLV records
+into `0x24`-stride chain slots. Type 2: single type-2 slot + variable payload
+from template at `PTR_DAT_800308d0`. Type 3: fixed `0x16`-byte cmd, single
+type-3 slot, `optimized_memcpy` 0x10 bytes to
+`resource_pool_chain_type3_slot_memcpy_dest_stride_base` (Pass 239). Type 4:
+fixed `0xd`-byte cmd, single type-4 slot, 6-byte payload. On success binds
+allocated slot index into `base_of_0x1ac_struct_array` entry at
+`slot_index * 0x114`, populating fields `+0x284`–`+0x290` (type nibble, slot
+indices, channel×10 timer, flags). When struct `field68_0x44` bits `0x18` set
+and `field69_0x45` bit `0x80` clear, arms hook fptrs at `PTR_DAT_800308e0`/
+`PTR_DAT_800308e4` and sets status bit `0x80`. Returns HCI `0x12` on validation
+failure, `7` on pool exhaustion, `0` on success. Sole direct caller of
+`allocate_resource_pool_chain_slots_by_type` (region `0x80070000` Pass 12fl).
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table HCI dispatch).
+
+**Confidence:** HIGH — full 730B decompile; four typed allocate paths, named
+callee `allocate_resource_pool_chain_slots_by_type`, `0x1ac` struct bind layout,
+and dealloc sibling `release_resource_pool_chain_slot_type02_with_cleanup`
+documented in Pass 160.
+
+Region unnamed count after this pass: **49** (50 minus this rename). Live named
+**2117** global.
+
+**Next:** Pass 242 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

@@ -13940,7 +13940,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 240;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 241: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 241 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800305f4`→`allocate_resource_pool_chain_slots_hci_feature_page_bind_0x1ac_struct`
+          (730B, HIGH, HANDLER-tier). HCI feature-page resource-pool allocate handler:
+          types 1–4 via `allocate_resource_pool_chain_slots_by_type`, TLV/payload
+          staging into `0x24`-stride chain slots, binds slot index into
+          `base_of_0x1ac_struct_array`; dealloc sibling Pass 160
+          `release_resource_pool_chain_slot_type02_with_cleanup`. 0 xref-in.
+          Region unnamed 49 remain; live named 2117.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 241;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 242: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
