@@ -7779,4 +7779,33 @@ siblings; callers span LMP connection-setup and HCI inquiry decision points.
 
 Region unnamed count after this pass: **79** (80 minus this rename). Live named **1842** global.
 
+**Next:** superseded by Pass 6 continuation (234).
+
+## Pass 6 continuation (234) (2026-07-01) — role-switch precondition lookup `FUN_80021f6c`
+
+Decompiled and renamed:
+**`FUN_80021f6c` → `lookup_role_switch_block_code_from_crypto_substate`**
+(44B, HIGH) via `RenamePass6Region80020000Fun80021f6c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=79` at pass start). Highest-xref
+function in the 44B tier alongside `FUN_8002ee54`/`FUN_800242b0` (xref_in=1 each).
+
+**Mechanism:** Role-switch precondition veto lookup. Indexes `big_ol_struct[conn & 0xffff]`,
+reads crypto sub-state byte at `_x58_crypto_struct_at_least_0x27_big`, subtracts 9 to
+index into 24-byte table `PTR_DAT_80021f9c`; returns table entry or 0 when index `>= 0x18`.
+Return 0 = role switch allowed; nonzero = blocked (HCI `0x0c` Command Disallowed in
+`FUN_8001ac74`). Sibling of `get_byte[0x26]_in_unknown_ptr_0x58_points_to_struct_at_least_0x27_big`
+(`0x80021f44`) which reads the adjacent crypto byte as a bool gate on the fast path.
+
+**Callers:** xref_in=2 — confirmed via `find_callers`: `LMP_SWITCH_REQ_0x13`; plus
+`FUN_8001ac74` role-switch state-machine kickoff (documented in
+`reverse_engineering_lmp_version_conn_setup.md` §5).
+
+**Confidence:** HIGH — decompile confirms established table-lookup idiom; role-switch
+caller context documented across LMP/HCI link-policy cluster; nonzero-return → `0x0c`
+pattern matches `FUN_8001ac74` pre-condition gate.
+
+Region unnamed count after this pass: **78** (79 minus this rename). Live named **1843** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
