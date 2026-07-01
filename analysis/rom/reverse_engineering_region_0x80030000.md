@@ -4192,5 +4192,34 @@ unsniff/slave-role cleanup hook role per `lc_lmp_state_machine` trace.
 Region unnamed count after this pass: **152** (153 minus this rename). Live named
 **2014** global.
 
-**Next:** Pass 139 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 139.
+
+## Pass 139 (2026-07-01) — VSC vendor-config subcmd feature-flag writer `FUN_80030158`
+
+Fresh `ListUnnamed80030000.java` re-run: **152 unnamed** remain in region
+(unchanged from Pass 138; rank-1 at xref=1 tier is `FUN_80030158` at 222B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80030158` → `dispatch_vsc_vendor_config_subcmd_write_feature_flags`**
+(222B, HIGH) via
+`RenamePass139Region80030000Fun80030158.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Sub-command dispatcher invoked from master VSC dispatcher
+(`HCI_CMD_OGF_3F__Vendor_Specific__FUN_80030f1c`). Validates `param+2` length
+byte (must be `0x02` for subcmds 1–4), switches on `param+3` sub-opcode 0–4:
+subcmd 0 delegates to `FUN_8003013c` (credit-scheduler global byte store);
+subcmds 1–4 write individual feature/config bit flags into
+`PTR_PTR_80030244[8]` (bits 0–4) and subcmd 4 also sets bit 15 of
+`DAT_80030248`; returns HCI error `0x12` on invalid parameters.
+
+**Callers:** 1 xref-in — master VSC dispatcher (`0x80030f1c`).
+
+**Confidence:** HIGH — decompile confirms switch-dispatch + global flag writes;
+caller anchors VSC vendor-config path.
+
+Region unnamed count after this pass: **151** (152 minus this rename). Live named
+**2015** global.
+
+**Next:** Pass 140 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
