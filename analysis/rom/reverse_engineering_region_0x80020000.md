@@ -9703,4 +9703,32 @@ semantics.
 
 Region unnamed count after this pass: **12** (13 minus this rename). Live named **1909** global.
 
+**Next:** superseded by Pass 6 continuation (301).
+
+## Pass 6 continuation (301) (2026-07-01) — max encryption key-size config reader `FUN_80024050`
+
+Decompiled and renamed:
+**`FUN_80024050` → `read_max_encryption_key_size_from_config`**
+(6B, HIGH) via `RenamePass6Region80020000Fun80024050.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with highest xref_in≥1:
+`FUN_80024050` (6B, xref_in=2) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=12` at pass start).
+
+**Mechanism:** Trivial getter returning global config byte `PTR_DAT_80024058[2]` — the max
+allowed encryption key-size byte. Sibling to `lookup_min_encryption_key_size_from_config_tables`
+at `0x8002405c` (reads min from `PTR_DAT_80024088`). Caller
+`dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role` stores return value into crypto
+struct `+0x23` before sending LMP 0x10 Encryption Key Size Req on random-BD_ADDR DHkey-Check
+pending path (`0x48`).
+
+**Callers:** `dispatch_pending_lmp_0x40_or_0x48_by_bdaddr_random_and_role`; xref_in=2.
+
+**Confidence:** HIGH — decompile is unambiguous single-byte config read; caller context in
+documented SSP pending-LMP dispatcher (Pass 6 cont. 63) and encryption key-size cluster
+(Pass 6 cont. 254) confirm semantics.
+
+Region unnamed count after this pass: **11** (12 minus this rename). Live named **1910** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
