@@ -7691,4 +7691,32 @@ documented in Pass 6 cont. (75).
 
 Region unnamed count after this pass: **82** (83 minus this rename). Live named **1839** global.
 
+**Next:** superseded by Pass 6 continuation (231).
+
+## Pass 6 continuation (231) (2026-07-01) — SSP pending-IN_RAND NOT ACCEPTED rejector `FUN_80022664`
+
+Decompiled and renamed:
+**`FUN_80022664` → `reject_pending_lmp_with_not_accepted_reason0x18_and_clear`**
+(46B, HIGH) via `RenamePass6Region80020000Fun80022664.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (46B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=82` at pass start). Sibling of Pass 6
+cont. (230)'s `reject_pending_lmp_with_not_accepted_reason6_and_clear` — same
+pending-LMP opcode extraction + clear idiom, different LMP error reason.
+
+**Mechanism:** SSP negative-reply pending-LMP reject helper. Reads pending LMP opcode byte
+at `*(crypto+0x1e8)+4`, splits into opcode (`>>1`) and transaction-ID bit (`&1`), sends
+`wrap_send_LMP_NOT_ACCEPTED(handle, opcode, tid, 0x18)` (LMP error reason **0x18**), then
+clears the pending callback via `FUN_80025634`.
+
+**Callers:** `dispatch_ssp_io_cap_or_oob_negative_reply_continuation` (`0x80022694`) —
+pending IN_RAND branch; xref_in=1 per `ListUnnamed80020000.java`. Documented in Pass 6
+cont. (161).
+
+**Confidence:** HIGH — decompile confirms established pending-LMP opcode extraction +
+`wrap_send_LMP_NOT_ACCEPTED` + `FUN_80025634` clear pattern; caller already named and
+documented; mechanical twin of Pass 6 cont. (230) with reason `0x18` instead of `6`.
+
+Region unnamed count after this pass: **81** (82 minus this rename). Live named **1840** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
