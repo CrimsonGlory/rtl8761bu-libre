@@ -1250,4 +1250,36 @@ integration already noted.
 
 Region unnamed count after this pass: **240** (241 minus this rename). Live named **1926** global.
 
-**Next:** Pass 49 — cold-triage rank-3 register-script interpreter callee `FUN_80009680` (delay/wait primitive).
+**Next:** superseded by Pass 49.
+
+## Pass 49 (2026-07-01) — register-script opcode `0xA000` delay callee `spin_delay_10x_iterations`
+
+Cross-region cold-triage of rank-3 register-script interpreter callee
+**`FUN_80009680` → `spin_delay_10x_iterations`** (`0x80009680`, 20B, HIGH).
+Already named in region `0x80000000` out-of-gap-scope pass 2 (2026-06-27); no
+Ghidra rename needed — this pass confirms register-script integration from the
+interpreter side.
+
+**Mechanism:** Bare spin-wait loop: `for (i = 0; i < param_1 * 10; i++)`.
+Script data word `uVar10` from each `(opcode, data)` pair is passed as
+`param_1`, so effective iteration count is `data × 10`.
+
+**Register-script integration:** Decompile of `FUN_8003aea0` (register-script
+interpreter, 688B) confirms opcode top-nibble `0xA000` branch:
+`spin_delay_10x_iterations(uVar10)`. Short busy-wait between register-script
+steps; contrast with opcode `0xB000` (`spin_delay_10000x_iterations`) and
+poll-wait opcodes `0xC`/`0xD`/`0xE` which use the 10000× primitive with
+argument `1` between retries.
+
+**Callers:** Direct callee of register-script interpreter only (within this
+analysis scope); also used elsewhere in ROM (eSCO interval apply, codec
+serialize cluster, link-status escalation) per region `0x80000000` pass 2.
+
+**Confidence:** HIGH — trivial decompile; opcode dispatch confirmed live in
+interpreter decompile; name pre-exists and resolves.
+
+Region unnamed count unchanged: **240**. Live named **1926** global (no rename).
+
+**Next:** Pass 50 — cold-triage rank-3 register-script interpreter callee
+`FUN_80009694` (`spin_delay_10000x_iterations`; opcode `0xB000` + poll-wait
+inter-retry timing).
