@@ -14957,8 +14957,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 110;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 111: cold-triage next rank-1
-          unnamed function in region `0x80010000` (201 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 111 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80017c3c`→`set_sync_gate_byte_one_by_remapped_role_index`
+          (28B, HIGH). Per-slot sync-gate byte arm via esco-remap on
+          `PTR_DAT_80017c58`; callers `apply_random_bdaddr_tx_power_delta_via_vsc_fc95_lmp_268`
+          + `FUN_80017c5c` + `FUN_8006af6c`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 111;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 112: cold-triage next rank-1
+          unnamed function in region `0x80010000` (200 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

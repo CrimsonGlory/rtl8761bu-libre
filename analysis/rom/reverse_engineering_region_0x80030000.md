@@ -5055,7 +5055,7 @@ Decompiled and renamed rank-1 cold-triage target:
 level exceeds global threshold `*PTR_DAT_8003fb04`, builds delta
 `(level - threshold) + field109_0x98 * -2` (16-bit wrap) and calls
 `FUN_8003fa24` (VSC `0xFC95` + LMP `0x268` path). On success (`FUN_8003fa24`
-returns 0), arms follow-up via `FUN_80017c3c(bos_connection__array_index,
+returns 0), arms follow-up via `set_sync_gate_byte_one_by_remapped_role_index(bos_connection__array_index,
 byte_0xCC)`. TX-power cluster sibling of Pass 162
 `compute_clamped_tx_power_level_from_link_class_baselines` and Pass 129
 `apply_tx_power_runtime_mode_byte_and_reconfigure_tables_and_links`.

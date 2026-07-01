@@ -2335,4 +2335,33 @@ page/inquiry/LAP baseband programming paths in `lc_lmp_state_machine.md`.
 
 Region unnamed count after this pass: **201** (202 minus this rename).
 
-**Next:** Pass 111 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 111.
+
+## Pass 111 (2026-07-01) — sync-gate byte arm `FUN_80017c3c`
+
+Pass 111 target from cold-triage rank-1 (3 xref_in, 28B — largest at xref=3
+tier after Pass 110 cleared `FUN_80013c3c`). Decompiled and renamed:
+**`FUN_80017c3c` → `set_sync_gate_byte_one_by_remapped_role_index`**
+(28B, HIGH) via `RenamePass111Region80010000Fun80017c3c.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Per-slot sync-gate byte arm primitive in the `0x80017cxx`
+cluster. Remaps `(role_index, conn_byte_0xCC)` via
+`remap_role_index_to_esco_slot_if_pending`, then writes `1` to
+`PTR_DAT_80017c58[remapped_index]`. Complement of Pass 7l's
+`clear_sync_gate_byte_bits_by_remapped_role_index` (AND-clear on sibling table
+`PTR_DAT_80017d7c`) and Pass 83's `or_conn_status_byte_bits_via_role_remap`
+(OR-mask on `PTR_DAT_80017bd4`).
+
+**Callers:** 3 xref_in per `ListXrefsTo80017c3c.java` —
+`apply_random_bdaddr_tx_power_delta_via_vsc_fc95_lmp_268` (arms after
+successful VSC FC95/LMP 268 TX-power delta apply),
+`FUN_80017c5c` (sibling in `0x80017cxx` conn-slot sweep cluster), and
+`FUN_8006af6c` (region `0x80060000`).
+
+**Confidence:** HIGH — trivial decompile; esco-remap + gate-byte write pattern
+matches documented sync-gate cluster semantics.
+
+Region unnamed count after this pass: **200** (201 minus this rename).
+
+**Next:** Pass 112 — cold-triage next rank-1 unnamed in region `0x80010000`.
