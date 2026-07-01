@@ -14128,7 +14128,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 260;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 261: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 261 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800396ec`→
+          `compute_timing_short_from_callback_scaled_by_byte_delta_div100`
+          (62B, HIGH, UTILITY-tier). Timing short scaler in `0x800396xx`
+          cluster: callback at `PTR_PTR_80039734`, formula
+          `(result × (dat[8]−config+0x408)) / 100 + (char)dat[0xe]`.
+          No callers (xref=0). 29 unnamed remain; live named 2137.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 261;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 262: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

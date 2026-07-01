@@ -8096,5 +8096,33 @@ right-shift. Pure compiler-support primitive — no protocol-specific meaning.
 Region unnamed count after this pass: **30** (31 minus this rename). Live named
 **2136** global.
 
-**Next:** Pass 261 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 261.
+
+## Pass 261 (2026-07-01) — timing short scaler `FUN_800396ec`
+
+Fresh `ListUnnamed80030000.java` re-run: **30 unnamed** remain in region
+(unchanged from Pass 260; xref_in=0 tier dominates — rank-1 is `FUN_800396ec`
+at 62B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800396ec` → `compute_timing_short_from_callback_scaled_by_byte_delta_div100`**
+(62B, HIGH, UTILITY-tier) via
+`RenamePass261Region80030000Fun800396ec.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Timing short scaler in the `0x800396xx` cluster (address-adjacent
+sibling of Pass 91's
+`compute_timing_offset_from_table_base_step_and_index_div10`). Invokes callback
+at `PTR_PTR_80039734`, reads config byte at `config_base+0x408` and data bytes
+at `PTR_DAT_80039730[+8]` / `[+0xe]`; returns signed short of
+`(callback_result * (dat[8] − config_byte)) / 100 + (char)dat[0xe]`.
+
+**Callers:** 0 xref-in (consistent with indirect/fptr dispatch).
+
+**Confidence:** HIGH — full 62B decompile; formula and timing-cluster context
+unambiguous.
+
+Region unnamed count after this pass: **29** (30 minus this rename). Live named
+**2137** global.
+
+**Next:** Pass 262 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
