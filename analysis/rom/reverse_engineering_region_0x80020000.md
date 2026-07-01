@@ -6970,4 +6970,33 @@ cluster (Pass 6 cont. 69); mechanism matches Bluetooth SSP passkey-entry flow.
 
 Region unnamed count after this pass: **106** (107 minus this rename). Live named **1815** global.
 
+**Next:** superseded by Pass 6 continuation (207).
+
+## Pass 6 continuation (207) (2026-07-01) — HCI Link Key Request Reply `FUN_80023180`
+
+Decompiled and renamed:
+**`FUN_80023180` → `fHCI_Link_Key_Request_Reply_0xb`**
+(56B, HIGH) via `RenamePass6Region80020000Fun80023180.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (56B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=106` at pass start). Sits in the
+`0x80023xxx` HCI link-key/PIN reply cluster alongside `fHCI_PIN_Code_Request_Reply_0xd`
+(`0x8002309c`) and `fHCI_Set_Connection_Encryption_0x13` (`0x800231d8`).
+
+**Mechanism:** HCI Link Key Request Reply (OGF1 OCF 0x0b / opcode `0x040b`) thin
+handler. Resolves connection via `hci_resolve_conn_record_validate_and_complete`
+with validator callback at `PTR_LAB_8002262c_1_800231b8`. On success, tail-calls
+`apply_link_key_and_dispatch_auth_pairing_flow` with 16-byte link key from cmd
+buffer `param_1+9`.
+
+**Callers:** `HCI_Write_Simple_Pairing_Debug_Mode` (opcode `0x40b` dispatch branch);
+xref_in=1 per `find_callers`.
+
+**Confidence:** HIGH — decompile confirms standard conn-resolve + link-key staging
+idiom; sole caller is the documented HCI command router; callee
+`apply_link_key_and_dispatch_auth_pairing_flow` already HIGH-named (Pass 6 cont. 16)
+and documents this function as its HCI command-path caller.
+
+Region unnamed count after this pass: **105** (106 minus this rename). Live named **1816** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
