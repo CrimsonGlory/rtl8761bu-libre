@@ -14835,8 +14835,19 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 98;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 99: cold-triage next rank-1
-          unnamed function in region `0x80010000` (213 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 99 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80017a04`→
+          `process_role_matched_acl_tx_completions_and_emit_hci_completed_packets`
+          (190B, HIGH). Role/type-filtered ACL TX buffer walk at
+          `PTR_DAT_80017ac4`; per match `FUN_80017748` + hook
+          `PTR_DAT_80017ac8`; emits
+          `thunk_send_evt_HCI_Number_Of_Completed_Packets` when notify;
+          caller `dual_slot_buffer_reassignment_on_role_switch`; 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 99;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 100: cold-triage next rank-1
+          unnamed function in region `0x80010000` (212 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

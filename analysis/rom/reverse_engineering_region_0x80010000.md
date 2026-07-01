@@ -1973,4 +1973,37 @@ and credit-scheduler alloc/arm choreography; closes the long-standing
 
 Region unnamed count after this pass: **213** (214 minus this rename).
 
-**Next:** Pass 99 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 99.
+
+## Pass 99 (2026-07-01) — role-matched ACL TX completion walker `FUN_80017a04`
+
+Pass 99 target from cold-triage rank-1 (3 xref_in, 190B — largest at xref=3
+tier after Pass 98 cleared `FUN_80014e40`). Decompiled and renamed:
+**`FUN_80017a04` → `process_role_matched_acl_tx_completions_and_emit_hci_completed_packets`**
+(190B, HIGH) via `RenamePass99Region80010000Fun80017a04.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Narrower sibling of Pass 85
+`process_acl_tx_completion_credits_and_emit_hci_completed_packets` — walks
+singly-linked ACL TX buffer list at `PTR_DAT_80017ac4` (`+0x204` chain),
+matching entries whose conn subrecord bytes at `+0xd` (role) and `+0xf`
+(type/slot) equal `param_1` and `param_3`. Per match: calls `FUN_80017748`,
+dispatches completion hook at `PTR_DAT_80017ac8` with arg `2`, and on first
+match resolves bos index via
+`lookup_up_to_3_bos_array_indices_by_connection_handle`. When `param_2==1`
+(notify): increments per-role counters on `the_0x300` or per-link
+`big_ol_struct.unknown2_0x6C`, then emits
+`thunk_send_evt_HCI_Number_Of_Completed_Packets`.
+
+**Callers:** 3 xref_in per `ListUnnamed80010000.java`; includes
+`dual_slot_buffer_reassignment_on_role_switch` (region `0x80030000` Pass 8)
+which invokes with `notify_flag==1` after role-switch buffer slot transitions.
+
+**Confidence:** HIGH — decompile confirms role/type-filtered buffer walk,
+completion hook dispatch, and HCI event `0x13` emission path; cross-confirmed
+with Pass 85 ACL TX completion cluster and region `0x80030000` role-switch
+buffer reassignment caller.
+
+Region unnamed count after this pass: **212** (213 minus this rename).
+
+**Next:** Pass 100 — cold-triage next rank-1 unnamed in region `0x80010000`.

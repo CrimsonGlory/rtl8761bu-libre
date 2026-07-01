@@ -806,7 +806,7 @@ Optional override callback via `PTR_DAT_8003563c` can replace the return value.
 buffer "slots" (offsets 0 and 0x40 within each entry), selected by bit 0 of a state byte.
 Swaps/clears one slot's buffer fields (`+0x31/+0x32/+0x40..0x43`) when the logical link's
 owning-role byte (`+0x34`) no longer matches the connection's current role, tracking a 3-state
-(0=idle/1=pending/2=done) transition. Notifies via `FUN_80017a04` when `notify_flag==1`,
+(0=idle/1=pending/2=done) transition. Notifies via `process_role_matched_acl_tx_completions_and_emit_hci_completed_packets` when `notify_flag==1`,
 always logs the role byte on exit.
 
 #### 8. `int64_arith_op_and_signed_shift_right` (0x8003a38c, 394B)
