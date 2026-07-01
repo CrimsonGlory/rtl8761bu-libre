@@ -13824,7 +13824,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 228;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 229: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 229 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800393f8`→`invoke_register_script_from_global_context_0x58_0x5c`
+          (24B, HIGH, SIMPLE-tier). Thin register-script invoke wrapper: loads
+          `PTR_PTR_80039410`, calls hook at `PTR_DAT_80039414` with
+          `(script_ptr, num_halfwords)` from context offsets `+0x58`/`+0x5c`;
+          sibling of Pass 135/216 cluster. Region 61 unnamed remain; live named
+          2105.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 229;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 230: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

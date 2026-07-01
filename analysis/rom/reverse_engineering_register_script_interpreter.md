@@ -18,7 +18,7 @@ void FUN_8003aea0(int script_ptr, uint num_halfwords)
 Callers (16 total): `FUN_8010a000` (**the patch entry point /
 `thing_that_calls_thing_that_installs_LMP_Patch`'s installer region** — see
 `firmware/reverse_engineering_patch_entry.md`), `FUN_8010ff08` (patch),
-`FUN_8003aa20`, `FUN_800393f8`, `invoke_register_script_dual_from_global_context_pairs` (`0x80039418`, ×2), `invoke_register_script_from_global_context_0x60_0x64` (`0x800393d8`),
+`FUN_8003aa20`, `invoke_register_script_from_global_context_0x58_0x5c` (`0x800393f8`), `invoke_register_script_dual_from_global_context_pairs` (`0x80039418`, ×2), `invoke_register_script_from_global_context_0x60_0x64` (`0x800393d8`),
 `run_bb_reg_init_hook_chain_and_program_0x1e_5bit_field` (`0x800395f0`, ×4), `FUN_80039174`, `FUN_8003b9a4`, `FUN_8003ab74`,
 `FUN_8003b170`, and directly from the raw-data region at file offset `0x392c`
 (inside `thing_that_calls_thing_that_installs_LMP_Patch` itself, per the GZF's
