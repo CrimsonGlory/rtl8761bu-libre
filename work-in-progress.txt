@@ -14931,8 +14931,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 107;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 108: cold-triage next rank-1
-          unnamed function in region `0x80010000` (204 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 108 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80018dcc`→`reject_lmp_sco_link_req_0x2b_not_accepted_and_cleanup`
+          (54B, HIGH). LMP NOT_ACCEPTED reject for opcode 0x2b (SCO Link Req) via
+          `send_LMP_NOT_ACCEPTED`; BOS status cleanup via `FUN_8006b850` +
+          `FUN_8006ba74`; callers `send_HCI_Command_Status_for_HCI_0x0A` +
+          `FUN_80019504` (2×); 3 xref_in.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 108;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 109: cold-triage next rank-1
+          unnamed function in region `0x80010000` (203 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

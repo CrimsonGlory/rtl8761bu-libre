@@ -2251,4 +2251,33 @@ this function alongside the AFH-flag-gated variant.
 
 Region unnamed count after this pass: **204** (205 minus this rename).
 
-**Next:** Pass 108 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 108.
+
+## Pass 108 (2026-07-01) — LMP SCO Link Req reject helper `FUN_80018dcc`
+
+Pass 108 target from cold-triage rank-1 (3 xref_in, 54B — largest at xref=3
+tier after Pass 107 cleared `FUN_80011a3c`; tied with `FUN_80019024` at 54B,
+selected first by address order). Decompiled and renamed:
+**`FUN_80018dcc` → `reject_lmp_sco_link_req_0x2b_not_accepted_and_cleanup`**
+(54B, HIGH) via `RenamePass108Region80010000Fun80018dcc.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Thin reject-and-cleanup helper for synchronous-connection setup
+failures. Sends `LMP_NOT_ACCEPTED` with rejected opcode **0x2b** (LMP SCO Link
+Req) via `send_LMP_NOT_ACCEPTED(conn, 0x2b, tid=2, reason=param_3)`, then
+updates BOS connection status via `FUN_8006b850` (maps status `0x0d`→4 /
+`0x15`→0xf through `set_bos_bosi__0xb2_index_arg2`, decrements global
+`struct_of_at_least_0x300_size.field_0x170` when nonzero), and finally calls
+`FUN_8006ba74` → `FUN_80068058` on the secondary handle parameter.
+
+**Callers:** `send_HCI_Command_Status_for_HCI_0x0A` (`0x80018efa`) and
+`FUN_80019504` (two sites at `0x80019542`/`0x80019582`) — 3 xref_in per
+`ListXrefsTo80018dcc.java`. Sits on the HCI Accept/Reject Synchronous
+Connection path alongside the `0x80018exx` sync-conn handler cluster.
+
+**Confidence:** HIGH — stereotyped LMP reject wrapper with explicit opcode
+constant and documented sync-conn callers.
+
+Region unnamed count after this pass: **203** (204 minus this rename).
+
+**Next:** Pass 109 — cold-triage next rank-1 unnamed in region `0x80010000`.
