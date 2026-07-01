@@ -6901,5 +6901,37 @@ naming gap.
 Region unnamed count after this pass: **68** (69 minus this rename). Live named
 **2098** global.
 
-**Next:** Pass 223 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 223.
+
+## Pass 223 (2026-07-01) — config-bit0-gated HW reg 0x17 hook `FUN_80039334`
+
+Fresh `ListUnnamed80030000.java` re-run: **68 unnamed** remain in region
+(unchanged from Pass 222; rank-1 by size at xref=1 tier is `FUN_80039334` at
+30B — wins on address over tied 30B siblings `FUN_80039234`/`FUN_80038f48`).
+
+Decompiled and renamed rank-1 cold-triage target (caller side documented Pass
+204 but remained `FUN_*` in Ghidra until this pass):
+**`FUN_80039334` → `read_modify_write_hw_reg_0x17_bits0_2_if_config_byte0_bit2_set`**
+(30B, HIGH, SIMPLE-tier) via
+`RenamePass223Region80030000Fun80039334.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin config-bit0-gated optional hook in the `0x800393xx` BB
+register-config init cluster: when config byte `PTR_DAT_80039354[0]` bit `0x2`
+is set, calls `read_modify_write_hw_reg_0x17_set_bits0_2_from_3bit_param`
+(Pass 204) with config byte at offset `0x39`. Caller-side complement of Pass
+204's reg `0x17` RMW writer; sibling of Pass 222's
+`read_modify_write_hw_reg_0x16_bits1_3_if_config_byte1_bit2_set` and Pass 220's
+`write_hw_reg_0x10_four_config_bytes_if_config_byte1_bit7_set`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; `xrefs_to` empty (indirect
+dispatch).
+
+**Confidence:** HIGH — full 30B decompile; config-byte bit `0x2` gate and
+callee chain to Pass 204 unambiguous; closes caller-side documentation-vs-Ghidra
+naming gap.
+
+Region unnamed count after this pass: **67** (68 minus this rename). Live named
+**2099** global.
+
+**Next:** Pass 224 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

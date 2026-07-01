@@ -13765,7 +13765,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 222;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 223: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 223 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80039334`→`read_modify_write_hw_reg_0x17_bits0_2_if_config_byte0_bit2_set`
+          (30B, HIGH, SIMPLE-tier). Config-bit0-gated optional hook: when
+          `PTR_DAT_80039354[0]` bit `0x2` set, calls Pass 204's
+          `read_modify_write_hw_reg_0x17_set_bits0_2_from_3bit_param` with byte
+          at offset `0x39`; closes caller-side doc-vs-Ghidra gap from Pass 204.
+          67 unnamed remain; live named 2099.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 223;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 224: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
