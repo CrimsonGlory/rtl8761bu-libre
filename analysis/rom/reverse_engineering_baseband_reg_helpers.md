@@ -19,14 +19,14 @@ they are generic low-level primitives rather than one-off helpers.
 
 ---
 
-## 1. `FUN_80011510` — Baseband register read (busy-wait, masked)
+## 1. `read_baseband_register_masked_busywait` — Baseband register read (busy-wait, masked)
 
-`0x80011510`, 98 bytes. Callers: 50+ (both ROM and patch/data block, e.g.
+`0x80011510`, 98 bytes (renamed Pass 7b region `0x80010000`, 2026-07-01). Callers: 50+ (both ROM and patch/data block, e.g.
 `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8`, many `FUN_8010xxxx` patch
 functions, AFH-related ROM functions below).
 
 ```c
-undefined4 FUN_80011510(uint param_1, uint param_2)
+undefined4 read_baseband_register_masked_busywait(uint param_1, uint param_2)
 {
     // param_1 = register address/index, param_2 = width-selector (0/1/2)
     if (((1 << (param_2 & 0x1f)) - 1U & param_1 & 0xffff) == 0) {
@@ -62,7 +62,7 @@ busy-wait and a safe fallback on timeout or misalignment.
 
 ## 2. `write_baseband_register_masked_busywait` — Baseband register write (busy-wait, masked, with merge)
 
-`0x80011608`, 110 bytes (renamed Pass 7 region `0x80010000`, 2026-07-01). Callers: 50+, same population as `FUN_80011510`
+`0x80011608`, 110 bytes (renamed Pass 7 region `0x80010000`, 2026-07-01). Callers: 50+, same population as `read_baseband_register_masked_busywait`
 (its write-side counterpart).
 
 ```c
@@ -84,16 +84,16 @@ void FUN_80011608(uint param_1, int param_2, uint param_3)
 }
 ```
 
-Mirror image of `FUN_80011510`: validates alignment, shifts sub-word data into
+Mirror image of `read_baseband_register_masked_busywait`: validates alignment, shifts sub-word data into
 the correct byte lane when `param_3` (width selector) is 0 (byte access), writes
 the data register then strobes the request register twice, and busy-waits for
 completion. No return value — write completion isn't checked beyond the poll
 timing out silently.
 
 **Purpose:** generic masked/width-aware baseband register write, write-side of
-the same low-level register access primitive as `FUN_80011510`.
+the same low-level register access primitive as `read_baseband_register_masked_busywait`.
 
-## 3. `FUN_800115c8` — Byte-extraction wrapper around `FUN_80011510`
+## 3. `FUN_800115c8` — Byte-extraction wrapper around `read_baseband_register_masked_busywait`
 
 `0x800115c8`, 62 bytes. Callers: `FUN_8010c260` (patch), `FUN_801106bc`,
 `FUN_80011b6c`, `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8`, `FUN_8003b170`.
@@ -111,11 +111,11 @@ uint FUN_800115c8(uint param_1)
 }
 ```
 
-**Purpose:** byte-granular register read on top of `FUN_80011510`, handling
+**Purpose:** byte-granular register read on top of `read_baseband_register_masked_busywait`, handling
 the case where the requested byte address isn't word-aligned by reading the
 containing word and shifting out the byte.
 
-## 4. `FUN_80011584` — Halfword-extraction wrapper around `FUN_80011510`
+## 4. `FUN_80011584` — Halfword-extraction wrapper around `read_baseband_register_masked_busywait`
 
 `0x80011584`, 66 bytes. Callers: `FUN_8010c278` (×7 call sites), `FUN_8010ce0c`,
 `VSC_0xfc61_write_to_relevant_data_FUN_80030dd8`, `FUN_800122fc`, `FUN_8000eda0`,
@@ -260,10 +260,10 @@ further tracing into `FUN_8000b864`).
 
 | Function | Size | Role |
 |----------|------|------|
-| `FUN_80011510` | 98 B | Generic masked baseband register read (busy-wait) |
-| `FUN_80011608` | 110 B | Generic masked baseband register write (busy-wait) |
-| `FUN_800115c8` | 62 B | Byte-granular read wrapper around `FUN_80011510` |
-| `FUN_80011584` | 66 B | Halfword-granular read wrapper around `FUN_80011510` (returns `0xdead` on bad alignment) |
+| `read_baseband_register_masked_busywait` | 98 B | Generic masked baseband register read (busy-wait) |
+| `write_baseband_register_masked_busywait` | 110 B | Generic masked baseband register write (busy-wait) |
+| `FUN_800115c8` | 62 B | Byte-granular read wrapper around `read_baseband_register_masked_busywait` |
+| `FUN_80011584` | 66 B | Halfword-granular read wrapper around `read_baseband_register_masked_busywait` (returns `0xdead` on bad alignment) |
 | `FUN_80011a74` | 56 B | AFH-flag-gated toggle of register `0xfc` bit `0x1000` |
 | `FUN_800117a4` | 14 B | Unconditional OR `0xfc00` into a fixed register/global |
 | `FUN_800122b8` | 64 B | Config-flag-gated dispatcher to `FUN_80012e38` |

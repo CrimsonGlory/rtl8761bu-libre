@@ -806,4 +806,26 @@ baseband R/W primitive pair.
 
 Region unnamed count after this pass: **257** (258 minus this rename).
 
-**Next:** Pass 7b — rename read-side counterpart `FUN_80011510` (98B, 59 xref_in).
+## Pass 7b (2026-07-01) — baseband register read primitive `FUN_80011510`
+
+Pass 7b target from cold-triage rank-2 (59 xref_in, 98B). Decompiled and renamed:
+**`FUN_80011510` → `read_baseband_register_masked_busywait`**
+(98B, HIGH) via `RenamePass7bRegion80010000Fun80011510.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** IRQ-masked baseband MMIO register read primitive (read-side
+counterpart of `write_baseband_register_masked_busywait`). Gates on address
+alignment via `((1 << (param_2 & 0x1f)) - 1) & param_1`. Builds request word
+`param_2 << 0x1b | param_1`, strobes control register at `DAT_8001157c` twice,
+busy-waits up to 20000 iterations for ready bit, reads result from
+`DAT_80011580` (or returns fallback `DAT_80011574` on timeout/misalignment).
+Completes the baseband R/W primitive pair documented in
+`reverse_engineering_baseband_reg_helpers.md`.
+
+**Confidence:** HIGH — mechanism fully documented in prior thematic pass;
+live decompile matches; rename closes read-side of the masked busy-wait pair.
+
+Region unnamed count after this pass: **256** (257 minus this rename).
+
+**Next:** Pass 7c — decompile+rename rank-1 `FUN_8001136c` (34B, 27 xref_in,
+ROM HW register read protocol per `reverse_engineering_rom_regs.md`).
