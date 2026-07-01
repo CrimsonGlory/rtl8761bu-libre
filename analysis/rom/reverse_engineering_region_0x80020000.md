@@ -2377,8 +2377,9 @@ Decompiled and renamed:
 **Triage note:** Rank-1 by size among remaining unnamed (174B, xref_in=2) per fresh
 `ListUnnamed80020000.java` run (`total_unnamed=256` at pass start).
 
-**Mechanism:** Encryption-start companion to sibling `FUN_80024114` (stop path via
-`LMP__25C_called1(...,0)`). Invoked from `sometimes_called_with_0_3_0` when
+**Mechanism:** Encryption-start companion to sibling
+`stop_encryption_lmp_25c_pair_on_mode_disable` (stop path via `LMP__25C_called1(...,0)`;
+renamed Pass 6 cont. 195). Invoked from `sometimes_called_with_0_3_0` when
 `param_3==3` and per-connection crypto flag `crypto+0x214` is set. Gated on feature-page
 bit2 in both `big_ol_struct[slot]._xf3_features_pages_array_2_[1]` and global
 `some_feature_page_base+0x11`, plus optional validator callback at `PTR_DAT_80024204`.
@@ -2390,8 +2391,9 @@ from `field_0x2a6`.
 
 **Callers:** `sometimes_called_with_0_3_0` (`0x80014a44`, encryption-mode==3 branch).
 
-**Confidence:** HIGH — decompile confirms symmetric start/stop pair with `FUN_80024114`;
-caller decompile shows direct `param_3==3` branch; VSC 0xfc95 + LMP 25B/268 idiom
+**Confidence:** HIGH — decompile confirms symmetric start/stop pair with
+`stop_encryption_lmp_25c_pair_on_mode_disable`; caller decompile shows direct `param_3==3`
+branch; VSC 0xfc95 + LMP 25B/268 idiom
 matches documented encryption-procedure cluster.
 
 Region unnamed count after this pass: **255** (256 minus this rename). Live named **1666** global.
@@ -6612,5 +6614,36 @@ branches; literal-pool pointer table immediately follows function body; matches 
 packet-slot flush-check wrapper idiom.
 
 Region unnamed count after this pass: **118** (119 minus this rename). Live named **1803** global.
+
+**Next:** superseded by Pass 6 continuation (195).
+
+## Pass 6 continuation (195) (2026-07-01) — encryption stop LMP 25C pair `FUN_80024114`
+
+Decompiled and renamed:
+**`FUN_80024114` → `stop_encryption_lmp_25c_pair_on_mode_disable`**
+(60B, HIGH) via `RenamePass6Region80020000Fun80024114.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed with xref_in=1 (60B) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=118` at pass start). First-listed at
+60B/xref_in=1 after larger 64B/62B candidates with higher xref counts.
+
+**Mechanism:** Encryption-stop companion to sibling
+`start_encryption_vsc_pair_on_mode3_enable` (Pass 6 cont. 57). For connection slot
+`param_1 & 0xffff`, when pending-LMP handles at `big_ol_struct[slot].field_0x2a8` and
+`field_0x2ac` are not `-1`, invokes `LMP__25C_called1(handle, 0)` on each — the LMP 0x25C
+vendor wrapper that dispatches via hook `PTR_DAT_80009a68` or falls back to
+`unlink_lmp_25b_pending_slot_from_index_queue`. Simpler than the start path (no VSC 0xfc95 /
+LMP 25B / LMP 268 fan-out).
+
+**Callers:** `sometimes_called_with_0_3_0` (`0x80014a44`) — encryption-mode configuration
+handler; invoked when crypto flag `+0x214` is set and `param_3 != 3` (disable/stop branch).
+xref_in=1.
+
+**Confidence:** HIGH — decompile confirms symmetric start/stop pair with documented
+`start_encryption_vsc_pair_on_mode3_enable`; caller decompile shows direct `param_3!=3`
+branch; `LMP__25C_called1(...,0)` idiom matches encryption-procedure cluster documented in
+Pass 6 cont. (57).
+
+Region unnamed count after this pass: **117** (118 minus this rename). Live named **1804** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
