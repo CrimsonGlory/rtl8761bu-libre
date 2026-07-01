@@ -14010,7 +14010,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 247;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 248: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 248 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank; decompiled+renamed rank-1
+          `FUN_80039c08`→`dispatch_scaled_tx_power_adjustment_by_mode_via_fptr_hook`
+          (126B, HIGH) — TX-power adjustment dispatcher: mode byte selects
+          baseline, computes scaled delta, dispatches via fptr hook.
+          42 unnamed remain; live named 2124.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 248;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 249: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

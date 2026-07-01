@@ -7701,5 +7701,35 @@ indexing match documented TX-power cluster.
 Region unnamed count after this pass: **43** (44 minus this rename). Live named
 **2123** global.
 
-**Next:** Pass 248 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 248.
+
+## Pass 248 (2026-07-01) — TX power adjustment dispatcher `FUN_80039c08`
+
+Fresh `ListUnnamed80030000.java` re-run: **43 unnamed** remain in region
+(unchanged from Pass 247; xref_in=0 tier dominates — rank-1 is `FUN_80039c08`
+at 126B, largest among xref=0 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039c08` → `dispatch_scaled_tx_power_adjustment_by_mode_via_fptr_hook`**
+(126B, HIGH, HANDLER-tier) via
+`RenamePass248Region80030000Fun80039c08.java` (`renamed=1`, live-verified).
+
+**Mechanism:** TX-power adjustment dispatcher in the `0x80039c` cluster. Mode
+byte `param_1` selects baseline from `PTR_DAT_80039c8c[+2]` (mode 0),
+`[+3]` (mode 1), or `[+4]` (mode 2); invalid mode logs via
+`possible_logging_function__var_args` and returns `-0x5b`. Computes
+`baseline - (*PTR_DAT_80039c88 - param_2) * scale(PTR_DAT_80039c8c[+0x11])`
+then dispatches via fptr `PTR_PTR_80039c90` with flag 0 (mode 0) or 1
+(modes 1/2). Sibling of Pass 72 `compute_tx_power_delta_from_global_baselines`
+caller notes and Pass 146 `init_tx_power_runtime_from_config_blob_and_halve_delta_baselines`.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 126B decompile; mode-byte baseline selection and
+scaled delta formula match documented TX-power init/adjust cluster.
+
+Region unnamed count after this pass: **42** (43 minus this rename). Live named
+**2124** global.
+
+**Next:** Pass 249 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
