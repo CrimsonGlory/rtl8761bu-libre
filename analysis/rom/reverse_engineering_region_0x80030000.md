@@ -3435,5 +3435,37 @@ caller context confirmed via patch-side decompile of `FUN_801103d4`.
 Region unnamed count after this pass: **174** (175 minus this rename). Live named
 **1992** global.
 
-**Next:** Pass 117 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 117.
+
+## Pass 117 (2026-07-01) — `apply_hw_reg_0x2b_slot_nibble_if_config_bit3`
+
+Fresh `ListUnnamed80030000.java` re-run: **174 unnamed** remain in region
+(unchanged from Pass 116 pre-rename list; rank-1 at xref=2 tier was
+`FUN_80039210` at 30B — largest among six tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039210` → `apply_hw_reg_0x2b_slot_nibble_if_config_bit3`**
+(30B, HIGH, SIMPLE-tier) via `RenamePass117Region80030000Fun80039210.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Config-gated BB-register helper: when config byte at
+`PTR_DAT_80039230[1]` has bit 3 (`0x8`) set, passes slot byte at offset
+`0x3a` to callee `FUN_80039194`, which reads BB reg `0x2b`, merges
+`(slot & 0xf) << 8` into the upper byte, and writes back via hook fptr
+pair. Optional-hook entry in the BB register-config init subsystem.
+
+**Callers:** 2 confirmed via `ListXrefsTo80039210.java` —
+`dispatch_optional_subsystem_hooks_during_hw_reg_config` (optional-hook
+table walker during `hw_register_config_with_timeout`) and `FUN_800395f0`
+(158B BB-reg init sequence sibling of
+`program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3`).
+
+**Confidence:** HIGH — fully decompiled 30B; config-bit gate + slot-byte
+offset unambiguous; callee HW-reg `0x2b` RMW semantics confirmed via
+live decompile of `FUN_80039194`; both callers anchor BB-reg-config role.
+
+Region unnamed count after this pass: **173** (174 minus this rename). Live named
+**1993** global.
+
+**Next:** Pass 118 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
