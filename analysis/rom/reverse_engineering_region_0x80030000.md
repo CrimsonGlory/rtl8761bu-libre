@@ -3200,7 +3200,7 @@ Decompiled and renamed rank-1 cold-triage target:
 `PTR_DAT_80038df0` (write): programs BB reg `0x1e` bits 5–9 from
 `param_1 & 0x1f`, then clears bit 3 on BB reg `0x1c` (`& 0xfff7`). BB-register
 programming sibling in the `0x80038dxx` cluster near
-`FUN_80038d7c` (reads current `0x1e` field) and wrapper `FUN_80038df4` (selects
+`read_bb_reg_0x1e_5bit_field_via_hook` (reads current `0x1e` field) and wrapper `FUN_80038df4` (selects
 byte from config `+0x24` or computed default, then calls this function).
 
 **Callers:** 2 xref-in — `FUN_80038df4` (config-flag-gated wrapper in same
@@ -4104,5 +4104,34 @@ offsets match documented register-script cluster; name persisted in Ghidra.
 Region unnamed count after this pass: **155** (156 minus this rename). Live named
 **2011** global.
 
-**Next:** Pass 136 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 136.
+
+## Pass 136 (2026-07-01) — BB reg 0x1e 5-bit field reader `FUN_80038d7c`
+
+Fresh `ListUnnamed80030000.java` re-run: **155 unnamed** remain in region
+(unchanged from Pass 135; rank-1 at xref=2 tier is `FUN_80038d7c` at 24B —
+largest among tied 2-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038d7c` → `read_bb_reg_0x1e_5bit_field_via_hook`**
+(24B, HIGH, SIMPLE-tier) via
+`RenamePass136Region80030000Fun80038d7c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin BB-register read wrapper in the `0x80038dxx` cluster.
+Calls hook fptr at `PTR_DAT_80038d94` with reg ID `0x1e`, then extracts the
+5-bit field via `(value & 0x7ffffff) >> 0xb` (bits 11–15). Read-side complement
+of `program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3` (Pass 109); consumed
+by config-flag wrapper `FUN_80038df4` when `*PTR_DAT_80038e20 & 0x10 == 0`
+(alternate path uses byte at `+0x24`).
+
+**Callers:** 2 xref-in — `FUN_80038df4` (confirmed via decompile); second xref
+unresolved (`find_callers` empty — likely indirect/data-ref).
+
+**Confidence:** HIGH — full 24B decompile; reg ID `0x1e`, mask/shift semantics
+match Pass 109 programmer; caller body anchors role.
+
+Region unnamed count after this pass: **154** (155 minus this rename). Live named
+**2012** global.
+
+**Next:** Pass 137 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
