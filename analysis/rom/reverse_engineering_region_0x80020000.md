@@ -3650,4 +3650,35 @@ sibling of `fHCI_Remote_OOB_Data_Request_Reply_0x30` at `0x800236cc`.
 
 Region unnamed count after this pass: **215** (216 minus this rename). Live named **1706** global.
 
+**Next:** superseded by Pass 6 continuation (98).
+
+## Pass 6 continuation (98) (2026-07-01) — LMP ext sub0x1e keypress `FUN_800292d8`
+
+Decompiled and renamed:
+**`FUN_800292d8` → `handle_lmp_ext_subopcode_0x1e_keypress_notification_by_ssp_state`**
+(130B, HIGH) via `RenamePass6Region80020000Fun800292d8.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (130B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=215` at pass start). Sits in the
+`0x80029xxx` SSP encryption-opcode cluster alongside Pass 6 cont. (76–85)'s
+`handle_lmp_ext_subopcode_0x1b/0x1c/0x1d_by_ssp_state` siblings.
+
+**Mechanism:** LMP extended (0x7F) sub-opcode **0x1e** (Keypress Notification) handler
+gated on role bit `param_1+4&1` vs `ret_bool_based_on_crypto_struct_0x50`, with bypass when
+global `PTR_DAT_80029360[2]&0x80`:
+- Crypto sub-state `+1` must be in set `{'1','3','5','6','7'}` (mask `0x75` on
+  `(byte)+1 - 0x31`); otherwise reject.
+- Reject / role mismatch: `FUN_800243b8(conn, 0x7f, 0x1e, role_bit, 0x24)`.
+- Accept path: when `param_1+6 < 5`, emit `send_evt_HCI_Keypress_Notification(conn)` to
+  forward peer keypress entry to the host.
+
+**Caller:** `LMP_encryption_opcode_handlers` at `0x800284a0` (xref_in=1, confirmed via
+`FindCallers800292d8.java`).
+
+**Confidence:** HIGH — structural sibling of Pass 6 cont. (76–85) LMP-ext SSP-state handlers
+(same role gate, same `FUN_800243b8` NOT_ACCEPTED idiom with sub-opcode in arg3); callee
+`send_evt_HCI_Keypress_Notification` confirms HCI Keypress Notification event forwarding.
+
+Region unnamed count after this pass: **214** (215 minus this rename). Live named **1707** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
