@@ -8085,4 +8085,34 @@ logic rather than calling this outlined helper.
 
 Region unnamed count after this pass: **68** (69 minus this rename). Live named **1853** global.
 
+**Next:** superseded by Pass 6 continuation (245).
+
+## Pass 6 continuation (245) (2026-07-01) — fixed 48-byte codec unscramble helper `FUN_80025758`
+
+Decompiled and renamed:
+**`FUN_80025758` → `copy_unscramble_fixed_48byte_two_half_reversals`**
+(42B, HIGH) via `RenamePass6Region80020000Fun80025758.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (42B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=68` at pass start). First-listed in tied
+42B tier; immediate neighbor of Pass 6 cont. (243)'s
+`copy_unscramble_fixed_64byte_two_half_reversals` at `0x80025784` and parameterized
+sibling `copy_unscramble_two_independent_half_reversals` at `0x800257b0`.
+
+**Mechanism:** Hardcoded `param_3==6` (codec-6) specialization of the codec-JIT template
+un-scramble algorithm (`reverse_engineering_hardware_layer.md` §9): copies 48 bytes from
+`param_1` into `param_2` as two independent 24-byte half-reversals (bytes
+`[0x17..0x00]`→`dst[0..0x17]`, then `[0x2f..0x18]`→`dst[0x18..0x2f]`). Same loop
+structure as `copy_unscramble_fixed_64byte_two_half_reversals` (64B/codec-8) and
+`copy_unscramble_two_independent_half_reversals` but without the `param_3` length
+parameter.
+
+**Callers:** xref_in=0 — not invoked directly; `unscramble_codec_jit_template_and_install_hw_hook`
+inlines equivalent loops for per-connection codec-6 (`0x30`) template install.
+
+**Confidence:** HIGH — decompile matches documented two-half-reversal pseudocode; sits in
+codec unscramble cluster between 48B/64B hardcoded siblings and parameterized helper.
+
+Region unnamed count after this pass: **67** (68 minus this rename). Live named **1854** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
