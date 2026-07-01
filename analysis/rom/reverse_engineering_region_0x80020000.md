@@ -1355,7 +1355,7 @@ per-connection `_x58_crypto_struct` at `+0x1de`, normalizes OOB-mode byte `+0x1d
 when `+0x214` pairing-mode flag is set. Primary path when crypto sub-state `== 0x1e`:
 runs `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto` then arms codec JIT via
 `unscramble_codec_jit_template_and_install_hw_hook`. Alternate paths inspect pending
-LMP slot at `+0x1e8`: when empty, `FUN_80025948` + status `0x15`; when holding LMP
+LMP slot at `+0x1e8`: when empty, `send_lmp_ext_io_capability_req_subopcode_0x19_from_crypto` + status `0x15`; when holding LMP
 ext IO-cap req (`0x7f`/`0x19`), either copies IO-cap bytes, emits
 `send_evt_HCI_IO_Capability_Response`, runs `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto`, installs codec hook
 (non-OOB path), or rejects via `FUN_800243b8`. Always finishes via `FUN_80025634`
@@ -7030,5 +7030,34 @@ continuations that documented this callee by role; sibling `FUN_80025948` mirror
 with sub-opcode `0x19`.
 
 Region unnamed count after this pass: **104** (105 minus this rename). Live named **1817** global.
+
+**Next:** superseded by Pass 6 continuation (209).
+
+## Pass 6 continuation (209) (2026-07-01) — LMP ext IO-cap req sender `FUN_80025948`
+
+Decompiled and renamed:
+**`FUN_80025948` → `send_lmp_ext_io_capability_req_subopcode_0x19_from_crypto`**
+(54B, HIGH) via `RenamePass6Region80020000Fun80025948.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (54B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=104` at pass start). Sibling of
+`send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto` (`0x80025910`, Pass 6 cont. 208);
+complement of inbound handler `handle_lmp_ext_io_capability_req_subopcode_0x19` (`0x800293f0`).
+
+**Mechanism:** Outbound LMP-extended IO Capability Request sender. Builds 6-byte PDU:
+opcode `0x7F`, sub-opcode `0x19`, three IO-capability bytes copied from per-connection
+crypto struct at `+0x1de`/`+0x1df`/`+0x1e0`, then transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`. Mirror image of
+`send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto` (sub-opcode `0x1A`).
+
+**Callers:** `continue_ssp_pairing_after_hci_debug_mode_write` (empty pending-LMP slot at
+`+0x1e8` branch); xref_in=2 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — decompile confirms fixed 0x7F/0x19 PDU template with crypto
+struct IO-cap byte copy idiom; caller already Pass-6 HIGH-named SSP pairing continuation
+that documented this callee by role; sibling `send_lmp_ext_io_capability_resp_subopcode_0x1a_from_crypto`
+mirrors with sub-opcode `0x1A`.
+
+Region unnamed count after this pass: **103** (104 minus this rename). Live named **1818** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
