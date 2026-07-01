@@ -7334,5 +7334,34 @@ inquiry-RSSI payload role; cluster placement beside Pass 195/200 siblings.
 Region unnamed count after this pass: **54** (55 minus this rename). Live named
 **2112** global.
 
-**Next:** Pass 237 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 237.
+
+## Pass 237 (2026-07-01) — SCO init global dword clear `FUN_80034474`
+
+Fresh `ListUnnamed80030000.java` re-run: **54 unnamed** remain in region
+(unchanged from Pass 236; rank-1 at xref=1 tier is `FUN_80034474` at 8B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034474` → `clear_global_dword_via_PTR_DAT_8003447c`**
+(8B, HIGH, SIMPLE-tier) via
+`RenamePass237Region80030000Fun80034474.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Thin global dword zero/clear in the `0x800344xx` SCO/conn-table
+init cluster adjacent to Pass 159's
+`reinit_conn_table_crypto_preserve_active_slot_record` (`PTR_DAT_80034464`/
+`PTR_DAT_8003446c`/`PTR_DAT_80034470`). Loads pointer `PTR_DAT_8003447c`,
+writes `*puVar1 = 0`.
+
+**Callers:** 1 xref-in — `init_sco_hw_channel_8plus4_slot_program_and_bb_regs`
+at `0x800375f8` (SCO HW channel 8+4 slot program + BB reg init tail, after
+`zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`).
+
+**Confidence:** HIGH — full 8B decompile; caller context unambiguous SCO
+channel-init staging clear; cluster placement beside Pass 159/43 siblings.
+
+Region unnamed count after this pass: **53** (54 minus this rename). Live named
+**2113** global.
+
+**Next:** Pass 238 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
