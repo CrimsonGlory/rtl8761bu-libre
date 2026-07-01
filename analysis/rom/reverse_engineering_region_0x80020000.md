@@ -7486,4 +7486,34 @@ reassembly pending-ring cluster at `0x8002a2xx`.
 
 Region unnamed count after this pass: **89** (90 minus this rename). Live named **1832** global.
 
+**Next:** superseded by Pass 6 continuation (224).
+
+## Pass 6 continuation (224) (2026-07-01) — QoS mode-2 error logger `FUN_800215e0`
+
+Decompiled and renamed:
+**`FUN_800215e0` → `log_hci_evt_0x1f8_qos_conn_reason_if_no_patch3`**
+(48B, HIGH) via `RenamePass6Region80020000Fun800215e0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (48B, xref_in=3) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=89` at pass start). QoS-cluster
+sibling of Pass 6 cont. (210)'s `log_hci_evt_0x1f9_qos_conn_mode_and_reason_if_no_patch3`
+and Pass 6 cont. (22)'s `compute_and_store_connection_qos_poll_interval`.
+
+**Mechanism:** Thin patch-hook logger wrapper: invokes `possible_logger_called_if_no_patch3`
+with hook fptr at `PTR_DAT_80021610`, connection index `param_1`, reason byte `param_2`,
+and log tag `0x1f8`. Called from `compute_and_store_connection_qos_poll_interval` on
+invalid latency/token-rate when mode selector `param_2 == 2` (modes `0`/`1` use sibling
+`log_hci_evt_0x1f9_qos_conn_mode_and_reason_if_no_patch3` with tag `0x1f9` instead);
+reason byte observed as `0x2d`.
+
+**Callers:** `compute_and_store_connection_qos_poll_interval` (invalid QoS param path,
+mode `2` branch); xref_in=3 per `ListUnnamed80020000.java`.
+
+**Confidence:** HIGH — unambiguous `possible_logger_called_if_no_patch3` idiom with
+fixed tag `0x1f8`; caller decompile documents this callee by role; naming pattern matches
+sibling `log_hci_evt_0x1f9_qos_conn_mode_and_reason_if_no_patch3` and
+`log_hci_evt_0x1fc_if_no_patch3` from region `0x80010000`.
+
+Region unnamed count after this pass: **88** (89 minus this rename). Live named **1833** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
