@@ -9731,4 +9731,35 @@ documented SSP pending-LMP dispatcher (Pass 6 cont. 63) and encryption key-size 
 
 Region unnamed count after this pass: **11** (12 minus this rename). Live named **1910** global.
 
+**Next:** superseded by Pass 6 continuation (302).
+
+## Pass 6 continuation (302) (2026-07-01) — crypto global dword-pair writer `FUN_80021f30`
+
+Decompiled and renamed:
+**`FUN_80021f30` → `store_dword_pair_to_crypto_global_offsets_a0_a4`**
+(14B, HIGH) via `RenamePass6Region80020000Fun80021f30.java` (`renamed=1`, live-verified).
+
+**Triage note:** Skipped rank-1 `FUN_80024004` (24B, xref_in=0) and `FUN_8002963c` (22B,
+xref_in=0) per established cold-triage convention; selected rank-1 with xref_in≥1:
+`FUN_80021f30` (14B, xref_in=1) per fresh `ListUnnamed80020000.java` run
+(`total_unnamed=11` at pass start).
+
+**Mechanism:** Thin global dword-pair writer in the BT-stack cold-init crypto cluster.
+Stores `param_1` and `param_2` to `PTR_DAT_80021f40+0xa0` and `+0xa4`, returns 1.
+Sibling writers `FUN_80021f08`/`FUN_80021f1c` store parallel pairs to `+0xa8/+0xac` and
+`+0xb0/+0xb4` respectively. Called from `FUN_800681d8` (region `0x80060000`) after
+`reset_all_connection_crypto_slots_and_link_key_table` with boot literal `DAT_800683cc`
+and second arg 0 — seeds first of three config-derived dword pairs into crypto dispatch
+globals during cold-init.
+
+**Callers:** `FUN_800681d8` at `0x8006835a` (xref_in=1, confirmed via
+`ListXrefsTo80021f30.java`) — BT stack cold-init orchestrator.
+
+**Confidence:** HIGH — decompile confirms unambiguous dual-dword store; single caller in
+documented cold-init chain alongside `clear_fifteen_dword_global_table_at_boot`,
+`init_three_0x88_slot_tables_and_clear_crypto_globals`, and
+`reset_all_connection_crypto_slots_and_link_key_table`.
+
+Region unnamed count after this pass: **10** (11 minus this rename). Live named **1911** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
