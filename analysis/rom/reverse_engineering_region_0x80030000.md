@@ -8557,5 +8557,32 @@ unambiguous; matches Pass 205 caller description.
 Region unnamed count after this pass: **14** (15 minus this rename). Live named
 **2152** global.
 
-**Next:** Pass 277 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 277.
+
+## Pass 277 (2026-07-01) — HW reg 0x44 bit-0 read `FUN_8003b6dc`
+
+Fresh `ListUnnamed80030000.java` re-run: **14 unnamed** remain in region
+(unchanged from Pass 276; xref_in=0 tier dominates — rank-1 is `FUN_8003b6dc`
+at 26B, wins on address over tied 26B sibling `FUN_800399c4`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003b6dc` → `read_hw_reg_0x44_bit0_via_indirect_read`**
+(26B, HIGH, UTILITY-tier) via
+`RenamePass277Region80030000Fun8003b6dc.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Read-only HW/VSC register `0x44` bit-0 poll: invokes indirect read
+fptr at `PTR_DAT_8003b6f8` with args `(0, 0x44, 1)` and returns `read_val & 1`.
+Read-side complement of Pass 71's `read_modify_write_hw_reg_0x44_set_bit0` (RMW
+via `PTR_DAT_8003b6d4`/`PTR_DAT_8003b6d8`) in the same `0x8003b6xx`
+per-connection HW-buffer setup cluster.
+
+**Callers:** 0 xref-in (consistent with indirect fptr-table invocation).
+
+**Confidence:** HIGH — full 26B decompile; register index `0x44` and bit-0 mask
+unambiguous; sibling RMW cluster context from Pass 71/194/196/197.
+
+Region unnamed count after this pass: **13** (14 minus this rename). Live named
+**2153** global.
+
+**Next:** Pass 278 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
