@@ -8618,4 +8618,31 @@ documented in Pass 6 cont. (175) with matching PDU bytes and sub-state arm idiom
 
 Region unnamed count after this pass: **50** (51 minus this rename). Live named **1871** global.
 
+**Next:** superseded by Pass 6 continuation (263).
+
+## Pass 6 continuation (263) (2026-07-01) — LMP-ext SSP pairing continuation sender `FUN_800258a0`
+
+Decompiled and renamed:
+**`FUN_800258a0` → `send_lmp_ext_pkt_0x7f_subopcode_0x1b_ssp_pairing_continuation_req`**
+(36B, HIGH) via `RenamePass6Region80020000Fun800258a0.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (36B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=50` at pass start). First-listed
+`FUN_800258a0` in the tied 36B cluster (`0x800258a0`/`0x8002587c`/`0x80025858`).
+
+**Mechanism:** Thin outbound LMP-ext sender: builds 3-byte PDU with bytes `0x7f`/`0x1b`
+and transmits via `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate(conn, buf, 3, param_3)`.
+Outbound complement of inbound `handle_lmp_ext_subopcode_0x1b_by_ssp_state` (Pass 6 cont. 84)
+which receives `0x7f`/`0x1b` SSP pairing-continuation requests.
+
+**Callers:** `dispatch_ssp_pairing_continuation_lmp_ext_0x1b_or_dhkey_0x41` (`0x80023940`) —
+no-pending-LMP auth-failure path sends this then
+`call_send_evt_HCI_Simple_Pairing_Complete(conn, 5)`; xref_in=1.
+
+**Confidence:** HIGH — decompile confirms fixed LMP-ext opcode pair; caller already
+documented in Pass 6 cont. (90) with matching PDU bytes and SSP Simple Pairing Complete
+auth-failure idiom.
+
+Region unnamed count after this pass: **49** (50 minus this rename). Live named **1872** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
