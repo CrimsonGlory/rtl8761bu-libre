@@ -11407,8 +11407,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (242);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (243): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (70 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (243) (2026-07-01):
+          decompiled+renamed rank-1 `FUN_80025784`→`copy_unscramble_fixed_64byte_two_half_reversals`
+          (42B, HIGH). Fixed 64-byte two-half byte-reversal codec unscramble (hardcoded
+          `param_3==8` sibling of `copy_unscramble_two_independent_half_reversals`); caller
+          `send_evt_Meta_subevent_0x08_HCI_LE_Read_Local_P-256_Public_Key_Complete`; xref_in=1;
+          69 unnamed remain; live named 1852.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (243);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (244): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (69 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

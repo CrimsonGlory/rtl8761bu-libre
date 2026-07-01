@@ -8030,4 +8030,32 @@ the HCI auth/pairing cluster; caller context from prior passes confirms PIN-code
 
 Region unnamed count after this pass: **70** (71 minus this rename). Live named **1851** global.
 
+**Next:** superseded by Pass 6 continuation (243).
+
+## Pass 6 continuation (243) (2026-07-01) — fixed 64-byte codec unscramble helper `FUN_80025784`
+
+Decompiled and renamed:
+**`FUN_80025784` → `copy_unscramble_fixed_64byte_two_half_reversals`**
+(42B, HIGH) via `RenamePass6Region80020000Fun80025784.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (42B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=70` at pass start). First-listed in tied
+42B tier (preferred over xref_in=0 siblings); immediate neighbor of Pass 6 cont. (196)'s
+parameterized sibling `copy_unscramble_two_independent_half_reversals` at `0x800257b0`.
+
+**Mechanism:** Hardcoded `param_3==8` specialization of the codec-JIT template un-scramble
+algorithm (`reverse_engineering_hardware_layer.md` §9): copies 64 bytes from `param_1` into
+`param_2` as two independent 32-byte half-reversals (bytes `[0x1f..0x00]`→`dst[0..0x1f]`,
+then `[0x3f..0x20]`→`dst[0x20..0x3f]`). Same loop structure as
+`copy_unscramble_two_independent_half_reversals` but without the `param_3` length parameter.
+
+**Callers:** `send_evt_Meta_subevent_0x08_HCI_LE_Read_Local_P-256_Public_Key_Complete` at
+`0x800455da` (LE P-256 public-key HCI meta-event path — unscrambles 64-byte key material
+before host delivery). xref_in=1 via `ListXrefsTo80025784.java`.
+
+**Confidence:** HIGH — decompile matches documented two-half-reversal pseudocode; caller is
+LE crypto HCI event sender; neighborhood cluster with `0x800257b0`/`0x80025b68`.
+
+Region unnamed count after this pass: **69** (70 minus this rename). Live named **1852** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
