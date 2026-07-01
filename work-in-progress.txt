@@ -13661,7 +13661,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 211;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 212: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 212 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80038df4`→`program_bb_reg_0x1e_5bit_from_hook_or_config_if_flag0x10`
+          (42B, HIGH) — config-flag `0x10` selects hook-read vs config `+0x24`
+          byte, then programs BB reg `0x1e` 5-bit field; caller
+          `dispatch_optional_subsystem_hooks_during_hw_reg_config`.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 212;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 213: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

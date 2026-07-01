@@ -6573,5 +6573,34 @@ unambiguous; boot-init caller context confirmed.
 Region unnamed count after this pass: **79** (80 minus this rename). Live named
 **2087** global.
 
-**Next:** Pass 212 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 212.
+
+## Pass 212 (2026-07-01) — BB reg `0x1e` 5-bit config-flag wrapper `FUN_80038df4`
+
+Fresh `ListUnnamed80030000.java` re-run: **79 unnamed** remain in region
+(unchanged from Pass 211; rank-1 by size at xref=1 tier is `FUN_80038df4` at
+42B — wins on address over tied 42B sibling `FUN_800347a0`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80038df4` → `program_bb_reg_0x1e_5bit_from_hook_or_config_if_flag0x10`**
+(42B, HIGH, SIMPLE-tier) via
+`RenamePass212Region80030000Fun80038df4.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Config-flag-gated BB reg `0x1e` 5-bit field programmer wrapper in
+the `0x80038dxx` cluster: when `PTR_DAT_80038e20[0] & 0x10 == 0`, reads current
+5-bit field via `read_bb_reg_0x1e_5bit_field_via_hook`; when flag set, uses
+cached byte at config offset `+0x24`; then calls
+`program_bb_regs_0x1e_5bit_field_and_clear_0x1c_bit3`. Read/program sibling pair
+documented in Pass 109/136.
+
+**Callers:** 1 xref-in — `dispatch_optional_subsystem_hooks_during_hw_reg_config`
+(`0x80039560`, COMPUTED_CALL) — optional-hook dispatch during BB reg-config init.
+
+**Confidence:** HIGH — full 42B decompile; flag `0x10` branch + callee chain
+unambiguous; caller matches BB reg-config optional-hook cluster (Pass 151).
+
+Region unnamed count after this pass: **78** (79 minus this rename). Live named
+**2088** global.
+
+**Next:** Pass 213 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
