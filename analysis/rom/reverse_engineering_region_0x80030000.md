@@ -2500,5 +2500,33 @@ config-bit vs constant `0x41` argument selection unambiguous.
 Region unnamed count after this pass: **204** (205 minus this rename). Live named
 **1962** global.
 
-**Next:** Pass 87 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 87.
+
+## Pass 87 (2026-07-01) — BE u16 pair reverse-step2 fptr dispatcher `FUN_80039974`
+
+Fresh `ListUnnamed80030000.java` re-run: **204 unnamed** remain in region
+(unchanged from Pass 86; rank-1 by size at xref=3 tier is `FUN_80039974` at
+74B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80039974` → `dispatch_be_u16_pairs_reverse_step2_from_buf_via_fptr_hook`**
+(74B, HIGH) via `RenamePass87Region80030000Fun80039974.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Four-iteration loop walking buffer offsets 7→5→3→1 (reverse
+step-2). Each iteration reads a big-endian `uint16` from `param_1+offset` and
+calls the patchable fptr at `PTR_DAT_800399c0` with `(param_2, u16)`; `param_2`
+advances by 2 each pass. Calibration-table lookup cluster sibling of Pass 52's
+`clamp_byte_offset_base_plus_adj_minus_product` (`0x80039920`).
+
+**Callers:** 3 xref-in (per `ListUnnamed80030000`; `xrefs_to` empty — known
+GZF indirect-call gap).
+
+**Confidence:** HIGH — full 74B decompile; reverse step-2 BE u16 extraction and
+fptr dispatch loop unambiguous.
+
+Region unnamed count after this pass: **203** (204 minus this rename). Live named
+**1963** global.
+
+**Next:** Pass 88 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
