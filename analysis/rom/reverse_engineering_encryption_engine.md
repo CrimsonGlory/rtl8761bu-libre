@@ -162,7 +162,7 @@ byte-for-byte in reference open-source SAFER+ implementations (e.g. BlueZ).
 
 ## 5. Linear mixing layer — `FUN_8002cd80` and `FUN_8002ca2c`
 
-- **`FUN_8002ca2c`** (`0x8002ca2c`, 92 bytes): per-byte combiner over a
+- **`safer_plus_round_key_xor_or_add_block`** (`0x8002ca2c`, 92 bytes): per-byte combiner over a
   16-byte block, mode selected by `param_3` (1 = XOR if bit set in mask
   `0x9999` else ADD; 2 = inverse selection). This implements SAFER+'s
   alternating ADD/XOR combination of round key into the cipher state
@@ -331,7 +331,7 @@ ROM-resident, also requiring no libre-side action) in
 | `0x8002cddc` | `FUN_8002cddc` | **SAFER+ block encrypt** — full round-function core |
 | `0x8002cb2c` | `FUN_8002cb2c` | **SAFER+ key schedule** — 17-byte extended key, 3-bit rotation, bias table |
 | `0x8002ca88` | `FUN_8002ca88` | **SAFER+ bias-1 constant** application (fixed add/XOR bytes) |
-| `0x8002ca2c` | `FUN_8002ca2c` | Per-byte XOR/ADD combiner (round-key injection) |
+| `0x8002ca2c` | `safer_plus_round_key_xor_or_add_block` | Per-byte XOR/ADD combiner (round-key injection) |
 | `0x8002cd80` | `FUN_8002cd80` | Linear mixing layer (called 3x/round); not separately decompiled |
 | `0x8002cf1c` | `PTR_CRYPT_SAFER_exp_tab_8002cf1c` | SAFER `45^x mod 257` exponentiation table pointer |
 | `0x8002cf20` | `PTR_CRYPT_SAFER_log_tab_8002cf20` | SAFER logarithm table pointer (inverse of exp_tab) |

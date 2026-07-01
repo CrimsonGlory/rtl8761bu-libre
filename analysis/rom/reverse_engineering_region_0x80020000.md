@@ -5210,4 +5210,31 @@ adjacent to the Pass 6 cont. (22) QoS cluster.
 
 Region unnamed count after this pass: **165** (166 minus this rename). Live named **1756** global.
 
+**Next:** superseded by Pass 6 continuation (148).
+
+## Pass 6 continuation (148) (2026-07-01) — SAFER+ round-key combiner `FUN_8002ca2c`
+
+Decompiled and renamed:
+**`FUN_8002ca2c` → `safer_plus_round_key_xor_or_add_block`**
+(92B, HIGH) via `RenamePass6Region80020000Fun8002ca2c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (92B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=165` at pass start). Highest xref_in
+among the 92B tier (`FUN_8002ca2c` beats `FUN_8002cd80`/`FUN_80029e14` at xref_in=1
+and `FUN_8002bc28` at xref_in=0).
+
+**Mechanism:** Per-byte 16-byte block combiner for SAFER+ round-key injection.
+`param_3==1`: XOR round-key byte when bit set in mask `0x9999`, else ADD; `param_3==2`:
+inverse selection. Implements the alternating ADD/XOR combination documented in
+`reverse_engineering_encryption_engine.md` §5.
+
+**Callers:** `safer_plus_block_encrypt` (`0x8002cddc`, xref_in=4) — invoked between
+every nonlinear and linear stage in the SAFER+ round loop.
+
+**Confidence:** HIGH — decompile confirms mask-gated XOR/ADD over 16 bytes; prior
+encryption-engine analysis already identified this as the SAFER+ round-key combiner;
+caller is the renamed SAFER+ block-encrypt core.
+
+Region unnamed count after this pass: **164** (165 minus this rename). Live named **1757** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
