@@ -5263,4 +5263,32 @@ caller is the renamed SAFER+ block-encrypt core.
 
 Region unnamed count after this pass: **163** (164 minus this rename). Live named **1758** global.
 
+**Next:** superseded by Pass 6 continuation (150).
+
+## Pass 6 continuation (150) (2026-07-01) — Master link key HCI event 0x0e `FUN_80029e14`
+
+Decompiled and renamed:
+**`FUN_80029e14` → `derive_master_link_key_hci_event_0x0e_via_safer_plus_xor`**
+(92B, HIGH) via `RenamePass6Region80020000Fun80029e14.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (92B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=163` at pass start). First-listed at
+92B (tied cluster; first entry `FUN_80029e14`).
+
+**Mechanism:** Second HCI event emitter in the Master Link Key staging pair (sibling of
+`FUN_80029e78` event `0x0d`). Builds 0x12-byte packet with event code `0x0e`, encrypts
+16B key material at `param_2+2` via `pad_concat_safer_plus_encrypt_16byte_key_block`,
+XORs ciphertext with 16B template at `PTR_DAT_80029e74+0x5c`, and transmits via
+`wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`.
+
+**Caller:** `stage_master_link_key_for_encrypted_connection_slot` (`0x80029eb0`, Pass 6
+cont. 51) — xref_in=1; second event in the two-event notification sequence after key
+blocks are staged.
+
+**Confidence:** HIGH — decompile confirms SAFER+ encrypt + template XOR + 0x12-byte
+event `0x0e` dispatch; documented caller from Pass 6 cont. (51); complements the
+already-analyzed Master Link Key staging cluster.
+
+Region unnamed count after this pass: **162** (163 minus this rename). Live named **1759** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
