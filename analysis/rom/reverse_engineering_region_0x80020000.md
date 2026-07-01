@@ -6372,4 +6372,37 @@ return; adjacent to documented VSC handlers.
 
 Region unnamed count after this pass: **126** (127 minus this rename). Live named **1795** global.
 
+**Next:** superseded by Pass 6 continuation (187).
+
+## Pass 6 continuation (187) (2026-07-01) — SCO/eSCO link slot config init `FUN_8002b894`
+
+Decompiled and renamed:
+**`FUN_8002b894` → `zero_esco_link_high_nibble_and_merge_slot_config_low_bits`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002b894.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=4) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=126` at pass start). First listed at
+66B/xref_in=4 after Pass 186 cleared the sole 68B tier.
+
+**Mechanism:** Compact SCO/eSCO link-slot config initializer in the `0x8002b8xx`
+cluster adjacent to `program_or_restore_sco_esco_link_register_slot_banks`
+(`0x8002bd04`). Zeros the eSCO link-register high nibble via
+`write_esco_link_register_high_nibble_field_with_retry(param_1, 0)`, clears byte
+`+0xbc` in the per-slot 12-byte table at `PTR_DAT_8002b8d8`, and merges the low
+5 bits from global config byte `*PTR_DAT_8002b8dc` into byte `+0xbd`
+(`& 0xe0 | *pbVar2 & 0x1f`).
+
+**Callers:** xref_in=4 — documented callers in region `0x80050000` include
+`program_sco_esco_hw_registers_from_connection_record` (`0x80058dd4`),
+`program_link_mode_registers_and_commit` (`0x800590b0`), and SCO baseband
+register programmers at `0x80054b14` — final commit step after bulk HW-register
+programming during SCO/eSCO connection setup.
+
+**Confidence:** HIGH — decompile confirms established eSCO link-register high-nibble
+zero idiom (pair with `write_esco_link_register_high_nibble_field_with_retry`);
+12-byte stride slot-table layout matches `0x8002bd04` cluster; xref_in=4 across
+documented SCO/eSCO HW-commit paths.
+
+Region unnamed count after this pass: **125** (126 minus this rename). Live named **1796** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
