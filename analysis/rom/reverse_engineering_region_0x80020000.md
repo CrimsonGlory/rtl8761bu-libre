@@ -8389,4 +8389,30 @@ bound against PDU byte 5 during LMP 0x10 negotiation in both `'J'` and `'G'` bra
 
 Region unnamed count after this pass: **58** (59 minus this rename). Live named **1863** global.
 
+**Next:** superseded by Pass 6 continuation (255).
+
+## Pass 6 continuation (255) (2026-07-01) — HCI evt buffer fptr dispatch mode-2 `FUN_8002ed70`
+
+Decompiled and renamed:
+**`FUN_8002ed70` → `hci_evt_buffer_fptr_dispatch_mode2_computed_ushort_range`**
+(38B, HIGH) via `RenamePass6Region80020000Fun8002ed70.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (38B, xref_in=1) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=58` at pass start). First-listed in tied
+38B tier; sits in the `0x8002edxx` HCI event-buffer fptr-dispatch cluster immediately
+before sibling thunk `FUN_8002ed9c` (mode-3 forwarder used by `HCI_EVT_0x1fd_FUN_8002a334`).
+
+**Mechanism:** Loads function pointer from `PTR_DAT_8002ed98`, computes a ushort window
+(`end = param_4 − (param_3 & 0xffff)`, `start = (param_5 + param_3) & 0xffff`), and
+invokes the fptr with fixed mode argument `2` plus the computed range and trailing `0`.
+Thin arithmetic wrapper around the same indirect-dispatch pattern as `FUN_8002ed9c`.
+
+**Caller:** `FUN_8002f378` at `0x8002f38e` — passes fixed offset `4`, buffer base, and
+`*(ushort*)(buffer+2)` as `param_5`; xref_in=1 via `ListXrefsTo8002ed70.java`.
+
+**Confidence:** HIGH — decompile confirms ushort window arithmetic and mode-2 fptr tail-call;
+caller decompile shows fixed `param_3=4` buffer-dispatch wrapper pattern.
+
+Region unnamed count after this pass: **57** (58 minus this rename). Live named **1864** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
