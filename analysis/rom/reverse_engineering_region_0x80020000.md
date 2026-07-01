@@ -1542,7 +1542,7 @@ sub-state byte at `+1`:
 - `0x28`: `LMP__271__FUN_80025cb4` (LMP 0x271 continuation)
 - `0x25`/`0x2c`/`0x34`/`0x39`: status transitions via `set_arg1_1_to_arg2`
   (`0x24`/`0x2b`/`0x32`/`0x37`); `0x39` with `+0x13c==0x14` also calls
-  `FUN_8002600c` before LMP 0x271 path
+  `zero_stage_copy_16byte_crypto_buffer_inject_3bytes_from_0x138` before LMP 0x271 path
 
 **Callers:** `LMP_NOT_ACCEPTED_0x04` (1 site, rejected-opcode `0x40` branch).
 
@@ -6465,5 +6465,34 @@ delete path alongside `store_link_keys_in_global_slot_table`/`FUN_80026920`. xre
 both callers confirmed; layout matches documented link-key table cluster.
 
 Region unnamed count after this pass: **123** (124 minus this rename). Live named **1798** global.
+
+**Next:** superseded by Pass 6 continuation (190).
+
+## Pass 6 continuation (190) (2026-07-01) — SSP crypto buffer staging `FUN_8002600c`
+
+Decompiled and renamed:
+**`FUN_8002600c` → `zero_stage_copy_16byte_crypto_buffer_inject_3bytes_from_0x138`**
+(66B, HIGH) via `RenamePass6Region80020000Fun8002600c.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (66B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=123` at pass start). First-listed at
+66B/xref_in=2 after Pass 189 cleared the sibling `FUN_8002694c`.
+
+**Mechanism:** Operates on per-connection `_x58_crypto_struct`. Zeroes 16 bytes at
+`+0x108`, injects the high 3 bytes of dword at `+0x138` into offsets `+0x115`–`+0x117`
+(within the staging buffer), then copies the staged 16-byte block to `+0x118` via
+`optimized_memcpy`. Prepares crypto buffer material ahead of LMP 0x271 continuation.
+
+**Callers:** `handle_lmp_simple_pairing_number_not_accepted` (`0x8002877e`) — SSP
+NOT-ACCEPTED recovery when crypto sub-state `0x39` and `+0x13c==0x14`, immediately
+before `LMP__271__FUN_80025cb4`; second site `0x80028b2c` (unnamed SSP handler in
+`0x80028bxx` cluster). xref_in=2 via `ListXrefsTo8002600c.java`.
+
+**Confidence:** HIGH — decompile confirms memset/memcpy staging with 3-byte patch from
+`+0x138`; primary caller confirmed in live decompile of
+`handle_lmp_simple_pairing_number_not_accepted`; ties to documented SSP NOT-ACCEPTED
+recovery path (Pass 6 cont. 31).
+
+Region unnamed count after this pass: **122** (123 minus this rename). Live named **1799** global.
 
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
