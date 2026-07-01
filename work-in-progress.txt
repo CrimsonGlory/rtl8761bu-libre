@@ -11310,8 +11310,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (231);
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (232): cold-triage
-          next rank-1 unnamed per `ListUnnamed80020000.java` (81 remain).
+[DONE]  Full RE: ROM region 0x80020000 — Pass 6 continuation (232) (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80024218`→`invoke_lmp_0x268_from_crypto_pending_slot_if_active`
+          (44B, HIGH). Crypto `+0x1ec` pending-slot LMP 0x268 gateway when dword `!= -1`;
+          mechanical twin of `invoke_lmp_0x25b_from_crypto_pending_slot_if_active`; callers
+          include `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`,
+          `send_lmp_ext_opcode_reply_maybe_ssp_complete`; xref_in=9. 80 unnamed remain;
+          live named 1841.
+          → analysis/rom/reverse_engineering_region_0x80020000.md Pass 6 cont. (232);
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80020000 — Pass 6 continuation (233): cold-triage
+          next rank-1 unnamed per `ListUnnamed80020000.java` (80 remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

@@ -7719,4 +7719,35 @@ documented; mechanical twin of Pass 6 cont. (230) with reason `0x18` instead of 
 
 Region unnamed count after this pass: **81** (82 minus this rename). Live named **1840** global.
 
+**Next:** superseded by Pass 6 continuation (232).
+
+## Pass 6 continuation (232) (2026-07-01) — crypto pending-slot LMP 0x268 gateway `FUN_80024218`
+
+Decompiled and renamed:
+**`FUN_80024218` → `invoke_lmp_0x268_from_crypto_pending_slot_if_active`**
+(44B, HIGH) via `RenamePass6Region80020000Fun80024218.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (44B, xref_in=9) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=81` at pass start). Highest-xref
+function in the 44B tier; long referenced by address across encryption/SSP cluster
+without being decompiled or renamed.
+
+**Mechanism:** Per-connection crypto pending-slot LMP 0x268 gateway. Indexes
+`big_ol_struct[conn & 0xffff]`, checks dword at `_x58_crypto_struct+0x1ec != -1`
+(pending-slot active sentinel), and when set calls
+`LMP__268__most_common_for_VSCs2_checks_fptr_patch`. Mechanical twin of Pass 6
+cont. (227)'s `invoke_lmp_0x25b_from_crypto_pending_slot_if_active` (same `+0x1ec`
+gate, dispatches LMP 0x25B instead of 0x268).
+
+**Callers:** xref_in=9 — includes `wrap_send_lmp_pkt_with_conn_cc_hook_and_validate`
+(pre-send validation gateway for non-encryption-sensitive opcodes, Pass 6 cont. 95),
+`send_lmp_ext_opcode_reply_maybe_ssp_complete` (SSP-complete arm when crypto `+1`
+nonzero, Pass 6 cont. 181), and additional encryption/SSP reply handlers.
+
+**Confidence:** HIGH — decompile confirms established `+0x1ec` pending-slot gate +
+LMP 0x268 dispatch pattern; sibling 0x25B gateway already named; ubiquitous caller
+context documented across 9+ prior pass cross-references.
+
+Region unnamed count after this pass: **80** (81 minus this rename). Live named **1841** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
