@@ -12141,7 +12141,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 54;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 55: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 55 (2026-07-01): fresh
+          ListUnnamed80030000 re-rank (236 unnamed); decompiled+renamed rank-1
+          `FUN_800362b4`→`arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots`
+          (54B, HIGH, 8 xref-in). Page/inquiry scan-window timer arm-or-flush on
+          `the_0x300`: idle sets `field_0x175..0x178`; busy calls `FUN_800361e4`
+          codec-slot flush. 235 unnamed remain; live named 1931.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 55;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 56: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

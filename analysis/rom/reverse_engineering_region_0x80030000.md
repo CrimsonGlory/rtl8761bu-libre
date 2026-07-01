@@ -1428,5 +1428,38 @@ constant pairs match documented eSCO/SCO codec-type cluster.
 Region unnamed count after this pass: **236** (237 minus this rename). Live named
 **1930** global.
 
-**Next:** Pass 55 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 55.
+
+## Pass 55 (2026-07-01) — page/inquiry scan timer arm `FUN_800362b4`
+
+Fresh `ListUnnamed80030000.java` re-run: **236 unnamed** remain in region
+(unchanged from Pass 54 pre-rename list; rank-1 was `FUN_800362b4`).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800362b4` → `arm_page_inquiry_scan_timer_if_idle_else_flush_codec_slots`**
+(54B, HIGH) via `RenamePass55Region80030000Fun800362b4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Page/inquiry scan-window timer arm-or-flush gate on
+`the_0x300` inquiry state struct. When `field_0x173 < 2` and `int_0x10 == 0`
+(idle), sets timer-active `field_0x175=1` plus scan-window/interval bytes
+`field_0x176=8`, `field_0x177=4`, `field_0x178=4` (same field cluster seeded by
+`init_inquiry_page_state_from_config` in region `0x80060000`). Otherwise
+delegates to `FUN_800361e4` which clears `field_0x175` and IRQ-masked-flushes
+up to 12 active codec slots via `FUN_80014450`/`FUN_80014dac`.
+
+**Callers:** 8 xref_in (rank-1 by xref count); includes paging/inquiry cluster
+from region `0x80040000`: `program_page_train_baseband_regs_and_start_paging`,
+`program_inquiry_or_esco_baseband_from_hci_command`,
+`complete_inquiry_lap_slot_apply_lmp268_remote_name_and_arm_timer`,
+`teardown_inquiry_lap_slot_baseband_cleanup_and_release`, plus
+`fHCI_inquiry_cancel` in this region.
+
+**Confidence:** HIGH — fully decompiled 54B; idle-arm vs busy-flush branches
+match documented paging/inquiry watchdog usage across `0x80040000` passes.
+
+Region unnamed count after this pass: **235** (236 minus this rename). Live named
+**1931** global.
+
+**Next:** Pass 56 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
