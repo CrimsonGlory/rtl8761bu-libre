@@ -3686,5 +3686,38 @@ register indices match documented diagnostic-read cluster (Pass 64 cross-ref).
 Region unnamed count after this pass: **167** (168 minus this rename). Live named
 **1999** global.
 
-**Next:** Pass 124 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 124.
+
+## Pass 124 (2026-07-01) — `compute_lmp_slot_offset_byte_from_conn_timing_params`
+
+Fresh `ListUnnamed80030000.java` re-run: **167 unnamed** remain in region
+(unchanged at xref=2 tier; rank-1 at xref=1 tier is `FUN_800334ac` at 296B —
+largest among tied 1-xref candidates).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800334ac` → `compute_lmp_slot_offset_byte_from_conn_timing_params`**
+(296B Ghidra boundary, HIGH, HANDLER-tier) via
+`RenamePass124Region80030000Fun800334ac.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LMP slot-offset byte calculator for role-switch / conn-timing
+cluster. Skips when conn `bdaddr_random_==1`; optional hook veto at
+`PTR_DAT_800335d8`. Default path scales `timing_param` by conn `field_0x202`
+(default `0xfa` when `0xff`) plus global offset at `PTR_DAT_800335dc+0x9e`,
+with extra `0x2ee` penalty when `timing_param` exceeds `field106_0x94`. Applies
+tiered downscaling via `DAT_800335e0`/`DAT_800335e4` thresholds, converts to
+slot units via `/0x138` (+1), aligns to slot grid when `field200_0x206` or
+global flag bit set, caps result at `0x7c`.
+
+**Callers:** 1 xref-in — `compute_lmp_slot_offset_and_program_hw_by_conn_cc_index`
+at `0x800362f0` (Pass 67; programs result into HW register indexed by
+`byte_0xCC`).
+
+**Confidence:** HIGH — full 296B decompile; callee relationship confirms
+timing-scaled slot-offset math; cap `0x7c` and `field_0x202`/`field106_0x94`
+inputs match Pass 67 caller analysis.
+
+Region unnamed count after this pass: **166** (167 minus this rename). Live named
+**2000** global.
+
+**Next:** Pass 125 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
