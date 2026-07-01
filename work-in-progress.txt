@@ -12656,7 +12656,16 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 105;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 106: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 106 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_800345ec`→`commit_link_mode_snapshot_role_slots_and_materialize_lut`
+          (96B, HIGH, HANDLER-tier). Hook-veto gated link-mode commit when
+          `field_0x10a` set: snapshots role slots, polls HW-ready bitmask,
+          materializes 9-entry dword LUT. Callers `link_mode_change_state_machine`
+          and `FUN_80010814`. 184 unnamed remain; live named 1982.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 106;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 107: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

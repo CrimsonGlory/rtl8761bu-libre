@@ -3085,5 +3085,36 @@ documented role-switch logging cluster; both callers confirmed via decompile.
 Region unnamed count after this pass: **185** (186 minus this rename). Live named
 **1981** global.
 
-**Next:** Pass 106 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 106.
+
+## Pass 106 (2026-07-01) — link-mode commit snapshot `FUN_800345ec`
+
+Fresh `ListUnnamed80030000.java` re-run: **185 unnamed** remain in region
+(unchanged from Pass 105; rank-1 by size at xref=2 tier is `FUN_800345ec` at
+96B).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_800345ec` → `commit_link_mode_snapshot_role_slots_and_materialize_lut`**
+(96B, HIGH, HANDLER-tier) via `RenamePass106Region80030000Fun800345ec.java`
+(`renamed=1`, live-verified).
+
+**Mechanism:** Optional hook veto at `PTR_DAT_8003464c` — when absent or
+returns zero and link-state struct `field_0x10a` is set, snapshots valid
+`big_ol_struct` role slots via `FUN_8003436c` (10-slot walk + `optimized_memcpy`),
+polls HW-ready bitmask via `FUN_80034564` (2000-iteration timeout + log on
+stall), dispatches via `PTR_DAT_80034654`, materializes 9-entry dword LUT from
+ushort index table, and copies commit dword from `DAT_8003466c` to
+`PTR_DAT_80034670`.
+
+**Callers:** 2 xref-in — `link_mode_change_state_machine` (region `0x80030000`,
+post-VSC-fc11 commit path after timing/budget adjust) and `FUN_80010814` (region
+`0x80010000`, connection-setup init after `FUN_80010324`).
+
+**Confidence:** HIGH — full 96B decompile; `field_0x10a` gate matches documented
+link-mode-change cluster; both callers confirmed via decompile.
+
+Region unnamed count after this pass: **184** (185 minus this rename). Live named
+**1982** global.
+
+**Next:** Pass 107 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
