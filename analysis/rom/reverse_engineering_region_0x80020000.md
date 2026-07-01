@@ -9957,4 +9957,34 @@ no proven call sites, but pointer target and cluster placement match documented 
 
 Region unnamed count after this pass: **3** (4 minus this rename). Live named **1918** global.
 
+**Next:** superseded by Pass 6 continuation (310).
+
+## Pass 6 continuation (310) (2026-07-01) — runtime global dword setter `FUN_80029630`
+
+Decompiled and renamed:
+**`FUN_80029630` → `set_runtime_global_dword_at_80121d88_offset_0x48`**
+(6B, HIGH) via `RenamePass6Region80020000Fun80029630.java` (`renamed=1`, live-verified).
+
+**Triage note:** All 3 remaining unnamed have xref_in=0; per established convention when no
+xref_in≥1 candidates remain, selected rank-1 by size: `FUN_80029630` (6B, xref_in=0) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=3` at pass start). Sits in the `0x800296xx`
+link-key-type / master-link-key cluster immediately before Pass 6 cont. (307)'s
+`is_conn_status_04_or_0f_at_offset_b2` at `0x8002963c`.
+
+**Mechanism:** Stores `param_1` to dword at runtime global `*(PTR_DAT_80029638 + 0x48)` where
+the PC-relative literal pool at `0x80029638` resolves to RAM address `0x80121d88` (effective
+store target `0x80121dd0`). Minimal orphan setter thunk — same 6-byte store-only idiom as
+Pass 6 cont. (301)'s `read_max_encryption_key_size_from_config` and Pass 6 cont. (305)'s
+`set_lmp_encryption_handler_ack_flag_one`, but writes a runtime RAM dword rather than reading
+ROM config or setting an ack flag.
+
+**Callers:** none (xref_in=0; orphan setter — no proven call sites; sole xref to literal pool
+is the function body itself per `ResolvePtr80029638.java`).
+
+**Confidence:** HIGH for mechanism (unambiguous dword store via literal-pool pointer); MEDIUM
+for role (orphan with no proven call sites, but cluster placement and +0x48 offset match
+documented link-key-type phase-dword idiom elsewhere in region).
+
+Region unnamed count after this pass: **2** (3 minus this rename). Live named **1919** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
