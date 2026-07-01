@@ -3106,7 +3106,7 @@ Decompiled and renamed rank-1 cold-triage target:
 **Mechanism:** Optional hook veto at `PTR_DAT_8003464c` — when absent or
 returns zero and link-state struct `field_0x10a` is set, snapshots valid
 `big_ol_struct` role slots via `FUN_8003436c` (10-slot walk + `optimized_memcpy`),
-polls HW-ready bitmask via `FUN_80034564` (2000-iteration timeout + log on
+polls HW-ready bitmask via `poll_hw_ready_bitmask_until_clear_or_log_timeout` (2000-iteration timeout + log on
 stall), dispatches via `PTR_DAT_80034654`, materializes 9-entry dword LUT from
 ushort index table, and copies commit dword from `DAT_8003466c` to
 `PTR_DAT_80034670`.
@@ -5200,5 +5200,34 @@ siblings `zero_bos_struct_and_init_link_mode_bb_timing_with_lmp_3ee_branch`
 Region unnamed count after this pass: **122** (123 minus this rename). Live named
 **2044** global.
 
-**Next:** Pass 169 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 169.
+
+## Pass 169 (2026-07-01) — HW-ready bitmask poll `FUN_80034564`
+
+Fresh `ListUnnamed80030000.java` re-run: **122 unnamed** remain in region
+(unchanged from Pass 168; rank-1 at xref=1 tier is `FUN_80034564` at 110B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80034564` → `poll_hw_ready_bitmask_until_clear_or_log_timeout`**
+(110B, HIGH, UTILITY-tier) via
+`RenamePass169Region80030000Fun80034564.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Link-mode-commit HW-ready poll. Merges initial value
+`*PTR_DAT_800345d8 |= DAT_800345d4 | 0xc3`, then spins until
+`(DAT_800345dc & *status) == 0` (ready). On 2000-iteration timeout logs via
+`possible_logging_function__var_args` and writes recovery dword
+`(*status & DAT_800345e4 | DAT_800345e8) & 0xffffff00 | 0xa5`.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000`; callee of
+`commit_link_mode_snapshot_role_slots_and_materialize_lut` (Pass 106).
+
+**Confidence:** HIGH — full 110B decompile; poll+timeout+log idiom matches
+`poll_hw_tx_status_until_nonnegative_or_log_timeout` (region `0x80020000`);
+previously referenced by name in Pass 106 parent analysis.
+
+Region unnamed count after this pass: **121** (122 minus this rename). Live named
+**2045** global.
+
+**Next:** Pass 170 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
