@@ -8750,4 +8750,32 @@ well-documented `+0x1e8` pending-callback field; xref density corroborates utili
 
 Region unnamed count after this pass: **45** (46 minus this rename). Live named **1876** global.
 
+**Next:** superseded by Pass 6 continuation (268).
+
+## Pass 6 continuation (268) (2026-07-01) — codec-8 staging `FUN_8002c2ac`
+
+Decompiled and renamed:
+**`FUN_8002c2ac` → `copy_codec8_h2_h0_rom_templates_to_staging`**
+(34B, HIGH) via `RenamePass6Region80020000Fun8002c2ac.java` (`renamed=1`, live-verified).
+
+**Triage note:** Rank-1 by size among remaining unnamed (34B, xref_in=2) per fresh
+`ListUnnamed80020000.java` run (`total_unnamed=45` at pass start). Highest xref_in of
+the tied 34B cluster; completes the codec-8 staging sibling pair with Pass 6 cont. (215)'s
+`copy_codec6_h2_h0_rom_templates_to_staging`.
+
+**Mechanism:** Codec-8 h2/h0 ROM template staging helper. `optimized_memcpy` copies
+`0x20` bytes from ROM literal `PTR_DAT_8002c2d0` into caller h2 staging area (`param_1`),
+then `0x40` bytes from `PTR_DAT_8002c2d4` into h0 staging area (`param_2`). Callee of
+`populate_codec_staging_tables_from_rom` (Pass 6 cont. 167) step (4) in the boot-time
+codec JIT staging pipeline documented in `reverse_engineering_hardware_layer.md` Section 9.
+
+**Callers:** `populate_codec_staging_tables_from_rom` (xref_in=2 — direct call + pipeline
+reference in hardware-layer doc).
+
+**Confidence:** HIGH — decompile confirms exact memcpy sizes matching hardware-layer
+codec-8 staging call `FUN_8002c2ac(0x8012216c, 0x801220ec)`; structural sibling of
+`copy_codec6_h2_h0_rom_templates_to_staging`; role pre-documented in Pass 6 cont. (167).
+
+Region unnamed count after this pass: **44** (45 minus this rename). Live named **1877** global.
+
 **Next:** cold-triage next rank-1 unnamed per `ListUnnamed80020000.java`.
