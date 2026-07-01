@@ -5809,5 +5809,37 @@ via `ListXrefsTo8003b1d0`.
 Region unnamed count after this pass: **103** (104 minus this rename). Live named
 **2063** global.
 
-**Next:** Pass 188 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 188.
+
+## Pass 188 (2026-07-01) — LC evt 0x321 logger `FUN_8003845c`
+
+Fresh `ListUnnamed80030000.java` re-run: **103 unnamed** remain in region
+(unchanged from Pass 187; rank-1 by size at xref=1 tier is `FUN_8003845c` at
+72B — tied with several 68–70B siblings, first by address wins).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003845c` → `log_lc_evt_0x321_with_hw_clock_by_role_index`**
+(72B, HIGH, UTILITY-tier) via
+`RenamePass188Region80030000Fun8003845c.java` (`renamed=1`, live-verified).
+
+**Mechanism:** LC event logger for opcode `0x321`: reads HW clock dword via
+`read_hw_clock_raw_dword_by_role_index(out, role_index)`, merges
+`role_index << 0x1e` with mask `DAT_800384a4`, then logs via
+`possible_logger_called_if_no_patch3` with `param_2 & 0xff` as secondary arg.
+Extracted helper matching the inline `0x321` logging path in
+`select_packet_type_and_renegotiate_or_log`'s else branch (which uses
+`byte_0xCC` for clock read instead of role index).
+
+**Callers:** 1 xref-in — `select_packet_type_and_renegotiate_or_log` at
+`0x8000333c` (region `0x80000000`, eSCO packet-type selection success path:
+calls this helper then separately logs evt `0x328`).
+
+**Confidence:** HIGH — full 72B decompile; LC evt `0x321` + HW-clock timestamp
+pattern matches documented eSCO packet-type cluster; sole caller confirmed via
+caller decompile.
+
+Region unnamed count after this pass: **102** (103 minus this rename). Live named
+**2064** global.
+
+**Next:** Pass 189 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

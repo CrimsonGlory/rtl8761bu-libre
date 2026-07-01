@@ -13438,7 +13438,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 187;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 188: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 188 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003845c`→`log_lc_evt_0x321_with_hw_clock_by_role_index`
+          (72B, HIGH, UTILITY-tier). LC evt `0x321` logger: HW clock via
+          `read_hw_clock_raw_dword_by_role_index`, mask-merge `DAT_800384a4`,
+          `possible_logger_called_if_no_patch3`; caller
+          `select_packet_type_and_renegotiate_or_log`.
+          102 unnamed remain; live named 2064.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 188;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 189: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
