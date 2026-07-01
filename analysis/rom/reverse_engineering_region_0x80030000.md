@@ -5591,5 +5591,36 @@ structure unambiguous (MSB initial guess + division/average convergence).
 Region unnamed count after this pass: **110** (111 minus this rename). Live named
 **2056** global.
 
-**Next:** Pass 181 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 181.
+
+## Pass 181 (2026-07-01) — fd49-diag bit0 gate `FUN_8003ac28`
+
+Fresh `ListUnnamed80030000.java` re-run: **110 unnamed** remain in region
+(unchanged from Pass 180; rank-1 at xref=1 tier is `FUN_8003ac28` at 84B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_8003ac28` → `dispatch_fd49_diag_bit0_preserve_bb_or_program_bb_bundle`**
+(84B, HIGH, HANDLER-tier) via
+`RenamePass181Region80030000Fun8003ac28.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Register-script cluster gated wrapper. Tests bit 0 of
+`read_fd49_extended_diag_build_dual_slot_bitmasks_and_shift_width`: when clear,
+invokes `preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle`
+(full save/restore + fd49 triple-compute path); when set, extracts three ushort
+params from the fd49-diag slot record (`+4`/`+7`/`+8` dword halves) and calls
+`program_bb_regs_41_43_44_46_47_via_hook_and_da_d6_dispatch` directly.
+
+**Callers:** 1 xref-in per `ListUnnamed80030000` — invoked from
+`register_script_interpreter` (`0x8003aea0`) alongside
+`preserve_bb_regs_5a_5c_run_regscript_hook_then_program_bb_bundle` (Pass 145).
+
+**Confidence:** HIGH — full 84B decompile; bit0 branch to both documented
+register-script cluster paths matches Pass 145/103 parent analysis; fd49-diag
+context global reference confirmed.
+
+Region unnamed count after this pass: **109** (110 minus this rename). Live named
+**2057** global.
+
+**Next:** Pass 182 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.

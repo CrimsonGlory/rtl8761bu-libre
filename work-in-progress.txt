@@ -13372,7 +13372,15 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 180;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 181: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 181 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_8003ac28`→`dispatch_fd49_diag_bit0_preserve_bb_or_program_bb_bundle`
+          (84B, HIGH, HANDLER-tier). Register-script fd49-diag bit0 gate: clear →
+          preserve-BB+regscript path, set → direct BB bundle dispatch from fd49
+          slot record params. 109 unnamed remain; live named 2057.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 181;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 182: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
