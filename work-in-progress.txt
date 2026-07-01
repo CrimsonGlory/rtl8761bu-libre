@@ -12988,7 +12988,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80030000.md Pass 140;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80030000 — Pass 141: fresh ListUnnamed80030000
+[DONE]  Full RE: ROM region 0x80030000 — Pass 141 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80037a20`→
+          `clear_role_slot_timing_flag_and_dispatch_link_supervision_event`
+          (196B, HIGH, HANDLER-tier). Clears `field_0x29f` timing/link-state flag
+          and dispatches events `0x2c8`/`0x2c9`/`0x2ca` per overrun/advance reason;
+          caller `conn_teardown_and_link_loss_cleanup_handler`.
+          149 unnamed remain; live named 2017.
+          → analysis/rom/reverse_engineering_region_0x80030000.md Pass 141;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80030000 — Pass 142: fresh ListUnnamed80030000
           re-rank; decompile+rename top rank-1 unnamed function.
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+

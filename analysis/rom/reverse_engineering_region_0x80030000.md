@@ -4248,5 +4248,37 @@ caller anchors SCO/eSCO HW subsystem init path.
 Region unnamed count after this pass: **150** (151 minus this rename). Live named
 **2016** global.
 
-**Next:** Pass 141 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
+**Next:** superseded by Pass 141.
+
+## Pass 141 (2026-07-01) — link supervision event dispatcher `FUN_80037a20`
+
+Fresh `ListUnnamed80030000.java` re-run: **150 unnamed** remain in region
+(unchanged from Pass 140; rank-1 at xref=1 tier is `FUN_80037a20` at 196B —
+largest among the xref=1 cohort).
+
+Decompiled and renamed rank-1 cold-triage target:
+**`FUN_80037a20` → `clear_role_slot_timing_flag_and_dispatch_link_supervision_event`**
+(196B, HIGH, HANDLER-tier) via
+`RenamePass141Region80030000Fun80037a20.java` (`renamed=1`, live-verified).
+
+**Mechanism:** Per-role-slot `big_ol_struct` link-supervision event dispatcher
+gated on index `!= 0xff`. Reads and clears `field_0x29f` (timing/link-state flag
+set by Pass 104/126 siblings). Switch on cleared value: `1` = relative timing
+overrun (logs opcode `0x27` subcode `0x21e`/`0x128`, dispatches event `0x2c8`
+when `field_0x29d != 1`); `2` = link-state advance (logs `0x227`/`0x129`,
+dispatches `0x2c9` when `field_0x29d == 1`); `3` = absolute timing overrun
+(logs `0x22f`/`0x12a`, dispatches `0x2ca`). Events sent via
+`possible_logger_called_if_no_patch3` through `PTR_DAT_80037aec`.
+
+**Callers:** 1 xref-in — `conn_teardown_and_link_loss_cleanup_handler` at
+`0x80004820` (invoked during per-connection teardown/link-loss cleanup).
+
+**Confidence:** HIGH — full 196B decompile; `field_0x29f` cluster matches Pass
+104/126 producers; three-way dispatch with documented logging opcodes; caller
+integration in connection-teardown path confirmed via `find_callers`.
+
+Region unnamed count after this pass: **149** (150 minus this rename). Live named
+**2017** global.
+
+**Next:** Pass 142 — fresh `ListUnnamed80030000` re-rank; decompile+rename top
 rank-1 unnamed function.
