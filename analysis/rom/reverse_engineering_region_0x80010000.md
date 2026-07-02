@@ -2654,7 +2654,8 @@ and `*(ushort*)(param_2+8) > 3`, else **0x12** (Command Disallowed).
 
 **Callers:** 2 xref_in per `ListXrefsTo80018f38.java` —
 `validate_sync_conn_feature_page_and_reject_conn_status_0x03` (eSCO setup gate)
-and `FUN_800194a0` (sync-conn reject path at `0x800194ac`).
+and `validate_sync_conn_feature_page_and_reject_unless_wildcard_sync_intervals`
+(sync-conn reject path at `0x800194ac`, renamed Pass 128).
 
 **Confidence:** HIGH — decompile confirms dual global+per-conn feature-page bit
 test with HCI error codes; callers sit on documented sync-conn setup chain
@@ -2850,4 +2851,38 @@ credit-scheduler primitive; caller chain documented in region `0x80030000` Pass
 
 Region unnamed count after this pass: **184** (185 minus this rename).
 
-**Next:** Pass 128 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 128.
+
+## Pass 128 (2026-07-02) — sync-conn wildcard-interval gate `FUN_800194a0`
+
+Pass 128 target from cold-triage rank-1 (2 xref_in, 96B — largest at xref=2
+tier after Pass 127 cleared `FUN_800132f4`). Decompiled and renamed:
+**`FUN_800194a0` → `validate_sync_conn_feature_page_and_reject_unless_wildcard_sync_intervals`**
+(96B, HIGH) via `RenamePass128Region80010000Fun800194a0.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Second sync-connection setup gate wrapper in the `0x800194xx`
+cluster (sibling of Pass 109's
+`validate_sync_conn_feature_page_and_reject_conn_status_0x03` and callee of
+Pass 121's `validate_sync_conn_feature_page_capability_and_encode_field_c4`).
+Delegates to core feature-page validator on conn index; when that returns 0
+(validation OK), applies additional interval/timing gate on caller's sync-conn
+parameter block: reads status byte at `param_2+0xe` and min/max interval dwords
+at `param_2[0]`/`param_2[1]`. When status is `0x00` or `0xff` and both
+intervals are wildcard (`0xffffffff` or `0x1f40` = 8000 slots), returns **0**
+(allow); otherwise logs via `possible_logging_function__var_args` (class
+`0x345`/event `0x518`) and returns **0x12** (Command Disallowed). Non-extreme
+status bytes always yield **0x12** after core validation passes.
+
+**Callers:** 2 xref_in per `ListXrefsTo800194a0.java` — `FUN_80019504`
+(HCI Command Status 0x09 sync-conn reject path) and `FUN_80019714` (Add SCO /
+sync-conn setup dispatch sibling of `send_HCI_Command_Status_for_HCI_0x07`
+cluster per Pass 92).
+
+**Confidence:** HIGH — decompile confirms validator delegation, wildcard
+interval acceptance (`-1`/`8000`), extreme-status-byte gate, and HCI 0x12
+reject path matching Pass 109/121 sync-conn cluster semantics.
+
+Region unnamed count after this pass: **183** (184 minus this rename).
+
+**Next:** Pass 129 — cold-triage next rank-1 unnamed in region `0x80010000`.

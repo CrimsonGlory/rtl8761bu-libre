@@ -15120,8 +15120,17 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 127;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 128: cold-triage next rank-1
-          unnamed function in region `0x80010000` (184 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 128 (2026-07-02): decompiled+
+          renamed rank-1 `FUN_800194a0`→`validate_sync_conn_feature_page_and_reject_unless_wildcard_sync_intervals`
+          (96B, HIGH). Sync-conn setup gate wrapper: delegates to Pass 121 core
+          validator, accepts wildcard sync intervals (`-1`/`8000`) only at status
+          `0x00`/`0xff`, else HCI 0x12 Command Disallowed; callers
+          `FUN_80019504` + `FUN_80019714`. 2 xref_in. 183 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 128;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 129: cold-triage next rank-1
+          unnamed function in region `0x80010000` (183 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
