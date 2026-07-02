@@ -15110,8 +15110,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 126;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 127: cold-triage next rank-1
-          unnamed function in region `0x80010000` (185 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 127 (2026-07-02): decompiled+
+          renamed rank-1 `FUN_800132f4`→`reinit_sco_esco_credit_slot_globals_disable_all_and_apply_slot0_timing`
+          (98B, HIGH). SCO/eSCO credit-scheduler globals reinit: optional
+          snapshot restore, four-slot disable (state 6), default slot-0 10 s
+          timing arm via `apply_sco_esco_credit_slot_timing_and_active_bitmask`;
+          caller `reset_sco_esco_hw_subsystem_on_link_loss`. 2 xref_in.
+          184 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 127;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 128: cold-triage next rank-1
+          unnamed function in region `0x80010000` (184 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`

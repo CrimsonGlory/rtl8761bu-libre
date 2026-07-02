@@ -2816,4 +2816,38 @@ crypto gate → kickoff dispatch; matches thematic role-switch chain documented 
 
 Region unnamed count after this pass: **185** (186 minus this rename).
 
-**Next:** Pass 127 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 127.
+
+## Pass 127 (2026-07-02) — SCO/eSCO credit-slot reinit `FUN_800132f4`
+
+Pass 127 target from cold-triage rank-1 (2 xref_in, 98B — largest at xref=2
+tier after Pass 126 cleared `FUN_8001acd8`). Decompiled and renamed:
+**`FUN_800132f4` → `reinit_sco_esco_credit_slot_globals_disable_all_and_apply_slot0_timing`**
+(98B, HIGH) via `RenamePass127Region80010000Fun800132f4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** SCO/eSCO credit-scheduler globals reinit helper in the
+`0x800132xx` cluster (sibling of Pass 7r's
+`apply_sco_esco_credit_slot_timing_and_active_bitmask`). When `param_1==0`,
+copies preserved dword from `PTR_DAT_80013358` → `PTR_DAT_8001335c`; clears
+`PTR_DAT_80013360`/`PTR_DAT_80013364`; seeds 4-dword config block at
+`PTR_DAT_80013368` from template constants plus hook fptrs
+`PTR_LAB_80013384`/`PTR_LAB_80013174`; loops four slots writing state code `6`
+(disable) into 20B-stride array at `DAT_8001337c` (offsets `+8`, `+0x1c`,
+`+0x30`, `+0x44`); finishes by calling
+`apply_sco_esco_credit_slot_timing_and_active_bitmask(0, 0x2710, 1)` — slot 0
+with 10 s default timing and enable.
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java`; includes
+`reset_sco_esco_hw_subsystem_on_link_loss` (`0x80037394`, region
+`0x80030000` Pass 43) which invokes `FUN_800132f4(1)` during link-loss SCO
+teardown after `disable_esco_hw_slot_for_each_active_connection`.
+
+**Confidence:** HIGH — decompile confirms globals reset, four-slot disable loop
+matching Pass 7r's state-6 idiom, and default slot-0 timing arm via established
+credit-scheduler primitive; caller chain documented in region `0x80030000` Pass
+43.
+
+Region unnamed count after this pass: **184** (185 minus this rename).
+
+**Next:** Pass 128 — cold-triage next rank-1 unnamed in region `0x80010000`.
