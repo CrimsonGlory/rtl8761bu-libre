@@ -2885,4 +2885,36 @@ reject path matching Pass 109/121 sync-conn cluster semantics.
 
 Region unnamed count after this pass: **183** (184 minus this rename).
 
-**Next:** Pass 129 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 129.
+
+## Pass 129 (2026-07-02) — role-switch kickoff `FUN_8001ac74`
+
+Pass 129 target from cold-triage rank-1 (2 xref_in, 96B — largest at xref=2
+tier after Pass 128 cleared `FUN_800194a0`). Decompiled and renamed:
+**`FUN_8001ac74` → `kickoff_role_switch_or_defer_if_slot_busy`**
+(96B, HIGH) via `RenamePass129Region80010000Fun8001ac74.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Role-switch state-machine entry point (completes the
+`lookup_role_switch_conn_slot_validate_and_invoke_kickoff` → kickoff chain
+documented in `lmp_version_conn_setup.md` §5 and `lc_lmp_state_machine.md`).
+When conn-record `int_0x50 == -1` (no linked in-flight op): vetoes via
+`lookup_role_switch_block_code_from_crypto_substate` (returns HCI **0x0c** on
+block); fast-path when conn sub-struct byte `+0x26 == 0` calls
+`compute_slot_offset_and_send_lmp_slot_offset_0x13_pdu` (LMP opcode 0x13);
+otherwise arms encryption via `arm_encryption_before_deferred_role_switch`
+(return **0x1f** on failure) and sets connection state **0xe** (role-switch
+pending) via `set_bos_bosi__0xb2_index_arg2`. When `int_0x50 != -1` (slot
+already linked to another op): sets `field_0x216 = 1` defer flag and returns 0.
+
+**Callers:** 2 xref_in — `lookup_role_switch_conn_slot_validate_and_invoke_kickoff`
+(Pass 126 HCI Link Policy role-switch wrapper) and one additional caller per
+prior `lc_lmp_state_machine.md` chain documentation.
+
+**Confidence:** HIGH — decompile confirms crypto veto, fast/deferred kickoff
+branching, connection-state `0xe` arm, and busy-slot defer semantics matching
+Pass 119/126 role-switch cluster.
+
+Region unnamed count after this pass: **182** (183 minus this rename).
+
+**Next:** Pass 130 — cold-triage next rank-1 unnamed in region `0x80010000`.
