@@ -1731,7 +1731,8 @@ sets bits 2–3 (`| 0xc`), pulses reg `0x10` bit 0, delays via
 (`spin_delay_10x_iterations(0x14)`), clears reg `0` bit 1, then restores
 `0xcc` (`& 0xf3`).
 
-**Callers:** 4 xref_in — ROM direct call from `FUN_80011bf4` (sibling in
+**Callers:** 4 xref_in — ROM direct call from
+`pulse_bb_regs_then_merge_mask_chain_into_bb_reg` (sibling in
 `0x80011bxx` cluster) plus three patch-firmware computed-call sites
 (`FUN_8010c854`, `FUN_8010c160`, `FUN_8010d2e8`).
 
@@ -2917,4 +2918,35 @@ Pass 119/126 role-switch cluster.
 
 Region unnamed count after this pass: **182** (183 minus this rename).
 
-**Next:** Pass 130 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 130.
+
+## Pass 130 (2026-07-02) — BB reg pulse+mask merge `FUN_80011bf4`
+
+Pass 130 target from cold-triage rank-1 (2 xref_in, 88B — largest at xref=2
+tier after Pass 129 cleared `FUN_8001ac74`). Decompiled and renamed:
+**`FUN_80011bf4` → `pulse_bb_regs_then_merge_mask_chain_into_bb_reg`**
+(88B, HIGH) via `RenamePass130Region80010000Fun80011bf4.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Composite baseband register primitive in the `0x80011bxx`
+cluster (callee of Pass 90's
+`pulse_bb_regs_0x00_0x10_with_cc_mode_bits_and_spin_delays`, sibling of
+Pass 82's `poll_indexed_bb_register_until_stable_read`). First invokes the
+pulse primitive; then performs a three-step read-modify-write on the BB
+register dword at `DAT_80011c4c` using literal-pool masks
+`DAT_80011c50`/`DAT_80011c54`/`DAT_80011c58`/`DAT_80011c5c`: clear bits
+via `& 0xffff80ff` plus chained AND masks, OR-merge, final AND trim.
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java` — feature-bit
+escalation handlers `escalating_feature_bit_enable_and_report` (`0x800007d0`)
+and `link_state_feature_bit_escalation_and_log_dispatcher` (`0x80000820`,
+region `0x80000000`); both share the enable-feature-and-report pattern
+documented there alongside `poll_indexed_bb_register_until_stable_read`.
+
+**Confidence:** HIGH — decompile confirms pulse-then-mask-chain sequence,
+literal-pool mask operands, and caller placement in feature-bit escalation
+cluster; naming consistent with Pass 90 pulse primitive.
+
+Region unnamed count after this pass: **181** (182 minus this rename).
+
+**Next:** Pass 131 — cold-triage next rank-1 unnamed in region `0x80010000`.

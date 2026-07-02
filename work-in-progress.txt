@@ -15139,8 +15139,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 129;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 130: cold-triage next rank-1
-          unnamed function in region `0x80010000` (182 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 130 (2026-07-02): decompiled+
+          renamed rank-1 `FUN_80011bf4`→`pulse_bb_regs_then_merge_mask_chain_into_bb_reg`
+          (88B, HIGH). Pulse-then-mask-chain BB reg primitive: invokes Pass 90
+          pulse helper, then three-step RMW on `DAT_80011c4c` with literal-pool
+          masks; callers `escalating_feature_bit_enable_and_report` +
+          `link_state_feature_bit_escalation_and_log_dispatcher`. 2 xref_in.
+          181 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 130;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 131: cold-triage next rank-1
+          unnamed function in region `0x80010000` (181 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
