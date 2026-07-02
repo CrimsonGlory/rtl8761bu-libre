@@ -2785,4 +2785,35 @@ caller note, timer arm/restore, and infinite-loop halt terminus.
 
 Region unnamed count after this pass: **186** (187 minus this rename).
 
-**Next:** Pass 126 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 126.
+
+## Pass 126 (2026-07-02) — role-switch slot lookup `FUN_8001acd8`
+
+Pass 126 target from cold-triage rank-1 (2 xref_in, 104B — largest at xref=2
+tier after Pass 125 cleared `FUN_80013780`). Decompiled and renamed:
+**`FUN_8001acd8` → `lookup_role_switch_conn_slot_validate_and_invoke_kickoff`**
+(104B, HIGH) via `RenamePass126Region80010000Fun8001acd8.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** HCI Link Policy role-switch backend wrapper in the `0x8001acxx`
+cluster (documented chain head: this → `FUN_8001ac74` →
+`compute_slot_offset_and_send_lmp_slot_offset_0x13_pdu`). Copies 6-byte BD_ADDR
+from `param_1+3`, runs `validate_hci_role_switch_feasibility_for_bdaddr_and_role`;
+on success calls `look_for_non_matching_bdaddr_bos_index_i_e__free_connection_slot`
+to resolve conn index; when slot found and crypto sub-struct byte `+1` is zero,
+writes `*out_slot`, clears `field_0x216`, and invokes `FUN_8001ac74` kickoff;
+returns `2` when no slot, `0xc` when crypto path already active (Command
+Disallowed).
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java`; includes patch
+`FUN_8010b7d4` and `HCI_CMD_OGF_02__Link_Policy__FUN_8002060c` (HCI Switch Role
+backend per `reverse_engineering_lmp_version_conn_setup.md` §5).
+
+**Confidence:** HIGH — decompile confirms validation → slot lookup → in-progress
+crypto gate → kickoff dispatch; matches thematic role-switch chain documented in
+`reverse_engineering_lc_lmp_state_machine.md` and Pass 119's
+`compute_slot_offset_and_send_lmp_slot_offset_0x13_pdu` callee note.
+
+Region unnamed count after this pass: **185** (186 minus this rename).
+
+**Next:** Pass 127 — cold-triage next rank-1 unnamed in region `0x80010000`.

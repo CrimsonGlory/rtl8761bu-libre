@@ -15098,8 +15098,20 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 125;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 126: cold-triage next rank-1
-          unnamed function in region `0x80010000` (186 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 126 (2026-07-02): decompiled+
+          renamed rank-1 `FUN_8001acd8`→`lookup_role_switch_conn_slot_validate_and_invoke_kickoff`
+          (104B, HIGH). HCI Link Policy role-switch slot lookup wrapper: copies
+          BD_ADDR from `param+3`, validates via
+          `validate_hci_role_switch_feasibility_for_bdaddr_and_role`, resolves
+          free conn slot, gates on crypto sub-struct `+1`, clears `field_0x216`,
+          invokes `FUN_8001ac74` kickoff; returns `2`/`0xc` on failure.
+          Callers patch `FUN_8010b7d4` + `HCI_CMD_OGF_02__Link_Policy__FUN_8002060c`.
+          2 xref_in. 185 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 126;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 127: cold-triage next rank-1
+          unnamed function in region `0x80010000` (185 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
