@@ -1475,8 +1475,9 @@ zero padding bytes; when `param_2 != 0` emits word-count
 4-byte alignment.
 
 **Callers:** 5 xref_in per `ListUnnamed80010000.java`; primary consumer
-`FUN_80013780` issues writes to slot addresses `0xffdc` (24-byte CP0 register
-snapshot), `0xffdd` (4-byte dword), and `0xffde` (address-only commits).
+`capture_cp0_exception_context_emit_scheduler_slot_dump_then_halt` issues writes
+to slot addresses `0xffdc` (24-byte CP0 register snapshot), `0xffdd` (4-byte
+dword), and `0xffde` (address-only commits).
 
 **Confidence:** HIGH — decompile confirms full A5-framed protocol sequence,
 4-byte alignment padding, and caller-side usage pattern for scheduler slot
@@ -2753,4 +2754,35 @@ writes via established `write_codec_table_entry_and_wait_ack` primitive;
 
 Region unnamed count after this pass: **187** (188 minus this rename).
 
-**Next:** Pass 125 — cold-triage next rank-1 unnamed in region `0x80010000`.
+**Next:** superseded by Pass 125.
+
+## Pass 125 (2026-07-01) — CP0 exception snapshot dump `FUN_80013780`
+
+Pass 125 target from cold-triage rank-1 (2 xref_in, 154B — largest at xref=2
+tier after Pass 124 cleared `FUN_80014ba8`). Decompiled and renamed:
+**`FUN_80013780` → `capture_cp0_exception_context_emit_scheduler_slot_dump_then_halt`**
+(154B, HIGH) via `RenamePass125Region80010000Fun80013780.java` (`renamed=1`,
+live-verified).
+
+**Mechanism:** Fatal-exception / crash-dump path in the `0x800135xx` scheduler
+cluster (consumer of Pass 81's `emit_a5_framed_scheduler_slot_write_command`).
+Arms a timer dword at `DAT_8001381c` with `0x4e20`, captures `get_CP0_Cause_register`
+plus five saved-context dwords from pointer globals (`PTR_PTR_80013820` through
+`PTR_DAT_80013830`), optionally calls `unknown_referencing_default_name_7` when
+flag byte at `PTR_DAT_80013834` is zero, then emits A5-framed scheduler-slot
+writes: `0xffdc` with 24-byte CP0/context snapshot, `0xffdd` with 4-byte dword
+from ring-buffer drain helper `FUN_8001365c`, and three address-only commits to
+`0xffde`; restores timer dword and enters infinite loop (halt).
+
+**Callers:** 2 xref_in per `ListUnnamed80010000.java`; includes
+`isr_bottom_half_status_dispatcher` (`0x80000d78`, region `0x80000000`) when
+deferred status bit `0x7c` is set — exception bottom-half dispatch, not UART/SCO
+as earlier Pass 81 note had tentatively labeled it.
+
+**Confidence:** HIGH — decompile confirms CP0 Cause capture, 24-byte snapshot
+packing, scheduler-slot addresses `0xffdc`/`0xffdd`/`0xffde` matching Pass 81
+caller note, timer arm/restore, and infinite-loop halt terminus.
+
+Region unnamed count after this pass: **186** (187 minus this rename).
+
+**Next:** Pass 126 — cold-triage next rank-1 unnamed in region `0x80010000`.

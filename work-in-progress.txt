@@ -15088,8 +15088,18 @@ sweep beyond enumeration and is the most out-of-date):
           → analysis/rom/reverse_engineering_region_0x80010000.md Pass 124;
           rom_function_index.md; analysis/INDEX.md
 
-[NEXT]  Full RE: ROM region 0x80010000 — Pass 125: cold-triage next rank-1
-          unnamed function in region `0x80010000` (187 unnamed remain).
+[DONE]  Full RE: ROM region 0x80010000 — Pass 125 (2026-07-01): decompiled+
+          renamed rank-1 `FUN_80013780`→`capture_cp0_exception_context_emit_scheduler_slot_dump_then_halt`
+          (154B, HIGH). CP0 exception snapshot writer: arms timer, captures CP0
+          Cause + saved context, emits A5-framed dumps to scheduler slots
+          `0xffdc`/`0xffdd`/`0xffde`, restores timer, infinite-loop halt;
+          caller `isr_bottom_half_status_dispatcher` status-bit `0x7c`. 2 xref_in.
+          186 unnamed remain.
+          → analysis/rom/reverse_engineering_region_0x80010000.md Pass 125;
+          rom_function_index.md; analysis/INDEX.md
+
+[NEXT]  Full RE: ROM region 0x80010000 — Pass 126: cold-triage next rank-1
+          unnamed function in region `0x80010000` (186 unnamed remain).
 
 [DONE]  Full RE: ROM region 0x80070000 — Pass 12fp (2026-06-29): decompiled+
           renamed rank-1 `FUN_800740c8`→`periodic_9tick_dispatch_link_sample_flush_and_feature_retry`
